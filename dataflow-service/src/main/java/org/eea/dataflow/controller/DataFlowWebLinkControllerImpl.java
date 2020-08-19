@@ -23,6 +23,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 
 /**
@@ -30,6 +35,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  */
 @RestController
 @RequestMapping(value = "/weblink")
+@Api(tags = "Weblinks : Weblinks Manager")
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
@@ -48,12 +54,18 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Gets the link.
    *
    * @param idLink the id link
+   *
    * @return the link
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "{idLink}")
-  public WeblinkVO getLink(@PathVariable("idLink") Long idLink) {
+  @ApiOperation(value = "Find a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public WeblinkVO getLink(
+      @ApiParam(value = "Weblink Id", example = "0") @PathVariable("idLink") Long idLink) {
 
     try {
       return dataflowWebLinkService.getWebLink(idLink);
@@ -69,7 +81,6 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     }
 
 
-
   }
 
   /**
@@ -82,7 +93,16 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @HystrixCommand
   @PostMapping
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
-  public void saveLink(@RequestParam(value = "dataflowId") Long dataflowId, WeblinkVO weblinkVO) {
+  @ApiOperation(value = "Create a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Successfully created Weblink"),
+      @ApiResponse(code = 404, message = "Dataflow Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void saveLink(
+      @ApiParam(value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+      @ApiParam(type = "Object", value = "Weblink Object") WeblinkVO weblinkVO) {
 
     try {
       dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
@@ -107,7 +127,12 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idLink}")
-  public void removeLink(@PathVariable(value = "idLink") Long idLink) {
+  @ApiOperation(value = "Remove a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void removeLink(
+      @ApiParam(value = "Weblink Id", example = "0") @PathVariable(value = "idLink") Long idLink) {
 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
@@ -131,7 +156,13 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PutMapping
-  public void updateLink(@RequestBody WeblinkVO weblinkVO) {
+  @ApiOperation(value = "Update a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void updateLink(
+      @ApiParam(type = "Object", value = "Weblink Object") @RequestBody WeblinkVO weblinkVO) {
     try {
       dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EntityNotFoundException e) {

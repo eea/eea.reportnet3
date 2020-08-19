@@ -19,6 +19,8 @@ const create = async integration => apiIntegration.create(parseManageIntegration
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
+const findEUDatasetIntegration = async datasetSchemaId => parseIntegration(await apiIntegration.findEUDatasetIntegration(datasetSchemaId));
+
 const getProcesses = async (repositoryName, datasetId) =>
   parseProcessList(await apiIntegration.getProcesses(repositoryName, datasetId));
 
@@ -43,24 +45,25 @@ const parseExternalParameters = parameterDTO => {
   return externalParameters;
 };
 
-const parseIntegration = integrationDTO => {
-  const integration = new Integration();
-  integration.externalParameters = integrationDTO.externalParameters;
-  integration.integrationDescription = integrationDTO.description;
-  integration.integrationId = integrationDTO.id;
-  integration.integrationName = integrationDTO.name;
-  integration.internalParameters = integrationDTO.internalParameters;
-  integration.operation = integrationDTO.operation;
-  integration.tool = integrationDTO.tool;
+const parseIntegration = integration => {
+  const integrationDTO = new Integration();
+  integrationDTO.externalParameters = integration.externalParameters;
+  integrationDTO.integrationDescription = integration.description;
+  integrationDTO.integrationId = integration.id;
+  integrationDTO.integrationName = integration.name;
+  integrationDTO.internalParameters = integration.internalParameters;
+  integrationDTO.operation = integration.operation;
+  integrationDTO.operationName = integration.operation.split('_').join(' ');
+  integrationDTO.tool = integration.tool;
 
-  return integration;
+  return integrationDTO;
 };
 
-const parseIntegrationsList = integrationsDTO => {
-  if (!isNil(integrationsDTO)) {
-    const integrations = [];
-    integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegration(integrationDTO)));
-    return sortBy(integrations, ['integrationId']);
+const parseIntegrationsList = integrations => {
+  if (!isNil(integrations)) {
+    const integrationsDTO = [];
+    integrations.forEach(integration => integrationsDTO.push(parseIntegration(integration)));
+    return sortBy(integrationsDTO, ['integrationId']);
   }
   return;
 };
@@ -115,6 +118,7 @@ export const ApiIntegrationRepository = {
   allExtensionsOperations,
   create,
   deleteById,
+  findEUDatasetIntegration,
   getProcesses,
   getRepositories,
   update

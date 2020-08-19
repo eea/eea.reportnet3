@@ -6,13 +6,11 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DesignDatasetMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -150,26 +148,6 @@ public class DesignDatasetServiceTest {
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
     assertEquals("failed assertion", datasets,
         designDatasetService.getDesignDataSetIdByDataflowId(Mockito.anyLong()));
-  }
-
-  @Test
-  public void getFileNameDesignTest1() throws EEAException {
-    DesignDataset dataset = new DesignDataset();
-    when(designDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(new DataSetSchemaVO());
-    when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
-    assertEquals("not equals", "test.csv",
-        designDatasetService.getFileNameDesign("csv", "test", 1L));
-  }
-
-  @Test
-  public void getFileNameDesignTest2() throws EEAException {
-    when(designDatasetRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DesignDataset()));
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(null);
-    when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(null);
-    assertEquals("null.csv", designDatasetService.getFileNameDesign("csv", "test", 1L));
   }
 
   @Test(expected = EEAException.class)

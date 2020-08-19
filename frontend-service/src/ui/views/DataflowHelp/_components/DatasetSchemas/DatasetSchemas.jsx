@@ -26,7 +26,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
   const [validationList, setValidationList] = useState();
@@ -40,8 +40,10 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   }, [datasetsSchemas]);
 
   useEffect(() => {
-    renderDatasetSchemas();
-  }, [uniqueList, validationList]);
+    if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(validationList)) {
+      setIsLoading(false);
+    }
+  }, [extensionsOperationsList, uniqueList, validationList]);
 
   const filterData = (designDataset, data) => {
     if (!isUndefined(data)) {
@@ -124,7 +126,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       };
       notificationContext.add(schemaError);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -192,12 +194,13 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       };
       notificationContext.add(schemaError);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
   const getValidationList = async datasetsSchemas => {
     try {
+      setIsLoading(true);
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
         return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
       });
@@ -272,7 +275,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       };
       notificationContext.add(schemaError);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 

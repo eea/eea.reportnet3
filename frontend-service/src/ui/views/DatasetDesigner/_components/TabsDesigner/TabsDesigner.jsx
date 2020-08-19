@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -12,14 +12,12 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 
 import { DatasetService } from 'core/services/Dataset';
 
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 import isEmpty from 'lodash/isEmpty';
@@ -51,7 +49,6 @@ export const TabsDesigner = withRouter(
       params: { dataflowId, datasetId }
     } = match;
 
-    const leftSideBarContext = useContext(LeftSideBarContext);
     const validationContext = useContext(ValidationContext);
 
     // const [activeIndex, setActiveIndex] = useState(activeIdx);
@@ -111,13 +108,21 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill, notEmpty) => {
+    const onChangeTableProperties = (
+      tableSchemaId,
+      tableSchemaDescription,
+      readOnly,
+      toPrefill,
+      notEmpty,
+      fixedNumber
+    ) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
+      inmTabs[tabIdx].fixedNumber = fixedNumber;
+      inmTabs[tabIdx].notEmpty = notEmpty;
       inmTabs[tabIdx].readOnly = readOnly;
       inmTabs[tabIdx].toPrefill = toPrefill;
-      inmTabs[tabIdx].notEmpty = notEmpty;
       setTabs(inmTabs);
     };
 
@@ -127,10 +132,9 @@ export const TabsDesigner = withRouter(
 
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
-          table.toPrefill = table.tableSchemaToPrefill;
-          table.notEmpty = table.tableSchemaNotEmpty;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
+          table.fixedNumber = table.tableSchemaFixedNumber;
           table.hasErrors =
             !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
               ? {
@@ -141,8 +145,10 @@ export const TabsDesigner = withRouter(
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
           table.newTab = false;
+          table.notEmpty = table.tableSchemaNotEmpty;
           table.readOnly = table.tableSchemaReadOnly;
           table.showContextMenu = false;
+          table.toPrefill = table.tableSchemaToPrefill;
         });
         //Add tab Button/Tab
         inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
@@ -355,14 +361,18 @@ export const TabsDesigner = withRouter(
 
     const renderErrors = (errorTitle, error) => {
       return (
-        <Dialog
-          footer={errorDialogFooter}
-          header={errorTitle}
-          modal={true}
-          onHide={() => setIsErrorDialogVisible(false)}
-          visible={isErrorDialogVisible}>
-          <div className="p-grid p-fluid">{error}</div>
-        </Dialog>
+        <Fragment>
+          {isErrorDialogVisible && (
+            <Dialog
+              footer={errorDialogFooter}
+              header={errorTitle}
+              modal={true}
+              onHide={() => setIsErrorDialogVisible(false)}
+              visible={isErrorDialogVisible}>
+              <div className="p-grid p-fluid">{error}</div>
+            </Dialog>
+          )}
+        </Fragment>
       );
     };
 
@@ -482,7 +492,7 @@ export const TabsDesigner = withRouter(
     };
 
     return (
-      <React.Fragment>
+      <Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
         {datasetSchema && tabs && validationContext.isVisible && (
@@ -493,7 +503,7 @@ export const TabsDesigner = withRouter(
             datasetId={datasetId}
           />
         )}
-      </React.Fragment>
+      </Fragment>
     );
   }
 );

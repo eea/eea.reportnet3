@@ -5,12 +5,16 @@ import { AddRecordFieldDesign } from './AddRecordFieldDesign';
 import { AddTableDesign } from './AddTableDesign';
 import { CreateValidation } from './CreateValidation';
 import { DeleteData } from './DeleteData';
+import { DeleteFileData } from './DeleteFileData';
 import { DeleteRecord } from './DeleteRecord';
 import { DeleteRecordFieldDesign } from './DeleteRecordFieldDesign';
 import { DeleteSchema } from './DeleteSchema';
 import { DeleteTableData } from './DeleteTableData';
 import { DeleteTableDesign } from './DeleteTableDesign';
+import { DownloadExportFile } from './DownloadExportFile';
+import { DownloadFileData } from './DownloadFileData';
 import { ExportData } from './ExportData';
+import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
 import { GetData } from './GetData';
 import { GetErrorPosition } from './GetErrorPosition';
@@ -36,15 +40,19 @@ export const DatasetService = {
   addTableDesign: AddTableDesign({ datasetRepository }),
   createValidation: CreateValidation({ datasetRepository }),
   deleteDataById: DeleteData({ datasetRepository }),
+  deleteFileData: DeleteFileData({ datasetRepository }),
   deleteRecordById: DeleteRecord({ datasetRepository }),
   deleteRecordFieldDesign: DeleteRecordFieldDesign({ datasetRepository }),
   deleteSchemaById: DeleteSchema({ datasetRepository }),
   deleteTableDataById: DeleteTableData({ datasetRepository }),
   deleteTableDesign: DeleteTableDesign({ datasetRepository }),
+  downloadExportFile: DownloadExportFile({ datasetRepository }),
+  downloadFileData: DownloadFileData({ datasetRepository }),
   errorsById: GetErrors({ datasetRepository }),
   errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
   errorStatisticsById: GetStatistics({ datasetRepository }),
   exportDataById: ExportData({ datasetRepository }),
+  exportDatasetDataExternal: ExportDatasetDataExternal({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),

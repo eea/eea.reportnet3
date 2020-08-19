@@ -32,14 +32,14 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
-      <label for={`${row.id}_checkbox`} className="srOnly">
+      <label htmlFor={`${row.id}_checkbox`} className="srOnly">
         {resources.messages['selectedObligation']}
       </label>
     </div>
   );
 
   const onLoadTitleTemplate = row => (
-    <div className={styles.titleColum}>
+    <div className={styles.titleColumn}>
       {row.title}
       <FontAwesomeIcon
         aria-hidden={false}

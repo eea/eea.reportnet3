@@ -134,7 +134,7 @@ const LinkSelector = withRouter(
               onChange={e => setPkMustBeUsed(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <label for={'pkMustBeUsed_check'} className="srOnly">
+            <label htmlFor={'pkMustBeUsed_check'} className="srOnly">
               {resources.messages['pkValuesMustBeUsed']}
             </label>
             <span className={styles.switchTextInput}>{resources.messages['pkHasMultipleValues']}</span>
@@ -146,7 +146,7 @@ const LinkSelector = withRouter(
               onChange={e => setPkHasMultipleValues(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <label for={'pkHasMultipleValues_check'} className="srOnly">
+            <label htmlFor={'pkHasMultipleValues_check'} className="srOnly">
               {resources.messages['pkHasMultipleValues']}
             </label>
           </div>
@@ -159,22 +159,23 @@ const LinkSelector = withRouter(
     };
 
     return (
-      <Dialog
-        blockScroll={false}
-        contentStyle={{ overflow: 'auto' }}
-        closeOnEscape={false}
-        footer={linkSelectorDialogFooter}
-        header={resources.messages['linkSelector']}
-        modal={true}
-        onHide={() => {
-          onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
-          setIsVisible(false);
-        }}
-        style={{ minWidth: '55%' }}
-        visible={isVisible}
-        zIndex={3003}>
-        {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
-      </Dialog>
+      isVisible && (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          footer={linkSelectorDialogFooter}
+          header={resources.messages['linkSelector']}
+          modal={true}
+          onHide={() => {
+            onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+            setIsVisible(false);
+          }}
+          style={{ minWidth: '55%' }}
+          visible={isVisible}
+          zIndex={3003}>
+          {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
+        </Dialog>
+      )
     );
   }
 );

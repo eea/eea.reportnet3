@@ -46,7 +46,7 @@ const DataflowManagementForm = forwardRef(
     }));
 
     const dataflowCrudValidation = Yup.object().shape({
-      name: Yup.string().required(' '),
+      name: Yup.string().required(' ').max(255, resources.messages['dataflowNameValidationMax']),
       description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax']),
       obligation: Yup.object({ title: Yup.string().required(' ') })
     });
@@ -76,7 +76,7 @@ const DataflowManagementForm = forwardRef(
               const notification = isEditForm
                 ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
                 : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
-              
+
               notificationContext.add(notification);
             }
           } finally {
@@ -103,7 +103,7 @@ const DataflowManagementForm = forwardRef(
                   type="text"
                   value={data.name}
                 />
-                <label for="dataflowName" className="srOnly">
+                <label htmlFor="dataflowName" className="srOnly">
                   {resources.messages['createDataflowName']}
                 </label>
                 <ErrorMessage className="error" name="name" component="div" />
@@ -120,7 +120,7 @@ const DataflowManagementForm = forwardRef(
                   placeholder={resources.messages['createDataflowDescription']}
                   value={data.description}
                 />
-                <label for="dataflowDescription" className="srOnly">
+                <label htmlFor="dataflowDescription" className="srOnly">
                   {resources.messages['createDataflowDescription']}
                 </label>
                 <ErrorMessage className="error" name="description" component="div" />
@@ -142,7 +142,7 @@ const DataflowManagementForm = forwardRef(
                   type="text"
                   value={data.obligation.title}
                 />
-                <label for="searchObligation" className="srOnly">
+                <label htmlFor="searchObligation" className="srOnly">
                   {resources.messages['searchObligations']}
                 </label>
                 <ErrorMessage className="error" name="obligation.title" component="div" />

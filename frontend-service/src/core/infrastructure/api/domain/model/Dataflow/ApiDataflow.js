@@ -46,7 +46,7 @@ export const apiDataflow = {
   },
   create: async (name, description, obligationId) => {
     const response = await HTTPRequester.post({
-      url: window.env.REACT_APP_JSON ? '/dataflow' : getUrl(DataflowConfig.createDataflow),
+      url: getUrl(DataflowConfig.createDataflow),
       data: { name, description, obligation: { obligationId } }
     });
     return response;

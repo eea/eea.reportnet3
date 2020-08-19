@@ -1,42 +1,47 @@
-import React, { useContext, useEffect, useReducer, useRef } from 'react';
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './FieldDesigner.module.scss';
 
+import { config } from 'conf';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { AttachmentEditor } from './_components/AttachmentEditor';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'primereact/checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { LinkSelector } from './_components/LinkSelector';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { LinkSelector } from './_components/LinkSelector';
+
+import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
-import { DatasetService } from 'core/services/Dataset';
-
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
   codelistItems,
   datasetId,
-  fieldId,
   fieldDescription,
+  fieldFileProperties,
+  fieldHasMultipleValues,
+  fieldId,
+  fieldLink,
+  fieldMustBeUsed,
   fieldName,
   fieldPK,
   fieldPKReferenced,
-  fieldLink,
-  fieldHasMultipleValues,
-  fieldMustBeUsed,
+  fieldReadOnly,
   fieldRequired,
   fieldType,
   hasPK,
@@ -71,7 +76,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
+    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
@@ -80,7 +85,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
     // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    // { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
+    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
   const getFieldTypeValue = value => {
@@ -101,16 +106,19 @@ export const FieldDesigner = ({
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
     fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
+    fieldReadOnlyValue: fieldReadOnly,
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
     fieldValue: fieldName,
     initialDescriptionValue: undefined,
     initialFieldValue: undefined,
+    isAttachmentEditorVisible: false,
     isCodelistEditorVisible: false,
     isDragging: false,
     isEditing: false,
     isLinkSelectorVisible: false,
-    isQCManagerVisible: false
+    isQCManagerVisible: false,
+    fieldFileProperties: fieldFileProperties
   };
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
@@ -118,6 +126,44 @@ export const FieldDesigner = ({
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [headerInitialHeight, setHeaderInitialHeight] = useState();
+
+  useEffect(() => {
+    const header = document.getElementById('header');
+    const observer = new ResizeObserver(entries =>
+      entries.forEach(entry => {
+        if (headerHeight !== entry.contentRect.height) {
+          setHeaderHeight(entry.contentRect.height);
+        }
+      })
+    );
+
+    if (!isNil(header)) {
+      observer.observe(header);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const dropDowns = document.querySelectorAll('.p-dropdown-panel');
+    dropDowns.forEach(dropDown => {
+      const dropDownDisplay = dropDown.style.display;
+      if (dropDownDisplay) {
+        if (headerInitialHeight === 70 || headerInitialHeight === 180) {
+          dropDown.style.marginTop = `${headerHeight - headerInitialHeight}px`;
+        }
+      }
+    });
+  }, [headerHeight]);
+
+  const onSetInitHeaderHeight = () => {
+    const header = document.getElementById('header');
+    setHeaderInitialHeight(header.offsetHeight);
+  };
 
   useEffect(() => {
     dispatchFieldDesigner({ type: 'SET_PK_REFERENCED', payload: fieldPKReferenced });
@@ -176,12 +222,21 @@ export const FieldDesigner = ({
     }
   }, [fieldDesignerState.isDragging]);
 
+  const onAttachmentDropdownSelected = fieldType => {
+    if (!isUndefined(fieldType)) {
+      onCodelistAndLinkShow(fieldId, fieldType);
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: true });
+  };
+
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
     if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
       onCodelistDropdownSelected(type);
     } else if (type.fieldType.toLowerCase() === 'link') {
       onLinkDropdownSelected(type);
+    } else if (type.fieldType.toLowerCase() === 'attachment') {
+      onAttachmentDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
         if (type !== '') {
@@ -201,6 +256,7 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
+      dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -271,17 +327,30 @@ export const FieldDesigner = ({
     }
   };
 
+  const onCancelSaveAttachment = () => {
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        }
+      }
+    }
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
+  };
+
   const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({
-          codelistItems,
-          type: 'LINK',
-          referencedField: link,
-          pkMustBeUsed,
-          pkHasMultipleValues
-        });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({
+            codelistItems,
+            type: 'LINK',
+            referencedField: link,
+            pkMustBeUsed,
+            pkHasMultipleValues
+          });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' });
@@ -292,7 +361,9 @@ export const FieldDesigner = ({
 
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({ codelistItems });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({ codelistItems });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
@@ -315,29 +386,35 @@ export const FieldDesigner = ({
   const onFieldAdd = async ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
+    maxSize = fieldDesignerState.fieldFileProperties.maxSize,
     pk = fieldDesignerState.fieldPKValue,
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    readOnly = fieldDesignerState.fieldReadOnlyValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
-    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
+    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         codelistItems,
         description,
+        maxSize,
         pk,
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        readOnly,
         recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
         required,
-        type
+        type,
+        validExtensions
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -348,14 +425,17 @@ export const FieldDesigner = ({
           description,
           fieldId: response.data,
           fieldLinkValue: null,
+          maxSize,
+          name,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
-          name,
+          readOnly,
           recordId,
           referencedField,
           required,
-          type
+          type,
+          validExtensions
         });
       }
     } catch (error) {
@@ -456,6 +536,24 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
   };
 
+  const onReadOnlyChange = checked => {
+    if (!fieldDesignerState.isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isNil(fieldDesignerState.fieldTypeValue) &&
+          fieldDesignerState.fieldTypeValue !== '' &&
+          !isNil(fieldDesignerState.fieldValue) &&
+          fieldDesignerState.fieldValue !== ''
+        ) {
+          onFieldAdd({ readOnly: checked });
+        }
+      } else {
+        fieldUpdate({ readOnly: checked });
+      }
+    }
+    dispatchFieldDesigner({ type: 'SET_READONLY', payload: checked });
+  };
+
   const onRequiredChange = checked => {
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
@@ -472,6 +570,25 @@ export const FieldDesigner = ({
       }
     }
     dispatchFieldDesigner({ type: 'SET_REQUIRED', payload: checked });
+  };
+
+  const onSaveAttachment = fileProperties => {
+    dispatchFieldDesigner({
+      type: 'SET_ATTACHMENT_PROPERTIES',
+      payload: { validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize }
+    });
+    if (fieldDesignerState.fieldValue === '') {
+      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+    } else {
+      if (!isUndefined(fieldId)) {
+        if (fieldId.toString() === '-1') {
+          onFieldAdd({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
+        } else {
+          fieldUpdate({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
+        }
+      }
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: false });
   };
 
   const onSaveCodelist = codelistItems => {
@@ -550,30 +667,36 @@ export const FieldDesigner = ({
     description = fieldDesignerState.fieldDescriptionValue,
     fieldSchemaId = fieldId,
     isLinkChange = false,
+    maxSize = fieldDesignerState.fieldFileProperties.maxSize,
     pk = fieldDesignerState.fieldPKValue,
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    readOnly = fieldDesignerState.fieldReadOnlyValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
-    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
+    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,
+        maxSize,
         pk,
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        readOnly,
         recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
         required,
-        type
+        type,
+        validExtensions
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
@@ -584,14 +707,17 @@ export const FieldDesigner = ({
           description,
           id: fieldId,
           isLinkChange,
+          maxSize,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
           name,
+          readOnly,
           recordId,
           referencedField,
           required,
-          type
+          type,
+          validExtensions
         });
       }
     } catch (error) {
@@ -624,6 +750,18 @@ export const FieldDesigner = ({
       ) : (
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
       )}
+      <Checkbox
+        checked={fieldDesignerState.fieldReadOnlyValue}
+        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step`}
+        id={`${fieldId}_check_readOnly`}
+        inputId={`${fieldId}_check_readOnly`}
+        label="Default"
+        onChange={e => onReadOnlyChange(e.checked)}
+        style={{ width: '70px' }}
+      />
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+        {resources.messages['readOnly']}
+      </label>
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step`}
@@ -659,10 +797,10 @@ export const FieldDesigner = ({
     </div>
   );
 
-  const renderCodelistAndLinkButtons = () => {
-    return !isUndefined(fieldDesignerState.fieldTypeValue) &&
-      (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
-        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
+  const renderCodelistFileAndLinkButtons = () =>
+    !isUndefined(fieldDesignerState.fieldTypeValue) &&
+    (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
+      fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
@@ -700,10 +838,36 @@ export const FieldDesigner = ({
         }
         tooltipOptions={{ position: 'top' }}
       />
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      fieldDesignerState.fieldTypeValue.fieldType === 'Attachment' ? (
+      <Button
+        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        label={`${resources.messages['validExtensions']} ${
+          !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
+          !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
+            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+            : '*'
+        } - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+          resources.messages['MB']
+        }`}
+        onClick={() => onAttachmentDropdownSelected()}
+        style={{ pointerEvents: 'auto' }}
+        tooltip={`${resources.messages['validExtensions']} ${
+          !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
+          !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
+            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+            : '*'
+        } - ${resources.messages['maxFileSize']} ${
+          !isNil(fieldDesignerState.fieldFileProperties.maxSize) &&
+          fieldDesignerState.fieldFileProperties.maxSize.toString() !== '0'
+            ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resources.messages['MB']}`
+            : resources.messages['maxSizeNotDefined']
+        }`}
+        tooltipOptions={{ position: 'top' }}
+      />
     ) : isCodelistOrLink ? (
       <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
     ) : null;
-  };
 
   const renderDeleteButton = () =>
     !addField ? (
@@ -783,6 +947,7 @@ export const FieldDesigner = ({
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
+          onSetInitHeaderHeight();
           event.stopPropagation();
         }}
         optionLabel="value"
@@ -824,10 +989,14 @@ export const FieldDesigner = ({
 
         {renderCheckboxes()}
         {renderInputs()}
-        {renderCodelistAndLinkButtons()}
+        {renderCodelistFileAndLinkButtons()}
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            disabled={
+              !isUndefined(fieldDesignerState.fieldTypeValue) &&
+              config.validations.bannedFields.includes(fieldDesignerState.fieldTypeValue.value.toLowerCase())
+            }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
@@ -842,6 +1011,15 @@ export const FieldDesigner = ({
           onCancelSaveCodelist={onCancelSaveCodelist}
           onSaveCodelist={onSaveCodelist}
           selectedCodelist={fieldDesignerState.codelistItems}
+          type={fieldDesignerState.fieldTypeValue.value}
+        />
+      ) : null}
+      {fieldDesignerState.isAttachmentEditorVisible ? (
+        <AttachmentEditor
+          isAttachmentEditorVisible={fieldDesignerState.isAttachmentEditorVisible}
+          onCancelSaveAttachment={onCancelSaveAttachment}
+          onSaveAttachment={onSaveAttachment}
+          selectedAttachment={fieldDesignerState.fieldFileProperties}
           type={fieldDesignerState.fieldTypeValue.value}
         />
       ) : null}
@@ -860,7 +1038,6 @@ export const FieldDesigner = ({
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
-          closeOnEscape={false}
           footer={qcDialogFooter}
           header={resources.messages['qcManager']}
           modal={true}

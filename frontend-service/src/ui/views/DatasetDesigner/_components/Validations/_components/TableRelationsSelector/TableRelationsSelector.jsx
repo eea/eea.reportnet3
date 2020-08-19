@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './TableRelationsSelector.module.scss';
 
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
 import { FieldRelations } from './_components/FieldRelations';
-import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -28,10 +26,6 @@ export const TableRelationsSelector = ({
   tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
-  const options = [
-    { label: resources.messages['fieldRelationsLabel'], value: 'fieldRelations' },
-    { label: resources.messages['ifThenLabel'], value: 'ifThenClause' }
-  ];
   const {
     candidateRule: { expressionType }
   } = creationFormState;
@@ -118,7 +112,7 @@ export const TableRelationsSelector = ({
               onChange={e => onDoubleReferencedChange(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}
             />
-            <label for={'isDoubleReferenced_check'} className="srOnly">
+            <label htmlFor={'isDoubleReferenced_check'} className="srOnly">
               {resources.messages['datasetReferenceMustBeUsed']}
             </label>
           </div>

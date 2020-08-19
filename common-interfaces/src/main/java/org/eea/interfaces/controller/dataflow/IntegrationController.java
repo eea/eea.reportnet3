@@ -9,18 +9,17 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 /**
  * The Interface IntegrationController.
  */
 public interface IntegrationController {
-
 
   /**
    * The Interface IntegrationControllerZuul.
@@ -29,7 +28,6 @@ public interface IntegrationController {
   interface IntegrationControllerZuul extends IntegrationController {
 
   }
-
 
   /**
    * Find all integrations by criteria.
@@ -40,8 +38,6 @@ public interface IntegrationController {
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration);
 
-
-
   /**
    * Creates the integration.
    *
@@ -50,12 +46,11 @@ public interface IntegrationController {
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   void createIntegration(@RequestBody IntegrationVO integration);
 
-
-
   /**
    * Delete integration.
    *
    * @param integrationId the integration id
+   * @param dataflowId the dataflow id
    */
   @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -71,8 +66,6 @@ public interface IntegrationController {
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateIntegration(@RequestBody IntegrationVO integration);
 
-
-
   /**
    * Find extensions and operations.
    *
@@ -82,14 +75,13 @@ public interface IntegrationController {
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
 
-
-
   /**
    * Execute integration process.
    *
+   * @param integrationToolTypeEnum the integration tool type enum
    * @param integrationOperationTypeEnum the integration operation type enum
    * @param file the file
-   * @param datasetId
+   * @param datasetId the dataset id
    * @param integration the integration
    * @return the execution result VO
    */
@@ -99,7 +91,6 @@ public interface IntegrationController {
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
       @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
       @RequestBody IntegrationVO integration);
-
 
   /**
    * Execute EU dataset export.
@@ -118,6 +109,42 @@ public interface IntegrationController {
   @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   void copyIntegrations(@RequestBody CopySchemaVO copyVO);
 
+  /**
+   * Creates the default integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @PostMapping("/private/createDefaultIntegration")
+  void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
 
+  /**
+   * Find export EU dataset integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integration VO
+   */
+  @GetMapping("/findExportEUDatasetIntegration")
+  IntegrationVO findExportEUDatasetIntegration(
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
 
+  /**
+   * Find export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the integration VO
+   */
+  @GetMapping("/private/findExportIntegration")
+  IntegrationVO findExportIntegration(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fileExtension") String fileExtension);
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @DeleteMapping("/private/deleteSchemaIntegrations")
+  void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

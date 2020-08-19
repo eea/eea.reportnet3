@@ -57,7 +57,6 @@ import {
   faList,
   faMapMarkedAlt,
   faMapPin,
-  faMinus,
   faPalette,
   faPaperclip,
   faPen,

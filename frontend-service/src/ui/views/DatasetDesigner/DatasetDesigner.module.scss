@@ -61,23 +61,16 @@
   overflow: hidden !important;
 }
 
-.qcRulesDialog {
-  width: 90% !important;
-}
-.qcRulesDialogEmpty {
-  width: 70% !important;
-}
-
 .integrationsButtonIcon {
-  transform: rotate(90deg) !important;
+  transform: rotate(-90deg) !important;
 }
 
 .integrationsButton:hover span:first-child:not(:hover) {
-  transform: rotate(90deg) scale(1.25) !important;
+  transform: rotate(-90deg) scale(1.25) !important;
   transition: 0.08s auto;
 }
 
 .integrationsButton span:first-child:hover {
-  transform: rotate(90deg) scale(1.25) !important;
+  transform: rotate(-90deg) scale(1.25) !important;
   transition: 0.08s auto;
 }

@@ -118,7 +118,7 @@ const UserImg = () => {
           }}
           type="file"
         />
-        <label for="userIcon" className="srOnly">
+        <label htmlFor="userIcon" className="srOnly">
           {resources.messages['selectImage']}
         </label>
         <img
@@ -134,13 +134,15 @@ const UserImg = () => {
         />
         <Icon icon="edit" className={styles.editIcon} />
       </div>
-      <Dialog
-        header={resources.messages['selectImage']}
-        visible={isAvatarDialogVisible}
-        style={{ width: '80%' }}
-        onHide={e => setIsAvatarDialogVisible(false)}>
-        <div className={styles.gridContainer}>{listOfImages()}</div>
-      </Dialog>
+      {isAvatarDialogVisible && (
+        <Dialog
+          header={resources.messages['selectImage']}
+          visible={isAvatarDialogVisible}
+          style={{ width: '80%' }}
+          onHide={e => setIsAvatarDialogVisible(false)}>
+          <div className={styles.gridContainer}>{listOfImages()}</div>
+        </Dialog>
+      )}
       <ReactTooltip
         className={styles.tooltipClass}
         clickable={true}

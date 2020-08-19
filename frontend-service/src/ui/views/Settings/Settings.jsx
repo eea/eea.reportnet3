@@ -1,53 +1,38 @@
 import React, { useContext, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
-import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import styles from './Settings.module.scss';
-import { routes } from 'ui/routes';
 
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Title } from '../_components/Title/Title';
 import { UserCard } from './_components/UserCard';
 import { UserConfiguration } from './_components/UserConfiguration';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const Settings = withRouter(({ history }) => {
-  const breadCrumbContext = useContext(BreadCrumbContext);
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { CurrentPage } from 'ui/views/_functions/Utils';
 
+const Settings = withRouter(({ history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
+  useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS, history });
+
   useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: '',
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['userSettingsBreadcrumbs'],
-        icon: 'user-profile',
-        href: getUrl(routes.SETTINGS),
-        command: () => history.push(getUrl(routes.SETTINGS))
-      }
-    ]);
     leftSideBarContext.addModels([]);
   }, []);
 
   const renderUserOptions = () => {
     return (
       <>
-        <UserConfiguration />
-        <UserCard />
+        <div className={styles.userConfiguration}>
+          <UserConfiguration />
+        </div>
+        <div className={styles.userCard}>
+          <UserCard />
+        </div>
       </>
     );
   };

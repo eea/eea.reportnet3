@@ -2,9 +2,11 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
-import javax.ws.rs.Produces;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
@@ -22,6 +24,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -52,58 +55,46 @@ import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
- * The type Data set controller.
+ * The Class DataSetControllerImpl.
  */
 @RestController
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The file treatment helper.
-   */
+  /** The file treatment helper. */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /**
-   * The load validations helper.
-   */
+  /** The update record helper. */
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
-  /**
-   * The delete helper.
-   */
+  /** The delete helper. */
   @Autowired
   private DeleteHelper deleteHelper;
 
-  /**
-   * The design dataset service.
-   */
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The dataset schema service. */
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * Gets the data tables values.
@@ -114,12 +105,11 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
-   *
    * @return the data tables values
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("TableValueDataset/{id}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ') OR (hasRole('DATA_CUSTODIAN'))")
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
@@ -162,8 +152,8 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateDataset(@RequestBody final DataSetVO dataset) {
+  @PutMapping("/update")
+  public void updateDataset(@RequestBody DataSetVO dataset) {
     if (dataset == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -176,21 +166,20 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Load dataset data.
+   * Load table data.
    *
    * @param datasetId the dataset id
    * @param file the file
    * @param idTableSchema the id table schema
    */
-  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
-  public void loadTableData(
-      @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
-      @RequestParam("file") final MultipartFile file, @LockCriteria(
-          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+  public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @RequestParam("file") MultipartFile file,
+      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -214,9 +203,19 @@ public class DataSetControllerImpl implements DatasetController {
             datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
-          "Error importing a file into a table of the dataset {}. The table is read only",
-          datasetId);
+          "Error importing the file {} into a table of the dataset {}. The table is read only",
+          file.getOriginalFilename(), datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, idTableSchema,
+            EntityTypeEnum.TABLE))) {
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
+      LOG_ERROR.error(
+          "Error importing the file {} into a table of the dataset {}. The table has a fixed number of records",
+          file.getOriginalFilename(), datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
     // extract the filename
     String fileName = file.getOriginalFilename();
@@ -243,8 +242,8 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @PostMapping("{id}/loadDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
-  public void loadDatasetData(@PathVariable("id") final Long datasetId,
-      @RequestParam("file") final MultipartFile file) {
+  public void loadDatasetData(@PathVariable("id") Long datasetId,
+      @RequestParam("file") MultipartFile file) {
 
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
@@ -279,12 +278,11 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId the data set id
    */
   @Override
-  @LockMethod(removeWhenFinish = false)
   @HystrixCommand
-  @DeleteMapping(value = "{id}/deleteImportData")
+  @LockMethod(removeWhenFinish = false)
+  @DeleteMapping("{id}/deleteImportData")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void deleteImportData(
-      @LockCriteria(name = "id") @PathVariable("id") final Long dataSetId) {
+  public void deleteImportData(@LockCriteria(name = "id") @PathVariable("id") Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -302,52 +300,43 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Gets the table from any object id.
+   * Gets the position from any object id.
    *
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
-   *
-   * @return the table from any object id
+   * @return the position from any object id
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("findPositionFromAnyObject/{id}")
   public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
-      @RequestParam(value = "datasetId", required = true) Long idDataset,
-      @RequestParam(value = "type", required = true) EntityTypeEnum type) {
+      @RequestParam("datasetId") Long idDataset, @RequestParam("type") EntityTypeEnum type) {
 
-    ValidationLinkVO result = null;
     if (id == null || idDataset == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
     try {
-      result = datasetService.getPositionFromAnyObjectId(id, idDataset, type);
+      return datasetService.getPositionFromAnyObjectId(id, idDataset, type);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
-    return result;
   }
-
 
   /**
    * Gets the by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the by id
-   *
-   * @deprecated this method is deprecated
    */
+  @Deprecated
   @Override
   @HystrixCommand
-  @GetMapping(value = "{id}")
-  @Deprecated
-  public DataSetVO getById(Long datasetId) {
+  @GetMapping("{id}")
+  public DataSetVO getById(@PathVariable("id") Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -361,12 +350,10 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
-
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the data flow id by id
    */
   @Override
@@ -384,10 +371,10 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping("/{id}/updateRecord")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateRecords(@PathVariable("id") final Long datasetId,
-      @RequestBody final List<RecordVO> records) {
+  public void updateRecords(@PathVariable("id") Long datasetId,
+      @RequestBody List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
           "Error updating records. The datasetId or the records to update are emtpy or null");
@@ -409,25 +396,34 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
-   * Delete records.
+   * Delete record.
    *
    * @param datasetId the dataset id
    * @param recordId the record id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{id}/record/{recordId}")
+  @DeleteMapping("/{id}/record/{recordId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void deleteRecord(@PathVariable("id") final Long datasetId,
-      @PathVariable("recordId") final String recordId) {
+  public void deleteRecord(@PathVariable("id") Long datasetId,
+      @PathVariable("recordId") String recordId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE
-            .equals(datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD))) {
+        && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
+            datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
+            datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
+      LOG_ERROR.error(
+          "Error deleting record in the datasetId {}. The table has a fixed number of records",
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+              datasetService.findRecordSchemaIdById(datasetId, recordId)));
     }
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordId);
@@ -438,7 +434,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
    * Insert records.
    *
@@ -448,22 +443,30 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{id}/table/{idTableSchema}/record")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void insertRecords(@PathVariable("id") final Long datasetId,
-      @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestBody final List<RecordVO> records) {
+  public void insertRecords(@PathVariable("id") Long datasetId,
+      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     // Not allow insert if the table is marked as read only. This not applies to design datasets
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+        && Boolean.TRUE.equals(
+            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
       LOG_ERROR.error("Error inserting records in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, idTableSchema,
+            EntityTypeEnum.TABLE))) {
+      LOG_ERROR.error(
+          "Error inserting records in the datasetId {}. The table has a fixed number of records",
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
@@ -480,27 +483,38 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    */
-  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
+  @LockMethod(removeWhenFinish = false)
+  @DeleteMapping("{datasetId}/deleteImportTable/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteImportTable(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
-      @LockCriteria(
-          name = "tableSchemaId") @PathVariable("tableSchemaId") final String tableSchemaId) {
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE)) {
+        && Boolean.TRUE.equals(
+            datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
           datasetId);
       LOG_ERROR.error(
           "Error deleting the table values from the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, tableSchemaId,
+            EntityTypeEnum.TABLE))) {
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
+      LOG_ERROR.error(
+          "Error deleting the table values from the datasetId {}. The table has a fixed number of records",
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, tableSchemaId));
     }
 
     LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
@@ -516,46 +530,59 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
    * Export file.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @param mimeType the mime type
-   *
    * @return the response entity
    */
   @Override
   @HystrixCommand
-  @GetMapping("/exportFile")
-  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
+  public ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType) {
-    LOG.info("Init the export controller");
-    byte[] file;
+
+    String tableName =
+        null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
+            : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
+    if (null == tableName) {
+      LOG_ERROR.error("tableSchemaId not found: {}", tableSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+
     try {
-      file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
-
-      // set file name and content type
-      // Depending on the dataset type (REPORTING/DESIGN) one method or another is used to get the
-      // fileName
-      String filename = "";
-      if (datasetService.isReportingDataset(datasetId)) {
-        filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
-      } else {
-        filename = designDatasetService.getFileNameDesign(mimeType, idTableSchema, datasetId);
-      }
-
+      byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
+      String fileName = tableName + "." + mimeType;
       HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-
-      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
-
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Export file through integration.
+   *
+   * @param datasetId the dataset id
+   * @param fileExtension the file extension
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/exportFileThroughIntegration")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
+  public void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("fileExtension") String fileExtension) {
+    try {
+      datasetService.exportFileThroughIntegration(datasetId, fileExtension);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
@@ -567,10 +594,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{id}/insertIdSchema")
   public void insertIdDataSchema(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema) {
-
+      @RequestParam("idDatasetSchema") String idDatasetSchema) {
     try {
       datasetService.insertSchema(datasetId, idDatasetSchema);
     } catch (EEAException e) {
@@ -587,13 +613,12 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping("/{id}/updateField")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateField(@PathVariable("id") final Long datasetId,
-      @RequestBody final FieldVO field) {
+  public void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
-            EntityTypeEnum.FIELD)) {
+        && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
+            EntityTypeEnum.FIELD))) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -613,12 +638,10 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
    * @param searchValue the search value
-   *
    * @return the field values referenced
    */
   @Override
   @GetMapping("/{id}/getFieldsValuesReferenced")
-  @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @RequestParam("idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue) {
@@ -626,41 +649,11 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Gets the referenced dataset id.
-   *
-   * @param datasetIdOrigin the dataset id origin
-   * @param idFieldSchema the id field schema
-   *
-   * @return the referenced dataset id
-   */
-  @Override
-  @GetMapping("/private/getReferencedDatasetId")
-  public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema) {
-    return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
-  }
-
-  /**
-   * Gets the dataset type.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the dataset type
-   */
-  @Override
-  @GetMapping("/private/datasetType/{datasetId}")
-  public DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId) {
-    return datasetMetabaseService.getDatasetType(datasetId);
-  }
-
-
-  /**
    * Etl export dataset.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   *
    * @return the ETL dataset VO
    */
   @Override
@@ -671,8 +664,9 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
-      LOG_ERROR
-          .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
@@ -685,7 +679,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
   /**
    * Etl import dataset.
    *
@@ -695,15 +688,16 @@ public class DataSetControllerImpl implements DatasetController {
    * @param providerId the provider id
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @PostMapping("/{datasetId}/etlImport")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
-      LOG_ERROR
-          .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
@@ -719,5 +713,156 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) {
+
+    LOG.info("Downloading attachment from the datasetId {}", datasetId);
+    try {
+      AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
+      byte[] file = attachment.getContent();
+      String filename = attachment.getFileName();
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error downloading attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param file the file
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/{datasetId}/field/{fieldId}/attachment")
+  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file) {
+
+    try {
+      // Not allow insert attachment if the table is marked as read only. This not applies to design
+      // datasets
+      if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+          && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
+              datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD))) {
+        LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
+            datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
+      String fileName = file.getOriginalFilename();
+      if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+      }
+      InputStream is = file.getInputStream();
+      datasetService.updateAttachment(datasetId, idField, fileName, is);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error updating attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
+  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) {
+    try {
+      datasetService.deleteAttachment(datasetId, idField);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Gets the referenced dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param idFieldSchema the id field schema
+   * @return the referenced dataset id
+   */
+  @Override
+  @GetMapping("/private/getReferencedDatasetId")
+  public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
+      @RequestParam("idFieldSchema") String idFieldSchema) {
+    return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
+  }
+
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  @Override
+  @GetMapping("/private/datasetType/{datasetId}")
+  public DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId) {
+    return datasetMetabaseService.getDatasetType(datasetId);
+  }
+
+  /**
+   * Validate attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param originalFilename the original filename
+   * @param size the size
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
+      Long size) throws EEAException {
+
+    Boolean result = true;
+    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
+    }
+    FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+    FieldSchemaVO fieldSchema =
+        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
+    if (fieldSchema == null || fieldSchema.getId() == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+    }
+    // Validate property maxSize of the file. If the size is 0, it's ok, continue
+    if (fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
+        && fieldSchema.getMaxSize() * 1000000 < size) {
+      result = false;
+    }
+    // Validate property extensions of the file. If no extensions provided, it's ok, continue
+    if (fieldSchema.getValidExtensions() != null) {
+      List<String> extensions = Arrays.asList(fieldSchema.getValidExtensions());
+      if (!extensions.isEmpty()
+          && !extensions.contains(datasetService.getMimetype(originalFilename))) {
+        result = false;
+      }
+    }
+    return result;
   }
 }

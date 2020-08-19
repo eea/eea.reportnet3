@@ -1,12 +1,9 @@
 package org.eea.interfaces.vo.dataflow.enums;
 
-
-
 /**
  * The Enum IntegrationToolTypeEnum.
  */
 public enum IntegrationToolTypeEnum {
-
 
   /** The fme. */
   FME("FME"),
@@ -14,11 +11,8 @@ public enum IntegrationToolTypeEnum {
   /** The other. */
   OTHER("OTHER");
 
-
   /** The value. */
   private final String value;
-
-
 
   /**
    * Instantiates a new integration tool type enum.
@@ -37,5 +31,4 @@ public enum IntegrationToolTypeEnum {
   public String getValue() {
     return value;
   }
-
 }

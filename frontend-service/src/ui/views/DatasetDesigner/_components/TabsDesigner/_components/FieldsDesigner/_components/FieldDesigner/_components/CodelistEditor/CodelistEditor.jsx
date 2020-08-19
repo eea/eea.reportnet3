@@ -83,27 +83,28 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      contentStyle={{ overflow: 'auto' }}
-      closeOnEscape={false}
-      focusOnShow={false}
-      footer={codelistDialogFooter}
-      header={
-        type.toUpperCase() === 'SINGLE SELECT'
-          ? resources.messages['codelistEditor']
-          : resources.messages['multiselectCodelistEditor']
-      }
-      modal={true}
-      onHide={() => {
-        onCancelSaveCodelist();
-        setIsVisible(false);
-      }}
-      style={{ width: '40%' }}
-      visible={isVisible}
-      zIndex={3003}>
-      {renderChips()}
-    </Dialog>
+    isVisible && (
+      <Dialog
+        blockScroll={false}
+        contentStyle={{ overflow: 'auto' }}
+        focusOnShow={false}
+        footer={codelistDialogFooter}
+        header={
+          type.toUpperCase() === 'SINGLE SELECT'
+            ? resources.messages['codelistEditor']
+            : resources.messages['multiselectCodelistEditor']
+        }
+        modal={true}
+        onHide={() => {
+          onCancelSaveCodelist();
+          setIsVisible(false);
+        }}
+        style={{ width: '40%' }}
+        visible={isVisible}
+        zIndex={3003}>
+        {renderChips()}
+      </Dialog>
+    )
   );
 };
 

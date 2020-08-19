@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -22,15 +23,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DatasetSchemaController {
 
   /**
-   * The Interface DataSetSchemaControllerZuul.
+   * The Interface DatasetSchemaControllerZuul.
    */
   @FeignClient(value = "dataset", contextId = "dataschema", path = "/dataschema")
-  interface DataSetSchemaControllerZuul extends DatasetSchemaController {
+  interface DatasetSchemaControllerZuul extends DatasetSchemaController {
 
   }
 
   /**
-   * Creates the empty data schema.
+   * Creates the empty dataset schema.
    *
    * @param dataflowId the dataflow id
    * @param datasetSchemaName the dataset schema name
@@ -275,4 +276,17 @@ public interface DatasetSchemaController {
   void copyDesignsFromDataflow(@RequestParam("sourceDataflow") Long dataflowIdOrigin,
       @RequestParam("targetDataflow") Long dataflowIdDestination);
 
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the simple schema
+   */
+  @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 }

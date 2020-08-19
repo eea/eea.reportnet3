@@ -458,7 +458,9 @@ const FieldValidation = ({ datasetId, tabs }) => {
               <Button
                 id={`${componentName}__create`}
                 disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                className="p-button-primary p-button-text-icon-left"
+                className={`p-button-primary p-button-text-icon-left ${
+                  !creationFormState.isValidationCreationDisabled && !isSubmitDisabled ? 'p-button-animated-blink' : ''
+                }`}
                 type="button"
                 label={resourcesContext.messages.create}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
@@ -474,7 +476,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
           <Button
             id={`${componentName}__cancel`}
-            className="p-button-secondary p-button-text-icon-left"
+            className="p-button-secondary p-button-text-icon-left p-button-animated-blink"
             type="button"
             label={resourcesContext.messages.cancel}
             icon="cancel"
@@ -486,19 +488,23 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      footer={renderFieldQCsFooter}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editFieldConstraint
-          : resourcesContext.messages.createFieldConstraintTitle
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={e => onHide()}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {validationContext.isVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderFieldQCsFooter}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages.editFieldConstraint
+              : resourcesContext.messages.createFieldConstraintTitle
+          }
+          visible={validationContext.isVisible}
+          style={{ width: '975px' }}
+          onHide={e => onHide()}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   return dialogLayout(

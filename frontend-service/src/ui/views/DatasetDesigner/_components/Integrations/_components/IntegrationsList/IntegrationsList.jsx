@@ -24,7 +24,9 @@ export const IntegrationsList = ({
   getUpdatedData,
   integrationsList,
   manageDialogs,
-  onUpdateDesignData
+  needsRefresh,
+  onUpdateDesignData,
+  refreshList,
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -39,18 +41,20 @@ export const IntegrationsList = ({
   });
 
   useEffect(() => {
-    onLoadIntegrations();
-  }, [integrationListState.isDataUpdated]);
+    if (!designerState.isIntegrationManageDialogVisible && needsRefresh) {
+      onLoadIntegrations();
+    }
+  }, [integrationListState.isDataUpdated, designerState.isIntegrationManageDialogVisible, needsRefresh]);
 
   const actionsTemplate = row => (
     <ActionsColumn
-      onDeleteClick={() => isDeleteDialogVisible(true)}
+      onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        const updatedData = integrationListState.data.filter(
+        const filteredData = integrationListState.data.filter(
           integration => integration.integrationId === row.integrationId
         );
-        manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
-        getUpdatedData(updatedData);
+        manageDialogs('isIntegrationManageDialogVisible', true);
+        if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
     />
   );
@@ -62,7 +66,7 @@ export const IntegrationsList = ({
   const isDeleteDialogVisible = value =>
     integrationListDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
-  const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: value });
+  const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteIntegration = async () => {
     try {
@@ -82,9 +86,11 @@ export const IntegrationsList = ({
 
   const onLoadIntegrations = async () => {
     try {
+      isLoading(true);
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
-      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
+      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
       integrationsList(response);
+      refreshList(false);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
@@ -108,24 +114,33 @@ export const IntegrationsList = ({
 
   const renderColumns = integrations => {
     const fieldColumns = Object.keys(integrations[0])
-      .filter(key => key.includes('integrationName') || key.includes('operation'))
+      .filter(key => key.includes('integrationName') || key.includes('operationName'))
       .map(field => <Column field={field} header={resources.messages[field]} key={field} sortable={true} />);
 
     fieldColumns.push(renderActionButtonsColumn);
     return fieldColumns;
   };
 
-  if (integrationListState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (integrationListState.isLoading) {
+    return (
+    <div className={styles.integrationsWithoutTable}>
+      <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+    </div>);
+  }
 
   return isEmpty(integrationListState.data) ? (
-    <div className={styles.noIntegrations}>{resources.messages['noIntegrations']}</div>
+    <div className={styles.integrationsWithoutTable}>
+      <div className={styles.noIntegrations}>
+        {resources.messages['noIntegrations']}
+      </div>
+    </div>
   ) : (
     <div className={styles.integrations}>
       <Filters
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
         inputOptions={['integrationName']}
-        selectOptions={['operation']}
+        selectOptions={['operationName']}
       />
 
       {!isEmpty(integrationListState.filteredData) ? (

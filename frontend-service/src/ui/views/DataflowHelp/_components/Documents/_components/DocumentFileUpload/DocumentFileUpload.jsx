@@ -47,7 +47,7 @@ const DocumentFileUpload = ({
   }, [isUploadDialogVisible]);
 
   const validationSchema = Yup.object().shape({
-    description: Yup.string().required(),
+    description: Yup.string().required(' ').max(255, resources.messages['documentDescriptionValidationMax']),
     lang: Yup.string().required(),
     uploadFile: isEditForm
       ? Yup.mixed()
@@ -158,9 +158,10 @@ const DocumentFileUpload = ({
                 type="text"
                 value={values.description}
               />
-              <label for="descriptionDocumentFileUpload" className="srOnly">
+              <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
                 {resources.messages['description']}
               </label>
+              <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field id={'selectLanguage'} name="lang" component="select" value={values.lang}>
@@ -171,7 +172,7 @@ const DocumentFileUpload = ({
                   </option>
                 ))}
               </Field>
-              <label for="selectLanguage" className="srOnly">
+              <label htmlFor="selectLanguage" className="srOnly">
                 {resources.messages['selectLang']}
               </label>
             </div>
@@ -191,7 +192,7 @@ const DocumentFileUpload = ({
                       placeholder="file upload"
                       type="file"
                     />
-                    <label for="uploadDocument" className="srOnly">
+                    <label htmlFor="uploadDocument" className="srOnly">
                       {resources.messages['uploadDocument']}
                     </label>
                   </span>
@@ -216,7 +217,7 @@ const DocumentFileUpload = ({
                     : styles.disabledButton
                 }
                 disabled={isSubmitting}
-                icon={isEditForm ? 'save' : 'add'}
+                icon={isEditForm ? 'check' : 'add'}
                 label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 type={isSubmitting ? '' : 'submit'}
               />

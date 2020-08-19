@@ -93,7 +93,8 @@ public final class EEAErrorMessage {
   public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
 
   /** The Constant TABLE_NOT_FOUND: {@value}. */
-  public static final String TABLE_NOT_FOUND = "Table not found";
+  public static final String TABLE_NOT_FOUND =
+      "Table with schema %s from the datasetId %s not found";
 
   /** The Constant DOCUMENT_NOT_FOUND: {@value}. */
   public static final String DOCUMENT_NOT_FOUND = "Document not found";
@@ -209,6 +210,9 @@ public final class EEAErrorMessage {
   /** The Constant TABLE_READ_ONLY: {@value}. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
+  /** The Constant FIELD_READ_ONLY: {@value}. */
+  public static final String FIELD_READ_ONLY = "The field is marked as read only";
+
   /** The Constant RULE_NOT_FOUND: {@value}. */
   public static final String RULE_NOT_FOUND = "Rule not found for datasetSchemaId %s and ruleId %s";
 
@@ -240,16 +244,32 @@ public final class EEAErrorMessage {
   /** The Constant NOT_EMAIL: {@value}. */
   public static final String NOT_EMAIL = "%s is not an email";
 
+  /** The Constant FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION: {@value}. */
+  public static final String FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION =
+      "Aditional EXPORT_EU_DATASET integrations cannot be created";
 
-  /** The Constant NO_DESIGNS_TO_COPY: {@value} */
+  /** The Constant FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION: {@value}. */
+  public static final String FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION =
+      "EXPORT_EU_DATASET integrations cannot be deleted";
+
+  /** The Constant NO_DESIGNS_TO_COPY: {@value}. */
   public static final String NO_DESIGNS_TO_COPY =
       "No designs datasets found to copy in the dataflow %s";
 
-  /** The Constant ERROR COPYING SCHEMAS: {@value} */
+  /** The Constant ERROR COPYING SCHEMAS: {@value}. */
   public static final String ERROR_COPYING_SCHEMAS =
       "Error copying schemas from the dataflow %s to the dataflow %s";
 
+  /** The Constant OPERATION_TYPE_NOT_EDITABLE: {@value}. */
+  public static final String OPERATION_TYPE_NOT_EDITABLE = "The operation type is not editable";
 
+  /** The Constant FIXED_NUMBER_OF_RECORDS: {@value}. */
+  public static final String FIXED_NUMBER_OF_RECORDS =
+      "The table with id schema %s has a fixed number of records";
+
+  /** The Constant ERROR_UPDATING_TABLE_SCHEMA: {@value}. */
+  public static final String ERROR_UPDATING_TABLE_SCHEMA =
+      "Error updating the table with id schema %s from the dataset id %s";
 
   /**
    * Instantiates a new EEA error message.

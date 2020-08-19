@@ -62,11 +62,9 @@ export const apiSnapshot = {
 
   allReporter: async datasetId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/snapshots.json'
-        : getUrl(SnapshotConfig.loadSnapshotsListReporter, {
-            datasetId: datasetId
-          })
+      url: getUrl(SnapshotConfig.loadSnapshotsListReporter, {
+        datasetId: datasetId
+      })
     });
     return response.data;
   },

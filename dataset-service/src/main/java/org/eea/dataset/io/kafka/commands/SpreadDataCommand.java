@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
@@ -23,6 +26,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -71,6 +75,10 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The attachment repository. */
+  @Autowired
+  private AttachmentRepository attachmentRepository;
 
   /** The Constant DATASET_ID. */
   private static final String DATASET_ID = "dataset_%s";
@@ -150,17 +158,25 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
         if (null != datasetPartition.orElse(null)) {
           datasetPartitionId = datasetPartition.get().getId();
         }
-
+        // attachment values
+        List<AttachmentValue> attachments = new ArrayList<>();
+        Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
+        iterableAttachments.forEach(attachments::add);
         recordDesingAssignation(datasetId, design, recordDesignValues, recordDesignValuesList,
-            datasetPartitionId);
+            datasetPartitionId, attachments);
         if (!recordDesignValuesList.isEmpty()) {
           // save values
           TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
           recordRepository.saveAll(recordDesignValuesList);
+          // copy attachments too
+          if (!attachments.isEmpty()) {
+            attachmentRepository.saveAll(attachments);
+          }
         }
       }
     }
   }
+
 
   /**
    * Record desing assignation.
@@ -170,10 +186,11 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
    * @param recordDesignValues the record design values
    * @param recordDesignValuesList the record design values list
    * @param datasetPartitionId the dataset partition id
+   * @param attachments the attachments
    */
   private void recordDesingAssignation(Long datasetId, DesignDataset design,
       List<RecordValue> recordDesignValues, List<RecordValue> recordDesignValuesList,
-      Long datasetPartitionId) {
+      Long datasetPartitionId, List<AttachmentValue> attachments) {
     for (RecordValue record : recordDesignValues) {
       RecordValue recordAux = new RecordValue();
       TableValue tableAux = record.getTableValue();
@@ -206,6 +223,16 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
         auxField.setType(field.getType());
         auxField.setRecord(recordAux);
         fieldValuesOnlyValues.add(auxField);
+        if (DataType.ATTACHMENT.equals(field.getType())) {
+          for (AttachmentValue attach : attachments) {
+            if (StringUtils.isNotBlank(attach.getFieldValue().getId())
+                && attach.getFieldValue().getId().equals(field.getId())) {
+              attach.setFieldValue(auxField);
+              attach.setId(null);
+              break;
+            }
+          }
+        }
       }
       recordAux.setFields(fieldValuesOnlyValues);
       recordDesignValuesList.add(recordAux);

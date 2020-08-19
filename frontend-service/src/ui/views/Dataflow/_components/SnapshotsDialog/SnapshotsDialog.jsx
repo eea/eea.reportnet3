@@ -17,14 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
-export const SnapshotsDialog = ({
-  dataflowId,
-  datasetId,
-  datasetName,
-  hideSnapshotDialog,
-  isSnapshotDialogVisible,
-  manageDialogs
-}) => {
+export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshotDialogVisible, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -100,7 +93,7 @@ export const SnapshotsDialog = ({
 
   const onShowReleaseDialog = ({ isReleased }) => {
     setIsActiveReleaseSnapshotConfirmDialog(true);
-    manageDialogs('isSnapshotDialogVisible', false);
+    manageDialogs('isActiveReleaseSnapshotConfirmDialog', true);
     setIsReleased(isReleased);
   };
 
@@ -125,6 +118,7 @@ export const SnapshotsDialog = ({
         }}
         style={{ width: '30vw' }}
         visible={isSnapshotDialogVisible}>
+          
         <li className={styles.createAndReleaseItem}>
           <div className={styles.itemInner}>
             <div className={styles.itemData}>
@@ -144,6 +138,7 @@ export const SnapshotsDialog = ({
                   <div className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper}`}>
                     <div className="p-inputgroup" style={{ width: '100%' }}>
                       <InputText
+                        maxLength="255"
                         name="createSnapshotDescription"
                         onBlur={event => {
                           event.preventDefault();
@@ -182,18 +177,20 @@ export const SnapshotsDialog = ({
           snapshotsListData={snapshotsListData}
         />
       </Dialog>
-      <ReleaseSnapshotDialog
-        dataflowId={dataflowId}
-        datasetId={datasetId}
-        hideReleaseDialog={onHideReleaseDialog}
-        isCopyAndReleaseBody={isCopyAndRelease}
-        isReleased={isReleased}
-        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
-        onLoadSnapshotList={onLoadSnapshotList}
-        setIsLoading={setIsLoading}
-        snapshotDataToRelease={snapshotDataToRelease}
-        snapshotDescription={snapshotDescription}
-      />
+      {isActiveReleaseSnapshotConfirmDialog && (
+        <ReleaseSnapshotDialog
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          hideReleaseDialog={onHideReleaseDialog}
+          isCopyAndReleaseBody={isCopyAndRelease}
+          isReleased={isReleased}
+          isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
+          onLoadSnapshotList={onLoadSnapshotList}
+          setIsLoading={setIsLoading}
+          snapshotDataToRelease={snapshotDataToRelease}
+          snapshotDescription={snapshotDescription}
+        />
+      )}
     </>
   );
 };

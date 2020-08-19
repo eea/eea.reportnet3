@@ -16,7 +16,6 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        opener: payload.opener,
         level: payload.level
       };
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
@@ -57,7 +56,6 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         isVisible: true,
         referenceId: payload.referenceId,
-        opener: payload.opener,
         ruleEdit: true,
         ruleToEdit: payload.ruleToEdit,
         level: payload.level
@@ -86,7 +84,7 @@ export const ValidationProvider = ({ children }) => {
     <ValidationContext.Provider
       value={{
         ...state,
-        onOpenModal: () => {
+        onOpenModal: level => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL'
           });
@@ -95,7 +93,6 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER',
             payload: {
-              opener,
               level
             }
           });
@@ -122,13 +119,12 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPENER_RESET'
           });
         },
-        onOpenToEdit: (rule, opener, level) => {
+        onOpenToEdit: (rule, level) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {
               ruleToEdit: { ...rule },
               referenceId: rule.referenceId,
-              opener,
               level
             }
           });

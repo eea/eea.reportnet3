@@ -14,6 +14,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
 const SnapshotSlideBar = ({
   isLoadingSnapshotListData,
@@ -22,6 +23,7 @@ const SnapshotSlideBar = ({
   snapshotListData
 }) => {
   const [slideBarStyle, setSlideBarStyle] = useState({});
+  const dialogContext = useContext(DialogContext);
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const form = useRef(null);
@@ -46,8 +48,13 @@ const SnapshotSlideBar = ({
 
   const showScrollingBar = () => {
     const bodySelector = document.querySelector('body');
-
-    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
+    if (isVisible) {
+      bodySelector.style.overflow = 'hidden';
+    } else {
+      if (dialogContext.open.length == 0) {
+        bodySelector.style.overflow = 'hidden auto';
+      }
+    }
   };
 
   const resetSlideBarPositionAndSize = () => {
@@ -62,7 +69,7 @@ const SnapshotSlideBar = ({
   };
 
   const snapshotValidationSchema = Yup.object().shape({
-    createSnapshotDescription: Yup.string().required()
+    createSnapshotDescription: Yup.string().max(255, resources.messages['snapshotDescriptionValidationMax']).required()
   });
 
   if (isVisible) {
@@ -71,6 +78,7 @@ const SnapshotSlideBar = ({
 
   return (
     <Sidebar
+      baseZIndex={1900}
       blockScroll={true}
       className={styles.sidebar}
       onHide={() => setIsVisible()}

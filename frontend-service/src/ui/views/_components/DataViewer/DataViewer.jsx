@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useState, useEffect, useContext, useRef, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -25,6 +25,7 @@ import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { FieldEditor } from './_components/FieldEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
@@ -44,30 +45,32 @@ import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { ExtensionUtils, MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import {
-  useLoadColsSchemasAndColumnOptions,
   useContextMenu,
-  useSetColumns,
-  useRecordErrorPosition
+  useLoadColsSchemasAndColumnOptions,
+  useRecordErrorPosition,
+  useSetColumns
 } from './_functions/Hooks/DataViewerHooks';
 
 const DataViewer = withRouter(
   ({
+    hasCountryCode,
     hasWritePermissions,
     isDatasetDeleted = false,
-    isDataCollection,
+    isExportable,
     isValidationSelected,
-    //levelErrorTypes,
     match: {
       params: { datasetId, dataflowId }
     },
     onLoadTableData,
     recordPositionId,
+    reporting,
     selectedRecordErrorId,
     setIsValidationSelected,
     showWriteButtons,
+    tableFixedNumber,
     tableHasErrors,
     tableId,
     tableName,
@@ -78,6 +81,8 @@ const DataViewer = withRouter(
 
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -121,8 +126,12 @@ const DataViewer = withRouter(
       numCopiedRecords: undefined,
       pastedRecords: undefined,
       recordsPerPage: userContext.userProps.rowsPerPage,
+      selectedFieldId: '',
+      selectedFieldSchemaId: '',
       selectedMapCells: {},
+      selectedMaxSize: '',
       selectedRecord: {},
+      selectedValidExtensions: [],
       totalFilteredRecords: 0,
       totalRecords: 0
     });
@@ -133,14 +142,20 @@ const DataViewer = withRouter(
 
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
-    const snapshotContext = useContext(SnapshotContext);
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
     let divRef = useRef();
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
-    const { menu } = useContextMenu(resources, records, setEditDialogVisible, setConfirmDeleteVisible);
+    const { menu } = useContextMenu(
+      resources,
+      records,
+      RecordUtils.allAttachments(colsSchema),
+      tableFixedNumber,
+      setEditDialogVisible,
+      setConfirmDeleteVisible
+    );
 
     const cellDataEditor = (cells, record) => {
       return (
@@ -148,18 +163,23 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
+          hasWritePermissions={hasWritePermissions}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
+          // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
+          reporting={reporting}
         />
       );
     };
 
     const actionTemplate = () => (
       <ActionsColumn
+        hideDeletion={tableFixedNumber}
+        hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
         onEditClick={() => setEditDialogVisible(true)}
       />
@@ -177,18 +197,38 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
+    const onFileDownload = async (fileName, fieldId) => {
+      const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+
+      DownloadFile(fileContent, fileName);
+    };
+
+    const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, validExtensions, maxSize } });
+    };
+
+    const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+      setIsDeleteAttachmentVisible(true);
+    };
+
     const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
       colsSchema,
       columnOptions,
+      hasCountryCode,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
-      isDataCollection,
+      onFileDeleteVisible,
+      onFileDownload,
+      onFileUploadVisible,
       records,
       resources,
+      setIsAttachFileVisible,
       setIsColumnInfoVisible,
-      validationsTemplate
+      validationsTemplate,
+      reporting
     );
 
     // useEffect(() => {
@@ -416,6 +456,11 @@ const DataViewer = withRouter(
       setIsValidationShown(true);
     };
 
+    const onAttach = async value => {
+      RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
+      setIsAttachFileVisible(false);
+    };
+
     const onCancelRowEdit = () => {
       let updatedValue = RecordUtils.changeRecordInTable(
         fetchedData,
@@ -459,6 +504,14 @@ const DataViewer = withRouter(
         });
       } finally {
         setDeleteDialogVisible(false);
+      }
+    };
+
+    const onConfirmDeleteAttachment = async () => {
+      const fileDeleted = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
+      if (fileDeleted) {
+        RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
+        setIsDeleteAttachmentVisible(false);
       }
     };
 
@@ -575,13 +628,13 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
     };
 
     const onPasteAccept = async () => {
@@ -743,20 +796,24 @@ const DataViewer = withRouter(
               onChange={() => setAddAnotherOne(!addAnotherOne)}
               role="checkbox"
             />
-            <span className={styles.addAnotherOne}>{resources.messages['addAnotherOne']}</span>
+            <span className={styles.addAnotherOne} onClick={() => setAddAnotherOne(!addAnotherOne)}>
+              {resources.messages['addAnotherOne']}
+            </span>
           </div>
         )}
         <Button
+          className="p-button-animated-blink"
           disabled={isSaving}
           label={resources.messages['save']}
-          icon={!isSaving ? 'save' : 'spinnerAnimate'}
+          icon={!isSaving ? 'check' : 'spinnerAnimate'}
           onClick={() => {
             onSaveRecord(records.newRecord);
           }}
         />
         <Button
-          label={resources.messages['cancel']}
+          className="p-button-secondary"
           icon="cancel"
+          label={resources.messages['cancel']}
           onClick={() => {
             dispatchRecords({
               type: 'SET_NEW_RECORD',
@@ -771,8 +828,8 @@ const DataViewer = withRouter(
     const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          label={resources.messages['ok']}
           icon="check"
+          label={resources.messages['ok']}
           onClick={() => {
             setIsColumnInfoVisible(false);
           }}
@@ -783,8 +840,9 @@ const DataViewer = withRouter(
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
+          className="p-button-animated-blink"
+          icon={isSaving === true ? 'spinnerAnimate' : 'check'}
           label={resources.messages['save']}
-          icon={isSaving === true ? 'spinnerAnimate' : 'save'}
           onClick={() => {
             try {
               onSaveRecord(records.editedRecord);
@@ -793,7 +851,12 @@ const DataViewer = withRouter(
             }
           }}
         />
-        <Button label={resources.messages['cancel']} icon={'cancel'} onClick={onCancelRowEdit} />
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'cancel'}
+          label={resources.messages['cancel']}
+          onClick={onCancelRowEdit}
+        />
       </div>
     );
 
@@ -842,14 +905,27 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
-          ) : rowData.field === 'Single select items' ? (
-            <Chips disabled={true} value={rowData.value}></Chips>
+          ) : rowData.field === 'Single select items' ||
+            rowData.field === 'Multiple select items' ||
+            rowData.field === 'Valid extensions' ? (
+            <Chips disabled={true} value={rowData.value.split(',')} className={styles.chips}></Chips>
+          ) : rowData.field === 'Maximum file size' ? (
+            `${rowData.value} ${resources.messages['MB']}`
           ) : (
             rowData.value
           )}
         </div>
       );
     };
+
+    const renderCustomFileAttachFooter = (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsAttachFileVisible(false)}
+      />
+    );
 
     const renderCustomFileUploadFooter = (
       <Button
@@ -878,6 +954,17 @@ const DataViewer = withRouter(
         onSaveRecord(records.newRecord);
       }
     };
+    const getAttachExtensions = [{ datasetSchemaId, fileExtension: records.selectedValidExtensions || [] }]
+      .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
+      .flat()
+      .join(', ');
+
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+    ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+      !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
+        ? `${records.selectedMaxSize} ${resources.messages['MB']}`
+        : resources.messages['maxSizeNotDefined']
+    }`;
 
     return (
       <SnapshotContext.Provider>
@@ -885,14 +972,14 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          hasWritePermissions={hasWritePermissions}
-          showWriteButtons={showWriteButtons}
-          hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
-          isDataCollection={isDataCollection}
+          hasCountryCode={hasCountryCode}
+          hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
+          hideValidationFilter={hideValidationFilter}
+          isExportable={isExportable}
           isFilterValidationsActive={isFilterValidationsActive}
-          isTableDeleted={isTableDeleted}
           isLoading={isLoading}
+          isTableDeleted={isTableDeleted}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
@@ -905,10 +992,10 @@ const DataViewer = withRouter(
           setImportTableDialogVisible={setImportTableDialogVisible}
           setRecordErrorPositionId={setRecordErrorPositionId}
           showValidationFilter={showValidationFilter}
+          showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}
           tableId={tableId}
           tableName={tableName}
-          tableReadOnly={tableReadOnly}
         />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
@@ -919,7 +1006,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly && !isDataCollection ? (
+              hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
@@ -990,6 +1077,14 @@ const DataViewer = withRouter(
                 ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
+                  : []),
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
+                  ? ['validExtensions']
+                  : []),
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
+                  ? ['maxSize']
                   : [])
               ])}>
               {['field', 'value'].map((column, i) => (
@@ -1032,11 +1127,45 @@ const DataViewer = withRouter(
           </Dialog>
         )}
 
+        {isAttachFileVisible && (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            footer={renderCustomFileAttachFooter}
+            header={`${resources.messages['uploadAttachment']}`}
+            onHide={() => setIsAttachFileVisible(false)}
+            visible={isAttachFileVisible}>
+            <CustomFileUpload
+              accept={getAttachExtensions || '*'}
+              // accept=".txt"
+              chooseLabel={resources.messages['selectFile']}
+              className={styles.FileUpload}
+              fileLimit={1}
+              infoTooltip={infoAttachTooltip}
+              mode="advanced"
+              multiple={false}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+              maxFileSize={
+                !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
+                  ? records.selectedMaxSize * 1000 * 1024
+                  : 20 * 1000 * 1024
+              }
+              name="file"
+              onUpload={onAttach}
+              operation="PUT"
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+                datasetId,
+                fieldId: records.selectedFieldId
+              })}`}
+            />
+          </Dialog>
+        )}
+
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
-              className={'edit-table calendar-table'}
               blockScroll={false}
+              className={'edit-table calendar-table'}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
               modal={true}
@@ -1051,9 +1180,11 @@ const DataViewer = withRouter(
                   datasetId={datasetId}
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
+                  hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
                   onShowFieldInfo={onShowFieldInfo}
                   records={records}
+                  reporting={reporting}
                 />
               </div>
             </Dialog>
@@ -1064,7 +1195,6 @@ const DataViewer = withRouter(
           <Dialog
             blockScroll={false}
             className="edit-table calendar-table"
-            closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
@@ -1079,9 +1209,11 @@ const DataViewer = withRouter(
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
+                hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
+                reporting={reporting}
               />
             </div>
           </Dialog>
@@ -1100,6 +1232,19 @@ const DataViewer = withRouter(
           </ConfirmDialog>
         )}
 
+        {isDeleteAttachmentVisible && (
+          <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
+            header={`${resources.messages['deleteAttachmentHeader']}`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmDeleteAttachment}
+            onHide={() => setIsDeleteAttachmentVisible(false)}
+            visible={isDeleteAttachmentVisible}>
+            {resources.messages['deleteAttachmentConfirm']}
+          </ConfirmDialog>
+        )}
+
         {confirmDeleteVisible && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
@@ -1112,16 +1257,16 @@ const DataViewer = withRouter(
             {resources.messages['confirmDeleteRow']}
           </ConfirmDialog>
         )}
-
         {confirmPasteVisible && (
           <ConfirmDialog
             className="edit-table"
+            disabledConfirm={isEmpty(records.pastedRecords)}
             divRef={divRef}
             header={resources.messages['pasteRecords']}
             hasPasteOption={true}
             isPasting={isPasting}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
             onConfirm={onPasteAccept}
             onHide={onPasteCancel}
             onPaste={onPaste}
@@ -1145,7 +1290,6 @@ const DataViewer = withRouter(
         {records.isMapOpen && (
           <Dialog
             className={'map-data'}
-            // maximizable={true}
             blockScroll={false}
             dismissableMask={false}
             // contentStyle={

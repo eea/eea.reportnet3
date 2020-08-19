@@ -271,7 +271,7 @@ export const WebLinks = ({
                       placeholder={resources.messages['description']}
                       value={values.description}
                     />
-                    <label for="descriptionWebLinks" className="srOnly">
+                    <label htmlFor="descriptionWebLinks" className="srOnly">
                       {resources.messages['description']}
                     </label>
                   </div>
@@ -283,7 +283,7 @@ export const WebLinks = ({
                       placeholder={resources.messages['url']}
                       value={values.url}
                     />
-                    <label for="urlWebLinks" className="srOnly">
+                    <label htmlFor="urlWebLinks" className="srOnly">
                       {resources.messages['url']}
                     </label>
                     <ErrorMessage name="url" component="div" />
@@ -318,17 +318,18 @@ export const WebLinks = ({
         </Dialog>
       )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={e => onDeleteWeblink(e)}
-        onHide={onHideDeleteDialog}
-        visible={isConfirmDeleteVisible}>
-        {resources.messages['deleteWebLink']}
-      </ConfirmDialog>
+      {isConfirmDeleteVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={e => onDeleteWeblink(e)}
+          onHide={onHideDeleteDialog}
+          visible={isConfirmDeleteVisible}>
+          {resources.messages['deleteWebLink']}
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };

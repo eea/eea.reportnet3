@@ -17,21 +17,23 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
+  getDatasetData,
   getDeleteSchemaIndex,
+  handleExportEuDataset,
   handleRedirect,
   isActiveButton,
   onCloneDataflow,
-  onCopyDataCollectionToEuDataset,
-  onDatasetSchemaNameError,
-  onDuplicateName,
-  onExportEuDataset,
+  onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onSaveName,
+  onShowCopyDataCollectionToEuDatasetModal,
   onShowDataCollectionModal,
+  onShowExportEuDatasetModal,
   onShowManageReportersDialog,
   onShowNewSchemaDialog,
   onShowSnapshotDialog,
-  onShowUpdateDataCollectionModal
+  onShowUpdateDataCollectionModal,
+  setErrorDialogData
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -193,11 +195,10 @@ const useBigButtonList = ({
           // }
         ]
       : [],
-    onDuplicateName: onDuplicateName,
-    onSaveError: onDatasetSchemaNameError,
     onSaveName: onSaveName,
     onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+    setErrorDialogData: setErrorDialogData,
     tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
     visibility:
       !isUndefined(dataflowState.data.designDatasets) &&
@@ -415,12 +416,32 @@ const useBigButtonList = ({
       caption: 'Copy Data Collections to EU Datasets',
       handleRedirect: dataflowState.isCopyDataCollectionToEuDatasetLoading
         ? () => {}
-        : () => onCopyDataCollectionToEuDataset(),
+        : () => onShowCopyDataCollectionToEuDatasetModal(),
       layout: 'defaultBigButton',
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }
   ];
+
+  const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
+    ? [
+        {
+          label: resources.messages['updateConfigurations'],
+          title: true
+        }
+      ].concat(
+        dataflowState.data.euDatasets.map(dataset => ({
+          command: () => {
+            getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
+            handleExportEuDataset(true);
+            onLoadEuDatasetIntegration(dataset.datasetSchemaId);
+          },
+          icon: 'export',
+          iconStyle: { transform: 'rotate(-90deg)' },
+          label: dataset.euDatasetName
+        }))
+      )
+    : [];
 
   const exportEuDatasetBigButton = [
     {
@@ -428,8 +449,9 @@ const useBigButtonList = ({
       buttonIcon: dataflowState.isExportEuDatasetLoading ? 'spinner' : 'fileExport',
       buttonIconClass: dataflowState.isExportEuDatasetLoading ? 'spinner' : '',
       caption: 'Export EU Datasets',
-      handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onExportEuDataset(),
+      handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onShowExportEuDatasetModal(),
       layout: 'defaultBigButton',
+      model: exportEuDatasetModel,
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }

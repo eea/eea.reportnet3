@@ -16,7 +16,7 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, resetUniques }) => {
+export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, refreshList, resetUniques }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -126,8 +126,9 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         selectedTable.value
       );
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', false);
         onResetValues();
+        refreshList(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
@@ -149,7 +150,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
     const noChangedConstraint = isEqual(fieldsInUniqueConstraint.sort(), selectedFieldsInUniqueConstraint.sort());
 
     if (noChangedConstraint) {
-      manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+      manageDialogs('isManageUniqueConstraintDialogVisible', false);
       onResetValues();
     } else {
       try {
@@ -161,8 +162,9 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
           uniqueId
         );
         if (response.status >= 200 && response.status <= 299) {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+          manageDialogs('isManageUniqueConstraintDialogVisible', false);
           onResetValues();
+          refreshList(true);
         }
       } catch (error) {
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
@@ -188,7 +190,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         header={
           !isNil(uniqueId) ? resources.messages['editUniqueConstraint'] : resources.messages['createUniqueConstraint']
         }
-        onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true)}
+        onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false)}
         style={{ width: '975px' }}
         visible={isManageUniqueConstraintDialogVisible}>
         {children}
@@ -199,7 +201,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
     <Fragment>
       <span data-tip data-for="createTooltip">
         <Button
-          className="p-button-primary p-button-animated-blink"
+          className={`p-button-primary ${!isEmpty(selectedFields) && !isDuplicated ? 'p-button-animated-blink' : ''}`}
           disabled={isEmpty(selectedFields) || isDuplicated}
           icon={'check'}
           label={!isNil(uniqueId) ? resources.messages['update'] : resources.messages['create']}
@@ -211,7 +213,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+          manageDialogs('isManageUniqueConstraintDialogVisible', false);
           onResetValues();
         }}
       />

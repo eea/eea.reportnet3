@@ -50,6 +50,15 @@ public class FieldSchemaVO {
   /** The pk has multiple values. */
   private Boolean pkHasMultipleValues;
 
+  /** The valid file extensions for the attachment. */
+  private String[] validExtensions;
+
+  /** The max attachment size. */
+  private Float maxSize;
+
+  /** The read only. */
+  private Boolean readOnly;
+
   /**
    * Hash code.
    *
@@ -59,7 +68,7 @@ public class FieldSchemaVO {
   public int hashCode() {
 
     return Objects.hash(id, description, idRecord, name, type, codelistItems, required, pk,
-        pkMustBeUsed);
+        pkMustBeUsed, validExtensions, maxSize, readOnly);
 
   }
 
@@ -81,6 +90,7 @@ public class FieldSchemaVO {
     return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
         && Objects.equals(type, other.type) && Objects.equals(required, other.required)
-        && Objects.equals(pk, other.pk) && Objects.equals(pkMustBeUsed, other.pkMustBeUsed);
+        && Objects.equals(pk, other.pk) && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
+        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly);
   }
 }

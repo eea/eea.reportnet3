@@ -1,5 +1,3 @@
-import { sample } from 'lodash';
-
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'GET_EXPORT_LIST':
@@ -37,10 +35,10 @@ export const designerReducer = (state, { type, payload }) => {
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 
-    case 'IS_LOADING':
+    case 'SET_IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'IS_LOADING_FILE':
+    case 'SET_IS_LOADING_FILE':
       return { ...state, isLoadingFile: payload.value };
 
     case 'IS_PREVIEW_MODE_ON':
@@ -88,6 +86,9 @@ export const designerReducer = (state, { type, payload }) => {
         },
         isValidationViewerVisible: false
       };
+
+    case 'SET_EXPORT_DATASET_FILE_TYPE':
+      return { ...state, exportDatasetFileType: payload.fileType };
 
     case 'SET_IS_VALIDATION_SELECTED':
       return {

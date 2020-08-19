@@ -28,7 +28,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
   className,
-  data,
+  data = [],
   dateOptions,
   dropDownList,
   dropdownOptions,
@@ -49,9 +49,9 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
-    data: [],
+    data: data,
     filterBy: {},
-    filteredData: [],
+    filteredData: data,
     labelAnimations: {},
     matchMode: true,
     orderBy: {},
@@ -225,7 +225,7 @@ export const Filters = ({
             onChange={() => onToggleMatchMode()}
             role="checkbox"
           />
-          <label for={`matchMode_checkbox`} className="srOnly">
+          <label htmlFor={`matchMode_checkbox`} className="srOnly">
             {resources.messages['strictModeCheckboxFilter']}
           </label>
         </span>

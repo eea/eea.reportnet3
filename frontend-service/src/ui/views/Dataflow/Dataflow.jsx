@@ -11,8 +11,8 @@ import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
 import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/requester/draft';
-import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
+import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -34,7 +34,6 @@ import { Title } from '../_components/Title/Title';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,8 +41,10 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
@@ -52,7 +53,6 @@ const Dataflow = withRouter(({ history, match }) => {
     params: { dataflowId, representativeId }
   } = match;
 
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -97,6 +97,15 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATAFLOW,
+    dataflowId,
+    dataflowStateData: dataflowState.data,
+    history,
+    matchParams: match.params,
+    representativeId
+  });
+
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
   }, [userContext, dataflowState.data]);
@@ -112,99 +121,6 @@ const Dataflow = withRouter(({ history, match }) => {
       leftSideBarContext.addHelpSteps(DataflowReporterHelpConfig, 'dataflowReporterHelp');
     }
   }, [userContext, dataflowState]);
-
-  //Bread Crumbs settings
-  useEffect(() => {
-    if (!isEmpty(dataflowState.data)) {
-      let representatives = dataflowState.data.datasets.map(dataset => {
-        return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
-      });
-
-      if (representatives.length === 1) {
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone'
-          }
-        ]);
-      } else if (representatives.length > 1 && isUndefined(representativeId)) {
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone'
-          }
-        ]);
-      } else if (representativeId) {
-        const currentRepresentative = representatives
-          .filter(representative => representative.dataProviderId === parseInt(representativeId))
-          .map(representative => representative.name);
-
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone',
-            href: getUrl(routes.DATAFLOW),
-            command: () => history.goBack()
-          },
-          {
-            label: currentRepresentative[0],
-            icon: 'clone'
-          }
-        ]);
-      } else if (dataflowState.status === 'DESIGN') {
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone'
-          }
-        ]);
-      }
-    }
-  }, [match.params, dataflowState.data]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.userRoles)) {
@@ -587,15 +503,17 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         )}
 
-        <SnapshotsDialog
-          dataflowId={dataflowId}
-          datasetId={dataflowState.datasetIdToSnapshotProps}
-          datasetName={dataflowState.datasetNameToSnapshotProps}
-          isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
-          manageDialogs={manageDialogs}
-        />
+        {dataflowState.isSnapshotDialogVisible && (
+          <SnapshotsDialog
+            dataflowId={dataflowId}
+            datasetId={dataflowState.datasetIdToSnapshotProps}
+            datasetName={dataflowState.datasetNameToSnapshotProps}
+            isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
+            manageDialogs={manageDialogs}
+          />
+        )}
 
-        {dataflowState.isCustodian && (
+        {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
@@ -614,42 +532,46 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        <Dialog
-          contentStyle={{ maxHeight: '60vh' }}
-          footer={manageRightsDialogFooter}
-          header={
-            dataflowState.isCustodian
-              ? resources.messages['manageEditorsRights']
-              : resources.messages['manageReportersRights']
-          }
-          onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
-          visible={dataflowState.isManageRightsDialogVisible}>
-          <div className={styles.dialog}>
-            <ManageRights
-              dataflowId={dataflowId}
-              dataflowState={dataflowState}
-              dataProviderId={dataflowState.dataProviderId}
-              isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
-            />
-          </div>
-        </Dialog>
+        {dataflowState.isManageRightsDialogVisible && (
+          <Dialog
+            contentStyle={{ maxHeight: '60vh' }}
+            footer={manageRightsDialogFooter}
+            header={
+              dataflowState.isCustodian
+                ? resources.messages['manageEditorsRights']
+                : resources.messages['manageReportersRights']
+            }
+            onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
+            visible={dataflowState.isManageRightsDialogVisible}>
+            <div className={styles.dialog}>
+              <ManageRights
+                dataflowId={dataflowId}
+                dataflowState={dataflowState}
+                dataProviderId={dataflowState.dataProviderId}
+                isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
+              />
+            </div>
+          </Dialog>
+        )}
 
-        <Dialog
-          footer={manageRightsDialogFooter}
-          header={
-            dataflowState.isCustodian
-              ? resources.messages['manageEditorsRights']
-              : resources.messages['manageReportersRights']
-          }
-          onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
-          visible={dataflowState.isShareRightsDialogVisible}>
-          <ShareRights
-            dataflowId={dataflowId}
-            dataProviderId={dataflowState.dataProviderId}
-            isCustodian={dataflowState.isCustodian}
-            representativeId={representativeId}
-          />
-        </Dialog>
+        {dataflowState.isShareRightsDialogVisible && (
+          <Dialog
+            footer={manageRightsDialogFooter}
+            header={
+              dataflowState.isCustodian
+                ? resources.messages['manageEditorsRights']
+                : resources.messages['manageReportersRights']
+            }
+            onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
+            visible={dataflowState.isShareRightsDialogVisible}>
+            <ShareRights
+              dataflowId={dataflowId}
+              dataProviderId={dataflowState.dataProviderId}
+              isCustodian={dataflowState.isCustodian}
+              representativeId={representativeId}
+            />
+          </Dialog>
+        )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 

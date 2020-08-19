@@ -2,7 +2,6 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
@@ -26,14 +25,15 @@ import { DatasetService } from 'core/services/Dataset';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
@@ -41,19 +41,19 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     params: { dataflowId }
   } = match;
 
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
-  const [datasetsSchemas, setDatasetsSchemas] = useState([]);
+  const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
   const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
@@ -61,6 +61,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
+
+  useEffect(() => {
+    leftSideBarContext.removeModels();
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -79,46 +83,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   }, [userContext]);
 
-  //Bread Crumbs settings
-  useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflows'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflow'],
-        icon: 'clone',
-        href: getUrl(
-          routes.DATAFLOW,
-          {
-            dataflowId
-          },
-          true
-        ),
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId
-              },
-              true
-            )
-          )
-      },
-      { label: resources.messages['dataflowHelp'], icon: 'info' }
-    ]);
-    leftSideBarContext.removeModels();
-    // filterHelpSteps('initial');
-  }, []);
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, history });
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
@@ -209,6 +174,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           Promise.all(datasetSchemas).then(completed => {
             setDatasetsSchemas(completed);
           });
+        } else {
+          setIsLoadingSchemas(false);
         }
       } else {
         if (!isEmpty(dataflow.designDatasets)) {
@@ -218,6 +185,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           Promise.all(datasetSchemas).then(completed => {
             setDatasetsSchemas(completed);
           });
+        } else {
+          setIsLoadingSchemas(false);
         }
       }
     } catch (error) {
@@ -289,7 +258,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             <Documents
               dataflowId={dataflowId}
               documents={documents}
-              isCustodian={isCustodian}
               isDeletingDocument={isDeletingDocument}
               isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
@@ -313,7 +281,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               webLinks={webLinks}
             />
           </TabPanel>
-          <TabPanel headerClassName="dataflowHelp-schemas-help-step" header={resources.messages['datasetSchemas']}>
+          <TabPanel
+            disabled={isEmpty(datasetsSchemas)}
+            headerClassName="dataflowHelp-schemas-help-step"
+            header={resources.messages['datasetSchemas']}
+            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas && config.icons['spinnerAnimate']}>
             <DatasetSchemas
               dataflowId={dataflowId}
               datasetsSchemas={datasetsSchemas}

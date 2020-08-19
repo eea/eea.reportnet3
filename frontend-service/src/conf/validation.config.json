@@ -802,5 +802,6 @@
     "dataset": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
   },
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
-  "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"]
+  "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
+  "bannedFields": ["attachment"]
 }

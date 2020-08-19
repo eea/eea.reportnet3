@@ -73,7 +73,7 @@ export const DataflowManagement = ({
   const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
   const onDeleteDataflow = async () => {
-    manageDialogs('isDeleteDialogVisible', false, secondaryDialog, true);
+    manageDialogs('isDeleteDialogVisible', false);
     showLoading();
     try {
       const response = await DataflowService.deleteById(dataflowId);
@@ -96,7 +96,7 @@ export const DataflowManagement = ({
   };
 
   const onHideObligationDialog = () => {
-    manageDialogs('isRepObDialogVisible', false, secondaryDialog, true);
+    manageDialogs('isRepObDialogVisible', false);
     onResetObl();
   };
 
@@ -133,13 +133,13 @@ export const DataflowManagement = ({
             className="p-button-danger p-button-animated-blink"
             icon="trash"
             label={resources.messages['deleteDataflowButton']}
-            onClick={() => manageDialogs('isDeleteDialogVisible', true, secondaryDialog, false)}
+            onClick={() => manageDialogs('isDeleteDialogVisible', true)}
           />
         )}
       </div>
       <Button
         disabled={dataflowManagementState.isSubmitting}
-        icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'save' : 'add'}
+        icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}
         onClick={() => (dataflowManagementState.isSubmitting ? {} : onSave())}
       />
@@ -153,7 +153,7 @@ export const DataflowManagement = ({
         icon="check"
         label={resources.messages['ok']}
         onClick={() => {
-          manageDialogs('isRepObDialogVisible', false, secondaryDialog, true);
+          manageDialogs('isRepObDialogVisible', false);
           getPrevState(dataflowManagementState.obligation);
         }}
       />
@@ -188,7 +188,7 @@ export const DataflowManagement = ({
             isEditForm={isEditForm}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
-            onSearch={() => manageDialogs('isRepObDialogVisible', true, secondaryDialog, false)}
+            onSearch={() => manageDialogs('isRepObDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
             refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
@@ -204,7 +204,7 @@ export const DataflowManagement = ({
           labelConfirm={resources.messages['yes']}
           disabledConfirm={state.deleteInput.toLowerCase() !== state.name.toLowerCase()}
           onConfirm={() => onDeleteDataflow()}
-          onHide={() => manageDialogs('isDeleteDialogVisible', false, secondaryDialog, true)}
+          onHide={() => manageDialogs('isDeleteDialogVisible', false)}
           visible={state.isDeleteDialogVisible}>
           <p>{resources.messages['deleteDataflow']}</p>
           <p
@@ -222,7 +222,7 @@ export const DataflowManagement = ({
               ref={deleteInputRef}
               value={state.deleteInput}
             />
-            <label for="deleteDataflow" className="srOnly">
+            <label htmlFor="deleteDataflow" className="srOnly">
               {resources.messages['deleteDataflowButton']}
             </label>
           </p>

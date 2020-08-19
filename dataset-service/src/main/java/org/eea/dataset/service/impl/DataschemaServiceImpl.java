@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
+import org.eea.dataset.mapper.SimpleDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -35,7 +36,7 @@ import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -44,6 +45,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
@@ -95,9 +97,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The rules controller zuul. */
   @Autowired
@@ -140,6 +142,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The unique constraint mapper. */
   @Autowired
   private UniqueConstraintMapper uniqueConstraintMapper;
+
+  /** The simple data schema mapper. */
+  @Autowired
+  private SimpleDataSchemaMapper simpleDataSchemaMapper;
 
   /**
    * Creates the empty data set schema.
@@ -330,7 +336,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
+    recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -362,6 +368,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (null == tableSchemaVO.getReadOnly()) {
       tableSchemaVO.setReadOnly(false);
+    }
+    if (null == tableSchemaVO.getFixedNumber()) {
+      tableSchemaVO.setFixedNumber(false);
     }
 
     RecordSchema recordSchema = new RecordSchema();
@@ -411,6 +420,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
         }
+        if (tableSchemaVO.getFixedNumber() != null) {
+          tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
+        }
         if (tableSchemaVO.getNotEmpty() != null) {
           Boolean oldValue = tableSchema.getBoolean("notEmpty");
           Boolean newValue = tableSchemaVO.getNotEmpty();
@@ -419,12 +431,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
 
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
-            .getModifiedCount() == 1) {
-          return;
+            .getModifiedCount() != 1) {
+          LOG.error(
+              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
+          throw new EEAException(
+              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
         }
+      } else {
+        LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+        throw new EEAException(
+            String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
       }
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
@@ -446,8 +463,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
     if (tableSchema == null) {
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+      throw new EEAException(
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
     }
     // when we delete a table we need to delete all rules of this table, we mean, rules of the
     // records fields, etc
@@ -520,6 +538,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
+      if (null == fieldSchemaVO.getReadOnly()) {
+        fieldSchemaVO.setReadOnly(false);
+      }
       // we create this if to clean blank space at begining and end of any codelistItem
       // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
@@ -531,7 +552,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         fieldSchemaVO.setCodelistItems(codelistItems);
       }
-
+      if (fieldSchemaVO.getValidExtensions() != null
+          && fieldSchemaVO.getValidExtensions().length != 0) {
+        String[] validExtensions = fieldSchemaVO.getValidExtensions();
+        for (int i = 0; i < validExtensions.length; i++) {
+          validExtensions[i] = validExtensions[i].trim();
+        }
+        fieldSchemaVO.setValidExtensions(validExtensions);
+      }
+      if (fieldSchemaVO.getMaxSize() == null || fieldSchemaVO.getMaxSize() == 0
+          || fieldSchemaVO.getMaxSize() > 20) {
+        fieldSchemaVO.setMaxSize(20f);
+      }
 
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
@@ -560,7 +592,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (fieldSchemaVO != null) {
         Document fieldSchema =
             schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-
         if (fieldSchema != null) {
           // First of all, we update the previous data in the catalog
           updatePreviousDataInCatalog(fieldSchema);
@@ -635,6 +666,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (fieldSchemaVO.getPkHasMultipleValues() != null) {
       fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
+    }
+    Float size = 20f;
+    if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
+        && fieldSchemaVO.getMaxSize() < 20) {
+      size = fieldSchemaVO.getMaxSize();
+    }
+    fieldSchema.put("maxSize", size);
+    if (fieldSchemaVO.getReadOnly() != null) {
+      fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
+    }
+
+    if (fieldSchemaVO.getValidExtensions() != null) {
+      String[] validExtensions = fieldSchemaVO.getValidExtensions();
+      for (int i = 0; i < validExtensions.length; i++) {
+        validExtensions[i] = validExtensions[i].trim();
+      }
+      fieldSchema.put("validExtensions", Arrays.asList(validExtensions));
     }
     if (fieldSchemaVO.getReferencedField() != null) {
       Document referenced = new Document();
@@ -1612,6 +1660,83 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
       }
     }
+  }
+
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @return the simple schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException {
+    String schemaId = getDatasetSchemaId(datasetId);
+    if (schemaId != null) {
+      LOG.info("Getting schema from id {}", schemaId);
+      Optional<DesignDataset> designDataset =
+          designDatasetRepository.findFirstByDatasetSchema(schemaId);
+      DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+      if (datasetSchema != null) {
+        SimpleDatasetSchemaVO simpleDatasetSchema =
+            simpleDataSchemaMapper.entityToClass(datasetSchema);
+        if (designDataset.isPresent()) {
+          simpleDatasetSchema.setDatasetName(designDataset.get().getDataSetName());
+        }
+        return simpleDatasetSchema;
+      } else {
+        throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, schemaId));
+      }
+    } else {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
+    }
+  }
+
+
+  /**
+   * Check clear attachments.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
+  @Override
+  public Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
+      FieldSchemaVO fieldSchemaVO) {
+    Boolean hasToClean = false;
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+    if (fieldSchema != null) {
+      Double previousMaxSize = (Double) fieldSchema.get("maxSize");
+      List<String> previousExtensions = (List<String>) fieldSchema.get("validExtensions");
+      List<String> differentExtensions = new ArrayList<>();
+      if (previousExtensions != null) {
+        List<String> similarExtensions = new ArrayList<>(previousExtensions);
+        differentExtensions.addAll(similarExtensions);
+        differentExtensions.addAll(Arrays.asList(fieldSchemaVO.getValidExtensions()));
+        similarExtensions.retainAll(Arrays.asList(fieldSchemaVO.getValidExtensions()));
+        differentExtensions.removeAll(similarExtensions);
+      }
+      // Clean if the data type was or is going to be an Attachment type
+      if ((DataType.ATTACHMENT.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+          || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))
+          && !fieldSchema.get(LiteralConstants.TYPE_DATA)
+              .equals(fieldSchemaVO.getType().getValue())) {
+        hasToClean = true;
+      }
+      // Clean if the type is still ATTACHMENT, but the maxSize or the list of file formats have
+      // changed
+      if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())
+          && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+          && previousMaxSize != null && previousExtensions != null
+          && ((fieldSchemaVO.getMaxSize() != null
+              && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
+              || !differentExtensions.isEmpty())) {
+        hasToClean = true;
+      }
+    }
+    return hasToClean;
   }
 
   /**

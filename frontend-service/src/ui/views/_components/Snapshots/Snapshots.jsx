@@ -31,34 +31,37 @@ const Snapshots = ({
         isReleaseVisible={isReleaseVisible}
       />
 
-      <ConfirmDialog
-        className={styles.snapshotDialog}
-        classNameConfirm={snapshotContext.snapshotState.dialogMessage === 'Delete copy' ? 'p-button-danger' : undefined}
-        header={snapshotContext.snapshotState.dialogMessage}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={snapshotContext.snapshotState.action}
-        onHide={() => setIsSnapshotDialogVisible(false)}
-        showHeader={false}
-        visible={isSnapshotDialogVisible}>
-        <p className={styles.dialogQuestion}>{snapshotContext.snapshotState.dialogConfirmQuestion}</p>
-        <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
-        <ul>
-          <li>
-            <strong>{resources.messages.creationDate}: </strong>
-            {moment(snapshotContext.snapshotState.creationDate).format(
-              `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-                userContext.userProps.amPm24h ? '' : ' A'
-              }`
-            )}
-          </li>
-          <li>
-            <strong>{resources.messages.description}: </strong>
-            {snapshotContext.snapshotState.description}
-          </li>
-        </ul>
-      </ConfirmDialog>
+      {isSnapshotDialogVisible && (
+        <ConfirmDialog
+          className={styles.snapshotDialog}
+          classNameConfirm={
+            snapshotContext.snapshotState.dialogMessage === 'Delete copy' ? 'p-button-danger' : undefined
+          }
+          header={snapshotContext.snapshotState.dialogMessage}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={snapshotContext.snapshotState.action}
+          onHide={() => setIsSnapshotDialogVisible(false)}
+          showHeader={false}
+          visible={isSnapshotDialogVisible}>
+          <p className={styles.dialogQuestion}>{snapshotContext.snapshotState.dialogConfirmQuestion}</p>
+          <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
+          <ul>
+            <li>
+              <strong>{resources.messages.creationDate}: </strong>
+              {moment(snapshotContext.snapshotState.creationDate).format(
+                `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+                  userContext.userProps.amPm24h ? '' : ' A'
+                }`
+              )}
+            </li>
+            <li>
+              <strong>{resources.messages.description}: </strong>
+              {snapshotContext.snapshotState.description}
+            </li>
+          </ul>
+        </ConfirmDialog>
+      )}
     </>
   );
 };

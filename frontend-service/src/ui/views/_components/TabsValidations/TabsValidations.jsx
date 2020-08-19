@@ -17,8 +17,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
-import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -39,7 +37,7 @@ const TabsValidations = withRouter(
     datasetSchemaId,
     onHideValidationsDialog,
     reporting = false,
-    setHasValidations
+    setHasValidations = () => {}
   }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
@@ -63,7 +61,8 @@ const TabsValidations = withRouter(
     }, [tabsValidationsState.isDataUpdated]);
 
     useEffect(() => {
-      const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+      const response = notificationContext.hidden.find(notification => notification.key === 'VALIDATED_QC_RULE_EVENT');
+
       if (response) onUpdateData();
     }, [notificationContext]);
 
@@ -255,8 +254,7 @@ const TabsValidations = withRouter(
         <ActionsColumn
           onDeleteClick={() => onShowDeleteDialog()}
           onEditClick={() => {
-            validationContext.onOpenToEdit(row, 'validationsListDialog', rowType);
-            onHideValidationsDialog();
+            validationContext.onOpenToEdit(row, rowType);
           }}
         />
       );
@@ -268,8 +266,7 @@ const TabsValidations = withRouter(
       return (
         <ActionsColumn
           onEditClick={() => {
-            validationContext.onOpenToEdit(row, 'validationsListDialog', rowType);
-            onHideValidationsDialog();
+            validationContext.onOpenToEdit(row, rowType);
           }}
         />
       );
@@ -284,7 +281,7 @@ const TabsValidations = withRouter(
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
         visible={tabsValidationsState.isDeleteDialogVisible}
-        maximizable={false}>
+        >
         {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );
@@ -292,15 +289,18 @@ const TabsValidations = withRouter(
     const columnStyles = field => {
       const style = {};
       const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date'];
+      const fieldUppercase = field.toUpperCase();
       if (reporting) {
         invisibleFields.push('enabled', 'automatic', 'isCorrect');
       }
-      if (field.toUpperCase() === 'DESCRIPTION') {
+      if (fieldUppercase === 'DESCRIPTION') {
         style.width = '23%';
       }
-      // else {
-      //   style.width = '20%';
-      // }
+
+      if (fieldUppercase === 'ENTITYTYPE' || fieldUppercase === 'LEVELERROR') {
+        style.minWidth = '6rem';
+      }
+
       if (invisibleFields.includes(field)) {
         style.display = 'none';
       } else {
@@ -356,10 +356,19 @@ const TabsValidations = withRouter(
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
     const validationList = () => {
+      if (tabsValidationsState.isLoading) {
+        return (
+        <div className={styles.validationsWithoutTable}>
+          <div className={styles.loadingSpinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+        </div>);
+      }
+
       if (checkIsEmptyValidations()) {
         return (
-          <div>
-            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
+          <div className={styles.validationsWithoutTable}>
+            <div className={styles.noValidations}>
+              {resources.messages['emptyValidations']}
+            </div>
           </div>
         );
       }
@@ -367,7 +376,7 @@ const TabsValidations = withRouter(
       const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.filteredData.length}`;
 
       return (
-        <Fragment>
+        <div className={styles.validations}>
           <div className={styles.searchInput}>
             <Filters
               className="filter-lines"
@@ -394,37 +403,17 @@ const TabsValidations = withRouter(
               {renderColumns(tabsValidationsState.validationList.validations)}
             </DataTable>
           ) : (
-            <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
+            <div className={styles.emptyFilteredData}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
           )}
-        </Fragment>
-
-        // <TabPanel header={entityType} key={entityType} rightIcon={null}>
-        //   <div className={null}>
-        //     <DataTable
-        //       autoLayout={true}
-        //       className={null}
-        //       loading={false}
-        //       paginator={true}
-        //       paginatorRight={paginatorRightText}
-        //       rows={10}
-        //       rowsPerPageOptions={[5, 10, 15]}
-        //       totalRecords={validationsFilteredByEntityType.length}
-        //       value={validationsFilteredByEntityType}>
-        //       {columns}
-        //     </DataTable>
-        //   </div>
-        // </TabPanel>
+        </div>
       );
-      // });
     };
 
-    if (tabsValidationsState.isLoading) return <Spinner className={styles.positioning} />;
-
     return (
-      <div className={checkIsEmptyValidations() ? styles.noValidations : styles.validations}>
+      <Fragment>
         {validationList()}
         {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
-      </div>
+      </Fragment>
     );
   }
 );
