@@ -572,7 +572,11 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                 ) : (
                   <span data-tip data-for="createTooltip">
                     <Button
-                      className="p-button-primary p-button-text-icon-left"
+                      className={`p-button-primary p-button-text-icon-left ${
+                        !creationFormState.isValidationCreationDisabled && !isSubmitDisabled
+                          ? 'p-button-animated-blin'
+                          : ''
+                      }`}
                       disabled={
                         creationFormState.isValidationCreationDisabled ||
                         isSubmitDisabled ||
@@ -593,7 +597,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                 )}
 
                 <Button
-                  className="p-button-secondary p-button-text-icon-left"
+                  className="p-button-secondary p-button-text-icon-left p-button-animated-blink"
                   icon="cancel"
                   id={`${componentName}__cancel`}
                   label={resourcesContext.messages['cancel']}

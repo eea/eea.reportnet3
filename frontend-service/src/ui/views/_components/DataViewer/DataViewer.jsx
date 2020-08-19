@@ -802,6 +802,7 @@ const DataViewer = withRouter(
           </div>
         )}
         <Button
+          className="p-button-animated-blink"
           disabled={isSaving}
           label={resources.messages['save']}
           icon={!isSaving ? 'save' : 'spinnerAnimate'}
@@ -810,8 +811,9 @@ const DataViewer = withRouter(
           }}
         />
         <Button
-          label={resources.messages['cancel']}
+          className="p-button-secondary p-button-animated-blink"
           icon="cancel"
+          label={resources.messages['cancel']}
           onClick={() => {
             dispatchRecords({
               type: 'SET_NEW_RECORD',
@@ -826,8 +828,8 @@ const DataViewer = withRouter(
     const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          label={resources.messages['ok']}
           icon="check"
+          label={resources.messages['ok']}
           onClick={() => {
             setIsColumnInfoVisible(false);
           }}
@@ -838,8 +840,9 @@ const DataViewer = withRouter(
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          label={resources.messages['save']}
+          className="p-button-animated-blink"
           icon={isSaving === true ? 'spinnerAnimate' : 'save'}
+          label={resources.messages['save']}
           onClick={() => {
             try {
               onSaveRecord(records.editedRecord);
@@ -848,7 +851,12 @@ const DataViewer = withRouter(
             }
           }}
         />
-        <Button label={resources.messages['cancel']} icon={'cancel'} onClick={onCancelRowEdit} />
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'cancel'}
+          label={resources.messages['cancel']}
+          onClick={onCancelRowEdit}
+        />
       </div>
     );
 
@@ -1252,12 +1260,13 @@ const DataViewer = withRouter(
         {confirmPasteVisible && (
           <ConfirmDialog
             className="edit-table"
+            disabledConfirm={isEmpty(records.pastedRecords)}
             divRef={divRef}
             header={resources.messages['pasteRecords']}
             hasPasteOption={true}
             isPasting={isPasting}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
             onConfirm={onPasteAccept}
             onHide={onPasteCancel}
             onPaste={onPaste}

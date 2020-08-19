@@ -653,7 +653,9 @@ export const RowValidation = ({ datasetId, tabs }) => {
     return (
       <span data-tip data-for="createTooltip">
         <Button
-          className="p-button-primary p-button-text-icon-left"
+          className={`p-button-primary p-button-text-icon-left ${
+            !creationFormState.isValidationCreationDisabled && !isSubmitDisabled ? 'p-button-animated-blink' : ''
+          }`}
           disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
           icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
           id={options.id}
@@ -677,7 +679,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           )}
 
           <Button
-            className="p-button-secondary p-button-text-icon-left"
+            className="p-button-secondary p-button-text-icon-left p-button-animated-blink"
             icon="cancel"
             id={`${componentName}__cancel`}
             label={resourcesContext.messages.cancel}
