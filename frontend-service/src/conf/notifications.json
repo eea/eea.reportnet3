@@ -537,7 +537,8 @@
           "key": "VALIDATION_FINISHED_EVENT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         },
         {
@@ -641,7 +642,8 @@
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         },
 
