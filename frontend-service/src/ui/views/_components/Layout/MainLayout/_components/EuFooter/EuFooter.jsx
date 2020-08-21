@@ -127,7 +127,7 @@ export const EuFooter = ({ leftMargin }) => {
     },
     {
       title: 'Reportnet 3.0 Data Privacy Notice',
-      url: 'https://rn3test.eionet.europa.eu/privacyPolicy'
+      url: '/privacyPolicy'
     },
     {
       title: 'Legal notice',
