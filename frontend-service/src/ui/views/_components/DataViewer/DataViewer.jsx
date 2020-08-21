@@ -135,6 +135,7 @@ const DataViewer = withRouter(
       totalFilteredRecords: 0,
       totalRecords: 0
     });
+
     const [sort, dispatchSort] = useReducer(sortReducer, {
       sortField: undefined,
       sortOrder: undefined
@@ -749,11 +750,13 @@ const DataViewer = withRouter(
       }
     };
 
-    const onSelectPoint = coordinates => {
+    const onSavePoint = coordinates => {
       dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
       onEditorValueChange(records.selectedMapCells, coordinates);
       onEditorSubmitValue(records.selectedMapCells, coordinates.join(', '), records.selectedRecord);
     };
+
+    const onSelectPoint = coordinates => dispatchRecords({ type: 'SET_MAP_COORDINATES', payload: { coordinates } });
 
     const onSetVisible = (fnUseState, visible) => {
       fnUseState(visible);
@@ -856,6 +859,30 @@ const DataViewer = withRouter(
           icon={'cancel'}
           label={resources.messages['cancel']}
           onClick={onCancelRowEdit}
+        />
+      </div>
+    );
+
+    const saveMapCoordinatesDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button
+          className="p-button-animated-blink"
+          // disabled={isSaving}
+          label={resources.messages['save']}
+          icon={'check'}
+          onClick={() => onSavePoint(records.mapCoordinates)}
+        />
+        <Button
+          className="p-button-secondary"
+          icon="cancel"
+          label={resources.messages['cancel']}
+          onClick={() => {
+            // dispatchRecords({
+            //   type: 'SET_NEW_RECORD',
+            //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            // });
+            dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+          }}
         />
       </div>
     );
@@ -1056,6 +1083,7 @@ const DataViewer = withRouter(
             value={fetchedData}>
             {columns}
           </DataTable>
+          {/* <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map> */}
         </div>
 
         {isColumnInfoVisible && (
@@ -1297,7 +1325,7 @@ const DataViewer = withRouter(
             //     ? { height: '80%', maxHeight: '80%', width: '100%' }
             //     : { height: '80%', maxHeight: '80%', overflow: 'auto' }
             // }
-            // footer={isMapOpen ? null : addDialogVisible ? addRowDialogFooter : editRowDialogFooter}
+            footer={saveMapCoordinatesDialogFooter}
             header={resources.messages['geospatialData']}
             modal={true}
             onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}

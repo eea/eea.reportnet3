@@ -186,6 +186,7 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    console.log(Array.isArray(field.fieldData[column.field]), field.fieldData.type !== 'POINT');
     if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
@@ -198,8 +199,10 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field])
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
               ? field.fieldData[column.field].sort().join(', ')
+              : Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].join(', ')
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
@@ -223,8 +226,10 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field])
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
               ? field.fieldData[column.field].sort().join(', ')
+              : Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].join(', ')
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||

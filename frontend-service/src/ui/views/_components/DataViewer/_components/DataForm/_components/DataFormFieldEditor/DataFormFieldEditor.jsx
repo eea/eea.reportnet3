@@ -78,12 +78,14 @@ const DataFormFieldEditor = ({
     setMapCoordinates(coordinates);
   };
 
-  const onSelectPoint = coordinates => {
+  const onSavePoint = coordinates => {
     setIsMapOpen(false);
     onChangeForm(field, coordinates.join(', '));
 
     // onEditorSubmitValue(cells, coordinates.join(', '));
   };
+
+  const onSelectPoint = coordinates => setMapCoordinates(coordinates);
 
   const formatDate = (date, isInvalidDate) => {
     if (isInvalidDate) return '';
@@ -408,6 +410,30 @@ const DataFormFieldEditor = ({
     </div>
   );
 
+  const saveMapCoordinatesDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        className="p-button-animated-blink"
+        // disabled={isSaving}
+        label={resources.messages['save']}
+        icon={'check'}
+        onClick={() => onSavePoint(mapCoordinates)}
+      />
+      <Button
+        className="p-button-secondary"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => {
+          // dispatchRecords({
+          //   type: 'SET_NEW_RECORD',
+          //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+          // });
+          setIsMapOpen(false);
+        }}
+      />
+    </div>
+  );
+
   return (
     <React.Fragment>
       {renderFieldEditor()}
@@ -455,6 +481,7 @@ const DataFormFieldEditor = ({
           className={'map-data'}
           blockScroll={false}
           dismissableMask={false}
+          footer={saveMapCoordinatesDialogFooter}
           header={resources.messages['geospatialData']}
           modal={true}
           onHide={() => setIsMapOpen(false)}
