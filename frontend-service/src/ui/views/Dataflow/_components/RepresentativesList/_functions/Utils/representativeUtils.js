@@ -242,6 +242,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status >= 400 || error.response.status <= 404) {
+        updatedRepresentative.errorMessages.add('Account not found');
         let { representativesHaveError } = formState;
         representativesHaveError.unshift(updatedRepresentative.representativeId);
 

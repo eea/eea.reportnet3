@@ -130,6 +130,7 @@ const RepresentativesList = ({
         );
       } else {
         representativesHaveError = formState.representativesHaveError;
+        thisRepresentative.errorMessages.add('Not valid email');
         representativesHaveError.unshift(thisRepresentative.representativeId);
       }
 
