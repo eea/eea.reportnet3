@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.dataflow.integration.executor.fme.domain.Directive;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
@@ -180,12 +181,25 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     NMDirectives nmDirectives = new NMDirectives();
 
     List<String> successTopics = new ArrayList<>();
-    successTopics.add("Reportnet3_Success_Topic");
+    successTopics.add("Reportnet3_Topic");
     nmDirectives.setSuccessTopics(successTopics);
 
     List<String> failureTopics = new ArrayList<>();
-    failureTopics.add("Reportnet3_Failure_Topic");
+    failureTopics.add("Reportnet3_Topic");
     nmDirectives.setFailureTopics(failureTopics);
+
+    List<Directive> directives = new ArrayList<>();
+    Directive dataflowDirective = new Directive();
+    dataflowDirective.setName(IntegrationParams.DATAFLOW_ID);
+    dataflowDirective
+        .setValue(integrationOperationParams.get(IntegrationParams.DATAFLOW_ID).toString());
+    directives.add(dataflowDirective);
+    Directive apiKeyDirective = new Directive();
+    apiKeyDirective.setName(IntegrationParams.APIKEY_PROPERTY);
+    apiKeyDirective.setValue(apiKey);
+    directives.add(apiKeyDirective);
+
+    nmDirectives.setDirectives(directives);
 
     fmeAsyncJob.setNmDirectives(nmDirectives);
 
@@ -193,8 +207,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     parameters.add(saveParameter(IntegrationParams.DATAFLOW_ID,
         integrationOperationParams.get(IntegrationParams.DATAFLOW_ID)));
     // datasetDataId
-    parameters.add(saveParameter(IntegrationParams.DATASET_ID,
-        integrationOperationParams.get(IntegrationParams.DATASET_ID)));
+    parameters.add(saveParameter(IntegrationParams.DATASET_ID, integrationOperationParams.get(1L)));
     // apikey
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     // base URL

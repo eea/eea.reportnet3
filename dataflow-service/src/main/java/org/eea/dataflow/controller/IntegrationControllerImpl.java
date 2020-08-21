@@ -299,10 +299,14 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @GetMapping("/private/findExportIntegration")
-  @ApiOperation(value = "Find Integration for data export processes based on their Schema and file extension", hidden = true)
+  @ApiOperation(
+      value = "Find Integration for data export processes based on their Schema and file extension",
+      hidden = true)
   public IntegrationVO findExportIntegration(
-      @ApiParam(value = "Dataschema Id", example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "File extension", example = "csv") @RequestParam("fileExtension") String fileExtension) {
+      @ApiParam(value = "Dataschema Id",
+          example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "File extension",
+          example = "csv") @RequestParam("fileExtension") String fileExtension) {
     return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
   }
 

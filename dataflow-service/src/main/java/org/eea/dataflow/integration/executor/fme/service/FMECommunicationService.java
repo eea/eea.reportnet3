@@ -36,6 +36,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class FMECommunicationService.
@@ -126,6 +128,15 @@ public class FMECommunicationService {
     Integer result = 0;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
+      String textBody = fmeAsyncJob.toString();
+      ObjectMapper mapper = new ObjectMapper();
+      String jsonString = null;
+      try {
+        jsonString = mapper.writeValueAsString(fmeAsyncJob);
+      } catch (JsonProcessingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
