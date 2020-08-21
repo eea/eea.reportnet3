@@ -330,7 +330,6 @@ export const ManageIntegrations = ({
     <Fragment>
       {isIntegrationManageDialogVisible && (
         <Dialog
-          closeOnEscape={false}
           footer={renderDialogFooter}
           header={
             !isEmpty(updatedData)
@@ -403,13 +402,13 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
+          maxLength={255}
           onChange={event => onFillField(event.target.value, option)}
           onKeyDown={event => onSaveKeyDown(event)}
           placeholder={resources.messages[option]}
           ref={inputRefs[option]}
           type="search"
           value={manageIntegrationsState[option]}
-          maxLength={255}
         />
       </div>
     ));

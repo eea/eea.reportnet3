@@ -306,7 +306,6 @@ const Documents = ({
           header={resources.messages['delete']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={() => {
             setIsDeletingDocument(true);
             onDeleteDocument(rowDataState);

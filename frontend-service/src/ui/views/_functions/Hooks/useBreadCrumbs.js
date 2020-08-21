@@ -154,7 +154,7 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.USER_SETTINGS) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getSettingsCrumb()]);
+      breadCrumbContext.add([getHomeCrumb(), getSettingsCrumb()]);
     }
   };
 

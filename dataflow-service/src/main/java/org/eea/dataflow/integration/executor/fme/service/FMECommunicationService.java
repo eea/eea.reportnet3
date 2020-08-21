@@ -167,11 +167,12 @@ public class FMECommunicationService {
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
     String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design?createDirectories=true&overwrite=true";
+
     if (null != idProvider) {
       uriParams.put("providerId", idProvider);
       auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design?createDirectories=true&overwrite=true";
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();

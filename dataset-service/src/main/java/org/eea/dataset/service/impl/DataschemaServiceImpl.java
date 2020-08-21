@@ -369,6 +369,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getReadOnly()) {
       tableSchemaVO.setReadOnly(false);
     }
+    if (null == tableSchemaVO.getFixedNumber()) {
+      tableSchemaVO.setFixedNumber(false);
+    }
 
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -417,6 +420,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
         }
+        if (tableSchemaVO.getFixedNumber() != null) {
+          tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
+        }
         if (tableSchemaVO.getNotEmpty() != null) {
           Boolean oldValue = tableSchema.getBoolean("notEmpty");
           Boolean newValue = tableSchemaVO.getNotEmpty();
@@ -425,12 +431,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
 
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
-            .getModifiedCount() == 1) {
-          return;
+            .getModifiedCount() != 1) {
+          LOG.error(
+              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
+          throw new EEAException(
+              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
         }
+      } else {
+        LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+        throw new EEAException(
+            String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
       }
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
@@ -452,8 +463,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
     if (tableSchema == null) {
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+      throw new EEAException(
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
     }
     // when we delete a table we need to delete all rules of this table, we mean, rules of the
     // records fields, etc
@@ -547,6 +559,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           validExtensions[i] = validExtensions[i].trim();
         }
         fieldSchemaVO.setValidExtensions(validExtensions);
+      }
+      if (fieldSchemaVO.getMaxSize() == null || fieldSchemaVO.getMaxSize() == 0
+          || fieldSchemaVO.getMaxSize() > 20) {
+        fieldSchemaVO.setMaxSize(20f);
       }
 
       return schemasRepository
@@ -651,10 +667,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getPkHasMultipleValues() != null) {
       fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
     }
-    if (fieldSchemaVO.getMaxSize() != null) {
-      fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
+    Float size = 20f;
+    if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
+        && fieldSchemaVO.getMaxSize() < 20) {
+      size = fieldSchemaVO.getMaxSize();
     }
-
+    fieldSchema.put("maxSize", size);
     if (fieldSchemaVO.getReadOnly() != null) {
       fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
     }
@@ -1712,7 +1730,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())
           && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
           && previousMaxSize != null && previousExtensions != null
-          && ((previousMaxSize.doubleValue() != fieldSchemaVO.getMaxSize().doubleValue())
+          && ((fieldSchemaVO.getMaxSize() != null
+              && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
               || !differentExtensions.isEmpty())) {
         hasToClean = true;
       }

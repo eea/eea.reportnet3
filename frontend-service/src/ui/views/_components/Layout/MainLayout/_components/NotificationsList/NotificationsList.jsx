@@ -3,9 +3,11 @@ import moment from 'moment';
 
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-
 import sanitizeHtml from 'sanitize-html';
 
+import styles from './NotificationsList.module.scss';
+
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -42,7 +44,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       },
       {
         id: 'redirectionUrl',
-        header: resources.messages['url']
+        header: resources.messages['action']
       }
     ];
 
@@ -77,6 +79,19 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             userContext.userProps.amPm24h ? '' : ' A'
           }`
         ),
+
+        downloadButton: notification.onClick ? (
+          <span className={styles.center}>
+            <Button
+              className={`${styles.columnActionButton}`}
+              icon={'export'}
+              onClick={() => notification.onClick()}
+              label={resources.messages['downloadFile']}
+            />
+          </span>
+        ) : (
+          ''
+        ),
         redirectionUrl: !isNil(notification.redirectionUrl)
           ? `${window.location.protocol}//${window.location.hostname}${
               window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
@@ -100,6 +115,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   };
 
   const linkTemplate = rowData => {
+    if (rowData.downloadButton) {
+      return rowData.downloadButton;
+    }
+
     return (
       rowData.redirectionUrl !== '' && (
         <a href={getValidUrl(rowData.redirectionUrl)} target="_self" rel="noopener noreferrer">
@@ -115,19 +134,18 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   // };
 
   return (
-    <Fragment>
-      {isNotificationVisible && (
-        <Dialog
-          className="edit-table"
-          blockScroll={false}
-          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-          closeOnEscape={false}
-          header={resources.messages['notifications']}
-          modal={true}
-          onHide={() => setIsNotificationVisible(false)}
-          style={{ width: '60%' }}
-          visible={isNotificationVisible}
-          zIndex={3100}>
+    isNotificationVisible && (
+      <Dialog
+        className="edit-table"
+        blockScroll={false}
+        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+        header={resources.messages['notifications']}
+        modal={true}
+        onHide={() => setIsNotificationVisible(false)}
+        style={{ width: '60%' }}
+        visible={isNotificationVisible}
+        zIndex={3100}>
+        {notificationContext.all.length > 0 ? (
           <DataTable
             autoLayout={true}
             loading={false}
@@ -139,9 +157,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             value={notifications}>
             {columns}
           </DataTable>
-        </Dialog>
-      )}
-    </Fragment>
+        ) : (
+          <div className={styles.notificationsWithoutTable}>
+            <div className={styles.noNotifications}>{resources.messages['noNotifications']}</div>
+          </div>
+        )}
+      </Dialog>
+    )
   );
 };
 

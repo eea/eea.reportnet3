@@ -365,7 +365,8 @@ public class DatasetServiceImpl implements DatasetService {
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
     // Delete the records from the tables of the dataset that aren't marked as read only
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      if (tableSchema.getReadOnly() == null || !tableSchema.getReadOnly()) {
+      if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
+          && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
         recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
       }
     }
@@ -1198,7 +1199,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetValue dataset = new DatasetValue();
     List<TableValue> tables = new ArrayList<>();
     List<String> readOnlyTables = new ArrayList<>();
-
+    List<String> fixedNumberTables = new ArrayList<>();
 
     // Loops to build the entity
     dataset.setId(datasetId);
@@ -1210,6 +1211,9 @@ public class DatasetServiceImpl implements DatasetService {
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
+      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
+      }
     }
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
@@ -1220,7 +1224,16 @@ public class DatasetServiceImpl implements DatasetService {
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
       fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
-      if (!readOnlyTables.contains(tableValue.getIdTableSchema())) {
+      if (!readOnlyTables.contains(tableValue.getIdTableSchema())
+          && !fixedNumberTables.contains(tableValue.getIdTableSchema())) {
+        // Put an empty value to the field if it's an attachment type
+        tableValue.getRecords().stream().forEach(r -> {
+          r.getFields().stream().forEach(f -> {
+            if (DataType.ATTACHMENT.equals(f.getType())) {
+              f.setValue("");
+            }
+          });
+        });
         allRecords.addAll(tableValue.getRecords());
       }
       if (null == oldTableId) {
@@ -1404,6 +1417,15 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException, IOException {
 
     FieldValue field = fieldRepository.findById(fieldId);
+    // Check if the field is marked as read only
+    Document fieldSchema = schemasRepository.findFieldSchema(
+        field.getRecord().getTableValue().getDatasetId().getIdDatasetSchema(),
+        field.getIdFieldSchema());
+    if (!isDesignDataset(datasetId) && fieldSchema != null
+        && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && fieldSchema.getBoolean(LiteralConstants.READ_ONLY)) {
+      throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
+    }
     // Attachment table
     AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
     if (null == attachment) {
@@ -1455,6 +1477,65 @@ public class DatasetServiceImpl implements DatasetService {
     // Put the field value name to null
     fieldRepository.clearFieldValue(fieldSchemaId);
   }
+
+
+  /**
+   * Gets the table fixed number of records.
+   *
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table fixed number of records
+   */
+  @Override
+  public Boolean getTableFixedNumberOfRecords(Long datasetId, String objectId,
+      EntityTypeEnum type) {
+    Boolean fixedNumber = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        fixedNumber = tableForFixedNumberOfRecords(objectId, fixedNumber, schema);
+        break;
+      case RECORD:
+        fixedNumber = recordForFixedNumberOfRecords(objectId, fixedNumber, schema);
+        break;
+      case FIELD:
+      case DATASET:
+        break;
+    }
+    return fixedNumber;
+  }
+
+
+  /**
+   * Find record schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idRecord the id record
+   * @return the string
+   */
+  @Override
+  public String findRecordSchemaIdById(Long datasetId, String idRecord) {
+    RecordValue record = recordRepository.findById(idRecord);
+    return record.getIdRecordSchema();
+  }
+
+
+  /**
+   * Find field schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the string
+   */
+  @Override
+  public String findFieldSchemaIdById(Long datasetId, String idField) {
+    FieldValue field = fieldRepository.findById(idField);
+    return field.getIdFieldSchema();
+  }
+
 
   /**
    * Obtain partition.
@@ -1892,7 +1973,8 @@ public class DatasetServiceImpl implements DatasetService {
     }
     Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
     if (null == tableId || tableId == 0) {
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      throw new EEAException(
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, idTableSchema, datasetId));
     }
     return tableId;
   }
@@ -2058,6 +2140,26 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Table for fixed number of records.
+   *
+   * @param objectId the object id
+   * @param fixedNumber the fixed number
+   * @param schema the schema
+   * @return the boolean
+   */
+  private Boolean tableForFixedNumberOfRecords(String objectId, Boolean fixedNumber,
+      DataSetSchema schema) {
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      if (objectId.equals(tableSchema.getIdTableSchema().toString())
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumber = true;
+        break;
+      }
+    }
+    return fixedNumber;
+  }
+
+  /**
    * Record for read only.
    *
    * @param objectId the object id
@@ -2075,6 +2177,28 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return readOnly;
   }
+
+
+  /**
+   * Record for fixed number of records.
+   *
+   * @param objectId the object id
+   * @param fixedNumber the fixed number
+   * @param schema the schema
+   * @return the boolean
+   */
+  private Boolean recordForFixedNumberOfRecords(String objectId, Boolean fixedNumber,
+      DataSetSchema schema) {
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumber = true;
+        break;
+      }
+    }
+    return fixedNumber;
+  }
+
 
   /**
    * Field for read only.
@@ -2183,8 +2307,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValuesOnlyValues.add(auxField);
         if (DataType.ATTACHMENT.equals(field.getType())) {
           for (AttachmentValue attach : attachments) {
-            if (attach.getFieldValue().getIdFieldSchema().equals(field.getIdFieldSchema())
-                && attach.getFileName().equals(field.getValue())
+            if (StringUtils.isNotBlank(attach.getFieldValue().getId())
                 && attach.getFieldValue().getId().equals(field.getId())) {
               attach.setFieldValue(auxField);
               attach.setId(null);

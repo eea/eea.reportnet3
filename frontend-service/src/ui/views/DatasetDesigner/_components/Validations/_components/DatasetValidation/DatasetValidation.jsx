@@ -363,6 +363,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
       await ValidationService.createDatasetRule(datasetId, candidateRule);
       onHide();
+      notificationContext.hide({
+        type: 'VALIDATED_QC_RULE_EVENT'
+      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
@@ -387,6 +390,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
       await ValidationService.updateDatasetRule(datasetId, candidateRule);
       onHide();
+      notificationContext.hide({
+        type: 'VALIDATED_QC_RULE_EVENT'
+      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
@@ -566,7 +572,11 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                 ) : (
                   <span data-tip data-for="createTooltip">
                     <Button
-                      className="p-button-primary p-button-text-icon-left"
+                      className={`p-button-primary p-button-text-icon-left ${
+                        !creationFormState.isValidationCreationDisabled && !isSubmitDisabled
+                          ? 'p-button-animated-blin'
+                          : ''
+                      }`}
                       disabled={
                         creationFormState.isValidationCreationDisabled ||
                         isSubmitDisabled ||
@@ -587,7 +597,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                 )}
 
                 <Button
-                  className="p-button-secondary p-button-text-icon-left"
+                  className="p-button-secondary p-button-text-icon-left p-button-animated-blink"
                   icon="cancel"
                   id={`${componentName}__cancel`}
                   label={resourcesContext.messages['cancel']}

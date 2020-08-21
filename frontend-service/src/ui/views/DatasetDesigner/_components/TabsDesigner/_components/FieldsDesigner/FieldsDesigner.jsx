@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -112,6 +112,7 @@ export const FieldsDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
+    readOnly,
     recordId,
     referencedField,
     required,
@@ -128,6 +129,7 @@ export const FieldsDesigner = ({
       pkHasMultipleValues,
       pkMustBeUsed,
       name,
+      readOnly,
       recordId,
       referencedField,
       required,
@@ -155,6 +157,7 @@ export const FieldsDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
+    readOnly,
     referencedField,
     required,
     type,
@@ -173,6 +176,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].readOnly = readOnly;
       inmFields[fieldIndex].type = type;
       inmFields[fieldIndex].validExtensions = validExtensions;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
@@ -183,28 +187,37 @@ export const FieldsDesigner = ({
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
     if (checked) {
-      setToPrefill(checked);
+      setToPrefill(true);
     }
     updateTableDesign({
       readOnly: checked,
-      toPrefill: checked === false ? toPrefill : checked,
-      notEmpty: checked === false ? notEmpty : checked
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber,
+      notEmpty
     });
   };
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber, notEmpty });
   };
 
   const onChangeFixedNumber = checked => {
     setFixedNumber(checked);
-    updateTableDesign({ toPrefill: checked, fixedNumber: checked });
+    if (checked) {
+      setToPrefill(true);
+    }
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber: checked,
+      notEmpty
+    });
   };
 
   const onChangeNotEmpty = checked => {
     setNotEmpty(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, notEmpty: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -483,9 +496,6 @@ export const FieldsDesigner = ({
   );
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
-    // if (isUndefined(tableDescriptionValue)) {
-    //   return;
-    // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         toPrefill,
@@ -507,7 +517,7 @@ export const FieldsDesigner = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.switchDivInput}>
         <InputTextarea
@@ -636,7 +646,7 @@ export const FieldsDesigner = ({
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
-    </React.Fragment>
+    </Fragment>
   );
 };
 FieldsDesigner.propTypes = {};

@@ -488,4 +488,35 @@ public interface DatasetService {
    * @return true, if is design dataset
    */
   boolean isDesignDataset(Long datasetId);
+
+  /**
+   * Gets the table fixed number of records.
+   *
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table fixed number of records
+   */
+  Boolean getTableFixedNumberOfRecords(Long datasetId, String objectId, EntityTypeEnum type);
+
+
+  /**
+   * Find record schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idRecord the id record
+   * @return the string
+   */
+  String findRecordSchemaIdById(@DatasetId Long datasetId, String idRecord);
+
+
+  /**
+   * Find field schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the string
+   */
+  String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
+
 }

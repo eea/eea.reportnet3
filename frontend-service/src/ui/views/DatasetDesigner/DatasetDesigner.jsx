@@ -11,7 +11,6 @@ import styles from './DatasetDesigner.module.scss';
 import { config } from 'conf';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import { Button } from 'ui/views/_components/Button';
@@ -66,7 +65,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+
   const [hasValidations, setHasValidations] = useState();
+  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -85,6 +86,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     exportButtonsList: [],
     exportDatasetData: null,
     exportDatasetDataName: '',
+    exportDatasetFileType: '',
     extensionsOperationsList: { export: [], import: [] },
     hasWritePermissions: false,
     initialDatasetDescription: '',
@@ -200,6 +202,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [designerState.exportDatasetData]);
 
+  const refreshUniqueList = value => setNeedsRefreshUnique(value);
+
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
@@ -230,16 +234,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
         return filteredTable[0].index;
       }
-    } else {
-      return index;
     }
+    return index;
   };
 
   const getExportList = () => {
     const { extensionsOperationsList } = designerState;
 
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
-      command: () => onExportData(type.code),
+      command: () => onExportDataInternalExtension(type.code),
       icon: config.icons['archive'],
       label: type.text
     }));
@@ -248,7 +251,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
-          command: () => onExportData(type.fileExtension.toUpperCase()),
+          command: () => onExportDataExternalExtension(type.fileExtension),
           icon: config.icons['archive'],
           label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
         }))
@@ -287,7 +290,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     } finally {
-      isLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -316,9 +319,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getImportExtensions.split(', ')
   ).join(', ')}`;
 
-  const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
+  const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
-  const isLoadingFile = value => designerDispatch({ type: 'IS_LOADING_FILE', payload: { value } });
+  const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
     designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
@@ -360,6 +363,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: inmDatasetSchemas } });
   };
 
+  const onCloseUniqueListModal = () => {
+    manageDialogs('isUniqueConstraintsListDialogVisible', false);
+    refreshUniqueList(true);
+  };
+
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
     try {
@@ -386,30 +394,52 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onExportData = async fileType => {
-    isLoadingFile(true);
+  const onExportError = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
+
+    notificationContext.add({
+      type: 'EXPORT_DATA_BY_ID_ERROR',
+      content: { dataflowId, datasetId, dataflowName, datasetName }
+    });
+  };
+
+  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
+
+  const onExportDataExternalExtension = async fileExtension => {
+    setIsLoadingFile(true);
+    setFileType(fileExtension);
+    notificationContext.add({
+      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
+    });
+    try {
+      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+    } catch (error) {
+      onExportError();
+    }
+  };
+
+  const onExportDataInternalExtension = async fileType => {
+    setIsLoadingFile(true);
+    setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      onExportError();
     } finally {
-      isLoadingFile(false);
+      setIsLoadingFile(false);
     }
   };
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -431,7 +461,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onHighlightRefresh(false);
 
     try {
-      isLoading(true);
+      setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
         const tableSchemaNamesList = [];
@@ -442,7 +472,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
-        isLoading(false);
+        setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
@@ -574,6 +604,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
+  const renderDashboardFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
+    />
+  );
+
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
       <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
@@ -596,7 +635,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <Dialog
           footer={renderUniqueConstraintsFooter}
           header={resources.messages['uniqueConstraints']}
-          onHide={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+          onHide={() => onCloseUniqueListModal()}
           style={{ width: '70%' }}
           visible={designerState.isUniqueConstraintsListDialogVisible}>
           <UniqueConstraints
@@ -604,8 +643,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             designerState={designerState}
             getManageUniqueConstraint={manageUniqueConstraint}
             getUniques={getUniqueConstraintsList}
-            setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
             manageDialogs={manageDialogs}
+            needsRefresh={needsRefreshUnique}
+            refreshList={refreshUniqueList}
+            setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
           />
         </Dialog>
       )}
@@ -626,7 +667,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+        onClick={() => onCloseUniqueListModal()}
       />
     </Fragment>
   );
@@ -851,6 +892,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           dataflowId={dataflowId}
           designerState={designerState}
           manageDialogs={manageDialogs}
+          refreshList={refreshUniqueList}
           resetUniques={manageUniqueConstraint}
         />
 

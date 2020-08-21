@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef } from 'react';
-
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -127,6 +126,44 @@ export const FieldDesigner = ({
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [headerInitialHeight, setHeaderInitialHeight] = useState();
+
+  useEffect(() => {
+    const header = document.getElementById('header');
+    const observer = new ResizeObserver(entries =>
+      entries.forEach(entry => {
+        if (headerHeight !== entry.contentRect.height) {
+          setHeaderHeight(entry.contentRect.height);
+        }
+      })
+    );
+
+    if (!isNil(header)) {
+      observer.observe(header);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const dropDowns = document.querySelectorAll('.p-dropdown-panel');
+    dropDowns.forEach(dropDown => {
+      const dropDownDisplay = dropDown.style.display;
+      if (dropDownDisplay) {
+        if (headerInitialHeight === 70 || headerInitialHeight === 180) {
+          dropDown.style.marginTop = `${headerHeight - headerInitialHeight}px`;
+        }
+      }
+    });
+  }, [headerHeight]);
+
+  const onSetInitHeaderHeight = () => {
+    const header = document.getElementById('header');
+    setHeaderInitialHeight(header.offsetHeight);
+  };
 
   useEffect(() => {
     dispatchFieldDesigner({ type: 'SET_PK_REFERENCED', payload: fieldPKReferenced });
@@ -293,7 +330,9 @@ export const FieldDesigner = ({
   const onCancelSaveAttachment = () => {
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
@@ -303,13 +342,15 @@ export const FieldDesigner = ({
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({
-          codelistItems,
-          type: 'LINK',
-          referencedField: link,
-          pkMustBeUsed,
-          pkHasMultipleValues
-        });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({
+            codelistItems,
+            type: 'LINK',
+            referencedField: link,
+            pkMustBeUsed,
+            pkHasMultipleValues
+          });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' });
@@ -320,7 +361,9 @@ export const FieldDesigner = ({
 
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({ codelistItems });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({ codelistItems });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
@@ -383,10 +426,11 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           maxSize,
+          name,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
-          name,
+          readOnly,
           recordId,
           referencedField,
           required,
@@ -668,6 +712,7 @@ export const FieldDesigner = ({
           pkHasMultipleValues,
           pkMustBeUsed,
           name,
+          readOnly,
           recordId,
           referencedField,
           required,
@@ -902,6 +947,7 @@ export const FieldDesigner = ({
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
+          onSetInitHeaderHeight();
           event.stopPropagation();
         }}
         optionLabel="value"
@@ -992,7 +1038,6 @@ export const FieldDesigner = ({
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
-          closeOnEscape={false}
           footer={qcDialogFooter}
           header={resources.messages['qcManager']}
           modal={true}

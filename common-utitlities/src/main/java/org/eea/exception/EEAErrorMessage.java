@@ -93,7 +93,8 @@ public final class EEAErrorMessage {
   public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
 
   /** The Constant TABLE_NOT_FOUND: {@value}. */
-  public static final String TABLE_NOT_FOUND = "Table not found";
+  public static final String TABLE_NOT_FOUND =
+      "Table with schema %s from the datasetId %s not found";
 
   /** The Constant DOCUMENT_NOT_FOUND: {@value}. */
   public static final String DOCUMENT_NOT_FOUND = "Document not found";
@@ -261,6 +262,14 @@ public final class EEAErrorMessage {
 
   /** The Constant OPERATION_TYPE_NOT_EDITABLE: {@value}. */
   public static final String OPERATION_TYPE_NOT_EDITABLE = "The operation type is not editable";
+
+  /** The Constant FIXED_NUMBER_OF_RECORDS: {@value}. */
+  public static final String FIXED_NUMBER_OF_RECORDS =
+      "The table with id schema %s has a fixed number of records";
+
+  /** The Constant ERROR_UPDATING_TABLE_SCHEMA: {@value}. */
+  public static final String ERROR_UPDATING_TABLE_SCHEMA =
+      "Error updating the table with id schema %s from the dataset id %s";
 
   /**
    * Instantiates a new EEA error message.

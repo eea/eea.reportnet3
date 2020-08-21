@@ -73,10 +73,9 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
   //Maximum number of records to paste should be 500
   const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
 
-  //TODO: Change Pk to readOnly
   const readOnlyFieldsIndex = [];
   colsSchema.forEach((col, i) => {
-    if (col.pk) {
+    if (col.readOnly) {
       readOnlyFieldsIndex.push(i);
     }
   });
@@ -90,7 +89,9 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
       emptyRecord = RecordUtils.changeRecordValue(
         emptyRecord,
         record.fieldData.fieldSchemaId,
-        readOnlyFieldsIndex.indexOf(i) > -1 && reporting ? '' : copiedCols[i]
+        (readOnlyFieldsIndex.indexOf(i) > -1 && reporting) || record.fieldData.type === 'ATTACHMENT'
+          ? ''
+          : copiedCols[i]
       );
     });
 

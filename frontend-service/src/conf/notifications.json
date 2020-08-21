@@ -431,6 +431,9 @@
         },
         {
           "key": "ERROR_LOADING_PROCESSES"
+        },
+        {
+          "key": "DOWNLOAD_FME_FILE_ERROR"
         }
       ]
     },
@@ -609,7 +612,14 @@
           "key": "COPY_DATA_TO_EUDATASET_COMPLETED_EVENT"
         },
         {
-          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
         }
       ]
     },
@@ -634,6 +644,7 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
+
         {
           "key": "CREATE_DATA_COLLECTION_INIT"
         },
@@ -645,9 +656,16 @@
         },
         {
           "key": "EXPORT_EU_DATASET_INIT"
+        },
+        {
+          "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
         }
       ]
     }
   ],
-  "hiddenNotifications": ["VALIDATED_QC_RULE_EVENT"]
+  "hiddenNotifications": [
+    "VALIDATED_QC_RULE_EVENT",
+    "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
+    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
+  ]
 }

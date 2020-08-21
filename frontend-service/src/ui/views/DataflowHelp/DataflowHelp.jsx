@@ -47,12 +47,13 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
-  const [datasetsSchemas, setDatasetsSchemas] = useState([]);
+  const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
   const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
@@ -173,6 +174,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           Promise.all(datasetSchemas).then(completed => {
             setDatasetsSchemas(completed);
           });
+        } else {
+          setIsLoadingSchemas(false);
         }
       } else {
         if (!isEmpty(dataflow.designDatasets)) {
@@ -182,6 +185,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           Promise.all(datasetSchemas).then(completed => {
             setDatasetsSchemas(completed);
           });
+        } else {
+          setIsLoadingSchemas(false);
         }
       }
     } catch (error) {
@@ -276,7 +281,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               webLinks={webLinks}
             />
           </TabPanel>
-          <TabPanel headerClassName="dataflowHelp-schemas-help-step" header={resources.messages['datasetSchemas']}>
+          <TabPanel
+            disabled={isEmpty(datasetsSchemas)}
+            headerClassName="dataflowHelp-schemas-help-step"
+            header={resources.messages['datasetSchemas']}
+            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas && config.icons['spinnerAnimate']}>
             <DatasetSchemas
               dataflowId={dataflowId}
               datasetsSchemas={datasetsSchemas}

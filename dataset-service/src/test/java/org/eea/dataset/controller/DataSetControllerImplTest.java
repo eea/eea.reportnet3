@@ -234,6 +234,27 @@ public class DataSetControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void testLoadDataFixedNumberOfRecordsException() throws Exception {
+    try {
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
+
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
+      final EEAMockMultipartFile file =
+          new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+      dataSetControllerImpl.loadTableData(1L, file, "example");
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "example"),
+          e.getReason());
+      throw e;
+    }
+  }
+
   /**
    * Test delete import data throw non provided.
    *
@@ -566,6 +587,26 @@ public class DataSetControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableFixedNumberException() throws Exception {
+    try {
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
+
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+
+      dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190");
+    } catch (ResponseStatusException e) {
+      assertEquals(
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "5cf0e9b3b793310e9ceca190"),
+          e.getReason());
+      throw e;
+    }
+  }
+
   /**
    * Testupdate records null entry.
    *
@@ -673,6 +714,22 @@ public class DataSetControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteRecordFixedNumberException() throws Exception {
+    try {
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
+
+      dataSetControllerImpl.deleteRecord(1L, recordId);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+          datasetService.findRecordSchemaIdById(1L, recordId)), e.getReason());
+      throw e;
+    }
+  }
+
   /**
    * Testdelete record not found exception.
    *
@@ -758,6 +815,21 @@ public class DataSetControllerImplTest {
       dataSetControllerImpl.insertRecords(1L, "id", records);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testinsertRecordsTableFixedNumberException() throws Exception {
+    try {
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
+
+      dataSetControllerImpl.insertRecords(1L, "id", records);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "id"), e.getReason());
       throw e;
     }
   }
@@ -1124,7 +1196,7 @@ public class DataSetControllerImplTest {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, e.getReason());
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }
@@ -1142,7 +1214,7 @@ public class DataSetControllerImplTest {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }
@@ -1189,7 +1261,7 @@ public class DataSetControllerImplTest {
     try {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }

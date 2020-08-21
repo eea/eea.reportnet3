@@ -123,6 +123,14 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             ? rowData => itemTemplate(rowData, 'pk')
             : field === 'required'
             ? rowData => itemTemplate(rowData, 'required')
+            : field === 'mandatory'
+            ? rowData => itemTemplate(rowData, 'mandatory')
+            : field === 'prefilled'
+            ? rowData => itemTemplate(rowData, 'prefilled')
+            : field === 'fixedNumber'
+            ? rowData => itemTemplate(rowData, 'fixedNumber')
+            : field === 'readOnly'
+            ? rowData => itemTemplate(rowData, 'readOnly')
             : field === 'levelError'
             ? levelErrorTemplate
             : null
