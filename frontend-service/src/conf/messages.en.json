@@ -110,7 +110,7 @@
     "datasetDesignerAddTable": "Create a table to start editing your dataset schema",
     "datasetDesignerNoFields": "There are no fields created for the table schema",
     "datasetLoading": " is loading...",
-    "datasetLoadingMessage": "The table ",
+    "datasetLoadingMessage": "The dataset ",
     "datasetLoadingTitle": "Data loading",
     "datasets": "Datasets",
     "datasetSchema": "Dataset schema",
@@ -841,6 +841,9 @@
     "action": "Action",
     "exportExternalIntegrationDataset": "Exporting dataset data",
     "noNotifications": "There are no notifications yet",
-    "webLinkDescriptionValidationMax": "Web link description is too long"
+    "webLinkDescriptionValidationMax": "Web link description is too long",
+    "importPreviousData": "Import previous data",
+    "importPreviousDataHeader": "Import previous data",
+    "importPreviousDataConfirm": "Are you want to import previous data?"
   }
 }
