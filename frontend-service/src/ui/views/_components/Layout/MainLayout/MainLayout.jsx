@@ -62,6 +62,7 @@ const MainLayout = ({ children }) => {
     try {
       const userConfiguration = await UserService.getConfiguration();
 
+      userContext.onChangeBasemapLayer(userConfiguration.basemapLayer);
       userContext.onChangeDateFormat(userConfiguration.dateFormat);
       userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
@@ -135,10 +136,7 @@ const MainLayout = ({ children }) => {
       )}
       <Header onMainContentStyleChange={onMainContentStyleChange} />
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
-        <LeftSideBar
-          onToggleSideBar={onToggleSideBar}
-          setIsNotificationVisible={setIsNotificationVisible}
-        />
+        <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
         <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
           {children}
         </div>

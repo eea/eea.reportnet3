@@ -18,6 +18,46 @@ const UserConfiguration = () => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
+  const basemapTemplate = option => {
+    if (!option.value) {
+      return option.label;
+    } else {
+      return (
+        <div className={`p-clearfix ${styles.basemapItem}`}>
+          <span style={{ margin: '.5em .25em 0 0.5em' }}>{option.label}</span>
+          <img alt={option.label} src={`assets/img/layers/${option.value}.png`} />
+        </div>
+      );
+    }
+  };
+
+  const basemapLayerDropdown = (
+    <Fragment>
+      <Dropdown
+        className={styles.basemapLayer}
+        id={`basemapLayer`}
+        itemTemplate={basemapTemplate}
+        name="basemapLayer"
+        // optionLabel="label"
+        options={resources.userParameters['defaultBasemapLayer']}
+        onChange={async e => {
+          const inmUserProperties = { ...userContext.userProps };
+          console.log(e.target.value);
+          inmUserProperties.basemapLayer = e.target.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status >= 200 && response.status <= 299) {
+            userContext.onChangeBasemapLayer(e.target.value);
+          }
+        }}
+        placeholder="select"
+        value={userContext.userProps.basemapLayer}
+      />
+      <label htmlFor="basemapLayer" className="srOnly">
+        {resources.messages['userSettingsBasemapLayerSubtitle']}
+      </label>
+    </Fragment>
+  );
+
   const changeUserProperties = async userProperties => {
     try {
       const response = await UserService.updateAttributes(userProperties);
@@ -135,6 +175,7 @@ const UserConfiguration = () => {
         options={resources.userParameters['defaultRowsPage']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
+          console.log(e.target.value);
           inmUserProperties.rowsPerPage = e.target.value;
           const response = await changeUserProperties(inmUserProperties);
           if (response.status >= 200 && response.status <= 299) {
@@ -145,7 +186,7 @@ const UserConfiguration = () => {
         value={userContext.userProps.rowsPerPage}
       />
       <label htmlFor="rowsPage" className="srOnly">
-        {resources.messages['defaultRowsPage']}
+        {resources.messages['userSettingsRowsPerPageSubtitle']}
       </label>
     </Fragment>
   );
@@ -157,6 +198,7 @@ const UserConfiguration = () => {
         options={resources.userParameters['dateFormat']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
+          console.log(e.target.value);
           inmUserProperties.dateFormat = e.target.value;
           const response = await changeUserProperties(inmUserProperties);
           if (response.status >= 200 && response.status <= 299) {
@@ -167,6 +209,16 @@ const UserConfiguration = () => {
         value={userContext.userProps.dateFormat}
       />
     </Fragment>
+  );
+
+  const basemapLayerConfiguration = (
+    <TitleWithItem
+      title={resources.messages['basemapLayer']}
+      icon="map"
+      iconSize="2rem"
+      subtitle={resources.messages['userSettingsBasemapLayerSubtitle']}
+      items={[basemapLayerDropdown]}
+    />
   );
 
   const themeConfiguration = (
@@ -234,6 +286,7 @@ const UserConfiguration = () => {
         {themeConfiguration}
         {viewConfiguration}
         {logoutConfiguration}
+        {basemapLayerConfiguration}
       </div>
     </React.Fragment>
   );

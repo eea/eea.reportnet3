@@ -24,6 +24,7 @@
     "node-sass": "^4.14.1",
     "primeicons": "^2.0.0",
     "primereact": "^4.2.1",
+    "proj4leaflet": "^1.0.2",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^16.13.1",

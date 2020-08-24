@@ -10,6 +10,7 @@ import { userReducer } from 'ui/views/_functions/Reducers/userReducer';
 const userSettingsDefaultState = {
   userProps: {
     amPm24h: true,
+    basemapLayer: { label: 'Topographic', value: 'Topographic' },
     dateFormat: 'YYYY-MM-DD',
     listView: true,
     rowsPerPage: 10,
@@ -47,6 +48,7 @@ export const UserProvider = ({ children }) => {
 
         onAddSocket: socket => userDispatcher({ type: 'ADD_SOCKET', payload: socket }),
 
+        onChangeBasemapLayer: basemapLayer => userDispatcher({ type: 'BASEMAP_LAYER', payload: basemapLayer }),
         onChangeDateFormat: dateFormat => userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat }),
 
         onChangeRowsPerPage: rowNumber => userDispatcher({ type: 'DEFAULT_ROW_SELECTED', payload: rowNumber }),

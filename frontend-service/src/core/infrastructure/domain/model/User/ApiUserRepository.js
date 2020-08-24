@@ -56,6 +56,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
+    basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
     showLogoutConfirmation: true,
     rowsPerPage: 10,
@@ -66,6 +67,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
+    console.log(userDefaultConfiguration.basemapLayer);
+    userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
@@ -74,6 +77,10 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
     userConfiguration.listView = userDefaultConfiguration.listView;
   } else {
+    userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer[0])
+      ? userConfigurationDTO.basemapLayer[0]
+      : userDefaultConfiguration.basemapLayer;
+
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;

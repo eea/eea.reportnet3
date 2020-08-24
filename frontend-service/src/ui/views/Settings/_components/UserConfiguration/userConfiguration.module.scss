@@ -1,3 +1,16 @@
+.basemapLayer {
+  width: 12rem;
+}
+
+.basemapItem {
+  display: flex;
+  align-items: center;
+}
+
+.basemapItem span {
+  width: 60%;
+}
+
 .switchDiv {
   display: flex;
   align-items: center;

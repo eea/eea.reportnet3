@@ -25,7 +25,17 @@ export const userReducer = (state, { type, payload }) => {
           showLogoutConfirmation: payload
         }
       };
+    case 'BASEMAP_LAYER':
+      console.log(payload);
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          basemapLayer: payload
+        }
+      };
     case 'DEFAULT_ROW_SELECTED':
+      console.log(payload);
       return {
         ...state,
         userProps: {

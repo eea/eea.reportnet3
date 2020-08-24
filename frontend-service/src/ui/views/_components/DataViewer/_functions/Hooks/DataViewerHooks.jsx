@@ -186,7 +186,6 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-    console.log(Array.isArray(field.fieldData[column.field]), field.fieldData.type !== 'POINT');
     if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);

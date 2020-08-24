@@ -1,3 +1,13 @@
+.crsSwitcherSplitButton {
+  width: 20% !important;
+  min-width: 20% !important;
+  margin-right: 1rem;
+  position: absolute;
+  top: 40px;
+  float: right;
+  z-index: 9999;
+}
+
 .themeSwitcherSplitButton {
   width: 20% !important;
   min-width: 20% !important;
