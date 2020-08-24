@@ -251,12 +251,12 @@
     <dependency>
       <groupId>org.eea.utils</groupId>
       <artifactId>common-utitlities</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>${common-utitlities.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eea.interfaces</groupId>
       <artifactId>common-interfaces</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>${common-interfaces.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
