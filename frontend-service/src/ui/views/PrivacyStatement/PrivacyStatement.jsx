@@ -3,56 +3,21 @@ import { withRouter } from 'react-router-dom';
 
 import styles from './PrivacyStatement.module.scss';
 
-import { routes } from 'ui/routes';
-import { MainLayout } from 'ui/views/_components/Layout';
+import { PublicLayout } from 'ui/views/_components/Layout';
 import { Title } from 'ui/views/_components/Title';
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 const PrivacyStatement = withRouter(({ history }) => {
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
-  const leftSideBarContext = useContext(LeftSideBarContext);
-
-  useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: '',
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['privacyPolicy'],
-        icon: 'info',
-        href: getUrl(routes.PRIVACY_STATEMENT),
-        command: () => history.push(getUrl(routes.PRIVACY_STATEMENT))
-      }
-    ]);
-  }, []);
-
-  useEffect(() => {
-    leftSideBarContext.addModels([]);
-  }, []);
 
   const layout = children => {
     return (
-      <MainLayout
-        leftSideBarConfig={{
-          buttons: []
-        }}>
+      <PublicLayout>
         <div className>
           <div className="rep-container">{children}</div>
         </div>
-      </MainLayout>
+      </PublicLayout>
     );
   };
 
