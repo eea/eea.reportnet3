@@ -134,18 +134,18 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   // };
 
   return (
-    <Fragment>
-      {isNotificationVisible && (
-        <Dialog
-          className="edit-table"
-          blockScroll={false}
-          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-          header={resources.messages['notifications']}
-          modal={true}
-          onHide={() => setIsNotificationVisible(false)}
-          style={{ width: '60%' }}
-          visible={isNotificationVisible}
-          zIndex={3100}>
+    isNotificationVisible && (
+      <Dialog
+        className="edit-table"
+        blockScroll={false}
+        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+        header={resources.messages['notifications']}
+        modal={true}
+        onHide={() => setIsNotificationVisible(false)}
+        style={{ width: '60%' }}
+        visible={isNotificationVisible}
+        zIndex={3100}>
+        {notificationContext.all.length > 0 ? (
           <DataTable
             autoLayout={true}
             loading={false}
@@ -157,9 +157,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             value={notifications}>
             {columns}
           </DataTable>
-        </Dialog>
-      )}
-    </Fragment>
+        ) : (
+          <div className={styles.notificationsWithoutTable}>
+            <div className={styles.noNotifications}>{resources.messages['noNotifications']}</div>
+          </div>
+        )}
+      </Dialog>
+    )
   );
 };
 

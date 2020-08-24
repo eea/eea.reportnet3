@@ -153,6 +153,7 @@ const DocumentFileUpload = ({
               <Field
                 id={'descriptionDocumentFileUpload'}
                 innerRef={inputRef}
+                maxLength={255}
                 name="description"
                 placeholder={resources.messages['fileDescription']}
                 type="text"
@@ -217,7 +218,7 @@ const DocumentFileUpload = ({
                     : styles.disabledButton
                 }
                 disabled={isSubmitting}
-                icon={isEditForm ? 'save' : 'add'}
+                icon={isEditForm ? 'check' : 'add'}
                 label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 type={isSubmitting ? '' : 'submit'}
               />

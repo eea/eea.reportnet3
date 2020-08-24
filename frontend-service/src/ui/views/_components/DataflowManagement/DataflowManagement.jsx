@@ -139,7 +139,7 @@ export const DataflowManagement = ({
       </div>
       <Button
         disabled={dataflowManagementState.isSubmitting}
-        icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'save' : 'add'}
+        icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}
         onClick={() => (dataflowManagementState.isSubmitting ? {} : onSave())}
       />

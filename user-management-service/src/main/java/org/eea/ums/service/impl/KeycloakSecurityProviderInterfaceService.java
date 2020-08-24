@@ -96,7 +96,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   @PostConstruct
   private void init() {
-    users = Arrays.asList(keycloakConnectorService.getUsers());
+    users = new ArrayList<>(Arrays.asList(keycloakConnectorService.getUsers()));
   }
 
   /**
@@ -470,7 +470,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     } else {
       LOG.error("Contributor is not present. The userMail is {} and the group name {}", userMail,
           groupName);
-      throw new EEAException("Error, user not found");
+      throw new EEAException(String.format(
+          "Error, user with mail %s not found and it was impossible to add it to the group %s",
+          userMail, groupName));
     }
   }
 
@@ -667,9 +669,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         if (groupInfo.getName()
             .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))
             || groupInfo.getName()
-                .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
+            .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
             || groupInfo.getName()
-                .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
+            .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
           userGroups.add(groupInfo.getName());
         }
       }
@@ -787,11 +789,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> !groups.isEmpty()).ifPresent(groups -> groups.stream().map(group -> {
-            if (group.startsWith("/")) {
-              group = group.substring(1);
-            }
-            return group.toUpperCase();
-          }).forEach(eeaGroups::add));
+        if (group.startsWith("/")) {
+          group = group.substring(1);
+        }
+        return group.toUpperCase();
+      }).forEach(eeaGroups::add));
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());

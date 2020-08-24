@@ -110,9 +110,10 @@ public class LoadValidationsHelper {
         }
       }
     }
-    validation
-        .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
-
+    if (!errors.isEmpty()) {
+      validation
+          .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
+    }
     validation.setTotalRecords(validationRepository.count());
     validation.setTotalFilteredRecords(validationRepository.countRecordsByFilter(datasetId,
         levelErrorsFilter, typeEntitiesFilter, originsFilter));

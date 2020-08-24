@@ -293,6 +293,7 @@ const Tab = ({
           }
           href={'#' + ariaControls}
           id={id}
+          onAuxClick={e => e.preventDefault()}
           onMouseDownCapture={e => {
             if (e.button === 1) {
               e.preventDefault();

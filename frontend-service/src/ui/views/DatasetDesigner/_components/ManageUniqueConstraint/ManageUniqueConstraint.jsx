@@ -163,7 +163,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         );
         if (response.status >= 200 && response.status <= 299) {
           manageDialogs('isManageUniqueConstraintDialogVisible', false);
-          onResetValues();          
+          onResetValues();
           refreshList(true);
         }
       } catch (error) {
@@ -201,7 +201,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
     <Fragment>
       <span data-tip data-for="createTooltip">
         <Button
-          className="p-button-primary p-button-animated-blink"
+          className={`p-button-primary ${!isEmpty(selectedFields) && !isDuplicated ? 'p-button-animated-blink' : ''}`}
           disabled={isEmpty(selectedFields) || isDuplicated}
           icon={'check'}
           label={!isNil(uniqueId) ? resources.messages['update'] : resources.messages['create']}

@@ -127,7 +127,7 @@ export const EuFooter = ({ leftMargin }) => {
     },
     {
       title: 'Reportnet 3.0 Data Privacy Notice',
-      url: ''
+      url: 'https://rn3test.eionet.europa.eu/privacyPolicy'
     },
     {
       title: 'Legal notice',
@@ -168,7 +168,11 @@ export const EuFooter = ({ leftMargin }) => {
         <div className={styles.footerBottom}>
           <div className="rep-container">
             {bottomContent.map(link => {
-              return <a key={link.title} href={link.url}>{link.title}</a>;
+              return (
+                <a key={link.title} href={link.url}>
+                  {link.title}
+                </a>
+              );
             })}
           </div>
         </div>

@@ -317,8 +317,23 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, e);
+      if (e.getMessage() != null
+          && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
+              tableSchemaVO.getIdTableSchema(), datasetId))) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
+                tableSchemaVO.getIdTableSchema(), datasetId),
+            e);
+      }
+      if (e.getMessage() != null && e.getMessage().equals(String
+          .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId))) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(String
+            .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId)),
+            e);
+      } else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_INCORRECT_ID, e);
+      }
     }
   }
 

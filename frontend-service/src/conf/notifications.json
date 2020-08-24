@@ -537,7 +537,8 @@
           "key": "VALIDATION_FINISHED_EVENT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         },
         {
@@ -612,7 +613,11 @@
           "key": "COPY_DATA_TO_EUDATASET_COMPLETED_EVENT"
         },
         {
-          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
@@ -637,7 +642,8 @@
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         },
 

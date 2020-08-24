@@ -431,12 +431,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
 
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
-            .getModifiedCount() == 1) {
-          return;
+            .getModifiedCount() != 1) {
+          LOG.error(
+              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
+          throw new EEAException(
+              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
         }
+      } else {
+        LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+        throw new EEAException(
+            String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
       }
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
@@ -458,8 +463,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
     if (tableSchema == null) {
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+      throw new EEAException(
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
     }
     // when we delete a table we need to delete all rules of this table, we mean, rules of the
     // records fields, etc

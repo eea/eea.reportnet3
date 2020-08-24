@@ -5,6 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ManageIntegrations.module.scss';
 
+import { config } from 'conf';
+
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -402,7 +404,7 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
-          maxLength={255}
+          maxLength={option === 'fileExtension' ? config.MAX_FILE_EXTENSION_LENGTH : 255}
           onChange={event => onFillField(event.target.value, option)}
           onKeyDown={event => onSaveKeyDown(event)}
           placeholder={resources.messages[option]}

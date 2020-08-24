@@ -758,6 +758,15 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file) {
 
     try {
+      // Not allow insert attachment if the table is marked as read only. This not applies to design
+      // datasets
+      if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+          && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
+              datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD))) {
+        LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
+            datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
       String fileName = file.getOriginalFilename();
       if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -767,7 +776,7 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error updating attachment from the datasetId {}, with message: {}",
           datasetId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 

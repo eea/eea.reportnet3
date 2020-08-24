@@ -51,7 +51,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
 
   useEffect(() => {
     if (findHiddenNotification()) downloadExportFMEFile();
-  }, [notificationContext.hidden]); 
+  }, [notificationContext.hidden]);
 
   const findHiddenNotification = () => {
     return notificationContext.hidden.find(
@@ -139,7 +139,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       label: 'notifications',
       onClick: async e => {
         e.preventDefault();
-        if (notificationContext.all.length > 0) setIsNotificationVisible(true);
+        setIsNotificationVisible(true);
       },
       title: 'notifications'
     };
