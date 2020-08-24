@@ -16,6 +16,7 @@ import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,6 +34,7 @@ import com.github.dockerjava.api.model.Container;
  * The Class RecordStoreServiceImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class RecordStoreServiceImplTest {
 
   /** The record store service impl. */
