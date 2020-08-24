@@ -13,7 +13,7 @@
 
   <groupId>org.eea.dataflow</groupId>
   <artifactId>dataflow-service</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>${dataflow.version}</version>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:dataflow-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>

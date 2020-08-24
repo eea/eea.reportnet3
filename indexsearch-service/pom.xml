@@ -15,7 +15,7 @@
   </properties>
   <groupId>org.eea.indexsearc</groupId>
   <artifactId>indexsearch-service</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>${indexsearch.version}</version>
   <dependencies>
     <dependency>
       <groupId>org.eea.interfaces</groupId>
