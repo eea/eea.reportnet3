@@ -16,6 +16,7 @@ public enum FMEOperation {
 
   /** The import with prefill data. */
   IMPORT_FROM_OTHER_SYSTEM("IMPORT_FROM_OTHER_SYSTEM");
+
   /** The value. */
   private final String value;
 

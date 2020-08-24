@@ -236,6 +236,20 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
+      case IMPORT_FROM_OTHER_SYSTEM:
+        // providerId
+        parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
+        // folder
+        parameters.add(saveParameter(IntegrationParams.FOLDER,
+            integrationOperationParams.get(IntegrationParams.DATASET_ID) + "/"
+                + paramDataProvider));
+
+        fmeAsyncJob.setPublishedParameters(parameters);
+
+        LOG.info("Executing FME Import from other system");
+        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
+        break;
       case EXPORT_EU_DATASET:
         // DataBaseConnectionPublic
         parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
