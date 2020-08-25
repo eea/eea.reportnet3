@@ -1,14 +1,40 @@
-.sectionMainContent {
-  margin-bottom: 5rem;
-
-  h3 {
-    font-size: 2rem;
-    color: var(--subtitle-color);
-    margin-bottom: 1rem;
-    margin-top: 4rem;
+.contentMain {
+  display: flex;
+  justify-content: center;
+  aside {
+    width: 15%;
+    margin-right: 4rem;
+    ul {
+      list-style: none;
+      padding: 0px;
+      li {
+        margin-bottom: 1rem;
+        a {
+          &:hover {
+            font-weight: bold;
+          }
+        }
+      }
+    }
   }
+  .privacyStatementContent {
+    width: 50%;
+    section {
+      h3 {
+        font-size: 2rem;
+        color: var(--subtitle-color);
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+      }
 
-  p {
-    color: var(--title-color);
+      p {
+        color: var(--title-color);
+      }
+      &:nth-of-type(1) {
+        h3 {
+          margin-top: 0px;
+        }
+      }
+    }
   }
 }
