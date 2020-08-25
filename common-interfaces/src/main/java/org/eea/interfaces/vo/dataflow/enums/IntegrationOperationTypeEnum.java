@@ -16,6 +16,7 @@ public enum IntegrationOperationTypeEnum {
 
   /** The import from other system. */
   IMPORT_FROM_OTHER_SYSTEM("IMPORT_FROM_OTHER_SYSTEM");
+
   /** The value. */
   private final String value;
 

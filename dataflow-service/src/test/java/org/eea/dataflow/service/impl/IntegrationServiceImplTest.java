@@ -1,6 +1,6 @@
 package org.eea.dataflow.service.impl;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,7 +150,7 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setName("name");
     integrationVOList.add(integrationVO);
-    assertNull(
+    assertNotNull(
         integrationService.getOnlyExtensionsAndOperations(integrationVOList).get(0).getName());
   }
 
