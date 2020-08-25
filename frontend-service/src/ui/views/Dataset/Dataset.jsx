@@ -333,10 +333,10 @@ export const Dataset = withRouter(({ match, history }) => {
   const onImportOtherSystems = async () => {
     setIsImportOtherSystemsDialogVisible(false);
 
-    // const {
-    //   dataflow: { name: dataflowName },
-    //   dataset: { name: datasetName }
-    // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
     notificationContext.add({
       type: 'DATASET_DATA_LOADING_INIT',
       content: {
