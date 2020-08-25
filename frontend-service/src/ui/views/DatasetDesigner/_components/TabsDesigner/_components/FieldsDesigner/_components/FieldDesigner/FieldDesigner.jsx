@@ -170,8 +170,8 @@ export const FieldDesigner = ({
   }, [fieldPKReferenced]);
 
   useEffect(() => {
-    if (totalFields > 0) {
-      if (!isUndefined(inputRef.current)) {
+    if (!isNil(totalFields)) {
+      if (totalFields === 0 && !isUndefined(inputRef.current)) {
         if (index === '-1') {
           inputRef.current.element.focus();
         }
@@ -441,6 +441,11 @@ export const FieldDesigner = ({
     } catch (error) {
       console.error('Error during field Add: ', error);
     } finally {
+      if (!isUndefined(inputRef.current)) {
+        if (index === '-1') {
+          inputRef.current.element.focus();
+        }
+      }
     }
   };
 
@@ -463,7 +468,6 @@ export const FieldDesigner = ({
   const onFieldDragEnd = () => {
     if (!isUndefined(onFieldDragAndDropStart)) {
       onFieldDragAndDropStart(undefined);
-      inputRef.current.element.focus();
     }
     dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
   };
