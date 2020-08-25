@@ -841,6 +841,7 @@
     "action": "Action",
     "exportExternalIntegrationDataset": "Exporting dataset data",
     "noNotifications": "There are no notifications yet",
+    "webLinkDescriptionValidationMax": "Web link description is too long",
     "userSettingsBasemapLayerSubtitle": "Configure the defaul basemap layer for your maps",
     "basemapLayer": "Basemap layer"
   }
