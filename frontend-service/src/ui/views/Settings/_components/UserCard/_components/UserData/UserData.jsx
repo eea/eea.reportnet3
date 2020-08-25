@@ -17,7 +17,7 @@ const UserData = () => {
         <UserImg />
       </div>
       <div className={styles.userName}>
-        {userContext.firstName !== '' && userContext.lastName !== ''
+        {userContext.firstName !== ''
           ? `${userContext.firstName} ${userContext.lastName}`
           : userContext.preferredUsername}
       </div>
