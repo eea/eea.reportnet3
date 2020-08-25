@@ -78,16 +78,16 @@ export const Dataset = withRouter(({ match, history }) => {
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
-  const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
-  const [importOtherSystemsDialogVisible, setImportOtherSystemsDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
+  const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [metaData, setMetaData] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
@@ -171,7 +171,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (datasetSchemaId) getFileExtensions();
-  }, [datasetSchemaId, importDatasetDialogVisible]);
+  }, [datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
     getExportExtensions(externalOperationsList.export);
@@ -192,7 +192,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const importFromFile = [{
     label: resources.messages['importFromFile'],
     icon: config.icons['import'],
-    command: () => setImportDatasetDialogVisible(true)
+    command: () => setIsImportDatasetDialogVisible(true)
   }];
 
   const importFromOtherSystems = [
@@ -201,7 +201,7 @@ export const Dataset = withRouter(({ match, history }) => {
     items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
       label: importOtherSystem.name,
       icon: config.icons['import'],
-      command: () => setImportOtherSystemsDialogVisible(true)
+      command: () => setIsImportOtherSystemsDialogVisible(true)
     }))
   }];
 
@@ -331,11 +331,12 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onImportOtherSystems = async () => {
-    setImportOtherSystemsDialogVisible(false);
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    setIsImportOtherSystemsDialogVisible(false);
+
+    // const {
+    //   dataflow: { name: dataflowName },
+    //   dataset: { name: datasetName }
+    // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
     notificationContext.add({
       type: 'DATASET_DATA_LOADING_INIT',
       content: {
@@ -557,7 +558,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onUpload = async () => {
-    setImportDatasetDialogVisible(false);
+    setIsImportDatasetDialogVisible(false);
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
@@ -589,7 +590,7 @@ export const Dataset = withRouter(({ match, history }) => {
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
       label={resources.messages['close']}
-      onClick={() => setImportDatasetDialogVisible(false)}
+      onClick={() => setIsImportDatasetDialogVisible(false)}
     />
   );
 
@@ -631,7 +632,7 @@ export const Dataset = withRouter(({ match, history }) => {
                   disabled={!hasWritePermissions}
                   icon={'import'}
                   label={resources.messages['importDataset']}
-                  onClick={!isEmpty(externalOperationsList.importOtherSystems) ? event => importMenuRef.current.show(event) : () => setImportDatasetDialogVisible(true)}
+                  onClick={!isEmpty(externalOperationsList.importOtherSystems) ? event => importMenuRef.current.show(event) : () => setIsImportDatasetDialogVisible(true)}
                 />
                 {!isEmpty(externalOperationsList.importOtherSystems) &&
                 <Menu
@@ -795,14 +796,14 @@ export const Dataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       )}
-      {importDatasetDialogVisible && (
+      {isImportDatasetDialogVisible && (
         <Dialog
           className={styles.Dialog}
           dismissableMask={false}
           footer={renderCustomFileUploadFooter}
           header={`${resources.messages['uploadDataset']}${datasetName}`}
-          onHide={() => setImportDatasetDialogVisible(false)}
-          visible={importDatasetDialogVisible}>
+          onHide={() => setIsImportDatasetDialogVisible(false)}
+          visible={isImportDatasetDialogVisible}>
           <CustomFileUpload
             accept={getImportExtensions}
             chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
@@ -820,14 +821,14 @@ export const Dataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       )}
-      {importOtherSystemsDialogVisible && (        
+      {isImportOtherSystemsDialogVisible && (        
         <ConfirmDialog
           header={resources.messages['importPreviousDataHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onImportOtherSystems}
-          onHide={() => onSetVisible(setImportOtherSystemsDialogVisible, false)}
-          visible={importOtherSystemsDialogVisible}>
+          onHide={() => onSetVisible(setIsImportOtherSystemsDialogVisible, false)}
+          visible={isImportOtherSystemsDialogVisible}>
           {resources.messages['importPreviousDataConfirm']}
         </ConfirmDialog>
       )}

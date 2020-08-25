@@ -96,7 +96,8 @@ const parseManageIntegration = integration => ({
 const parseIntegrationOperationExtension = integration => ({
   datasetSchemaId: integration.internalParameters.datasetSchemaId,
   fileExtension: integration.internalParameters.fileExtension,
-  operation: integration.operation
+  operation: integration.operation,
+  name: integration.name
 });
 
 const parseRepositoryList = repositoryList => parseKeyValue(repositoryList);
