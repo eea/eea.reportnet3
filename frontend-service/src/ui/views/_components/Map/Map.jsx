@@ -297,7 +297,7 @@ export const Map = ({
         ref={mapRef}
         onClick={e => {
           console.log([e.latlng.lat, e.latlng.lng]);
-          console.log(crsProj.unproject([e.latlng.lat, e.latlng.lng]));
+          console.log(crsProj.projection.unproject([e.latlng.lat, e.latlng.lng]));
           if (!isNewPositionMarkerVisible) {
             setIsNewPositionMarkerVisible(true);
           }
