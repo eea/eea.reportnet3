@@ -46,11 +46,14 @@ import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -1799,6 +1802,35 @@ public class DatasetSchemaServiceTest {
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     when(simpleDataSchemaMapper.entityToClass(Mockito.any(DataSetSchema.class)))
         .thenReturn(simpleDatasetSchemaVO);
+    assertEquals(simpleDatasetSchemaVO, dataSchemaServiceImpl.getSimpleSchema(1L));
+  }
+
+  @Test
+  public void getSimpleSchemaEUDatasetTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    DataSetSchema datasetSchema = new DataSetSchema();
+    DesignDataset design = new DesignDataset();
+    SimpleDatasetSchemaVO simpleDatasetSchemaVO = new SimpleDatasetSchemaVO();
+    SimpleTableSchemaVO table = new SimpleTableSchemaVO();
+    ArrayList<SimpleTableSchemaVO> tables = new ArrayList<SimpleTableSchemaVO>();
+    ArrayList<SimpleFieldSchemaVO> fields = new ArrayList<SimpleFieldSchemaVO>();
+    table.setFields(fields);
+    tables.add(table);
+    simpleDatasetSchemaVO.setTables(tables);
+    SimpleFieldSchemaVO countryCode = new SimpleFieldSchemaVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(datasetMetabase));
+    when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(design));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    when(simpleDataSchemaMapper.entityToClass(Mockito.any(DataSetSchema.class)))
+        .thenReturn(simpleDatasetSchemaVO);
+    when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.EUDATASET);
+    countryCode.setFieldName(LiteralConstants.COUNTRY_CODE);
+    countryCode.setFieldType(DataType.TEXT);
+    fields.add(countryCode);
     assertEquals(simpleDatasetSchemaVO, dataSchemaServiceImpl.getSimpleSchema(1L));
   }
 
