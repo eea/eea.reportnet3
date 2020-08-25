@@ -271,11 +271,11 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const getPosition = e => {
-    const exportButton = e.currentTarget;
-    const left = `${exportButton.offsetLeft}px`;
-    const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
+    const button = e.currentTarget;
+    const left = `${button.offsetLeft}px`;
+    const topValue = button.offsetHeight + button.offsetTop + 3;
     const top = `${topValue}px `;
-    const menu = exportButton.nextElementSibling;
+    const menu = button.nextElementSibling;
     menu.style.top = top;
     menu.style.left = left;
   };
