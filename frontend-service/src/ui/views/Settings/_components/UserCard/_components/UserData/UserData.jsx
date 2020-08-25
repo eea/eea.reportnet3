@@ -16,7 +16,12 @@ const UserData = () => {
       <div className={styles.userLogoBoxContainer}>
         <UserImg />
       </div>
-      <div className={styles.userName}>{userContext.preferredUsername}</div>
+      <div className={styles.userName}>
+        {userContext.firstName !== ''
+          ? `${userContext.firstName} ${userContext.lastName}`
+          : userContext.preferredUsername}
+      </div>
+      <div className={styles.userMail}>{userContext.email !== '' && userContext.email}</div>
       <div>
         <a
           type="button"

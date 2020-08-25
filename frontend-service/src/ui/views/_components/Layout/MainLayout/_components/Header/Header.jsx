@@ -175,7 +175,13 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />
       {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
-      <span>{userContext.preferredUsername}</span>
+      <span>
+        {userContext.firstName !== '' && userContext.lastName !== ''
+          ? `${userContext.firstName} ${userContext.lastName}`
+          : userContext.email !== ''
+          ? userContext.email
+          : userContext.preferredUsername}
+      </span>
     </a>
   );
 
