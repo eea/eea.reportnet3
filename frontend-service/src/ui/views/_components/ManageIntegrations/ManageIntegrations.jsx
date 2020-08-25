@@ -91,6 +91,7 @@ export const ManageIntegrations = ({
     manageIntegrationsState.id
   );
   const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
+  const operationsWithFileExtension = ['IMPORT', 'EXPORT'];
 
   useEffect(() => {
     if (!isEmpty(updatedData)) getUpdatedData();
@@ -357,12 +358,12 @@ export const ManageIntegrations = ({
   const renderDropdownLayout = (options = []) => {
     const optionList = {
       operation: [
-        { label: resources.messages['import'], value: 'IMPORT' },
+        { label: resources.messages['importOperationManageIntegration'].toUpperCase(), value: 'IMPORT' },
         {
-          label: resources.messages['importFromOtherSystemOperationManageIntegration'],
+          label: resources.messages['importFromOtherSystemOperationManageIntegration'].toUpperCase(),
           value: 'IMPORT_FROM_OTHER_SYSTEM'
         },
-        { label: resources.messages['exportOperationManageIntegration'], value: 'EXPORT' }
+        { label: resources.messages['exportOperationManageIntegration'].toUpperCase(), value: 'EXPORT' }
       ],
       repository: manageIntegrationsState.repositories,
       processName: manageIntegrationsState.processes
@@ -481,8 +482,7 @@ export const ManageIntegrations = ({
           <div className={styles.group}>
             {renderDropdownLayout(['operation'])}
             {!isNil(manageIntegrationsState.operation) &&
-            (manageIntegrationsState.operation.value === 'IMPORT' ||
-              manageIntegrationsState.operation.value === 'EXPORT')
+            operationsWithFileExtension.includes(manageIntegrationsState.operation.value)
               ? renderInputLayout(['fileExtension'])
               : null}
           </div>
