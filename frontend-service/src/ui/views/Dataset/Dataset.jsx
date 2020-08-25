@@ -633,7 +633,8 @@ export const Dataset = withRouter(({ match, history }) => {
                   label={resources.messages['importDataset']}
                   onClick={!isEmpty(externalOperationsList.importOtherSystems) ? event => importMenuRef.current.show(event) : () => setImportDatasetDialogVisible(true)}
                 />
-                {!isEmpty(externalOperationsList.importOtherSystems) && <Menu
+                {!isEmpty(externalOperationsList.importOtherSystems) &&
+                <Menu
                   model={importButtonsList}
                   popup={true}
                   ref={importMenuRef}

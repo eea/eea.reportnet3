@@ -44,10 +44,10 @@ export const designerReducer = (state, { type, payload }) => {
     case 'IS_PREVIEW_MODE_ON':
       return { ...state, isPreviewModeOn: payload.value };
 
-    case 'LOAD_EXTERNAL_EXTENSIONS':
+    case 'LOAD_EXTERNAL_OPERATIONS':
       return {
         ...state,
-        extensionsOperationsList: { ...state.extensionsOperationsList, export: payload.export, import: payload.import }
+        externalOperationsList: { ...state.externalOperationsList, export: payload.export, import: payload.import }
       };
 
     case 'LOAD_DATASET_SCHEMAS':
