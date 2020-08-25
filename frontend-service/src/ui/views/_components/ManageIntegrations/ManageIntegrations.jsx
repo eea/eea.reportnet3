@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'reac
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ManageIntegrations.module.scss';
 
@@ -216,10 +217,16 @@ export const ManageIntegrations = ({
     manageIntegrationsDispatch({ type: 'TOGGLE_EDIT_VIEW', payload: { id, isEdit: true, keyData, valueData } });
   };
 
-  const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+  const onFillField = (data, name) => {
+    manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+  };
 
   const onFillFieldRepository = (data, name) => {
     manageIntegrationsDispatch({ type: 'ON_FILL_REPOSITORY', payload: { data, name, processName: [] } });
+  };
+
+  const onFillOperation = (data, name) => {
+    manageIntegrationsDispatch({ type: 'ON_FILL_OPERATION', payload: { data, name } });
   };
 
   const onResetParameterInput = () => {
@@ -351,6 +358,7 @@ export const ManageIntegrations = ({
     const optionList = {
       operation: [
         { label: 'IMPORT', value: 'IMPORT' },
+        { label: 'IMPORT FROM OTHER SYSTEM', value: 'IMPORT_OTHER_SYSTEM' },
         { label: 'EXPORT', value: 'EXPORT' }
       ],
       repository: manageIntegrationsState.repositories,
@@ -368,9 +376,17 @@ export const ManageIntegrations = ({
           filter={optionList[option].length > 7}
           disabled={isEmpty(optionList[option])}
           inputId={`${componentName}__${option}`}
-          onChange={event =>
-            option === 'repository' ? onFillFieldRepository(event.value, option) : onFillField(event.value, option)
-          }
+          onChange={event => {
+            if (option === 'repository') {
+              console.log('event.value, option', event.value, option);
+              onFillFieldRepository(event.value, option);
+            } else if (option === 'operation') {
+              console.log('event.value, option', event.value, option);
+              onFillOperation(event.value, option);
+            } else {
+              onFillField(event.value, option);
+            }
+          }}
           optionLabel="label"
           options={optionList[option]}
           placeholder={resources.messages[`${option}PlaceHolder`]}
@@ -463,7 +479,11 @@ export const ManageIntegrations = ({
         {(isEmpty(updatedData) || manageIntegrationsState.operation.value !== 'EXPORT_EU_DATASET') && (
           <div className={styles.group}>
             {renderDropdownLayout(['operation'])}
-            {renderInputLayout(['fileExtension'])}
+            {!isNil(manageIntegrationsState.operation) &&
+            (manageIntegrationsState.operation.value === 'IMPORT' ||
+              manageIntegrationsState.operation.value === 'EXPORT')
+              ? renderInputLayout(['fileExtension'])
+              : null}
           </div>
         )}
         <div className={styles.group}>
