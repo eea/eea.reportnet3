@@ -156,6 +156,7 @@ public class IntegrationServiceImpl implements IntegrationService {
           integration.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID));
       integrationVOAux.setOperation(integration.getOperation());
       integrationVOAux.setInternalParameters(internalParameters);
+      integrationVOAux.setName(integration.getName());
       newIntegrationVOList.add(integrationVOAux);
     });
     return newIntegrationVOList;
