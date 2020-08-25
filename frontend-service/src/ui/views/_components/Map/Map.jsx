@@ -30,10 +30,12 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
-  shadowUrl: iconShadow
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 36]
 });
 
-const crsProj = new L.Proj.CRS('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs', {
+const crsProj = new L.Proj.CRS('EPSG:4258', '+proj=longlat +datum=WGS84 +no_defs', {
   origin: [-180, 90],
   resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125]
 });
@@ -41,7 +43,9 @@ const crsProj = new L.Proj.CRS('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs
 L.Marker.prototype.options.icon = DefaultIcon;
 
 let NewMarkerIcon = L.icon({
-  iconUrl: newMarkerIcon
+  iconUrl: newMarkerIcon,
+  iconSize: [25, 41],
+  iconAnchor: [12, 36]
   // iconSize: [27, 31],
   // iconAnchor: [13.5, 17.5],
   // popupAnchor: [0, -11]
@@ -68,7 +72,7 @@ export const Map = ({
   const userContext = useContext(UserContext);
 
   const crs = [
-    { label: 'WGS84', value: 'EPSG4326' },
+    { label: 'WGS84', value: 'EPSG3857' },
     { label: 'ETRS89', value: 'EPSG4258' },
     { label: 'LAEA-ETRS89', value: 'EPSG3035' }
   ];
@@ -281,7 +285,7 @@ export const Map = ({
       {console.log(CRS[currentCRS.value], currentCRS.value, CRS.EPSG4326)}
       <MapComponent
         // crs={CRS[currentCRS.value]}
-        // crs={crsProj}
+        crs={crsProj}
         continuousWorld={true}
         worldCopyJump={false}
         style={{ height: '60vh' }}
@@ -292,6 +296,8 @@ export const Map = ({
         zoom="10"
         ref={mapRef}
         onClick={e => {
+          console.log([e.latlng.lat, e.latlng.lng]);
+          console.log(crsProj.unproject([e.latlng.lat, e.latlng.lng]));
           if (!isNewPositionMarkerVisible) {
             setIsNewPositionMarkerVisible(true);
           }

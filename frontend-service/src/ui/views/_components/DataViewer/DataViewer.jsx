@@ -1083,7 +1083,7 @@ const DataViewer = withRouter(
             value={fetchedData}>
             {columns}
           </DataTable>
-          {/* <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map> */}
+          <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>
         </div>
 
         {isColumnInfoVisible && (
