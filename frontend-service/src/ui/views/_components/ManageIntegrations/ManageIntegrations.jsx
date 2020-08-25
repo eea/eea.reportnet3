@@ -357,9 +357,12 @@ export const ManageIntegrations = ({
   const renderDropdownLayout = (options = []) => {
     const optionList = {
       operation: [
-        { label: 'IMPORT', value: 'IMPORT' },
-        { label: 'IMPORT FROM OTHER SYSTEM', value: 'IMPORT_OTHER_SYSTEM' },
-        { label: 'EXPORT', value: 'EXPORT' }
+        { label: resources.messages['import'], value: 'IMPORT' },
+        {
+          label: resources.messages['importFromOtherSystemOperationManageIntegration'],
+          value: 'IMPORT_FROM_OTHER_SYSTEM'
+        },
+        { label: resources.messages['exportOperationManageIntegration'], value: 'EXPORT' }
       ],
       repository: manageIntegrationsState.repositories,
       processName: manageIntegrationsState.processes
