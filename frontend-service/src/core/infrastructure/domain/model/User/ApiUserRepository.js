@@ -29,6 +29,10 @@ const login = async code => {
     tokenExpireTime: userDTO.accessTokenExpiration
   });
   userStorage.set({ accessToken, refreshToken });
+  const userInfoDTO = await apiUser.userInfo(userDTO.userId);
+  user.email = userInfoDTO.data.email;
+  user.firstName = userInfoDTO.data.firstName;
+  user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
   const remain = userDTO.accessTokenExpiration - moment().unix();
   timeOut((remain - 10) * 1000);
@@ -45,6 +49,17 @@ const logout = async () => {
 const uploadImg = async (userId, imgData) => {
   const response = await apiUser.uploadImg(userId, imgData);
   return response;
+};
+
+const userInfo = async userId => {
+  const userDTO = await apiUser.userInfo(userId);
+  const user = new User({
+    email: userDTO.email,
+    firstName: userDTO.firstName,
+    lastName: userDTO.lastName
+  });
+
+  return user;
 };
 
 const getConfiguration = async () => {
@@ -115,6 +130,7 @@ const updateAttributes = async attributes => await apiUser.updateAttributes(attr
 
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
+
   const { accessToken, refreshToken } = userDTO;
   const user = new User({
     accessRole: userDTO.roles,
@@ -125,6 +141,10 @@ const oldLogin = async (userName, password) => {
     tokenExpireTime: userDTO.accessTokenExpiration
   });
   userStorage.set({ accessToken, refreshToken });
+  const userInfoDTO = await apiUser.userInfo(userDTO.userId);
+  user.email = userInfoDTO.data.email;
+  user.firstName = userInfoDTO.data.firstName;
+  user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
   const remain = userDTO.accessTokenExpiration - moment().unix();
   timeOut((remain - 10) * 1000);
@@ -145,6 +165,10 @@ const refreshToken = async () => {
       tokenExpireTime: userDTO.accessTokenExpiration
     });
     userStorage.set({ accessToken, refreshToken });
+    const userInfoDTO = await apiUser.userInfo(userDTO.userId);
+    user.email = userInfoDTO.data.email;
+    user.firstName = userInfoDTO.data.firstName;
+    user.lastName = userInfoDTO.data.lastName;
     //calculate difference between now and expiration
     const remain = userDTO.accessTokenExpiration - moment().unix();
     timeOut((remain - 10) * 1000);
@@ -176,5 +200,6 @@ export const ApiUserRepository = {
   refreshToken,
   getToken,
   userRole,
-  uploadImg
+  uploadImg,
+  userInfo
 };
