@@ -378,10 +378,8 @@ export const ManageIntegrations = ({
           inputId={`${componentName}__${option}`}
           onChange={event => {
             if (option === 'repository') {
-              console.log('event.value, option', event.value, option);
               onFillFieldRepository(event.value, option);
             } else if (option === 'operation') {
-              console.log('event.value, option', event.value, option);
               onFillOperation(event.value, option);
             } else {
               onFillField(event.value, option);
