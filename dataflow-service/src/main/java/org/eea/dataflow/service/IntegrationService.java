@@ -3,6 +3,7 @@ package org.eea.dataflow.service;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 
@@ -119,4 +120,17 @@ public interface IntegrationService {
    * @param datasetSchemaId the dataset schema id
    */
   void deleteSchemaIntegrations(String datasetSchemaId);
+
+
+  /**
+   * Execute external integration.
+   *
+   * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
+   * @return the execution result VO
+   * @throws EEAException the EEA exception
+   */
+  ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
+      IntegrationOperationTypeEnum operation) throws EEAException;
 }
