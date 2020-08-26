@@ -81,7 +81,8 @@ import {
   faUsersCog,
   faUserShield,
   faVectorSquare,
-  faBookOpen
+  faBookOpen,
+  faLock
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -240,6 +241,8 @@ export const AwesomeIcons = icon => {
       return faClipboardList;
     case 'localhostAlert':
       return faIgloo;
+    case 'lock':
+      return faLock;
     case 'logout':
       return faPowerOff;
     case 'manageReporters':

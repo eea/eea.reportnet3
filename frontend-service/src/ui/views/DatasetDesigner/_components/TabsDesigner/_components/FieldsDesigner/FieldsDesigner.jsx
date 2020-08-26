@@ -626,8 +626,6 @@ export const FieldsDesigner = ({
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
-          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
-          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
             <Button
@@ -639,7 +637,8 @@ export const FieldsDesigner = ({
               tooltipOptions={{ position: 'top' }}
             />
           </span>
-
+          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
+          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
           <label>{resources.messages['newFieldPlaceHolder']}</label>
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>
