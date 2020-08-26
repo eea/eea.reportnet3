@@ -10,7 +10,7 @@ import isUndefined from 'lodash/isUndefined';
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
-import styles from './DataViewer.module.css';
+import styles from './DataViewer.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
@@ -927,7 +927,7 @@ const DataViewer = withRouter(
     const requiredTemplate = rowData => {
       return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          {rowData.field === 'Required' ? (
+          {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
@@ -1113,7 +1113,11 @@ const DataViewer = withRouter(
                 ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
                   ? ['maxSize']
-                  : [])
+                  : []),
+                !isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
+                DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).readOnly
+                  ? 'readOnly'
+                  : ''
               ])}>
               {['field', 'value'].map((column, i) => (
                 <Column

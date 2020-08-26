@@ -33,6 +33,8 @@ const getFieldValues = (columns, header, filterColumns) => {
           ? 'Valid extensions'
           : key === 'maxSize'
           ? 'Maximum file size'
+          : key === 'readOnly'
+          ? 'Read only'
           : capitalize(key),
       value:
         filteredValues[key] === 'CODELIST'

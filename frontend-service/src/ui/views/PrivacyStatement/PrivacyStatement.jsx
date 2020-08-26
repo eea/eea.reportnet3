@@ -20,14 +20,15 @@ const PrivacyStatement = withRouter(({ history }) => {
 
     if (header.clientHeight === 180) {
       scrollHeight = anchorTarget.getBoundingClientRect().top - 100;
+      if (window.innerWidth <= 768) {
+        scrollHeight = scrollHeight - 100;
+      }
     }
-
-    if (header.clientHeight)
-      window.scroll({
-        top: scrollHeight,
-        left: 0,
-        behavior: 'smooth'
-      });
+    window.scroll({
+      top: scrollHeight,
+      left: 0,
+      behavior: 'smooth'
+    });
   };
 
   const layout = children => {

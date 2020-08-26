@@ -170,8 +170,8 @@ export const FieldDesigner = ({
   }, [fieldPKReferenced]);
 
   useEffect(() => {
-    if (totalFields > 0) {
-      if (!isUndefined(inputRef.current)) {
+    if (!isNil(totalFields)) {
+      if (totalFields === 0 && !isUndefined(tableSchemaId) && !isUndefined(inputRef.current)) {
         if (index === '-1') {
           inputRef.current.element.focus();
         }
@@ -441,6 +441,11 @@ export const FieldDesigner = ({
     } catch (error) {
       console.error('Error during field Add: ', error);
     } finally {
+      if (!isUndefined(inputRef.current)) {
+        if (index === '-1') {
+          inputRef.current.element.focus();
+        }
+      }
     }
   };
 
@@ -463,7 +468,6 @@ export const FieldDesigner = ({
   const onFieldDragEnd = () => {
     if (!isUndefined(onFieldDragAndDropStart)) {
       onFieldDragAndDropStart(undefined);
-      inputRef.current.element.focus();
     }
     dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
   };
@@ -751,16 +755,21 @@ export const FieldDesigner = ({
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
       )}
       <Checkbox
-        checked={fieldDesignerState.fieldReadOnlyValue}
-        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step`}
-        id={`${fieldId}_check_readOnly`}
-        inputId={`${fieldId}_check_readOnly`}
+        checked={fieldDesignerState.fieldPKValue}
+        className={`${styles.checkPK} datasetSchema-pk-help-step`}
+        disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
+        id={`${fieldId}_check_pk`}
+        inputId={`${fieldId}_check_pk`}
         label="Default"
-        onChange={e => onReadOnlyChange(e.checked)}
-        style={{ width: '70px' }}
+        onChange={e => {
+          if (!(hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))) {
+            onPKChange(e.checked);
+          }
+        }}
+        style={{ width: '35px' }}
       />
-      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
-        {resources.messages['readOnly']}
+      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
+        {resources.messages['pk']}
       </label>
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
@@ -778,21 +787,16 @@ export const FieldDesigner = ({
         {resources.messages['required']}
       </label>
       <Checkbox
-        checked={fieldDesignerState.fieldPKValue}
-        className={`${styles.checkPK} datasetSchema-pk-help-step`}
-        disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
-        id={`${fieldId}_check_pk`}
-        inputId={`${fieldId}_check_pk`}
+        checked={fieldDesignerState.fieldReadOnlyValue}
+        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step`}
+        id={`${fieldId}_check_readOnly`}
+        inputId={`${fieldId}_check_readOnly`}
         label="Default"
-        onChange={e => {
-          if (!(hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))) {
-            onPKChange(e.checked);
-          }
-        }}
-        style={{ width: '35px' }}
+        onChange={e => onReadOnlyChange(e.checked)}
+        style={{ width: '90px' }}
       />
-      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
-        {resources.messages['pk']}
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+        {resources.messages['readOnly']}
       </label>
     </div>
   );

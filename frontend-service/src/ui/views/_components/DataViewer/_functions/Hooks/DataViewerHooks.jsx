@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from '../../DataViewer.module.css';
+import styles from '../../DataViewer.module.scss';
 
 import { config } from 'conf';
 
@@ -12,7 +12,9 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -270,10 +272,11 @@ export const useSetColumns = (
       let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
       let invisibleColumn =
         column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
+      const readOnlyColumn = column.readOnly ? styles.readOnlyFields : '';
       return (
         <Column
           body={dataTemplate}
-          className={invisibleColumn}
+          className={`${invisibleColumn} ${readOnlyColumn}`}
           editor={
             hasWritePermissions && column.type !== 'ATTACHMENT'
               ? row => cellDataEditor(row, records.selectedRecord)
@@ -282,6 +285,14 @@ export const useSetColumns = (
           field={column.field}
           header={
             <React.Fragment>
+              {column.readOnly && (
+                <FontAwesomeIcon
+                  aria-hidden={false}
+                  className="p-breadcrumb-home"
+                  icon={AwesomeIcons('lock')}
+                  style={{ fontSize: '8pt' }}
+                />
+              )}
               {column.header}
               <Button
                 className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}

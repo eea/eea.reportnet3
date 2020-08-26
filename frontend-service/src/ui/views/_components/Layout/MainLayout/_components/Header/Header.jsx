@@ -75,7 +75,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
             transition: '0.5s'
           });
           setEuHeaderElementStyle({
-            marginTop: '-15px',
+            marginTop: '-16px',
             transition: '0.5s'
           });
           setHeaderElementStyle({
