@@ -4,15 +4,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
+import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.integration.enums.FMEOperation;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
-import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
@@ -46,95 +53,16 @@ public class FMECommunicationServiceTest {
   @Mock
   private FMECollectionMapper fmeCollectionMapper;
 
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
+
+  @Mock
+  private FMEJobRepository fmeJobRepository;
+
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
-  }
-
-  @Test
-  public void operationFinishedImportDesignTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setDatasetId(1L);
-    fmeOperationInfoVO.setDataflowId(1L);
-    fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
-    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
-  }
-
-  @Test
-  public void operationFinishedImportReportingTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setDatasetId(1L);
-    fmeOperationInfoVO.setDataflowId(1L);
-    fmeOperationInfoVO.setProviderId(1L);
-    fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
-    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
-  }
-
-  @Test
-  public void operationFinishedExporttDesignTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setDatasetId(1L);
-    fmeOperationInfoVO.setDataflowId(1L);
-    fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-  }
-
-  @Test
-  public void operationFinishedExportReportingTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setDatasetId(1L);
-    fmeOperationInfoVO.setDataflowId(1L);
-    fmeOperationInfoVO.setProviderId(1L);
-    fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-  }
-
-
-  @Test
-  public void operationFinishedKafkaExceptionTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setDatasetId(1L);
-    fmeOperationInfoVO.setDataflowId(1L);
-    fmeOperationInfoVO.setProviderId(1L);
-    fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
-    Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
-        .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-
-    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(0)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
   }
 
   @Test
@@ -251,4 +179,167 @@ public class FMECommunicationServiceTest {
     Assert.assertEquals(HttpStatus.OK, result);
   }
 
+  @Test
+  public void authenticateAndAuthorizeTest() throws EEAException {
+    TokenVO tokenVO = new TokenVO();
+    Set<String> groups = new HashSet<>();
+    groups.add("/group");
+    tokenVO.setPreferredUsername("userName");
+    tokenVO.setRoles(new HashSet<>());
+    tokenVO.setGroups(groups);
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setUser("userName");
+
+    Mockito.when(userManagementControllerZull.authenticateUserByApiKey(Mockito.any()))
+        .thenReturn(tokenVO);
+    Mockito.when(fmeJobRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(fmeJob));
+    Assert.assertEquals(fmeJob,
+        fmeCommunicationService.authenticateAndAuthorize("sampleApiKey", 1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void authenticateAndAuthorizeUnauthorizedTest() throws EEAException {
+    try {
+      fmeCommunicationService.authenticateAndAuthorize(null, 1L);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.UNAUTHORIZED, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void authenticateAndAuthorizeForbiddenTest() throws EEAException {
+    TokenVO tokenVO = new TokenVO();
+    Set<String> groups = new HashSet<>();
+    groups.add("/group");
+    tokenVO.setPreferredUsername("userName");
+    tokenVO.setRoles(new HashSet<>());
+    tokenVO.setGroups(groups);
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setUser("otherUserName");
+
+    Mockito.when(userManagementControllerZull.authenticateUserByApiKey(Mockito.any()))
+        .thenReturn(tokenVO);
+    Mockito.when(fmeJobRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(fmeJob));
+    try {
+      fmeCommunicationService.authenticateAndAuthorize("sampleApiKey", 1L);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.FORBIDDEN, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void releaseNotificationsImportReportingCompletedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsImportReportingFailedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsImportDesignCompletedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsImportDesignFailedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsExportReportingCompletedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsExportReportingFailedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsExportDesignCompletedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsExportDesignFailedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsExportEUDatasetCompletedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsExportEUDatasetFailedTest() throws EEAException {
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void udpateJobStatusSuccessTest() {
+    Mockito.when(fmeJobRepository.save(Mockito.any())).thenReturn(new FMEJob());
+    fmeCommunicationService.updateJobStatus(new FMEJob(), 0L);
+    Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void udpateJobStatusFailTest() {
+    Mockito.when(fmeJobRepository.save(Mockito.any())).thenReturn(new FMEJob());
+    fmeCommunicationService.updateJobStatus(new FMEJob(), 1L);
+    Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
+  }
 }

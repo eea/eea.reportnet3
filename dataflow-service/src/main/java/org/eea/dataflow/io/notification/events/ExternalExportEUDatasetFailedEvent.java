@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class ExternalExportEUDatasetCompletedEvent.
+ * The Class ExternalExportEUDatasetFailedEvent.
  */
 @Component
-public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHandler {
+public class ExternalExportEUDatasetFailedEvent implements NotificableEventHandler {
 
   /** The dataflow service. */
   @Autowired
@@ -32,7 +32,7 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
    */
   @Override
   public EventType getEventType() {
-    return EventType.EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT;
+    return EventType.EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT;
   }
 
   /**

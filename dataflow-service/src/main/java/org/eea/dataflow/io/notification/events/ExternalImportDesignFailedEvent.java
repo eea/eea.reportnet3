@@ -12,18 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class ExternalExportEUDatasetCompletedEvent.
+ * The Class ExternalImportDesignFailedEvent.
  */
 @Component
-public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHandler {
+public class ExternalImportDesignFailedEvent implements NotificableEventHandler {
 
   /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
 
-  /** The dataset metabase controller zuul. */
+  /** The data set metabase controller zuul. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Gets the event type.
@@ -32,7 +32,7 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
    */
   @Override
   public EventType getEventType() {
-    return EventType.EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT;
+    return EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
   }
 
   /**
@@ -45,18 +45,19 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
 
-    Long dataflowId = notificationVO.getDataflowId();
     Long datasetId = notificationVO.getDatasetId();
-    String dataflowName = dataflowService.getById(dataflowId).getName();
+    Long dataflowId = notificationVO.getDataflowId();
     String datasetName =
-        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
+        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
+    String dataflowName = dataflowService.getById(dataflowId).getName();
+
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
+    notification.put("datasetId", datasetId);
     notification.put("dataflowId", dataflowId);
-    notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
-
+    notification.put("fileName", notificationVO.getFileName());
     return notification;
   }
 }

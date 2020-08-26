@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class FMEJob.
+ */
 @Entity
 @Getter
 @Setter
@@ -19,6 +22,7 @@ import lombok.ToString;
 @Table(name = "FME_JOBS")
 public class FMEJob {
 
+  /** The id job. */
   @Id
   @Column(name = "IDJOB")
   private Long idJob;
@@ -27,9 +31,21 @@ public class FMEJob {
   @Column(name = "DATASET_ID")
   private Long datasetId;
 
+  /** The dataflow id. */
+  @Column(name = "DATAFLOW_ID")
+  private Long dataflowId;
+
+  /** The provider id. */
+  @Column(name = "PROVIDER_ID")
+  private Long providerId;
+
   /** The description. */
   @Column(name = "R3USER")
   private String user;
+
+  /** The file name. */
+  @Column(name = "FILE_NAME")
+  private String fileName;
 
   /** The status. */
   @Column(name = "OPERATION")
