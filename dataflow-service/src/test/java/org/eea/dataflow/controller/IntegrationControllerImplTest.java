@@ -317,4 +317,23 @@ public class IntegrationControllerImplTest {
     integrationControllerImpl.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
     Mockito.verify(integrationService, times(1)).deleteSchemaIntegrations(Mockito.anyString());
   }
+
+  @Test
+  public void executeExternalIntegrationTest() {
+    ExecutionResultVO response = integrationControllerImpl.executeExternalIntegration(1L, 1L);
+    Assert.assertNull(response);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void executeExternalIntegrationExceptionTest() throws EEAException {
+
+    Mockito.when(integrationService.executeExternalIntegration(Mockito.anyLong(), Mockito.anyLong(),
+        Mockito.any())).thenThrow(EEAException.class);
+    try {
+      integrationControllerImpl.executeExternalIntegration(1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
 }
