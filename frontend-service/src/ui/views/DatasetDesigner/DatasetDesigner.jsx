@@ -203,7 +203,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
   }, [designerState.exportDatasetData]);
-  
+
   useEffect(() => {
     getImportList();
   }, [designerState.externalOperationsList]);
@@ -253,16 +253,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label: type.text
     }));
 
-    const externalExtensions = !isEmpty(externalOperationsList.export) ? [
-      {
-        label: resources.messages['externalExtensions'],
-        items: externalOperationsList.export.map(type => ({
-          command: () => onExportDataExternalExtension(type.fileExtension),
-          icon: config.icons['archive'],
-          label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
-        }))
-      }
-    ] : [];
+    const externalExtensions = !isEmpty(externalOperationsList.export)
+      ? [
+          {
+            label: resources.messages['externalExtensions'],
+            items: externalOperationsList.export.map(type => ({
+              command: () => onExportDataExternalExtension(type.fileExtension),
+              icon: config.icons['archive'],
+              label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+            }))
+          }
+        ]
+      : [];
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
@@ -275,21 +277,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getImportList = () => {
     const { externalOperationsList } = designerState;
 
-    const importFromFile = !isEmpty(externalOperationsList.import) ? [{
-      label: resources.messages['importFromFile'],
-      icon: config.icons['import'],
-      command: () => manageDialogs('isImportDatasetDialogVisible', true)
-    }] : [];
+    const importFromFile = !isEmpty(externalOperationsList.import)
+      ? [
+          {
+            label: resources.messages['importFromFile'],
+            icon: config.icons['import'],
+            command: () => manageDialogs('isImportDatasetDialogVisible', true)
+          }
+        ]
+      : [];
 
-    const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems) ? [
-    {
-      label: resources.messages['importPreviousData'],
-      items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
-        label: importOtherSystem.name,
-        icon: config.icons['import'],
-        command: () => manageDialogs('isImportOtherSystemsDialogVisible', true)
-      }))
-    }] : [];
+    const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
+      ? [
+          {
+            label: resources.messages['importPreviousData'],
+            items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
+              label: importOtherSystem.name,
+              icon: config.icons['import'],
+              command: () => manageDialogs('isImportOtherSystemsDialogVisible', true)
+            }))
+          }
+        ]
+      : [];
 
     designerDispatch({
       type: 'GET_IMPORT_LIST',
@@ -302,12 +311,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getFileExtensions = async () => {
     try {
       const response = await IntegrationService.allExtensionsOperations(designerState.datasetSchemaId);
+      console.log('getFileExtensions', response);
       const externalOperations = ExtensionUtils.groupOperations('operation', response);
       designerDispatch({
         type: 'LOAD_EXTERNAL_OPERATIONS',
-        payload: { export: externalOperations.export, import: externalOperations.import, importOtherSystems: externalOperations.importOtherSystems }
+        payload: {
+          export: externalOperations.export,
+          import: externalOperations.import,
+          importOtherSystems: externalOperations.importOtherSystems
+        }
       });
     } catch (error) {
+      console.log('error,', error);
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
   };
@@ -587,7 +602,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
       }
     });
-  }; 
+  };
 
   const onImportOtherSystems = async () => {
     manageDialogs('isImportOtherSystemsDialogVisible', false);
@@ -787,24 +802,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           />
           <Toolbar>
             <div className="p-toolbar-group-left">
-              {(!isEmpty(designerState.externalOperationsList.import) || !isEmpty(designerState.externalOperationsList.importOtherSystems)) && (
+              {(!isEmpty(designerState.externalOperationsList.import) ||
+                !isEmpty(designerState.externalOperationsList.importOtherSystems)) && (
                 <Fragment>
                   <Button
                     className={`p-button-rounded p-button-secondary p-button-animated-blink`}
                     icon={'import'}
                     label={resources.messages['importDataset']}
-                    onClick={!isEmpty(designerState.externalOperationsList.importOtherSystems) ? event => importMenuRef.current.show(event) : () => manageDialogs('isImportDatasetDialogVisible', true)}
+                    onClick={
+                      !isEmpty(designerState.externalOperationsList.importOtherSystems)
+                        ? event => importMenuRef.current.show(event)
+                        : () => manageDialogs('isImportDatasetDialogVisible', true)
+                    }
                   />
-                  {!isEmpty(designerState.externalOperationsList.importOtherSystems) &&
-                  <Menu
-                    model={designerState.importButtonsList}
-                    popup={true}
-                    ref={importMenuRef}
-                    id="importDataSetMenu"
-                    onShow={e => {
-                      getPosition(e);
-                    }}
-                  />}
+                  {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
+                    <Menu
+                      model={designerState.importButtonsList}
+                      popup={true}
+                      ref={importMenuRef}
+                      id="importDataSetMenu"
+                      onShow={e => {
+                        getPosition(e);
+                      }}
+                    />
+                  )}
                 </Fragment>
               )}
               <Button
@@ -1026,8 +1047,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
           </Dialog>
         )}
-        
-        {designerState.isImportOtherSystemsDialogVisible && (        
+
+        {designerState.isImportOtherSystemsDialogVisible && (
           <ConfirmDialog
             header={resources.messages['importPreviousDataHeader']}
             labelCancel={resources.messages['no']}

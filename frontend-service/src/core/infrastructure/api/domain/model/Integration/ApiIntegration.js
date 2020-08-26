@@ -17,7 +17,7 @@ export const apiIntegration = {
       url: getUrl(IntegrationConfig.allExtensionsOperations),
       data: integration
     });
-
+    console.log('All Extensions Operations', response.data);
     return response.data;
   },
 
@@ -26,6 +26,7 @@ export const apiIntegration = {
       url: getUrl(IntegrationConfig.create),
       data: integration
     });
+
     return response;
   },
 
@@ -33,11 +34,15 @@ export const apiIntegration = {
     const response = await HTTPRequester.delete({
       url: getUrl(IntegrationConfig.delete, { dataflowId, integrationId })
     });
+
     return response;
   },
 
   findEUDatasetIntegration: async datasetSchemaId => {
-    const response = await HTTPRequester.get({ url: getUrl(IntegrationConfig.euDatasetIntegration, { datasetSchemaId }) });
+    const response = await HTTPRequester.get({
+      url: getUrl(IntegrationConfig.euDatasetIntegration, { datasetSchemaId })
+    });
+
     return response.data;
   },
 
@@ -57,11 +62,20 @@ export const apiIntegration = {
     return response.data;
   },
 
+  runIntegration: async (integrationId, datasetId) => {
+    const response = await HTTPRequester.post({
+      url: getUrl(IntegrationConfig.runIntegration, { integrationId, datasetId })
+    });
+
+    return response.data;
+  },
+
   update: async integration => {
     const response = await HTTPRequester.update({
       url: getUrl(IntegrationConfig.update),
       data: integration
     });
+
     return response;
   }
 };

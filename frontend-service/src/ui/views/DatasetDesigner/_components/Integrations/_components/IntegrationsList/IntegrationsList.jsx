@@ -26,7 +26,7 @@ export const IntegrationsList = ({
   manageDialogs,
   needsRefresh,
   onUpdateDesignData,
-  refreshList,
+  refreshList
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -88,6 +88,7 @@ export const IntegrationsList = ({
     try {
       isLoading(true);
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
+      console.log('response', response);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
       integrationsList(response);
       refreshList(false);
@@ -123,16 +124,17 @@ export const IntegrationsList = ({
 
   if (integrationListState.isLoading) {
     return (
-    <div className={styles.integrationsWithoutTable}>
-      <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
-    </div>);
+      <div className={styles.integrationsWithoutTable}>
+        <div className={styles.spinner}>
+          <Spinner style={{ top: 0, left: 0 }} />
+        </div>
+      </div>
+    );
   }
 
   return isEmpty(integrationListState.data) ? (
     <div className={styles.integrationsWithoutTable}>
-      <div className={styles.noIntegrations}>
-        {resources.messages['noIntegrations']}
-      </div>
+      <div className={styles.noIntegrations}>{resources.messages['noIntegrations']}</div>
     </div>
   ) : (
     <div className={styles.integrations}>
