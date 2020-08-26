@@ -376,7 +376,6 @@ export const BigButtonList = ({
       {newDatasetDialog && (
         <Dialog
           className={styles.dialog}
-          dismissableMask={false}
           header={resources.messages['newDatasetSchema']}
           onHide={() => setNewDatasetDialog(false)}
           visible={newDatasetDialog}>

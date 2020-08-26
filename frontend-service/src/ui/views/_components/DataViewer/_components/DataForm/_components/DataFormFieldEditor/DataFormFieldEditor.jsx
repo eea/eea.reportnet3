@@ -414,7 +414,6 @@ const DataFormFieldEditor = ({
       {/* {isAttachFileVisible && (
         <Dialog
           // className={styles.Dialog}
-          dismissableMask={false}
           footer={renderCustomFileAttachFooter}
           header={`${resources.messages['uploadAttachment']}`}
           onHide={() => setIsAttachFileVisible(false)}
@@ -454,7 +453,6 @@ const DataFormFieldEditor = ({
         <Dialog
           className={'map-data'}
           blockScroll={false}
-          dismissableMask={false}
           header={resources.messages['geospatialData']}
           modal={true}
           onHide={() => setIsMapOpen(false)}

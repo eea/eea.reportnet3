@@ -8,25 +8,15 @@ import { Dialog as PrimeDialog } from 'primereact/dialog';
 import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
 export const Dialog = ({
-  appendTo,
-  baseZIndex,
   blockScroll = true,
   children,
   className,
-  closable,
   closeOnEscape = false,
   contentStyle,
-  dismissableMask,
   focusOnShow = true,
   footer,
   header,
-  id,
-  maximizable = false,
-  modal,
   onHide,
-  onShow,
-  rtl,
-  showHeader,
   style,
   visible,
   zIndex = 5000
@@ -83,11 +73,10 @@ export const Dialog = ({
         className={className}
         closeOnEscape={closeOnEscape}
         contentStyle={contentStyle}
-        dismissableMask={dismissableMask}
         focusOnShow={focusOnShow}
         footer={footer}
         header={header}
-        maximizable={maximizable}
+        maximizable={false}
         onHide={onHide}
         style={style ? { ...style, ...dialogStyle } : { ...dialogStyle, width: '50vw' }}
         visible={visible}>
