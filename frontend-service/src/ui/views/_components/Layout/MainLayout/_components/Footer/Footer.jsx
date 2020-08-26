@@ -20,10 +20,6 @@ export const Footer = withRouter(({ history, leftMargin }) => {
   return (
     <Fragment>
       <div className={styles.Footer}>
-        <div
-          className={styles.blueBox}
-          style={leftSideBarContext.isLeftSideBarOpened ? { width: '200px' } : { width: '50px' }}></div>
-
         <div className={styles.footerContent}>
           <div className={styles.reportnetLogo}>
             <a href="https://www.eea.europa.eu/" className={styles.title} title={resources.messages['eea']}>
