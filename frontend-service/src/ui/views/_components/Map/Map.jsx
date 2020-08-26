@@ -14,6 +14,7 @@ import { InputSwitch } from 'ui/views/_components/InputSwitch';
 
 import 'proj4leaflet';
 import L from 'leaflet';
+import proj4 from 'proj4';
 import { CRS } from 'leaflet';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
@@ -35,10 +36,38 @@ let DefaultIcon = L.icon({
   iconAnchor: [12, 36]
 });
 
-const crsProj = new L.Proj.CRS('EPSG:4258', '+proj=longlat +datum=WGS84 +no_defs', {
-  origin: [-180, 90],
+// 3035 --> ETRS89 / ETRS-LAEA
+// 4258 --> ETRS89
+// 4326 --> WGS84
+
+const crsProj4258 = new L.Proj.CRS('EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs', {
+  origin: [0, 0],
   resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125]
 });
+
+const crsProj3035 = new L.Proj.CRS(
+  'EPSG:3035',
+  '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs',
+  {
+    origin: [0, 0],
+    resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125]
+  }
+);
+
+const crsProj4326 = new L.Proj.CRS('EPSG:4326', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs', {
+  origin: [0, 0],
+  resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125]
+});
+
+var crs25830 = new L.Proj.CRS(
+  'EPSG:25830',
+  '+proj=utm +zone=30 +ellps=GRS80 +units=m +no_defs', //http://spatialreference.org/ref/epsg/25830/proj4/
+  {
+    resolutions: [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5]
+    //Origen de servicio tileado
+    //		origin:[0,0]
+  }
+);
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
@@ -90,7 +119,6 @@ export const Map = ({
     { label: 'Shaded Relief', value: 'ShadedRelief' }
   ];
 
-  console.log(userContext.userProps);
   const [currentTheme, setCurrentTheme] = useState(
     themes.filter(theme => theme.value === userContext.userProps.basemapLayer)[0] || themes[0]
   );
@@ -105,8 +133,8 @@ export const Map = ({
   const mapRef = useRef();
 
   useEffect(() => {
-    console.log(mapRef.current);
     const map = mapRef.current.leafletElement;
+    console.log('map crs: ' + map.options.crs.code);
     esri.basemapLayer(currentTheme.value).addTo(map);
     // mapRef.current.leafletElement.setView(options.center, 2);
     // esri
@@ -282,10 +310,10 @@ export const Map = ({
         value={currentCRS}
         style={{ width: '20%' }}
       />
-      {console.log(CRS[currentCRS.value], currentCRS.value, CRS.EPSG4326)}
+      {/* {console.log(CRS[currentCRS.value], currentCRS.value, CRS.EPSG4326)} */}
       <MapComponent
         // crs={CRS[currentCRS.value]}
-        crs={crsProj}
+        // crs={CRS.}
         continuousWorld={true}
         worldCopyJump={false}
         style={{ height: '60vh' }}
@@ -297,7 +325,16 @@ export const Map = ({
         ref={mapRef}
         onClick={e => {
           console.log([e.latlng.lat, e.latlng.lng]);
-          console.log(crsProj.projection.unproject([e.latlng.lat, e.latlng.lng]));
+          // var proj = crsProj4258.projection.project(e.latlng);
+
+          var firstProjection = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs';
+          //3035
+          var secondProjection =
+            '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ';
+          //I'm not going to redefine those two in latter examples.
+          console.log(proj4(firstProjection, secondProjection, [e.latlng.lat, e.latlng.lng]));
+
+          // console.log(proj);
           if (!isNewPositionMarkerVisible) {
             setIsNewPositionMarkerVisible(true);
           }
