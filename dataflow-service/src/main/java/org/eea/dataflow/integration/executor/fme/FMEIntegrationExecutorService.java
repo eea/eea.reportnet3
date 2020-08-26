@@ -192,10 +192,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     List<Directive> directives = new ArrayList<>();
     Directive dataflowDirective = new Directive();
-    dataflowDirective.setName(IntegrationParams.DATAFLOW_ID);
-    dataflowDirective
-        .setValue(integrationOperationParams.get(IntegrationParams.DATAFLOW_ID).toString());
-    directives.add(dataflowDirective);
     Directive apiKeyDirective = new Directive();
     apiKeyDirective.setName(IntegrationParams.APIKEY_PROPERTY);
     apiKeyDirective.setValue(apiKey);
@@ -205,12 +201,9 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     fmeAsyncJob.setNmDirectives(nmDirectives);
 
-    // dataflowId
     parameters.add(saveParameter(IntegrationParams.DATAFLOW_ID,
         integrationOperationParams.get(IntegrationParams.DATAFLOW_ID)));
-    // datasetDataId
     parameters.add(saveParameter(IntegrationParams.DATASET_ID, integrationOperationParams.get(1L)));
-    // apikey
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
 
