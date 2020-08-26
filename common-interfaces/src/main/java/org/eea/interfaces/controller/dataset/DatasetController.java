@@ -70,7 +70,8 @@ public interface DatasetController {
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema);
+      @PathVariable("idTableSchema") String idTableSchema,
+      @RequestParam("replace") Boolean replace);
 
   /**
    * Load dataset data.

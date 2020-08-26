@@ -179,7 +179,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
   public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file,
-      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema) {
+      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema,
+      @RequestParam("remove") Boolean remove) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -492,6 +493,22 @@ public class DataSetControllerImpl implements DatasetController {
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId) {
     // Set the user name on the thread
+    comprobaciónBorrado(datasetId, tableSchemaId);
+
+    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
+    try {
+      // This method will release the lock
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: {}",
+          datasetId, e.getMessage());
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  private void comprobaciónBorrado(Long datasetId, String tableSchemaId) {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -515,18 +532,6 @@ public class DataSetControllerImpl implements DatasetController {
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, tableSchemaId));
-    }
-
-    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
-    try {
-      // This method will release the lock
-      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: {}",
-          datasetId, e.getMessage());
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
