@@ -1,5 +1,10 @@
 package org.eea.ums.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,11 +46,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -290,7 +290,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the string
    */
   @HystrixCommand
-  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/test-security")
   @ApiOperation(value = "Test Secured Service", response = String.class)
   public String testSecuredService(
@@ -682,6 +682,13 @@ public class UserManagementControllerImpl implements UserManagementController {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
   }
 
+  @Override
+  @HystrixCommand
+  @PostMapping("/authenticateByEmail")
+  @ApiOperation(value = "Authenticate an User by its email.", response = TokenVO.class)
+  public TokenVO authenticateUserByEmail(@RequestParam("email") String email) {
+    return securityProviderInterfaceService.authenticateEmail(email);
+  }
 
   /**
    * Gets the users by group.
@@ -708,24 +715,6 @@ public class UserManagementControllerImpl implements UserManagementController {
         : null;
   }
 
-  /**
-   * Retrieve api key.
-   *
-   * @param userId the user id
-   * @param dataflowId the dataflow id
-   * @param dataProvider the data provider
-   *
-   * @return the string
-   */
-  private String retrieveApiKey(String userId, Long dataflowId, Long dataProvider) {
-    try {
-      return securityProviderInterfaceService.getApiKey(userId, dataflowId, dataProvider);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
-    }
-  }
 
   /**
    * Gets the resources by user email.
@@ -749,5 +738,24 @@ public class UserManagementControllerImpl implements UserManagementController {
       userId = users[0].getId();
     }
     return securityProviderInterfaceService.getResourcesByUser(userId);
+  }
+
+  /**
+   * Retrieve api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the string
+   */
+  private String retrieveApiKey(String userId, Long dataflowId, Long dataProvider) {
+    try {
+      return securityProviderInterfaceService.getApiKey(userId, dataflowId, dataProvider);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+    }
   }
 }
