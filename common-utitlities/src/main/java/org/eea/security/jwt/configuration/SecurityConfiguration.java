@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eea.security.jwt.utils.ApiKeyAuthenticationFilter;
+import org.eea.security.jwt.utils.ExternalJwtAuthenticationFilter;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
 import org.slf4j.Logger;
@@ -44,10 +45,14 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
   @Autowired
   private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  /** The api key authentication filter. */
+  /**
+   * The api key authentication filter.
+   */
   @Autowired
   private ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
+  @Autowired
+  private ExternalJwtAuthenticationFilter externalJwtAuthenticationFilter;
   /**
    * The Constant LOG_ERROR.
    */
@@ -100,6 +105,8 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
     // Add our custom JWT security filter
     http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     http.addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(externalJwtAuthenticationFilter,
+        UsernamePasswordAuthenticationFilter.class);
 
 
   }
