@@ -415,6 +415,9 @@ public class FMECommunicationService {
       case EXPORT_EU_DATASET:
         eventType = exportEUDatasetNotification(isStatusCompleted);
         break;
+      case IMPORT_FROM_OTHER_SYSTEM:
+        eventType = EventType.EXTERNAL_IMPORT_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+        break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
     }

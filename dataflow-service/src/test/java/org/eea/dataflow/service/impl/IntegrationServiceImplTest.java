@@ -1,6 +1,6 @@
 package org.eea.dataflow.service.impl;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,7 +150,7 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setName("name");
     integrationVOList.add(integrationVO);
-    assertNull(
+    assertNotNull(
         integrationService.getOnlyExtensionsAndOperations(integrationVOList).get(0).getName());
   }
 
@@ -303,5 +303,20 @@ public class IntegrationServiceImplTest {
     integrationService.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
     Mockito.verify(integrationRepository, times(1)).deleteByParameterAndValue(Mockito.anyString(),
         Mockito.anyString());
+  }
+
+  @Test
+  public void executeExternalIntegrationTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
+        .thenReturn(new ExecutionResultVO());
+    ExecutionResultVO result = integrationService.executeExternalIntegration(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    Assert.assertNotNull(result);
   }
 }

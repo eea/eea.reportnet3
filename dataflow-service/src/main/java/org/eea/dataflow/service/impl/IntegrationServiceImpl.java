@@ -71,6 +71,7 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Autowired
   private IntegrationMapper integrationMapper;
 
+
   /**
    * Creates the integration.
    *
@@ -156,6 +157,8 @@ public class IntegrationServiceImpl implements IntegrationService {
           integration.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID));
       integrationVOAux.setOperation(integration.getOperation());
       integrationVOAux.setInternalParameters(internalParameters);
+      integrationVOAux.setName(integration.getName());
+      integrationVOAux.setId(integration.getId());
       newIntegrationVOList.add(integrationVOAux);
     });
     return newIntegrationVOList;
@@ -363,5 +366,30 @@ public class IntegrationServiceImpl implements IntegrationService {
   public void deleteSchemaIntegrations(String datasetSchemaId) {
     integrationRepository.deleteByParameterAndValue(IntegrationParams.DATASET_SCHEMA_ID,
         datasetSchemaId);
+  }
+
+
+  /**
+   * Execute external integration.
+   *
+   * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
+   * @return the execution result VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
+      IntegrationOperationTypeEnum operation) throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(integrationId);
+    List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
+    ExecutionResultVO result = new ExecutionResultVO();
+    if (integrations != null && !integrations.isEmpty()) {
+      result = integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME)
+          .execute(operation, null, datasetId, integrations.get(0));
+    }
+    return result;
   }
 }

@@ -99,6 +99,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userId the user id
    * @param groupId the group id
+   *
    * @throws EEAException the EEA exception
    */
   void removeUserFromUserGroup(String userId, String groupId) throws EEAException;
@@ -203,6 +204,15 @@ public interface SecurityProviderInterfaceService {
   TokenVO authenticateApiKey(String apiKey);
 
   /**
+   * Authenticate an user by its email.
+   *
+   * @param email the email
+   *
+   * @return the token vo
+   */
+  TokenVO authenticateEmail(String email);
+
+  /**
    * Create api key string.
    *
    * @param userId the user id
@@ -221,7 +231,9 @@ public interface SecurityProviderInterfaceService {
    * @param userId the user id
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
+   *
    * @return the api key
+   *
    * @throws EEAException the EEA exception
    */
   String getApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException;
@@ -230,6 +242,7 @@ public interface SecurityProviderInterfaceService {
    * Gets the user without keys.
    *
    * @param userId the user id
+   *
    * @return the user without keys
    */
   UserRepresentation getUserWithoutKeys(String userId);
@@ -240,6 +253,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @param user the user
    * @param attributes the attributes
+   *
    * @return the user representation
    */
   UserRepresentation setAttributesWithApiKey(UserRepresentation user,
@@ -251,6 +265,7 @@ public interface SecurityProviderInterfaceService {
    * @param contributor the contributor
    * @param userMail the user mail
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   void removeContributorFromUserGroup(Optional<UserRepresentation> contributor, String userMail,
@@ -260,6 +275,7 @@ public interface SecurityProviderInterfaceService {
    * Removes the contributors from user group.
    *
    * @param resources the resources
+   *
    * @throws EEAException the EEA exception
    */
   void removeContributorsFromUserGroup(List<ResourceAssignationVO> resources) throws EEAException;

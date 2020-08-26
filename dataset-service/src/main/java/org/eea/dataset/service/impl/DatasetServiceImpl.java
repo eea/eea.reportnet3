@@ -1135,6 +1135,7 @@ public class DatasetServiceImpl implements DatasetService {
         ETLRecordVO etlRecordVO = new ETLRecordVO();
         List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
         etlRecordVO.setFields(etlFieldVOs);
+        etlRecordVO.setCountryCode(record.getDataProviderCode());
         etlRecordVOs.add(etlRecordVO);
 
         // Loop to fill ETLFieldVOs
