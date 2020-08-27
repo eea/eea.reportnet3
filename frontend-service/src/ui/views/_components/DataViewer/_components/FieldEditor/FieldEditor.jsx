@@ -22,17 +22,33 @@ const FieldEditor = ({
   colsSchema,
   datasetId,
   hasWritePermissions,
+  onChangePointCRS,
   onEditorKeyChange,
   onEditorSubmitValue,
   onEditorValueChange,
   onEditorValueFocus,
   onMapOpen,
   record,
-  reporting
+  reporting,
+  selectedCRS
 }) => {
+  const crs = [
+    { label: 'WGS84', value: 'EPSG:4326' },
+    { label: 'ETRS89', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
+  ];
+
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
+  const [currentCRS, setCurrentCRS] = useState(
+    !isNil(selectedCRS)
+      ? crs.filter(crsItem => {
+          console.log({ crsItem });
+          return crsItem.value === selectedCRS;
+        })[0]
+      : selectedCRS
+  );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
@@ -137,6 +153,11 @@ const FieldEditor = ({
     }
   };
 
+  const parsePoint = (coordinates, crs, withCRS = true) =>
+    withCRS
+      ? `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}, ${crs}`
+      : `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}`;
+
   const renderField = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
@@ -223,7 +244,25 @@ const FieldEditor = ({
               }}
               onKeyDown={e => onEditorKeyChange(cells, e, record)}
               type="text"
-              value={RecordUtils.getCellValue(cells, cells.field)}
+              value={parsePoint(RecordUtils.getCellValue(cells, cells.field), currentCRS, false)}
+            />
+            <Dropdown
+              ariaLabel={'crs'}
+              appendTo={document.body}
+              // className={styles.crsSwitcherSplitButton}
+              options={crs}
+              optionLabel="label"
+              onChange={e => {
+                onEditorValueChange(
+                  cells,
+                  parsePoint(RecordUtils.getCellValue(cells, cells.field), e.target.value.value)
+                );
+                setCurrentCRS(e.target.value);
+                onChangePointCRS(e.target.value.value);
+              }}
+              placeholder="Select a CRS"
+              value={currentCRS}
+              style={{ width: '20%' }}
             />
             <Button
               className={`p-button-secondary-transparent button`}

@@ -84,7 +84,18 @@ export const recordReducer = (state, { type, payload }) => {
     case 'OPEN_MAP':
       return { ...state, isMapOpen: true, mapCoordinates: payload.coordinates, selectedMapCells: payload.mapCells };
     case 'SET_MAP_COORDINATES':
-      return { ...state, mapCoordinates: payload.coordinates };
+      // console.log({ payload });
+      return {
+        ...state,
+        mapCoordinates: `${payload.coordinates[0]}, ${payload.coordinates[1]}`,
+        crs: payload.crs
+      };
+    case 'SET_MAP_CRS':
+      console.log({ payload });
+      return {
+        ...state,
+        crs: payload
+      };
     case 'TOGGLE_MAP_VISIBILITY':
       return { ...state, isMapOpen: payload };
     default:

@@ -40,8 +40,9 @@ const DataFormFieldEditor = ({
   const inputRef = useRef(null);
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
+  const [crs, setCRS] = useState('EPSG:4326');
   // const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
-  const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
+  // const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState();
 
@@ -85,7 +86,11 @@ const DataFormFieldEditor = ({
     // onEditorSubmitValue(cells, coordinates.join(', '));
   };
 
-  const onSelectPoint = coordinates => setMapCoordinates(coordinates);
+  const onSelectPoint = (coordinates, crs) => {
+    console.log({ coordinates, crs });
+    setMapCoordinates(coordinates);
+    setCRS(crs);
+  };
 
   const formatDate = (date, isInvalidDate) => {
     if (isInvalidDate) return '';
@@ -237,10 +242,10 @@ const DataFormFieldEditor = ({
     }
   };
 
-  const onConfirmDeleteAttachment = () => {
-    onChangeForm(field, []);
-    setIsDeleteAttachmentVisible(false);
-  };
+  // const onConfirmDeleteAttachment = () => {
+  //   onChangeForm(field, []);
+  //   setIsDeleteAttachmentVisible(false);
+  // };
 
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
@@ -380,7 +385,9 @@ const DataFormFieldEditor = ({
     }
   };
 
-  const renderMap = () => <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>;
+  const renderMap = () => (
+    <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true} selectedCRS={crs}></Map>
+  );
 
   const renderMapType = (field, fieldValue) => (
     <div style={{ display: 'flex', alignItems: 'center' }}>

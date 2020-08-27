@@ -113,6 +113,7 @@ const DataViewer = withRouter(
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
+      crs: 'EPSG:4326',
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
@@ -165,6 +166,7 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
+          onChangePointCRS={onChangePointCRS}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -173,6 +175,7 @@ const DataViewer = withRouter(
           onMapOpen={onMapOpen}
           record={record}
           reporting={reporting}
+          selectedCRS={records.crs}
         />
       );
     };
@@ -197,6 +200,8 @@ const DataViewer = withRouter(
       );
       return getIconsValidationsErrors(validationsGroup);
     };
+
+    const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
     const onFileDownload = async (fileName, fieldId) => {
       const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
@@ -752,11 +757,15 @@ const DataViewer = withRouter(
 
     const onSavePoint = coordinates => {
       dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
-      onEditorValueChange(records.selectedMapCells, coordinates);
-      onEditorSubmitValue(records.selectedMapCells, coordinates.join(', '), records.selectedRecord);
+      console.log({ coordinates, crs: records.crs });
+      onEditorValueChange(records.selectedMapCells, `${coordinates}, ${records.crs}`);
+      onEditorSubmitValue(records.selectedMapCells, `${coordinates}, ${records.crs}`, records.selectedRecord);
     };
 
-    const onSelectPoint = coordinates => dispatchRecords({ type: 'SET_MAP_COORDINATES', payload: { coordinates } });
+    const onSelectPoint = (coordinates, crs) => {
+      console.log({ coordinates, crs });
+      dispatchRecords({ type: 'SET_MAP_COORDINATES', payload: { coordinates, crs } });
+    };
 
     const onSetVisible = (fnUseState, visible) => {
       fnUseState(visible);
@@ -912,9 +921,23 @@ const DataViewer = withRouter(
       return <div className={styles.iconTooltipWrapper}>{icons}</div>;
     };
 
-    const mapRender = () => (
-      <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>
-    );
+    const mapRender = () => {
+      console.log(
+        records.mapCoordinates
+        // !Array.isArray(records.mapCoordinates)
+        //   ? records.mapCoordinates.split('*')[0].split(',')
+        //   : Array.isArray(records.mapCoordinates[0])
+        //   ? records.mapCoordinates[0]
+        //   : records.mapCoordinates
+      );
+      return (
+        <Map
+          coordinates={records.mapCoordinates}
+          onSelectPoint={onSelectPoint}
+          selectButton={true}
+          selectedCRS={records.crs}></Map>
+      );
+    };
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
@@ -1083,7 +1106,7 @@ const DataViewer = withRouter(
             value={fetchedData}>
             {columns}
           </DataTable>
-          <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>
+          {/* <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map> */}
         </div>
 
         {isColumnInfoVisible && (

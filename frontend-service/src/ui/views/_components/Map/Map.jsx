@@ -40,6 +40,12 @@ let DefaultIcon = L.icon({
 // 4258 --> ETRS89
 // 4326 --> WGS84
 
+proj4.defs([
+  ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
+  ['EPSG:3035', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'],
+  ['EPSG:4326', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs']
+]);
+
 const crsProj4258 = new L.Proj.CRS('EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs', {
   origin: [0, 0],
   resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125]
@@ -82,28 +88,24 @@ let NewMarkerIcon = L.icon({
 
 export const Map = ({
   centerToCoordinates = false,
-  coordinates,
+  coordinates = '',
   onSelectPoint,
   options = {
     zoom: [15],
     bearing: [0],
     pitch: [0],
-    center:
-      coordinates !== ''
-        ? !Array.isArray(coordinates)
-          ? coordinates.split(',')
-          : coordinates
-        : [55.6811608, 12.5844761]
+    center: coordinates !== '' ? coordinates : `55.6811608, 12.5844761, EPSG:4326`
   },
-  selectButton = false
+  selectedCRS = { label: 'WGS84', value: 'EPSG:4326' }
 }) => {
+  console.log({ coordinates }, options.center);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const crs = [
-    { label: 'WGS84', value: 'EPSG3857' },
-    { label: 'ETRS89', value: 'EPSG4258' },
-    { label: 'LAEA-ETRS89', value: 'EPSG3035' }
+    { label: 'WGS84', value: 'EPSG:4326' },
+    { label: 'ETRS89', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
   ];
 
   const themes = [
@@ -122,10 +124,13 @@ export const Map = ({
   const [currentTheme, setCurrentTheme] = useState(
     themes.filter(theme => theme.value === userContext.userProps.basemapLayer)[0] || themes[0]
   );
-  const [currentCRS, setCurrentCRS] = useState(crs[1]);
+
+  const [currentCRS, setCurrentCRS] = useState(
+    !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
+  );
   const [is3dSwitched, setIs3dSwitched] = useState(false);
   const [marker, setMarker] = useState(options.center);
-  const [newPositionMarker, setNewPositionMarker] = useState([0, 0]);
+  const [newPositionMarker, setNewPositionMarker] = useState(`0, 0`);
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   // const [popUpCoordinates, setPopUpCoordinates] = useState(options.center);
   const [popUpVisible, setPopUpVisible] = useState(false);
@@ -243,21 +248,16 @@ export const Map = ({
     setCurrentTheme(selectedTheme);
   };
 
-  const parseCoordinates = coord => {
-    const parsedCoords = coord
-      .replace(/\[/g, '')
-      .replace(/\]/g, '')
-      .split(',')
-      .map(c => Number(c))
-      .reduce((result, value, i, array) => {
-        if (i % 2 === 0) result.push(array.slice(i, i + 2));
-        return result;
-      }, []);
-    if (parsedCoords.length > 1) {
-      return parsedCoords;
-    } else {
-      return parsedCoords[0];
-    }
+  const parseCoordinates = coordinates => {
+    console.log({ coordinates });
+    return [parseFloat(coordinates.split(', ')[0]), parseFloat(coordinates.split(', ')[1])];
+  };
+
+  const projectCoordinates = coordinates => {
+    console.log({ currentCRS });
+    // console.log(coordinates, currentCRS, currentCRS.value, parseCoordinates(coordinates));
+    console.log(proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates)));
+    return proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates));
   };
 
   // const parseCoordinatesSRID = coord => {
@@ -314,51 +314,53 @@ export const Map = ({
       <MapComponent
         // crs={CRS[currentCRS.value]}
         // crs={CRS.}
-        continuousWorld={true}
-        worldCopyJump={false}
+        // continuousWorld={true}
+        // worldCopyJump={false}
         style={{ height: '60vh' }}
         doubleClickZoom={false}
         // fitBounds={[[40.712, -74.227]]}
-        center={options.center}
+        center={projectCoordinates(options.center)}
         // setView={([42.528, -12.68], 2)}
         zoom="10"
         ref={mapRef}
         onClick={e => {
-          console.log([e.latlng.lat, e.latlng.lng]);
+          // console.log(
+          //   [e.latlng.lat, e.latlng.lng],
+          //   proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng])
+          // );
           // var proj = crsProj4258.projection.project(e.latlng);
-
-          var firstProjection = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs';
-          //3035
-          var secondProjection =
-            '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ';
-          //I'm not going to redefine those two in latter examples.
-          console.log(proj4(firstProjection, secondProjection, [e.latlng.lat, e.latlng.lng]));
-
+          // console.log(proj4(proj4('EPSG:4326'), proj4('EPSG:3035'), [e.latlng.lat, e.latlng.lng]));
+          // console.log(proj4(proj4('EPSG:4326'), proj4('EPSG:4258'), [e.latlng.lat, e.latlng.lng]));
+          // console.log(proj4(proj4('EPSG:3035'), proj4('EPSG:4326'), [9323919.149606757, 307743.5211649621]));
           // console.log(proj);
           if (!isNewPositionMarkerVisible) {
             setIsNewPositionMarkerVisible(true);
           }
-          setNewPositionMarker([e.latlng.lat, e.latlng.lng]);
-          onSelectPoint([e.latlng.lat, e.latlng.lng]);
+          setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}`);
+          onSelectPoint(
+            // [e.latlng.lat, e.latlng.lng],
+            proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
+            currentCRS.value
+          );
         }}>
         {isNewPositionMarkerVisible && (
           <Marker
             draggable={true}
             icon={NewMarkerIcon}
-            position={newPositionMarker}
+            position={projectCoordinates(newPositionMarker)}
             onClick={e => {
               // setPopUpCoordinates(newPositionMarker);
               if (!popUpVisible) {
                 setPopUpVisible(true);
               }
             }}
-            onDrag={e => setNewPositionMarker([e.latlng.lat, e.latlng.lng])}>
+            onDrag={e => setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}`)}>
             <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
           </Marker>
         )}
         <Marker
           className={`${styles.marker} ${styles.bounce}`}
-          position={marker}
+          position={projectCoordinates(marker)}
           onClick={e => {
             // setPopUpCoordinates(marker);
             if (!popUpVisible) {
