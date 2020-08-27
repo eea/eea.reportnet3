@@ -12,6 +12,7 @@ import { config } from 'conf';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
+import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -144,6 +145,22 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
+      setIsLoading(true);
+      const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
+        config.permissions.DATA_CUSTODIAN,
+        config.permissions.EDITOR_READ,
+        config.permissions.EDITOR_WRITE
+      ]);
+
+      if (accessPermission !== true && designerState.metaData?.dataflow?.status !== 'DESIGN') {
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+      setIsLoading(true);
+    }
+  }, [userContext.contextRoles, designerState.metaData]);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
       designerDispatch({
         type: 'LOAD_PERMISSIONS',
         payload: {
@@ -173,11 +190,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       }
     }
   }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
-
-  useEffect(() => {
-    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
-      manageDialogs('validationListDialogVisible', true);
-  }, [validationContext]);
 
   useEffect(() => {
     if (designerState.validationListDialogVisible) {
