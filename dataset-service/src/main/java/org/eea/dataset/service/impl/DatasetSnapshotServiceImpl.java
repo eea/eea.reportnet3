@@ -456,7 +456,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         if (!representatives.isEmpty()) {
           RepresentativeVO representative = representatives.get(0);
           // We only update the representative if the receipt is not outdated
-          if (false == representative.getReceiptOutdated()) {
+          if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
             representative.setReceiptOutdated(true);
             representativeControllerZuul.updateRepresentative(representative);
             LOG.info("Receipt from the representative {} marked as outdated",
