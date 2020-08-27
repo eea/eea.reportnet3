@@ -9,13 +9,11 @@ import eeaLogo from 'assets/images/pdflogo-web.png';
 import logo from 'assets/images/logo.png';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Footer = withRouter(({ history, leftMargin }) => {
   const resources = useContext(ResourcesContext);
-  const leftSideBarContext = useContext(LeftSideBarContext);
 
   return (
     <Fragment>
