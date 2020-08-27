@@ -19,7 +19,8 @@ const create = async integration => apiIntegration.create(parseManageIntegration
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
-const findEUDatasetIntegration = async datasetSchemaId => parseIntegration(await apiIntegration.findEUDatasetIntegration(datasetSchemaId));
+const findEUDatasetIntegration = async datasetSchemaId =>
+  parseIntegration(await apiIntegration.findEUDatasetIntegration(datasetSchemaId));
 
 const getProcesses = async (repositoryName, datasetId) =>
   parseProcessList(await apiIntegration.getProcesses(repositoryName, datasetId));
@@ -96,6 +97,8 @@ const parseManageIntegration = integration => ({
 const parseIntegrationOperationExtension = integration => ({
   datasetSchemaId: integration.internalParameters.datasetSchemaId,
   fileExtension: integration.internalParameters.fileExtension,
+  id: integration.id,
+  name: integration.name,
   operation: integration.operation
 });
 
@@ -113,6 +116,10 @@ const parseKeyValue = list => {
   return listDTO;
 };
 
+const runIntegration = async (integrationId, datasetId) => {
+  return await apiIntegration.runIntegration(integrationId, datasetId);
+};
+
 export const ApiIntegrationRepository = {
   all,
   allExtensionsOperations,
@@ -121,5 +128,6 @@ export const ApiIntegrationRepository = {
   findEUDatasetIntegration,
   getProcesses,
   getRepositories,
+  runIntegration,
   update
 };
