@@ -5,6 +5,7 @@ import { Delete } from './Delete';
 import { FindEUDatasetIntegration } from './FindEUDatasetIntegration';
 import { GetProcesses } from './GetProcesses';
 import { GetRepositories } from './GetRepositories';
+import { RunIntegration } from './RunIntegration';
 import { Update } from './Update';
 
 import { integrationRepository } from 'core/domain/model/Integration/IntegrationRepository';
@@ -17,5 +18,6 @@ export const IntegrationService = {
   findEUDatasetIntegration: FindEUDatasetIntegration({ integrationRepository }),
   getProcesses: GetProcesses({ integrationRepository }),
   getRepositories: GetRepositories({ integrationRepository }),
+  runIntegration: RunIntegration({ integrationRepository }),
   update: Update({ integrationRepository })
 };
