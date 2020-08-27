@@ -16,6 +16,8 @@ import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
@@ -201,7 +203,7 @@ public class FMECommunicationServiceTest {
   public void authenticateAndAuthorizeUnauthorizedTest() throws EEAException {
     try {
       fmeCommunicationService.authenticateAndAuthorize(null, 1L);
-    } catch (EEAException e) {
+    } catch (EEAUnauthorizedException e) {
       Assert.assertEquals(EEAErrorMessage.UNAUTHORIZED, e.getMessage());
       throw e;
     }
@@ -223,7 +225,7 @@ public class FMECommunicationServiceTest {
     Mockito.when(fmeJobRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(fmeJob));
     try {
       fmeCommunicationService.authenticateAndAuthorize("sampleApiKey", 1L);
-    } catch (EEAException e) {
+    } catch (EEAForbiddenException e) {
       Assert.assertEquals(EEAErrorMessage.FORBIDDEN, e.getMessage());
       throw e;
     }

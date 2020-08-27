@@ -278,7 +278,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // add save execution id
     if (null != idFMEJob) {
       FMEJob job = new FMEJob();
-      job.setIdJob(Long.valueOf(idFMEJob));
+      job.setJobId(Long.valueOf(idFMEJob));
       job.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
       job.setDataflowId(dataflowId);
       job.setProviderId(providerId);

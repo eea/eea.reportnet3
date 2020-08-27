@@ -5,6 +5,8 @@ import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService
 import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -81,7 +83,7 @@ public class FMEControllerImplTest {
     fmeOperationInfoVO.setFmeJobId(1L);
     Mockito.when(
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
-        .thenThrow(new EEAException(EEAErrorMessage.FORBIDDEN));
+        .thenThrow(new EEAForbiddenException(EEAErrorMessage.FORBIDDEN));
     try {
       fmeControllerImpl.operationFinished(fmeOperationInfoVO);
     } catch (ResponseStatusException e) {
@@ -95,9 +97,10 @@ public class FMEControllerImplTest {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
     fmeOperationInfoVO.setFmeJobId(1L);
-    Mockito.when(
-        fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
-        .thenThrow(new EEAException(EEAErrorMessage.UNAUTHORIZED));
+    Mockito
+        .when(fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(),
+            Mockito.anyLong()))
+        .thenThrow(new EEAUnauthorizedException(EEAErrorMessage.UNAUTHORIZED));
     try {
       fmeControllerImpl.operationFinished(fmeOperationInfoVO);
     } catch (ResponseStatusException e) {

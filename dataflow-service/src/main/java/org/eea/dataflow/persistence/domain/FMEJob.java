@@ -24,8 +24,8 @@ public class FMEJob {
 
   /** The id job. */
   @Id
-  @Column(name = "IDJOB")
-  private Long idJob;
+  @Column(name = "JOB_ID")
+  private Long jobId;
 
   /** The name. */
   @Column(name = "DATASET_ID")

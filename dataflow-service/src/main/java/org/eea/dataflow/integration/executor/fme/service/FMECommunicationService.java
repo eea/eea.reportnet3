@@ -16,6 +16,8 @@ import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
@@ -374,14 +376,14 @@ public class FMECommunicationService {
       FMEJob fmeJob = fmeJobRepository.findById(fmeJobId).orElse(null);
       if (!(null != fmeJob && userName.equals(fmeJob.getUser()))) {
         LOG_ERROR.error("User not allowed: userName={}, fmeJobId={}", userName, fmeJobId);
-        throw new EEAException(EEAErrorMessage.FORBIDDEN);
+        throw new EEAForbiddenException(EEAErrorMessage.FORBIDDEN);
       }
 
       LOG.info("Succefully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey, fmeJob);
       return fmeJob;
     }
     LOG_ERROR.error("Invalid apiKey: {}", apiKey);
-    throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
+    throw new EEAUnauthorizedException(EEAErrorMessage.UNAUTHORIZED);
   }
 
   /**

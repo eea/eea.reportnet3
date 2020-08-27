@@ -4,8 +4,9 @@ import java.io.InputStream;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.StreamingUtil;
 import org.eea.dataflow.persistence.domain.FMEJob;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
@@ -99,15 +100,12 @@ public class FMEControllerImpl implements FMEController {
           fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getFmeJobId());
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
+    } catch (EEAForbiddenException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    } catch (EEAUnauthorizedException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
     } catch (EEAException e) {
-      switch (e.getMessage()) {
-        case EEAErrorMessage.FORBIDDEN:
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
-        case EEAErrorMessage.UNAUTHORIZED:
-          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
-        default:
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
