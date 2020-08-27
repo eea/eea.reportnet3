@@ -180,7 +180,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file,
       @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam("remove") Boolean remove) {
+      @RequestParam(value = "replace", required = false) boolean replace) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -218,6 +218,12 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
+
+
+    // delete if replace is true
+    if (replace) {
+      datasetService.deleteTableBySchema(idTableSchema, datasetId);
+    }
     // extract the filename
     String fileName = file.getOriginalFilename();
 
@@ -244,7 +250,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("{id}/loadDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
   public void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file) {
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace) {
 
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
@@ -259,6 +266,12 @@ public class DataSetControllerImpl implements DatasetController {
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
+
+    // delete if replace is true
+    if (replace) {
+      datasetService.deleteImportData(datasetId);
+    }
+
     // extract the filename
     String fileName = file.getOriginalFilename();
 
@@ -478,6 +491,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
    * Delete import table.
    *
@@ -493,22 +507,6 @@ public class DataSetControllerImpl implements DatasetController {
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId) {
     // Set the user name on the thread
-    comprobaciónBorrado(datasetId, tableSchemaId);
-
-    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
-    try {
-      // This method will release the lock
-      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: {}",
-          datasetId, e.getMessage());
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
-  }
-
-  private void comprobaciónBorrado(Long datasetId, String tableSchemaId) {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -532,6 +530,18 @@ public class DataSetControllerImpl implements DatasetController {
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, tableSchemaId));
+    }
+
+    LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
+    try {
+      // This method will release the lock
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: {}",
+          datasetId, e.getMessage());
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 

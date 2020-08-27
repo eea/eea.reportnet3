@@ -71,7 +71,7 @@ public interface DatasetController {
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
       @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam("replace") Boolean replace);
+      @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
    * Load dataset data.
@@ -80,8 +80,8 @@ public interface DatasetController {
    * @param file the file
    */
   @PostMapping("{id}/loadDatasetData")
-  void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file);
+  void loadDatasetData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
    * Delete import data.
