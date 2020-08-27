@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * The Class ExternalIntegrationCompletedEvent.
+ * The Class ExternalIntegrationDesignCompletedEvent.
  */
 @Component
-public class ExternalIntegrationCompletedEvent implements NotificableEventHandler {
+public class ExternalIntegrationDesignCompletedEvent implements NotificableEventHandler {
 
   /** The dataflow service. */
   @Autowired
@@ -35,7 +35,7 @@ public class ExternalIntegrationCompletedEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.EXTERNAL_IMPORT_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+    return EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
   }
 
   /**

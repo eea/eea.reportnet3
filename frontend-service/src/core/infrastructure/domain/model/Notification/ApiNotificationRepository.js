@@ -19,7 +19,6 @@ const parse = ({ config, content = {}, message, onClick, routes, type }) => {
   const notificationDTO = {};
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
-
     if (notificationTypeConfig) {
       const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
       const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
@@ -42,6 +41,10 @@ const parse = ({ config, content = {}, message, onClick, routes, type }) => {
             ? routes[navigateTo.section]
             : routes[getSectionValidationRedirectionUrl(content.type)];
         notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
+
+        if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
+          notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}${window.location.search}`;
+        }
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
         });

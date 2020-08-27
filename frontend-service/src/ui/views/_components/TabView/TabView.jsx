@@ -167,7 +167,7 @@ const TabView = withRouter(
     };
     const getUrlParamValue = param => {
       let value = '';
-      let queryString = history.location.search;
+      let queryString = window.location.search;
       const params = queryString.substring(1, queryString.length).split('&');
       params.forEach(parameter => {
         if (parameter.includes(param)) {

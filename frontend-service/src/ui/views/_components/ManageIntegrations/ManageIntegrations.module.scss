@@ -21,6 +21,10 @@
     }
 
     .field {
+      :global .p-dropdown {
+        padding-bottom: 3px;
+      }
+
       --fieldGap: 1rem;
       --fieldWidth: 285px;
 
@@ -42,7 +46,9 @@
         width: calc(100% - (var(--fieldWidth)) - var(--fieldGap));
       }
 
-      &.operation,
+      &.operation {
+        width: calc(50% - var(--fieldGap));
+      }
       &.fileExtension,
       &.repository,
       &.processName {

@@ -15,10 +15,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class ExternalIntegrationCompletedEventTest {
+public class ExternalIntegrationReportingCompletedEventTest {
 
   @InjectMocks
-  private ExternalIntegrationCompletedEvent externalIntegrationCompletedEvent;
+  private ExternalIntegrationReportingCompletedEvent externalIntegrationCompletedEvent;
 
   @Mock
   private DataflowService dataflowService;
@@ -33,7 +33,7 @@ public class ExternalIntegrationCompletedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.EXTERNAL_IMPORT_FROM_OTHER_SYSTEM_COMPLETED_EVENT,
+    Assert.assertEquals(EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT,
         externalIntegrationCompletedEvent.getEventType());
   }
 
