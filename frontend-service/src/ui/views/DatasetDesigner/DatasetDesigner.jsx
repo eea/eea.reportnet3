@@ -764,7 +764,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
