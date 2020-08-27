@@ -418,9 +418,7 @@ public class FMECommunicationService {
         eventType = exportEUDatasetNotification(isStatusCompleted);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
-        eventType = null != fmeOperationInfoVO.getProviderId()
-            ? EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT
-            : EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+        eventType = importFromOtherSystemNotification(isReporting);
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
@@ -508,20 +506,20 @@ public class FMECommunicationService {
   /**
    * Export notification.
    *
-   * @param isProvider the is provider
+   * @param isReporting the is provider
    * @param isStatusCompleted the is status completed
    * @return the event type
    */
-  private EventType exportNotification(boolean isProvider, boolean isStatusCompleted) {
+  private EventType exportNotification(boolean isReporting, boolean isStatusCompleted) {
     EventType eventType;
     if (isStatusCompleted) {
-      if (isProvider) {
+      if (isReporting) {
         eventType = EventType.EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT;
       } else {
         eventType = EventType.EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT;
       }
     } else {
-      if (isProvider) {
+      if (isReporting) {
         eventType = EventType.EXTERNAL_EXPORT_REPORTING_FAILED_EVENT;
       } else {
         eventType = EventType.EXTERNAL_EXPORT_DESIGN_FAILED_EVENT;
@@ -542,6 +540,22 @@ public class FMECommunicationService {
       eventType = EventType.EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT;
     } else {
       eventType = EventType.EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT;
+    }
+    return eventType;
+  }
+
+  /**
+   * Import from other system notification.
+   *
+   * @param isReporting the is reporting
+   * @return the event type
+   */
+  private EventType importFromOtherSystemNotification(boolean isReporting) {
+    EventType eventType;
+    if (isReporting) {
+      eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+    } else {
+      eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
     }
     return eventType;
   }
