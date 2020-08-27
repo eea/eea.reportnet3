@@ -129,6 +129,9 @@ public final class EEAErrorMessage {
   /** The Constant FORBIDDEN: {@value}. */
   public static final String FORBIDDEN = "The user has no permissions";
 
+  /** The Constant UNAUTHORIZED: {@value}. */
+  public static final String UNAUTHORIZED = "Method secured. Authentication needed";
+
   /** The Constant ID_LINK_NOT_FOUND: {@value}. */
   public static final String ID_LINK_NOT_FOUND = "WebLink not found";
 

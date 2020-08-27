@@ -16,6 +16,7 @@ const EULogin = ({ location, history }) => {
     try {
       const params = new URLSearchParams(location.hash);
       const code = params.get('code');
+
       if (code) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);

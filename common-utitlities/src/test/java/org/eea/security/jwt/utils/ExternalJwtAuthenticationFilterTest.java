@@ -13,16 +13,18 @@ import javax.servlet.http.HttpServletRequest;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class ExternalJwtAuthenticationFilterTest {
 
   @InjectMocks
@@ -39,8 +41,9 @@ public class ExternalJwtAuthenticationFilterTest {
   @Mock
   private FilterChain filterChain;
 
+  @Before
   public void init() {
-    Mockito.reset(userManagementControllerZull, request, filterChain, jwtTokenProvider);
+    MockitoAnnotations.initMocks(this);
     SecurityContextHolder.getContext().setAuthentication(null);
   }
 

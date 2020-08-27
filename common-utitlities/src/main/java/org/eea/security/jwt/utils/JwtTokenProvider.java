@@ -160,14 +160,15 @@ public class JwtTokenProvider {
     String withoutSignature = jwt.substring(0, endBodyIndex + 1);
     Jwt<Header, Claims> untrusted = Jwts.parser().parseClaimsJwt(withoutSignature);
     PublicKey publicKey = this.externalPublicKeys.get(untrusted.getBody().getIssuer());
-    Jwt<Header, Claims> parsedToken = null;
+    String email = null;
     if (publicKey == null) {
       log.warn("No public key for issuer {}", untrusted.getBody().getIssuer());
     } else {
-      parsedToken = Jwts.parser()
+      Jwt<Header, Claims> parsedToken = Jwts.parser()
           .setSigningKey(this.externalPublicKeys.get(untrusted.getBody().getIssuer())).parse(jwt);
+      email = parsedToken.getBody().get("email").toString();
     }
-    return parsedToken.getBody().get("email").toString();
+    return email;
   }
 
   /**

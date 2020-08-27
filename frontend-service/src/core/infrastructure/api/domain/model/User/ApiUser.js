@@ -95,5 +95,14 @@ export const apiUser = {
       })
     });
     return tokens.data;
+  },
+
+  userInfo: async userId => {
+    const response = await HTTPRequester.get({
+      url: getUrl(UserConfig.userInfo, {
+        userId
+      })
+    });
+    return response;
   }
 };
