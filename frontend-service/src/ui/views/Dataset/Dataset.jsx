@@ -746,7 +746,6 @@ export const Dataset = withRouter(({ match, history }) => {
       {importDatasetDialogVisible && (
         <Dialog
           className={styles.Dialog}
-          dismissableMask={false}
           footer={renderCustomFileUploadFooter}
           header={`${resources.messages['uploadDataset']}${datasetName}`}
           onHide={() => setImportDatasetDialogVisible(false)}

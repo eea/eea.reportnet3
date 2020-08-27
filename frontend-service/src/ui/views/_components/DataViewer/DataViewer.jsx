@@ -1061,7 +1061,6 @@ const DataViewer = withRouter(
         {isColumnInfoVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
@@ -1107,7 +1106,6 @@ const DataViewer = withRouter(
         {importTableDialogVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadTable']}${tableName}`}
             onHide={() => setImportTableDialogVisible(false)}
@@ -1134,7 +1132,6 @@ const DataViewer = withRouter(
         {isAttachFileVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileAttachFooter}
             header={`${resources.messages['uploadAttachment']}`}
             onHide={() => setIsAttachFileVisible(false)}
@@ -1295,7 +1292,6 @@ const DataViewer = withRouter(
           <Dialog
             className={'map-data'}
             blockScroll={false}
-            dismissableMask={false}
             // contentStyle={
             //   isMapOpen
             //     ? { height: '80%', maxHeight: '80%', width: '100%' }
