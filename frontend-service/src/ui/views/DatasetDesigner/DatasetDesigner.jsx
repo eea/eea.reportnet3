@@ -67,6 +67,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const validationContext = useContext(ValidationContext);
 
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
+  const [importFromOtherSystemSelectedId, setImportFromOtherSystemSelectedId] = useState();
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -292,14 +293,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           {
             label: resources.messages['importPreviousData'],
             items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
+              id: importOtherSystem.id,
               label: importOtherSystem.name,
               icon: config.icons['import'],
-              command: () => manageDialogs('isImportOtherSystemsDialogVisible', true)
+              command: () => {
+                setImportFromOtherSystemSelectedId(importOtherSystem.id);
+                manageDialogs('isImportOtherSystemsDialogVisible', true);
+              }
             }))
           }
         ]
       : [];
-
     designerDispatch({
       type: 'GET_IMPORT_LIST',
       payload: {
@@ -606,21 +610,31 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onImportOtherSystems = async () => {
     manageDialogs('isImportOtherSystemsDialogVisible', false);
-
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    notificationContext.add({
-      type: 'DATASET_DATA_LOADING_INIT',
-      content: {
-        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-        title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-        datasetLoading: resources.messages['datasetLoading'],
-        dataflowName,
-        datasetName
-      }
-    });
+    try {
+      await IntegrationService.runIntegration(importFromOtherSystemSelectedId, datasetId);
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          dataflowName,
+          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+          datasetLoading: resources.messages['datasetLoading'],
+          datasetName,
+          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+        }
+      });
+    } catch (error) {
+      notificationContext.add({
+        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_ERROR',
+        content: {
+          dataflowName: designerState.dataflowName,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
   };
 
   const renderActionButtonsValidationDialog = (

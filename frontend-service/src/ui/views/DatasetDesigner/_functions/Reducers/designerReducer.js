@@ -50,7 +50,12 @@ export const designerReducer = (state, { type, payload }) => {
     case 'LOAD_EXTERNAL_OPERATIONS':
       return {
         ...state,
-        externalOperationsList: { ...state.externalOperationsList, export: payload.export, import: payload.import, importOtherSystems: payload.importOtherSystems }
+        externalOperationsList: {
+          ...state.externalOperationsList,
+          export: payload.export,
+          import: payload.import,
+          importOtherSystems: payload.importOtherSystems
+        }
       };
 
     case 'LOAD_DATASET_SCHEMAS':
