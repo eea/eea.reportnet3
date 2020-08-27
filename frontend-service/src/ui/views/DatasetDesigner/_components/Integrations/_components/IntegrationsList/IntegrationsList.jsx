@@ -88,7 +88,6 @@ export const IntegrationsList = ({
     try {
       isLoading(true);
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
-      console.log('response', response);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
       integrationsList(response);
       refreshList(false);

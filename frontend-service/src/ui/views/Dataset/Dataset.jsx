@@ -82,6 +82,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
+  const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
@@ -143,8 +144,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (isEmpty(externalOperationsList.import)) {
-      console.log('externalOperationsList.import', externalOperationsList.import);
-      console.log('importFromOtherSystems', importFromOtherSystems);
       setImportButtonsList(importFromOtherSystems);
     } else {
       setImportButtonsList(importFromFile.concat(importFromOtherSystems));
@@ -173,7 +172,6 @@ export const Dataset = withRouter(({ match, history }) => {
     getDataflowName();
     getDatasetSchemaId();
     onLoadDataflow();
-    console.log('externalOperationsList', externalOperationsList);
   }, []);
 
   useEffect(() => {
@@ -181,7 +179,6 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
-    console.log('externalOperationsList.export', externalOperationsList.export);
     getExportExtensions(externalOperationsList.export);
   }, [externalOperationsList]);
 
@@ -194,7 +191,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getExportExtensions = exportExtensionsOperationsList => {
     const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    console.log('uniqExportExtensions', uniqExportExtensions);
     setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
   };
 
@@ -212,7 +208,10 @@ export const Dataset = withRouter(({ match, history }) => {
       items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
         label: importOtherSystem.name,
         icon: config.icons['import'],
-        command: () => setIsImportOtherSystemsDialogVisible(true)
+        command: () => {
+          setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
+          setIsImportOtherSystemsDialogVisible(true);
+        }
       }))
     }
   ];
@@ -237,7 +236,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const getFileExtensions = async () => {
     try {
       const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-      console.log('response', response);
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', response));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -346,7 +344,10 @@ export const Dataset = withRouter(({ match, history }) => {
   const onImportOtherSystems = async () => {
     try {
       setIsImportOtherSystemsDialogVisible(false);
-      const dataImported = await IntegrationService.runIntegration(1, datasetId);
+      const dataImported = await IntegrationService.runIntegration(
+        importFromOtherSystemSelectedIntegrationId,
+        datasetId
+      );
       if (dataImported) {
         setIsDataLoaded(true);
       }
@@ -356,13 +357,10 @@ export const Dataset = withRouter(({ match, history }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DATASET_DATA_LOADING_INIT',
+        type: 'EXTERNAL_IMPORT_REPORING_FROM_OTHER_SYSTEM_ERROR',
         content: {
-          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-          datasetLoading: resources.messages['datasetLoading'],
-          dataflowName,
-          datasetName
+          dataflowName: dataflowName,
+          datasetName: datasetName
         }
       });
     }

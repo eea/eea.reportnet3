@@ -67,7 +67,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const validationContext = useContext(ValidationContext);
 
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
-  const [importFromOtherSystemSelectedId, setImportFromOtherSystemSelectedId] = useState();
+  const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -297,7 +297,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label: importOtherSystem.name,
               icon: config.icons['import'],
               command: () => {
-                setImportFromOtherSystemSelectedId(importOtherSystem.id);
+                setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
                 manageDialogs('isImportOtherSystemsDialogVisible', true);
               }
             }))
@@ -315,7 +315,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getFileExtensions = async () => {
     try {
       const response = await IntegrationService.allExtensionsOperations(designerState.datasetSchemaId);
-      console.log('getFileExtensions', response);
       const externalOperations = ExtensionUtils.groupOperations('operation', response);
       designerDispatch({
         type: 'LOAD_EXTERNAL_OPERATIONS',
@@ -326,7 +325,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
-      console.log('error,', error);
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
   };
@@ -611,7 +609,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onImportOtherSystems = async () => {
     manageDialogs('isImportOtherSystemsDialogVisible', false);
     try {
-      await IntegrationService.runIntegration(importFromOtherSystemSelectedId, datasetId);
+      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

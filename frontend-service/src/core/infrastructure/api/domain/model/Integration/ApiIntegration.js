@@ -17,7 +17,7 @@ export const apiIntegration = {
       url: getUrl(IntegrationConfig.allExtensionsOperations),
       data: integration
     });
-    console.log('All Extensions Operations', response.data);
+
     return response.data;
   },
 

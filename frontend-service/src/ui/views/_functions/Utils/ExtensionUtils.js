@@ -1,5 +1,4 @@
 const groupOperations = (operation, list) => {
-  console.log('list', list);
   const extensionList = list.reduce((objectsByKeyValue, obj) => {
     const value = obj[operation].toLowerCase();
     objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
