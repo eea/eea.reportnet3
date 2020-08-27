@@ -73,7 +73,7 @@ export const WebLinks = ({
   }, [webLinks]);
 
   const addWeblinkSchema = Yup.object().shape({
-    description: Yup.string().required(' '),
+    description: Yup.string().required(' ').max(255, resources.messages['webLinkDescriptionValidationMax']),
     url: Yup.string()
       .lowercase()
       .matches(
@@ -266,6 +266,7 @@ export const WebLinks = ({
                       autoFocus={true}
                       id={`descriptionWebLinks`}
                       innerRef={inputRef}
+                      maxLength={255}
                       name="description"
                       type="text"
                       placeholder={resources.messages['description']}
@@ -274,6 +275,7 @@ export const WebLinks = ({
                     <label htmlFor="descriptionWebLinks" className="srOnly">
                       {resources.messages['description']}
                     </label>
+                    <ErrorMessage className="error" name="description" component="div" />
                   </div>
                   <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
                     <Field

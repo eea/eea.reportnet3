@@ -6,5 +6,6 @@
   "euDatasetIntegration": "/integration/findExportEUDatasetIntegration?datasetSchemaId={:datasetSchemaId}",
   "getProcesses": "/fme/findItems?datasetId={:datasetId}&repository={:repositoryName}",
   "getRepositories": "/fme/findRepositories?datasetId={:datasetId}",
+  "runIntegration": "/integration/{:integrationId}/runIntegration/dataset/{:datasetId}",
   "update": "/integration/update"
 }
