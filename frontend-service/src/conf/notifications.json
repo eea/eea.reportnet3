@@ -689,6 +689,9 @@
         },
         {
           "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
+        },
+        {
+          "key": "DATASET_IMPORT_INIT"
         }
       ]
     }

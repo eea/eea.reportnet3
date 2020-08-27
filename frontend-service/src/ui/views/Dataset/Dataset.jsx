@@ -342,6 +342,10 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onImportOtherSystems = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
     try {
       setIsImportOtherSystemsDialogVisible(false);
       const dataImported = await IntegrationService.runIntegration(
@@ -351,11 +355,11 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataImported) {
         setIsDataLoaded(true);
       }
+      notificationContext.add({
+        type: 'DATASET_IMPORT_INIT',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
     } catch {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_REPORING_FROM_OTHER_SYSTEM_ERROR',
         content: {

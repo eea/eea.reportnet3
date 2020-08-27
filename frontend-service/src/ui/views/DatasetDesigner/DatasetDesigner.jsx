@@ -615,14 +615,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          dataflowName,
-          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-          datasetLoading: resources.messages['datasetLoading'],
-          datasetName,
-          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-        }
+        type: 'DATASET_IMPORT_INIT',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
       });
     } catch (error) {
       notificationContext.add({
