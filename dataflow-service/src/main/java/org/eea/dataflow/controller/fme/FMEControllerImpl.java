@@ -97,7 +97,7 @@ public class FMEControllerImpl implements FMEController {
       type = "Object") @RequestBody FMEOperationInfoVO fmeOperationInfoVO) {
     try {
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(
-          fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getFmeJobId());
+          fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getRn3JobId());
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
     } catch (EEAForbiddenException e) {

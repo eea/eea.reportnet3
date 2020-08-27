@@ -63,7 +63,8 @@ public class FMEControllerImplTest {
   public void operationFinishedTest() throws EEAException {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
-    fmeOperationInfoVO.setFmeJobId(1L);
+    fmeOperationInfoVO.setRn3JobId(1L);
+    fmeOperationInfoVO.setStatusNumber(1L);
     Mockito.when(
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(new FMEJob());
@@ -80,7 +81,7 @@ public class FMEControllerImplTest {
   public void operationFinishedForbiddenTest() throws EEAException {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
-    fmeOperationInfoVO.setFmeJobId(1L);
+    fmeOperationInfoVO.setRn3JobId(1L);
     Mockito.when(
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
         .thenThrow(new EEAForbiddenException(EEAErrorMessage.FORBIDDEN));
@@ -96,7 +97,7 @@ public class FMEControllerImplTest {
   public void operationFinishedUnauthorizedTest() throws EEAException {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
-    fmeOperationInfoVO.setFmeJobId(1L);
+    fmeOperationInfoVO.setRn3JobId(1L);
     Mockito
         .when(fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(),
             Mockito.anyLong()))
@@ -113,7 +114,8 @@ public class FMEControllerImplTest {
   public void operationFinishedErrorTest() throws EEAException {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
-    fmeOperationInfoVO.setFmeJobId(1L);
+    fmeOperationInfoVO.setRn3JobId(1L);
+    fmeOperationInfoVO.setStatusNumber(1L);
     Mockito.when(
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(new FMEJob());

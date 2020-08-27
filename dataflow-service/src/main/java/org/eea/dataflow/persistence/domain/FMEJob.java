@@ -4,7 +4,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -12,9 +15,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * The Class FMEJob.
- */
 @Entity
 @Getter
 @Setter
@@ -22,39 +22,35 @@ import lombok.ToString;
 @Table(name = "FME_JOBS")
 public class FMEJob {
 
-  /** The id job. */
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fme_jobs_id_seq")
+  @SequenceGenerator(name = "fme_jobs_id_seq", allocationSize = 1)
+  @Column(name = "ID")
+  private Long id;
+
   @Column(name = "JOB_ID")
   private Long jobId;
 
-  /** The name. */
   @Column(name = "DATASET_ID")
   private Long datasetId;
 
-  /** The dataflow id. */
   @Column(name = "DATAFLOW_ID")
   private Long dataflowId;
 
-  /** The provider id. */
   @Column(name = "PROVIDER_ID")
   private Long providerId;
 
-  /** The description. */
-  @Column(name = "R3USER")
-  private String user;
-
-  /** The file name. */
   @Column(name = "FILE_NAME")
   private String fileName;
 
-  /** The status. */
+  @Column(name = "USER_NAME")
+  private String userName;
+
   @Column(name = "OPERATION")
   @Enumerated(EnumType.STRING)
   private IntegrationOperationTypeEnum operation;
 
-  /** The status. */
   @Column(name = "STATUS")
   @Enumerated(EnumType.STRING)
   private FMEJobstatus status;
-
 }

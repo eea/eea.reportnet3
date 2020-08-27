@@ -190,7 +190,7 @@ public class FMECommunicationServiceTest {
     tokenVO.setRoles(new HashSet<>());
     tokenVO.setGroups(groups);
     FMEJob fmeJob = new FMEJob();
-    fmeJob.setUser("userName");
+    fmeJob.setUserName("userName");
 
     Mockito.when(userManagementControllerZull.authenticateUserByApiKey(Mockito.any()))
         .thenReturn(tokenVO);
@@ -218,7 +218,7 @@ public class FMECommunicationServiceTest {
     tokenVO.setRoles(new HashSet<>());
     tokenVO.setGroups(groups);
     FMEJob fmeJob = new FMEJob();
-    fmeJob.setUser("otherUserName");
+    fmeJob.setUserName("otherUserName");
 
     Mockito.when(userManagementControllerZull.authenticateUserByApiKey(Mockito.any()))
         .thenReturn(tokenVO);

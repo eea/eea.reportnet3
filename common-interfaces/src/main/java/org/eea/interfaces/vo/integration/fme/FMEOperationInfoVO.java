@@ -16,11 +16,10 @@ public class FMEOperationInfoVO implements Serializable {
   /** The api key. */
   private String apiKey;
 
-  /** The fme job id. */
-  @JsonProperty("fme_job_id")
-  private Long fmeJobId;
+  /** The rn 3 job id. */
+  private Long rn3JobId;
 
   /** The fme job status. */
   @JsonProperty("StatusNumber")
-  private long statusNumber;
+  private Long statusNumber;
 }

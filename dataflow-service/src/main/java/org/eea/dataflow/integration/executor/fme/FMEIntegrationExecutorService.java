@@ -1,6 +1,7 @@
 package org.eea.dataflow.integration.executor.fme;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The EU job. */
   @Value("${integration.fme.eu.job}")
   private String euDatasetJob;
+
+  /** The topic. */
+  @Value("${integration.fme.topic}")
+  private String topic;
 
   /** The fme communication service. */
   @Autowired
@@ -178,36 +183,40 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Long providerId = integrationOperationParams.get(IntegrationParams.PROVIDER_ID);
     String paramDataProvider = null != providerId ? providerId.toString() : "design";
 
-    List<PublishedParameter> parameters = new ArrayList<>();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
+    fmeJob.setDataflowId(dataflowId);
+    fmeJob.setProviderId(providerId);
+    fmeJob.setFileName(fileName);
+    fmeJob.setOperation(integrationOperationTypeEnum);
+    fmeJob.setUserName(SecurityContextHolder.getContext().getAuthentication().getName());
+    fmeJob.setStatus(FMEJobstatus.CREATED);
+    fmeJob = fmeJobRepository.save(fmeJob);
 
-    NMDirectives nmDirectives = new NMDirectives();
-
-    List<String> successTopics = new ArrayList<>();
-    successTopics.add("Reportnet3_Topic");
-    nmDirectives.setSuccessTopics(successTopics);
-
-    List<String> failureTopics = new ArrayList<>();
-    failureTopics.add("Reportnet3_Topic");
-    nmDirectives.setFailureTopics(failureTopics);
-
-    List<Directive> directives = new ArrayList<>();
-    Directive dataflowDirective = new Directive();
     Directive apiKeyDirective = new Directive();
     apiKeyDirective.setName(IntegrationParams.APIKEY_PROPERTY);
     apiKeyDirective.setValue(apiKey);
-    directives.add(apiKeyDirective);
+    Directive rn3JobId = new Directive();
+    apiKeyDirective.setName(IntegrationParams.RN3_JOB_ID);
+    apiKeyDirective.setValue(fmeJob.getId().toString());
 
-    nmDirectives.setDirectives(directives);
+    List<String> topics = Arrays.asList(topic);
+    NMDirectives nmDirectives = new NMDirectives();
+    nmDirectives.setSuccessTopics(topics);
+    nmDirectives.setFailureTopics(topics);
+    nmDirectives.setDirectives(Arrays.asList(apiKeyDirective, rn3JobId));
 
     fmeAsyncJob.setNmDirectives(nmDirectives);
 
+    List<PublishedParameter> parameters = new ArrayList<>();
     parameters.add(saveParameter(IntegrationParams.DATAFLOW_ID,
         integrationOperationParams.get(IntegrationParams.DATAFLOW_ID)));
-    parameters.add(saveParameter(IntegrationParams.DATASET_ID, integrationOperationParams.get(1L)));
+    parameters.add(saveParameter(IntegrationParams.DATASET_ID,
+        integrationOperationParams.get(IntegrationParams.DATASET_ID)));
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
 
-    Integer idFMEJob = null;
+    Integer fmeJobId = null;
     switch (integrationOperationTypeEnum) {
       case EXPORT:
         fileName = LocalDateTime.now().toString("yyyyMMddhhmmss") + ".xlsx";
@@ -228,7 +237,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
           LOG.info("Directory created successful");
         }
         LOG.info("Executing FME Export");
-        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+        fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case IMPORT:
@@ -246,7 +255,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
-        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+        fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
@@ -254,7 +263,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Import to other system");
-        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+        fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case EXPORT_EU_DATASET:
@@ -264,29 +273,22 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
-        idFMEJob = executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
+        fmeJobId = executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
         break;
       default:
-        idFMEJob = null;
+        fmeJobId = null;
         break;
     }
     ExecutionResultVO executionResultVO = new ExecutionResultVO();
     Map<String, Object> executionResultParams = new HashMap<>();
-    executionResultParams.put("id", idFMEJob);
+    executionResultParams.put("id", fmeJobId);
     executionResultVO.setExecutionResultParams(executionResultParams);
 
     // add save execution id
-    if (null != idFMEJob) {
-      FMEJob job = new FMEJob();
-      job.setJobId(Long.valueOf(idFMEJob));
-      job.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
-      job.setDataflowId(dataflowId);
-      job.setProviderId(providerId);
-      job.setFileName(fileName);
-      job.setOperation(integrationOperationTypeEnum);
-      job.setUser(SecurityContextHolder.getContext().getAuthentication().getName().toString());
-      job.setStatus(FMEJobstatus.QUEUED);
-      fmeJobRepository.save(job);
+    if (null != fmeJobId) {
+      fmeJob.setJobId(Long.valueOf(fmeJobId));
+      fmeJob.setStatus(FMEJobstatus.QUEUED);
+      fmeJobRepository.save(fmeJob);
     }
     return executionResultVO;
   }

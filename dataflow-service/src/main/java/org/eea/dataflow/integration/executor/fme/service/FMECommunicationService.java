@@ -341,11 +341,11 @@ public class FMECommunicationService {
    * if the process completes successfully.
    *
    * @param apiKey the api key
-   * @param fmeJobId the fme job id
+   * @param rn3JobId the rn 3 job id
    * @return the FME job
    * @throws EEAException the EEA exception
    */
-  public FMEJob authenticateAndAuthorize(String apiKey, Long fmeJobId) throws EEAException {
+  public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId) throws EEAException {
 
     TokenVO tokenVO;
     if (null != apiKey && !apiKey.isEmpty()
@@ -373,9 +373,9 @@ public class FMECommunicationService {
       ThreadPropertiesManager.setVariable("user", userName);
 
       // Authorization
-      FMEJob fmeJob = fmeJobRepository.findById(fmeJobId).orElse(null);
-      if (!(null != fmeJob && userName.equals(fmeJob.getUser()))) {
-        LOG_ERROR.error("User not allowed: userName={}, fmeJobId={}", userName, fmeJobId);
+      FMEJob fmeJob = fmeJobRepository.findById(rn3JobId).orElse(null);
+      if (!(null != fmeJob && userName.equals(fmeJob.getUserName()))) {
+        LOG_ERROR.error("User not allowed: userName={}, fmeJobId={}", userName, rn3JobId);
         throw new EEAForbiddenException(EEAErrorMessage.FORBIDDEN);
       }
 
@@ -440,7 +440,7 @@ public class FMECommunicationService {
    */
   @Transactional
   public void updateJobStatus(FMEJob fmeJob, long statusNumber) {
-    fmeJob.setStatus(statusNumber == 0L ? FMEJobstatus.SUCCESS : FMEJobstatus.JOB_FAILURE);
+    fmeJob.setStatus(statusNumber == 0L ? FMEJobstatus.SUCCESS : FMEJobstatus.FAILURE);
     fmeJobRepository.save(fmeJob);
   }
 
