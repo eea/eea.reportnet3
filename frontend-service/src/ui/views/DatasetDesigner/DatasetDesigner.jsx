@@ -764,7 +764,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
@@ -1011,6 +1010,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         )}
         {designerState.dashDialogVisible && (
           <Dialog
+            footer={renderDashboardFooter}
             header={resources.messages['titleDashboard']}
             onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
             style={{ width: '70vw' }}
