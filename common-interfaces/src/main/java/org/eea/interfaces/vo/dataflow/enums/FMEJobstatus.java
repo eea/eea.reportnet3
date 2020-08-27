@@ -5,22 +5,17 @@ package org.eea.interfaces.vo.dataflow.enums;
  */
 public enum FMEJobstatus {
 
+  /** The created. */
+  CREATED("CREATED"),
 
-  /** The submitted. */
-  SUBMITTED("SUBMITTED"),
   /** The queued. */
   QUEUED("QUEUED"),
-  /** The aborted. */
-  ABORTED("ABORTED"),
+
   /** The success. */
   SUCCESS("SUCCESS"),
-  /** The fme failure. */
-  FME_FAILURE("FME_FAILURE"),
-  /** The job failure. */
-  JOB_FAILURE("JOB_FAILURE"),
-  /** The pulled. */
-  PULLED("PULLED");
 
+  /** The job failure. */
+  FAILURE("FAILURE");
 
   /** The value. */
   private final String value;
@@ -34,7 +29,6 @@ public enum FMEJobstatus {
     this.value = value;
   }
 
-
   /**
    * Gets the value.
    *
@@ -43,5 +37,4 @@ public enum FMEJobstatus {
   public String getValue() {
     return value;
   }
-
 }

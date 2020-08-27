@@ -1,29 +1,15 @@
 package org.eea.dataflow.integration.executor.fme.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Gets the tag.
- *
- * @return the tag
- */
+
 @Getter
-
-/**
- * Sets the tag.
- *
- * @param tag the new tag
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TMDirectives {
 
   /**

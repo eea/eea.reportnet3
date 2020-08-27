@@ -42,21 +42,41 @@ public enum EventType {
   EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_import_reporting_completed_event", true),
 
+  /** The external import reporting failed event. */
+  EXTERNAL_IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_reporting_failed_event", true),
+
   /** The external import design completed event. */
   EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_import_design_completed_event", true),
+
+  /** The external import design failed event. */
+  EXTERNAL_IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_design_failed_event", true),
 
   /** The external export reporting completed event. */
   EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_export_reporting_completed_event", true),
 
+  /** The external export reporting failed event. */
+  EXTERNAL_EXPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_reporting_failed_event", true),
+
   /** The external export design completed event. */
   EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_export_design_completed_event", true),
 
+  /** The external export design failed event. */
+  EXTERNAL_EXPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_design_failed_event", true),
+
   /** The external export eudataset completed event. */
   EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_export_eudataset_completed_event", true),
+
+  /** The external export eudataset failed event. */
+  EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_eudataset_failed_event", true),
 
   /** The load record completed event. */
   RECORD_UPDATED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
