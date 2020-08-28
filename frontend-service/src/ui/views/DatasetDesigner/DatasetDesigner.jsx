@@ -151,8 +151,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         config.permissions.EDITOR_READ,
         config.permissions.EDITOR_WRITE
       ]);
-
-      if (accessPermission !== true && designerState.metaData?.dataflow?.status !== 'DESIGN') {
+      if (
+        accessPermission !== true &&
+        !isUndefined(designerState.metaData?.dataflow?.status) &&
+        designerState.metaData?.dataflow?.status !== 'DESIGN'
+      ) {
         history.push(getUrl(routes.DATAFLOWS));
       }
       setIsLoading(true);
