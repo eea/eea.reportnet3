@@ -379,7 +379,8 @@ public class FMECommunicationService {
         throw new EEAForbiddenException(EEAErrorMessage.FORBIDDEN);
       }
 
-      LOG.info("Succefully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey, fmeJob);
+      LOG.info("Successfully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey,
+          fmeJob);
       return fmeJob;
     }
     LOG_ERROR.error("Invalid apiKey: {}", apiKey);
