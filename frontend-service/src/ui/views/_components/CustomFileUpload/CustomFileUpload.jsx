@@ -284,11 +284,11 @@ export class CustomFileUpload extends Component {
       }
     };
 
-    const url = this.props.url;
+    let url = this.props.url;
 
     if (this.props.replaceCheck) {
-      url += url.indexOf('?') !== -1 ? "&" : "?";
-      url += "replace=" + this.state.replace;
+      url += url.indexOf('?') !== -1 ? '&' : '?';
+      url += 'replace=' + this.state.replace;
     }
 
     xhr.open(this.props.operation, url, true);
