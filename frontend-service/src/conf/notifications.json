@@ -436,14 +436,14 @@
           "key": "DOWNLOAD_FME_FILE_ERROR"
         },
         {
-          "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_ERROR",
+          "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT",
           "navigateTo": {
-            "section": "DATASET",
+            "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
         },
         {
-          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_ERROR",
+          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -487,7 +487,7 @@
         {
           "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT",
           "navigateTo": {
-            "section": "DATASET",
+            "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
         },
