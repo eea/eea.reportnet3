@@ -197,8 +197,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     apiKeyDirective.setName(IntegrationParams.APIKEY_PROPERTY);
     apiKeyDirective.setValue(apiKey);
     Directive rn3JobId = new Directive();
-    apiKeyDirective.setName(IntegrationParams.RN3_JOB_ID);
-    apiKeyDirective.setValue(fmeJob.getId().toString());
+    rn3JobId.setName(IntegrationParams.RN3_JOB_ID);
+    rn3JobId.setValue(fmeJob.getId().toString());
 
     List<String> topics = Arrays.asList(topic);
     NMDirectives nmDirectives = new NMDirectives();
