@@ -420,6 +420,8 @@ public class FMECommunicationService {
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
         eventType = importFromOtherSystemNotification(isReporting, isStatusCompleted);
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+            fmeJob.getDatasetId());
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
