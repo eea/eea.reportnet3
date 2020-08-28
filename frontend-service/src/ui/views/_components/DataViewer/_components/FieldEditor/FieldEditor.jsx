@@ -42,12 +42,7 @@ const FieldEditor = ({
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
   const [currentCRS, setCurrentCRS] = useState(
-    !isNil(selectedCRS)
-      ? crs.filter(crsItem => {
-          console.log({ crsItem });
-          return crsItem.value === selectedCRS;
-        })[0]
-      : selectedCRS
+    !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
@@ -236,13 +231,14 @@ const FieldEditor = ({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <InputText
               keyfilter={getFilter(type)}
-              onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-              onChange={e => onEditorValueChange(cells, e.target.value)}
+              onBlur={e => onEditorSubmitValue(cells, `${e.target.value}, ${currentCRS.value}`, record)}
+              onChange={e => onEditorValueChange(cells, `${e.target.value}, ${currentCRS.value}`)}
               onFocus={e => {
                 e.preventDefault();
-                onEditorValueFocus(cells, e.target.value);
+                onEditorValueFocus(cells, `${e.target.value}, ${currentCRS.value}`);
               }}
               onKeyDown={e => onEditorKeyChange(cells, e, record)}
+              style={{ marginRight: '2rem' }}
               type="text"
               value={parsePoint(RecordUtils.getCellValue(cells, cells.field), currentCRS, false)}
             />
@@ -262,7 +258,7 @@ const FieldEditor = ({
               }}
               placeholder="Select a CRS"
               value={currentCRS}
-              style={{ width: '20%' }}
+              style={{ width: '20%', marginRight: '1rem' }}
             />
             <Button
               className={`p-button-secondary-transparent button`}
@@ -272,7 +268,7 @@ const FieldEditor = ({
                   onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
                 }
               }}
-              style={{ width: '2.357em', marginLeft: '0.5rem' }}
+              style={{ width: '2.357em', marginRight: '1rem' }}
               tooltip={resources.messages['selectGeographicalDataOnMap']}
               tooltipOptions={{ position: 'bottom' }}
             />

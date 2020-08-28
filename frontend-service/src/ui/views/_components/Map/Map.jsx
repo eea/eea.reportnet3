@@ -18,7 +18,7 @@ import proj4 from 'proj4';
 import { CRS } from 'leaflet';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
-import { Map as MapComponent, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Map as MapComponent, GeoJSON, TileLayer, Marker, Popup } from 'react-leaflet';
 // import ReactMapboxGl, { Feature, Layer, Marker, Popup } from 'react-mapbox-gl';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -39,6 +39,84 @@ let DefaultIcon = L.icon({
 // 3035 --> ETRS89 / ETRS-LAEA
 // 4258 --> ETRS89
 // 4326 --> WGS84
+
+var geojson = {
+  type: 'featureCollections',
+  features: [
+    {
+      type: 'Feature',
+      properties: {
+        popupContent: 'This is the Auraria West Campus',
+        style: {
+          weight: 2,
+          color: '#999',
+          opacity: 1,
+          fillColor: '#B0DE5C',
+          fillOpacity: 0.8
+        }
+      },
+      geometry: {
+        type: 'MultiPolygon',
+        coordinates: [
+          [
+            [
+              [-105.00432014465332, 39.74732195489861],
+              [-105.00715255737305, 39.7462000683517],
+              [-105.00921249389647, 39.74468219277038],
+              [-105.01067161560059, 39.74362625960105],
+              [-105.01195907592773, 39.74290029616054],
+              [-105.00989913940431, 39.74078835902781],
+              [-105.00758171081543, 39.74059036160317],
+              [-105.00346183776855, 39.74059036160317],
+              [-105.00097274780272, 39.74059036160317],
+              [-105.00062942504881, 39.74072235994946],
+              [-105.00020027160645, 39.74191033368865],
+              [-105.00071525573731, 39.74276830198601],
+              [-105.00097274780272, 39.74369225589818],
+              [-105.00097274780272, 39.74461619742136],
+              [-105.00123023986816, 39.74534214278395],
+              [-105.00183105468751, 39.74613407445653],
+              [-105.00432014465332, 39.74732195489861]
+            ],
+            [
+              [-105.00361204147337, 39.74354376414072],
+              [-105.00301122665405, 39.74278480127163],
+              [-105.00221729278564, 39.74316428375108],
+              [-105.00283956527711, 39.74390674342741],
+              [-105.00361204147337, 39.74354376414072]
+            ]
+          ],
+          [
+            [
+              [-105.00942707061768, 39.73989736613708],
+              [-105.00942707061768, 39.73910536278566],
+              [-105.00685214996338, 39.73923736397631],
+              [-105.00384807586671, 39.73910536278566],
+              [-105.00174522399902, 39.73903936209552],
+              [-105.00041484832764, 39.73910536278566],
+              [-105.00041484832764, 39.73979836621592],
+              [-105.00535011291504, 39.73986436617916],
+              [-105.00942707061768, 39.73989736613708]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-104.99728202819826, 39.7449215603964]
+      },
+      properties: {
+        GPSId: '9',
+        DateTime: '7/12/2013 9:05:00 AM',
+        GPSUserName: 'fake4',
+        GPSUserColor: '#00FF57'
+      }
+    }
+  ]
+};
 
 proj4.defs([
   ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
@@ -128,11 +206,10 @@ export const Map = ({
   const [currentCRS, setCurrentCRS] = useState(
     !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
   );
-  const [is3dSwitched, setIs3dSwitched] = useState(false);
+
   const [marker, setMarker] = useState(options.center);
   const [newPositionMarker, setNewPositionMarker] = useState(`0, 0`);
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
-  // const [popUpCoordinates, setPopUpCoordinates] = useState(options.center);
   const [popUpVisible, setPopUpVisible] = useState(false);
 
   const mapRef = useRef();
@@ -141,6 +218,21 @@ export const Map = ({
     const map = mapRef.current.leafletElement;
     console.log('map crs: ' + map.options.crs.code);
     esri.basemapLayer(currentTheme.value).addTo(map);
+
+    // const geojsonLayer = L.geoJson(geojson, {
+    //   style: function (feature) {
+    //     return { color: feature.properties.GPSUserColor };
+    //   },
+    //   pointToLayer: function (feature, latlng) {
+    //     return new L.CircleMarker(latlng, { radius: 10, fillOpacity: 0.85 });
+    //   },
+    //   onEachFeature: function (feature, layer) {
+    //     layer.bindPopup(feature.properties.GPSUserName);
+    //   }
+    // });
+
+    // map.addLayer(geojsonLayer);
+
     // mapRef.current.leafletElement.setView(options.center, 2);
     // esri
     //   .tiledMapLayer({
@@ -167,8 +259,7 @@ export const Map = ({
     searchControl.on('results', function (data) {
       results.clearLayers();
       for (let i = data.results.length - 1; i >= 0; i--) {
-        console.log(data.results[i]);
-        setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
+        setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}`);
         // results.addLayer(L.marker(data.results[i].latlng));
       }
     });
@@ -205,6 +296,12 @@ export const Map = ({
   }, []);
 
   useEffect(() => {
+    if (!isNewPositionMarkerVisible) {
+      setIsNewPositionMarkerVisible(true);
+    }
+  }, [newPositionMarker]);
+
+  useEffect(() => {
     const map = mapRef.current.leafletElement;
     // esri.removeLayer();
     esri.basemapLayer(currentTheme.value).addTo(map);
@@ -231,20 +328,14 @@ export const Map = ({
   // };
 
   const onCRSChange = item => {
-    console.log({ item });
     const selectedCRS = crs.filter(t => t.value === item.value)[0];
-    console.log(selectedCRS);
     setCurrentCRS(selectedCRS);
   };
 
-  const onPrintCoordinates = coordinates => {
-    return `{Lat: ${coordinates[0]}, Lng: ${coordinates[1]}}`;
-  };
+  const onPrintCoordinates = coordinates => `{Lat: ${coordinates.split(', ')[0]}, Lng: ${coordinates.split(', ')[1]}}`;
 
   const onThemeChange = item => {
-    console.log({ item });
     const selectedTheme = themes.filter(t => t.value === item.value)[0];
-    console.log(selectedTheme);
     setCurrentTheme(selectedTheme);
   };
 
@@ -254,8 +345,7 @@ export const Map = ({
   };
 
   const projectCoordinates = coordinates => {
-    console.log({ currentCRS });
-    // console.log(coordinates, currentCRS, currentCRS.value, parseCoordinates(coordinates));
+    console.log({ coordinates });
     console.log(proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates)));
     return proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates));
   };
@@ -310,7 +400,6 @@ export const Map = ({
         value={currentCRS}
         style={{ width: '20%' }}
       />
-      {/* {console.log(CRS[currentCRS.value], currentCRS.value, CRS.EPSG4326)} */}
       <MapComponent
         // crs={CRS[currentCRS.value]}
         // crs={CRS.}
@@ -333,9 +422,6 @@ export const Map = ({
           // console.log(proj4(proj4('EPSG:4326'), proj4('EPSG:4258'), [e.latlng.lat, e.latlng.lng]));
           // console.log(proj4(proj4('EPSG:3035'), proj4('EPSG:4326'), [9323919.149606757, 307743.5211649621]));
           // console.log(proj);
-          if (!isNewPositionMarkerVisible) {
-            setIsNewPositionMarkerVisible(true);
-          }
           setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}`);
           onSelectPoint(
             // [e.latlng.lat, e.latlng.lng],
@@ -343,13 +429,14 @@ export const Map = ({
             currentCRS.value
           );
         }}>
+        {<GeoJSON data={geojson} />}
         {isNewPositionMarkerVisible && (
           <Marker
+            className={`${styles.marker} ${styles.bounce}`}
             draggable={true}
             icon={NewMarkerIcon}
             position={projectCoordinates(newPositionMarker)}
             onClick={e => {
-              // setPopUpCoordinates(newPositionMarker);
               if (!popUpVisible) {
                 setPopUpVisible(true);
               }
@@ -359,10 +446,8 @@ export const Map = ({
           </Marker>
         )}
         <Marker
-          className={`${styles.marker} ${styles.bounce}`}
           position={projectCoordinates(marker)}
           onClick={e => {
-            // setPopUpCoordinates(marker);
             if (!popUpVisible) {
               setPopUpVisible(true);
             }
