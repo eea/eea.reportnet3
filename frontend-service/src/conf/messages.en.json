@@ -849,9 +849,9 @@
     "importFromOtherSystemOperationManageIntegration": "Import from other system",
     "exportOperationManageIntegration": "Export",
     "externalImportDesignFromOtherSystemCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportDesignFromOtherSystemError": "Error loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportDesignFromOtherSystemFailedEvent": "Error loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportReportingFromOtherSystemError": "Error loding data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportReportingFromOtherSystemFailedEvent": "Error loding data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "datasetImportInit": "Importing data in <a title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }
