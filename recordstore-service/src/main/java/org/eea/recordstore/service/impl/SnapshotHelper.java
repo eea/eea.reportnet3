@@ -77,13 +77,16 @@ public class SnapshotHelper implements DisposableBean {
   }
 
   /**
-   * Submits the restoration task to the validation executor thread pool. If any thread is available
-   * the task will start automatically. Otherwise it will wait in a FIFO queue
+   * Submits the restoration task to the restoration executor thread pool. If any thread is
+   * available the task will start automatically. Otherwise it will wait in a FIFO queue
    *
-   * @param eeaEventVO the eea event vo
-   * @param processId the process id
    * @param datasetId the dataset id
-   * @param notificationEventType the notification event type
+   * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
+   * @param datasetType the dataset type
+   * @param user the user
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
    * @throws EEAException the eea exception
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
@@ -96,7 +99,7 @@ public class SnapshotHelper implements DisposableBean {
 
     if (((ThreadPoolExecutor) restorationExecutorService).getActiveCount() == maxRunningTasks) {
       LOG.info(
-          "Snapshot {} will be queued up as there are no validating threads available at the moment",
+          "Snapshot {} will be queued up as there are no restoration threads available at the moment",
           idSnapshot);
     }
 
@@ -106,6 +109,18 @@ public class SnapshotHelper implements DisposableBean {
 
   /**
    * The Class RestorationTask.
+   */
+
+  /**
+   * Instantiates a new restoration task.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
+   * @param datasetType the dataset type
+   * @param user the user
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
    */
 
   /**
@@ -157,7 +172,7 @@ public class SnapshotHelper implements DisposableBean {
     private RestorationTask restorationTask;
 
     /**
-     * Instantiates a new validation tasks executor thread.
+     * Instantiates a new restoration tasks executor thread.
      *
      * @param restorationTask the restoration task
      */
