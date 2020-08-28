@@ -258,7 +258,7 @@
   {
     "key": "config/dataflow/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-  },  
+  },
   {
     "key": "config/dataflow/stream.download.timeout",
     "value": "JHtTVFJFQU1fVElNRU9VVDozNjAwMDB9"
@@ -1318,5 +1318,9 @@
   {
     "key": "config/apiGateway/dataflow.ribbon.ReadTimeout",
     "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjMwMDB9"
+  },
+  {
+    "key": "config/application/spring.profiles.active",
+    "value": "bG9jYWw="
   }
 ]
