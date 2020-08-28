@@ -419,7 +419,7 @@ public class FMECommunicationService {
         eventType = exportEUDatasetNotification(isStatusCompleted);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
-        eventType = importFromOtherSystemNotification(isReporting);
+        eventType = importFromOtherSystemNotification(isReporting, isStatusCompleted);
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
@@ -545,18 +545,29 @@ public class FMECommunicationService {
     return eventType;
   }
 
+
   /**
    * Import from other system notification.
    *
    * @param isReporting the is reporting
+   * @param isStatusCompleted the is status completed
    * @return the event type
    */
-  private EventType importFromOtherSystemNotification(boolean isReporting) {
+  private EventType importFromOtherSystemNotification(boolean isReporting,
+      boolean isStatusCompleted) {
     EventType eventType;
-    if (isReporting) {
-      eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+    if (isStatusCompleted) {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      }
     } else {
-      eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT;
+      }
     }
     return eventType;
   }
