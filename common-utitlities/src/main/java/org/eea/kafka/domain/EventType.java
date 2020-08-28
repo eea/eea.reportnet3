@@ -38,6 +38,16 @@ public enum EventType {
   EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_import_design_from_other_system_completed_event", true),
 
+
+  /** The external import reporting from other system failed event. */
+  EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_reporting_from_other_system_failed_event", true),
+
+
+  /** The external import design from other system failed event. */
+  EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_design_from_other_system_failed_event", true),
+
   /** The external import reporting completed event. */
   EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_import_reporting_completed_event", true),
