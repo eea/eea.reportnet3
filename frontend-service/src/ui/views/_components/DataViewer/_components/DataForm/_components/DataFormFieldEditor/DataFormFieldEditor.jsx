@@ -163,7 +163,7 @@ const DataFormFieldEditor = ({
     });
     return codelistItems;
   };
-  
+
   const renderCodelistDropdown = (field, fieldValue) => {
     return (
       <Dropdown
@@ -234,32 +234,6 @@ const DataFormFieldEditor = ({
         return null;
     }
   };
-
-  // const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
-
-  // const onAttach = async value => {
-  //   setIsAttachFileVisible(false);
-  //   console.log('ON ATTACH', { value });
-
-  //   const toBase64 = file =>
-  //     new Promise((resolve, reject) => {
-  //       const reader = new FileReader();
-  //       reader.readAsDataURL(file);
-  //       reader.onload = () => resolve(reader.result);
-  //       reader.onerror = error => reject(error);
-  //     });
-
-  //   const result = await toBase64(value.files[0]).catch(e => Error(e));
-  //   if (result instanceof Error) {
-  //     console.log('Error: ', result.message);
-  //     return;
-  //   } else {
-  //     console.log({ result });
-  //     onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
-  //   }
-
-  //   console.log(result);
-  // };
 
   const onConfirmDeleteAttachment = () => {
     onChangeForm(field, []);
@@ -440,7 +414,6 @@ const DataFormFieldEditor = ({
       {/* {isAttachFileVisible && (
         <Dialog
           // className={styles.Dialog}
-          dismissableMask={false}
           footer={renderCustomFileAttachFooter}
           header={`${resources.messages['uploadAttachment']}`}
           onHide={() => setIsAttachFileVisible(false)}
@@ -480,7 +453,6 @@ const DataFormFieldEditor = ({
         <Dialog
           className={'map-data'}
           blockScroll={false}
-          dismissableMask={false}
           header={resources.messages['geospatialData']}
           modal={true}
           onHide={() => setIsMapOpen(false)}

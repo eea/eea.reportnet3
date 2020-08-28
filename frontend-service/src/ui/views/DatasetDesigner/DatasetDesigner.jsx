@@ -12,6 +12,7 @@ import { config } from 'conf';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
+import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -66,8 +67,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
-  const [hasValidations, setHasValidations] = useState();
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
+  const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -87,12 +88,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     exportDatasetData: null,
     exportDatasetDataName: '',
     exportDatasetFileType: '',
-    extensionsOperationsList: { export: [], import: [] },
+    externalOperationsList: { export: [], import: [], importOtherSystems: [] },
     hasWritePermissions: false,
+    importButtonsList: [],
     initialDatasetDescription: '',
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
+    isImportOtherSystemsDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
     isLoading: true,
@@ -119,6 +122,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   });
 
   const exportMenuRef = useRef();
+  const importMenuRef = useRef();
 
   const {
     isLoadingSnapshotListData,
@@ -138,6 +142,25 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onLoadSchema();
     callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      setIsLoading(true);
+      const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
+        config.permissions.DATA_CUSTODIAN,
+        config.permissions.EDITOR_READ,
+        config.permissions.EDITOR_WRITE
+      ]);
+      if (
+        !accessPermission &&
+        !isUndefined(designerState.metaData?.dataflow?.status) &&
+        designerState.metaData?.dataflow?.status !== 'DESIGN'
+      ) {
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+      setIsLoading(true);
+    }
+  }, [userContext.contextRoles, designerState.metaData]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -172,11 +195,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
 
   useEffect(() => {
-    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
-      manageDialogs('validationListDialogVisible', true);
-  }, [validationContext]);
-
-  useEffect(() => {
     if (designerState.validationListDialogVisible) {
       validationContext.resetReOpenOpener();
     }
@@ -194,13 +212,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     getExportList();
-  }, [designerState.datasetSchemaName, designerState.extensionsOperationsList]);
+  }, [designerState.datasetSchemaName, designerState.externalOperationsList]);
 
   useEffect(() => {
     if (!isNil(designerState.exportDatasetData)) {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
   }, [designerState.exportDatasetData]);
+
+  useEffect(() => {
+    getImportList();
+  }, [designerState.externalOperationsList]);
 
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
@@ -239,7 +261,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const getExportList = () => {
-    const { extensionsOperationsList } = designerState;
+    const { externalOperationsList } = designerState;
 
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
       command: () => onExportDataInternalExtension(type.code),
@@ -247,21 +269,60 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label: type.text
     }));
 
-    const externalExtensions = [
-      {
-        label: resources.messages['externalExtensions'],
-        items: extensionsOperationsList.export.map(type => ({
-          command: () => onExportDataExternalExtension(type.fileExtension),
-          icon: config.icons['archive'],
-          label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
-        }))
-      }
-    ];
+    const externalExtensions = !isEmpty(externalOperationsList.export)
+      ? [
+          {
+            label: resources.messages['externalExtensions'],
+            items: externalOperationsList.export.map(type => ({
+              command: () => onExportDataExternalExtension(type.fileExtension),
+              icon: config.icons['archive'],
+              label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+            }))
+          }
+        ]
+      : [];
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
       payload: {
-        exportList: internalExtensionList.concat(!isEmpty(extensionsOperationsList.export) ? externalExtensions : [])
+        exportList: internalExtensionList.concat(externalExtensions)
+      }
+    });
+  };
+
+  const getImportList = () => {
+    const { externalOperationsList } = designerState;
+
+    const importFromFile = !isEmpty(externalOperationsList.import)
+      ? [
+          {
+            label: resources.messages['importFromFile'],
+            icon: config.icons['import'],
+            command: () => manageDialogs('isImportDatasetDialogVisible', true)
+          }
+        ]
+      : [];
+
+    const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
+      ? [
+          {
+            label: resources.messages['importPreviousData'],
+            items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
+              id: importOtherSystem.id,
+              label: importOtherSystem.name,
+              icon: config.icons['import'],
+              command: () => {
+                setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
+                manageDialogs('isImportOtherSystemsDialogVisible', true);
+              }
+            }))
+          }
+        ]
+      : [];
+    designerDispatch({
+      type: 'GET_IMPORT_LIST',
+      payload: {
+        importList: importFromFile.concat(importOtherSystems)
       }
     });
   };
@@ -269,17 +330,21 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getFileExtensions = async () => {
     try {
       const response = await IntegrationService.allExtensionsOperations(designerState.datasetSchemaId);
-      const externalExtension = ExtensionUtils.groupOperations('operation', response);
+      const externalOperations = ExtensionUtils.groupOperations('operation', response);
       designerDispatch({
-        type: 'LOAD_EXTERNAL_EXTENSIONS',
-        payload: { export: externalExtension.export, import: externalExtension.import }
+        type: 'LOAD_EXTERNAL_OPERATIONS',
+        payload: {
+          export: externalOperations.export,
+          import: externalOperations.import,
+          importOtherSystems: externalOperations.importOtherSystems
+        }
       });
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
   };
 
-  const getImportExtensions = designerState.extensionsOperationsList.import
+  const getImportExtensions = designerState.externalOperationsList.import
     .map(file => `.${file.fileExtension}`)
     .join(', ')
     .toLowerCase();
@@ -556,6 +621,29 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
+  const onImportOtherSystems = async () => {
+    manageDialogs('isImportOtherSystemsDialogVisible', false);
+    try {
+      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId);
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'DATASET_IMPORT_INIT',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
+    } catch (error) {
+      notificationContext.add({
+        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_ERROR',
+        content: {
+          dataflowName: designerState.dataflowName,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
+  };
+
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
@@ -679,18 +767,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
-          dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
+          style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
           <TabsValidations
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
             onHideValidationsDialog={onHideValidationsDialog}
-            setHasValidations={setHasValidations}
           />
         </Dialog>
       );
@@ -737,13 +823,31 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           />
           <Toolbar>
             <div className="p-toolbar-group-left">
-              {!isEmpty(designerState.extensionsOperationsList.import) && (
-                <Button
-                  className={`p-button-rounded p-button-secondary p-button-animated-blink`}
-                  icon={'import'}
-                  label={resources.messages['importDataset']}
-                  onClick={() => manageDialogs('isImportDatasetDialogVisible', true)}
-                />
+              {(!isEmpty(designerState.externalOperationsList.import) ||
+                !isEmpty(designerState.externalOperationsList.importOtherSystems)) && (
+                <Fragment>
+                  <Button
+                    className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+                    icon={'import'}
+                    label={resources.messages['importDataset']}
+                    onClick={
+                      !isEmpty(designerState.externalOperationsList.importOtherSystems)
+                        ? event => importMenuRef.current.show(event)
+                        : () => manageDialogs('isImportDatasetDialogVisible', true)
+                    }
+                  />
+                  {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
+                    <Menu
+                      model={designerState.importButtonsList}
+                      popup={true}
+                      ref={importMenuRef}
+                      id="importDataSetMenu"
+                      onShow={e => {
+                        getPosition(e);
+                      }}
+                    />
+                  )}
+                </Fragment>
               )}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -901,7 +1005,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             header={resources.messages['validateDataset']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            maximizable={false}
             onConfirm={onConfirmValidate}
             onHide={() => manageDialogs('validateDialogVisible', false)}
             visible={designerState.validateDialogVisible}>
@@ -910,7 +1013,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         )}
         {designerState.dashDialogVisible && (
           <Dialog
-            dismissableMask={true}
+            footer={renderDashboardFooter}
             header={resources.messages['titleDashboard']}
             onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
             style={{ width: '70vw' }}
@@ -925,7 +1028,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {designerState.isValidationViewerVisible && (
           <Dialog
             className={styles.paginatorValidationViewer}
-            dismissableMask={true}
             header={resources.messages['titleValidations']}
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
             style={{ width: '80%' }}
@@ -945,7 +1047,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {designerState.isImportDatasetDialogVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
             onHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
@@ -966,6 +1067,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               })}`}
             />
           </Dialog>
+        )}
+
+        {designerState.isImportOtherSystemsDialogVisible && (
+          <ConfirmDialog
+            header={resources.messages['importPreviousDataHeader']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onImportOtherSystems}
+            onHide={() => manageDialogs('isImportOtherSystemsDialogVisible', false)}
+            visible={designerState.isImportOtherSystemsDialogVisible}>
+            {resources.messages['importPreviousDataConfirm']}
+          </ConfirmDialog>
         )}
       </div>
     </SnapshotContext.Provider>

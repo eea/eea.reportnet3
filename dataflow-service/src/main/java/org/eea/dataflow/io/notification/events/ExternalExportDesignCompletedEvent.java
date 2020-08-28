@@ -51,7 +51,6 @@ public class ExternalExportDesignCompletedEvent implements NotificableEventHandl
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
     String dataflowName = dataflowService.getById(dataflowId).getName();
 
-
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("datasetId", datasetId);

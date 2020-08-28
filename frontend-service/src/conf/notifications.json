@@ -434,6 +434,20 @@
         },
         {
           "key": "DOWNLOAD_FME_FILE_ERROR"
+        },
+        {
+          "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -465,6 +479,20 @@
         },
         {
           "key": "EXTERNAL_IMPORT_COMPLETE_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -537,7 +565,8 @@
           "key": "VALIDATION_FINISHED_EVENT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         },
         {
@@ -641,7 +670,8 @@
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         },
 
@@ -659,6 +689,9 @@
         },
         {
           "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
+        },
+        {
+          "key": "DATASET_IMPORT_INIT"
         }
       ]
     }

@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Autowired
   private RecordStoreService recordStoreService;
+
+  /** The restore snapshot helper. */
+  @Autowired
+  private SnapshotHelper restoreSnapshotHelper;
 
   /**
    * The Constant LOG_ERROR.
@@ -180,10 +185,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
 
     try {
-      ThreadPropertiesManager.setVariable("user", user);
-      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData);
-    } catch (SQLException | IOException | RecordStoreAccessException e) {
+      restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
+          user, isSchemaSnapshot, deleteData);
+    } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
