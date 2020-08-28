@@ -57,20 +57,6 @@ public class SnapshotHelperTest {
   }
 
   @Test
-  public void processRestorationMaximunTasksTest() throws EEAException, SQLException, IOException,
-      RecordStoreAccessException, InterruptedException {
-    ReflectionTestUtils.setField(snapshotHelper, "restorationExecutorService",
-        Executors.newFixedThreadPool(1));
-    ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 1);
-    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
-    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
-
-    Thread.sleep(1000);
-    Mockito.verify(recordStoreService, Mockito.times(2)).restoreDataSnapshot(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-  }
-
-  @Test
   public void processRestorationExceptionTest() throws EEAException, SQLException, IOException,
       RecordStoreAccessException, InterruptedException {
     ReflectionTestUtils.setField(snapshotHelper, "restorationExecutorService",
