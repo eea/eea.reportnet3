@@ -46,6 +46,8 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
@@ -1683,12 +1685,32 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (designDataset.isPresent()) {
           simpleDatasetSchema.setDatasetName(designDataset.get().getDataSetName());
         }
+        setCountryCodeField(datasetId, simpleDatasetSchema);
         return simpleDatasetSchema;
       } else {
         throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, schemaId));
       }
     } else {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
+    }
+  }
+
+  /**
+   * Sets the country code field if is a EUDatasset or DataCollection.
+   *
+   * @param datasetId the dataset id
+   * @param simpleDatasetSchema the simple dataset schema
+   */
+  private void setCountryCodeField(Long datasetId, SimpleDatasetSchemaVO simpleDatasetSchema) {
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+    if (DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+      SimpleFieldSchemaVO countryCode = new SimpleFieldSchemaVO();
+      countryCode.setFieldName(LiteralConstants.COUNTRY_CODE);
+      countryCode.setFieldType(DataType.TEXT);
+      for (SimpleTableSchemaVO tables : simpleDatasetSchema.getTables()) {
+        tables.getFields().add(0, countryCode);
+      }
     }
   }
 

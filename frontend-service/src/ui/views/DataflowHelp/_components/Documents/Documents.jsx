@@ -285,7 +285,6 @@ const Documents = ({
       {isUploadDialogVisible && (
         <Dialog
           className={styles.dialog}
-          dismissableMask={false}
           header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
           onHide={onCancelDialog}
           visible={isUploadDialogVisible}>

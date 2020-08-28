@@ -1,10 +1,15 @@
 .Footer {
-  background-color: var(--bg);
-  border-top: 4px solid var(--c-corporate-blue);
+  background-color: var(--c-corporate-blue);
+  display: flex;
+  padding: 8px 0;
   .footerContent {
+    background-color: var(--bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex: 1 auto;
+    padding: 0 4rem;
+    background-color: var(--bg);
     .reportnetLogo {
       a {
         display: flex;
