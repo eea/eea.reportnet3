@@ -1322,5 +1322,9 @@
   {
     "key": "config/application/spring.profiles.active",
     "value": "bG9jYWw="
+  },
+  {
+    "key": "config/recordstore/snapshot.task.parallelism",
+    "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
   }
 ]
