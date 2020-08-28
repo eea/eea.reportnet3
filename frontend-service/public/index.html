@@ -39,12 +39,27 @@
       You can use it to define "runtime" environment variables.
       Please open this file for more details.
     -->
+
+    <div
+      id="browserNotice"
+      style="display: none; justify-content: center; align-items: center; width: 100vw; height: 100vh;"
+    >
+      <div style="width: 200px; height: 300px;">
+        <h1>It appears that you are using an unsupported web browser.</h1>
+        <p>
+          We reccommend you to use a Chromium-based browser (such as
+          <a href="https://www.google.com/intl/chrome/">Google Chrome</a>, Microsoft Edge Chromium or
+          <a href="https://www.mozilla.org/firefox/">Mozilla Firefox</a>)
+        </p>
+      </div>
+    </div>
+
     <script src="%PUBLIC_URL%/env.js"></script>
   </body>
   <script>
     window.addEventListener(
       'dragover',
-      function(e) {
+      function (e) {
         // e.dataTransfer.effectAllowed = 'none';
         e.preventDefault();
         e = e || event;
@@ -53,11 +68,22 @@
     );
     window.addEventListener(
       'drop',
-      function(e) {
+      function (e) {
         e = e || event;
         e.preventDefault();
       },
       false
     );
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    // Internet Explorer 6-11
+    var isIE = /*@cc_on!@*/ false || !!document.documentMode;
+
+    // Edge 20+ no chromium
+    var isEdge = !isIE && !!window.StyleMedia;
+    if (isIE || isEdge) {
+      const notice = document.getElementById('browserNotice');
+      notice.style.display = 'flex';
+    }
   </script>
 </html>
