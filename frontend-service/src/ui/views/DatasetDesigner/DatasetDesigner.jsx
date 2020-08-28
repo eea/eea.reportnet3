@@ -152,7 +152,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         config.permissions.EDITOR_WRITE
       ]);
       if (
-        accessPermission !== true &&
+        !accessPermission &&
         !isUndefined(designerState.metaData?.dataflow?.status) &&
         designerState.metaData?.dataflow?.status !== 'DESIGN'
       ) {
