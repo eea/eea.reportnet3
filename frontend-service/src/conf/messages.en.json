@@ -852,6 +852,8 @@
     "externalImportDesignFromOtherSystemFailedEvent": "Error loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemFailedEvent": "Error loding data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "datasetImportInit": "Importing data in <a title='{:datasetName}'>{:shortDatasetName}</a>"
+    "datasetImportInit": "Importing data in <a title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportDesignFailedEvent": "Error loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportReportingFailedEvent": "Error loding data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }

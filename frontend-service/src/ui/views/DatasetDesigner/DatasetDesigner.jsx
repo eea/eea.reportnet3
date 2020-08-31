@@ -603,22 +603,32 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
+    try {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-
-    notificationContext.add({
-      type: 'DATASET_DATA_LOADING_INIT',
-      content: {
-        dataflowName,
-        datasetLoading: resources.messages['datasetLoading'],
-        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-        datasetName,
-        title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-      }
-    });
+      notificationContext.add({
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          dataflowName,
+          datasetLoading: resources.messages['datasetLoading'],
+          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+          datasetName,
+          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+        }
+      });
+    } catch (error) {
+      console.log('error', error);
+      notificationContext.add({
+        type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
+        content: {
+          dataflowName: designerState.dataflowName,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -635,7 +645,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       });
     } catch (error) {
       notificationContext.add({
-        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_ERROR',
+        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
         content: {
           dataflowName: designerState.dataflowName,
           datasetName: designerState.datasetSchemaName
