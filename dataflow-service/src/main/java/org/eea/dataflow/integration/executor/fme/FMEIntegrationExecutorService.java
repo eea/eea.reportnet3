@@ -103,11 +103,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   public ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
       Object... executionParams) {
 
-    // 1- Long datasetId
     Long datasetId = null;
-    // 2- MultipartFile
     String fileName = null;
-    // 3- IntegrationVO
     IntegrationVO integration = new IntegrationVO();
 
     LOG.info("trying to extract params for Execution");
@@ -125,6 +122,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       }
     } catch (IllegalArgumentException | SecurityException e) {
       LOG_ERROR.error("Error getting params in FME Integration Executor: {} ", e.getMessage());
+    }
+
+    if (IntegrationOperationTypeEnum.EXPORT.equals(integrationOperationTypeEnum)) {
+      fileName = LocalDateTime.now().toString("yyyyMMddhhmmss") + ".xlsx";
     }
 
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
@@ -164,7 +165,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /**
    * Switch integration operator enum.
    *
-   * @param integrationOperationTypeEnum the integration operation type enum
+   * @param operation the integration operation type enum
    * @param fileName the file name
    * @param integration the integration
    * @param apiKey the api key
@@ -173,9 +174,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * @param fmeParams the fme params
    * @return the execution result VO
    */
-  private ExecutionResultVO switchIntegrationOperatorEnum(
-      IntegrationOperationTypeEnum integrationOperationTypeEnum, String fileName,
-      IntegrationVO integration, String apiKey, FMEAsyncJob fmeAsyncJob,
+  private ExecutionResultVO switchIntegrationOperatorEnum(IntegrationOperationTypeEnum operation,
+      String fileName, IntegrationVO integration, String apiKey, FMEAsyncJob fmeAsyncJob,
       Map<String, Long> integrationOperationParams, Map<String, String> fmeParams) {
 
     Long datasetId = integrationOperationParams.get(IntegrationParams.DATASET_ID);
@@ -188,7 +188,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     fmeJob.setDataflowId(dataflowId);
     fmeJob.setProviderId(providerId);
     fmeJob.setFileName(fileName);
-    fmeJob.setOperation(integrationOperationTypeEnum);
+    fmeJob.setOperation(operation);
     fmeJob.setUserName(SecurityContextHolder.getContext().getAuthentication().getName());
     fmeJob.setStatus(FMEJobstatus.CREATED);
     fmeJob = fmeJobRepository.save(fmeJob);
@@ -217,9 +217,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
 
     Integer fmeJobId = null;
-    switch (integrationOperationTypeEnum) {
+    switch (operation) {
       case EXPORT:
-        fileName = LocalDateTime.now().toString("yyyyMMddhhmmss") + ".xlsx";
         parameters.add(saveParameter(IntegrationParams.EXPORT_FILE_NAME, fileName));
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         parameters.add(saveParameter(IntegrationParams.FOLDER,
