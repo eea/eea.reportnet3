@@ -17,11 +17,13 @@ const UserData = () => {
         <UserImg />
       </div>
       <div className={styles.userName}>
-        {userContext.firstName !== ''
+        {!isUndefined(userContext.firstName) && userContext.firstName !== ''
           ? `${userContext.firstName} ${userContext.lastName}`
           : userContext.preferredUsername}
       </div>
-      <div className={styles.userMail}>{userContext.email !== '' && userContext.email}</div>
+      <div className={styles.userMail}>
+        {!isUndefined(userContext.firstName) && userContext.email !== '' && userContext.email}
+      </div>
       <div>
         <a
           type="button"
