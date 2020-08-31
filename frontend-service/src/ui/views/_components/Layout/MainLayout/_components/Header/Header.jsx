@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -176,9 +177,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       />
       {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>
-        {userContext.firstName !== '' && userContext.lastName !== ''
+        {userContext.firstName !== '' &&
+        userContext.lastName !== '' &&
+        !isUndefined(userContext.email) &&
+        !isUndefined(userContext.lastName)
           ? `${userContext.firstName} ${userContext.lastName}`
-          : userContext.email !== ''
+          : userContext.email !== '' && !isUndefined(userContext.email)
           ? userContext.email
           : userContext.preferredUsername}
       </span>
