@@ -325,11 +325,13 @@ public class IntegrationControllerImpl implements IntegrationController {
   }
 
 
+
   /**
    * Execute external integration.
    *
    * @param integrationId the integration id
    * @param datasetId the dataset id
+   * @param replace the replace
    * @return the execution result VO
    */
   @Override
@@ -340,12 +342,13 @@ public class IntegrationControllerImpl implements IntegrationController {
       response = ExecutionResultVO.class)
   public ExecutionResultVO executeExternalIntegration(
       @PathVariable(value = "integrationId") Long integrationId,
-      @PathVariable("datasetId") Long datasetId) {
+      @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "replace", defaultValue = "false") Boolean replace) {
 
     ExecutionResultVO execution = null;
     try {
       execution = integrationService.executeExternalIntegration(datasetId, integrationId,
-          IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+          IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, replace);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",

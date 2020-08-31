@@ -1342,4 +1342,10 @@ public class DataSetControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void deleteDataToReplaceTest() {
+    dataSetControllerImpl.deleteDataBeforeReplacing(1L);
+    Mockito.verify(datasetService, times(1)).deleteImportData(Mockito.anyLong());
+  }
 }

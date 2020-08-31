@@ -320,7 +320,8 @@ public class IntegrationControllerImplTest {
 
   @Test
   public void executeExternalIntegrationTest() {
-    ExecutionResultVO response = integrationControllerImpl.executeExternalIntegration(1L, 1L);
+    ExecutionResultVO response =
+        integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
     Assert.assertNull(response);
   }
 
@@ -328,9 +329,9 @@ public class IntegrationControllerImplTest {
   public void executeExternalIntegrationExceptionTest() throws EEAException {
 
     Mockito.when(integrationService.executeExternalIntegration(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.any())).thenThrow(EEAException.class);
+        Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
     try {
-      integrationControllerImpl.executeExternalIntegration(1L, 1L);
+      integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;

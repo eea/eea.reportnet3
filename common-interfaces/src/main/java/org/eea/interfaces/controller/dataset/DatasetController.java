@@ -293,4 +293,14 @@ public interface DatasetController {
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
   public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField);
+
+
+
+  /**
+   * Delete data before replacing.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping("/private/{id}/deleteForReplacing")
+  void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId);
 }

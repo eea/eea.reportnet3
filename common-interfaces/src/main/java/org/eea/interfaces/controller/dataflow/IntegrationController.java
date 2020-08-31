@@ -159,5 +159,6 @@ public interface IntegrationController {
   @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
   ExecutionResultVO executeExternalIntegration(
       @PathVariable(value = "integrationId") Long integrationId,
-      @PathVariable("datasetId") Long datasetId);
+      @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "replace", defaultValue = "false") Boolean replace);
 }

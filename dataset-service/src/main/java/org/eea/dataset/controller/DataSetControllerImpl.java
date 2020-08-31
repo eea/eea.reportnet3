@@ -841,6 +841,19 @@ public class DataSetControllerImpl implements DatasetController {
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
+
+  /**
+   * Delete data before replacing.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @DeleteMapping("/private/{id}/deleteForReplacing")
+  public void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId) {
+    datasetService.deleteImportData(datasetId);
+  }
+
+
   /**
    * Validate attachment.
    *

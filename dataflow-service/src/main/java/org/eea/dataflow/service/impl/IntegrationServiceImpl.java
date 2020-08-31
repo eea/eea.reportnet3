@@ -18,6 +18,7 @@ import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -70,6 +71,10 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The integration mapper. */
   @Autowired
   private IntegrationMapper integrationMapper;
+
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul datasetControllerZuul;
 
 
   /**
@@ -369,19 +374,27 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
 
+
   /**
    * Execute external integration.
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
    * @param operation the operation
+   * @param replace the replace
    * @return the execution result VO
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
-      IntegrationOperationTypeEnum operation) throws EEAException {
+      IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
+
+    // Delete the previous data in the dataset if the FME has to replace the data
+    if (Boolean.TRUE.equals(replace)) {
+      LOG.info("Replacing the data in dataset {}", datasetId);
+      datasetControllerZuul.deleteDataBeforeReplacing(datasetId);
+    }
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(integrationId);
     List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);

@@ -18,6 +18,7 @@ import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
@@ -68,6 +69,10 @@ public class IntegrationServiceImplTest {
   /** The integration executor factory. */
   @Mock
   private IntegrationExecutorFactory integrationExecutorFactory;
+
+  /** The dataset controller zuul. */
+  @Mock
+  private DataSetControllerZuul datasetControllerZuul;
 
   /**
    * Inits the mocks.
@@ -316,7 +321,22 @@ public class IntegrationServiceImplTest {
     Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
         .thenReturn(new ExecutionResultVO());
     ExecutionResultVO result = integrationService.executeExternalIntegration(1L, 1L,
-        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
+    Assert.assertNotNull(result);
+  }
+
+  @Test
+  public void executeExternalIntegrationReplacingDataTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
+        .thenReturn(new ExecutionResultVO());
+    ExecutionResultVO result = integrationService.executeExternalIntegration(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, true);
     Assert.assertNotNull(result);
   }
 }
