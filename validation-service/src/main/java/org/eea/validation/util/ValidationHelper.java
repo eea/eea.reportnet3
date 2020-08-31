@@ -586,6 +586,16 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
+  /**
+   * Instantiates a new validation task.
+   *
+   * @param eeaEventVO the eea event VO
+   * @param validator the validator
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @param processId the process id
+   * @param notificationEventType the notification event type
+   */
   @AllArgsConstructor
   private class ValidationTask {
 
@@ -622,6 +632,7 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
+    /** The Constant MILISECONDS. */
     private static final double MILISECONDS = 1000.0;
     /**
      * The validation task.

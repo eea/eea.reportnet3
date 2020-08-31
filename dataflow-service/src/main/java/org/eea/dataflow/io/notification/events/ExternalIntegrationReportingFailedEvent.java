@@ -11,11 +11,13 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+
+
 /**
- * The Class ExternalExportEUDatasetCompletedEvent.
+ * The Class ExternalIntegrationReportingFailedEvent.
  */
 @Component
-public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHandler {
+public class ExternalIntegrationReportingFailedEvent implements NotificableEventHandler {
 
   /** The dataflow service. */
   @Autowired
@@ -25,6 +27,7 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+
   /**
    * Gets the event type.
    *
@@ -32,7 +35,7 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
    */
   @Override
   public EventType getEventType() {
-    return EventType.EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT;
+    return EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
   }
 
   /**
@@ -48,8 +51,11 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
     Long dataflowId = notificationVO.getDataflowId();
     Long datasetId = notificationVO.getDatasetId();
     String dataflowName = dataflowService.getById(dataflowId).getName();
-    String datasetName =
-        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
+    String datasetName = "";
+    if (datasetId != null) {
+      datasetName =
+          datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
+    }
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
