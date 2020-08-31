@@ -505,6 +505,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
   useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
+  useCheckNotifications(['DOWNLOAD_FME_FILE_ERROR'], setIsLoadingFile, false);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
