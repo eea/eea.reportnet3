@@ -373,8 +373,11 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
-  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
-  useCheckNotifications(['DOWNLOAD_FME_FILE_ERROR'], setIsLoadingFile, false);
+  useCheckNotifications(
+    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
+    setIsLoadingFile,
+    false
+  );
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);

@@ -459,18 +459,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onExportError = async () => {
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId });
-
-    notificationContext.add({
-      type: 'EXPORT_DATA_BY_ID_ERROR',
-      content: { dataflowId, datasetId, dataflowName, datasetName }
-    });
-  };
-
   const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
   const onExportDataExternalExtension = async fileExtension => {
@@ -482,7 +470,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
-      onExportError();
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
+        content: {
+          dataflowName: dataflowName,
+          datasetName: datasetName
+        }
+      });
     }
   };
 
@@ -495,7 +494,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
-      onExportError();
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+
+      notificationContext.add({
+        type: 'EXPORT_DATA_BY_ID_ERROR',
+        content: {
+          dataflowName: dataflowName,
+          datasetName: datasetName
+        }
+      });
     } finally {
       setIsLoadingFile(false);
     }
@@ -504,8 +514,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
-  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
-  useCheckNotifications(['DOWNLOAD_FME_FILE_ERROR'], setIsLoadingFile, false);
+  useCheckNotifications(
+    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
+    setIsLoadingFile,
+    false
+  );
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
