@@ -459,43 +459,44 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onExportError = async () => {
+  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
+
+  const onExportError = async exportNotification => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = await getMetadata({ dataflowId, datasetId });
 
     notificationContext.add({
-      type: 'EXPORT_DATA_BY_ID_ERROR',
-      content: { dataflowId, datasetId, dataflowName, datasetName }
+      type: exportNotification,
+      content: {
+        dataflowName: dataflowName,
+        datasetName: datasetName
+      }
     });
   };
 
-  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
-
   const onExportDataExternalExtension = async fileExtension => {
     setIsLoadingFile(true);
-    setFileType(fileExtension);
     notificationContext.add({
       type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
     });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
-      onExportError();
+      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
   };
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
-      onExportError();
+      onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {
       setIsLoadingFile(false);
     }
@@ -504,7 +505,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
-  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
+  useCheckNotifications(
+    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
+    setIsLoadingFile,
+    false
+  );
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -603,22 +608,32 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
+    try {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-
-    notificationContext.add({
-      type: 'DATASET_DATA_LOADING_INIT',
-      content: {
-        dataflowName,
-        datasetLoading: resources.messages['datasetLoading'],
-        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-        datasetName,
-        title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-      }
-    });
+      notificationContext.add({
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          dataflowName,
+          datasetLoading: resources.messages['datasetLoading'],
+          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+          datasetName,
+          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+        }
+      });
+    } catch (error) {
+      console.log('error', error);
+      notificationContext.add({
+        type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
+        content: {
+          dataflowName: designerState.dataflowName,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -635,7 +650,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       });
     } catch (error) {
       notificationContext.add({
-        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_ERROR',
+        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
         content: {
           dataflowName: designerState.dataflowName,
           datasetName: designerState.datasetSchemaName
@@ -1062,6 +1077,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               multiple={false}
               name="file"
               onUpload={onUpload}
+              replaceCheck={true}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
                 datasetId: datasetId
               })}`}
