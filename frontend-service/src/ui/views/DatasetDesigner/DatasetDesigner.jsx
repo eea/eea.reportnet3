@@ -461,51 +461,42 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
+  const onExportError = async exportType => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
+
+    notificationContext.add({
+      type: exportType === 'external' ? 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT' : 'EXPORT_DATA_BY_ID_ERROR',
+      content: {
+        dataflowName: dataflowName,
+        datasetName: datasetName
+      }
+    });
+  };
+
   const onExportDataExternalExtension = async fileExtension => {
     setIsLoadingFile(true);
-    setFileType(fileExtension);
     notificationContext.add({
       type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
     });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-
-      notificationContext.add({
-        type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
-        content: {
-          dataflowName: dataflowName,
-          datasetName: datasetName
-        }
-      });
+      onExportError('external');
     }
   };
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: {
-          dataflowName: dataflowName,
-          datasetName: datasetName
-        }
-      });
+      onExportError('internal');
     } finally {
       setIsLoadingFile(false);
     }
