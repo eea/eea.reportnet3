@@ -116,8 +116,8 @@ const parseKeyValue = list => {
   return listDTO;
 };
 
-const runIntegration = async (integrationId, datasetId) => {
-  return await apiIntegration.runIntegration(integrationId, datasetId);
+const runIntegration = async (integrationId, datasetId, replaceData) => {
+  return await apiIntegration.runIntegration(integrationId, datasetId, replaceData);
 };
 
 export const ApiIntegrationRepository = {

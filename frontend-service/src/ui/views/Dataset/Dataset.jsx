@@ -14,6 +14,7 @@ import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporte
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
@@ -94,6 +95,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
+  const [replaceData, setReplaceData] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaId, setTableSchemaId] = useState();
@@ -341,20 +343,26 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const cleanImportOtherSystemsDialog = () => {
+    setReplaceData(false);
+    onSetVisible(setIsImportOtherSystemsDialogVisible, false);
+  }
+
   const onImportOtherSystems = async () => {
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
     try {
-      setIsImportOtherSystemsDialogVisible(false);
+      cleanImportOtherSystemsDialog();
       const dataImported = await IntegrationService.runIntegration(
         importFromOtherSystemSelectedIntegrationId,
-        datasetId
+        datasetId,
+        replaceData
       );
       if (dataImported) {
         setIsDataLoaded(true);
-      }
+      }      
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'DATASET_IMPORT_INIT',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -625,6 +633,23 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
+  const renderImportOtherSystemsFooter = ( 
+    <Fragment>
+      <Button
+        className="p-button-animated-blink"
+        label={resources.messages['import']}
+        icon={'check'}
+        onClick={() => onImportOtherSystems()}
+      />
+      <Button
+        className="p-button-secondary"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => cleanImportOtherSystemsDialog()}
+      />
+    </Fragment>
+  );
+
   if (isLoading) return layout(<Spinner />);
 
   return layout(
@@ -850,15 +875,22 @@ export const Dataset = withRouter(({ match, history }) => {
         </Dialog>
       )}
       {isImportOtherSystemsDialogVisible && (
-        <ConfirmDialog
+        <Dialog
+          className={styles.Dialog}
+          footer={renderImportOtherSystemsFooter}
           header={resources.messages['importPreviousDataHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          onConfirm={onImportOtherSystems}
-          onHide={() => onSetVisible(setIsImportOtherSystemsDialogVisible, false)}
+          onHide={cleanImportOtherSystemsDialog}
           visible={isImportOtherSystemsDialogVisible}>
-          {resources.messages['importPreviousDataConfirm']}
-        </ConfirmDialog>
+          <Checkbox
+            id="replaceCheckbox"
+            inputId="replaceCheckbox"
+            isChecked={replaceData}
+            onChange={() => setReplaceData(!replaceData)}
+            role="checkbox"
+          />
+          <label htmlFor="replaceCheckbox">{resources.messages['replaceData']}</label>
+          <div>{resources.messages['importPreviousDataConfirm']}</div>
+        </Dialog>
       )}
       {deleteDialogVisible && (
         <ConfirmDialog

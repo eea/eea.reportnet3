@@ -15,6 +15,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
@@ -115,6 +116,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     },
     metaData: {},
     refresh: false,
+    replaceData: false,
     tableSchemaNames: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
@@ -622,10 +624,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const onImportOtherSystems = async () => {
+  const cleanImportOtherSystemsDialog = () => {
+    designerDispatch({
+      type: 'SET_REPLACE_DATA',
+      payload: { value: false }
+    });
     manageDialogs('isImportOtherSystemsDialogVisible', false);
+  }
+
+  const onImportOtherSystems = async () => {
     try {
-      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId);
+      cleanImportOtherSystemsDialog();
+      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId, designerState.replaceData);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -700,6 +710,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label={resources.messages['close']}
       onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
     />
+  );
+
+  const renderImportOtherSystemsFooter = ( 
+    <Fragment>
+      <Button
+        className="p-button-animated-blink"
+        label={resources.messages['import']}
+        icon={'check'}
+        onClick={() => { onImportOtherSystems(); }}
+      />
+      <Button
+        className="p-button-secondary"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => cleanImportOtherSystemsDialog()}
+      />
+    </Fragment>
   );
 
   const renderSwitchView = () => (
@@ -1072,15 +1099,26 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         )}
 
         {designerState.isImportOtherSystemsDialogVisible && (
-          <ConfirmDialog
+          <Dialog
+            className={styles.Dialog}
+            footer={renderImportOtherSystemsFooter}
             header={resources.messages['importPreviousDataHeader']}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
-            onConfirm={onImportOtherSystems}
-            onHide={() => manageDialogs('isImportOtherSystemsDialogVisible', false)}
+            onHide={cleanImportOtherSystemsDialog}
             visible={designerState.isImportOtherSystemsDialogVisible}>
-            {resources.messages['importPreviousDataConfirm']}
-          </ConfirmDialog>
+            <Checkbox
+              id="replaceCheckbox"
+              inputId="replaceCheckbox"
+              isChecked={designerState.replaceData}
+              onChange={() =>
+                designerDispatch({
+                  type: 'SET_REPLACE_DATA',
+                  payload: { value: !designerState.replaceData }
+                })}
+              role="checkbox"
+            />
+            <label htmlFor="replaceCheckbox">{resources.messages['replaceData']}</label>
+            <div>{resources.messages['importPreviousDataConfirm']}</div>
+          </Dialog>
         )}
       </div>
     </SnapshotContext.Provider>
