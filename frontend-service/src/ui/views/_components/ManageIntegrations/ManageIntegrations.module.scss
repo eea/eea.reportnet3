@@ -32,7 +32,6 @@
       flex-direction: column;
       justify-content: flex-start;
       margin-bottom: 0;
-      margin-right: var(--fieldGap);
 
       > label {
         margin-bottom: 0.2rem;
@@ -47,12 +46,12 @@
       }
 
       &.operation {
-        width: 50%;
+        width: 49%;
       }
       &.fileExtension,
       &.repository,
       &.processName {
-        width: 50%;
+        width: 49%;
       }
 
       &.description,
@@ -63,7 +62,7 @@
 
       &.parameterKey,
       &.parameterValue {
-        width: 100%;
+        width: 44%;
       }
     }
 
