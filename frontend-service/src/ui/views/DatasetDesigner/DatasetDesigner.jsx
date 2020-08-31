@@ -461,14 +461,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
-  const onExportError = async exportType => {
+  const onExportError = async exportNotification => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = await getMetadata({ dataflowId, datasetId });
 
     notificationContext.add({
-      type: exportType === 'external' ? 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT' : 'EXPORT_DATA_BY_ID_ERROR',
+      type: exportNotification,
       content: {
         dataflowName: dataflowName,
         datasetName: datasetName
@@ -484,7 +484,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
-      onExportError('external');
+      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
   };
 
@@ -496,7 +496,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
-      onExportError('internal');
+      onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {
       setIsLoadingFile(false);
     }
