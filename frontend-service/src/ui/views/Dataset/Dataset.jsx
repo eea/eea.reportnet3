@@ -374,6 +374,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
   useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
+  useCheckNotifications(['DOWNLOAD_FME_FILE_ERROR'], setIsLoadingFile, false);
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
