@@ -427,9 +427,6 @@ export class CustomFileUpload extends Component {
   renderReplaceCheck() {
     return (
       <Fragment>
-        <label htmlFor="replaceCheckbox" className="srOnly">
-          {this.props.replaceCheckLabel}
-        </label>
         <Checkbox
           id="replaceCheckbox"
           inputId="replaceCheckbox"
@@ -437,6 +434,7 @@ export class CustomFileUpload extends Component {
           onChange={() => this.setState({ replace: !this.state.replace })}
           role="checkbox"
         />
+        <label htmlFor="replaceCheckbox">{this.props.replaceCheckLabel}</label>
       </Fragment>
     );
   }
@@ -486,8 +484,10 @@ export class CustomFileUpload extends Component {
       <Fragment>
         <div id={this.props.id} className={className} style={this.props.style}>
           <div className="p-fileupload-buttonbar">
-            {chooseButton}
-            {this.props.replaceCheck && replaceCheck}
+            <div>
+              {chooseButton}
+              {replaceCheck}
+            </div>
             <div className="p-toolbar-group-right">
               {uploadButton}
               {cancelButton}
