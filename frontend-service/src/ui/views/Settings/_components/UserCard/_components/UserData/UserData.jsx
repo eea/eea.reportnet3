@@ -1,11 +1,13 @@
 import React, { useContext } from 'react';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './UserData.module.scss';
-import { UserImg } from './_components/UserImg';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { routes } from 'ui/routes';
-import { getUrl } from 'core/infrastructure/CoreUtils';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { UserImg } from './_components/UserImg';
 
 const UserData = () => {
   const userContext = useContext(UserContext);
