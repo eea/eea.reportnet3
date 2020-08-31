@@ -486,7 +486,7 @@ export class CustomFileUpload extends Component {
           <div className="p-fileupload-buttonbar">
             <div>
               {chooseButton}
-              {replaceCheck}
+              {this.props.replaceCheck && replaceCheck}
             </div>
             <div className="p-toolbar-group-right">
               {uploadButton}
