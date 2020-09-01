@@ -35,13 +35,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       await SnapshotService.createByIdDesigner(datasetId, datasetSchemaId, snapshotState.description);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'CREATE_BY_ID_DESIGNER_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_CREATION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'CREATE_BY_ID_REPORTER_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }

@@ -476,6 +476,10 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "SNAPSHOT_CREATION_BLOCKED_ERROR",          
+          "lifeTime": 5000
         }
       ]
     },

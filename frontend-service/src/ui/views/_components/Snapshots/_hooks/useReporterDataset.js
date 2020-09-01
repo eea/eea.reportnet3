@@ -37,10 +37,17 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'CREATE_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+     
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_CREATION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'CREATE_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }

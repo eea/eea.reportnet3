@@ -856,6 +856,7 @@
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportDesignFailedEvent": "Failed exporting <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
+    "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "snapshotCreationBlockedError": "Could not perform copy creation due to previous creation process blocking"
   }
 }

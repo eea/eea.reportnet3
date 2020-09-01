@@ -636,11 +636,10 @@ export const Dataset = withRouter(({ match, history }) => {
   return layout(
     <SnapshotContext.Provider
       value={{
-        snapshotState: snapshotState,
-        snapshotDispatch: snapshotDispatch,
         isSnapshotsBarVisible: isSnapshotsBarVisible,
-
-        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
+        snapshotDispatch: snapshotDispatch,
+        snapshotState: snapshotState,
       }}>
       <Title
         title={`${datasetTitle()}`}
