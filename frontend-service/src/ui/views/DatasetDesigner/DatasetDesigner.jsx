@@ -630,12 +630,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       payload: { value: false }
     });
     manageDialogs('isImportOtherSystemsDialogVisible', false);
-  }
+  };
 
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
-      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId, designerState.replaceData);
+      await IntegrationService.runIntegration(
+        importFromOtherSystemSelectedIntegrationId,
+        datasetId,
+        designerState.replaceData
+      );
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -712,13 +716,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
-  const renderImportOtherSystemsFooter = ( 
+  const renderImportOtherSystemsFooter = (
     <Fragment>
       <Button
         className="p-button-animated-blink"
         label={resources.messages['import']}
         icon={'check'}
-        onClick={() => { onImportOtherSystems(); }}
+        onClick={() => {
+          onImportOtherSystems();
+        }}
       />
       <Button
         className="p-button-secondary"
@@ -1105,19 +1111,32 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             header={resources.messages['importPreviousDataHeader']}
             onHide={cleanImportOtherSystemsDialog}
             visible={designerState.isImportOtherSystemsDialogVisible}>
-            <Checkbox
-              id="replaceCheckbox"
-              inputId="replaceCheckbox"
-              isChecked={designerState.replaceData}
-              onChange={() =>
-                designerDispatch({
-                  type: 'SET_REPLACE_DATA',
-                  payload: { value: !designerState.replaceData }
-                })}
-              role="checkbox"
-            />
-            <label htmlFor="replaceCheckbox">{resources.messages['replaceData']}</label>
-            <div>{resources.messages['importPreviousDataConfirm']}</div>
+            <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
+            <div className={styles.checkboxWrapper}>
+              <Checkbox
+                id="replaceCheckbox"
+                inputId="replaceCheckbox"
+                isChecked={designerState.replaceData}
+                onChange={() =>
+                  designerDispatch({
+                    type: 'SET_REPLACE_DATA',
+                    payload: { value: !designerState.replaceData }
+                  })
+                }
+                role="checkbox"
+              />
+              <label htmlFor="replaceCheckbox">
+                <a
+                  onClick={() =>
+                    designerDispatch({
+                      type: 'SET_REPLACE_DATA',
+                      payload: { value: !designerState.replaceData }
+                    })
+                  }>
+                  {resources.messages['replaceData']}
+                </a>
+              </label>
+            </div>
           </Dialog>
         )}
       </div>
