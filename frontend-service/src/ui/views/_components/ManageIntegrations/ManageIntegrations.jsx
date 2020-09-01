@@ -314,7 +314,7 @@ export const ManageIntegrations = ({
 
   const renderDialogFooterTooltipContent = () => {
     if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
-    else if (isExtensionDuplicated) return 'duplicatedExtensions';
+    else if (isExtensionDuplicated) return 'duplicatedIntegrationOperation';
     else return 'fcSubmitButtonDisabled';
   };
 
