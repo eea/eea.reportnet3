@@ -14,6 +14,18 @@
 
 .Dialog {
   width: 55vw;
+  .checkboxWrapper {
+    margin-top: 1rem;
+    :global .p-checkbox {
+      margin-left: 0 !important;
+    }
+    label {
+      a {
+        cursor: pointer;
+        color: var(--main-font-color);
+      }
+    }
+  }
 }
 
 .FileUpload .span {
