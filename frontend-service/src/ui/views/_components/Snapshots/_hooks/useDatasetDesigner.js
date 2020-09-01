@@ -94,7 +94,6 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
           datasetId
         }
       });
-    } finally {
     }
   };
 
