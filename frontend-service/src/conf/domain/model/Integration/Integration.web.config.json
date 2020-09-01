@@ -7,5 +7,6 @@
   "getProcesses": "/fme/findItems?datasetId={:datasetId}&repository={:repositoryName}",
   "getRepositories": "/fme/findRepositories?datasetId={:datasetId}",
   "runIntegration": "/integration/{:integrationId}/runIntegration/dataset/{:datasetId}",
+  "runIntegrationWithReplace": "/integration/{:integrationId}/runIntegration/dataset/{:datasetId}?replace={:replaceData}",
   "update": "/integration/update"
 }
