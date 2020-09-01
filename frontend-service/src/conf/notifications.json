@@ -478,7 +478,7 @@
           }
         },
         {
-          "key": "SNAPSHOT_CREATION_BLOCKED_ERROR",          
+          "key": "SNAPSHOT_ACTION_BLOCKED_ERROR",
           "lifeTime": 5000
         }
       ]

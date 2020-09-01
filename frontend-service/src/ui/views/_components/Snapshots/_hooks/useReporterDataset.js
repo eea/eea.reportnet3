@@ -40,7 +40,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_CREATION_BLOCKED_ERROR'
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -58,10 +58,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.deleteByIdReporter(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'DELETED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'DELETED_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -93,10 +99,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'RELEASED_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -106,10 +118,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
     try {
       await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {
-      notificationContext.add({
-        type: 'RESTORED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'RESTORED_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }

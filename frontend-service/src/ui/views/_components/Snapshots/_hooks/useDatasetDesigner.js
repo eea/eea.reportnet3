@@ -38,7 +38,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_CREATION_BLOCKED_ERROR'
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -59,13 +59,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       await SnapshotService.deleteByIdDesigner(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      NotificationContext.add({
-        type: 'SNAPSHOT_DELETE_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_DELETE_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -97,13 +103,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'SNAPSHOT_RELEASE_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_RELEASE_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -113,13 +125,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     try {
       await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
     } catch (error) {
-      notificationContext.add({
-        type: 'SNAPSHOT_RESTORING_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_RESTORING_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
