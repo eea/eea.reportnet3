@@ -1,6 +1,7 @@
-import React, { useContext, useEffect, useRef, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -14,18 +15,18 @@ import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { UserService } from 'core/services/User';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
   const notificationContext = useContext(NotificationContext);
@@ -176,9 +177,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       />
       {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>
-        {userContext.firstName !== '' && userContext.lastName !== ''
+        {!isUndefined(userContext.email) &&
+        !isUndefined(userContext.lastName) &&
+        userContext.firstName !== '' &&
+        userContext.lastName !== ''
           ? `${userContext.firstName} ${userContext.lastName}`
-          : userContext.email !== ''
+          : !isUndefined(userContext.email) && userContext.email !== ''
           ? userContext.email
           : userContext.preferredUsername}
       </span>

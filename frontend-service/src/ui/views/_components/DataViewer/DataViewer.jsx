@@ -1121,6 +1121,7 @@ const DataViewer = withRouter(
               multiple={false}
               name="file"
               onUpload={onUpload}
+              replaceCheck={true}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
                 datasetId: datasetId,
                 tableId: tableId
@@ -1138,7 +1139,6 @@ const DataViewer = withRouter(
             visible={isAttachFileVisible}>
             <CustomFileUpload
               accept={getAttachExtensions || '*'}
-              // accept=".txt"
               chooseLabel={resources.messages['selectFile']}
               className={styles.FileUpload}
               fileLimit={1}
