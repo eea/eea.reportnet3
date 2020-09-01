@@ -10,7 +10,7 @@ import isUndefined from 'lodash/isUndefined';
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
-import styles from './DataViewer.module.css';
+import styles from './DataViewer.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
@@ -900,7 +900,7 @@ const DataViewer = withRouter(
     const requiredTemplate = rowData => {
       return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          {rowData.field === 'Required' ? (
+          {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
@@ -1061,7 +1061,6 @@ const DataViewer = withRouter(
         {isColumnInfoVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
@@ -1085,7 +1084,11 @@ const DataViewer = withRouter(
                 ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
                   ? ['maxSize']
-                  : [])
+                  : []),
+                !isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
+                DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).readOnly
+                  ? 'readOnly'
+                  : ''
               ])}>
               {['field', 'value'].map((column, i) => (
                 <Column
@@ -1103,7 +1106,6 @@ const DataViewer = withRouter(
         {importTableDialogVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadTable']}${tableName}`}
             onHide={() => setImportTableDialogVisible(false)}
@@ -1119,6 +1121,7 @@ const DataViewer = withRouter(
               multiple={false}
               name="file"
               onUpload={onUpload}
+              replaceCheck={true}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
                 datasetId: datasetId,
                 tableId: tableId
@@ -1130,14 +1133,12 @@ const DataViewer = withRouter(
         {isAttachFileVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileAttachFooter}
             header={`${resources.messages['uploadAttachment']}`}
             onHide={() => setIsAttachFileVisible(false)}
             visible={isAttachFileVisible}>
             <CustomFileUpload
               accept={getAttachExtensions || '*'}
-              // accept=".txt"
               chooseLabel={resources.messages['selectFile']}
               className={styles.FileUpload}
               fileLimit={1}
@@ -1291,7 +1292,6 @@ const DataViewer = withRouter(
           <Dialog
             className={'map-data'}
             blockScroll={false}
-            dismissableMask={false}
             // contentStyle={
             //   isMapOpen
             //     ? { height: '80%', maxHeight: '80%', width: '100%' }

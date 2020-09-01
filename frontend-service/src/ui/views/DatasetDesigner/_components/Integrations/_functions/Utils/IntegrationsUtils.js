@@ -7,7 +7,7 @@ const parseIntegration = data => ({
   id: data.integrationId,
   isUpdatedVisible: true,
   name: data.integrationName,
-  operation: { label: data.operation, value: data.operation },
+  operation: { label: data.operationName, value: data.operation },
   processName: !isNil(data.internalParameters.processName)
     ? { label: data.internalParameters.processName, value: data.internalParameters.processName }
     : {},
