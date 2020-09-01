@@ -124,7 +124,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
         });
       } else {
         notificationContext.add({
-          type: 'RESTORED_BY_ID_REPORTER_ERROR',
+          type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT',
           content: {}
         });
       }

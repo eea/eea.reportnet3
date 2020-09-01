@@ -21,13 +21,6 @@
           }
         },
         {
-          "key": "RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
           "key": "UPLOAD_DOCUMENT_FAILED_EVENT",
           "navigateTo": {
             "section": "DOCUMENTS",
@@ -101,13 +94,6 @@
         },
         {
           "key": "SNAPSHOT_RELEASE_ERROR",
-          "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "SNAPSHOT_RESTORING_ERROR",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -195,9 +181,6 @@
         },
         {
           "key": "RELEASED_BY_ID_REPORTER_ERROR"
-        },
-        {
-          "key": "RESTORED_BY_ID_REPORTER_ERROR"
         },
         {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
@@ -549,13 +532,6 @@
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
-          }
-        },
-        {
-          "key": "RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
           }
         },
         {

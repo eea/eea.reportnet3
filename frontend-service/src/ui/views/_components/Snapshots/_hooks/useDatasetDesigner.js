@@ -130,7 +130,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
         });
       } else {
         notificationContext.add({
-          type: 'SNAPSHOT_RESTORING_ERROR',
+          type: 'RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT',
           content: {
             dataflowId,
             datasetId
