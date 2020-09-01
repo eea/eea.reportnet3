@@ -12,16 +12,17 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   const [snapshotListData, setSnapshotListData] = useState([]);
 
   const snapshotInitialState = {
+    action: () => {},
     apiCall: '',
     createdAt: '',
+    datasetId,
+    datasetSchemaId,
     description: '',
-    dialogMessage: '',
     dialogConfirmMessage: '',
     dialogConfirmQuestion: '',
-    datasetSchemaId,
-    datasetId,
-    snapShotId: '',
-    action: () => {}
+    dialogMessage: '',
+    isConfirmDisabled: false,
+    snapShotId: ''
   };
 
   useEffect(() => {

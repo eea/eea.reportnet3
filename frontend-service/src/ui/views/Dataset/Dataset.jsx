@@ -158,10 +158,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const {
     isLoadingSnapshotListData,
-    isSnapshotsBarVisible,
-    setIsSnapshotsBarVisible,
     isSnapshotDialogVisible,
+    isSnapshotsBarVisible,
     setIsSnapshotDialogVisible,
+    setIsSnapshotsBarVisible,
     snapshotDispatch,
     snapshotListData,
     snapshotState
@@ -639,7 +639,7 @@ export const Dataset = withRouter(({ match, history }) => {
         isSnapshotsBarVisible: isSnapshotsBarVisible,
         setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
         snapshotDispatch: snapshotDispatch,
-        snapshotState: snapshotState,
+        snapshotState: snapshotState
       }}>
       <Title
         title={`${datasetTitle()}`}
@@ -889,10 +889,10 @@ export const Dataset = withRouter(({ match, history }) => {
         </ConfirmDialog>
       )}
       <Snapshots
-        snapshotListData={snapshotListData}
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        snapshotListData={snapshotListData}
       />
     </SnapshotContext.Provider>
   );

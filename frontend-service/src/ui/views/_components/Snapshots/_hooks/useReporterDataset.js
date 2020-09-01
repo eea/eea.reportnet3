@@ -14,16 +14,17 @@ const useReporterDataset = (datasetId, dataflowId) => {
   const [snapshotListData, setSnapshotListData] = useState([]);
 
   const snapshotInitialState = {
+    action: () => {},
     apiCall: '',
     createdAt: '',
-    description: '',
-    dialogMessage: '',
-    dialogConfirmMessage: '',
-    dialogConfirmQuestion: '',
     dataflowId,
     datasetId,
-    snapShotId: '',
-    action: () => {}
+    description: '',
+    dialogConfirmMessage: '',
+    dialogConfirmQuestion: '',
+    dialogMessage: '',
+    isConfirmDisabled: false,
+    snapShotId: ''
   };
 
   useEffect(() => {
@@ -37,7 +38,6 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
       onLoadSnapshotList();
     } catch (error) {
-     
       if (error.response.status === 423) {
         notificationContext.add({
           type: 'SNAPSHOT_CREATION_BLOCKED_ERROR'
