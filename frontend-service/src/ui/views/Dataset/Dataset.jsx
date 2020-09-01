@@ -346,7 +346,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const cleanImportOtherSystemsDialog = () => {
     setReplaceData(false);
     onSetVisible(setIsImportOtherSystemsDialogVisible, false);
-  }
+  };
 
   const onImportOtherSystems = async () => {
     try {
@@ -358,7 +358,7 @@ export const Dataset = withRouter(({ match, history }) => {
       );
       if (dataImported) {
         setIsDataLoaded(true);
-      }      
+      }
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -633,7 +633,7 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
-  const renderImportOtherSystemsFooter = ( 
+  const renderImportOtherSystemsFooter = (
     <Fragment>
       <Button
         className="p-button-animated-blink"
@@ -881,15 +881,19 @@ export const Dataset = withRouter(({ match, history }) => {
           header={resources.messages['importPreviousDataHeader']}
           onHide={cleanImportOtherSystemsDialog}
           visible={isImportOtherSystemsDialogVisible}>
-          <Checkbox
-            id="replaceCheckbox"
-            inputId="replaceCheckbox"
-            isChecked={replaceData}
-            onChange={() => setReplaceData(!replaceData)}
-            role="checkbox"
-          />
-          <label htmlFor="replaceCheckbox">{resources.messages['replaceData']}</label>
-          <div>{resources.messages['importPreviousDataConfirm']}</div>
+          <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              id="replaceCheckbox"
+              inputId="replaceCheckbox"
+              isChecked={replaceData}
+              onChange={() => setReplaceData(!replaceData)}
+              role="checkbox"
+            />
+            <label htmlFor="replaceCheckbox">
+              <a onClick={() => setReplaceData(!replaceData)}>{resources.messages['replaceData']}</a>
+            </label>
+          </div>
         </Dialog>
       )}
       {deleteDialogVisible && (
