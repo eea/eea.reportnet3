@@ -848,12 +848,15 @@
     "externalImportDesignFromOtherSystemCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "import": "Import",
+    "replaceData": "Replace data",
     "externalImportReportingFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "datasetImportInit": "Importing data in <a title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportDesignFailedEvent": "Failed exporting <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "snapshotActionBlockedError": "Could not perform Manage copy action due to previous action blocking"
+    "snapshotActionBlockedError": "Could not perform Manage copy action due to previous action blocking",
+    "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension."
   }
 }

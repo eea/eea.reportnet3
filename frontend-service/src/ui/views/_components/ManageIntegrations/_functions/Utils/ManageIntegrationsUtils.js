@@ -1,9 +1,22 @@
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 
+const getIntegrations = (list = [], id) => list.filter(integration => integration.integrationId !== id);
+
 const getParameterData = (id, option, parameters) => {
   const selectedParameter = parameters.filter(parameter => parameter.id === id);
   if (!isEmpty(selectedParameter)) return selectedParameter[0][option];
+};
+
+const isDuplicatedExtension = (extension, operation, integrationsList = [], id) => {
+  const integrations = getIntegrations(integrationsList, id);
+
+  const operationsList = integrations.filter(
+    integration => integration.operation === operation && integration.operation !== 'IMPORT_FROM_OTHER_SYSTEM'
+  );
+  const fileExtensionList = operationsList.map(operation => operation.internalParameters.fileExtension);
+
+  return (!isEmpty(operationsList) ? fileExtensionList : []).includes(extension);
 };
 
 const isDuplicatedIntegration = (integration, incomingIntegration) => {
@@ -121,6 +134,7 @@ const toggleParameterEditorView = (id, option, parameters) => {
 
 export const ManageIntegrationsUtils = {
   getParameterData,
+  isDuplicatedExtension,
   isDuplicatedIntegration,
   isDuplicatedIntegrationName,
   isDuplicatedParameter,

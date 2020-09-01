@@ -1,3 +1,5 @@
+import isUndefined from 'lodash/isUndefined';
+
 import { IntegrationConfig } from 'conf/domain/model/Integration';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
@@ -62,12 +64,20 @@ export const apiIntegration = {
     return response.data;
   },
 
-  runIntegration: async (integrationId, datasetId) => {
-    const response = await HTTPRequester.post({
-      url: getUrl(IntegrationConfig.runIntegration, { integrationId, datasetId })
-    });
+  runIntegration: async (integrationId, datasetId, replaceData) => {
+    if (isUndefined(replaceData)) {
+      const response = await HTTPRequester.post({
+        url: getUrl(IntegrationConfig.runIntegration, { integrationId, datasetId })
+      });
 
-    return response.data;
+      return response.data;
+    } else {
+      const response = await HTTPRequester.post({
+        url: getUrl(IntegrationConfig.runIntegrationWithReplace, { integrationId, datasetId, replaceData })
+      });
+
+      return response.data;
+    }
   },
 
   update: async integration => {
