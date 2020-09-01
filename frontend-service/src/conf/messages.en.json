@@ -857,6 +857,6 @@
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportDesignFailedEvent": "Failed exporting <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "duplicatedExtensions": "The integration"
+    "duplicatedExtensions": "There is already an external integration with the same operation type and file extension."
   }
 }

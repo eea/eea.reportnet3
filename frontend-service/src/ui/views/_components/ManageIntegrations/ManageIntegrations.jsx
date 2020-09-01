@@ -312,6 +312,12 @@ export const ManageIntegrations = ({
     }
   };
 
+  const renderDialogFooterTooltipContent = () => {
+    if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
+    else if (isExtensionDuplicated) return 'duplicatedExtensions';
+    else return 'fcSubmitButtonDisabled';
+  };
+
   const renderDialogFooter = (
     <Fragment>
       <span data-tip data-for="integrationTooltip">
@@ -335,9 +341,7 @@ export const ManageIntegrations = ({
 
       {(isEmptyForm || isIntegrationNameDuplicated || isExtensionDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {isIntegrationNameDuplicated
-            ? resources.messages['duplicatedIntegrationName']
-            : resources.messages['fcSubmitButtonDisabled']}
+          {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
     </Fragment>
