@@ -62,22 +62,34 @@ import org.springframework.stereotype.Service;
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant DELETE_FROM_DATASET: {@value}. */
+  /**
+   * The Constant DELETE_FROM_DATASET: {@value}.
+   */
   private static final String DELETE_FROM_DATASET = "DELETE FROM dataset_";
 
-  /** The Constant COPY_DATASET: {@value}. */
+  /**
+   * The Constant COPY_DATASET: {@value}.
+   */
   private static final String COPY_DATASET = "COPY dataset_";
 
-  /** The Constant SNAPSHOT_: {@value}. */
+  /**
+   * The Constant SNAPSHOT_: {@value}.
+   */
   private static final String SNAPSHOT_QUERY = "snapshot_";
 
-  /** The Constant COLLECTION: {@value}. */
+  /**
+   * The Constant COLLECTION: {@value}.
+   */
   private static final String COLLECTION = "collection";
 
-  /** The Constant SCHEMA: {@value}. */
+  /**
+   * The Constant SCHEMA: {@value}.
+   */
   private static final String SCHEMA = "schema";
 
-  /** The Constant SNAPSHOT: {@value}. */
+  /**
+   * The Constant SNAPSHOT: {@value}.
+   */
   private static final String SNAPSHOT = "snapshot";
 
   /**
@@ -136,7 +148,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /** the dataset users. */
+  /**
+   * the dataset users.
+   */
 
   @Value("${dataset.users}")
   private String datasetUsers;
@@ -198,15 +212,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /** The data set snapshot controller zuul. */
+  /**
+   * The data set snapshot controller zuul.
+   */
   @Autowired
   private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
-  /** The dataset controller zuul. */
+  /**
+   * The dataset controller zuul.
+   */
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
-  /** The data set metabase controller zuul. */
+  /**
+   * The data set metabase controller zuul.
+   */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
@@ -365,13 +385,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
-
   /**
    * Creates the data snapshot.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
@@ -522,6 +542,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   *
    * @return the string
    */
   private String checkType(Long idDataset, Long idSnapshot) {
@@ -544,6 +565,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param type the type
+   *
    * @return the event type
    */
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type) {
@@ -590,20 +612,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException {
 
     EventType successEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
-            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
-            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
@@ -696,7 +717,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     String signature = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+        : LockSignature.RESTORE_SNAPSHOT.getValue()
         : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idReportingDataset);
@@ -795,6 +816,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   *
    * @return the string
    */
   private String composeDeleteSql(Long idReportingDataset, Long partitionId,
