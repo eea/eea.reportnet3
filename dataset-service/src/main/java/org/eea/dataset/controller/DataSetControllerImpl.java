@@ -171,6 +171,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    * @param idTableSchema the id table schema
+   * @param replace the replace
    */
   @Override
   @HystrixCommand
@@ -219,11 +220,6 @@ public class DataSetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
 
-
-    // delete if replace is true
-    if (replace) {
-      datasetService.deleteTableBySchema(idTableSchema, datasetId);
-    }
     // extract the filename
     String fileName = file.getOriginalFilename();
 
@@ -231,7 +227,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema, replace);
     } catch (IOException e) {
       LOG_ERROR.error("Error importing a file into a table of the dataset {}. Message: {}",
           datasetId, e.getMessage());
@@ -244,17 +240,20 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param replace the replace
    */
   @Override
   @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
   @PostMapping("{id}/loadDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
-  public void loadDatasetData(@PathVariable("id") Long datasetId,
+  public void loadDatasetData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace) {
 
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
@@ -264,12 +263,8 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(
           "Error importing a file into a table of the datasetId {}. The file is null or empty",
           datasetId);
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-    }
-
-    // delete if replace is true
-    if (replace) {
-      datasetService.deleteImportData(datasetId);
     }
 
     // extract the filename
@@ -277,11 +272,13 @@ public class DataSetControllerImpl implements DatasetController {
 
     // extract the file content
     try {
+      // this method would release the lock
       fileTreatmentHelper.executeExternalIntegrationFileProcess(datasetId, fileName,
-          file.getInputStream());
-    } catch (IOException | EEAException e) {
+          file.getInputStream(), replace);
+    } catch (IOException e) {
       LOG_ERROR.error("Error importing a file into dataset {}. Message: {}", datasetId,
           e.getMessage());
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
