@@ -212,10 +212,10 @@ public class DataSetControllerImplTest {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
     dataSetControllerImpl.loadTableData(1L, file, "example", true);
     Mockito.verify(fileTreatmentHelper, times(1)).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   /**
@@ -1071,37 +1071,11 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
     Mockito.when(file.isEmpty()).thenReturn(false);
     Mockito.when(file.getOriginalFilename()).thenReturn("fileName");
-    Mockito.doNothing().when(fileTreatmentHelper)
-        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetData(1L, file, true);
-    Mockito.verify(fileTreatmentHelper, times(1))
-        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    Mockito.verify(fileTreatmentHelper, times(1)).executeExternalIntegrationFileProcess(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
-  /**
-   * Load dataset data test integration exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetDataTestIntegrationException() throws EEAException {
-    MultipartFile file = Mockito.mock(MultipartFile.class);
-    Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
-    Mockito.when(file.isEmpty()).thenReturn(false);
-    Mockito.when(file.getOriginalFilename()).thenReturn("fileName");
-    Mockito
-        .doThrow(new EEAException(
-            String.format("Error loading data into dataset %s via external integration", 1L)))
-        .when(fileTreatmentHelper)
-        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
-    try {
-      dataSetControllerImpl.loadDatasetData(1L, file, false);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(e.getReason(),
-          String.format("Error loading data into dataset %s via external integration", 1L));
-      throw e;
-    }
-  }
 
   /**
    * Load dataset data empty file.
