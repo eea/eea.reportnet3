@@ -154,11 +154,10 @@ public interface IntegrationController {
    *
    * @param integrationId the integration id
    * @param datasetId the dataset id
-   * @return the execution result VO
+   * @param replace the replace
    */
   @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
-  ExecutionResultVO executeExternalIntegration(
-      @PathVariable(value = "integrationId") Long integrationId,
+  void executeExternalIntegration(@PathVariable(value = "integrationId") Long integrationId,
       @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "replace", defaultValue = "false") Boolean replace);
 }

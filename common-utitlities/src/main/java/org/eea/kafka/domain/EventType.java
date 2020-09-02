@@ -284,7 +284,12 @@ public enum EventType {
 
   /** The copy dataset schema not found event. */
   COPY_DATASET_SCHEMA_NOT_FOUND_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "copy_dataset_schema_not_found_event", true);
+      "copy_dataset_schema_not_found_event", true),
+
+
+  /** The data delete to replace completed event. */
+  DATA_DELETE_TO_REPLACE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "data_delete_to_replace_completed_event", true);
 
 
 

@@ -27,11 +27,15 @@ import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -75,6 +79,10 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
 
   /**
@@ -382,27 +390,26 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @param integrationId the integration id
    * @param operation the operation
    * @param replace the replace
-   * @return the execution result VO
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
-  public ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
+  @Async
+  public void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
 
-    // Delete the previous data in the dataset if the FME has to replace the data
+    // Delete the previous data in the dataset if we have chosen it before the call to FME
     if (Boolean.TRUE.equals(replace)) {
-      LOG.info("Replacing the data in dataset {}", datasetId);
-      datasetControllerZuul.deleteDataBeforeReplacing(datasetId);
+      LOG.info("Replacing the data previous the execution of an external integration in dataset {}",
+          datasetId);
+      datasetControllerZuul.deleteDataBeforeReplacing(datasetId, integrationId, operation);
+    } else {
+      Map<String, Object> value = new HashMap<>();
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+      value.put(LiteralConstants.INTEGRATION_ID, integrationId);
+      value.put(LiteralConstants.OPERATION, operation);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT, value);
     }
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(integrationId);
-    List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
-    ExecutionResultVO result = new ExecutionResultVO();
-    if (integrations != null && !integrations.isEmpty()) {
-      result = integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME)
-          .execute(operation, null, datasetId, integrations.get(0));
-    }
-    return result;
   }
+
+
 }

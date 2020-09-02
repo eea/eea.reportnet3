@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -300,7 +301,11 @@ public interface DatasetController {
    * Delete data before replacing.
    *
    * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
    */
   @DeleteMapping("/private/{id}/deleteForReplacing")
-  void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId);
+  void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
+      @RequestParam("integrationId") Long integrationId,
+      @RequestParam("operation") IntegrationOperationTypeEnum operation);
 }

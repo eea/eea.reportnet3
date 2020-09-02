@@ -133,6 +133,8 @@ public interface IntegrationService {
    * @return the execution result VO
    * @throws EEAException the EEA exception
    */
-  ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
+  void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException;
+
+
 }

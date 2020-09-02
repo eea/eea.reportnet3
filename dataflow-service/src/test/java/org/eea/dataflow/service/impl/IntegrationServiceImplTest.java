@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,6 +74,10 @@ public class IntegrationServiceImplTest {
   /** The dataset controller zuul. */
   @Mock
   private DataSetControllerZuul datasetControllerZuul;
+
+  /** The kafka sender utils. */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Inits the mocks.
@@ -312,31 +317,19 @@ public class IntegrationServiceImplTest {
 
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
-    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
-    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
-    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
-    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
-        .thenReturn(new ExecutionResultVO());
-    ExecutionResultVO result = integrationService.executeExternalIntegration(1L, 1L,
+    integrationService.executeExternalIntegration(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
-    Assert.assertNotNull(result);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void executeExternalIntegrationReplacingDataTest() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
-    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
-    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
-    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
-    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
-        .thenReturn(new ExecutionResultVO());
-    ExecutionResultVO result = integrationService.executeExternalIntegration(1L, 1L,
+
+    Mockito.doNothing().when(datasetControllerZuul).deleteDataBeforeReplacing(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
+    integrationService.executeExternalIntegration(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, true);
-    Assert.assertNotNull(result);
+    Mockito.verify(datasetControllerZuul, times(1)).deleteDataBeforeReplacing(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 }

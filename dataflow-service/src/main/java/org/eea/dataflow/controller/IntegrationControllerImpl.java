@@ -332,7 +332,6 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @param integrationId the integration id
    * @param datasetId the dataset id
    * @param replace the replace
-   * @return the execution result VO
    */
   @Override
   @HystrixCommand
@@ -340,14 +339,12 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiOperation(
       value = "Run an external integration process providing the integration id and the dataset where applies",
       response = ExecutionResultVO.class)
-  public ExecutionResultVO executeExternalIntegration(
-      @PathVariable(value = "integrationId") Long integrationId,
+  public void executeExternalIntegration(@PathVariable(value = "integrationId") Long integrationId,
       @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "replace", defaultValue = "false") Boolean replace) {
 
-    ExecutionResultVO execution = null;
     try {
-      execution = integrationService.executeExternalIntegration(datasetId, integrationId,
+      integrationService.executeExternalIntegration(datasetId, integrationId,
           IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, replace);
     } catch (EEAException e) {
       LOG_ERROR.error(
@@ -355,6 +352,6 @@ public class IntegrationControllerImpl implements IntegrationController {
           integrationId, datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-    return execution;
+
   }
 }
