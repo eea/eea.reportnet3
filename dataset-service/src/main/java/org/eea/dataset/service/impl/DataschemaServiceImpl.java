@@ -410,42 +410,55 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           schemasRepository.findTableSchema(datasetSchemaId, tableSchemaVO.getIdTableSchema());
 
       if (tableSchema != null) {
-        if (tableSchemaVO.getDescription() != null) {
-          tableSchema.put("description", tableSchemaVO.getDescription());
-        }
-        if (tableSchemaVO.getNameTableSchema() != null) {
-          tableSchema.put("nameTableSchema", tableSchemaVO.getNameTableSchema());
-        }
-        if (tableSchemaVO.getReadOnly() != null) {
-          tableSchema.put("readOnly", tableSchemaVO.getReadOnly());
-        }
-        if (tableSchemaVO.getToPrefill() != null) {
-          tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
-        }
-        if (tableSchemaVO.getFixedNumber() != null) {
-          tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
-        }
-        if (tableSchemaVO.getNotEmpty() != null) {
-          Boolean oldValue = tableSchema.getBoolean("notEmpty");
-          Boolean newValue = tableSchemaVO.getNotEmpty();
-          tableSchema.put("notEmpty", newValue);
-          updateNotEmptyRule(oldValue, newValue, tableSchemaVO.getIdTableSchema(), datasetId);
-        }
-
-        if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
-            .getModifiedCount() != 1) {
-          LOG.error(
-              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
-          throw new EEAException(
-              String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
-        }
+        tableShemaAddAtributes(datasetId, tableSchemaVO, datasetSchemaId, tableSchema);
       } else {
-        LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+        LOG.error("Table with schema {} from the datasetId {} not found", tableSchema, datasetId);
         throw new EEAException(
             String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
       }
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
+    }
+  }
+
+  /**
+   * Table shema add atributes.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaVO the table schema VO
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchema the table schema
+   * @throws EEAException the EEA exception
+   */
+  private void tableShemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
+      String datasetSchemaId, Document tableSchema) throws EEAException {
+    if (tableSchemaVO.getDescription() != null) {
+      tableSchema.put("description", tableSchemaVO.getDescription());
+    }
+    if (tableSchemaVO.getNameTableSchema() != null) {
+      tableSchema.put("nameTableSchema", tableSchemaVO.getNameTableSchema());
+    }
+    if (tableSchemaVO.getReadOnly() != null) {
+      tableSchema.put("readOnly", tableSchemaVO.getReadOnly());
+    }
+    if (tableSchemaVO.getToPrefill() != null) {
+      tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
+    }
+    if (tableSchemaVO.getFixedNumber() != null) {
+      tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
+    }
+    if (tableSchemaVO.getNotEmpty() != null) {
+      Boolean oldValue = tableSchema.getBoolean("notEmpty");
+      Boolean newValue = tableSchemaVO.getNotEmpty();
+      tableSchema.put("notEmpty", newValue);
+      updateNotEmptyRule(oldValue, newValue, tableSchemaVO.getIdTableSchema(), datasetId);
+    }
+
+    if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema).getModifiedCount() != 1) {
+      LOG.error("Error updating the table with id schema {} from the dataset id {}", tableSchema,
+          datasetId);
+      throw new EEAException(
+          String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
     }
   }
 
@@ -465,7 +478,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
     if (tableSchema == null) {
-      LOG.error(String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+      LOG.error("Table with schema {} from the datasetId {} not found", tableSchema, datasetId);
       throw new EEAException(
           String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
     }
@@ -660,15 +673,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getRequired() != null) {
       fieldSchema.put("required", fieldSchemaVO.getRequired());
     }
-    if (fieldSchemaVO.getPk() != null) {
-      fieldSchema.put("pk", fieldSchemaVO.getPk());
-    }
-    if (fieldSchemaVO.getPkMustBeUsed() != null) {
-      fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
-    }
-    if (fieldSchemaVO.getPkHasMultipleValues() != null) {
-      fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
-    }
+    pkFieldSchemaValues(fieldSchemaVO, fieldSchema);
     Float size = 20f;
     if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
         && fieldSchemaVO.getMaxSize() < 20) {
@@ -699,6 +704,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchemaVO.getReferencedField().getIdPk(), true);
     }
     return typeModified;
+  }
+
+  /**
+   * Pk field schema values.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchema the field schema
+   */
+  private void pkFieldSchemaValues(FieldSchemaVO fieldSchemaVO, Document fieldSchema) {
+    if (fieldSchemaVO.getPk() != null) {
+      fieldSchema.put("pk", fieldSchemaVO.getPk());
+    }
+    if (fieldSchemaVO.getPkMustBeUsed() != null) {
+      fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
+    }
+    if (fieldSchemaVO.getPkHasMultipleValues() != null) {
+      fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
+    }
   }
 
   /**

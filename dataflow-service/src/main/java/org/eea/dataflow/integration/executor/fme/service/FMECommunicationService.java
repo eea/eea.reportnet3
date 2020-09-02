@@ -49,8 +49,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class FMECommunicationService.
@@ -72,6 +70,12 @@ public class FMECommunicationService {
 
   /** The Constant ACCEPT: {@value}. */
   private static final String ACCEPT = "Accept";
+
+  /** The Constant DATASETID: {@value}. */
+  private static final String DATASETID = "datasetId";
+
+  /** The Constant PROVIDERID: {@value}. */
+  private static final String PROVIDERID = "providerId";
 
   /** The fme host. */
   @Value("${integration.fme.host}")
@@ -130,15 +134,6 @@ public class FMECommunicationService {
     Integer result = 0;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
-      String textBody = fmeAsyncJob.toString();
-      ObjectMapper mapper = new ObjectMapper();
-      String jsonString = null;
-      try {
-        jsonString = mapper.writeValueAsString(fmeAsyncJob);
-      } catch (JsonProcessingException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
@@ -167,12 +162,12 @@ public class FMECommunicationService {
       String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put(DATASETID, String.valueOf(idDataset));
     String auxURL =
         "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design?createDirectories=true&overwrite=true";
 
     if (null != idProvider) {
-      uriParams.put("providerId", idProvider);
+      uriParams.put(PROVIDERID, idProvider);
       auxURL =
           "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
     }
@@ -205,10 +200,10 @@ public class FMECommunicationService {
   public HttpStatus createDirectory(Long idDataset, String idProvider) {
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put(DATASETID, String.valueOf(idDataset));
     String auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design";
     if (null != idProvider) {
-      uriParams.put("providerId", idProvider);
+      uriParams.put(PROVIDERID, idProvider);
       auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}";
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
@@ -246,11 +241,11 @@ public class FMECommunicationService {
   public InputStream receiveFile(Long idDataset, Long providerId, String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put(DATASETID, String.valueOf(idDataset));
     String auxURL =
         "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design/ExportFiles/{fileName}?accept=contents&disposition=attachment";
     if (null != providerId) {
-      uriParams.put("providerId", providerId.toString());
+      uriParams.put(PROVIDERID, providerId.toString());
       auxURL =
           "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}/ExportFiles/{fileName}?accept=contents&disposition=attachment";
     }
@@ -274,8 +269,8 @@ public class FMECommunicationService {
     }
 
 
-    InputStream initialStream = new ByteArrayInputStream(checkResult.getBody());
-    return initialStream;
+    return new ByteArrayInputStream(checkResult.getBody());
+
 
   }
 

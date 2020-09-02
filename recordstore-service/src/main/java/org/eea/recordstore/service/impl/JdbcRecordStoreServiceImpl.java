@@ -618,13 +618,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
-        ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
-        ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
@@ -717,7 +717,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     String signature = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-        : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
         : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idReportingDataset);
@@ -772,7 +772,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
 
-      String copyQueryAttachment = "COPY dataset_" + idReportingDataset
+      String copyQueryAttachment = COPY_DATASET + idReportingDataset
           + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
       copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
 
