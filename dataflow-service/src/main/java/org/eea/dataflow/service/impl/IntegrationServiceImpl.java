@@ -18,6 +18,7 @@ import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -26,6 +27,7 @@ import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +72,14 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The integration mapper. */
   @Autowired
   private IntegrationMapper integrationMapper;
+
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul datasetControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
 
   /**
@@ -369,27 +379,36 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
 
+
   /**
    * Execute external integration.
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
    * @param operation the operation
-   * @return the execution result VO
+   * @param replace the replace
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
-      IntegrationOperationTypeEnum operation) throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(integrationId);
-    List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
-    ExecutionResultVO result = new ExecutionResultVO();
-    if (integrations != null && !integrations.isEmpty()) {
-      result = integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME)
-          .execute(operation, null, datasetId, integrations.get(0));
+  public void executeExternalIntegration(Long datasetId, Long integrationId,
+      IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
+
+    // Delete the previous data in the dataset if we have chosen it before the call to FME
+    if (Boolean.TRUE.equals(replace)) {
+      LOG.info("Replacing the data previous the execution of an external integration in dataset {}",
+          datasetId);
+      datasetControllerZuul.deleteDataBeforeReplacing(datasetId, integrationId, operation);
+    } else {
+      IntegrationVO integrationVO = new IntegrationVO();
+      integrationVO.setId(integrationId);
+      List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
+      if (integrations != null && !integrations.isEmpty()) {
+        integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null,
+            datasetId, integrations.get(0));
+      }
     }
-    return result;
   }
+
+
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -115,6 +116,28 @@ public class DeleteHelper {
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
         value, notificationVO);
+  }
+
+
+  /**
+   * Execute delete import data async before replacing.
+   *
+   * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
+   */
+  @Async
+  public void executeDeleteImportDataAsyncBeforeReplacing(Long datasetId, Long integrationId,
+      IntegrationOperationTypeEnum operation) {
+    datasetService.deleteImportData(datasetId);
+    LOG.info("All data value deleted from datasetId {}. Next step call the FME by the kafka event",
+        datasetId);
+    // Send the kafka event after deleting to call FME
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.INTEGRATION_ID, integrationId);
+    value.put(LiteralConstants.OPERATION, operation);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT, value);
   }
 
 }

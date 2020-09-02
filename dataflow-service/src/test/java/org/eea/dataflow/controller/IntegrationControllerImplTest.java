@@ -39,6 +39,8 @@ public class IntegrationControllerImplTest {
   @Mock
   private IntegrationService integrationService;
 
+
+
   /**
    * Inits the mocks.
    */
@@ -319,18 +321,20 @@ public class IntegrationControllerImplTest {
   }
 
   @Test
-  public void executeExternalIntegrationTest() {
-    ExecutionResultVO response = integrationControllerImpl.executeExternalIntegration(1L, 1L);
-    Assert.assertNull(response);
+  public void executeExternalIntegrationTest() throws EEAException {
+
+    integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
+    Mockito.verify(integrationService, times(1)).executeExternalIntegration(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void executeExternalIntegrationExceptionTest() throws EEAException {
 
-    Mockito.when(integrationService.executeExternalIntegration(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.any())).thenThrow(EEAException.class);
+    Mockito.doThrow(EEAException.class).when(integrationService).executeExternalIntegration(
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any());
     try {
-      integrationControllerImpl.executeExternalIntegration(1L, 1L);
+      integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
