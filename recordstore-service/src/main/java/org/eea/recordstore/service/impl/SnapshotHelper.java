@@ -46,7 +46,9 @@ public class SnapshotHelper implements DisposableBean {
   @Value("${snapshot.task.parallelism}")
   private int maxRunningTasks;
 
-  /** The restoration executor service. */
+  /**
+   * The restoration executor service.
+   */
   private ExecutorService restorationExecutorService;
 
   /**
@@ -87,6 +89,7 @@ public class SnapshotHelper implements DisposableBean {
    * @param user the user
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   *
    * @throws EEAException the eea exception
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
@@ -123,39 +126,42 @@ public class SnapshotHelper implements DisposableBean {
    * @param deleteData the delete data
    */
 
-  /**
-   * Instantiates a new restoration task.
-   *
-   * @param datasetId the dataset id
-   * @param idSnapshot the id snapshot
-   * @param idPartition the id partition
-   * @param datasetType the dataset type
-   * @param user the user
-   * @param isSchemaSnapshot the is schema snapshot
-   * @param deleteData the delete data
-   */
   @AllArgsConstructor
   private class RestorationTask {
 
-    /** The dataset id. */
+    /**
+     * The dataset id.
+     */
     Long datasetId;
 
-    /** The id snapshot. */
+    /**
+     * The id snapshot.
+     */
     Long idSnapshot;
 
-    /** The id partition. */
+    /**
+     * The id partition.
+     */
     Long idPartition;
 
-    /** The dataset type. */
+    /**
+     * The dataset type.
+     */
     DatasetTypeEnum datasetType;
 
-    /** The user. */
+    /**
+     * The user.
+     */
     String user;
 
-    /** The is schema snapshot. */
+    /**
+     * The is schema snapshot.
+     */
     Boolean isSchemaSnapshot;
 
-    /** The delete data. */
+    /**
+     * The delete data.
+     */
     Boolean deleteData;
   }
 
@@ -164,7 +170,9 @@ public class SnapshotHelper implements DisposableBean {
    */
   private class RestorationTasksExecutorThread implements Runnable {
 
-    /** The Constant MILISECONDS. */
+    /**
+     * The Constant MILISECONDS.
+     */
     private static final double MILISECONDS = 1000.0;
     /**
      * The restoration task.
