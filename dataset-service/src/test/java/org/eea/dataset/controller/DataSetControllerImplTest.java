@@ -33,7 +33,6 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,9 +118,13 @@ public class DataSetControllerImplTest {
   /** The file mock. */
   private MockMultipartFile fileMock;
 
-  /** The kafka sender utils. */
+
+  /**
+   * The delete helper.
+   */
   @Mock
-  private KafkaSenderUtils kafkaSenderUtils;
+  private DeleteHelper deleteHelper;
+
 
   /**
    * Inits the mocks.
@@ -534,11 +537,7 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
   }
 
-  /**
-   * The delete helper.
-   */
-  @Mock
-  private DeleteHelper deleteHelper;
+
 
   /**
    * Test delete import table.
@@ -1351,9 +1350,9 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteDataToReplaceTest() {
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     dataSetControllerImpl.deleteDataBeforeReplacing(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
-    Mockito.verify(datasetService, times(1)).deleteImportData(Mockito.anyLong());
+    Mockito.verify(deleteHelper, times(1)).executeDeleteImportDataAsyncBeforeReplacing(
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 }

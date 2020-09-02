@@ -317,9 +317,15 @@ public class IntegrationServiceImplTest {
 
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
     integrationService.executeExternalIntegration(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(integrationExecutorFactory, times(1)).getExecutor(Mockito.any());
   }
 
   @Test

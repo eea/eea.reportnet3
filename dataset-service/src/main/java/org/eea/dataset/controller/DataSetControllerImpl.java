@@ -3,9 +3,7 @@ package org.eea.dataset.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -28,12 +26,9 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
-import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,8 +93,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the data tables values.
@@ -860,13 +853,8 @@ public class DataSetControllerImpl implements DatasetController {
   public void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
       @RequestParam("integrationId") Long integrationId,
       @RequestParam("operation") IntegrationOperationTypeEnum operation) {
-    datasetService.deleteImportData(datasetId);
     // When deleting the data finishes, we send a kafka event to make the FME call to import data
-    Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
-    value.put(LiteralConstants.INTEGRATION_ID, integrationId);
-    value.put(LiteralConstants.OPERATION, operation);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT, value);
+    deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
   }
 
 

@@ -1,18 +1,14 @@
 package org.eea.dataflow.io.kafka.event;
 
 import static org.junit.Assert.assertEquals;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
-import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
-import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.utils.LiteralConstants;
@@ -64,14 +60,9 @@ public class ExecuteExternalIntegrationEventTest {
 
   @Test
   public void executeTest() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
-    Mockito.when(integrationService.getAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(Arrays.asList(integrationVO));
-    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
-    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
-        .thenReturn(new ExecutionResultVO());
+
+    Mockito.doNothing().when(integrationService).executeExternalIntegration(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any());
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT);
     Map<String, Object> value = new HashMap<>();
@@ -80,20 +71,16 @@ public class ExecuteExternalIntegrationEventTest {
     value.put(LiteralConstants.OPERATION, IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     event.setData(value);
     executeExternalIntegrationEvent.execute(event);
-    Mockito.verify(integrationService, Mockito.times(1))
-        .getAllIntegrationsByCriteria(Mockito.any());
+    Mockito.verify(integrationService, Mockito.times(1)).executeExternalIntegration(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void executeTestException() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+
     Mockito.doThrow(EEAException.class).when(integrationService)
-        .getAllIntegrationsByCriteria(Mockito.any());
-    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
-    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
-        .thenReturn(new ExecutionResultVO());
+        .executeExternalIntegration(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT);
     Map<String, Object> value = new HashMap<>();

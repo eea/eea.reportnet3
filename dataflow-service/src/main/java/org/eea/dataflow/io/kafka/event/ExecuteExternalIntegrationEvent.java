@@ -1,12 +1,8 @@
 package org.eea.dataflow.io.kafka.event;
 
-import java.util.List;
-import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
-import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -35,11 +31,6 @@ public class ExecuteExternalIntegrationEvent extends AbstractEEAEventHandlerComm
   /** The integration service. */
   @Autowired
   private IntegrationService integrationService;
-
-  /** The integration executor factory. */
-  @Autowired
-  private IntegrationExecutorFactory integrationExecutorFactory;
-
 
 
   /**
@@ -70,15 +61,7 @@ public class ExecuteExternalIntegrationEvent extends AbstractEEAEventHandlerComm
         .valueOf(eeaEventVO.getData().get(LiteralConstants.OPERATION).toString());
 
     try {
-      IntegrationVO integrationVO = new IntegrationVO();
-      integrationVO.setId(integrationId);
-      List<IntegrationVO> integrations =
-          integrationService.getAllIntegrationsByCriteria(integrationVO);
-
-      if (integrations != null && !integrations.isEmpty()) {
-        integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null,
-            datasetId, integrations.get(0));
-      }
+      integrationService.executeExternalIntegration(datasetId, integrationId, operation, false);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
