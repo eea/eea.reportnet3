@@ -21,3 +21,4 @@ CREATE SEQUENCE IF NOT EXISTS public.fme_jobs_id_seq
 	NO CYCLE;
 
 GRANT ALL ON TABLE public.fme_jobs TO testuser,dataflow,dataset,validation,recordstore;
+GRANT ALL ON SEQUENCE public.fme_jobs_id_seq TO testuser,dataflow,dataset,validation,recordstore;

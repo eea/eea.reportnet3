@@ -379,7 +379,8 @@ public class FMECommunicationService {
         throw new EEAForbiddenException(EEAErrorMessage.FORBIDDEN);
       }
 
-      LOG.info("Succefully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey, fmeJob);
+      LOG.info("Successfully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey,
+          fmeJob);
       return fmeJob;
     }
     LOG_ERROR.error("Invalid apiKey: {}", apiKey);
@@ -407,9 +408,7 @@ public class FMECommunicationService {
     // Set the notification EventType
     switch (fmeJob.getOperation()) {
       case IMPORT:
-        eventType = importNotification(isReporting, isStatusCompleted);
-        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
-            fmeJob.getDatasetId());
+        eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId());
         break;
       case EXPORT:
         eventType = exportNotification(isReporting, isStatusCompleted);
@@ -418,7 +417,8 @@ public class FMECommunicationService {
         eventType = exportEUDatasetNotification(isStatusCompleted);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
-        eventType = importFromOtherSystemNotification(isReporting);
+        eventType = importFromOtherSystemNotification(isReporting, isStatusCompleted,
+            fmeJob.getDatasetId());
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
@@ -478,14 +478,17 @@ public class FMECommunicationService {
     return headers;
   }
 
+
   /**
    * Import notification.
    *
-   * @param isReporting the is provider
+   * @param isReporting the is reporting
    * @param isStatusCompleted the is status completed
+   * @param datasetId the dataset id
    * @return the event type
    */
-  private EventType importNotification(boolean isReporting, boolean isStatusCompleted) {
+  private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
+      Long datasetId) {
     EventType eventType;
     if (isStatusCompleted) {
       if (isReporting) {
@@ -493,6 +496,7 @@ public class FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
       }
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
@@ -544,18 +548,31 @@ public class FMECommunicationService {
     return eventType;
   }
 
+
   /**
    * Import from other system notification.
    *
    * @param isReporting the is reporting
+   * @param isStatusCompleted the is status completed
+   * @param datasetId the dataset id
    * @return the event type
    */
-  private EventType importFromOtherSystemNotification(boolean isReporting) {
+  private EventType importFromOtherSystemNotification(boolean isReporting,
+      boolean isStatusCompleted, Long datasetId) {
     EventType eventType;
-    if (isReporting) {
-      eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+    if (isStatusCompleted) {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      }
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     } else {
-      eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT;
+      }
     }
     return eventType;
   }

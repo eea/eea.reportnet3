@@ -1,8 +1,7 @@
-package org.eea.validation.util.model;
+package org.eea.recordstore.model;
 
 import java.util.Deque;
 import org.eea.kafka.domain.EEAEventVO;
-import org.kie.api.KieBase;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,12 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ValidationProcessVO {
+public class RestoreSnapshotProcessVO {
 
-  private Integer pendingOks;
-  private Deque<EEAEventVO> pendingValidations;
-  private KieBase kieBase;
-  private boolean coordinatorProcess;
+  private Deque<EEAEventVO> pendingRestorations;
   private String requestingUser;
 
 }
