@@ -851,6 +851,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("integrationId") Long integrationId,
       @RequestParam("operation") IntegrationOperationTypeEnum operation) {
     // When deleting the data finishes, we send a kafka event to make the FME call to import data
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
   }
 
