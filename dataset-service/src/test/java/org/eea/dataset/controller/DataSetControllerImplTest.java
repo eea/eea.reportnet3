@@ -22,6 +22,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -116,6 +117,14 @@ public class DataSetControllerImplTest {
 
   /** The file mock. */
   private MockMultipartFile fileMock;
+
+
+  /**
+   * The delete helper.
+   */
+  @Mock
+  private DeleteHelper deleteHelper;
+
 
   /**
    * Inits the mocks.
@@ -528,11 +537,7 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
   }
 
-  /**
-   * The delete helper.
-   */
-  @Mock
-  private DeleteHelper deleteHelper;
+
 
   /**
    * Test delete import table.
@@ -1315,5 +1320,13 @@ public class DataSetControllerImplTest {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void deleteDataToReplaceTest() {
+    dataSetControllerImpl.deleteDataBeforeReplacing(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteImportDataAsyncBeforeReplacing(
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 }

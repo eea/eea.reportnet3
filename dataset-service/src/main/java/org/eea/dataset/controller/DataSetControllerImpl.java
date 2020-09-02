@@ -8,13 +8,13 @@ import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -84,9 +84,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DeleteHelper deleteHelper;
 
-  /** The design dataset service. */
-  @Autowired
-  private DesignDatasetService designDatasetService;
 
   /** The dataset metabase service. */
   @Autowired
@@ -95,6 +92,7 @@ public class DataSetControllerImpl implements DatasetController {
   /** The dataset schema service. */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
+
 
   /**
    * Gets the data tables values.
@@ -838,6 +836,25 @@ public class DataSetControllerImpl implements DatasetController {
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
+
+
+  /**
+   * Delete data before replacing.
+   *
+   * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
+   */
+  @Override
+  @DeleteMapping("/private/{id}/deleteForReplacing")
+  public void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
+      @RequestParam("integrationId") Long integrationId,
+      @RequestParam("operation") IntegrationOperationTypeEnum operation) {
+    // When deleting the data finishes, we send a kafka event to make the FME call to import data
+    deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+  }
+
+
   /**
    * Validate attachment.
    *
@@ -877,4 +894,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
+
+
 }

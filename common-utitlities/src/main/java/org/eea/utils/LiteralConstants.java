@@ -105,6 +105,12 @@ public final class LiteralConstants {
   /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX. */
   public static final String SNAPSHOT_FILE_ATTACHMENT_SUFFIX = "_table_AttachmentValue.snap";
 
+  /** The Constant INTEGRATION_ID. */
+  public static final String INTEGRATION_ID = "integrationId";
+
+  /** The Constant OPERATION. */
+  public static final String OPERATION = "operation";
+
 
   /**
    * Instantiates a new literal constants.

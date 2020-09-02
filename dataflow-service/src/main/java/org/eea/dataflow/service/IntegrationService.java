@@ -122,15 +122,19 @@ public interface IntegrationService {
   void deleteSchemaIntegrations(String datasetSchemaId);
 
 
+
   /**
    * Execute external integration.
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
    * @param operation the operation
+   * @param replace the replace
    * @return the execution result VO
    * @throws EEAException the EEA exception
    */
-  ExecutionResultVO executeExternalIntegration(Long datasetId, Long integrationId,
-      IntegrationOperationTypeEnum operation) throws EEAException;
+  void executeExternalIntegration(Long datasetId, Long integrationId,
+      IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException;
+
+
 }
