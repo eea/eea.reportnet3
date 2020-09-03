@@ -1324,6 +1324,8 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteDataToReplaceTest() {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.deleteDataBeforeReplacing(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     Mockito.verify(deleteHelper, times(1)).executeDeleteImportDataAsyncBeforeReplacing(
