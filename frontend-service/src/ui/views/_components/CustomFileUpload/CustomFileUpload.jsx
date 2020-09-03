@@ -14,8 +14,11 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 import ReactTooltip from 'react-tooltip';
 
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 export class CustomFileUpload extends Component {
+  static contextType = NotificationContext;
+
   static defaultProps = {
     accept: undefined,
     auto: false,
@@ -275,6 +278,10 @@ export class CustomFileUpload extends Component {
             this.props.onUpload({ xhr: xhr, files: this.files });
           }
         } else {
+          if (xhr.status === 423) {
+            this.context.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
+          }
+
           if (this.props.onError) {
             this.props.onError({ xhr: xhr, files: this.files });
           }
@@ -526,7 +533,7 @@ export class CustomFileUpload extends Component {
     });
 
     return (
-      <span className={buttonClassName} onMouseUp={this.onSimpleUploaderClick}>
+      <span className={buttonClassName} onMouseUp={this.onSimpleUnloaderClick}>
         <span className={iconClassName} />
         <span className="p-button-text p-clickable">
           {this.props.auto
