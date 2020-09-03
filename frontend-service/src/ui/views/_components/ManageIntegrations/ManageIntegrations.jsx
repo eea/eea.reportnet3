@@ -63,7 +63,7 @@ export const ManageIntegrations = ({
     isLoading: true,
     isUpdatedVisible: false,
     name: '',
-    operation: {},
+    operation: { label: '', value: '' },
     parameterKey: '',
     parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
     parameterValue: '',
@@ -76,6 +76,7 @@ export const ManageIntegrations = ({
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
   const {
+    isDuplicatedExtension,
     isDuplicatedIntegrationName,
     isDuplicatedParameter,
     isFormEmpty,
@@ -85,6 +86,12 @@ export const ManageIntegrations = ({
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
+  const isExtensionDuplicated = isDuplicatedExtension(
+    manageIntegrationsState.fileExtension,
+    manageIntegrationsState.operation.value,
+    integrationsList,
+    manageIntegrationsState.id
+  );
   const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
     manageIntegrationsState.name,
     integrationsList,
@@ -305,12 +312,18 @@ export const ManageIntegrations = ({
     }
   };
 
+  const renderDialogFooterTooltipContent = () => {
+    if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
+    else if (isExtensionDuplicated) return 'duplicatedIntegrationOperation';
+    else return 'fcSubmitButtonDisabled';
+  };
+
   const renderDialogFooter = (
     <Fragment>
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isIntegrationNameDuplicated}
+          disabled={isIntegrationNameDuplicated || isExtensionDuplicated}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
@@ -320,17 +333,15 @@ export const ManageIntegrations = ({
         />
       </span>
       <Button
-        className="p-button-secondary p-button-rounded  p-button-animated-blink"
+        className="p-button-secondary p-button-rounded p-button-animated-blink"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => onCloseModal()}
       />
 
-      {(isEmptyForm || isIntegrationNameDuplicated) && (
+      {(isEmptyForm || isIntegrationNameDuplicated || isExtensionDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {isIntegrationNameDuplicated
-            ? resources.messages['duplicatedIntegrationName']
-            : resources.messages['fcSubmitButtonDisabled']}
+          {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
     </Fragment>
