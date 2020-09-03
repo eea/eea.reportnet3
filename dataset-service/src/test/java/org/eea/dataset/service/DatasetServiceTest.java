@@ -355,6 +355,7 @@ public class DatasetServiceTest {
   @Mock
   private UpdateRecordHelper updateRecordHelper;
 
+  /** The attachment repository. */
   @Mock
   private AttachmentRepository attachmentRepository;
 
@@ -1245,6 +1246,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
+  /**
+   * Creates the records test read only field.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createRecordsTestReadOnlyField() throws EEAException {
     List<RecordValue> myRecords = new ArrayList<>();
@@ -1785,6 +1791,9 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test get table fixed records.
+   */
   @Test
   public void testGetTableFixedRecords() {
 
@@ -1832,6 +1841,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get table fixed records with non matching.
+   */
   @Test
   public void testGetTableFixedRecordsWithNonMatching() {
 
@@ -1879,6 +1891,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get record fixed number.
+   */
   @Test
   public void testGetRecordFixedNumber() {
 
@@ -1927,6 +1942,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get record fixed number with non matching.
+   */
   @Test
   public void testGetRecordFixedNumberWithNonMatching() {
 
@@ -2233,12 +2251,18 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test release lock.
+   */
   @Test
   public void testReleaseLock() {
     datasetService.releaseLock(1L);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
+  /**
+   * Checks if is reportable design test.
+   */
   @Test
   public void isReportableDesignTest() {
     DataFlowVO dataflow = new DataFlowVO();
@@ -2250,6 +2274,9 @@ public class DatasetServiceTest {
     assertTrue(datasetService.isDatasetReportable(1L));
   }
 
+  /**
+   * Checks if is not reportable design test.
+   */
   @Test
   public void isNotReportableDesignTest() {
     DataFlowVO dataflow = new DataFlowVO();
@@ -2261,11 +2288,17 @@ public class DatasetServiceTest {
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
+  /**
+   * Checks if is reportable test.
+   */
   @Test
   public void isReportableTest() {
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
+  /**
+   * Checks if is reportable reporting test.
+   */
   @Test
   public void isReportableReportingTest() {
     DataFlowVO dataflow = new DataFlowVO();
@@ -2277,6 +2310,9 @@ public class DatasetServiceTest {
     assertTrue(datasetService.isDatasetReportable(1L));
   }
 
+  /**
+   * Checks if is not reportable reporting test.
+   */
   @Test
   public void isNotReportableReportingTest() {
     DataFlowVO dataflow = new DataFlowVO();
@@ -2288,6 +2324,9 @@ public class DatasetServiceTest {
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
+  /**
+   * Test copy data.
+   */
   @Test
   public void testCopyData() {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
@@ -2329,12 +2368,22 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test get attachment.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testGetAttachment() throws EEAException {
     datasetService.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
     Mockito.verify(attachmentRepository, times(1)).findByFieldValueId(Mockito.any());
   }
 
+  /**
+   * Test delete attachment.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testDeleteAttachment() throws EEAException {
     when(fieldRepository.findById(Mockito.anyString())).thenReturn(new FieldValue());
@@ -2342,6 +2391,12 @@ public class DatasetServiceTest {
     Mockito.verify(attachmentRepository, times(1)).deleteByFieldValueId(Mockito.any());
   }
 
+  /**
+   * Test update attachment.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testUpdateAttachment() throws EEAException, IOException {
     final MockMultipartFile file =
@@ -2367,6 +2422,12 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Gets the field by id test.
+   *
+   * @return the field by id test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getFieldByIdTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -2378,6 +2439,12 @@ public class DatasetServiceTest {
     assertEquals(fieldVO, datasetService.getFieldById(1L, "idField"));
   }
 
+  /**
+   * Gets the field by id exception test.
+   *
+   * @return the field by id exception test
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getFieldByIdExceptionTest() throws EEAException {
     try {
@@ -2390,12 +2457,22 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Test delete attachment by id field schema.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testDeleteAttachmentByIdFieldSchema() throws EEAException {
     datasetService.deleteAttachmentByFieldSchemaId(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(fieldRepository, times(1)).clearFieldValue(Mockito.any());
   }
 
+  /**
+   * Export file through integration test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportFileThroughIntegrationTest() throws EEAException {
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.anyLong()))
@@ -2410,6 +2487,9 @@ public class DatasetServiceTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test find record schema by id.
+   */
   @Test
   public void testFindRecordSchemaById() {
     RecordValue record = new RecordValue();
@@ -2420,6 +2500,9 @@ public class DatasetServiceTest {
         datasetService.findRecordSchemaIdById(1L, "0A07FD45F1CD7965A2B0F13E57948A13"));
   }
 
+  /**
+   * Test find field schema by id.
+   */
   @Test
   public void testFindFieldSchemaById() {
     FieldValue field = new FieldValue();
@@ -2430,4 +2513,69 @@ public class DatasetServiceTest {
         datasetService.findFieldSchemaIdById(1L, "0A07FD45F1CD7965A2B0F13E57948A13"));
   }
 
+  /**
+   * Execute test not to prefill.
+   */
+  @Test
+  public void executeTestNotToPrefill() {
+    DesignDataset desingDataset = new DesignDataset();
+    desingDataset.setId(2L);
+    List<DesignDataset> desingDatasetList = new ArrayList<>();
+    desingDatasetList.add(desingDataset);
+    DataSetSchema schema = new DataSetSchema();
+    schema.setIdDataSetSchema(new ObjectId());
+    TableSchema desingTableSchema = new TableSchema();
+    desingTableSchema.setToPrefill(Boolean.FALSE);
+    desingTableSchema.setIdTableSchema(new ObjectId());
+    List<TableSchema> desingTableSchemas = new ArrayList<>();
+    desingTableSchemas.add(desingTableSchema);
+    schema.setTableSchemas(desingTableSchemas);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.spreadDataPrefill(desingDatasetList, 2L, schema.getIdDataSetSchema().toString());
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+  /**
+   * Execute test no desing.
+   */
+  @Test
+  public void executeTestToPrefill() {
+    DesignDataset desingDataset = new DesignDataset();
+    desingDataset.setId(2L);
+    List<DesignDataset> desingDatasetList = new ArrayList<>();
+    desingDatasetList.add(desingDataset);
+    DataSetSchema schema = new DataSetSchema();
+    schema.setIdDataSetSchema(new ObjectId());
+    TableSchema desingTableSchema = new TableSchema();
+    desingTableSchema.setToPrefill(Boolean.TRUE);
+    desingTableSchema.setIdTableSchema(new ObjectId());
+    List<TableSchema> desingTableSchemas = new ArrayList<>();
+    desingTableSchemas.add(desingTableSchema);
+    schema.setTableSchemas(desingTableSchemas);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    List<RecordValue> recordDesignValues = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    TableValue table = new TableValue();
+    table.setId(1L);
+    record.setTableValue(table);
+    recordDesignValues.add(record);
+    when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    fieldValues.add(field);
+    when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDataProviderId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(datasetVO);
+    DataProviderVO dataprovider = new DataProviderVO();
+    dataprovider.setCode("ES");
+    when(representativeControllerZuul.findDataProviderById(Mockito.any())).thenReturn(dataprovider);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.spreadDataPrefill(desingDatasetList, 2L, schema.getIdDataSetSchema().toString());
+    Mockito.verify(representativeControllerZuul, times(1)).findDataProviderById(Mockito.any());
+
+  }
 }

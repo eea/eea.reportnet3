@@ -237,6 +237,8 @@ public class DatasetServiceImpl implements DatasetService {
   /** The attachment repository. */
   @Autowired
   private AttachmentRepository attachmentRepository;
+  /** The Constant DATASET_ID. */
+  private static final String DATASET_ID = "dataset_%s";
 
   /**
    * Process file.
@@ -1591,6 +1593,200 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
+  /**
+   * Spread data prefill.
+   *
+   * @param designs the designs
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @Override
+  public void spreadDataPrefill(List<DesignDataset> designs, Long datasetId,
+      String idDatasetSchema) {
+    for (DesignDataset design : designs) {
+      // get tables from schema
+      List<TableSchema> listOfTablesFiltered = getTablesFromSchema(idDatasetSchema);
+      // get the data from designs datasets
+      if (!listOfTablesFiltered.isEmpty()) {
+
+
+
+        TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+        List<RecordValue> recordDesignValues = new ArrayList<>();
+
+        for (TableSchema desingTable : listOfTablesFiltered) {
+          List<RecordValue> data = recordRepository
+              .findByTableValueAllRecords(desingTable.getIdTableSchema().toString());
+          recordDesignValues.addAll(data);
+
+        }
+        List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+        // fill the data
+        DatasetValue ds = new DatasetValue();
+        ds.setId(datasetId);
+
+        Optional<PartitionDataSetMetabase> datasetPartition =
+            partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(datasetId);
+        Long datasetPartitionId = datasetPartition.orElse(new PartitionDataSetMetabase()).getId();
+        // attachment values
+        List<AttachmentValue> attachments = new ArrayList<>();
+        Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
+        iterableAttachments.forEach(attachments::add);
+        recordDesingAssignation(datasetId, design, recordDesignValues, recordDesignValuesList,
+            datasetPartitionId, attachments);
+        if (!recordDesignValuesList.isEmpty()) {
+          // save values
+          TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+          recordRepository.saveAll(recordDesignValuesList);
+          // copy attachments too
+          if (!attachments.isEmpty()) {
+            attachmentRepository.saveAll(attachments);
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Record desing assignation.
+   *
+   * @param datasetId the dataset id
+   * @param design the design
+   * @param recordDesignValues the record design values
+   * @param recordDesignValuesList the record design values list
+   * @param datasetPartitionId the dataset partition id
+   * @param attachments the attachments
+   */
+  private void recordDesingAssignation(Long datasetId, DesignDataset design,
+      List<RecordValue> recordDesignValues, List<RecordValue> recordDesignValuesList,
+      Long datasetPartitionId, List<AttachmentValue> attachments) {
+    for (RecordValue record : recordDesignValues) {
+      RecordValue recordAux = new RecordValue();
+      TableValue tableAux = record.getTableValue();
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      tableAux
+          .setId(tableRepository.findIdByIdTableSchema(record.getTableValue().getIdTableSchema()));
+
+      recordAux.setTableValue(tableAux);
+      recordAux.setIdRecordSchema(record.getIdRecordSchema());
+      recordAux.setDatasetPartitionId(datasetPartitionId);
+
+      Long dataProviderId =
+          datasetMetabaseService.findDatasetMetabase(datasetId).getDataProviderId();
+
+      if (null != dataProviderId) {
+        DataProviderVO dataprovider =
+            representativeControllerZuul.findDataProviderById(dataProviderId);
+        if (null != dataprovider && null != dataprovider.getCode()) {
+          recordAux.setDataProviderCode(dataprovider.getCode());
+        }
+      }
+
+      TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+      List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+      fieldValueFor(attachments, recordAux, fieldValues, fieldValuesOnlyValues);
+      recordAux.setFields(fieldValuesOnlyValues);
+      recordDesignValuesList.add(recordAux);
+    }
+  }
+
+  /**
+   * Field value for.
+   *
+   * @param attachments the attachments
+   * @param recordAux the record aux
+   * @param fieldValues the field values
+   * @param fieldValuesOnlyValues the field values only values
+   */
+  private void fieldValueFor(List<AttachmentValue> attachments, RecordValue recordAux,
+      List<FieldValue> fieldValues, List<FieldValue> fieldValuesOnlyValues) {
+    for (FieldValue field : fieldValues) {
+      FieldValue auxField = new FieldValue();
+      auxField.setValue(field.getValue());
+      auxField.setIdFieldSchema(field.getIdFieldSchema());
+      auxField.setType(field.getType());
+      auxField.setRecord(recordAux);
+      fieldValuesOnlyValues.add(auxField);
+      if (DataType.ATTACHMENT.equals(field.getType())) {
+        for (AttachmentValue attach : attachments) {
+          if (StringUtils.isNotBlank(attach.getFieldValue().getId())
+              && attach.getFieldValue().getId().equals(field.getId())) {
+            attach.setFieldValue(auxField);
+            attach.setId(null);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Gets the tables from schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the tables from schema
+   */
+  private List<TableSchema> getTablesFromSchema(String idDatasetSchema) {
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+    List<TableSchema> listOfTables = schema.getTableSchemas();
+    List<TableSchema> listOfTablesFiltered = new ArrayList<>();
+    for (TableSchema desingTableToPrefill : listOfTables) {
+      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+        listOfTablesFiltered.add(desingTableToPrefill);
+      }
+    }
+    return listOfTablesFiltered;
+  }
+
+  /**
+   * Gets the dataflow.
+   *
+   * @param idDataset the id dataset
+   * @return the dataflow
+   */
+  private DataFlowVO getDataflow(Long idDataset) {
+    // Get the dataFlowId from the metabase
+    Long dataflowId = getDataFlowIdById(idDataset);
+    // get de dataflow
+    return dataflowControllerZull.getMetabaseById(dataflowId);
+  }
+
+  /**
+   * Field value for.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param attachments the attachments
+   * @param recordAux the record aux
+   * @param fieldValues the field values
+   * @param fieldValuesOnlyValues the field values only values
+   */
+  private void fieldValueFor(Map<String, String> dictionaryOriginTargetObjectId,
+      List<AttachmentValue> attachments, RecordValue recordAux, List<FieldValue> fieldValues,
+      List<FieldValue> fieldValuesOnlyValues) {
+    for (FieldValue field : fieldValues) {
+      FieldValue auxField = new FieldValue();
+      auxField.setValue(field.getValue());
+      auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+      auxField.setType(field.getType());
+      auxField.setRecord(recordAux);
+      fieldValuesOnlyValues.add(auxField);
+      if (DataType.ATTACHMENT.equals(field.getType())) {
+        for (AttachmentValue attach : attachments) {
+          if (StringUtils.isNotBlank(attach.getFieldValue().getId())
+              && attach.getFieldValue().getId().equals(field.getId())) {
+            attach.setFieldValue(auxField);
+            attach.setId(null);
+            break;
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Obtain partition.
    *
@@ -2379,48 +2575,5 @@ public class DatasetServiceImpl implements DatasetService {
     return recordDesignValuesList;
   }
 
-  /**
-   * Field value for.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param attachments the attachments
-   * @param recordAux the record aux
-   * @param fieldValues the field values
-   * @param fieldValuesOnlyValues the field values only values
-   */
-  private void fieldValueFor(Map<String, String> dictionaryOriginTargetObjectId,
-      List<AttachmentValue> attachments, RecordValue recordAux, List<FieldValue> fieldValues,
-      List<FieldValue> fieldValuesOnlyValues) {
-    for (FieldValue field : fieldValues) {
-      FieldValue auxField = new FieldValue();
-      auxField.setValue(field.getValue());
-      auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
-      auxField.setType(field.getType());
-      auxField.setRecord(recordAux);
-      fieldValuesOnlyValues.add(auxField);
-      if (DataType.ATTACHMENT.equals(field.getType())) {
-        for (AttachmentValue attach : attachments) {
-          if (StringUtils.isNotBlank(attach.getFieldValue().getId())
-              && attach.getFieldValue().getId().equals(field.getId())) {
-            attach.setFieldValue(auxField);
-            attach.setId(null);
-            break;
-          }
-        }
-      }
-    }
-  }
 
-  /**
-   * Gets the dataflow.
-   *
-   * @param idDataset the id dataset
-   * @return the dataflow
-   */
-  private DataFlowVO getDataflow(Long idDataset) {
-    // Get the dataFlowId from the metabase
-    Long dataflowId = getDataFlowIdById(idDataset);
-    // get de dataflow
-    return dataflowControllerZull.getMetabaseById(dataflowId);
-  }
 }
