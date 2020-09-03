@@ -7,10 +7,12 @@
   width: 55vw;
   .checkboxWrapper {
     margin-top: 1rem;
+    user-select: none;
     :global .p-checkbox {
       margin-left: 0 !important;
     }
     label {
+      margin-left: 0.5rem !important;
       a {
         cursor: pointer;
         color: var(--main-font-color);
