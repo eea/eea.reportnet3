@@ -426,7 +426,7 @@ export class CustomFileUpload extends Component {
 
   renderReplaceCheck() {
     return (
-      <Fragment>
+      <div className={styles.checkboxWrapper}>
         <Checkbox
           id="replaceCheckbox"
           inputId="replaceCheckbox"
@@ -434,8 +434,10 @@ export class CustomFileUpload extends Component {
           onChange={() => this.setState({ replace: !this.state.replace })}
           role="checkbox"
         />
-        <label htmlFor="replaceCheckbox">{this.props.replaceCheckLabel}</label>
-      </Fragment>
+        <label htmlFor="replaceCheckbox">
+          <a onClick={() => this.setState({ replace: !this.state.replace })}>{this.props.replaceCheckLabel}</a>
+        </label>
+      </div>
     );
   }
 
