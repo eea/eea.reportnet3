@@ -25,7 +25,7 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The dataschema service impl. */
+  /** The dataset service. */
   @Autowired
   private DatasetService datasetService;
 
