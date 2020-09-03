@@ -77,9 +77,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant DATASET_ID. */
-  private static final String DATASET_ID = "dataset_%s";
-
 
   /** The schemas repository. */
   @Autowired
@@ -416,7 +413,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (tableSchema != null) {
         tableShemaAddAtributes(datasetId, tableSchemaVO, datasetSchemaId, tableSchema);
       } else {
-        LOG.error("Table with schema {} from the datasetId {} not found", tableSchema, datasetId);
+        LOG.error("Table with schema {} from the datasetId {} not found",
+            tableSchemaVO.getIdTableSchema(), datasetId);
         throw new EEAException(
             String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
       }
@@ -482,7 +480,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
     if (tableSchema == null) {
-      LOG.error("Table with schema {} from the datasetId {} not found", tableSchema, datasetId);
+      LOG.error("Table with schema {} from the datasetId {} not found", tableSchemaId, datasetId);
       throw new EEAException(
           String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
     }
