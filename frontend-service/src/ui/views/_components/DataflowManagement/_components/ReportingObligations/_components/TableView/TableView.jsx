@@ -24,7 +24,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
   const onLoadCheckButton = row => (
-    <div className={styles.checkColum}>
+    <div className={styles.checkColumn}>
       <Checkbox
         id={`${row.id}_checkbox`}
         inputId={`${row.id}_checkbox`}
@@ -52,7 +52,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
 
   const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
-  const renderCheckColum = (
+  const renderCheckColumn = (
     <Column
       key="checkId"
       className={styles.emptyTableHeader}
@@ -83,7 +83,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
           );
         })
     );
-    return [renderCheckColum, ...repOblCols];
+    return [renderCheckColumn, ...repOblCols];
   };
 
   return isEmpty(data) ? (

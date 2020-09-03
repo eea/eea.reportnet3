@@ -140,12 +140,7 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
         TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
         List<RecordValue> recordDesignValues = new ArrayList<>();
 
-        for (TableSchema desingTable : listOfTablesFiltered) {
-
-          recordDesignValues.addAll(recordRepository
-              .findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
-
-        }
+        addListRecordDesign(listOfTablesFiltered, recordDesignValues);
         List<RecordValue> recordDesignValuesList = new ArrayList<>();
 
         // fill the data
@@ -174,6 +169,22 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
           }
         }
       }
+    }
+  }
+
+  /**
+   * Adds the list record design.
+   *
+   * @param listOfTablesFiltered the list of tables filtered
+   * @param recordDesignValues the record design values
+   */
+  private void addListRecordDesign(List<TableSchema> listOfTablesFiltered,
+      List<RecordValue> recordDesignValues) {
+    for (TableSchema desingTable : listOfTablesFiltered) {
+
+      recordDesignValues.addAll(
+          recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
+
     }
   }
 
@@ -216,26 +227,39 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
       TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
       List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-      for (FieldValue field : fieldValues) {
-        FieldValue auxField = new FieldValue();
-        auxField.setValue(field.getValue());
-        auxField.setIdFieldSchema(field.getIdFieldSchema());
-        auxField.setType(field.getType());
-        auxField.setRecord(recordAux);
-        fieldValuesOnlyValues.add(auxField);
-        if (DataType.ATTACHMENT.equals(field.getType())) {
-          for (AttachmentValue attach : attachments) {
-            if (StringUtils.isNotBlank(attach.getFieldValue().getId())
-                && attach.getFieldValue().getId().equals(field.getId())) {
-              attach.setFieldValue(auxField);
-              attach.setId(null);
-              break;
-            }
+      fieldValueFor(attachments, recordAux, fieldValues, fieldValuesOnlyValues);
+      recordAux.setFields(fieldValuesOnlyValues);
+      recordDesignValuesList.add(recordAux);
+    }
+  }
+
+  /**
+   * Field value for.
+   *
+   * @param attachments the attachments
+   * @param recordAux the record aux
+   * @param fieldValues the field values
+   * @param fieldValuesOnlyValues the field values only values
+   */
+  private void fieldValueFor(List<AttachmentValue> attachments, RecordValue recordAux,
+      List<FieldValue> fieldValues, List<FieldValue> fieldValuesOnlyValues) {
+    for (FieldValue field : fieldValues) {
+      FieldValue auxField = new FieldValue();
+      auxField.setValue(field.getValue());
+      auxField.setIdFieldSchema(field.getIdFieldSchema());
+      auxField.setType(field.getType());
+      auxField.setRecord(recordAux);
+      fieldValuesOnlyValues.add(auxField);
+      if (DataType.ATTACHMENT.equals(field.getType())) {
+        for (AttachmentValue attach : attachments) {
+          if (StringUtils.isNotBlank(attach.getFieldValue().getId())
+              && attach.getFieldValue().getId().equals(field.getId())) {
+            attach.setFieldValue(auxField);
+            attach.setId(null);
+            break;
           }
         }
       }
-      recordAux.setFields(fieldValuesOnlyValues);
-      recordDesignValuesList.add(recordAux);
     }
   }
 
