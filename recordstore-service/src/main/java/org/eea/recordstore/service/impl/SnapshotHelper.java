@@ -197,7 +197,7 @@ public class SnapshotHelper implements DisposableBean {
       int workingThreads = ((ThreadPoolExecutor) restorationExecutorService).getActiveCount();
 
       LOG.info(
-          "Executing restoration for event {}. Working restoration threads {}, Available restoration threads {}",
+          "Executing restoration for snapshot {}. Working restoration threads {}, Available restoration threads {}",
           restorationTask.idSnapshot, workingThreads, maxRunningTasks - workingThreads);
       try {
         ThreadPropertiesManager.setVariable("user", restorationTask.user);
