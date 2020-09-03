@@ -287,7 +287,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       fmeJob.setJobId(Long.valueOf(fmeJobId));
       fmeJob.setStatus(FMEJobstatus.QUEUED);
     } else {
-      fmeJob.setStatus(FMEJobstatus.FAILURE);
+      fmeJob.setStatus(FMEJobstatus.ABORTED);
       fmeCommunicationService.releaseNotifications(fmeJob, -1L);
     }
     fmeJobRepository.save(fmeJob);

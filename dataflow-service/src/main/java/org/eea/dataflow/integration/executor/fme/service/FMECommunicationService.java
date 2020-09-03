@@ -332,15 +332,16 @@ public class FMECommunicationService {
   }
 
   /**
-   * Authenticate and authorize a request against the given fmeJobId. Returns the full FMEJob object
-   * if the process completes successfully.
+   * Authenticate and authorize.
    *
    * @param apiKey the api key
    * @param rn3JobId the rn 3 job id
    * @return the FME job
-   * @throws EEAException the EEA exception
+   * @throws EEAForbiddenException the EEA forbidden exception
+   * @throws EEAUnauthorizedException the EEA unauthorized exception
    */
-  public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId) throws EEAException {
+  public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId)
+      throws EEAForbiddenException, EEAUnauthorizedException {
 
     TokenVO tokenVO;
     if (null != apiKey && !apiKey.isEmpty()
@@ -387,7 +388,6 @@ public class FMECommunicationService {
    *
    * @param fmeJob the fme job
    * @param statusNumber the status number
-   * @throws EEAException the EEA exception
    */
   public void releaseNotifications(FMEJob fmeJob, long statusNumber) {
 

@@ -8,6 +8,9 @@ public enum FMEJobstatus {
   /** The created. */
   CREATED("CREATED"),
 
+  /** The aborted. */
+  ABORTED("ABORTED"),
+
   /** The queued. */
   QUEUED("QUEUED"),
 
