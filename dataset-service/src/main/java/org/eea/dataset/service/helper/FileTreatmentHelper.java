@@ -176,7 +176,7 @@ public class FileTreatmentHelper {
         integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
             IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationAux.get(0));
       } finally {
-        datasetService.releaseLock(LockSignature.LOAD_TABLE.toString(), datasetId, tableSchemaId);
+        datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, tableSchemaId);
       }
     } else {
       // REP-3 file process
@@ -232,7 +232,7 @@ public class FileTreatmentHelper {
       releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId, null,
           fileName, "Fail importing file " + fileName);
     } finally {
-      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.toString(), datasetId);
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
     }
   }
 
@@ -329,7 +329,7 @@ public class FileTreatmentHelper {
       releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
           tableSchemaId, fileName, "Fail importing file " + fileName);
     } finally {
-      datasetService.releaseLock(LockSignature.LOAD_TABLE.toString(), datasetId, tableSchemaId);
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, tableSchemaId);
     }
   }
 
