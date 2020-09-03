@@ -131,7 +131,7 @@ public class FMECommunicationService {
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     ResponseEntity<SubmitResult> checkResult = null;
-    Integer result = 0;
+    Integer result = null;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
@@ -332,15 +332,16 @@ public class FMECommunicationService {
   }
 
   /**
-   * Authenticate and authorize a request against the given fmeJobId. Returns the full FMEJob object
-   * if the process completes successfully.
+   * Authenticate and authorize.
    *
    * @param apiKey the api key
    * @param rn3JobId the rn 3 job id
    * @return the FME job
-   * @throws EEAException the EEA exception
+   * @throws EEAForbiddenException the EEA forbidden exception
+   * @throws EEAUnauthorizedException the EEA unauthorized exception
    */
-  public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId) throws EEAException {
+  public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId)
+      throws EEAForbiddenException, EEAUnauthorizedException {
 
     TokenVO tokenVO;
     if (null != apiKey && !apiKey.isEmpty()
@@ -387,9 +388,8 @@ public class FMECommunicationService {
    *
    * @param fmeJob the fme job
    * @param statusNumber the status number
-   * @throws EEAException the EEA exception
    */
-  public void releaseNotifications(FMEJob fmeJob, long statusNumber) throws EEAException {
+  public void releaseNotifications(FMEJob fmeJob, long statusNumber) {
 
     // Build the major notification
     EventType eventType;

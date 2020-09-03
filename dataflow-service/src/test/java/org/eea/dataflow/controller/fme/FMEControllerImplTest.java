@@ -109,23 +109,4 @@ public class FMEControllerImplTest {
       throw e;
     }
   }
-
-  @Test(expected = ResponseStatusException.class)
-  public void operationFinishedErrorTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setApiKey("sampleApiKey");
-    fmeOperationInfoVO.setRn3JobId(1L);
-    fmeOperationInfoVO.setStatusNumber(1L);
-    Mockito.when(
-        fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
-        .thenReturn(new FMEJob());
-    Mockito.doThrow(new EEAException("Error realeasing event: FMEJob={}"))
-        .when(fmeCommunicationService).releaseNotifications(Mockito.any(), Mockito.anyLong());
-    try {
-      fmeControllerImpl.operationFinished(fmeOperationInfoVO);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      throw e;
-    }
-  }
 }

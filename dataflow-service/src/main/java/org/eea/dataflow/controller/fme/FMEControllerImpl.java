@@ -4,7 +4,6 @@ import java.io.InputStream;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.StreamingUtil;
 import org.eea.dataflow.persistence.domain.FMEJob;
-import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
@@ -104,8 +103,6 @@ public class FMEControllerImpl implements FMEController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAUnauthorizedException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 

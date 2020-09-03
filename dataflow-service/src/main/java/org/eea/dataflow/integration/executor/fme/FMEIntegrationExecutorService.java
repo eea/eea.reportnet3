@@ -258,7 +258,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
-        // providerId
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Import to other system");
@@ -283,12 +282,15 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     executionResultParams.put("id", fmeJobId);
     executionResultVO.setExecutionResultParams(executionResultParams);
 
-    // add save execution id
+    // Update FMEJob
     if (null != fmeJobId) {
       fmeJob.setJobId(Long.valueOf(fmeJobId));
       fmeJob.setStatus(FMEJobstatus.QUEUED);
-      fmeJobRepository.save(fmeJob);
+    } else {
+      fmeJob.setStatus(FMEJobstatus.ABORTED);
+      fmeCommunicationService.releaseNotifications(fmeJob, -1L);
     }
+    fmeJobRepository.save(fmeJob);
     return executionResultVO;
   }
 
