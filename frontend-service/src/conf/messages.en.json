@@ -844,7 +844,7 @@
     "webLinkDescriptionValidationMax": "Web link description is too long",
     "importPreviousData": "Import previous data",
     "importPreviousDataHeader": "Import previous data",
-    "importPreviousDataConfirm": "Are you want to import previous data?",
+    "importPreviousDataConfirm": "Do you want to import previous data?",
     "importOperationManageIntegration": "Import",
     "importFromOtherSystemOperationManageIntegration": "Import from other system",
     "exportOperationManageIntegration": "Export",
