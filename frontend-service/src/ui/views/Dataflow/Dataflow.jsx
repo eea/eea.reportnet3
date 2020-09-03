@@ -470,12 +470,7 @@ const Dataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
-        <Title
-          icon="clone"
-          iconSize="4rem"
-          subtitle={resources.messages['dataflow']}
-          title={TextUtils.ellipsis(dataflowState.name)}
-        />
+        <Title icon="clone" iconSize="4rem" subtitle={resources.messages['dataflow']} title={dataflowState.name} />
 
         {!dataflowState.isRepresentativeView && isNil(representativeId) ? (
           <BigButtonList
