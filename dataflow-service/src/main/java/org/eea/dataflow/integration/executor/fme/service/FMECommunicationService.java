@@ -127,7 +127,7 @@ public class FMECommunicationService {
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     ResponseEntity<SubmitResult> checkResult = null;
-    Integer result = 0;
+    Integer result = null;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
       String textBody = fmeAsyncJob.toString();
@@ -394,7 +394,7 @@ public class FMECommunicationService {
    * @param statusNumber the status number
    * @throws EEAException the EEA exception
    */
-  public void releaseNotifications(FMEJob fmeJob, long statusNumber) throws EEAException {
+  public void releaseNotifications(FMEJob fmeJob, long statusNumber) {
 
     // Build the major notification
     EventType eventType;
