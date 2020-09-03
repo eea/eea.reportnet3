@@ -939,11 +939,14 @@ const DataViewer = withRouter(
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {isFilterValidationsActive && records.totalRecords !== records.totalFilteredRecords
-          ? `${resources.messages['filtered']} : ${records.totalFilteredRecords} | `
+          ? `${resources.messages['filtered']}: ${records.totalFilteredRecords} | `
           : ''}
-        {resources.messages['totalRecords']} {records.totalRecords} {resources.messages['records'].toLowerCase()}
+        {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
+        {records.totalRecords === 1
+          ? resources.messages['record'].toLowerCase()
+          : resources.messages['records'].toLowerCase()}
         {isFilterValidationsActive && records.totalRecords === records.totalFilteredRecords
-          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          ? `(${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
