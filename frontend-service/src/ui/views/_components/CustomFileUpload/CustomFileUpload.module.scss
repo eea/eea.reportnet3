@@ -94,6 +94,7 @@
 
 .chooseButton {
   display: flex;
+  margin-left: 0 !important;
 }
 
 .infoButton {
@@ -133,6 +134,20 @@
   }
 }
 
-:global .p-checkbox {
-  margin: 5px !important;
+.checkboxWrapper {
+  margin-top: 1rem;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    user-select: none;
+    a {
+      cursor: pointer;
+      color: var(--main-font-color);
+    }
+    a:hover {
+      color: var(--main-font-color);
+    }
+  }
 }
