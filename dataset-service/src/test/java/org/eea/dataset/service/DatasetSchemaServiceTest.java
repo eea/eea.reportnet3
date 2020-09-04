@@ -683,13 +683,13 @@ public class DatasetSchemaServiceTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
+    TableSchemaVO tableSchemaVOSend = new TableSchemaVO();
+    tableSchemaVOSend.setIdTableSchema("idTableSchema");
     try {
-      TableSchemaVO tableSchemaVO = new TableSchemaVO();
-      tableSchemaVO.setIdTableSchema("idTableSchema");
-      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVOSend);
     } catch (EEAException e) {
       Assert.assertEquals(
-          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), 1L),
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVOSend.getIdTableSchema(), 1L),
           e.getMessage());
       throw e;
     }
