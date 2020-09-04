@@ -12,16 +12,17 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   const [snapshotListData, setSnapshotListData] = useState([]);
 
   const snapshotInitialState = {
+    action: () => {},
     apiCall: '',
     createdAt: '',
+    datasetId,
+    datasetSchemaId,
     description: '',
-    dialogMessage: '',
     dialogConfirmMessage: '',
     dialogConfirmQuestion: '',
-    datasetSchemaId,
-    datasetId,
-    snapShotId: '',
-    action: () => {}
+    dialogMessage: '',
+    isConfirmDisabled: false,
+    snapShotId: ''
   };
 
   useEffect(() => {
@@ -35,13 +36,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       await SnapshotService.createByIdDesigner(datasetId, datasetSchemaId, snapshotState.description);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'CREATE_BY_ID_DESIGNER_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'CREATE_BY_ID_REPORTER_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -52,13 +59,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       await SnapshotService.deleteByIdDesigner(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      NotificationContext.add({
-        type: 'SNAPSHOT_DELETE_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_DELETE_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -81,7 +94,6 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
           datasetId
         }
       });
-    } finally {
     }
   };
 
@@ -90,13 +102,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'SNAPSHOT_RELEASE_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'SNAPSHOT_RELEASE_ERROR',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -106,13 +124,19 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     try {
       await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
     } catch (error) {
-      notificationContext.add({
-        type: 'SNAPSHOT_RESTORING_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT',
+          content: {
+            dataflowId,
+            datasetId
+          }
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
