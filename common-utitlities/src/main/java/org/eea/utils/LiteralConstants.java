@@ -111,6 +111,9 @@ public final class LiteralConstants {
   /** The Constant OPERATION. */
   public static final String OPERATION = "operation";
 
+  /** The Constant USER. */
+  public static final String USER = "user";
+
 
   /**
    * Instantiates a new literal constants.

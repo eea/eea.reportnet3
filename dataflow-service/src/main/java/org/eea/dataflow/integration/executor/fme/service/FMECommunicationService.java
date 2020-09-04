@@ -400,7 +400,8 @@ public class FMECommunicationService {
     // Set the notification EventType
     switch (fmeJob.getOperation()) {
       case IMPORT:
-        eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId());
+        eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId(),
+            fmeJob.getUserName());
         break;
       case EXPORT:
         eventType = exportNotification(isReporting, isStatusCompleted);
@@ -410,7 +411,7 @@ public class FMECommunicationService {
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
         eventType = importFromOtherSystemNotification(isReporting, isStatusCompleted,
-            fmeJob.getDatasetId());
+            fmeJob.getDatasetId(), fmeJob.getUserName());
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
@@ -471,16 +472,18 @@ public class FMECommunicationService {
   }
 
 
+
   /**
    * Import notification.
    *
    * @param isReporting the is reporting
    * @param isStatusCompleted the is status completed
    * @param datasetId the dataset id
+   * @param userName the user name
    * @return the event type
    */
   private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
-      Long datasetId) {
+      Long datasetId, String userName) {
     EventType eventType;
     if (isStatusCompleted) {
       if (isReporting) {
@@ -488,7 +491,7 @@ public class FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
       }
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      launchValidationProcess(datasetId, userName);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
@@ -541,16 +544,18 @@ public class FMECommunicationService {
   }
 
 
+
   /**
    * Import from other system notification.
    *
    * @param isReporting the is reporting
    * @param isStatusCompleted the is status completed
    * @param datasetId the dataset id
+   * @param userName the user name
    * @return the event type
    */
   private EventType importFromOtherSystemNotification(boolean isReporting,
-      boolean isStatusCompleted, Long datasetId) {
+      boolean isStatusCompleted, Long datasetId, String userName) {
     EventType eventType;
     if (isStatusCompleted) {
       if (isReporting) {
@@ -558,7 +563,7 @@ public class FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
       }
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      launchValidationProcess(datasetId, userName);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
@@ -568,4 +573,20 @@ public class FMECommunicationService {
     }
     return eventType;
   }
+
+
+
+  /**
+   * Launch validation process.
+   *
+   * @param datasetId the dataset id
+   * @param userName the user name
+   */
+  private void launchValidationProcess(Long datasetId, String userName) {
+    Map<String, Object> values = new HashMap<>();
+    values.put(LiteralConstants.DATASET_ID, datasetId);
+    values.put(LiteralConstants.USER, userName);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
+  }
+
 }
