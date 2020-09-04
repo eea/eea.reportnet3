@@ -37,6 +37,7 @@ export const CustomFileUpload = ({
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
   isDialog = false,
+  manageDialogs,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
@@ -55,8 +56,7 @@ export const CustomFileUpload = ({
   style = null,
   uploadLabel = 'Upload',
   url = null,
-  withCredentials = false,
-  manageDialogs = manageDialogs
+  withCredentials = false
 }) => {
   // static propTypes = {
   //   accept: PropTypes.string,
@@ -101,10 +101,14 @@ export const CustomFileUpload = ({
     replace: false
   });
 
+  const _files = useRef([]);
+  const content = useRef(null);
   const fileInput = useRef(null);
   const messagesUI = useRef(null);
-  const content = useRef(null);
-  const _files = useRef([]);
+
+  useEffect(() => {
+    if (hasFiles() && auto) upload();
+  }, [fileUploadState]);
 
   const checkValidExtension = file => {
     const acceptedExtensions = accept.toLowerCase().split(', ');
@@ -127,33 +131,21 @@ export const CustomFileUpload = ({
   };
 
   const clearInputElement = () => {
-    if (fileInput) {
-      fileInput.value = '';
+    if (fileInput.current) {
+      fileInput.current.value = '';
       if (mode === 'basic') {
-        fileInput.style.display = 'inline';
+        fileInput.current.style.display = 'inline';
       }
     }
   };
 
-  const hasFiles = () => {
-    return fileUploadState.files && fileUploadState.files.length > 0;
-  };
+  const hasFiles = () => fileUploadState.files && fileUploadState.files.length > 0;
 
-  const isImage = file => {
-    return /^image\//.test(file.type);
-  };
-
-  const remove = index => {
-    clearInputElement();
-    let currentFiles = [...fileUploadState.files];
-    currentFiles.splice(index, 1);
-    setFileUploadState({ ...fileUploadState, files: currentFiles });
-  };
+  const isImage = file => /^image\//.test(file.type);
 
   const formatSize = bytes => {
-    if (bytes === 0) {
-      return '0 B';
-    }
+    if (bytes === 0) return '0 B';
+
     let k = 1000,
       dm = 2,
       sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -206,12 +198,6 @@ export const CustomFileUpload = ({
     }
   };
 
-  useEffect(() => {
-    if (hasFiles() && auto) {
-      upload();
-    }
-  }, [fileUploadState]);
-
   const isFileSelected = file => {
     for (let sFile of fileUploadState.files) {
       if (sFile.name + sFile.type + sFile.size === file.name + file.type + file.size) return true;
@@ -246,10 +232,7 @@ export const CustomFileUpload = ({
     let formData = new FormData();
 
     if (onBeforeUpload) {
-      onBeforeUpload({
-        xhr: xhr,
-        formData: formData
-      });
+      onBeforeUpload({ xhr: xhr, formData: formData });
     }
 
     for (let file of fileUploadState.files) {
@@ -262,10 +245,7 @@ export const CustomFileUpload = ({
       }
 
       if (onProgress) {
-        onProgress({
-          originalEvent: event,
-          progress: fileUploadState.progress
-        });
+        onProgress({ originalEvent: event, progress: fileUploadState.progress });
       }
     });
 
@@ -299,10 +279,7 @@ export const CustomFileUpload = ({
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {
-      onBeforeSend({
-        xhr: xhr,
-        formData: formData
-      });
+      onBeforeSend({ xhr: xhr, formData: formData });
     }
 
     xhr.withCredentials = withCredentials;
@@ -318,13 +295,9 @@ export const CustomFileUpload = ({
     clearInputElement();
   };
 
-  const onFocus = event => {
-    DomHandler.addClass(event.currentTarget.parentElement, 'p-focus');
-  };
+  const onFocus = event => DomHandler.addClass(event.currentTarget.parentElement, 'p-focus');
 
-  const onBlur = event => {
-    DomHandler.removeClass(event.currentTarget.parentElement, 'p-focus');
-  };
+  const onBlur = event => DomHandler.removeClass(event.currentTarget.parentElement, 'p-focus');
 
   const onDragEnter = event => {
     if (!disabled) {
@@ -341,7 +314,7 @@ export const CustomFileUpload = ({
     }
   };
 
-  const onDragLeave = event => {
+  const onDragLeave = () => {
     if (!disabled) {
       DomHandler.removeClass(content, 'p-fileupload-highlight');
     }
@@ -356,16 +329,19 @@ export const CustomFileUpload = ({
       let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
       let allowDrop = multiple || (files && files.length === 1);
 
-      if (allowDrop) {
-        onFileSelect(event);
-      }
+      if (allowDrop) onFileSelect(event);
     }
   };
 
   const onSimpleUploaderClick = () => {
-    if (hasFiles()) {
-      upload();
-    }
+    if (hasFiles()) upload();
+  };
+
+  const remove = index => {
+    clearInputElement();
+    let currentFiles = [...fileUploadState.files];
+    currentFiles.splice(index, 1);
+    setFileUploadState({ ...fileUploadState, files: currentFiles });
   };
 
   const renderChooseButton = () => {
@@ -375,14 +351,14 @@ export const CustomFileUpload = ({
       <span className={styles.chooseButton}>
         <span icon="pi pi-plus" className={className}>
           <input
-            ref={fileInput}
-            type="file"
-            onChange={onFileSelect}
-            onFocus={onFocus}
-            onBlur={onBlur}
-            multiple={multiple}
             accept={accept}
             disabled={disabled}
+            multiple={multiple}
+            onBlur={onBlur}
+            onChange={onFileSelect}
+            onFocus={onFocus}
+            ref={fileInput}
+            type="file"
           />
           <span className="p-button-icon p-button-icon-left p-clickable pi pi-fw pi-plus" />
           <span className="p-button-text p-clickable">{chooseLabel}</span>
@@ -438,7 +414,9 @@ export const CustomFileUpload = ({
           role="checkbox"
         />
         <label htmlFor="replaceCheckbox">
-          <a onClick={() => this.setState({ replace: !this.state.replace })}>{this.props.replaceCheckLabel}</a>
+          <a onClick={() => setFileUploadState({ ...fileUploadState, replace: !fileUploadState.replace })}>
+            {replaceCheckLabel}
+          </a>
         </label>
       </div>
     );
@@ -515,16 +493,14 @@ export const CustomFileUpload = ({
     );
   };
 
-  const renderCustomFileUploadFooter = () => {
-    return (
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resourcesContext.messages['close']}
-        onClick={() => manageDialogs('isImportDatasetDialogVisible', false)}
-      />
-    );
-  };
+  const renderCustomFileUploadFooter = () => (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resourcesContext.messages['close']}
+      onClick={() => manageDialogs('isImportDatasetDialogVisible', false)}
+    />
+  );
 
   const renderBasic = () => {
     const buttonClassName = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left', {
@@ -542,14 +518,14 @@ export const CustomFileUpload = ({
           {auto ? chooseLabel : hasFiles() ? fileUploadState.files[0].name : chooseLabel}
         </span>
         <input
-          ref={fileInput}
-          type="file"
-          multiple={multiple}
           accept={accept}
           disabled={disabled}
+          multiple={multiple}
+          onBlur={onBlur}
           onChange={onFileSelect}
           onFocus={onFocus}
-          onBlur={onBlur}
+          ref={fileInput}
+          type="file"
         />
       </span>
     );
