@@ -14,11 +14,8 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 import ReactTooltip from 'react-tooltip';
 
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 export class CustomFileUpload extends Component {
-  static contextType = NotificationContext;
-
   static defaultProps = {
     accept: undefined,
     auto: false,
