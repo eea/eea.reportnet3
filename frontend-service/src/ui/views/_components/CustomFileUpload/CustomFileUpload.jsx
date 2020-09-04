@@ -533,7 +533,7 @@ export class CustomFileUpload extends Component {
     });
 
     return (
-      <span className={buttonClassName} onMouseUp={this.onSimpleUnloaderClick}>
+      <span className={buttonClassName} onMouseUp={this.onSimpleUploaderClick}>
         <span className={iconClassName} />
         <span className="p-button-text p-clickable">
           {this.props.auto
