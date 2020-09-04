@@ -278,10 +278,6 @@ export class CustomFileUpload extends Component {
             this.props.onUpload({ xhr: xhr, files: this.files });
           }
         } else {
-          if (xhr.status === 423) {
-            this.context.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
-          }
-
           if (this.props.onError) {
             this.props.onError({ xhr: xhr, files: this.files });
           }
