@@ -470,6 +470,9 @@
         {
           "key": "SNAPSHOT_ACTION_BLOCKED_ERROR",
           "lifeTime": 5000
+        },
+        {
+          "key": "FILE_UPLOAD_BLOCKED_ERROR"
         }
       ]
     },

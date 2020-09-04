@@ -969,6 +969,12 @@ const DataViewer = withRouter(
         : resources.messages['maxSizeNotDefined']
     }`;
 
+    const onImportTableError = async ({ xhr, files }) => {
+      if (xhr.status === 423) {
+        notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
+      }
+    };
+
     return (
       <SnapshotContext.Provider>
         <ActionsToolbar
@@ -1123,6 +1129,7 @@ const DataViewer = withRouter(
               mode="advanced"
               multiple={false}
               name="file"
+              onError={onImportTableError}
               onUpload={onUpload}
               replaceCheck={true}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
