@@ -27,7 +27,6 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.security.jwt.utils.EeaUserDetails;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -366,7 +365,6 @@ public class FMECommunicationService {
       details.put(AuthenticationDetails.USER_ID, tokenVO.getUserId());
       authentication.setDetails(details);
       SecurityContextHolder.getContext().setAuthentication(authentication);
-      ThreadPropertiesManager.setVariable("user", userName);
 
       // Authorization
       FMEJob fmeJob = fmeJobRepository.findById(rn3JobId).orElse(null);
@@ -395,10 +393,9 @@ public class FMECommunicationService {
     EventType eventType;
     boolean isReporting = null != fmeJob.getProviderId();
     boolean isStatusCompleted = statusNumber == 0L;
-    NotificationVO notificationVO =
-        NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-            .datasetId(fmeJob.getDatasetId()).dataflowId(fmeJob.getDataflowId())
-            .fileName(fmeJob.getFileName()).providerId(fmeJob.getProviderId()).build();
+    NotificationVO notificationVO = NotificationVO.builder().user(fmeJob.getUserName())
+        .datasetId(fmeJob.getDatasetId()).dataflowId(fmeJob.getDataflowId())
+        .fileName(fmeJob.getFileName()).providerId(fmeJob.getProviderId()).build();
 
     // Set the notification EventType
     switch (fmeJob.getOperation()) {
