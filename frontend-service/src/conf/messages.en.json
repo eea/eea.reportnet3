@@ -426,13 +426,10 @@
     "reset": "Reset",
     "restApiKey": "Rest API Key",
     "restore": "Restore",
-    "restoreDatasetschemaSnapshotCompletedEvent": "Dataset schema restored successfully at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "restoreDatasetSchemaSnapshotCompletedEvent": "Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "restoreDatasetschemaSnapshotFailedEvent": "Error on dataset schema restore at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "restoreDatasetSchemaSnapshotFailedEvent": "Restored dataset schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "restoreDatasetSchemaSnapshotCompletedEvent": "Restored dataset schema copy at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "restoreDatasetSchemaSnapshotFailedEvent": "Error restoring dataset schema copy at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "restoreDatasetSnapshotCompletedEvent": "Dataset restored successfully at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "restoreDatasetSnapshotFailedEvent": "Error restoring copy at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "restoredByIdReporterError": "Error restoring copy",
+    "restoreDatasetSnapshotFailedEvent": "Error restoring dataset copy at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "restoreSnapshotMessage": "Restore copy",
     "restoreSnapshotTooltip": "Restore copy",
     "role": "Role",
@@ -858,6 +855,8 @@
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportDesignFailedEvent": "Failed exporting <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension."
+    "snapshotActionBlockedError": "Failure in the Manage copy's process. Please wait until the end of the previous operation",
+    "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension.",
+    "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import"
   }
 }
