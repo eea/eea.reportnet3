@@ -491,7 +491,7 @@ public class FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
       }
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      launchValidationProcess(datasetId);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
@@ -561,7 +561,7 @@ public class FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
       }
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      launchValidationProcess(datasetId);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
@@ -571,4 +571,19 @@ public class FMECommunicationService {
     }
     return eventType;
   }
+
+
+  /**
+   * Launch validation process.
+   *
+   * @param datasetId the dataset id
+   */
+  private void launchValidationProcess(Long datasetId) {
+    Map<String, Object> values = new HashMap<>();
+    values.put(LiteralConstants.DATASET_ID, datasetId);
+    values.put(LiteralConstants.USER,
+        (String) ThreadPropertiesManager.getVariable(LiteralConstants.USER));
+    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
+  }
+
 }

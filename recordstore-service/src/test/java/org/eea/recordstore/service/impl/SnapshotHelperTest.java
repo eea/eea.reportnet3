@@ -51,9 +51,11 @@ public class SnapshotHelperTest {
         Executors.newFixedThreadPool(2));
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
     snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
+    Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Thread.currentThread().interrupt();
   }
 
   @Test
@@ -65,9 +67,11 @@ public class SnapshotHelperTest {
     doThrow(new SQLException()).when(recordStoreService).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
+    Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Thread.currentThread().interrupt();
   }
 
   @Test
