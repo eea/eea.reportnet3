@@ -415,8 +415,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       } else {
         LOG.error("Table with schema {} from the datasetId {} not found",
             tableSchemaVO.getIdTableSchema(), datasetId);
-        throw new EEAException(
-            String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+        throw new EEAException(String.format(EEAErrorMessage.TABLE_NOT_FOUND,
+            tableSchemaVO.getIdTableSchema(), datasetId));
       }
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
@@ -482,7 +482,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (tableSchema == null) {
       LOG.error("Table with schema {} from the datasetId {} not found", tableSchemaId, datasetId);
       throw new EEAException(
-          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchema, datasetId));
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaId, datasetId));
     }
     // when we delete a table we need to delete all rules of this table, we mean, rules of the
     // records fields, etc
