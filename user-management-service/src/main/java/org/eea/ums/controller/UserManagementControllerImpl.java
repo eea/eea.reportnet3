@@ -1,16 +1,12 @@
 package org.eea.ums.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
@@ -46,6 +42,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -101,7 +102,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/generateToken")
-  @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)", response = TokenVO.class)
+  @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)",
+      response = TokenVO.class)
   public TokenVO generateToken(
       @ApiParam(value = "User Name") @RequestParam("username") String username,
       @ApiParam(value = "User Password") @RequestParam("password") String password) {
@@ -118,7 +120,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/generateTokenByCode")
-  @ApiOperation(value = "Generate an Access Token based on a Keycloak's Code", response = TokenVO.class)
+  @ApiOperation(value = "Generate an Access Token based on a Keycloak's Code",
+      response = TokenVO.class)
   public TokenVO generateToken(@ApiParam(value = "Code") @RequestParam("code") String code) {
     return securityProviderInterfaceService.doLogin(code);
   }
@@ -154,7 +157,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @ApiOperation(value = "Check Resource Permission", response = Boolean.class)
   public Boolean checkResourceAccessPermission(
       @ApiParam(value = "Resource Name") @RequestParam("resource") String resource, @ApiParam(
-      value = "Access Scope Enum Array") @RequestParam("scopes") AccessScopeEnum[] scopes) {
+          value = "Access Scope Enum Array") @RequestParam("scopes") AccessScopeEnum[] scopes) {
     return securityProviderInterfaceService.checkAccessPermission(resource, scopes);
   }
 
@@ -354,7 +357,8 @@ public class UserManagementControllerImpl implements UserManagementController {
       @ApiParam(value = "User Email") @RequestParam("email") String email) {
     UserRepresentationVO user = null;
     UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
-    if (users != null && users.length == 1) {
+    if (users != null && users.length == 1 && StringUtils.isNotBlank(email)
+        && StringUtils.isNotBlank(users[0].getEmail()) && email.equals(users[0].getEmail())) {
       user = userRepresentationMapper.entityToClass(users[0]);
     }
     return user;
@@ -633,7 +637,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @GetMapping("/getApiKey")
-  @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id", response = String.class)
+  @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id",
+      response = String.class)
   public String getApiKey(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Data provider id", example = "0") @RequestParam(value = "dataProvider",
