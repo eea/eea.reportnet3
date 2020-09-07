@@ -2,7 +2,6 @@ export class Representative {
   constructor({
     dataProviderGroupId,
     dataProviderId,
-    errorMessages = new Set(),
     hasDatasets,
     id,
     isReceiptDownloaded,
@@ -11,7 +10,6 @@ export class Representative {
   } = {}) {
     this.dataProviderGroupId = dataProviderGroupId;
     this.dataProviderId = dataProviderId;
-    this.errorMessages = errorMessages;
     this.isReceiptDownloaded = isReceiptDownloaded;
     this.isReceiptOutdated = isReceiptOutdated;
     this.providerAccount = providerAccount;
