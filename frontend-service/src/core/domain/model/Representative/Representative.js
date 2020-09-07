@@ -10,10 +10,10 @@ export class Representative {
   } = {}) {
     this.dataProviderGroupId = dataProviderGroupId;
     this.dataProviderId = dataProviderId;
+    this.hasDatasets = hasDatasets;
     this.isReceiptDownloaded = isReceiptDownloaded;
     this.isReceiptOutdated = isReceiptOutdated;
     this.providerAccount = providerAccount;
     this.representativeId = id;
-    this.hasDatasets = hasDatasets;
   }
 }
