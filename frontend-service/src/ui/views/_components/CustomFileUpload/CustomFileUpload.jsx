@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import styles from './CustomFileUpload.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
+
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { userStorage } from 'core/domain/model/User/UserStorage';
@@ -40,6 +42,8 @@ export class CustomFileUpload extends Component {
     onUpload: null,
     operation: 'POST',
     previewWidth: 50,
+    replaceCheck: false,
+    replaceCheckLabel: 'Replace data',
     style: null,
     uploadLabel: 'Upload',
     url: null,
@@ -72,6 +76,7 @@ export class CustomFileUpload extends Component {
     onUpload: PropTypes.func,
     operation: PropTypes.string,
     previewWidth: PropTypes.number,
+    replaceCheck: PropTypes.bool,
     style: PropTypes.object,
     uploadLabel: PropTypes.string,
     url: PropTypes.string,
@@ -84,7 +89,8 @@ export class CustomFileUpload extends Component {
       files: [],
       isUploading: false,
       isValid: true,
-      msgs: []
+      msgs: [],
+      replace: false
     };
 
     this.upload = this.upload.bind(this);
@@ -278,7 +284,14 @@ export class CustomFileUpload extends Component {
       }
     };
 
-    xhr.open(this.props.operation, this.props.url, true);
+    let url = this.props.url;
+
+    if (this.props.replaceCheck) {
+      url += url.indexOf('?') !== -1 ? '&' : '?';
+      url += 'replace=' + this.state.replace;
+    }
+
+    xhr.open(this.props.operation, url, true);
     const tokens = userStorage.get();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
@@ -411,10 +424,28 @@ export class CustomFileUpload extends Component {
     );
   }
 
+  renderReplaceCheck() {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          id="replaceCheckbox"
+          inputId="replaceCheckbox"
+          isChecked={this.state.replace}
+          onChange={() => this.setState({ replace: !this.state.replace })}
+          role="checkbox"
+        />
+        <label htmlFor="replaceCheckbox">
+          <a onClick={() => this.setState({ replace: !this.state.replace })}>{this.props.replaceCheckLabel}</a>
+        </label>
+      </div>
+    );
+  }
+
   renderAdvanced() {
     let className = classNames('p-fileupload p-component', this.props.className);
     let uploadButton, cancelButton, filesList, progressBar;
     let chooseButton = this.renderChooseButton();
+    let replaceCheck = this.renderReplaceCheck();
 
     if (!this.props.auto) {
       uploadButton = (
@@ -455,7 +486,10 @@ export class CustomFileUpload extends Component {
       <Fragment>
         <div id={this.props.id} className={className} style={this.props.style}>
           <div className="p-fileupload-buttonbar">
-            {chooseButton}
+            <div>
+              {chooseButton}
+              {this.props.replaceCheck && replaceCheck}
+            </div>
             <div className="p-toolbar-group-right">
               {uploadButton}
               {cancelButton}

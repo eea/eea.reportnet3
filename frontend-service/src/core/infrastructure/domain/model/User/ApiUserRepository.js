@@ -1,10 +1,7 @@
-import jwt_decode from 'jwt-decode';
 import moment from 'moment';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
 
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';

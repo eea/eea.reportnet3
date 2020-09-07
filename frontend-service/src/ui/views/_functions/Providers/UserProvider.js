@@ -41,6 +41,15 @@ export const UserProvider = ({ children }) => {
           return allow;
         },
 
+        hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
+          let hasPermissions = false;
+          allowedPermissions.forEach(allowedPermission => {
+            const permission = `${entity}-${entityID}-${allowedPermission}`;
+            if (userState.contextRoles.includes(permission)) hasPermissions = true;
+          });
+          return hasPermissions;
+        },
+
         getUserRole: entity => {
           const userRole = userState.contextRoles.filter(role => role.includes(entity));
           return userRole.map(role => role.replace(`${entity}-`, ''));

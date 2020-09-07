@@ -20,6 +20,41 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Reportnet 3</title>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      #browserNotice {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        background-color: #006699;
+        margin: 0px;
+        padding: 0px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      #browserNotice .noticeBox {
+        width: 300px;
+        height: 400px;
+        padding: 2rem;
+        border-radius: 5px;
+        background-color: #ffffff;
+        color: #000;
+      }
+      #browserNotice .noticeBox .corporate {
+        text-align: center;
+      }
+      #browserNotice .noticeBox .corporate img {
+        width: 80px;
+        height: 80px;
+      }
+      #browserNotice .noticeBox .corporate h2 {
+        margin: 0px;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -39,12 +74,29 @@
       You can use it to define "runtime" environment variables.
       Please open this file for more details.
     -->
+
+    <div id="browserNotice">
+      <div class="noticeBox">
+        <div class="corporate">
+          <img src="assets/img/logo.jpg" />
+          <h2>Reportnet 3.0</h2>
+        </div>
+        <h1>It appears that you are using an unsupported web browser.</h1>
+        <p>
+          We reccommend you to use a Chromium-based browser (such as
+          <a href="https://www.google.com/intl/chrome/">Google Chrome</a>,
+          <a href="https://www.microsoft.com/es-es/edge">Microsoft Edge Chromium</a> or
+          <a href="https://www.mozilla.org/firefox/">Mozilla Firefox</a>)
+        </p>
+      </div>
+    </div>
+
     <script src="%PUBLIC_URL%/env.js"></script>
   </body>
   <script>
     window.addEventListener(
       'dragover',
-      function(e) {
+      function (e) {
         // e.dataTransfer.effectAllowed = 'none';
         e.preventDefault();
         e = e || event;
@@ -53,11 +105,22 @@
     );
     window.addEventListener(
       'drop',
-      function(e) {
+      function (e) {
         e = e || event;
         e.preventDefault();
       },
       false
     );
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    // Internet Explorer 6-11
+    var isIE = /*@cc_on!@*/ false || !!document.documentMode;
+
+    // Edge 20+ no chromium
+    var isEdge = !isIE && !!window.StyleMedia;
+    if (isIE || isEdge) {
+      const notice = document.getElementById('browserNotice');
+      notice.style.display = 'flex';
+    }
   </script>
 </html>

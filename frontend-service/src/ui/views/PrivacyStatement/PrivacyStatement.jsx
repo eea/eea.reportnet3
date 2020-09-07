@@ -45,10 +45,10 @@ const PrivacyStatement = withRouter(({ history }) => {
     <div className="rep-row">
       <div className={` rep-col-12 rep-col-sm-12`}>
         <Title
-          title={resources.messages['PrivacyPolicyTitle']}
+          title={resources.messages['privacyPolicyTitle']}
           icon="info"
           iconSize="4rem"
-          subtitle={resources.messages['PrivacyPolicySubtitle']}
+          subtitle={resources.messages['privacyPolicySubtitle']}
         />
         <div className={styles.contentMain}>
           <aside>

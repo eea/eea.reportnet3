@@ -989,11 +989,14 @@ const DataViewer = withRouter(
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {isFilterValidationsActive && records.totalRecords !== records.totalFilteredRecords
-          ? `${resources.messages['filtered']} : ${records.totalFilteredRecords} | `
+          ? `${resources.messages['filtered']}: ${records.totalFilteredRecords} | `
           : ''}
-        {resources.messages['totalRecords']} {records.totalRecords} {resources.messages['records'].toLowerCase()}
+        {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
+        {records.totalRecords === 1
+          ? resources.messages['record'].toLowerCase()
+          : resources.messages['records'].toLowerCase()}
         {isFilterValidationsActive && records.totalRecords === records.totalFilteredRecords
-          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          ? `(${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
@@ -1015,6 +1018,12 @@ const DataViewer = withRouter(
         ? `${records.selectedMaxSize} ${resources.messages['MB']}`
         : resources.messages['maxSizeNotDefined']
     }`;
+
+    const onImportTableError = async ({ xhr, files }) => {
+      if (xhr.status === 423) {
+        notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
+      }
+    };
 
     return (
       <SnapshotContext.Provider>
@@ -1112,7 +1121,6 @@ const DataViewer = withRouter(
         {isColumnInfoVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
@@ -1158,7 +1166,6 @@ const DataViewer = withRouter(
         {importTableDialogVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadTable']}${tableName}`}
             onHide={() => setImportTableDialogVisible(false)}
@@ -1173,7 +1180,9 @@ const DataViewer = withRouter(
               mode="advanced"
               multiple={false}
               name="file"
+              onError={onImportTableError}
               onUpload={onUpload}
+              replaceCheck={true}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
                 datasetId: datasetId,
                 tableId: tableId
@@ -1185,14 +1194,12 @@ const DataViewer = withRouter(
         {isAttachFileVisible && (
           <Dialog
             className={styles.Dialog}
-            dismissableMask={false}
             footer={renderCustomFileAttachFooter}
             header={`${resources.messages['uploadAttachment']}`}
             onHide={() => setIsAttachFileVisible(false)}
             visible={isAttachFileVisible}>
             <CustomFileUpload
               accept={getAttachExtensions || '*'}
-              // accept=".txt"
               chooseLabel={resources.messages['selectFile']}
               className={styles.FileUpload}
               fileLimit={1}
@@ -1346,7 +1353,6 @@ const DataViewer = withRouter(
           <Dialog
             className={'map-data'}
             blockScroll={false}
-            dismissableMask={false}
             // contentStyle={
             //   isMapOpen
             //     ? { height: '80%', maxHeight: '80%', width: '100%' }
