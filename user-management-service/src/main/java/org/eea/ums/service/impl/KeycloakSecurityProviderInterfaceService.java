@@ -689,6 +689,57 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  @Override
+  public TokenVO authenticateEmail(String email) {
+    List<UserRepresentation> userRepresentations = new ArrayList<>();
+
+    synchronized (this.users) {
+      int usersReload = 0;
+
+      do {
+        for (UserRepresentation userRepresentation : this.users) {
+          if (email.equals(userRepresentation.getEmail())) {
+            userRepresentations.add(userRepresentation);
+            usersReload = 2;
+            break;
+          }
+        }
+        if (userRepresentations.size() == 0) {
+          usersReload++;
+          if (usersReload
+              < 2) { //ensure that there is only one invocation to Keycloak to retrieve users
+            users.clear(); // just in case the user was not found in
+            users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
+          }
+        }
+      } while (usersReload < 2);
+    }
+    TokenVO tokenVO = null;
+    if (1 == userRepresentations.size()) {
+      UserRepresentation user = userRepresentations.get(0);
+      LOG.info("Found user {} with email {}", user.getUsername(), email);
+      tokenVO = new TokenVO();
+      tokenVO.setUserId(user.getId());
+      tokenVO.setPreferredUsername(user.getUsername());
+      Set<String> userGroups = new HashSet<>();
+      for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
+        userGroups.add(groupInfo.getName());
+      }
+      tokenVO.setGroups(userGroups);
+
+      tokenVO.setRoles(Arrays.asList(keycloakConnectorService.getUserRoles(user.getId())).stream()
+          .map(RoleRepresentation::getName).collect(Collectors.toSet()));
+
+      LOG.info("User {} logged in and cached succesfully via email {}",
+          tokenVO.getPreferredUsername(), email);
+    } else {
+      LOG_ERROR.error("{} users found with email {} ", userRepresentations.size(), email);
+    }
+
+    return tokenVO;
+  }
+
+
   /**
    * Creates the api key.
    *
@@ -767,6 +818,41 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   }
 
+
+  /**
+   * Gets the user without keys.
+   *
+   * @param userId the user id
+   *
+   * @return the user without keys
+   */
+  @Override
+  public UserRepresentation getUserWithoutKeys(String userId) {
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null && user.getAttributes() != null) {
+      user.getAttributes().remove(API_KEYS);
+    }
+    return user;
+  }
+
+  /**
+   * Sets the attributes with ApiKeys.
+   *
+   * @param user the user
+   * @param attributes the attributes
+   *
+   * @return the user representation
+   */
+  @Override
+  public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
+      Map<String, List<String>> attributes) {
+    if (user.getAttributes() != null && user.getAttributes().get(API_KEYS) != null) {
+      attributes.put(API_KEYS, user.getAttributes().get(API_KEYS));
+    }
+    user.setAttributes(attributes);
+    return user;
+  }
+
   /**
    * Map token to VO.
    *
@@ -823,39 +909,4 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
     return key;
   }
-
-  /**
-   * Gets the user without keys.
-   *
-   * @param userId the user id
-   *
-   * @return the user without keys
-   */
-  @Override
-  public UserRepresentation getUserWithoutKeys(String userId) {
-    UserRepresentation user = keycloakConnectorService.getUser(userId);
-    if (user != null && user.getAttributes() != null) {
-      user.getAttributes().remove(API_KEYS);
-    }
-    return user;
-  }
-
-  /**
-   * Sets the attributes with ApiKeys.
-   *
-   * @param user the user
-   * @param attributes the attributes
-   *
-   * @return the user representation
-   */
-  @Override
-  public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
-      Map<String, List<String>> attributes) {
-    if (user.getAttributes() != null && user.getAttributes().get(API_KEYS) != null) {
-      attributes.put(API_KEYS, user.getAttributes().get(API_KEYS));
-    }
-    user.setAttributes(attributes);
-    return user;
-  }
-
 }

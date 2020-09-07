@@ -237,6 +237,8 @@ public class DatasetServiceImpl implements DatasetService {
   /** The attachment repository. */
   @Autowired
   private AttachmentRepository attachmentRepository;
+  /** The Constant DATASET_ID. */
+  private static final String DATASET_ID = "dataset_%s";
 
   /**
    * Process file.
@@ -629,26 +631,38 @@ public class DatasetServiceImpl implements DatasetService {
     List<FieldValue> fieldValues = new ArrayList<>();
     String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     for (RecordValue recordValue : recordValues) {
-      for (FieldValue fieldValue : recordValue.getFields()) {
-        if (null == fieldValue.getValue()) {
-          fieldValue.setValue("");
-        } else {
-          if (fieldValue.getValue().length() >= fieldMaxLength) {
-            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
-          }
-        }
-        Document fieldSchema =
-            schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
-        Boolean readOnly =
-            fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-                ? (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
-                : Boolean.FALSE;
-        if (!readOnly && !isDesignDataset(datasetId) || isDesignDataset(datasetId)) {
-          fieldValues.add(fieldValue);
-        }
-      }
+      fieldValueUpdateRecordFor(datasetId, fieldValues, datasetSchemaId, recordValue);
     }
     fieldRepository.saveAll(fieldValues);
+  }
+
+  /**
+   * Field value update record for.
+   *
+   * @param datasetId the dataset id
+   * @param fieldValues the field values
+   * @param datasetSchemaId the dataset schema id
+   * @param recordValue the record value
+   */
+  private void fieldValueUpdateRecordFor(final Long datasetId, List<FieldValue> fieldValues,
+      String datasetSchemaId, RecordValue recordValue) {
+    for (FieldValue fieldValue : recordValue.getFields()) {
+      if (null == fieldValue.getValue()) {
+        fieldValue.setValue("");
+      } else {
+        if (fieldValue.getValue().length() >= fieldMaxLength) {
+          fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+        }
+      }
+      Document fieldSchema =
+          schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
+      Boolean readOnly = fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+          ? (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+          : Boolean.FALSE;
+      if (!readOnly && !isDesignDataset(datasetId) || isDesignDataset(datasetId)) {
+        fieldValues.add(fieldValue);
+      }
+    }
   }
 
   /**
@@ -937,6 +951,12 @@ public class DatasetServiceImpl implements DatasetService {
     return reportingDatasetRepository.existsById(datasetId);
   }
 
+  /**
+   * Checks if is design dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is design dataset
+   */
   @Override
   public boolean isDesignDataset(Long datasetId) {
     return designDatasetRepository.existsById(datasetId);
@@ -1135,6 +1155,7 @@ public class DatasetServiceImpl implements DatasetService {
         ETLRecordVO etlRecordVO = new ETLRecordVO();
         List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
         etlRecordVO.setFields(etlFieldVOs);
+        etlRecordVO.setCountryCode(record.getDataProviderCode());
         etlRecordVOs.add(etlRecordVO);
 
         // Loop to fill ETLFieldVOs
@@ -1204,22 +1225,29 @@ public class DatasetServiceImpl implements DatasetService {
     // Loops to build the entity
     dataset.setId(datasetId);
 
-    for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
-      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
-      // Check if table is read Only and save into a list
-      TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
-      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
-        readOnlyTables.add(tableSchema.getIdTableSchema().toString());
-      }
-      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-        fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
-      }
-    }
+    etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
+        readOnlyTables, fixedNumberTables);
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
 
     List<RecordValue> allRecords = new ArrayList<>();
 
+    tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords);
+    recordRepository.saveAll(allRecords);
+    LOG.info("Data saved into dataset {}", datasetId);
+  }
+
+  /**
+   * Table value for.
+   *
+   * @param datasetId the dataset id
+   * @param dataset the dataset
+   * @param readOnlyTables the read only tables
+   * @param fixedNumberTables the fixed number tables
+   * @param allRecords the all records
+   */
+  private void tableValueFor(Long datasetId, DatasetValue dataset, List<String> readOnlyTables,
+      List<String> fixedNumberTables, List<RecordValue> allRecords) {
     for (TableValue tableValue : dataset.getTableValues()) {
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
@@ -1240,8 +1268,36 @@ public class DatasetServiceImpl implements DatasetService {
         tableRepository.saveAndFlush(tableValue);
       }
     }
-    recordRepository.saveAll(allRecords);
-    LOG.info("Data saved into dataset {}", datasetId);
+  }
+
+  /**
+   * Etl table for.
+   *
+   * @param etlDatasetVO the etl dataset VO
+   * @param provider the provider
+   * @param partition the partition
+   * @param tableMap the table map
+   * @param fieldMap the field map
+   * @param dataset the dataset
+   * @param tables the tables
+   * @param readOnlyTables the read only tables
+   * @param fixedNumberTables the fixed number tables
+   */
+  private void etlTableFor(ETLDatasetVO etlDatasetVO, DataProviderVO provider,
+      final PartitionDataSetMetabase partition, Map<String, TableSchema> tableMap,
+      Map<String, FieldSchema> fieldMap, DatasetValue dataset, List<TableValue> tables,
+      List<String> readOnlyTables, List<String> fixedNumberTables) {
+    for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
+      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
+      // Check if table is read Only and save into a list
+      TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
+      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+        readOnlyTables.add(tableSchema.getIdTableSchema().toString());
+      }
+      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
+      }
+    }
   }
 
   /**
@@ -1536,6 +1592,200 @@ public class DatasetServiceImpl implements DatasetService {
     return field.getIdFieldSchema();
   }
 
+
+
+  /**
+   * Spread data prefill.
+   *
+   * @param designs the designs
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @Override
+  public void spreadDataPrefill(List<DesignDataset> designs, Long datasetId,
+      String idDatasetSchema) {
+    for (DesignDataset design : designs) {
+      // get tables from schema
+      List<TableSchema> listOfTablesFiltered = getTablesFromSchema(idDatasetSchema);
+      // get the data from designs datasets
+      if (!listOfTablesFiltered.isEmpty()) {
+
+
+
+        TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+        List<RecordValue> recordDesignValues = new ArrayList<>();
+
+        for (TableSchema desingTable : listOfTablesFiltered) {
+          List<RecordValue> data = recordRepository
+              .findByTableValueAllRecords(desingTable.getIdTableSchema().toString());
+          recordDesignValues.addAll(data);
+
+        }
+        List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+        // fill the data
+        DatasetValue ds = new DatasetValue();
+        ds.setId(datasetId);
+
+        Optional<PartitionDataSetMetabase> datasetPartition =
+            partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(datasetId);
+        Long datasetPartitionId = datasetPartition.orElse(new PartitionDataSetMetabase()).getId();
+        // attachment values
+        List<AttachmentValue> attachments = new ArrayList<>();
+        Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
+        iterableAttachments.forEach(attachments::add);
+        recordDesingAssignation(datasetId, design, recordDesignValues, recordDesignValuesList,
+            datasetPartitionId, attachments);
+        if (!recordDesignValuesList.isEmpty()) {
+          // save values
+          TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+          recordRepository.saveAll(recordDesignValuesList);
+          // copy attachments too
+          if (!attachments.isEmpty()) {
+            attachmentRepository.saveAll(attachments);
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Record desing assignation.
+   *
+   * @param datasetId the dataset id
+   * @param design the design
+   * @param recordDesignValues the record design values
+   * @param recordDesignValuesList the record design values list
+   * @param datasetPartitionId the dataset partition id
+   * @param attachments the attachments
+   */
+  private void recordDesingAssignation(Long datasetId, DesignDataset design,
+      List<RecordValue> recordDesignValues, List<RecordValue> recordDesignValuesList,
+      Long datasetPartitionId, List<AttachmentValue> attachments) {
+    for (RecordValue record : recordDesignValues) {
+      RecordValue recordAux = new RecordValue();
+      TableValue tableAux = record.getTableValue();
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      tableAux
+          .setId(tableRepository.findIdByIdTableSchema(record.getTableValue().getIdTableSchema()));
+
+      recordAux.setTableValue(tableAux);
+      recordAux.setIdRecordSchema(record.getIdRecordSchema());
+      recordAux.setDatasetPartitionId(datasetPartitionId);
+
+      Long dataProviderId =
+          datasetMetabaseService.findDatasetMetabase(datasetId).getDataProviderId();
+
+      if (null != dataProviderId) {
+        DataProviderVO dataprovider =
+            representativeControllerZuul.findDataProviderById(dataProviderId);
+        if (null != dataprovider && null != dataprovider.getCode()) {
+          recordAux.setDataProviderCode(dataprovider.getCode());
+        }
+      }
+
+      TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+      List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+      fieldValueFor(attachments, recordAux, fieldValues, fieldValuesOnlyValues);
+      recordAux.setFields(fieldValuesOnlyValues);
+      recordDesignValuesList.add(recordAux);
+    }
+  }
+
+  /**
+   * Field value for.
+   *
+   * @param attachments the attachments
+   * @param recordAux the record aux
+   * @param fieldValues the field values
+   * @param fieldValuesOnlyValues the field values only values
+   */
+  private void fieldValueFor(List<AttachmentValue> attachments, RecordValue recordAux,
+      List<FieldValue> fieldValues, List<FieldValue> fieldValuesOnlyValues) {
+    for (FieldValue field : fieldValues) {
+      FieldValue auxField = new FieldValue();
+      auxField.setValue(field.getValue());
+      auxField.setIdFieldSchema(field.getIdFieldSchema());
+      auxField.setType(field.getType());
+      auxField.setRecord(recordAux);
+      fieldValuesOnlyValues.add(auxField);
+      if (DataType.ATTACHMENT.equals(field.getType())) {
+        for (AttachmentValue attach : attachments) {
+          if (StringUtils.isNotBlank(attach.getFieldValue().getId())
+              && attach.getFieldValue().getId().equals(field.getId())) {
+            attach.setFieldValue(auxField);
+            attach.setId(null);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Gets the tables from schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the tables from schema
+   */
+  private List<TableSchema> getTablesFromSchema(String idDatasetSchema) {
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+    List<TableSchema> listOfTables = schema.getTableSchemas();
+    List<TableSchema> listOfTablesFiltered = new ArrayList<>();
+    for (TableSchema desingTableToPrefill : listOfTables) {
+      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+        listOfTablesFiltered.add(desingTableToPrefill);
+      }
+    }
+    return listOfTablesFiltered;
+  }
+
+  /**
+   * Gets the dataflow.
+   *
+   * @param idDataset the id dataset
+   * @return the dataflow
+   */
+  private DataFlowVO getDataflow(Long idDataset) {
+    // Get the dataFlowId from the metabase
+    Long dataflowId = getDataFlowIdById(idDataset);
+    // get de dataflow
+    return dataflowControllerZull.getMetabaseById(dataflowId);
+  }
+
+  /**
+   * Field value for.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param attachments the attachments
+   * @param recordAux the record aux
+   * @param fieldValues the field values
+   * @param fieldValuesOnlyValues the field values only values
+   */
+  private void fieldValueFor(Map<String, String> dictionaryOriginTargetObjectId,
+      List<AttachmentValue> attachments, RecordValue recordAux, List<FieldValue> fieldValues,
+      List<FieldValue> fieldValuesOnlyValues) {
+    for (FieldValue field : fieldValues) {
+      FieldValue auxField = new FieldValue();
+      auxField.setValue(field.getValue());
+      auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+      auxField.setType(field.getType());
+      auxField.setRecord(recordAux);
+      fieldValuesOnlyValues.add(auxField);
+      if (DataType.ATTACHMENT.equals(field.getType())) {
+        for (AttachmentValue attach : attachments) {
+          if (StringUtils.isNotBlank(attach.getFieldValue().getId())
+              && attach.getFieldValue().getId().equals(field.getId())) {
+            attach.setFieldValue(auxField);
+            attach.setId(null);
+            break;
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Obtain partition.
@@ -2051,22 +2301,8 @@ public class DatasetServiceImpl implements DatasetService {
         recordValue.setTableValue(table);
         List<FieldValue> fieldValues = new ArrayList<>();
         List<String> idSchema = new ArrayList<>();
-        for (ETLFieldVO etlField : etlRecord.getFields()) {
-          FieldValue field = new FieldValue();
-          FieldSchema fieldSchema =
-              fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
-          if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
-              && !isDesignDataset(dataset.getId())
-              || fieldSchema != null && isDesignDataset(dataset.getId())
-              || fieldSchema != null && fieldSchema.getReadOnly() == null) {
-            field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
-            field.setType(fieldSchema.getType());
-            field.setValue(etlField.getValue());
-            field.setRecord(recordValue);
-            fieldValues.add(field);
-            idSchema.add(field.getIdFieldSchema());
-          }
-        }
+        etlFieldBuildFor(fieldMap, dataset, tableSchema, etlRecord, recordValue, fieldValues,
+            idSchema);
         // set the fields if not declared in the records
         setMissingField(
             tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema().getFieldSchema(),
@@ -2079,6 +2315,38 @@ public class DatasetServiceImpl implements DatasetService {
       table.setRecords(records);
       tables.add(table);
       table.setDatasetId(dataset);
+    }
+  }
+
+  /**
+   * Etl field build for.
+   *
+   * @param fieldMap the field map
+   * @param dataset the dataset
+   * @param tableSchema the table schema
+   * @param etlRecord the etl record
+   * @param recordValue the record value
+   * @param fieldValues the field values
+   * @param idSchema the id schema
+   */
+  private void etlFieldBuildFor(Map<String, FieldSchema> fieldMap, DatasetValue dataset,
+      TableSchema tableSchema, ETLRecordVO etlRecord, RecordValue recordValue,
+      List<FieldValue> fieldValues, List<String> idSchema) {
+    for (ETLFieldVO etlField : etlRecord.getFields()) {
+      FieldValue field = new FieldValue();
+      FieldSchema fieldSchema =
+          fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
+      if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
+          && !isDesignDataset(dataset.getId())
+          || fieldSchema != null && isDesignDataset(dataset.getId())
+          || fieldSchema != null && fieldSchema.getReadOnly() == null) {
+        field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+        field.setType(fieldSchema.getType());
+        field.setValue(etlField.getValue());
+        field.setRecord(recordValue);
+        fieldValues.add(field);
+        idSchema.add(field.getIdFieldSchema());
+      }
     }
   }
 
@@ -2298,24 +2566,8 @@ public class DatasetServiceImpl implements DatasetService {
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
 
 
-      for (FieldValue field : fieldValues) {
-        FieldValue auxField = new FieldValue();
-        auxField.setValue(field.getValue());
-        auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
-        auxField.setType(field.getType());
-        auxField.setRecord(recordAux);
-        fieldValuesOnlyValues.add(auxField);
-        if (DataType.ATTACHMENT.equals(field.getType())) {
-          for (AttachmentValue attach : attachments) {
-            if (StringUtils.isNotBlank(attach.getFieldValue().getId())
-                && attach.getFieldValue().getId().equals(field.getId())) {
-              attach.setFieldValue(auxField);
-              attach.setId(null);
-              break;
-            }
-          }
-        }
-      }
+      fieldValueFor(dictionaryOriginTargetObjectId, attachments, recordAux, fieldValues,
+          fieldValuesOnlyValues);
       recordAux.setFields(fieldValuesOnlyValues);
       recordDesignValuesList.add(recordAux);
     }
@@ -2323,16 +2575,5 @@ public class DatasetServiceImpl implements DatasetService {
     return recordDesignValuesList;
   }
 
-  /**
-   * Gets the dataflow.
-   *
-   * @param idDataset the id dataset
-   * @return the dataflow
-   */
-  private DataFlowVO getDataflow(Long idDataset) {
-    // Get the dataFlowId from the metabase
-    Long dataflowId = getDataFlowIdById(idDataset);
-    // get de dataflow
-    return dataflowControllerZull.getMetabaseById(dataflowId);
-  }
+
 }

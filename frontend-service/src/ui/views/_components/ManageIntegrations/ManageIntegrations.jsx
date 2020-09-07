@@ -2,8 +2,11 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'reac
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ManageIntegrations.module.scss';
+
+import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
@@ -60,7 +63,7 @@ export const ManageIntegrations = ({
     isLoading: true,
     isUpdatedVisible: false,
     name: '',
-    operation: {},
+    operation: { label: '', value: '' },
     parameterKey: '',
     parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
     parameterValue: '',
@@ -73,6 +76,7 @@ export const ManageIntegrations = ({
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
   const {
+    isDuplicatedExtension,
     isDuplicatedIntegrationName,
     isDuplicatedParameter,
     isFormEmpty,
@@ -82,12 +86,19 @@ export const ManageIntegrations = ({
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
+  const isExtensionDuplicated = isDuplicatedExtension(
+    manageIntegrationsState.fileExtension,
+    manageIntegrationsState.operation.value,
+    integrationsList,
+    manageIntegrationsState.id
+  );
   const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
     manageIntegrationsState.name,
     integrationsList,
     manageIntegrationsState.id
   );
   const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
+  const operationsWithFileExtension = ['IMPORT', 'EXPORT'];
 
   useEffect(() => {
     if (!isEmpty(updatedData)) getUpdatedData();
@@ -214,10 +225,16 @@ export const ManageIntegrations = ({
     manageIntegrationsDispatch({ type: 'TOGGLE_EDIT_VIEW', payload: { id, isEdit: true, keyData, valueData } });
   };
 
-  const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+  const onFillField = (data, name) => {
+    manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+  };
 
   const onFillFieldRepository = (data, name) => {
     manageIntegrationsDispatch({ type: 'ON_FILL_REPOSITORY', payload: { data, name, processName: [] } });
+  };
+
+  const onFillOperation = (data, name) => {
+    manageIntegrationsDispatch({ type: 'ON_FILL_OPERATION', payload: { data, name } });
   };
 
   const onResetParameterInput = () => {
@@ -295,12 +312,18 @@ export const ManageIntegrations = ({
     }
   };
 
+  const renderDialogFooterTooltipContent = () => {
+    if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
+    else if (isExtensionDuplicated) return 'duplicatedIntegrationOperation';
+    else return 'fcSubmitButtonDisabled';
+  };
+
   const renderDialogFooter = (
     <Fragment>
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isIntegrationNameDuplicated}
+          disabled={isIntegrationNameDuplicated || isExtensionDuplicated}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
@@ -310,17 +333,15 @@ export const ManageIntegrations = ({
         />
       </span>
       <Button
-        className="p-button-secondary p-button-rounded  p-button-animated-blink"
+        className="p-button-secondary p-button-rounded p-button-animated-blink"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => onCloseModal()}
       />
 
-      {(isEmptyForm || isIntegrationNameDuplicated) && (
+      {(isEmptyForm || isIntegrationNameDuplicated || isExtensionDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {isIntegrationNameDuplicated
-            ? resources.messages['duplicatedIntegrationName']
-            : resources.messages['fcSubmitButtonDisabled']}
+          {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
     </Fragment>
@@ -348,8 +369,12 @@ export const ManageIntegrations = ({
   const renderDropdownLayout = (options = []) => {
     const optionList = {
       operation: [
-        { label: 'IMPORT', value: 'IMPORT' },
-        { label: 'EXPORT', value: 'EXPORT' }
+        { label: resources.messages['importOperationManageIntegration'].toUpperCase(), value: 'IMPORT' },
+        {
+          label: resources.messages['importFromOtherSystemOperationManageIntegration'].toUpperCase(),
+          value: 'IMPORT_FROM_OTHER_SYSTEM'
+        },
+        { label: resources.messages['exportOperationManageIntegration'].toUpperCase(), value: 'EXPORT' }
       ],
       repository: manageIntegrationsState.repositories,
       processName: manageIntegrationsState.processes
@@ -366,9 +391,15 @@ export const ManageIntegrations = ({
           filter={optionList[option].length > 7}
           disabled={isEmpty(optionList[option])}
           inputId={`${componentName}__${option}`}
-          onChange={event =>
-            option === 'repository' ? onFillFieldRepository(event.value, option) : onFillField(event.value, option)
-          }
+          onChange={event => {
+            if (option === 'repository') {
+              onFillFieldRepository(event.value, option);
+            } else if (option === 'operation') {
+              onFillOperation(event.value, option);
+            } else {
+              onFillField(event.value, option);
+            }
+          }}
           optionLabel="label"
           options={optionList[option]}
           placeholder={resources.messages[`${option}PlaceHolder`]}
@@ -402,7 +433,7 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
-          maxLength={255}
+          maxLength={option === 'fileExtension' ? config.MAX_FILE_EXTENSION_LENGTH : 255}
           onChange={event => onFillField(event.target.value, option)}
           onKeyDown={event => onSaveKeyDown(event)}
           placeholder={resources.messages[option]}
@@ -461,7 +492,10 @@ export const ManageIntegrations = ({
         {(isEmpty(updatedData) || manageIntegrationsState.operation.value !== 'EXPORT_EU_DATASET') && (
           <div className={styles.group}>
             {renderDropdownLayout(['operation'])}
-            {renderInputLayout(['fileExtension'])}
+            {!isNil(manageIntegrationsState.operation) &&
+            operationsWithFileExtension.includes(manageIntegrationsState.operation.value)
+              ? renderInputLayout(['fileExtension'])
+              : null}
           </div>
         )}
         <div className={styles.group}>

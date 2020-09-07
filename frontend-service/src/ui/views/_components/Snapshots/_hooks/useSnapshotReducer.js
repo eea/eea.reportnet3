@@ -24,7 +24,8 @@ const useSnapshotReducer = (
           dialogConfirmMessage: resources.messages.createSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.createSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.createSnapshotMessage,
-          snapShotId: ''
+          snapShotId: '',
+          isConfirmDisabled: false
         };
 
       case 'DELETE_SNAPSHOT':
@@ -38,7 +39,8 @@ const useSnapshotReducer = (
           dialogConfirmMessage: resources.messages.deleteSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.deleteSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          snapShotId: payload.id
+          snapShotId: payload.id,
+          isConfirmDisabled: false
         };
 
       case 'RELEASE_SNAPSHOT':
@@ -52,7 +54,8 @@ const useSnapshotReducer = (
           dialogConfirmMessage: resources.messages.releaseSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.releaseSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.releaseSnapshotMessage,
-          snapShotId: payload.id
+          snapShotId: payload.id,
+          isConfirmDisabled: false
         };
 
       case 'RESTORE_SNAPSHOT':
@@ -66,7 +69,13 @@ const useSnapshotReducer = (
           dialogConfirmMessage: resources.messages.restoreSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.restoreSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.restoreSnapshotMessage,
-          snapShotId: payload.id
+          snapShotId: payload.id,
+          isConfirmDisabled: false
+        };
+      case 'ON_SNAPSHOT_ACTION':
+        return {
+          ...state,
+          isConfirmDisabled: true
         };
 
       default:

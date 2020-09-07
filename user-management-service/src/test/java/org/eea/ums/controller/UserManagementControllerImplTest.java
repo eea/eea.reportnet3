@@ -259,8 +259,11 @@ public class UserManagementControllerImplTest {
    */
   @Test
   public void getUserByEmailTest() {
-    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any()))
-        .thenReturn(new UserRepresentation[1]);
+    UserRepresentation user = new UserRepresentation();
+    user.setEmail("sample@email.net");
+    UserRepresentation[] users = new UserRepresentation[1];
+    users[0] = user;
+    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any())).thenReturn(users);
     Mockito.when(userRepresentationMapper.entityToClass(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
     Assert.assertNotNull(userManagementController.getUserByEmail("sample@email.net"));
@@ -675,5 +678,17 @@ public class UserManagementControllerImplTest {
         .thenReturn(resourceList);
     assertEquals("assertion error", resourceList,
         userManagementController.getResourcesByUserEmail("email"));
+  }
+
+  @Test
+  public void authenticateUserByEmail() {
+    TokenVO tokenVO = new TokenVO();
+    tokenVO.setUserId("user1");
+    Mockito
+        .when(securityProviderInterfaceService.authenticateEmail(Mockito.eq("user1@reportnet.net")))
+        .thenReturn(tokenVO);
+    TokenVO result = userManagementController.authenticateUserByEmail("user1@reportnet.net");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("user1", result.getUserId());
   }
 }
