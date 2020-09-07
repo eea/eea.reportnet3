@@ -215,6 +215,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       const filteredInputsWithErrors = formState.representativesHaveError.filter(
         representativeId => representativeId !== updatedRepresentative.representativeId
       );
+
       formDispatcher({
         type: 'MANAGE_ERRORS',
         payload: { representativesHaveError: filteredInputsWithErrors }
@@ -238,9 +239,10 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
     } catch (error) {
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
-      if (error.response.status === 400 || error.response.status === 404) {
+      if (error.response.status >= 400 || error.response.status <= 404) {
         let { representativesHaveError } = formState;
         representativesHaveError.unshift(updatedRepresentative.representativeId);
+
         formDispatcher({
           type: 'MANAGE_ERRORS',
           payload: { representativesHaveError: uniq(representativesHaveError) }
