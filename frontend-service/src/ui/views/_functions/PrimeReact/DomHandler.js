@@ -124,8 +124,6 @@ export default class DomHandler {
   }
 
   static addClass(element, className) {
-    Object.preventExtensions(element);
-
     if (element.classList) element.classList.add(className);
     else element.className += ' ' + className;
   }
