@@ -18,7 +18,7 @@ import proj4 from 'proj4';
 import { CRS } from 'leaflet';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
-import { Map as MapComponent, GeoJSON, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Map as MapComponent, GeoJSON, TileLayer, Marker, LayersControl, Popup } from 'react-leaflet';
 // import ReactMapboxGl, { Feature, Layer, Marker, Popup } from 'react-mapbox-gl';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -153,6 +153,37 @@ var crs25830 = new L.Proj.CRS(
   }
 );
 
+var crs3857 = new L.Proj.CRS(
+  'EPSG:3857',
+  '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
+  {
+    resolutions: [
+      156543.033928,
+      78271.5169639999,
+      39135.7584820001,
+      19567.8792409999,
+      9783.93962049996,
+      4891.96981024998,
+      2445.98490512499,
+      1222.99245256249,
+      611.49622628138,
+      305.748113140558,
+      152.874056570411,
+      76.4370282850732,
+      38.2185141425366,
+      19.1092570712683,
+      9.55462853563415,
+      4.77731426794937,
+      2.38865713397468,
+      1.19432856685505,
+      0.597164283559817,
+      0.298582141647617
+    ]
+    //Origen de servicio tileado
+    //		origin:[0,0]
+  }
+);
+
 L.Marker.prototype.options.icon = DefaultIcon;
 
 let NewMarkerIcon = L.icon({
@@ -179,6 +210,8 @@ export const Map = ({
   console.log({ coordinates }, options.center);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const { BaseLayer, Overlay } = LayersControl;
 
   const crs = [
     { label: 'WGS84', value: 'EPSG:4326' },
@@ -208,7 +241,7 @@ export const Map = ({
   );
 
   const [marker, setMarker] = useState(options.center);
-  const [newPositionMarker, setNewPositionMarker] = useState(`0, 0`);
+  const [newPositionMarker, setNewPositionMarker] = useState();
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
 
@@ -216,7 +249,7 @@ export const Map = ({
 
   useEffect(() => {
     const map = mapRef.current.leafletElement;
-    console.log('map crs: ' + map.options.crs.code);
+    console.log('map crs: ' + map.options.crs.code, map.options.crs);
     esri.basemapLayer(currentTheme.value).addTo(map);
 
     // const geojsonLayer = L.geoJson(geojson, {
@@ -236,7 +269,10 @@ export const Map = ({
     // mapRef.current.leafletElement.setView(options.center, 2);
     // esri
     //   .tiledMapLayer({
-    //     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer'
+    //     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer',
+    //     tileSize: 256,
+    //     maxZoom: 20,
+    //     minZoom: 0
     //   })
     //   .addTo(map);
 
@@ -265,14 +301,14 @@ export const Map = ({
     });
 
     // var service = esri.mapService({
-    //   url: 'https://air.discomap.eea.europa.eu/arcgis/rest/services/AirQuality/'
+    //   url: 'https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer'
     // });
 
     // service
     //   .identify()
     //   .on(map)
-    //   // .at([45.543, -12.621])
-    //   .layers('visible:1')
+    //   .at([45.543, -12.621])
+    //   .layers('Countries')
     //   .run(function (error, featureCollection, response) {
     //     if (error) {
     //       console.log(error);
@@ -296,7 +332,7 @@ export const Map = ({
   }, []);
 
   useEffect(() => {
-    if (!isNewPositionMarkerVisible) {
+    if (!isNewPositionMarkerVisible && !isNil(newPositionMarker)) {
       setIsNewPositionMarkerVisible(true);
     }
   }, [newPositionMarker]);
@@ -402,7 +438,7 @@ export const Map = ({
       />
       <MapComponent
         // crs={CRS[currentCRS.value]}
-        // crs={CRS.}
+        // crs={crs3857}
         // continuousWorld={true}
         // worldCopyJump={false}
         style={{ height: '60vh' }}
@@ -429,6 +465,22 @@ export const Map = ({
             currentCRS.value
           );
         }}>
+        <LayersControl position="topright">
+          <BaseLayer checked name="EEA">
+            <TileLayer
+              // attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+              url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer/tile/{z}/{y}/{x}"
+              opacity={0.5}
+            />
+          </BaseLayer>
+          <BaseLayer name="EEA 2">
+            <TileLayer url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Land/CLC2000_Cach_WM/MapServer/tile/{z}/{y}/{x}" />
+          </BaseLayer>
+        </LayersControl>
+        {/* <TileLayer
+          attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer"
+        /> */}
         {<GeoJSON data={geojson} />}
         {isNewPositionMarkerVisible && (
           <Marker

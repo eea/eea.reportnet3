@@ -149,9 +149,11 @@ const FieldEditor = ({
   };
 
   const parsePoint = (coordinates, crs, withCRS = true) =>
-    withCRS
-      ? `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}, ${crs}`
-      : `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}`;
+    coordinates !== ''
+      ? withCRS
+        ? `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}, ${crs}`
+        : `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}`
+      : '';
 
   const renderField = type => {
     const longCharacters = 20;
@@ -258,7 +260,7 @@ const FieldEditor = ({
               }}
               placeholder="Select a CRS"
               value={currentCRS}
-              style={{ width: '20%', marginRight: '1rem' }}
+              style={{ width: '25%', marginRight: '1rem' }}
             />
             <Button
               className={`p-button-secondary-transparent button`}
