@@ -445,6 +445,57 @@ export const CustomFileUpload = ({
           )}
         </Fragment>
       );
+    }
+
+    if (hasFiles()) {
+      filesList = renderFiles();
+      progressBar = <ProgressBar value={fileUploadState.progress} showValue={false} />;
+    }
+
+    return (
+      <Fragment>
+        <div id={id} className={cClassName} style={style}>
+          <div className="p-fileupload-buttonbar">{renderChooseButton()}</div>
+          <div
+            ref={content}
+            className="p-fileupload-content"
+            onDragEnter={onDragEnter}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}>
+            {progressBar}
+            <Messages ref={messagesUI} />
+            {filesList}
+          </div>
+          {replaceCheck && renderReplaceCheck()}
+        </div>
+        <p className={`${styles.invalidExtensionMsg} ${fileUploadState.isValid ? styles.isValid : undefined}`}>
+          {invalidExtensionMessage}
+        </p>
+      </Fragment>
+    );
+  };
+
+  const renderAdvancedFooter = () => {
+    const cClassName = classNames('p-fileupload p-component', className);
+    let uploadButton;
+    let cancelButton;
+    let filesList;
+    let progressBar;
+
+    if (!auto) {
+      uploadButton = (
+        <Fragment>
+          <span data-tip data-for="invalidExtension">
+            <Button
+              disabled={disabled || !hasFiles() || checkValidExtension() || fileUploadState.isUploading}
+              icon={fileUploadState.isUploading ? 'spinnerAnimate' : 'upload'}
+              label={uploadLabel}
+              onClick={upload}
+            />
+          </span>
+        </Fragment>
+      );
       cancelButton = (
         <Button
           className={'p-button-secondary'}
@@ -457,50 +508,25 @@ export const CustomFileUpload = ({
     }
 
     if (hasFiles()) {
-      filesList = renderFiles();
+      FileList = renderFiles();
       progressBar = <ProgressBar value={fileUploadState.progress} showValue={false} />;
     }
 
     return (
-      <Fragment>
-        <div id={id} className={cClassName} style={style}>
-          <div className="p-fileupload-buttonbar">
-            <div>
-              {renderChooseButton()}
-              {replaceCheck && renderReplaceCheck()}
-            </div>
-            <div className="p-toolbar-group-right">
-              {uploadButton}
-              {cancelButton}
-            </div>
-          </div>
-          <div
-            ref={content}
-            className="p-fileupload-content"
-            onDragEnter={onDragEnter}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}>
-            {progressBar}
-            <Messages ref={messagesUI} />
-            {filesList}
-          </div>
+      <div className={styles.dialogFooter}>
+        <div className={styles.secondaryZone}>{cancelButton}</div>
+        <div className={styles.primaryZone}>
+          {uploadButton}
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            icon={'cancel'}
+            label={resourcesContext.messages['close']}
+            onClick={() => dialogOnHide()}
+          />
         </div>
-        <p className={`${styles.invalidExtensionMsg} ${fileUploadState.isValid ? styles.isValid : undefined}`}>
-          {invalidExtensionMessage}
-        </p>
-      </Fragment>
+      </div>
     );
   };
-
-  const renderCustomFileUploadFooter = () => (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isImportDatasetDialogVisible', false)}
-    />
-  );
 
   const renderBasic = () => {
     const buttonClassName = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left', {
@@ -535,10 +561,11 @@ export const CustomFileUpload = ({
     return (
       <Dialog
         className={dialogClassName}
-        footer={renderCustomFileUploadFooter}
+        footer={renderAdvancedFooter()}
         header={dialogHeader}
         onHide={dialogOnHide}
-        visible={dialogVisible}>
+        visible={dialogVisible}
+        style={{ width: '35vw' }}>
         {mode === 'advanced' && renderAdvanced()}
         {mode === 'basic' && renderBasic()}
       </Dialog>

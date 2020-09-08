@@ -95,6 +95,25 @@
 .chooseButton {
   display: flex;
   margin-left: 0 !important;
+  width: 100%;
+  > span {
+    width: 100%;
+    padding: 0.5rem 0 !important;
+    display: flex;
+    justify-content: center;
+    span {
+      padding: 0px !important;
+      margin: 0px !important;
+      position: unset !important;
+      height: auto !important;
+      &:first-of-type {
+        line-height: 20px;
+      }
+    }
+    input {
+      width: 100%;
+    }
+  }
 }
 
 .infoButton {
@@ -150,4 +169,9 @@
       color: var(--main-font-color);
     }
   }
+}
+
+.dialogFooter {
+  display: flex;
+  justify-content: space-between;
 }
