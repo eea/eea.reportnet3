@@ -1093,29 +1093,27 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         )}
 
         {designerState.isImportDatasetDialogVisible && (
-          <Dialog
-            className={styles.Dialog}
-            footer={renderCustomFileUploadFooter}
-            header={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
-            onHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
-            visible={designerState.isImportDatasetDialogVisible}>
-            <CustomFileUpload
-              accept={getImportExtensions}
-              chooseLabel={resources.messages['selectFile']}
-              className={styles.FileUpload}
-              fileLimit={1}
-              infoTooltip={infoExtensionsTooltip}
-              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-              mode="advanced"
-              multiple={false}
-              name="file"
-              onUpload={onUpload}
-              replaceCheck={true}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
-                datasetId: datasetId
-              })}`}
-            />
-          </Dialog>
+          <CustomFileUpload
+            dialogClassName={styles.Dialog}
+            dialogHeader={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
+            dialogOnHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
+            dialogVisible={designerState.isImportDatasetDialogVisible}
+            isDialog={true}
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
+            fileLimit={1}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onUpload={onUpload}
+            replaceCheck={true}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+              datasetId: datasetId
+            })}`}
+          />
         )}
 
         {designerState.isImportOtherSystemsDialogVisible && (

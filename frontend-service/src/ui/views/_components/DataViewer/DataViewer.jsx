@@ -927,15 +927,6 @@ const DataViewer = withRouter(
       />
     );
 
-    const renderCustomFileUploadFooter = (
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => setImportTableDialogVisible(false)}
-      />
-    );
-
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {isFilterValidationsActive && records.totalRecords !== records.totalFilteredRecords
@@ -1113,63 +1104,59 @@ const DataViewer = withRouter(
         )}
 
         {importTableDialogVisible && (
-          <Dialog
-            className={styles.Dialog}
-            footer={renderCustomFileUploadFooter}
-            header={`${resources.messages['uploadTable']}${tableName}`}
-            onHide={() => setImportTableDialogVisible(false)}
-            visible={importTableDialogVisible}>
-            <CustomFileUpload
-              accept=".csv"
-              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
-              className={styles.FileUpload}
-              fileLimit={1}
-              infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
-              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-              mode="advanced"
-              multiple={false}
-              name="file"
-              onError={onImportTableError}
-              onUpload={onUpload}
-              replaceCheck={true}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
-                datasetId: datasetId,
-                tableId: tableId
-              })}`}
-            />
-          </Dialog>
+          <CustomFileUpload
+            dialogClassName={styles.Dialog}
+            dialogHeader={`${resources.messages['uploadTable']}${tableName}`}
+            dialogOnHide={() => setImportTableDialogVisible(false)}
+            dialogVisible={importTableDialogVisible}
+            accept=".csv"
+            chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+            className={styles.FileUpload}
+            isDialog={true}
+            fileLimit={1}
+            infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onError={onImportTableError}
+            onUpload={onUpload}
+            replaceCheck={true}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
+              datasetId: datasetId,
+              tableId: tableId
+            })}`}
+          />
         )}
 
         {isAttachFileVisible && (
-          <Dialog
-            className={styles.Dialog}
-            footer={renderCustomFileAttachFooter}
-            header={`${resources.messages['uploadAttachment']}`}
-            onHide={() => setIsAttachFileVisible(false)}
-            visible={isAttachFileVisible}>
-            <CustomFileUpload
-              accept={getAttachExtensions || '*'}
-              chooseLabel={resources.messages['selectFile']}
-              className={styles.FileUpload}
-              fileLimit={1}
-              infoTooltip={infoAttachTooltip}
-              mode="advanced"
-              multiple={false}
-              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-              maxFileSize={
-                !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
-                  ? records.selectedMaxSize * 1000 * 1024
-                  : 20 * 1000 * 1024
-              }
-              name="file"
-              onUpload={onAttach}
-              operation="PUT"
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
-                datasetId,
-                fieldId: records.selectedFieldId
-              })}`}
-            />
-          </Dialog>
+          <CustomFileUpload
+            dialogClassName={styles.Dialog}
+            dialogHeader={`${resources.messages['uploadAttachment']}`}
+            dialogOnHide={() => setIsAttachFileVisible(false)}
+            dialogVisible={isAttachFileVisible}
+            accept={getAttachExtensions || '*'}
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
+            fileLimit={1}
+            isDialog={true}
+            infoTooltip={infoAttachTooltip}
+            mode="advanced"
+            multiple={false}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            maxFileSize={
+              !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
+                ? records.selectedMaxSize * 1000 * 1024
+                : 20 * 1000 * 1024
+            }
+            name="file"
+            onUpload={onAttach}
+            operation="PUT"
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+              datasetId,
+              fieldId: records.selectedFieldId
+            })}`}
+          />
         )}
 
         {addDialogVisible && (
