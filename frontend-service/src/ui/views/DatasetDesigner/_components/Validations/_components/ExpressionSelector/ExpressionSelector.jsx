@@ -7,6 +7,7 @@ import styles from './ExpressionSelector.module.scss';
 import { Dropdown } from 'primereact/dropdown';
 import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
+import { SQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_components/SQLsentence';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
@@ -41,7 +42,8 @@ export const ExpressionSelector = ({
 
   const options = [
     { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
-    { label: resources.messages['ifThenLabel'], value: 'ifThenClause' }
+    { label: resources.messages['ifThenLabel'], value: 'ifThenClause' },
+    { label: resources.messages['SQLsentence'], value: 'SQLsentence' }
   ];
   const {
     candidateRule: { expressionType }
@@ -90,6 +92,9 @@ export const ExpressionSelector = ({
           onGetFieldType={onGetFieldType}
         />
       );
+    }
+    if (!isEmpty(expressionType) && expressionType === 'SQLsentence') {
+      return <SQLsentence />;
     }
     return <></>;
   };
