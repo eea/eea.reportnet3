@@ -246,9 +246,14 @@ const useBigButtonList = ({
           getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
         );
       },
-
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
+      model: [
+        {
+          label: resources.messages['historicReleases'],
+          command: () => console.log('view historicReleases')
+        }
+      ],
       onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
       visibility: !isEmpty(dataflowState.data.datasets)
     }));
@@ -328,6 +333,12 @@ const useBigButtonList = ({
     },
     helpClassName: 'dataflow-datacollection-help-step',
     layout: 'defaultBigButton',
+    model: [
+      {
+        label: resources.messages['historicReleases'],
+        command: () => console.log('view historicReleases')
+      }
+    ],
     visibility: !isEmpty(dataflowState.data.dataCollections)
   }));
 
@@ -429,18 +440,33 @@ const useBigButtonList = ({
           label: resources.messages['updateConfigurations'],
           title: true
         }
-      ].concat(
-        dataflowState.data.euDatasets.map(dataset => ({
-          command: () => {
-            getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
-            handleExportEuDataset(true);
-            onLoadEuDatasetIntegration(dataset.datasetSchemaId);
-          },
-          icon: 'export',
-          iconStyle: { transform: 'rotate(-90deg)' },
-          label: dataset.euDatasetName
-        }))
-      )
+      ]
+        .concat(
+          dataflowState.data.euDatasets.map(dataset => ({
+            command: () => {
+              getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
+              handleExportEuDataset(true);
+              onLoadEuDatasetIntegration(dataset.datasetSchemaId);
+            },
+            icon: 'export',
+            iconStyle: { transform: 'rotate(-90deg)' },
+            label: dataset.euDatasetName
+          }))
+        )
+        .concat(
+          [
+            {
+              command: () => console.log('view historicReleases'),
+              label: resources.messages['historicReleases'],
+              title: true
+            }
+          ].concat(
+            dataflowState.data.euDatasets.map(dataset => ({
+              command: () => console.log('view historicReleases'),
+              label: dataset.euDatasetName
+            }))
+          )
+        )
     : [];
 
   const exportEuDatasetBigButton = [
