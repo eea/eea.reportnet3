@@ -49,7 +49,9 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
 
   const [currentCRS, setCurrentCRS] = useState(
-    crs.filter(crsItem => crsItem.value === RecordUtils.getCellValue(cells, cells.field).split(', ')[2])[0]
+    RecordUtils.getCellValue(cells, cells.field) !== ''
+      ? crs.filter(crsItem => crsItem.value === RecordUtils.getCellValue(cells, cells.field).split(', ')[2])[0]
+      : { label: 'WGS84', value: 'EPSG:4326' }
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
@@ -62,6 +64,10 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
+    console.log({ currentCRS });
+    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
+      onChangePointCRS(currentCRS.value);
+    }
   }, []);
 
   let fieldType = {};
@@ -156,22 +162,19 @@ const FieldEditor = ({
   };
 
   const parsePoint = (coordinates, crs, withCRS = true) => {
-    console.log(projectCoordinates(coordinates, crs));
-    return coordinates !== ''
-      ? withCRS
-        ? `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}, ${crs}`
-        : `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}`
-      : '';
+    console.log({ coordinates });
+    if (coordinates !== '') {
+      const projectedCoordinates = projectCoordinates(coordinates, crs.value);
+      return withCRS ? `${projectedCoordinates.join(', ')}, ${crs.value}` : `${projectedCoordinates.join(', ')}`;
+    }
   };
 
   const parseCoordinates = coordinates => {
-    console.log({ coordinates });
     return [parseFloat(coordinates.split(', ')[0]), parseFloat(coordinates.split(', ')[1])];
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
-    console.log({ coordinates, newCRS });
-    return proj4(proj4(currentCRS.value), proj4(newCRS.value), parseCoordinates(coordinates));
+    return proj4(proj4(currentCRS.value), proj4(newCRS), parseCoordinates(coordinates));
   };
 
   const renderField = type => {
@@ -270,11 +273,7 @@ const FieldEditor = ({
               options={crs}
               optionLabel="label"
               onChange={e => {
-                console.log(e.target.value);
-                onEditorValueChange(
-                  cells,
-                  parsePoint(RecordUtils.getCellValue(cells, cells.field), e.target.value.value)
-                );
+                onEditorValueChange(cells, parsePoint(RecordUtils.getCellValue(cells, cells.field), e.target.value));
                 setCurrentCRS(e.target.value);
                 onChangePointCRS(e.target.value.value);
               }}

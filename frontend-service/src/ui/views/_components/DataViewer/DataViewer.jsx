@@ -283,6 +283,11 @@ const DataViewer = withRouter(
       getMetadata();
     }, []);
 
+    // useEffect(() => {
+    //   if (records.mapCoordinates !== '')
+    //     onChangePointCRS(records.mapCoordinates === '' ? 'EPSG:4326' : records.mapCoordinates.split(', ')[2]);
+    // }, [records.mapCoordinates]);
+
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
     }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
@@ -756,9 +761,16 @@ const DataViewer = withRouter(
 
     const onSavePoint = coordinates => {
       dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
-      console.log({ coordinates, crs: records.crs });
-      onEditorValueChange(records.selectedMapCells, `${coordinates}, ${records.crs}`);
-      onEditorSubmitValue(records.selectedMapCells, `${coordinates}, ${records.crs}`, records.selectedRecord);
+      console.log({ coordinates, crs: records.crs }, records.selectedMapCells);
+      onEditorValueChange(
+        records.selectedMapCells,
+        `${coordinates !== '' ? coordinates : '55.6811608, 12.5844761'}, ${records.crs}`
+      );
+      onEditorSubmitValue(
+        records.selectedMapCells,
+        `${coordinates !== '' ? coordinates : '55.6811608, 12.5844761'}, ${records.crs}`,
+        records.selectedRecord
+      );
     };
 
     const onSelectPoint = (coordinates, crs) => {
@@ -922,7 +934,8 @@ const DataViewer = withRouter(
 
     const mapRender = () => {
       console.log(
-        records.mapCoordinates
+        records.mapCoordinates,
+        records.crs
         // !Array.isArray(records.mapCoordinates)
         //   ? records.mapCoordinates.split('*')[0].split(',')
         //   : Array.isArray(records.mapCoordinates[0])

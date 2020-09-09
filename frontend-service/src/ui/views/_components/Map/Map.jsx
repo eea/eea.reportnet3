@@ -153,37 +153,6 @@ var crs25830 = new L.Proj.CRS(
   }
 );
 
-var crs3857 = new L.Proj.CRS(
-  'EPSG:3857',
-  '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
-  {
-    resolutions: [
-      156543.033928,
-      78271.5169639999,
-      39135.7584820001,
-      19567.8792409999,
-      9783.93962049996,
-      4891.96981024998,
-      2445.98490512499,
-      1222.99245256249,
-      611.49622628138,
-      305.748113140558,
-      152.874056570411,
-      76.4370282850732,
-      38.2185141425366,
-      19.1092570712683,
-      9.55462853563415,
-      4.77731426794937,
-      2.38865713397468,
-      1.19432856685505,
-      0.597164283559817,
-      0.298582141647617
-    ]
-    //Origen de servicio tileado
-    //		origin:[0,0]
-  }
-);
-
 L.Marker.prototype.options.icon = DefaultIcon;
 
 let NewMarkerIcon = L.icon({
@@ -235,7 +204,10 @@ export const Map = ({
   const [currentTheme, setCurrentTheme] = useState(
     themes.filter(theme => theme.value === userContext.userProps.basemapLayer)[0] || themes[0]
   );
-  console.log({ selectedCRS });
+  console.log(
+    { selectedCRS },
+    !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
+  );
   const [currentCRS, setCurrentCRS] = useState(
     !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
   );
@@ -295,7 +267,7 @@ export const Map = ({
     searchControl.on('results', function (data) {
       results.clearLayers();
       for (let i = data.results.length - 1; i >= 0; i--) {
-        setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}`);
+        setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}, EPSG:4326`);
         // results.addLayer(L.marker(data.results[i].latlng));
       }
     });
@@ -336,6 +308,24 @@ export const Map = ({
       setIsNewPositionMarkerVisible(true);
     }
   }, [newPositionMarker]);
+
+  useEffect(() => {
+    console.log({ isNewPositionMarkerVisible, newPositionMarker, marker });
+    if (isNewPositionMarkerVisible && !isNil(newPositionMarker)) {
+      console.log({ newPositionMarker });
+      console.log(projectCoordinates(newPositionMarker));
+      setNewPositionMarker(`${projectCoordinates(newPositionMarker).join(', ')}, ${currentCRS.value}`);
+    }
+    // if (!isNil(marker)) {
+    //   setMarker(
+    //     `${projectCoordinates(Array.isArray(marker) ? marker.join(', ') : marker).join(', ')}, ${currentCRS.value}`
+    //   );
+    // }
+  }, [currentCRS]);
+
+  useEffect(() => {
+    console.log({ newPositionMarker, marker });
+  }, [newPositionMarker, marker]);
 
   useEffect(() => {
     const map = mapRef.current.leafletElement;
@@ -381,10 +371,21 @@ export const Map = ({
   };
 
   const projectCoordinates = coordinates => {
-    // console.log({ coordinates });
-    console.log(currentCRS.value);
+    console.log(coordinates);
+    console.log(
+      proj4(
+        proj4(!isNil(coordinates.split(', ')[2]) ? coordinates.split(', ')[2] : currentCRS.value),
+        proj4('EPSG:4326'),
+        parseCoordinates(coordinates)
+      )
+    );
+    // console.log(proj4(proj4(coordinates.split(', ')[2]), proj4(currentCRS.value), parseCoordinates(coordinates)));
     // console.log(proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates)));
-    return proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates));
+    return proj4(
+      proj4(!isNil(coordinates.split(', ')[2]) ? coordinates.split(', ')[2] : currentCRS.value),
+      proj4('EPSG:4326'),
+      parseCoordinates(coordinates)
+    );
   };
 
   // const parseCoordinatesSRID = coord => {
@@ -460,7 +461,7 @@ export const Map = ({
           // console.log(proj4(proj4('EPSG:3035'), proj4('EPSG:4326'), [9323919.149606757, 307743.5211649621]));
           // console.log(proj);
           console.log(e.latlng.lat);
-          setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}`);
+          setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
           onSelectPoint(
             // [e.latlng.lat, e.latlng.lng],
             proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
@@ -484,6 +485,7 @@ export const Map = ({
           url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer"
         /> */}
         {<GeoJSON data={geojson} />}
+        {console.log(newPositionMarker)}
         {isNewPositionMarkerVisible && (
           <Marker
             className={`${styles.marker} ${styles.bounce}`}
@@ -495,10 +497,11 @@ export const Map = ({
                 setPopUpVisible(true);
               }
             }}
-            onDrag={e => setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}`)}>
+            onDrag={e => setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`)}>
             <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
           </Marker>
         )}
+        {console.log(marker)}
         <Marker
           position={projectCoordinates(marker)}
           onClick={e => {

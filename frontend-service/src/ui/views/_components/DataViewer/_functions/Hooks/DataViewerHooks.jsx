@@ -151,7 +151,7 @@ export const useSetColumns = (
   };
 
   const renderPoint = (value = '') => {
-    console.log({ value });
+    // console.log({ value });
     return value !== '' ? `${value.split(', ')[0]}, ${value.split(', ')[1]} - ${value.split(', ')[2]}` : '';
   };
 
