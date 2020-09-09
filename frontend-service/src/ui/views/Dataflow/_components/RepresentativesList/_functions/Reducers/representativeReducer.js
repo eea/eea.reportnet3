@@ -10,7 +10,8 @@ export const reducer = (state, { type, payload }) => {
     case 'REFRESH':
       return {
         ...state,
-        refresher: !state.refresher
+        refresher: !state.refresher,
+        representativesHaveError: []
       };
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
@@ -77,14 +78,14 @@ export const reducer = (state, { type, payload }) => {
         representatives: payload.response.representatives,
         initialRepresentatives: payload.representativesByCopy,
         selectedDataProviderGroup: getSelectedProviderGroup(),
-        representativesHaveError: []
+        representativeHaveError: []
       };
 
     case 'ON_ACCOUNT_CHANGE':
       return {
         ...state,
         representatives: payload.representatives,
-        representativeHasError: payload.representativeHasError
+        representativesHaveError: payload.representativesHaveError
       };
 
     case 'ON_PROVIDER_CHANGE':
