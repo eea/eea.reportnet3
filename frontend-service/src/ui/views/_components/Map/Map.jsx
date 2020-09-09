@@ -235,7 +235,7 @@ export const Map = ({
   const [currentTheme, setCurrentTheme] = useState(
     themes.filter(theme => theme.value === userContext.userProps.basemapLayer)[0] || themes[0]
   );
-
+  console.log({ selectedCRS });
   const [currentCRS, setCurrentCRS] = useState(
     !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
   );
@@ -381,8 +381,9 @@ export const Map = ({
   };
 
   const projectCoordinates = coordinates => {
-    console.log({ coordinates });
-    console.log(proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates)));
+    // console.log({ coordinates });
+    console.log(currentCRS.value);
+    // console.log(proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates)));
     return proj4(proj4(currentCRS.value), proj4('EPSG:4326'), parseCoordinates(coordinates));
   };
 
@@ -458,6 +459,7 @@ export const Map = ({
           // console.log(proj4(proj4('EPSG:4326'), proj4('EPSG:4258'), [e.latlng.lat, e.latlng.lng]));
           // console.log(proj4(proj4('EPSG:3035'), proj4('EPSG:4326'), [9323919.149606757, 307743.5211649621]));
           // console.log(proj);
+          console.log(e.latlng.lat);
           setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}`);
           onSelectPoint(
             // [e.latlng.lat, e.latlng.lng],
@@ -466,15 +468,15 @@ export const Map = ({
           );
         }}>
         <LayersControl position="topright">
-          <BaseLayer checked name="EEA">
+          <BaseLayer checked name="EEA Countries">
             <TileLayer
               // attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
               url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer/tile/{z}/{y}/{x}"
-              opacity={0.5}
+              opacity={0.35}
             />
           </BaseLayer>
-          <BaseLayer name="EEA 2">
-            <TileLayer url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Land/CLC2000_Cach_WM/MapServer/tile/{z}/{y}/{x}" />
+          <BaseLayer name="None">
+            <TileLayer url="" />
           </BaseLayer>
         </LayersControl>
         {/* <TileLayer

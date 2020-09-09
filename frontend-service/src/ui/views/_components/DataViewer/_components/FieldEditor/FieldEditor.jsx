@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import proj4 from 'proj4';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
@@ -17,6 +18,12 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
+proj4.defs([
+  ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
+  ['EPSG:3035', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'],
+  ['EPSG:4326', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs']
+]);
+
 const FieldEditor = ({
   cells,
   colsSchema,
@@ -29,8 +36,7 @@ const FieldEditor = ({
   onEditorValueFocus,
   onMapOpen,
   record,
-  reporting,
-  selectedCRS
+  reporting
 }) => {
   const crs = [
     { label: 'WGS84', value: 'EPSG:4326' },
@@ -41,8 +47,9 @@ const FieldEditor = ({
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
+
   const [currentCRS, setCurrentCRS] = useState(
-    !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
+    crs.filter(crsItem => crsItem.value === RecordUtils.getCellValue(cells, cells.field).split(', ')[2])[0]
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
@@ -148,12 +155,24 @@ const FieldEditor = ({
     }
   };
 
-  const parsePoint = (coordinates, crs, withCRS = true) =>
-    coordinates !== ''
+  const parsePoint = (coordinates, crs, withCRS = true) => {
+    console.log(projectCoordinates(coordinates, crs));
+    return coordinates !== ''
       ? withCRS
         ? `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}, ${crs}`
         : `${coordinates.split(', ')[0]}, ${coordinates.split(', ')[1]}`
       : '';
+  };
+
+  const parseCoordinates = coordinates => {
+    console.log({ coordinates });
+    return [parseFloat(coordinates.split(', ')[0]), parseFloat(coordinates.split(', ')[1])];
+  };
+
+  const projectCoordinates = (coordinates, newCRS) => {
+    console.log({ coordinates, newCRS });
+    return proj4(proj4(currentCRS.value), proj4(newCRS.value), parseCoordinates(coordinates));
+  };
 
   const renderField = type => {
     const longCharacters = 20;
@@ -251,6 +270,7 @@ const FieldEditor = ({
               options={crs}
               optionLabel="label"
               onChange={e => {
+                console.log(e.target.value);
                 onEditorValueChange(
                   cells,
                   parsePoint(RecordUtils.getCellValue(cells, cells.field), e.target.value.value)
@@ -260,7 +280,7 @@ const FieldEditor = ({
               }}
               placeholder="Select a CRS"
               value={currentCRS}
-              style={{ width: '25%', marginRight: '1rem' }}
+              style={{ width: '30%', marginRight: '1rem' }}
             />
             <Button
               className={`p-button-secondary-transparent button`}

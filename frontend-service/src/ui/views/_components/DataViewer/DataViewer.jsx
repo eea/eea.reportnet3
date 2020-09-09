@@ -175,7 +175,6 @@ const DataViewer = withRouter(
           onMapOpen={onMapOpen}
           record={record}
           reporting={reporting}
-          selectedCRS={records.crs}
         />
       );
     };
