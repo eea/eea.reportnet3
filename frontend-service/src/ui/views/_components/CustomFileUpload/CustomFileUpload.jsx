@@ -349,20 +349,23 @@ export const CustomFileUpload = ({
 
     return (
       <span className={styles.chooseButton}>
-        <span icon="pi pi-plus" className={className}>
-          <input
-            accept={accept}
-            disabled={disabled}
-            multiple={multiple}
-            onBlur={onBlur}
-            onChange={onFileSelect}
-            onFocus={onFocus}
-            ref={fileInput}
-            type="file"
-          />
-          <span className="p-button-icon p-button-icon-left p-clickable pi pi-fw pi-plus" />
-          <span className="p-button-text p-clickable">{chooseLabel}</span>
-        </span>
+        <input
+          id="file"
+          className={styles.chooseInput}
+          accept={accept}
+          disabled={disabled}
+          multiple={multiple}
+          onBlur={onBlur}
+          onChange={onFileSelect}
+          onFocus={onFocus}
+          ref={fileInput}
+          type="file"
+        />
+        <label for="file" className={className}>
+          <span className="pi pi-fw pi-plus" />
+          <span>{chooseLabel}</span>
+        </label>
+
         <Button
           className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
           icon="infoCircle"

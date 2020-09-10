@@ -71,11 +71,15 @@
   right: 0;
   margin: 0;
   opacity: 0;
-  min-height: 100%;
-  font-size: 100px;
   text-align: right;
   filter: alpha(opacity=0);
   direction: ltr;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.p-fileupload-choose input[type='file'] {
   cursor: pointer;
 }
 
@@ -96,22 +100,20 @@
   display: flex;
   margin-left: 0 !important;
   width: 100%;
-  > span {
-    width: 100%;
-    padding: 0.5rem 0 !important;
-    display: flex;
-    justify-content: center;
-    span {
-      padding: 0px !important;
-      margin: 0px !important;
-      position: unset !important;
-      height: auto !important;
-      &:first-of-type {
-        line-height: 20px;
-      }
-    }
-    input {
+  .chooseInput {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+    & + label {
       width: 100%;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
     }
   }
 }
