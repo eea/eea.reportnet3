@@ -235,7 +235,10 @@ const useBigButtonList = ({
           model: [
             {
               label: resources.messages['historicReleases'],
-              command: () => onShowHistoricReleases('dataCollection')
+              command: () => {
+                onShowHistoricReleases('reportingDataset');
+                getDatasetData(dataset.datasetId, dataset.datasetSchemaId);
+              }
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
@@ -258,7 +261,10 @@ const useBigButtonList = ({
       model: [
         {
           label: resources.messages['historicReleases'],
-          command: () => onShowHistoricReleases('reportingDataset')
+          command: () => {
+            onShowHistoricReleases('reportingDataset');
+            // getDatasetData(datasetId, datasetSchemaId);
+          }
         }
       ],
       onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
@@ -343,7 +349,10 @@ const useBigButtonList = ({
     model: [
       {
         label: resources.messages['historicReleases'],
-        command: () => onShowHistoricReleases('dataCollection')
+        command: () => {
+          onShowHistoricReleases('dataCollection');
+          getDatasetData(dataCollection.dataCollectionId, dataCollection.datasetSchemaId);
+        }
       }
     ],
     visibility: !isEmpty(dataflowState.data.dataCollections)
@@ -361,7 +370,10 @@ const useBigButtonList = ({
     model: [
       {
         label: resources.messages['historicReleases'],
-        command: () => onShowHistoricReleases('EUDataset')
+        command: () => {
+          onShowHistoricReleases('EUDataset');
+          getDatasetData(euDataset.euDatasetId, euDataset.datasetSchemaId);
+        }
       }
     ],
     visibility: !isEmpty(dataflowState.data.euDatasets)

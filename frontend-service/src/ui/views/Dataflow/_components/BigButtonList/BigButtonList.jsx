@@ -14,6 +14,7 @@ import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
@@ -66,12 +67,14 @@ export const BigButtonList = ({
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [euDatasetExportIntegration, setEuDatasetExportIntegration] = useState({});
+  const [historicReleasesView, setHistoricReleasesView] = useState('');
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isCopyDataCollectionToEuDatasetDialogVisible, setIsCopyDataCollectionToEuDatasetDialogVisible] = useState(
     false
   );
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
+  const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
@@ -195,6 +198,11 @@ export const BigButtonList = ({
     }
   };
 
+  const onShowHistoricReleases = typeView => {
+    setIsHistoricReleasesDialogVisible(true);
+    setHistoricReleasesView(typeView);
+  };
+
   const onLoadEuDatasetIntegration = async datasetSchemaId => {
     try {
       const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
@@ -308,7 +316,16 @@ export const BigButtonList = ({
 
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
-  const renderDialogFooter = (
+  const renderDialogFooter = isHistoricReleasesDialogVisible ? (
+    <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsHistoricReleasesDialogVisible(false)}
+      />
+    </Fragment>
+  ) : (
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink"
@@ -342,6 +359,7 @@ export const BigButtonList = ({
       onShowCopyDataCollectionToEuDatasetModal,
       onShowDataCollectionModal,
       onShowExportEuDatasetModal,
+      onShowHistoricReleases,
       onShowManageReportersDialog,
       onShowNewSchemaDialog,
       onShowSnapshotDialog,
@@ -361,7 +379,6 @@ export const BigButtonList = ({
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
-
       {isIntegrationManageDialogVisible && (
         <ManageIntegrations
           dataflowId={dataflowId}
@@ -372,7 +389,6 @@ export const BigButtonList = ({
           updatedData={euDatasetExportIntegration}
         />
       )}
-
       {newDatasetDialog && (
         <Dialog
           className={styles.dialog}
@@ -388,7 +404,6 @@ export const BigButtonList = ({
           />
         </Dialog>
       )}
-
       {cloneDialogVisible && (
         <Dialog
           className={styles.dialog}
@@ -400,7 +415,6 @@ export const BigButtonList = ({
           <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
         </Dialog>
       )}
-
       {errorDialogData.isVisible && (
         <Dialog
           footer={errorDialogFooter}
@@ -410,7 +424,6 @@ export const BigButtonList = ({
           <div className="p-grid p-fluid">{errorDialogData.message}</div>
         </Dialog>
       )}
-
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -424,6 +437,18 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
+      {isHistoricReleasesDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={`${resources.messages['historicReleases']} ${dataflowName}`}
+          onHide={() => setIsHistoricReleasesDialogVisible(false)}
+          // style={{ width: '80%' }}
+          visible={isHistoricReleasesDialogVisible}>
+          <HistoricReleases datasetId={datasetId} historicReleasesView={historicReleasesView} />
+        </Dialog>
+      )}
+
       {isUpdateDataCollectionDialogVisible && (
         <ConfirmDialog
           header={resources.messages['updateDataCollectionHeader']}
@@ -435,7 +460,6 @@ export const BigButtonList = ({
           <p>{resources.messages['updateDataCollectionMessage']}</p>
         </ConfirmDialog>
       )}
-
       {dataCollectionDialog && (
         <ConfirmDialog
           className={styles.calendarConfirm}
@@ -475,7 +499,6 @@ export const BigButtonList = ({
           />
         </ConfirmDialog>
       )}
-
       {isCopyDataCollectionToEuDatasetDialogVisible && (
         <ConfirmDialog
           header={resources.messages['copyDataCollectionToEuDatasetHeader']}
@@ -487,7 +510,6 @@ export const BigButtonList = ({
           <p>{resources.messages['copyDataCollectionToEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
-
       {isExportEuDatasetDialogVisible && (
         <ConfirmDialog
           header={resources.messages['exportEuDatasetHeader']}
@@ -499,7 +521,6 @@ export const BigButtonList = ({
           <p>{resources.messages['exportEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
-
       {isConfirmCollectionDialog && (
         <ConfirmDialog
           header={resources.messages['createDataCollection']}
@@ -514,7 +535,6 @@ export const BigButtonList = ({
           {resources.messages['createDataCollectionConfirm']}
         </ConfirmDialog>
       )}
-
       <button
         className="dataflow-big-buttons-confirmation-receipt-help-step"
         ref={receiptBtnRef}
