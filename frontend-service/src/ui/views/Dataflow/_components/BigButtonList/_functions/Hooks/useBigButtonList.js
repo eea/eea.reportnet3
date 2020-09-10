@@ -29,6 +29,7 @@ const useBigButtonList = ({
   onShowCopyDataCollectionToEuDatasetModal,
   onShowDataCollectionModal,
   onShowExportEuDatasetModal,
+  onShowHistoricReleases,
   onShowManageReportersDialog,
   onShowNewSchemaDialog,
   onShowSnapshotDialog,
@@ -231,6 +232,12 @@ const useBigButtonList = ({
           infoStatusIcon: true,
           layout: 'defaultBigButton',
           // model: [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
+          model: [
+            {
+              label: resources.messages['historicReleases'],
+              command: () => onShowHistoricReleases('dataCollection')
+            }
+          ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
           visibility: !isEmpty(dataflowState.data.datasets)
         };
@@ -251,7 +258,7 @@ const useBigButtonList = ({
       model: [
         {
           label: resources.messages['historicReleases'],
-          command: () => console.log('view historicReleases')
+          command: () => onShowHistoricReleases('reportingDataset')
         }
       ],
       onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
@@ -336,7 +343,7 @@ const useBigButtonList = ({
     model: [
       {
         label: resources.messages['historicReleases'],
-        command: () => console.log('view historicReleases')
+        command: () => onShowHistoricReleases('dataCollection')
       }
     ],
     visibility: !isEmpty(dataflowState.data.dataCollections)
@@ -351,6 +358,12 @@ const useBigButtonList = ({
     },
     helpClassName: 'dataflow-eudataset-help-step',
     layout: 'defaultBigButton',
+    model: [
+      {
+        label: resources.messages['historicReleases'],
+        command: () => onShowHistoricReleases('EUDataset')
+      }
+    ],
     visibility: !isEmpty(dataflowState.data.euDatasets)
   }));
 
@@ -440,33 +453,18 @@ const useBigButtonList = ({
           label: resources.messages['updateConfigurations'],
           title: true
         }
-      ]
-        .concat(
-          dataflowState.data.euDatasets.map(dataset => ({
-            command: () => {
-              getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
-              handleExportEuDataset(true);
-              onLoadEuDatasetIntegration(dataset.datasetSchemaId);
-            },
-            icon: 'export',
-            iconStyle: { transform: 'rotate(-90deg)' },
-            label: dataset.euDatasetName
-          }))
-        )
-        .concat(
-          [
-            {
-              command: () => console.log('view historicReleases'),
-              label: resources.messages['historicReleases'],
-              title: true
-            }
-          ].concat(
-            dataflowState.data.euDatasets.map(dataset => ({
-              command: () => console.log('view historicReleases'),
-              label: dataset.euDatasetName
-            }))
-          )
-        )
+      ].concat(
+        dataflowState.data.euDatasets.map(dataset => ({
+          command: () => {
+            getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
+            handleExportEuDataset(true);
+            onLoadEuDatasetIntegration(dataset.datasetSchemaId);
+          },
+          icon: 'export',
+          iconStyle: { transform: 'rotate(-90deg)' },
+          label: dataset.euDatasetName
+        }))
+      )
     : [];
 
   const exportEuDatasetBigButton = [
