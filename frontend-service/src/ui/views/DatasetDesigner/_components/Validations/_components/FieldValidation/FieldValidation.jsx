@@ -11,7 +11,8 @@ import styles from './FieldValidation.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
-import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
+
+import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
 
@@ -94,7 +95,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
           header={resourcesContext.messages.tabMenuExpression}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
-          <ExpressionsTab
+          <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
             onExpressionDelete={onExpressionDelete}
@@ -104,6 +105,8 @@ const FieldValidation = ({ datasetId, tabs }) => {
             tabsChanges={tabsChanges}
             onAddNewExpression={onAddNewExpression}
             onExpressionsErrors={onExpressionsErrors}
+            onExpressionTypeToggle={onExpressionTypeToggle}
+            onGetFieldType={onGetFieldType}
           />
         </TabPanel>
       ]);
@@ -252,6 +255,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
       }
     }
   }, [clickedFields]);
+
+  const onExpressionTypeToggle = expressionType => {
+    creationFormDispatch({
+      type: 'ON_EXPRESSION_TYPE_TOGGLE',
+      payload: expressionType
+    });
+  };
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
@@ -437,6 +447,10 @@ const FieldValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onGetFieldType = field => {
+    return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
+  };
+
   const renderFieldQCsFooter = (
     <div className={styles.footer}>
       <div className={`${styles.section} ${styles.footerToolBar}`}>
@@ -450,7 +464,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
                 type="button"
                 label={resourcesContext.messages.update}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                onClick={e => onUpdateValidationRule()}
+                onClick={() => onUpdateValidationRule()}
               />
             </span>
           ) : (
@@ -464,7 +478,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
                 type="button"
                 label={resourcesContext.messages.create}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                onClick={e => onCreateValidationRule()}
+                onClick={() => onCreateValidationRule()}
               />
             </span>
           )}
@@ -480,7 +494,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
             type="button"
             label={resourcesContext.messages.cancel}
             icon="cancel"
-            onClick={e => onHide()}
+            onClick={() => onHide()}
           />
         </div>
       </div>
@@ -498,9 +512,9 @@ const FieldValidation = ({ datasetId, tabs }) => {
               ? resourcesContext.messages.editFieldConstraint
               : resourcesContext.messages.createFieldConstraintTitle
           }
-          visible={validationContext.isVisible}
+          onHide={() => onHide()}
           style={{ width: '975px' }}
-          onHide={e => onHide()}>
+          visible={validationContext.isVisible}>
           {children}
         </Dialog>
       )}
@@ -513,8 +527,8 @@ const FieldValidation = ({ datasetId, tabs }) => {
         <div id={styles.QCFormWrapper}>
           <div className={styles.body}>
             <TabView
-              className={styles.tabView}
               activeIndex={tabMenuActiveItem}
+              className={styles.tabView}
               onTabChange={e => onTabChange(e.index)}
               renderActiveOnly={false}>
               {tabContents}

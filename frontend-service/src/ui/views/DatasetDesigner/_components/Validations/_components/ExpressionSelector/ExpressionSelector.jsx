@@ -8,9 +8,9 @@ import { Dropdown } from 'primereact/dropdown';
 import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
 import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
-import { SQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_components/SQLsentence';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_components/SQLsentence';
+import { TableRelationsSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const ExpressionSelector = ({
@@ -19,6 +19,9 @@ export const ExpressionSelector = ({
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
+  onAddNewRelation,
+  onDatasetSchemaChange,
+  onDoubleReferencedChange,
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
@@ -34,6 +37,11 @@ export const ExpressionSelector = ({
   onExpressionThenMarkToGroup,
   onExpressionTypeToggle,
   onGetFieldType,
+  onInfoFieldChange,
+  onReferencedTableChange,
+  onRelationDelete,
+  onRelationFieldUpdate,
+  onRelationsErrors,
   tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
@@ -58,7 +66,7 @@ export const ExpressionSelector = ({
     }
 
     return [
-      { label: resources.messages['fieldComparisonLabel'], value: 'datasetComparison' },
+      { label: resources.messages['datasetComparison'], value: 'fieldRelations' },
       { label: resources.messages['SQLsentence'], value: 'SQLsentence' }
     ];
   };
@@ -84,8 +92,8 @@ export const ExpressionSelector = ({
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
             onExpressionsErrors={onExpressionsErrors}
-            tabsChanges={tabsChanges}
             onGetFieldType={onGetFieldType}
+            tabsChanges={tabsChanges}
           />
         </>
       );
@@ -102,6 +110,27 @@ export const ExpressionSelector = ({
           onExpressionGroup={onExpressionGroup}
           onExpressionMarkToGroup={onExpressionMarkToGroup}
           onExpressionsErrors={onExpressionsErrors}
+          tabsChanges={tabsChanges}
+        />
+      );
+    }
+
+    if (!isEmpty(expressionType) && expressionType === 'fieldRelations') {
+      return (
+        <TableRelationsSelector
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewRelation={onAddNewRelation}
+          onDatasetSchemaChange={onDatasetSchemaChange}
+          onDoubleReferencedChange={onDoubleReferencedChange}
+          onExpressionTypeToggle={onExpressionTypeToggle}
+          onGetFieldType={onGetFieldType}
+          onInfoFieldChange={onInfoFieldChange}
+          onReferencedTableChange={onReferencedTableChange}
+          onRelationDelete={onRelationDelete}
+          onRelationFieldUpdate={onRelationFieldUpdate}
+          onRelationsErrors={onRelationsErrors}
+          showRequiredFields={tabsChanges.expression}
           tabsChanges={tabsChanges}
         />
       );
@@ -138,13 +167,7 @@ export const ExpressionSelector = ({
     <>
       <div className={styles.section} style={validationContext.ruleEdit ? { display: 'none' } : {}}>
         <Dropdown
-           onChange={e => onExpressionTypeToggle(e.value)}
-          /* onChange={e =>
-            creationFormDispatch({
-              type: 'ON_EXPRESSION_TYPE_TOGGLE',
-              payload: e.value
-            })
-          } */
+          onChange={e => onExpressionTypeToggle(e.value)}
           optionLabel="label"
           options={getOptions()}
           placeholder={resources.messages['expressionTypeDropdownPlaceholder']}

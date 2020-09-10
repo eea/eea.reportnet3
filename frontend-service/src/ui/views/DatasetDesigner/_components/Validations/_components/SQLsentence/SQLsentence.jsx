@@ -2,10 +2,9 @@ import React, { useContext, useState } from 'react';
 
 import styles from './SQLsentence.module.scss';
 
-import { InputTextarea } from 'primereact/inputtextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SQLsentence = ({}) => {
+export const SQLsentence = ({ creationFormState }) => {
   const resources = useContext(ResourcesContext);
 
   const [sentence, setSentence] = useState('');

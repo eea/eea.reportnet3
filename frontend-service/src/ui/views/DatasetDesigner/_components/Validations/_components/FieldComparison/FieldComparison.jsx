@@ -40,6 +40,8 @@ export const FieldComparison = ({
                 position={i}
                 rawTableFields={creationFormState.tableFields}
                 showRequiredFields={tabsChanges.expression}
+
+                fieldType={creationFormState.candidateRule.fieldType}            
               />
             ))}
         </ul>

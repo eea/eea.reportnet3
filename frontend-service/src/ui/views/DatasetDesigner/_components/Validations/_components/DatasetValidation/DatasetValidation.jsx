@@ -9,10 +9,11 @@ import styles from './DatasetValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { TableRelationsSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
+import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
-import ReactTooltip from 'react-tooltip';
+import { TableRelationsSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
 import { TabView, TabPanel } from 'primereact/tabview';
+import ReactTooltip from 'react-tooltip';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -89,8 +90,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
           header={resourcesContext.messages.tabMenuTableRelations}
           headerClassName={showErrorOnRelationsTab ? styles.error : ''}
           key="datasetValidationRelations"
-          leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>
-          <TableRelationsSelector
+          leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>        
+
+          <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
             onAddNewRelation={onAddNewRelation}
@@ -522,6 +524,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
+  
   const dialogLayout = children => (
     <Fragment>
       {validationContext.isVisible && (
