@@ -18,6 +18,7 @@ const useBigButtonList = ({
   dataflowId,
   dataflowState,
   getDatasetData,
+  getDataHistoricReleases,
   getDeleteSchemaIndex,
   handleExportEuDataset,
   handleRedirect,
@@ -212,7 +213,12 @@ const useBigButtonList = ({
     const { datasets } = dataflowData;
 
     const allDatasets = datasets.map(dataset => {
-      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+      return {
+        name: dataset.datasetSchemaName,
+        id: dataset.dataProviderId,
+        datasetId: dataset.datasetId,
+        datasetName: dataset.name
+      };
     });
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
@@ -220,6 +226,7 @@ const useBigButtonList = ({
     if (isUniqRepresentative && !buttonsVisibility.groupByRepresentative) {
       return datasets.map(dataset => {
         const datasetName = dataset.name;
+        const datasetId = dataset.datasetId;
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
@@ -237,7 +244,7 @@ const useBigButtonList = ({
               label: resources.messages['historicReleases'],
               command: () => {
                 onShowHistoricReleases('reportingDataset');
-                getDatasetData(dataset.datasetId, dataset.datasetSchemaId);
+                getDataHistoricReleases(datasetId, datasetName);
               }
             }
           ],
@@ -247,29 +254,36 @@ const useBigButtonList = ({
       });
     }
 
-    return allDatasets.map(representative => ({
-      buttonClass: 'dataset',
-      buttonIcon: 'representative',
-      caption: representative.name,
-      handleRedirect: () => {
-        handleRedirect(
-          getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
-        );
-      },
-      helpClassName: 'dataflow-dataset-container-help-step',
-      layout: 'defaultBigButton',
-      model: [
-        {
-          label: resources.messages['historicReleases'],
-          command: () => {
-            onShowHistoricReleases('reportingDataset');
-            // getDatasetData(datasetId, datasetSchemaId);
+    const datasetsDataArray = [];
+
+    return allDatasets.map(representative => {
+      datasetsDataArray.push(representative.datasetId);
+      console.log('datasetDataArray', datasetsDataArray);
+
+      return {
+        buttonClass: 'dataset',
+        buttonIcon: 'representative',
+        caption: representative.name,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
+          );
+        },
+        helpClassName: 'dataflow-dataset-container-help-step',
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resources.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('reportingDataset');
+              getDataHistoricReleases(representative.datasetId, representative.name);
+            }
           }
-        }
-      ],
-      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
-      visibility: !isEmpty(dataflowState.data.datasets)
-    }));
+        ],
+        onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
+        visibility: !isEmpty(dataflowState.data.datasets)
+      };
+    });
   };
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
@@ -351,7 +365,7 @@ const useBigButtonList = ({
         label: resources.messages['historicReleases'],
         command: () => {
           onShowHistoricReleases('dataCollection');
-          getDatasetData(dataCollection.dataCollectionId, dataCollection.datasetSchemaId);
+          getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
         }
       }
     ],
@@ -372,7 +386,7 @@ const useBigButtonList = ({
         label: resources.messages['historicReleases'],
         command: () => {
           onShowHistoricReleases('EUDataset');
-          getDatasetData(euDataset.euDatasetId, euDataset.datasetSchemaId);
+          getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
         }
       }
     ],
