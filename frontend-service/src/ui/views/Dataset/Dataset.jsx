@@ -661,7 +661,7 @@ export const Dataset = withRouter(({ match, history }) => {
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
       label={resources.messages['close']}
-      onClick={() => manageDialogs('isValidationViewerVisible', false)}
+      onClick={() => setValidationsVisible(false)}
     />
   );
 
