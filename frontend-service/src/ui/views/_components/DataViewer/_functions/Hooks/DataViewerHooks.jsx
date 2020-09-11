@@ -339,7 +339,7 @@ export const useSetColumns = (
     let validationCol = (
       <Column
         body={validationsTemplate}
-        header={resources.messages['errors']}
+        header={resources.messages['validationsDataColumn']}
         field="validations"
         key="recordValidation"
         sortable={false}
