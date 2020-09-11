@@ -749,6 +749,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </Fragment>
   );
 
+  const renderValidationsFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isValidationViewerVisible', false)}
+    />
+  );
+
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
       <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
@@ -1076,6 +1085,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {designerState.isValidationViewerVisible && (
           <Dialog
             className={styles.paginatorValidationViewer}
+            footer={renderValidationsFooter}
             header={resources.messages['titleValidations']}
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
             style={{ width: '80%' }}

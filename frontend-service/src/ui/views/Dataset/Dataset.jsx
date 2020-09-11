@@ -656,6 +656,15 @@ export const Dataset = withRouter(({ match, history }) => {
     </Fragment>
   );
 
+  const renderValidationsFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isValidationViewerVisible', false)}
+    />
+  );
+
   if (isLoading) return layout(<Spinner />);
 
   return layout(
@@ -823,6 +832,7 @@ export const Dataset = withRouter(({ match, history }) => {
       {validationsVisible && (
         <Dialog
           className={styles.paginatorValidationViewer}
+          footer={renderValidationsFooter}
           header={resources.messages['titleValidations']}
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
