@@ -66,6 +66,8 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
 
+  const onLoadFilteredData = data => historicReleasesDispatch({ type: 'FILTERED_DATA', payload: { data } });
+
   const onLoadHistoricReleases = async () => {
     try {
       // isLoading(true);
@@ -163,6 +165,14 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
 
   return (
     <div>
+      {historicReleasesView === 'dataCollection' && (
+        <Filters
+          data={historicReleasesState.data}
+          getFilteredData={onLoadFilteredData}
+          selectOptions={['countryCode']}
+        />
+      )}
+
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
           autoLayout={true}
