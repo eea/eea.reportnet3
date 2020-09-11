@@ -226,7 +226,6 @@
     "entity": "Entity",
     "error": "Error",
     "errorMessage": "Message",
-    "errors": "Errors",
     "errorStatisticsByIdError": "Error loading schema: Failed loading statistics of <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "errorType": "Error type",
     "events": "Events",
