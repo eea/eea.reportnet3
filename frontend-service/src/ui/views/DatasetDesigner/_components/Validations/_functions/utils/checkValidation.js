@@ -13,13 +13,21 @@ export const checkValidation = candidateRule => {
       if (isNil(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
         isValidated = false;
       }
-    } else if (ruleKey === 'expressions' && !isEmpty(candidateRule.expressions && ruleKey !== 'SQLsentence')) {
+    } else if (
+      ruleKey === 'expressions' &&
+      !isEmpty(candidateRule.expressions) &&
+      candidateRule.expressionType !== 'SQLsentence'
+    ) {
       if (checkExpressions(candidateRule[ruleKey])) {
         isValidated = false;
       }
     }
 
-    if (ruleKey === 'SQLsentence' && isEmpty(candidateRule[ruleKey])) {
+    if (
+      ruleKey === 'expressions' &&
+      candidateRule.expressionType === 'SQLsentence' &&
+      (isNil(candidateRule['SQLsentence']) || isEmpty(candidateRule['SQLsentence']))
+    ) {
       isValidated = false;
     }
   });
