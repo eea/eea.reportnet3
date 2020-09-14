@@ -40,6 +40,8 @@ const LinkSelector = withRouter(
       params: { dataflowId }
     } = match;
 
+    const [isSaved, setIsSaved] = useState(false);
+
     useEffect(() => {
       const getDatasetSchemas = async () => {
         setIsLoading(true);
@@ -51,6 +53,12 @@ const LinkSelector = withRouter(
       getDatasetSchemas();
     }, []);
 
+    useEffect(() => {
+      if (isSaved) {
+        onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+      }
+    }, [isSaved]);
+
     const linkSelectorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
@@ -58,7 +66,7 @@ const LinkSelector = withRouter(
           icon="check"
           label={resources.messages['save']}
           onClick={() => {
-            onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+            setIsSaved(true);
             setIsVisible(false);
           }}
         />

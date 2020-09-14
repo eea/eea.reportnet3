@@ -335,7 +335,7 @@ export const FieldDesigner = ({
         }
       }
     }
-    dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_ATTACHMENT' });
   };
 
   const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
@@ -590,9 +590,9 @@ export const FieldDesigner = ({
         } else {
           fieldUpdate({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
         }
+        dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: false });
       }
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: false });
   };
 
   const onSaveCodelist = codelistItems => {
@@ -606,9 +606,9 @@ export const FieldDesigner = ({
         } else {
           fieldUpdate({ codelistItems });
         }
+        dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
       }
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
   const onSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
@@ -637,10 +637,9 @@ export const FieldDesigner = ({
             pkHasMultipleValues
           });
         }
+        dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: false });
       }
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
-    dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: false });
   };
 
   const parseGeospatialTypes = value => {
