@@ -35,6 +35,7 @@ import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.SQLValitaionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,9 @@ public class RulesServiceImpl implements RulesService {
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
+
+  @Autowired
+  private SQLValitaionUtils sqlValitaionUtils;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -306,10 +310,10 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
-    }
 
-    if (null != ruleVO.getSQLSentence() && !ruleVO.getSQLSentence().isEmpty()) {
+    } else if (null != ruleVO.getSQLSentence() && !ruleVO.getSQLSentence().isEmpty()) {
       rule.setWhenCondition("isSQLSentence('" + ruleVO.getSQLSentence() + "')");
+      sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
 
     }
 
