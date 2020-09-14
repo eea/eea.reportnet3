@@ -107,6 +107,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
             onExpressionsErrors={onExpressionsErrors}
             onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
+            onSetSQLsentence={onSetSQLsentence}
           />
         </TabPanel>
       ]);
@@ -444,6 +445,16 @@ const FieldValidation = ({ datasetId, tabs }) => {
     setExpressionsErrors({
       ...expressionsErrors,
       [expression]: value
+    });
+  };
+
+  const onSetSQLsentence = (key, value) => {
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key,
+        value
+      }
     });
   };
 

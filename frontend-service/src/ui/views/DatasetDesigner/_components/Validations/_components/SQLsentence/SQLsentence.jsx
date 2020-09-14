@@ -4,7 +4,7 @@ import styles from './SQLsentence.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SQLsentence = ({ creationFormState }) => {
+export const SQLsentence = ({ creationFormState, onSetSQLsentence }) => {
   const resources = useContext(ResourcesContext);
 
   const [sentence, setSentence] = useState('');
@@ -18,9 +18,9 @@ export const SQLsentence = ({ creationFormState }) => {
           cols={30}
           id="SQLsentenceTextarea"
           name=""
-          onChange={e => setSentence(e.target.value)}
+          onChange={e => onSetSQLsentence('SQLsentence', e.target.value)}
           rows={10}
-          value={sentence}
+          value={creationFormState.candidateRule['SQLsentence']}
         />
       </div>
     </React.Fragment>

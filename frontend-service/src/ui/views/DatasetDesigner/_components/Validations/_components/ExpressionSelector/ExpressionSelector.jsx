@@ -42,7 +42,8 @@ export const ExpressionSelector = ({
   onRelationDelete,
   onRelationFieldUpdate,
   onRelationsErrors,
-  tabsChanges
+  tabsChanges,
+  onSetSQLsentence
 }) => {
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -159,7 +160,7 @@ export const ExpressionSelector = ({
     }
 
     if (!isEmpty(expressionType) && expressionType === 'SQLsentence') {
-      return <SQLsentence creationFormState={creationFormState} />;
+      return <SQLsentence creationFormState={creationFormState} onSetSQLsentence={onSetSQLsentence} />;
     }
     return <></>;
   };
