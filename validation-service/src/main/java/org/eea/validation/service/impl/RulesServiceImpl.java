@@ -307,13 +307,21 @@ public class RulesServiceImpl implements RulesService {
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
     }
+
+    if (null != ruleVO.getSQLSentence() && !ruleVO.getSQLSentence().isEmpty()) {
+      rule.setWhenCondition("isSQLSentence('" + ruleVO.getSQLSentence() + "')");
+
+    }
+
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
 
-    // Check if rule is valid
-    kieBaseManager.validateRule(datasetSchemaId, rule);
+    // Check if rule is valid if not sql
+    if (null == ruleVO.getSQLSentence() || ruleVO.getSQLSentence().isEmpty()) {
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
   }
 
   /**

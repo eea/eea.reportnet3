@@ -197,3 +197,8 @@ function boolean isTableEmpty(TableValue tableValue){
 	}
 	return true;
 }
+//////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
+
+function boolean isSQLSentence(String sqlSentence){	
+	return true;
+}
