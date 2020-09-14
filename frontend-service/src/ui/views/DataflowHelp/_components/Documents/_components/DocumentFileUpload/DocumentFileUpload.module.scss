@@ -24,6 +24,9 @@
   input:checked {
     border-radius: 3px;
   }
+  input:focus {
+    border-radius: 3px;
+  }
   label {
     margin-left: 0.5rem;
     font-weight: bold;
