@@ -356,6 +356,14 @@ export const Map = ({
   const onCRSChange = item => {
     const selectedCRS = crs.filter(t => t.value === item.value)[0];
     setCurrentCRS(selectedCRS);
+    // if (!isNewPositionMarkerVisible) {
+    //   console.log(options.center, parseCoordinates(options.center));
+    //   console.log(proj4(proj4('EPSG:4326'), proj4(selectedCRS.value), parseCoordinates(options.center)));
+    //   onSelectPoint(
+    //     proj4(proj4('EPSG:4326'), proj4(selectedCRS.value), parseCoordinates(options.center)),
+    //     selectedCRS.value
+    //   );
+    // }
   };
 
   const onPrintCoordinates = coordinates => `{Lat: ${coordinates.split(', ')[0]}, Lng: ${coordinates.split(', ')[1]}}`;
