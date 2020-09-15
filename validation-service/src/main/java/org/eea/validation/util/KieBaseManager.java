@@ -119,14 +119,37 @@ public class KieBaseManager {
             originName = fillTableOriginName(dataSetSchema, rule, originName);
             break;
           case RECORD:
-            schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
-            typeValidation = TypeValidation.RECORD;
-            originName = fillRecordOriginName(dataSetSchema, rule, originName);
+            if (null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty()) {
+              schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
+              typeValidation = TypeValidation.TABLE;
+              for (TableSchema table : dataSetSchema.getTableSchemas()) {
+                if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
+                  rule.setReferenceId(table.getIdTableSchema());
+                }
+              }
+            } else {
+              schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
+              typeValidation = TypeValidation.RECORD;
+              originName = fillRecordOriginName(dataSetSchema, rule, originName);
+            }
             break;
           case FIELD:
-            schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
-            typeValidation = TypeValidation.FIELD;
-            originName = fillFieldOriginName(dataSetSchema, rule, originName);
+            if (null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty()) {
+              schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
+              typeValidation = TypeValidation.TABLE;
+              for (TableSchema table : dataSetSchema.getTableSchemas()) {
+                for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+                  if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
+                    rule.setReferenceId(table.getIdTableSchema());
+                  }
+                }
+              }
+            } else {
+              schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
+              typeValidation = TypeValidation.FIELD;
+              originName = fillFieldOriginName(dataSetSchema, rule, originName);
+            }
+
             break;
           default:
             break;
