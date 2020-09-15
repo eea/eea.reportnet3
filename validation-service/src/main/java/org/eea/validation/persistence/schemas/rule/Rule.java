@@ -13,7 +13,6 @@ import lombok.ToString;
 /**
  * The Class Rule.
  */
-
 @Getter
 @Setter
 @ToString
@@ -81,7 +80,7 @@ public class Rule {
   @Field(value = "integrityConstraintId")
   private ObjectId integrityConstraintId;
 
-  /** The short code. */
+  /** The sql sentence. */
   @Field(value = "sqlSentence")
   private String sqlSentence;
 
