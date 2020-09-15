@@ -6,8 +6,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.bson.types.ObjectId;
@@ -119,28 +121,38 @@ public class SQLValitaionUtils {
 
 
     getListOfDatasets(sqlExample);
-
+    getTablesFromQuery(sqlExample);
   }
 
   private static List<Integer> getListOfDatasets(String query) {
     List<Integer> datasetIdList = new ArrayList<>();
 
-    String cadenaDondeBuscar = "sql";
-    String loQueQuieroBuscar = "lenguaje sql";
-    String[] palabras = loQueQuieroBuscar.split("\\s+");
+    String[] palabras = query.split("(?=\\s)");
     for (String palabra : palabras) {
-      if (query.contains(palabra)) {
-        System.out.println(palabra);
+      if (palabra.contains(DATASET_QUERY)) {
+        datasetIdList.add(Integer
+            .valueOf(palabra.substring(palabra.indexOf(UNDERSCORE) + 1, palabra.indexOf(DOT))));
       }
     }
-
-
-    datasetIdList.add(
-        Integer.valueOf(query.substring(1 + query.indexOf(UNDERSCORE, query.indexOf(DATASET_QUERY)),
-            query.indexOf(DOT, query.indexOf(DATASET_QUERY)))));
-
     return datasetIdList;
   }
+
+  private static Map<Integer, String> getTablesFromQuery(String query) {
+
+    Map<Integer, String> tableMap = new HashMap<>();
+
+    String[] palabras = query.split("(?=\\s)");
+    for (String palabra : palabras) {
+      if (palabra.contains(DATASET_QUERY)) {
+        tableMap.put(
+            Integer
+                .valueOf(palabra.substring(palabra.indexOf(UNDERSCORE) + 1, palabra.indexOf(DOT))),
+            palabra.substring(palabra.indexOf(DOT)));
+      }
+    }
+    return tableMap;
+  }
+
 
 
   private static String createWithClause(List<FieldSchemaVO> columns, String tableName,

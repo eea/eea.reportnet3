@@ -128,4 +128,13 @@ public interface RecordStoreService {
    */
   void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation);
 
+
+  /**
+   * Execute query view commands.
+   *
+   * @param command the command
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  void executeQueryViewCommands(String command) throws RecordStoreAccessException;
+
 }
