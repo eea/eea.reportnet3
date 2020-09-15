@@ -112,7 +112,7 @@ public class SQLValitaionUtils {
   }
 
 
-  private static void executeSQL(String ruleId) {
+  private static void executeValidationSQLRule(String ruleId) {
     String sqlExample =
         "select t25.campo_de_contaminacion from dataset_256.table_25 t25 inner join dataset_125.table_del_aire ta on t25.id as ta.id";
 
