@@ -27,13 +27,14 @@ import {
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
 import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonExpressions';
+import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonSQLsentence';
 import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
 import { checkComparisonValidationIfThen } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidationIfThen';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
+import { getComparisonExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getComparisonExpressionString';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
-import { getComparisonExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getComparisonExpressionString';
 import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByRecordId';
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
@@ -113,6 +114,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
             onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
             tabsChanges={tabsChanges}
+            onSetSQLsentence={onSetSQLsentence}
           />
         </TabPanel>
       ]);
@@ -628,13 +630,36 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onSetSQLsentence = (key, value) => {
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key,
+        value
+      }
+    });
+  };
+
   const onGetFieldType = field => {
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
+  };
+
+  const getIsCreationDisabled = () => {
+    if (creationFormState.candidateRule.expressionType === 'SQLsentence') {
+      return (
+        creationFormState.isValidationCreationDisabled ||
+        isSubmitDisabled ||
+        !checkComparisonSQLsentence(creationFormState?.candidateRule?.SQLsentence)
+      );
+    }
+
+    return creationFormState.isValidationCreationDisabled || isSubmitDisabled;
   };
 
   const getRuleCreationBtn = () => {
     const options = {
       onClick: () => {},
+
       disabled: true,
       label: '',
       id: ''
@@ -656,7 +681,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           className={`p-button-primary p-button-text-icon-left ${
             !creationFormState.isValidationCreationDisabled && !isSubmitDisabled ? 'p-button-animated-blink' : ''
           }`}
-          disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+          disabled={getIsCreationDisabled()}
           icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
           id={options.id}
           label={options.label}

@@ -16,14 +16,34 @@ export const checkComparisonValidation = candidateRule => {
       if (isNil(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
         isValidated = false;
       }
-    } else if (ruleKey === 'expressions' && !isEmpty(candidateRule.expressions)) {
+    }
+
+    if (
+      ruleKey === 'expressions' &&
+      !isEmpty(candidateRule.expressions) &&
+      candidateRule.expressionType !== 'SQLsentence'
+    ) {
       if (checkComparisonExpressions(candidateRule[ruleKey])) {
         isValidated = false;
       }
-    } else if (ruleKey == 'relations' && !isEmpty(candidateRule.relations.links)) {
+    }
+
+    if (
+      ruleKey === 'relations' &&
+      candidateRule.expressionType === 'fieldRelations' &&
+      !isEmpty(candidateRule.relations.links)
+    ) {
       if (checkComparisonRelation(candidateRule[ruleKey].links)) {
         isValidated = false;
       }
+    }
+
+    if (
+      ruleKey === 'SQLsentence' &&
+      candidateRule.expressionType === 'SQLsentence' &&
+      (isNil(candidateRule['SQLsentence']) || isEmpty(candidateRule['SQLsentence']))
+    ) {
+      isValidated = false;
     }
   });
 

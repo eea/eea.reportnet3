@@ -11,7 +11,6 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
-import { TableRelationsSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
 import { TabView, TabPanel } from 'primereact/tabview';
 import ReactTooltip from 'react-tooltip';
 
@@ -27,6 +26,7 @@ import {
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
 import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonRelation';
+import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonSQLsentence';
 import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
 import { deleteLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteLink';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
@@ -107,6 +107,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
             onRelationsErrors={onRelationsErrors}
             showRequiredFields={tabsChanges.expression}
             tabsChanges={tabsChanges}
+            onSetSQLsentence={onSetSQLsentence}
           />
         </TabPanel>
       ]);
@@ -524,7 +525,16 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
-  
+  const onSetSQLsentence = (key, value) => {
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key,
+        value
+      }
+    });
+  };
+
   const dialogLayout = children => (
     <Fragment>
       {validationContext.isVisible && (
@@ -544,6 +554,20 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     </Fragment>
   );
 
+  const getIsCreationDisabled = () => {
+    if (creationFormState.candidateRule.expressionType === 'SQLsentence') {
+      return (
+        creationFormState.isValidationCreationDisabled ||
+        isSubmitDisabled ||
+        !checkComparisonSQLsentence(creationFormState?.candidateRule?.SQLsentence)
+      );
+    }
+    return (
+      creationFormState.isValidationCreationDisabled ||
+      isSubmitDisabled ||
+      checkComparisonRelation(creationFormState.candidateRule.relations.links)
+    );
+  };
   return dialogLayout(
     <>
       <form>
@@ -580,11 +604,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                           ? 'p-button-animated-blin'
                           : ''
                       }`}
-                      disabled={
-                        creationFormState.isValidationCreationDisabled ||
-                        isSubmitDisabled ||
-                        checkComparisonRelation(creationFormState.candidateRule.relations.links)
-                      }
+                      disabled={getIsCreationDisabled()}
                       icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                       id={`${componentName}__create`}
                       label={resourcesContext.messages['create']}

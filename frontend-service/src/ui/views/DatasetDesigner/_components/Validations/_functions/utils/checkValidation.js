@@ -21,9 +21,7 @@ export const checkValidation = candidateRule => {
       if (checkExpressions(candidateRule[ruleKey])) {
         isValidated = false;
       }
-    }
-
-    if (
+    } else if (
       ruleKey === 'expressions' &&
       candidateRule.expressionType === 'SQLsentence' &&
       (isNil(candidateRule['SQLsentence']) || isEmpty(candidateRule['SQLsentence']))

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import styles from './SQLsentence.module.scss';
 
@@ -7,7 +7,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const SQLsentence = ({ creationFormState, onSetSQLsentence }) => {
   const resources = useContext(ResourcesContext);
 
-  const [sentence, setSentence] = useState('');
+  useEffect(() => {
+    return () => onSetSQLsentence('SQLsentence', '');
+  }, []);
 
   return (
     <React.Fragment>
