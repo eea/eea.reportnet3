@@ -1,7 +1,6 @@
 package org.eea.validation.util;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
@@ -44,7 +43,7 @@ public class SQLValitaionUtils {
 
 
   /** The entity manager. */
-  @PersistenceContext
+  // @PersistenceContext
   private static EntityManager entityManager;
 
   /** The kafka sender utils. */

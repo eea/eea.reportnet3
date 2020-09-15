@@ -119,6 +119,7 @@ public class KieBaseManager {
             originName = fillTableOriginName(dataSetSchema, rule, originName);
             break;
           case RECORD:
+            // transform the rule to a tablerule
             if (null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty()) {
               schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
               typeValidation = TypeValidation.TABLE;
@@ -134,6 +135,7 @@ public class KieBaseManager {
             }
             break;
           case FIELD:
+            // transform the rule to a tablerule
             if (null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty()) {
               schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
               typeValidation = TypeValidation.TABLE;
@@ -149,7 +151,6 @@ public class KieBaseManager {
               typeValidation = TypeValidation.FIELD;
               originName = fillFieldOriginName(dataSetSchema, rule, originName);
             }
-
             break;
           default:
             break;
