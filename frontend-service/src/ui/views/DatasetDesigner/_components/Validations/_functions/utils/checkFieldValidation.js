@@ -3,7 +3,7 @@ import isNil from 'lodash/isNil';
 
 import { checkExpressions } from './checkExpressions';
 
-export const checkValidation = candidateRule => {
+export const checkFieldValidation = candidateRule => {
   let isValidated = true;
   const ruleKeys = Object.keys(candidateRule);
   const requiredFields = ['table', 'name', 'field', 'shortCode', 'errorMessage', 'errorLevel'];

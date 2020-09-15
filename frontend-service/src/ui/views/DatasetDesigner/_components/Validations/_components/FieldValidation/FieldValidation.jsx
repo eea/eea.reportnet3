@@ -28,7 +28,7 @@ import {
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
 import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkExpressions';
-import { checkValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkValidation';
+import { checkFieldValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkFieldValidation';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
@@ -226,7 +226,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkValidation(creationFormState.candidateRule)
+      payload: !checkFieldValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);
 
