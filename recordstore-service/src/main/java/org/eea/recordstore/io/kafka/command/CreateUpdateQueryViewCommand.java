@@ -33,6 +33,11 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
   /** The Constant AS: {@value}. */
   private static final String AS = "') AS ";
 
+
+  /** The Constant AS: {@value}. */
+  private static final String COMMA = ", ";
+
+
   @Autowired
   private RecordStoreService recordStoreService;
 
@@ -42,7 +47,7 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
 
   @Override
   public EventType getEventType() {
-    return EventType.COMMAND_CREATE_QUERY_VIEWS_EVENT;
+    return EventType.COMMAND_EXECUTE_VALIDATION;
   }
 
   /**
@@ -92,23 +97,22 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
       String schemaId = iterator.next();
       stringQuery.append("(select fv.id from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
           .append(schemaId).append(AS).append(columns.get(i).getName()).append("_id");
-      stringQuery.append(",");
+      stringQuery.append(COMMA);
       stringQuery
           .append(
               "(select fv.id_field_schema from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
           .append(schemaId).append(AS).append(columns.get(i).getName()).append("_id_field_schema");
-      stringQuery.append(",");
+      stringQuery.append(COMMA);
       stringQuery.append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
           .append(schemaId).append(AS).append(columns.get(i).getName());
-      stringQuery.append(",");
+      stringQuery.append(COMMA);
       stringQuery.append("(select fv.type from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
           .append(schemaId).append(AS).append(columns.get(i).getName()).append("_type");
       if (iterator.hasNext()) {
-        stringQuery.append(",");
+        stringQuery.append(COMMA);
       }
       i++;
     }
-
     stringQuery.append(" from dataset_" + datasetId + ".record_value rv");
     stringQuery.append(" inner join dataset_" + datasetId
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
