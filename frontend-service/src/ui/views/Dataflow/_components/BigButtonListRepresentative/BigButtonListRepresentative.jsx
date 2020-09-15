@@ -1,15 +1,18 @@
-import React, { Fragment, useContext, useEffect, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
 import styles from '../BigButtonList/BigButtonList.module.css';
 
 import { BigButton } from '../BigButton';
-
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
@@ -22,6 +25,12 @@ export const BigButtonListRepresentative = ({
   setIsReceiptLoading
 }) => {
   const notificationContext = useContext(NotificationContext);
+  const resources = useContext(ResourcesContext);
+
+  const [datasetId, setDatasetId] = useState(null);
+  const [historicReleasesDialogHeader, setHistoricReleasesDialogHeader] = useState([]);
+  const [historicReleasesView, setHistoricReleasesView] = useState('');
+  const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
 
   const receiptBtnRef = useRef(null);
 
@@ -36,6 +45,11 @@ export const BigButtonListRepresentative = ({
     if (!isNil(response)) {
       DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
     }
+  };
+
+  const getDataHistoricReleases = (datasetId, value) => {
+    setDatasetId(datasetId);
+    setHistoricReleasesDialogHeader(value);
   };
 
   const onLoadReceiptData = async () => {
@@ -54,6 +68,22 @@ export const BigButtonListRepresentative = ({
     }
   };
 
+  const onShowHistoricReleases = typeView => {
+    setIsHistoricReleasesDialogVisible(true);
+    setHistoricReleasesView(typeView);
+  };
+
+  const renderDialogFooter = (
+    <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsHistoricReleasesDialogVisible(false)}
+      />
+    </Fragment>
+  );
+
   return (
     <>
       <div className={styles.buttonsWrapper}>
@@ -61,9 +91,11 @@ export const BigButtonListRepresentative = ({
           <div className={styles.datasetItem}>
             {useBigButtonList({
               dataflowState,
+              getDataHistoricReleases,
               handleRedirect,
               match,
               onLoadReceiptData,
+              onShowHistoricReleases,
               onShowSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
@@ -71,6 +103,18 @@ export const BigButtonListRepresentative = ({
       </div>
 
       <button ref={receiptBtnRef} style={{ display: 'none' }} />
+
+      {isHistoricReleasesDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={`${resources.messages['historicReleases']} ${historicReleasesDialogHeader}`}
+          onHide={() => setIsHistoricReleasesDialogVisible(false)}
+          // style={{ width: '80%' }}
+          visible={isHistoricReleasesDialogVisible}>
+          <HistoricReleases datasetId={datasetId} historicReleasesView={historicReleasesView} />
+        </Dialog>
+      )}
     </>
   );
 };

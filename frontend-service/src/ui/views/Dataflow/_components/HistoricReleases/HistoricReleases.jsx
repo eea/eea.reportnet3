@@ -18,11 +18,12 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { IntegrationService } from 'core/services/Integration';
+
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
+import { array } from 'prop-types';
 
-export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
-  console.log('datasetId', datasetId);
-
+export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName }) => {
   const data = [
     {
       countryCode: 'EN',
@@ -61,18 +62,42 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
   });
 
   useEffect(() => {
-    onLoadHistoricReleases();
+    Array.isArray(datasetId)
+      ? datasetId.forEach((datasetId, index) => {
+          onLoadHistoricReleasesArray(datasetId, datasetName[index]);
+        })
+      : onLoadHistoricReleases();
   }, []);
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onLoadFilteredData = data => historicReleasesDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const onLoadHistoricReleases = async () => {
+  const response = [];
+  const onLoadHistoricReleasesArray = async (datasetId, datasetName) => {
+    console.log('response', response);
+    console.log('response.length', response.length);
+    const historicReleases = [];
     try {
+      data.forEach(historicRelease => {
+        historicRelease.datasetId = datasetId;
+        historicRelease.datasetName = datasetName;
+        response.push(historicRelease);
+      });
+      console.log('datasetId', datasetId);
+      console.log('datasetName', datasetName);
+      historicReleasesDispatch({
+        type: 'INITIAL_LOAD',
+        payload: { data: response, filteredData: response }
+      });
       // isLoading(true);
-      const response = data;
-      historicReleasesDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
+      // const response = await IntegrationService.all(datasetId);
+      // response.forEach(historicRelease => {
+      //   historicRelease.datasetId = datasetId;
+      //   historicRelease.datasetName = datasetName;
+      //   historicReleases.push(historicRelease);
+      // });
+      // historicReleasesDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
     } catch (error) {
       // notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
       console.log('error', error);
@@ -81,17 +106,34 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
     }
   };
 
-  const releaseDateTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {moment(rowData.releaseDate).format(
-        `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-          userContext.userProps.amPm24h ? '' : ' A'
-        }`
-      )}
-    </div>
-  );
+  const onLoadHistoricReleases = async () => {
+    try {
+      const response = data;
+      historicReleasesDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
+      // isLoading(true);
+      // const response = await IntegrationService.all(datasetId);
+      // historicReleasesDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
+    } catch (error) {
+      // notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
+      console.log('error', error);
+    } finally {
+      // isLoading(false);
+    }
+  };
 
-  const isEUDatasetCurrentRelease = rowData => (
+  const releaseDateTemplate = rowData => {
+    return (
+      <div className={styles.checkedValueColumn}>
+        {moment(rowData.releaseDate).format(
+          `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+            userContext.userProps.amPm24h ? '' : ' A'
+          }`
+        )}
+      </div>
+    );
+  };
+
+  const isEUDatasetCurrentReleaseTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isEUDatasetCurrentRelease ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
@@ -105,13 +147,21 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
     </div>
   );
 
-  const renderColumns = historicReleases => {
-    if (historicReleasesView === 'dataCollection') {
-      const fieldColumns = Object.keys(historicReleases[0]).map(field => {
+  const renderDataCollectionColumns = historicReleases => {
+    const fieldColumns = Object.keys(historicReleases[0])
+      // .filter(
+      //   key =>
+      //     key.includes('countryCode') ||
+      //     key.includes('releaseDate') ||
+      //     key.includes('isReleased') ||
+      //     key.includes('isEUDatasetCurrentRelease')
+      // )
+      .map(field => {
         let template = null;
         if (field === 'releaseDate') template = releaseDateTemplate;
-        if (field === 'isEUDatasetCurrentRelease') template = isEUDatasetCurrentRelease;
+        if (field === 'isEUDatasetCurrentRelease') template = isEUDatasetCurrentReleaseTemplate;
         if (field === 'isReleased') template = isReleasedTemplate;
+
         return (
           <Column
             body={template}
@@ -123,44 +173,67 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
           />
         );
       });
-      return fieldColumns;
-    } else if (historicReleasesView === 'reportingDataset') {
-      const fieldColumns = Object.keys(historicReleases[0])
-        .filter(key => key.includes('releaseDate'))
-        .map(field => {
-          let template = null;
-          if (field === 'releaseDate') template = releaseDateTemplate;
-          return (
-            <Column
-              body={template}
-              columnResizeMode="expand"
-              field={field}
-              header={resources.messages[field]}
-              key={field}
-              sortable={true}
-            />
-          );
-        });
-      return fieldColumns;
-    } else {
-      const fieldColumns = Object.keys(historicReleases[0])
-        .filter(key => key.includes('countryCode') || key.includes('releaseDate'))
-        .map(field => {
-          let template = null;
-          if (field === 'releaseDate') template = releaseDateTemplate;
-          return (
-            <Column
-              body={template}
-              columnResizeMode="expand"
-              field={field}
-              header={resources.messages[field]}
-              key={field}
-              sortable={true}
-            />
-          );
-        });
-      return fieldColumns;
-    }
+    return fieldColumns;
+  };
+
+  const renderEUDatasetColumns = historicReleases => {
+    const fieldColumns = Object.keys(historicReleases[0])
+      .filter(key => key.includes('countryCode') || key.includes('releaseDate'))
+      .map(field => {
+        let template = null;
+        if (field === 'releaseDate') template = releaseDateTemplate;
+        return (
+          <Column
+            body={template}
+            columnResizeMode="expand"
+            field={field}
+            header={resources.messages[field]}
+            key={field}
+            sortable={true}
+          />
+        );
+      });
+    return fieldColumns;
+  };
+
+  const renderReportingDatasetColumns = historicReleases => {
+    const fieldColumns = Object.keys(historicReleases[0])
+      .filter(key => key.includes('releaseDate'))
+      .map(field => {
+        let template = null;
+        if (field === 'releaseDate') template = releaseDateTemplate;
+        return (
+          <Column
+            body={template}
+            columnResizeMode="expand"
+            field={field}
+            header={resources.messages[field]}
+            key={field}
+            sortable={true}
+          />
+        );
+      });
+    return fieldColumns;
+  };
+
+  const renderReportingDatasetsColumns = historicReleases => {
+    const fieldColumns = Object.keys(historicReleases[0])
+      .filter(key => key.includes('datasetName') || key.includes('releaseDate'))
+      .map(field => {
+        let template = null;
+        if (field === 'releaseDate') template = releaseDateTemplate;
+        return (
+          <Column
+            body={template}
+            columnResizeMode="expand"
+            field={field}
+            header={resources.messages[field]}
+            key={field}
+            sortable={true}
+          />
+        );
+      });
+    return fieldColumns;
   };
 
   return (
@@ -173,6 +246,14 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
         />
       )}
 
+      {Array.isArray(datasetName) && (
+        <Filters
+          data={historicReleasesState.data}
+          getFilteredData={onLoadFilteredData}
+          selectOptions={['datasetName']}
+        />
+      )}
+
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
           autoLayout={true}
@@ -182,7 +263,14 @@ export const HistoricReleases = ({ datasetId, historicReleasesView }) => {
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={historicReleasesState.filteredData.length}
           value={historicReleasesState.filteredData}>
-          {renderColumns(historicReleasesState.filteredData)}
+          {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
+          {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(historicReleasesState.filteredData)}
+          {historicReleasesView === 'reportingDataset' &&
+            Array.isArray(datasetId) &&
+            renderReportingDatasetsColumns(historicReleasesState.filteredData)}
+          {historicReleasesView === 'reportingDataset' &&
+            !Array.isArray(datasetId) &&
+            renderReportingDatasetColumns(historicReleasesState.filteredData)}
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>{resources.messages['noHistoricReleasesWithSelectedParameters']}</div>

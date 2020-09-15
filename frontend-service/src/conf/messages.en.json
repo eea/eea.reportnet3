@@ -857,11 +857,14 @@
     "snapshotActionBlockedError": "Failure in the Manage copy's process. Please wait until the end of the previous operation",
     "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension.",
     "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
-    "historicReleases": "Historic Releases for",
+    "historicReleases": "Historic Releases",
+    "historicReleasesContextMenu": "Historic Releases for",
     "isEUDatasetCurrentRelease": "EU Dataset",
     "releaseDate": "Release Date",
     "isReleased": "Data collection",
     "noHistoricReleasesWithSelectedParameters": "There are no releases with the selected parameters",
-    "validationsDataColumn": "Validations"
+    "validationsDataColumn": "Validations",
+    "datasetId": "Dataset Id",
+    "datasetName": "Dataset Name"
   }
 }

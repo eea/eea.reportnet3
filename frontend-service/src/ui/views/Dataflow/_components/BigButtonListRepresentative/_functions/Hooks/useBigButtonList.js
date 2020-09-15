@@ -12,7 +12,15 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog, match }) => {
+const useBigButtonList = ({
+  dataflowState,
+  getDataHistoricReleases,
+  handleRedirect,
+  match,
+  onLoadReceiptData,
+  onShowHistoricReleases,
+  onShowSnapshotDialog
+}) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -65,6 +73,8 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
   const groupByRepresentativeModels = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
     .map(dataset => {
+      const datasetName = dataset.name;
+      const datasetId = dataset.datasetId;
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
@@ -85,6 +95,15 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
+        model: [
+          {
+            label: resources.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('reportingDataset');
+              getDataHistoricReleases(datasetId, datasetName);
+            }
+          }
+        ],
         onWheel: getUrl(
           routes.DATASET,
           {

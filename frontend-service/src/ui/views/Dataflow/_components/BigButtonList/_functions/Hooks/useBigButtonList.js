@@ -254,11 +254,12 @@ const useBigButtonList = ({
       });
     }
 
-    const datasetsDataArray = [];
+    const datasetsIdsArray = [];
+    const datasetsNamesArray = [];
 
     return allDatasets.map(representative => {
-      datasetsDataArray.push(representative.datasetId);
-      console.log('datasetDataArray', datasetsDataArray);
+      datasetsIdsArray.push(representative.datasetId);
+      datasetsNamesArray.push(representative.datasetName);
 
       return {
         buttonClass: 'dataset',
@@ -276,7 +277,7 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleases(representative.datasetId, representative.name);
+              getDataHistoricReleases(datasetsIdsArray, representative.name, datasetsNamesArray);
             }
           }
         ],
