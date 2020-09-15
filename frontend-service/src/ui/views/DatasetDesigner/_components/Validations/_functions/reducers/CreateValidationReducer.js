@@ -332,6 +332,7 @@ export const createValidationReducer = (state, { type, payload }) => {
 
     case 'POPULATE_CREATE_FORM':
       const rowOptions = {};
+
       if (payload.expressionsIf && payload.expressionsIf.length > 0) {
         rowOptions.expressionType = 'ifThenClause';
         rowOptions.expressionsIf = payload.expressionsIf;
@@ -339,9 +340,19 @@ export const createValidationReducer = (state, { type, payload }) => {
         rowOptions.expressionsThen = payload.expressionsThen;
         rowOptions.allExpressionsThen = payload.allExpressionsThen;
       }
+
+      if (payload.entityType === 'DATASET') {   
+        rowOptions.expressionType = 'fieldRelations';
+      }
+
       if (payload.entityType === 'RECORD' && payload.expressions.length > 0) {
         rowOptions.expressionType = 'fieldComparison';
       }
+
+      if (payload.entityType === 'FIELD' && payload.expressions.length > 0) {
+        rowOptions.expressionType = 'fieldTab';
+      }
+
       return {
         ...state,
         candidateRule: {
