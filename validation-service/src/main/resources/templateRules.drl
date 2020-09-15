@@ -198,7 +198,7 @@ function boolean isTableEmpty(TableValue tableValue){
 	return true;
 }
 //////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
-function boolean isSQLSentence(String ruleId){	
-	SQLValitaionUtils.executeValidationSQLRule(ruleId);
+function boolean isSQLSentence(Long datasetId, String ruleId){	
+	SQLValitaionUtils.executeValidationSQLRule(datasetId,ruleId);
 	return true;
 }

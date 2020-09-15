@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -57,7 +56,7 @@ public class SQLValitaionUtils {
 
 
   /** The entity manager. */
-  @PersistenceContext
+  // @PersistenceContext
   private static EntityManager entityManager;
 
   /** The rules repository. */

@@ -312,8 +312,9 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence('")
-          .append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(
+          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
+              .append("',").append(datasetId).append(")").toString());
       // sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
 
     }
@@ -558,8 +559,9 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence('")
-          .append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(
+          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
+              .append("',").append(datasetId).append(")").toString());
       // sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
 
     }
