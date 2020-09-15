@@ -112,6 +112,7 @@ export const CustomFileUpload = ({
 
   const checkValidExtension = file => {
     const acceptedExtensions = accept.toLowerCase().split(', ');
+
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
       return acceptedExtensions.includes('*') || acceptedExtensions.includes(`.${extension.toLowerCase()}`);
@@ -194,7 +195,7 @@ export const CustomFileUpload = ({
     clearInputElement();
 
     if (mode === 'basic') {
-      fileInput.style.display = 'none';
+      fileInput.current.style.display = 'none';
     }
   };
 
@@ -308,7 +309,7 @@ export const CustomFileUpload = ({
 
   const onDragOver = event => {
     if (!disabled) {
-      DomHandler.addClass(content, 'p-fileupload-highlight');
+      DomHandler.addClass(content.current, 'p-fileupload-highlight');
       event.stopPropagation();
       event.preventDefault();
     }
@@ -316,13 +317,13 @@ export const CustomFileUpload = ({
 
   const onDragLeave = () => {
     if (!disabled) {
-      DomHandler.removeClass(content, 'p-fileupload-highlight');
+      DomHandler.removeClass(content.current, 'p-fileupload-highlight');
     }
   };
 
   const onDrop = event => {
     if (!disabled) {
-      DomHandler.removeClass(content, 'p-fileupload-highlight');
+      DomHandler.removeClass(content.current, 'p-fileupload-highlight');
       event.stopPropagation();
       event.preventDefault();
 
