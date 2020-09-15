@@ -113,6 +113,7 @@ const SnapshotSlideBar = ({
                     autoComplete="off"
                     className={styles.formField}
                     id="createSnapshotDescription"
+                    maxLength={255}
                     name="createSnapshotDescription"
                     placeholder={resources.messages.createSnapshotPlaceholder}
                     type="text"

@@ -123,6 +123,7 @@ export const FieldDesigner = ({
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
 
+  const fieldTypeRef = useRef();
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -249,6 +250,7 @@ export const FieldDesigner = ({
           fieldUpdate({ codelistItems: null, type: parseGeospatialTypes(type.fieldType) });
         } else {
           if (type !== '') {
+            fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
           }
         }
@@ -291,6 +293,7 @@ export const FieldDesigner = ({
             fieldDesignerState.fieldTypeValue !== '' &&
             !isUndefined(fieldDesignerState.fieldTypeValue)
           ) {
+            fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
           } else {
             if (!checkDuplicates(name, fieldId)) {
@@ -298,6 +301,7 @@ export const FieldDesigner = ({
                 onFieldAdd({ name });
               }
             } else {
+              fieldTypeRef.current.hide();
               onShowDialogError(
                 resources.messages['duplicatedFieldMessage'],
                 resources.messages['duplicatedFieldTitle']
@@ -307,6 +311,7 @@ export const FieldDesigner = ({
           }
         } else {
           if (name === '') {
+            fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
@@ -314,6 +319,7 @@ export const FieldDesigner = ({
               if (!checkDuplicates(name, fieldId)) {
                 fieldUpdate({ name });
               } else {
+                fieldTypeRef.current.hide();
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
                   resources.messages['duplicatedFieldTitle']
@@ -582,6 +588,7 @@ export const FieldDesigner = ({
       payload: { validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize }
     });
     if (fieldDesignerState.fieldValue === '') {
+      fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
       if (!isUndefined(fieldId)) {
@@ -598,6 +605,7 @@ export const FieldDesigner = ({
   const onSaveCodelist = codelistItems => {
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
+      fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
       if (!isUndefined(fieldId)) {
@@ -616,6 +624,7 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
     dispatchFieldDesigner({ type: 'SET_PK_HAS_MULTIPLE_VALUES', payload: pkHasMultipleValues });
     if (fieldDesignerState.fieldValue === '') {
+      fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
       if (!isUndefined(fieldId)) {
@@ -955,6 +964,7 @@ export const FieldDesigner = ({
         }}
         optionLabel="value"
         options={fieldTypes}
+        ref={fieldTypeRef}
         required={true}
         placeholder={resources.messages['newFieldTypePlaceHolder']}
         scrollHeight="450px"
