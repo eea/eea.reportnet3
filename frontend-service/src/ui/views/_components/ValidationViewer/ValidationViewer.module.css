@@ -23,3 +23,7 @@
 .validationCol {
   width: 15px;
 }
+
+.validationWrapper {
+  min-height: 200px;
+}
