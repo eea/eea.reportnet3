@@ -199,6 +199,6 @@ function boolean isTableEmpty(TableValue tableValue){
 }
 //////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
 
-function boolean isSQLSentence(String sqlSentence){	
-	return true;
+function boolean isSQLSentence(String idRule){	
+	return false;
 }

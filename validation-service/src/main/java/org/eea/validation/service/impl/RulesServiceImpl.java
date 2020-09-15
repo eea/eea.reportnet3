@@ -311,9 +311,9 @@ public class RulesServiceImpl implements RulesService {
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
 
-    } else if (null != ruleVO.getSQLSentence() && !ruleVO.getSQLSentence().isEmpty()) {
-      rule.setWhenCondition("isSQLSentence('" + ruleVO.getSQLSentence() + "')");
-      sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
+    } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
+      rule.setWhenCondition("isSQLSentence('" + rule.getRuleId() + "')");
+      // sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
 
     }
 
@@ -323,7 +323,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     // Check if rule is valid if not sql
-    if (null == ruleVO.getSQLSentence() || ruleVO.getSQLSentence().isEmpty()) {
+    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
@@ -556,14 +556,20 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
+    } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
+      rule.setWhenCondition("isSQLSentence('" + rule.getRuleId() + "')");
+      // sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
+
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
 
-    // Check if rule is valid
-    kieBaseManager.validateRule(datasetSchemaId, rule);
+    // Check if rule is valid if not sql
+    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
   }
 
   /**
