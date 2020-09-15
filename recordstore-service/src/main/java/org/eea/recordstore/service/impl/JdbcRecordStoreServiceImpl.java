@@ -1009,4 +1009,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  @Override
+  public void executeQueryViewCommands(String command) throws RecordStoreAccessException {
+    jdbcTemplate.execute(command);
+    LOG.info("Command on Query View executed: {}", command);
+  }
+
+
 }

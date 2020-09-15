@@ -289,7 +289,12 @@ public enum EventType {
 
   /** The data delete to replace completed event. */
   DATA_DELETE_TO_REPLACE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "data_delete_to_replace_completed_event", true);
+      "data_delete_to_replace_completed_event", true),
+
+
+  /** The command create query views event. */
+  COMMAND_CREATE_QUERY_VIEWS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "command_create_query_views_event", true);
 
 
 
