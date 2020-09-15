@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './AttachmentEditor.module.scss';
 
@@ -18,8 +18,14 @@ const AttachmentEditor = ({
   const resources = useContext(ResourcesContext);
   const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions || []);
   const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize || 0);
-
   const [isVisible, setIsVisible] = useState(isAttachmentEditorVisible);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (isSaved) {
+      onSaveAttachment({ validExtensions, maxSize });
+    }
+  }, [isSaved]);
 
   const onMaxSizeChange = size => {
     size = size.toString();
@@ -51,8 +57,8 @@ const AttachmentEditor = ({
         label={resources.messages['save']}
         icon="check"
         onClick={() => {
-          onSaveAttachment({ validExtensions, maxSize });
           setValidExtensionsItems([]);
+          setIsSaved(true);
           setIsVisible(false);
         }}
       />

@@ -3,23 +3,17 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'CANCEL_SELECT_ATTACHMENT':
       return {
         ...state,
-        isCodelistEditorVisible: false,
-        isLinkSelectorVisible: false,
         isAttachmentEditorVisible: false
       };
     case 'CANCEL_SELECT_CODELIST':
       return {
         ...state,
-        isCodelistEditorVisible: false,
-        isLinkSelectorVisible: false,
-        isAttachmentEditorVisible: false
+        isCodelistEditorVisible: false
       };
     case 'CANCEL_SELECT_LINK':
       return {
         ...state,
-        isCodelistEditorVisible: false,
-        isLinkSelectorVisible: false,
-        isAttachmentEditorVisible: false
+        isLinkSelectorVisible: false
       };
     case 'RESET_NEW_FIELD':
       return {
@@ -80,23 +74,17 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE':
       return {
         ...state,
-        isAttachmentEditorVisible: payload,
-        isCodelistEditorVisible: false,
-        isLinkSelectorVisible: false
+        isAttachmentEditorVisible: payload
       };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
       return {
         ...state,
-        isCodelistEditorVisible: payload,
-        isLinkSelectorVisible: false,
-        isAttachmentEditorVisible: false
+        isCodelistEditorVisible: payload
       };
     case 'TOGGLE_LINK_SELECTOR_VISIBLE':
       return {
         ...state,
-        isLinkSelectorVisible: payload,
-        isCodelistEditorVisible: false,
-        isAttachmentEditorVisible: false
+        isLinkSelectorVisible: payload
       };
     case 'TOGGLE_IS_DRAGGING':
       return { ...state, isDragging: payload };
