@@ -44,6 +44,9 @@ export const filterReducer = (state, { type, payload }) => {
     case 'ON_SEARCH_DATA':
       return { ...state, filteredData: payload.searchedValues, searchBy: payload.value };
 
+    case 'ON_CHECKBOX_FILTER':
+      return { ...state, checkboxState: payload.value, checkboxProperty: payload.property };
+
     case 'TOGGLE_MATCH_MODE':
       return { ...state, matchMode: payload };
 

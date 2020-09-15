@@ -27,6 +27,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
+  checkboxOptions,
   className,
   data = [],
   dateOptions,
@@ -50,6 +51,8 @@ export const Filters = ({
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     data: data,
+    // checkbox: { property: '', state: false },
+    checkboxState: null,
     filterBy: {},
     filteredData: data,
     labelAnimations: {},
@@ -70,7 +73,21 @@ export const Filters = ({
     onReApplyFilters();
   }, [filterState.matchMode]);
 
+  useEffect(() => {
+    filterState.checkboxState && onFilterData(filterState.checkboxProperty, [filterState.checkboxState]);
+  }, [filterState.checkboxState]);
+
+  // useEffect(() => {
+  //   checkboxOptions && loadCheckbox();
+  // }, []);
+
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
+
+  // const loadCheckbox = () => {
+  //   checkboxOptions.forEach(checkboxOption => {
+  //     filterDispatch({ type: 'INITIAL_CHECKBOX', payload: { property: checkboxOption, state: false } });
+  //   });
+  // };
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
@@ -80,6 +97,7 @@ export const Filters = ({
       selectOptions,
       dateOptions,
       dropdownOptions,
+      checkboxOptions,
       filterByList
     );
     const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
@@ -88,9 +106,16 @@ export const Filters = ({
       selectOptions,
       dateOptions,
       dropdownOptions,
+      checkboxOptions,
       filterState.filterBy
     );
-    const initialOrderBy = SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions);
+    const initialOrderBy = SortUtils.getOrderInitialState(
+      inputOptions,
+      selectOptions,
+      dateOptions,
+      dropdownOptions,
+      checkboxOptions
+    );
 
     filterDispatch({
       type: 'INITIAL_STATE',
@@ -102,14 +127,38 @@ export const Filters = ({
     filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
+  const onChangeCheckboxFilter = (property, value) => {
+    filterDispatch({ type: 'ON_CHECKBOX_FILTER', payload: { property, value } });
+    // onFilterData(filterState.checkboxProperty, [filterState.checkboxState]);
+  };
+
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FiltersUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
+        filterBy: FiltersUtils.getFilterInitialState(
+          data,
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          checkboxOptions
+        ),
         filteredData: cloneDeep(data),
-        labelAnimations: ApplyFilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
-        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        labelAnimations: ApplyFilterUtils.onClearLabelState(
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          checkboxOptions
+        ),
+        orderBy: SortUtils.getOrderInitialState(
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          checkboxOptions
+        ),
         searchBy: ''
       }
     });
@@ -119,6 +168,8 @@ export const Filters = ({
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+    // const checkboxKeys = FiltersUtils.getCheckedKeys(filterState, filter, checkboxOptions);
+    const checkboxKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
       dropdownOptions,
@@ -127,6 +178,8 @@ export const Filters = ({
       searchedKeys,
       selectedKeys,
       selectOptions,
+      checkboxKeys,
+      checkboxOptions,
       state: filterState,
       value
     });
@@ -146,13 +199,15 @@ export const Filters = ({
   const onSearchData = value => {
     const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const checkedKeys = FiltersUtils.getSelectedKeys(filterState, '', checkboxOptions);
     const searchedValues = ApplyFilterUtils.onApplySearch(
       filterState.data,
       searchBy,
       value,
       filterState,
       inputKeys,
-      selectedKeys
+      selectedKeys,
+      checkedKeys
     );
 
     filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
@@ -232,6 +287,31 @@ export const Filters = ({
       </span>
     </Fragment>
   );
+
+  const renderCheckboxFilter = (property, i) => {
+    return (
+      <span key={i} className={`${styles.dataflowInput}`}>
+        <div>
+          <span className={styles.switchTextInput}>{resources.messages[property]}</span>
+          <Checkbox
+            // className={styles.checkRequired}
+            id={property}
+            inputId={property}
+            isChecked={filterState.checkboxState}
+            label={property}
+            onChange={() => {
+              onChangeCheckboxFilter(property, !filterState.checkboxState);
+              // onFilterData(filterState.checkboxProperty, [filterState.checkboxState]);
+            }}
+            style={{ marginRight: '50px' }}
+          />
+          <label htmlFor={property} className="srOnly">
+            {resources.messages[property]}
+          </label>
+        </div>
+      </span>
+    );
+  };
 
   const renderDropdown = (property, i) => (
     <span key={i} className={`${styles.dataflowInput}`}>
@@ -368,6 +448,7 @@ export const Filters = ({
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
       {matchMode && renderCheckbox()}
+      {checkboxOptions && checkboxOptions.map((option, i) => renderCheckboxFilter(option, i))}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (

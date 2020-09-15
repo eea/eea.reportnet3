@@ -243,6 +243,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           selectOptions={['countryCode']}
+          checkboxOptions={['isReleased', 'isEUDatasetCurrentRelease']}
         />
       )}
 
@@ -253,6 +254,8 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
           selectOptions={['datasetName']}
         />
       )}
+
+      {console.log('historicReleasesState.filteredData', historicReleasesState.filteredData)}
 
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
