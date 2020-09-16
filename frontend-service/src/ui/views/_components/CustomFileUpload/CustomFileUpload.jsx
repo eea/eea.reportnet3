@@ -1,6 +1,5 @@
-import React, { Fragment, useEffect, useContext, useState, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import styles from './CustomFileUpload.module.scss';
@@ -16,6 +15,7 @@ import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { customFileUploadReducer } from './_functions/customFileUploadReducer';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export const CustomFileUpload = ({
@@ -58,42 +58,9 @@ export const CustomFileUpload = ({
   url = null,
   withCredentials = false
 }) => {
-  // static propTypes = {
-  //   accept: PropTypes.string,
-  //   auto: PropTypes.bool,
-  //   cancelLabel: PropTypes.string,
-  //   chooseLabel: PropTypes.string,
-  //   className: PropTypes.string,
-  //   disabled: PropTypes.bool,
-  //   fileLimit: PropTypes.number,
-  //   id: PropTypes.string,
-  //   infoTooltip: PropTypes.string,
-  //   invalidExtensionMessage: PropTypes.string,
-  //   invalidFileSizeMessageDetail: PropTypes.string,
-  //   invalidFileSizeMessageSummary: PropTypes.string,
-  //   maxFileSize: PropTypes.number,
-  //   mode: PropTypes.string,
-  //   multiple: PropTypes.bool,
-  //   name: PropTypes.string,
-  //   onBeforeSend: PropTypes.func,
-  //   onBeforeUpload: PropTypes.func,
-  //   onClear: PropTypes.func,
-  //   onError: PropTypes.func,
-  //   onProgress: PropTypes.func,
-  //   onSelect: PropTypes.func,
-  //   onUpload: PropTypes.func,
-  //   operation: PropTypes.string,
-  //   previewWidth: PropTypes.number,
-  //   replaceCheck: PropTypes.bool,
-  //   style: PropTypes.object,
-  //   uploadLabel: PropTypes.string,
-  //   url: PropTypes.string,
-  //   widthCredentials: PropTypes.bool
-  // };
-
   const resourcesContext = useContext(ResourcesContext);
 
-  const [fileUploadState, setFileUploadState] = useState({
+  const [state, dispatch] = useReducer(customFileUploadReducer, {
     files: [],
     isUploading: false,
     isValid: true,
@@ -108,7 +75,7 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (hasFiles() && auto) upload();
-  }, [fileUploadState]);
+  }, [state]);
 
   const checkValidExtension = file => {
     const acceptedExtensions = accept.toLowerCase().split(', ');
@@ -119,7 +86,7 @@ export const CustomFileUpload = ({
     }
 
     if (hasFiles()) {
-      const selectedExtension = fileUploadState.files.map(
+      const selectedExtension = state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
 
@@ -140,7 +107,7 @@ export const CustomFileUpload = ({
     }
   };
 
-  const hasFiles = () => fileUploadState.files && fileUploadState.files.length > 0;
+  const hasFiles = () => state.files && state.files.length > 0;
 
   const isImage = file => /^image\//.test(file.type);
 
@@ -156,8 +123,8 @@ export const CustomFileUpload = ({
   };
 
   const onFileSelect = event => {
-    setFileUploadState({ ...fileUploadState, msgs: [] });
-    _files.current = fileUploadState.files || [];
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [] } });
+    _files.current = state.files || [];
     let cFiles = event.dataTransfer ? event.dataTransfer.files : event.target.files;
 
     if (fileLimit > 1) {
@@ -186,7 +153,7 @@ export const CustomFileUpload = ({
       }
     }
 
-    setFileUploadState({ ...fileUploadState, files: _files.current });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: _files.current } });
 
     if (onSelect) {
       onSelect({ originalEvent: event, files: _files.current });
@@ -200,7 +167,7 @@ export const CustomFileUpload = ({
   };
 
   const isFileSelected = file => {
-    for (let sFile of fileUploadState.files) {
+    for (let sFile of state.files) {
       if (sFile.name + sFile.type + sFile.size === file.name + file.type + file.size) return true;
     }
     return false;
@@ -208,7 +175,7 @@ export const CustomFileUpload = ({
 
   const validate = file => {
     if (maxFileSize && file.size > maxFileSize) {
-      messagesUI.show({
+      messagesUI.current.show({
         severity: 'error',
         summary: invalidFileSizeMessageSummary.replace('{0}', file.name),
         detail: invalidFileSizeMessageDetail.replace('{0}', formatSize(maxFileSize))
@@ -218,17 +185,17 @@ export const CustomFileUpload = ({
     }
     if (accept) {
       if (!checkValidExtension(file)) {
-        setFileUploadState({ ...fileUploadState, isValid: false });
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: false } });
         return false;
       }
     }
 
-    setFileUploadState({ ...fileUploadState, isValid: true });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: true } });
     return true;
   };
 
   const upload = () => {
-    setFileUploadState({ ...fileUploadState, msgs: [], isUploading: true });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
@@ -236,23 +203,23 @@ export const CustomFileUpload = ({
       onBeforeUpload({ xhr: xhr, formData: formData });
     }
 
-    for (let file of fileUploadState.files) {
+    for (let file of state.files) {
       formData.append(name, file, file.name);
     }
 
     xhr.upload.addEventListener('progress', event => {
       if (event.lengthComputable) {
-        setFileUploadState({ ...fileUploadState, progress: Math.round((event.loaded * 100) / event.total) });
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
       }
 
       if (onProgress) {
-        onProgress({ originalEvent: event, progress: fileUploadState.progress });
+        onProgress({ originalEvent: event, progress: state.progress });
       }
     });
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        setFileUploadState({ ...fileUploadState, progress: 0 });
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
 
         if (xhr.status >= 200 && xhr.status < 300) {
           if (onUpload) {
@@ -272,7 +239,7 @@ export const CustomFileUpload = ({
 
     if (replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
-      nUrl += 'replace=' + fileUploadState.replace;
+      nUrl += 'replace=' + state.replace;
     }
 
     xhr.open(operation, nUrl, true);
@@ -289,7 +256,7 @@ export const CustomFileUpload = ({
   };
 
   const clear = () => {
-    setFileUploadState({ ...fileUploadState, files: [], isUploading: false });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: [], isUploading: false } });
     if (onClear) {
       onClear();
     }
@@ -340,9 +307,9 @@ export const CustomFileUpload = ({
 
   const remove = index => {
     clearInputElement();
-    let currentFiles = [...fileUploadState.files];
+    let currentFiles = [...state.files];
     currentFiles.splice(index, 1);
-    setFileUploadState({ ...fileUploadState, files: currentFiles });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: currentFiles } });
   };
 
   const renderChooseButton = () => {
@@ -380,7 +347,7 @@ export const CustomFileUpload = ({
   const renderFiles = () => {
     return (
       <div className="p-fileupload-files">
-        {fileUploadState.files.map((file, index) => {
+        {state.files.map((file, index) => {
           let preview = isImage(file) ? (
             <div>
               <img alt={file.name} role="presentation" src={file.objectURL} width={previewWidth} />
@@ -413,12 +380,12 @@ export const CustomFileUpload = ({
         <Checkbox
           id="replaceCheckbox"
           inputId="replaceCheckbox"
-          isChecked={fileUploadState.replace}
-          onChange={() => setFileUploadState({ ...fileUploadState, replace: !fileUploadState.replace })}
+          isChecked={state.replace}
+          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}
           role="checkbox"
         />
         <label htmlFor="replaceCheckbox">
-          <a onClick={() => setFileUploadState({ ...fileUploadState, replace: !fileUploadState.replace })}>
+          <a onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}>
             {replaceCheckLabel}
           </a>
         </label>
@@ -435,8 +402,8 @@ export const CustomFileUpload = ({
         <Fragment>
           <span data-tip data-for="inValidExtension">
             <Button
-              disabled={disabled || !hasFiles() || checkValidExtension() || fileUploadState.isUploading}
-              icon={fileUploadState.isUploading ? 'spinnerAnimate' : 'upload'}
+              disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
+              icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
               label={uploadLabel}
               onClick={upload}
             />
@@ -453,7 +420,7 @@ export const CustomFileUpload = ({
 
     if (hasFiles()) {
       filesList = renderFiles();
-      progressBar = <ProgressBar value={fileUploadState.progress} showValue={false} />;
+      progressBar = <ProgressBar value={state.progress} showValue={false} />;
     }
 
     return (
@@ -473,7 +440,7 @@ export const CustomFileUpload = ({
           </div>
           {replaceCheck && renderReplaceCheck()}
         </div>
-        <p className={`${styles.invalidExtensionMsg} ${fileUploadState.isValid ? styles.isValid : undefined}`}>
+        <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
           {invalidExtensionMessage}
         </p>
       </Fragment>
@@ -492,8 +459,8 @@ export const CustomFileUpload = ({
         <Fragment>
           <span data-tip data-for="invalidExtension">
             <Button
-              disabled={disabled || !hasFiles() || checkValidExtension() || fileUploadState.isUploading}
-              icon={fileUploadState.isUploading ? 'spinnerAnimate' : 'upload'}
+              disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
+              icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
               label={uploadLabel}
               onClick={upload}
             />
@@ -513,7 +480,7 @@ export const CustomFileUpload = ({
 
     if (hasFiles()) {
       FileList = renderFiles();
-      progressBar = <ProgressBar value={fileUploadState.progress} showValue={false} />;
+      progressBar = <ProgressBar value={state.progress} showValue={false} />;
     }
 
     return (
@@ -545,7 +512,7 @@ export const CustomFileUpload = ({
       <span className={buttonClassName} onMouseUp={onSimpleUploaderClick}>
         <span className={iconClassName} />
         <span className="p-button-text p-clickable">
-          {auto ? chooseLabel : hasFiles() ? fileUploadState.files[0].name : chooseLabel}
+          {auto ? chooseLabel : hasFiles() ? state.files[0].name : chooseLabel}
         </span>
         <input
           accept={accept}
