@@ -86,7 +86,7 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
     }
 
     StringBuilder stringQuery = new StringBuilder("CREATE OR REPLACE VIEW dataset_" + datasetId
-        + "." + queryViewName + " as (select rv.id, ");
+        + "." + "\"" + queryViewName + "\"" + " as (select rv.id, ");
     stringQuery.append("rv.id_record_schema,");
     stringQuery.append("rv.id_table,");
     stringQuery.append("rv.dataset_partition_id,");
