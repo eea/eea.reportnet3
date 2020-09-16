@@ -21,7 +21,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { IntegrationService } from 'core/services/Integration';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
-import { array } from 'prop-types';
 
 export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName }) => {
   const data = [

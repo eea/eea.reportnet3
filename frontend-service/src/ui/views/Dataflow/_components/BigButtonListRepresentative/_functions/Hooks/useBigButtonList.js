@@ -99,7 +99,7 @@ const useBigButtonList = ({
           {
             label: resources.messages['historicReleases'],
             command: () => {
-              onShowHistoricReleases('reportingDataset');
+              onShowHistoricReleases('reportingDataset', true);
               getDataHistoricReleases(datasetId, datasetName);
             }
           }

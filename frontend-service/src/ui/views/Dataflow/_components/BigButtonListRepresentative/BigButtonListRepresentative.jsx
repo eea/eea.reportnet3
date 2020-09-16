@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -14,6 +14,8 @@ import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigButtonListRepresentativeReducer';
+
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
 export const BigButtonListRepresentative = ({
@@ -27,10 +29,15 @@ export const BigButtonListRepresentative = ({
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const [datasetId, setDatasetId] = useState(null);
-  const [historicReleasesDialogHeader, setHistoricReleasesDialogHeader] = useState([]);
-  const [historicReleasesView, setHistoricReleasesView] = useState('');
-  const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
+  const [bigButtonListRepresentativeState, bigButtonListRepresentativeDispatch] = useReducer(
+    bigButtonListRepresentativeReducer,
+    {
+      datasetId: null,
+      historicReleasesDialogHeader: [],
+      historicReleasesView: '',
+      isHistoricReleasesDialogVisible: false
+    }
+  );
 
   const receiptBtnRef = useRef(null);
 
@@ -48,8 +55,11 @@ export const BigButtonListRepresentative = ({
   };
 
   const getDataHistoricReleases = (datasetId, value) => {
-    setDatasetId(datasetId);
-    setHistoricReleasesDialogHeader(value);
+    bigButtonListRepresentativeDispatch({ type: 'GET_HISTORIC_RELEASE_DATASET_DATA', payload: { datasetId, value } });
+  };
+
+  const onCloseHistoricReleasesDialogVisible = value => {
+    bigButtonListRepresentativeDispatch({ type: 'ON_CLOSE_HISTORIC_RELEASE_DIALOG', payload: value });
   };
 
   const onLoadReceiptData = async () => {
@@ -68,9 +78,8 @@ export const BigButtonListRepresentative = ({
     }
   };
 
-  const onShowHistoricReleases = typeView => {
-    setIsHistoricReleasesDialogVisible(true);
-    setHistoricReleasesView(typeView);
+  const onShowHistoricReleases = (typeView, value) => {
+    bigButtonListRepresentativeDispatch({ type: 'ON_SHOW_HISTORIC_RELEASES', payload: { typeView, value } });
   };
 
   const renderDialogFooter = (
@@ -79,7 +88,7 @@ export const BigButtonListRepresentative = ({
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => setIsHistoricReleasesDialogVisible(false)}
+        onClick={() => onCloseHistoricReleasesDialogVisible(false)}
       />
     </Fragment>
   );
@@ -104,15 +113,18 @@ export const BigButtonListRepresentative = ({
 
       <button ref={receiptBtnRef} style={{ display: 'none' }} />
 
-      {isHistoricReleasesDialogVisible && (
+      {bigButtonListRepresentativeState.isHistoricReleasesDialogVisible && (
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={`${resources.messages['historicReleases']} ${historicReleasesDialogHeader}`}
-          onHide={() => setIsHistoricReleasesDialogVisible(false)}
+          header={`${resources.messages['historicReleases']} ${bigButtonListRepresentativeState.historicReleasesDialogHeader}`}
+          onHide={() => onCloseHistoricReleasesDialogVisible(false)}
           // style={{ width: '80%' }}
-          visible={isHistoricReleasesDialogVisible}>
-          <HistoricReleases datasetId={datasetId} historicReleasesView={historicReleasesView} />
+          visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
+          <HistoricReleases
+            datasetId={bigButtonListRepresentativeState.datasetId}
+            historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
+          />
         </Dialog>
       )}
     </>
