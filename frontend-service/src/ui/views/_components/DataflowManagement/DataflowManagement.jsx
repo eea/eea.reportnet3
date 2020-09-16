@@ -218,6 +218,7 @@ export const DataflowManagement = ({
               autoFocus={true}
               id={'deleteDataflow'}
               className={`${styles.inputText}`}
+              maxLength={255}
               onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}
               value={state.deleteInput}
