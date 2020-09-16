@@ -1,5 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
-
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
@@ -11,6 +11,7 @@ import { parseDataValidationRulesDTO } from './Utils/parseDataValidationRulesDTO
 const create = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
+    sqlSentence: validationRule.SQLsentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
@@ -19,26 +20,31 @@ const create = async (datasetSchemaId, validationRule) => {
     shortCode: validationRule.shortCode,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'FIELD',
-    whenCondition: getCreationDTO(expressions)
+    whenCondition:
+      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence) ? getCreationDTO(expressions) : null
   };
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
   const validation = {
+    sqlSentence: validationRule.SQLsentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.relations.originDatasetSchema,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    integrityVO: {
-      isDoubleReferenced: validationRule.relations.isDoubleReferenced,
-      originDatasetSchemaId: validationRule.relations.originDatasetSchema,
-      originFields: validationRule.relations.links.map(link => link.originField.code),
-      referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
-      referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
-    },
+    integrityVO:
+      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence)
+        ? {
+            isDoubleReferenced: validationRule.relations.isDoubleReferenced,
+            originDatasetSchemaId: validationRule.relations.originDatasetSchema,
+            originFields: validationRule.relations.links.map(link => link.originField.code),
+            referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
+            referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
+          }
+        : null,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'DATASET',
     whenCondition: null
@@ -49,6 +55,8 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
 const createRowRule = async (datasetSchemaId, validationRule) => {
   const { expressions, expressionsIf, expressionsThen, expressionType } = validationRule;
   const validation = {
+    sqlSentence: validationRule.SQLsentence,
+    whenCondition: null,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
@@ -58,14 +66,17 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'RECORD'
   };
+
   if (expressionType === 'ifThenClause') {
     validation.whenCondition = {
       operator: 'RECORD_IF',
       params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
     };
-  } else {
+  }
+  if (expressionType === 'fieldComparison') {
     validation.whenCondition = getCreationComparisonDTO(expressions);
   }
+
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
@@ -95,6 +106,7 @@ const getAll = async (datasetSchemaId, reporting = false) => {
 const update = async (datasetId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
+    sqlSentence: validationRule.SQLsentence,
     ruleId: validationRule.id,
     description: validationRule.description,
     automatic: validationRule.automatic,
@@ -106,7 +118,8 @@ const update = async (datasetId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
   if (!validationRule.automatic) {
-    validation.whenCondition = getCreationDTO(expressions);
+    validation.whenCondition =
+      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence) ? getCreationDTO(expressions) : null;
   }
   return await apiValidation.update(datasetId, validation);
 };
@@ -114,6 +127,8 @@ const update = async (datasetId, validationRule) => {
 const updateRowRule = async (datasetId, validationRule) => {
   const { expressions, expressionType, expressionsIf, expressionsThen } = validationRule;
   const validation = {
+    sqlSentence: validationRule.SQLsentence,
+    whenCondition: null,
     ruleId: validationRule.id,
     description: validationRule.description,
     automatic: validationRule.automatic,
@@ -130,7 +145,8 @@ const updateRowRule = async (datasetId, validationRule) => {
         operator: 'RECORD_IF',
         params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
       };
-    } else {
+    }
+    if (expressionType === 'fieldComparison') {
       validation.whenCondition = getCreationComparisonDTO(expressions);
     }
   }
@@ -139,6 +155,7 @@ const updateRowRule = async (datasetId, validationRule) => {
 
 const updateDatasetRule = async (datasetId, validationRule) => {
   const validation = {
+    sqlSentence: validationRule.SQLsentence,
     ruleId: validationRule.id,
     description: validationRule.description,
     automatic: validationRule.automatic,
@@ -148,14 +165,17 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     shortCode: validationRule.shortCode,
     type: 'DATASET',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    integrityVO: {
-      id: validationRule.relations.id,
-      isDoubleReferenced: validationRule.relations.isDoubleReferenced,
-      originDatasetSchemaId: validationRule.relations.originDatasetSchema,
-      originFields: validationRule.relations.links.map(link => link.originField.code),
-      referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
-      referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
-    },
+    integrityVO:
+      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence)
+        ? {
+            id: validationRule.relations.id,
+            isDoubleReferenced: validationRule.relations.isDoubleReferenced,
+            originDatasetSchemaId: validationRule.relations.originDatasetSchema,
+            originFields: validationRule.relations.links.map(link => link.originField.code),
+            referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
+            referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
+          }
+        : null,
     whenCondition: null
   };
   return await apiValidation.update(datasetId, validation);
