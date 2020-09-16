@@ -47,7 +47,7 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
 
   @Override
   public EventType getEventType() {
-    return EventType.COMMAND_EXECUTE_VALIDATION;
+    return EventType.CREATE_UPDATE_RULE_EVENT;
   }
 
   /**
