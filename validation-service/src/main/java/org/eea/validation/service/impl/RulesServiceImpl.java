@@ -321,7 +321,15 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition(
           new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
               .append("',").append(datasetId).append(")").toString());
-      // sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
+
+      Map<String, Object> event = new HashMap<>();
+      event.put("dataset_id", String.valueOf(datasetId));
+      event.put("rule_id", ruleVO.getRuleId());
+      event.put("rule_type", "SQL");
+      event.put("event_type", "CREATE");
+      sentEvent(event);
+
+      sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
 
     }
 
@@ -334,16 +342,6 @@ public class RulesServiceImpl implements RulesService {
     if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-
-    if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      Map<String, Object> event = new HashMap<>();
-      event.put("dataset_id", String.valueOf(datasetId));
-      event.put("rule_id", ruleVO.getRuleId());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "CREATE");
-      sentEvent(event);
-    }
-
   }
 
   /**
@@ -578,7 +576,15 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition(
           new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
               .append("',").append(datasetId).append(")").toString());
-      // sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
+
+      Map<String, Object> event = new HashMap<>();
+      event.put("dataset_id", String.valueOf(datasetId));
+      event.put("rule_id", ruleVO.getRuleId());
+      event.put("rule_type", "SQL");
+      event.put("event_type", "UPDATE");
+      sentEvent(event);
+
+      sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
 
     }
     validateRule(rule);
@@ -589,14 +595,6 @@ public class RulesServiceImpl implements RulesService {
     // Check if rule is valid if not sql
     if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
       kieBaseManager.validateRule(datasetSchemaId, rule);
-    }
-    if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      Map<String, Object> event = new HashMap<>();
-      event.put("dataset_id", String.valueOf(datasetId));
-      event.put("rule_id", ruleVO.getRuleId());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "UPDATE");
-      sentEvent(event);
     }
   }
 

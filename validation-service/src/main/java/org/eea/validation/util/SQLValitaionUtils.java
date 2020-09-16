@@ -78,16 +78,16 @@ public class SQLValitaionUtils {
         .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
         .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
 
-    if (null != null) {
-      notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
-      rule.setVerified(true);
-      LOG.info("Rule validation passed: {}", rule);
-    } else {
-      notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
-      rule.setVerified(false);
-      rule.setEnabled(false);
-      LOG.info("Rule validation not passed: {}", rule);
-    }
+    // if (null != null) {
+    notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
+    rule.setVerified(true);
+    LOG.info("Rule validation passed: {}", rule);
+    // } else {
+    // notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
+    // rule.setVerified(false);
+    // rule.setEnabled(false);
+    // LOG.info("Rule validation not passed: {}", rule);
+    // }
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     releaseNotification(notificationEventType, notificationVO);
@@ -108,7 +108,7 @@ public class SQLValitaionUtils {
     }
   }
 
-  private static void executeValidationSQLRule(Long datasetId, String ruleId) {
+  public static void executeValidationSQLRule(Long datasetId, String ruleId) {
     // retrive the rule
     Rule rule = getRule(datasetId, ruleId);
     // retrive sql sentence
@@ -120,7 +120,7 @@ public class SQLValitaionUtils {
 
   }
 
-  private static String queryTreat(String query) {
+  public static String queryTreat(String query) {
 
     List<String> columnList = getColumsFromRuleQuery(query);
 
@@ -153,7 +153,7 @@ public class SQLValitaionUtils {
     return preparedStatement.toString();
   }
 
-  private static List<String> getColumsFromRuleQuery(String query) {
+  public static List<String> getColumsFromRuleQuery(String query) {
     if (query.contains("*")) {
       return new ArrayList<>();
     } else {
@@ -172,7 +172,7 @@ public class SQLValitaionUtils {
     }
   }
 
-  private static Rule getRule(Long datasetId, String ruleId) {
+  public static Rule getRule(Long datasetId, String ruleId) {
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     RulesSchema rulechema =
         rulesRepository.getActiveAndVerifiedRules(new ObjectId(datasetSchemaId));
@@ -185,7 +185,7 @@ public class SQLValitaionUtils {
   }
 
   @Transactional
-  private static TableValue retrivedata(String query) {
+  public static TableValue retrivedata(String query) {
     return datasetRepository.queryRSExecution(query);
   }
 
