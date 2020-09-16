@@ -1,13 +1,17 @@
 package org.eea.dataset.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -43,6 +47,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataset metabase service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -365,6 +373,57 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     response.setHeader("Content-Disposition", "attachment;filename=receipt.pdf");
 
     return new ResponseEntity<>(stream, HttpStatus.OK);
+  }
+
+
+  /**
+   * Historic releases.
+   *
+   * @param datasetId the dataset id
+   * @return the list
+   * @throws EEAException
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
+  public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId) {
+    List<ReleaseVO> releases = new ArrayList<>();
+    // get dataset type
+    try {
+      if (datasetService.isReportingDataset(datasetId)) {
+        // if dataset is reporting return released snapshots
+        releases = datasetSnapshotService.getSnapshotsReleasedByIdDataset(datasetId);
+      } else {
+        // if is not, check if user is custodian to get all the released snapshots
+        // MOCK
+        releases = new ArrayList<>();
+        ReleaseVO release = new ReleaseVO();
+        release.setId(1L);
+        release.setDateReleased(new Date());
+        release.setDatasetName("Dataset1");
+        release.setCountryCode("ES");
+        release.setDatasetId(1L);
+        release.setDcrelease(true);
+        release.setEurelease(false);
+        releases.add(release);
+        ReleaseVO release2 = new ReleaseVO();
+        release2.setId(1L);
+        release2.setDateReleased(new Date());
+        release2.setDatasetName("Dataset2");
+        release2.setCountryCode("FR");
+        release2.setDatasetId(1L);
+        release2.setDcrelease(true);
+        release2.setEurelease(true);
+        releases.add(release2);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error retreiving releases. Error message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DATASET_NOTFOUND, e);
+    }
+
+    return releases;
   }
 
 }

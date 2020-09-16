@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 
 /**
@@ -162,5 +163,14 @@ public interface DatasetSnapshotService {
    * @param dataProviderId the data provider id
    */
   void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId);
+
+  /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   * @throws EEAException the EEA exception
+   */
+  List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) throws EEAException;
 
 }
