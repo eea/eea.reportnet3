@@ -35,6 +35,7 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.SQLValitaionUtils;
@@ -88,6 +89,9 @@ public class RulesServiceImpl implements RulesService {
 
   @Autowired
   private SQLValitaionUtils sqlValitaionUtils;
+
+  @Autowired
+  private SqlRulesService sqlRulesService;
 
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -329,7 +333,7 @@ public class RulesServiceImpl implements RulesService {
       event.put("event_type", "CREATE");
       sentEvent(event);
 
-      sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
+      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
 
     }
 
@@ -584,7 +588,7 @@ public class RulesServiceImpl implements RulesService {
       event.put("event_type", "UPDATE");
       sentEvent(event);
 
-      sqlValitaionUtils.validateSQLRule(datasetSchemaId, rule);
+      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
 
     }
     validateRule(rule);
