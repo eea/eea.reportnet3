@@ -92,6 +92,7 @@ const DataflowManagementForm = forwardRef(
                   autoComplete="off"
                   id="dataflowName"
                   innerRef={inputRef}
+                  maxLength={255}
                   name="name"
                   placeholder={resources.messages['createDataflowName']}
                   onChange={event => {
