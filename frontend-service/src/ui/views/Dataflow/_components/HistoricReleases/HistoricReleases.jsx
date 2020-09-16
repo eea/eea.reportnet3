@@ -216,8 +216,21 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
     return fieldColumns;
   };
 
+  const getOrderedValidations = historicReleases => {
+    const historicReleasesWithPriority = [
+      { id: 'datasetName', index: 0 },
+      { id: 'releaseDate', index: 1 }
+    ];
+
+    return historicReleases
+      .map(error => historicReleasesWithPriority.filter(e => error === e.id))
+      .flat()
+      .sort((a, b) => a.index - b.index)
+      .map(orderedError => orderedError.id);
+  };
+
   const renderReportingDatasetsColumns = historicReleases => {
-    const fieldColumns = Object.keys(historicReleases[0])
+    const fieldColumns = getOrderedValidations(Object.keys(historicReleases[0]))
       .filter(key => key.includes('datasetName') || key.includes('releaseDate'))
       .map(field => {
         let template = null;
@@ -254,8 +267,6 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
           selectOptions={['datasetName']}
         />
       )}
-
-      {console.log('historicReleasesState.filteredData', historicReleasesState.filteredData)}
 
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
