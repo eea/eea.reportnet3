@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataset;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -167,4 +168,15 @@ public interface DatasetSnapshotController {
   ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
       @PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId);
+
+
+  /**
+   * Historic releases.
+   *
+   * @param datasetId the dataset id
+   * @return the list
+   */
+  @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId);
+
 }
