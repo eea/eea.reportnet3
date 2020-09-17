@@ -23,24 +23,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class SqlRulesServiceImpl.
+ */
 @Service("SQLRulesService")
 public class SqlRulesServiceImpl implements SqlRulesService {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant FIRST_QUERY_PART: {@value}. */
   private static final String FIRST_QUERY_PART =
       "ID, ID_RECORD_SCHEMA, ID_TABLE, DATASET_PARTITION_ID, DATA_PROVIDER_CODE";
 
+  /** The Constant COMMA: {@value}. */
   private static final String COMMA = ", ";
 
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
+  /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
 
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -90,6 +100,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
   }
 
+  /**
+   * Query treat.
+   *
+   * @param query the query
+   * @return the string
+   */
   @Override
   public String queryTreat(String query) {
 
@@ -124,6 +140,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return preparedStatement.toString();
   }
 
+  /**
+   * Gets the colums from rule query.
+   *
+   * @param query the query
+   * @return the colums from rule query
+   */
   private List<String> getColumsFromRuleQuery(String query) {
     if (query.contains("*")) {
       return new ArrayList<>();
@@ -143,6 +165,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
   }
 
+  /**
+   * Gets the rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule
+   */
   @Override
   public Rule getRule(Long datasetId, String ruleId) {
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -156,6 +185,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return null;
   }
 
+  /**
+   * Retrivedata.
+   *
+   * @param query the query
+   * @return the table value
+   */
   @Transactional
   @Override
   public TableValue retrivedata(String query) {

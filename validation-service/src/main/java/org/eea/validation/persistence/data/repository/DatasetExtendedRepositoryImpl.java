@@ -21,11 +21,21 @@ import org.eea.validation.persistence.data.domain.Validation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 
+/**
+ * The Class DatasetExtendedRepositoryImpl.
+ */
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
+  /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
 
+  /**
+   * Query RS execution.
+   *
+   * @param query the query
+   * @return the table value
+   */
   @Override
   public TableValue queryRSExecution(String query) {
     Session session = (Session) entityManager.getDelegate();
@@ -61,17 +71,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
                   case BOOLEAN:
                     field.setType(DataType.BOOLEAN.toString());
                     break;
-                  case CIRCLE:
-                    field.setType(DataType.CIRCLE.toString());
-                    break;
                   case CODELIST:
                     field.setType(DataType.CODELIST.toString());
-                    break;
-                  case COORDINATE_LAT:
-                    field.setType(DataType.COORDINATE_LAT.toString());
-                    break;
-                  case COORDINATE_LONG:
-                    field.setType(DataType.COORDINATE_LONG.toString());
                     break;
                   case DATE:
                     field.setType(DataType.DATE.toString());
@@ -100,12 +101,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
                   case PHONE:
                     field.setType(DataType.PHONE.toString());
                     break;
-                  case POINT:
-                    field.setType(DataType.POINT.toString());
-                    break;
-                  case POLYGON:
-                    field.setType(DataType.POLYGON.toString());
-                    break;
                   case URL:
                     field.setType(DataType.URL.toString());
                     break;
@@ -130,6 +125,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     });
   }
 
+  /**
+   * Query record validation execution.
+   *
+   * @param query the query
+   * @return the list
+   */
   @Override
   public List<RecordValidation> queryRecordValidationExecution(String query) {
 
@@ -175,6 +176,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     });
   }
 
+  /**
+   * Query field validation execution.
+   *
+   * @param query the query
+   * @return the list
+   */
   @Override
   public List<FieldValidation> queryFieldValidationExecution(String query) {
 

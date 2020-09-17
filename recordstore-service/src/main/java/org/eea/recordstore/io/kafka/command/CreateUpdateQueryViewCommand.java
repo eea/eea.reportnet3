@@ -19,13 +19,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * The Class CreateUpdateQueryViewCommand.
+ */
 @Component
 public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand {
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateQueryViewCommand.class);
 
+  /** The Constant QUERY_FILTER_BY_ID_RECORD: {@value}. */
   private static final String QUERY_FILTER_BY_ID_RECORD =
       ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '";
 
@@ -38,13 +44,20 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
   private static final String COMMA = ", ";
 
 
+  /** The record store service. */
   @Autowired
   private RecordStoreService recordStoreService;
 
+  /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaController;
 
 
+  /**
+   * Gets the event type.
+   *
+   * @return the event type
+   */
   @Override
   public EventType getEventType() {
     return EventType.CREATE_UPDATE_RULE_EVENT;
@@ -71,11 +84,20 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
             queryViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId);
           } catch (RecordStoreAccessException e) {
-            e.printStackTrace();
+            LOG_ERROR.error("Error creating Query view: ", e.getMessage(), e);;
           }
         });
   }
 
+  /**
+   * Query view query.
+   *
+   * @param columns the columns
+   * @param queryViewName the query view name
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
   @Transactional
   private void queryViewQuery(List<FieldSchemaVO> columns, String queryViewName,
       String idTableSchema, Long datasetId) throws RecordStoreAccessException {
