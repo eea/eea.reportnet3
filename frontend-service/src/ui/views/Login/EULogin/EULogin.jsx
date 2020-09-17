@@ -8,6 +8,8 @@ import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
+import { LocalStorageUtils } from 'ui/views/_functions/Utils';
+import { isNil } from 'lodash';
 
 const EULogin = ({ location, history }) => {
   const [isLoading] = useState(true);
@@ -20,7 +22,13 @@ const EULogin = ({ location, history }) => {
       if (code) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);
-        history.push(getUrl(routes.DATAFLOWS));
+        const rnLocalStorage = LocalStorageUtils.get();
+        let redirectUrl = getUrl(routes.DATAFLOWS);
+        if (!isNil(rnLocalStorage)) {
+          redirectUrl = rnLocalStorage.redirectUrl;
+          LocalStorageUtils.remove();
+        }
+        history.push(redirectUrl);
       } else {
         history.push(getUrl(routes.ACCESS_POINT));
       }
