@@ -2,6 +2,13 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
+const getCheckboxState = (checkboxes, property) => {
+  checkboxes.forEach(checkboxOption => {
+    if (checkboxOption.property === property) checkboxOption.isChecked = !checkboxOption.isChecked;
+  });
+  return checkboxes;
+};
+
 const getFilterInitialState = (
   data,
   input = [],
@@ -98,6 +105,7 @@ const getCheckedKeys = (state, select, checkboxOptions = []) => {
 };
 
 export const FiltersUtils = {
+  getCheckboxState,
   getCheckedKeys,
   getFilterInitialState,
   getFilterKeys,

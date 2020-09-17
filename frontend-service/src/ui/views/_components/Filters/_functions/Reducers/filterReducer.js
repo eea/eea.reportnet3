@@ -1,3 +1,5 @@
+import { FiltersUtils } from '../Utils/FiltersUtils';
+
 export const filterReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_STATE':
@@ -7,7 +9,8 @@ export const filterReducer = (state, { type, payload }) => {
         filterBy: payload.initialFilterBy,
         filteredData: payload.initialFilteredData,
         labelAnimations: payload.initialLabelAnimations,
-        orderBy: payload.initialOrderBy
+        orderBy: payload.initialOrderBy,
+        checkboxes: payload.initialCheckboxes
       };
 
     case 'ORDER_DATA':
@@ -45,7 +48,7 @@ export const filterReducer = (state, { type, payload }) => {
       return { ...state, filteredData: payload.searchedValues, searchBy: payload.value };
 
     case 'ON_CHECKBOX_FILTER':
-      return { ...state, checkboxState: payload.value, checkboxProperty: payload.property };
+      return { ...state, checkboxes: FiltersUtils.getCheckboxState(state.checkboxes, payload.property, payload.value) };
 
     case 'TOGGLE_MATCH_MODE':
       return { ...state, matchMode: payload };

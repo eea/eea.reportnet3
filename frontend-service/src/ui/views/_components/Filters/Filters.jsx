@@ -50,9 +50,10 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
-    data: data,
     // checkbox: { property: '', state: false },
-    checkboxState: null,
+    checkbox: { property: '', isChecked: false },
+    checkboxes: [],
+    data: data,
     filterBy: {},
     filteredData: data,
     labelAnimations: {},
@@ -73,21 +74,12 @@ export const Filters = ({
     onReApplyFilters();
   }, [filterState.matchMode]);
 
-  useEffect(() => {
-    filterState.checkboxState && onFilterData(filterState.checkboxProperty, [filterState.checkboxState]);
-  }, [filterState.checkboxState]);
-
-  // useEffect(() => {
-  //   checkboxOptions && loadCheckbox();
-  // }, []);
-
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
-  // const loadCheckbox = () => {
-  //   checkboxOptions.forEach(checkboxOption => {
-  //     filterDispatch({ type: 'INITIAL_CHECKBOX', payload: { property: checkboxOption, state: false } });
-  //   });
-  // };
+  const getCheckboxFilterState = property => {
+    const [checkBox] = filterState.checkboxes.filter(checkbox => checkbox.property === property);
+    return isNil(checkBox) ? false : checkBox.isChecked;
+  };
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
@@ -116,10 +108,22 @@ export const Filters = ({
       dropdownOptions,
       checkboxOptions
     );
+    const initialCheckboxes = [];
+    !isEmpty(checkboxOptions) &&
+      checkboxOptions.forEach(checkboxOption => {
+        initialCheckboxes.push({ property: checkboxOption, isChecked: false });
+      });
 
     filterDispatch({
       type: 'INITIAL_STATE',
-      payload: { initialData, initialFilterBy, initialFilteredData, initialLabelAnimations, initialOrderBy }
+      payload: {
+        initialData,
+        initialFilterBy,
+        initialFilteredData,
+        initialLabelAnimations,
+        initialOrderBy,
+        initialCheckboxes
+      }
     });
   };
 
@@ -127,9 +131,11 @@ export const Filters = ({
     filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
-  const onChangeCheckboxFilter = (property, value) => {
-    filterDispatch({ type: 'ON_CHECKBOX_FILTER', payload: { property, value } });
-    // onFilterData(filterState.checkboxProperty, [filterState.checkboxState]);
+  const onChangeCheckboxFilter = property => {
+    filterDispatch({ type: 'ON_CHECKBOX_FILTER', payload: { property } });
+    filterState.checkboxes.forEach(checkbox => {
+      checkbox.property === property && onFilterData(checkbox.property, [checkbox.isChecked]);
+    });
   };
 
   const onClearAllFilters = () => {
@@ -168,7 +174,6 @@ export const Filters = ({
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
-    // const checkboxKeys = FiltersUtils.getCheckedKeys(filterState, filter, checkboxOptions);
     const checkboxKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
@@ -297,12 +302,9 @@ export const Filters = ({
             // className={styles.checkRequired}
             id={property}
             inputId={property}
-            isChecked={filterState.checkboxState}
+            isChecked={getCheckboxFilterState(property)}
             label={property}
-            onChange={() => {
-              onChangeCheckboxFilter(property, !filterState.checkboxState);
-              // onFilterData(filterState.checkboxProperty, [filterState.checkboxState]);
-            }}
+            onChange={() => onChangeCheckboxFilter(property)}
             style={{ marginRight: '50px' }}
           />
           <label htmlFor={property} className="srOnly">
