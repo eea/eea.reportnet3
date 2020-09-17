@@ -18,7 +18,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-// import { IntegrationService } from 'core/services/Integration';
+import { ReleaseService } from 'core/services/Release';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
@@ -26,27 +26,27 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
   const data = [
     {
       countryCode: 'EN',
-      releaseDate: 1599565444237,
-      isReleased: true,
-      isEUDatasetCurrentRelease: true
+      releasedDate: 1599565444237,
+      isDataCollectionReleased: true,
+      isEUReleased: true
     },
     {
       countryCode: 'ES',
-      releaseDate: 1599565434866,
-      isReleased: false,
-      isEUDatasetCurrentRelease: true
+      releasedDate: 1599565434866,
+      isDataCollectionReleased: false,
+      isEUReleased: true
     },
     {
       countryCode: 'FR',
-      releaseDate: 1599565484237,
-      isReleased: false,
-      isEUDatasetCurrentRelease: false
+      releasedDate: 1599565484237,
+      isDataCollectionReleased: false,
+      isEUReleased: false
     },
     {
       countryCode: 'GR',
-      releaseDate: 1599563434866,
-      isReleased: true,
-      isEUDatasetCurrentRelease: true
+      releasedDate: 1599563434866,
+      isDataCollectionReleased: true,
+      isEUReleased: true
     }
   ];
 
@@ -75,22 +75,19 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
   const response = [];
   const historicReleases = [];
   const onLoadHistoricReleases = async (datasetId, datasetName) => {
-    // console.log('response', response);
-    // console.log('response.length', response.length);
     try {
       data.forEach(historicRelease => {
         historicRelease.datasetId = datasetId;
         historicRelease.datasetName = datasetName;
         response.push(historicRelease);
       });
-      // console.log('datasetId', datasetId);
-      // console.log('datasetName', datasetName);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
         payload: { data: response, filteredData: response }
       });
+
       // isLoading(true);
-      // const response = await IntegrationService.all(datasetId);
+      // const response = await ReleaseService.allDataCollectionHistoricReleases(141);
       // response.forEach(historicRelease => {
       //   historicRelease.datasetId = datasetId;
       //   historicRelease.datasetName = datasetName;
@@ -98,17 +95,17 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
       // });
       // historicReleasesDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
     } catch (error) {
-      // notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
+      notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
       console.log('error', error);
     } finally {
-      // isLoading(false);
+      isLoading(false);
     }
   };
 
-  const releaseDateTemplate = rowData => {
+  const releasedDateTemplate = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
-        {moment(rowData.releaseDate).format(
+        {moment(rowData.releasedDate).format(
           `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
             userContext.userProps.amPm24h ? '' : ' A'
           }`
@@ -117,17 +114,17 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
     );
   };
 
-  const isEUDatasetCurrentReleaseTemplate = rowData => (
+  const isEUReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isEUDatasetCurrentRelease ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
-      ) : null}
+      {rowData.isEUReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
-  const isReleasedTemplate = rowData => (
+  const isDataCollectionReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      {rowData.isDataCollectionReleased ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
+      ) : null}
     </div>
   );
 
@@ -136,15 +133,15 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
       .filter(
         key =>
           key.includes('countryCode') ||
-          key.includes('releaseDate') ||
-          key.includes('isReleased') ||
-          key.includes('isEUDatasetCurrentRelease')
+          key.includes('releasedDate') ||
+          key.includes('isDataCollectionReleased') ||
+          key.includes('isEUReleased')
       )
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
-        if (field === 'isEUDatasetCurrentRelease') template = isEUDatasetCurrentReleaseTemplate;
-        if (field === 'isReleased') template = isReleasedTemplate;
+        if (field === 'releasedDate') template = releasedDateTemplate;
+        if (field === 'isEUReleased') template = isEUReleasedTemplate;
+        if (field === 'isDataCollectionReleased') template = isDataCollectionReleasedTemplate;
 
         return (
           <Column
@@ -162,10 +159,10 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
 
   const renderEUDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('countryCode') || key.includes('releaseDate'))
+      .filter(key => key.includes('countryCode') || key.includes('releasedDate'))
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'releasedDate') template = releasedDateTemplate;
         return (
           <Column
             body={template}
@@ -182,10 +179,10 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
 
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('releaseDate'))
+      .filter(key => key.includes('releasedDate'))
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'releasedDate') template = releasedDateTemplate;
         return (
           <Column
             body={template}
@@ -203,7 +200,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
   const getOrderedValidations = historicReleases => {
     const historicReleasesWithPriority = [
       { id: 'datasetName', index: 0 },
-      { id: 'releaseDate', index: 1 }
+      { id: 'releasedDate', index: 1 }
     ];
 
     return historicReleases
@@ -215,10 +212,10 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
 
   const renderReportingDatasetsColumns = historicReleases => {
     const fieldColumns = getOrderedValidations(Object.keys(historicReleases[0]))
-      .filter(key => key.includes('datasetName') || key.includes('releaseDate'))
+      .filter(key => key.includes('datasetName') || key.includes('releasedDate'))
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'releasedDate') template = releasedDateTemplate;
         return (
           <Column
             body={template}
@@ -240,7 +237,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           selectOptions={['countryCode']}
-          checkboxOptions={['isReleased', 'isEUDatasetCurrentRelease']}
+          checkboxOptions={['isDataCollectionReleased', 'isEUReleased']}
         />
       )}
 

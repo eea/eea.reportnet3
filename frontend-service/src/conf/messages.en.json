@@ -859,12 +859,13 @@
     "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
     "historicReleases": "Historic Releases",
     "historicReleasesContextMenu": "Historic Releases for",
-    "isEUDatasetCurrentRelease": "EU Dataset",
-    "releaseDate": "Release Date",
-    "isReleased": "Data collection",
+    "isEUReleased": "EU Dataset",
+    "releasedDate": "Release Date",
+    "isDataCollectionReleased": "Data collection",
     "noHistoricReleasesWithSelectedParameters": "There are no releases with the selected parameters",
     "validationsDataColumn": "Validations",
     "datasetId": "Dataset Id",
-    "datasetName": "Dataset Name"
+    "datasetName": "Dataset Name",
+    "loadHistoricReleasesError": "Error loading integrations"
   }
 }
