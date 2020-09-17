@@ -13,7 +13,6 @@ import lombok.ToString;
 /**
  * The Class Rule.
  */
-
 @Getter
 @Setter
 @ToString
@@ -81,6 +80,10 @@ public class Rule {
   @Field(value = "integrityConstraintId")
   private ObjectId integrityConstraintId;
 
+  /** The sql sentence. */
+  @Field(value = "sqlSentence")
+  private String sqlSentence;
+
   /**
    * Hash code.
    *
@@ -90,7 +93,7 @@ public class Rule {
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
         whenCondition, thenCondition, description, shortCode, uniqueConstraintId,
-        integrityConstraintId);
+        integrityConstraintId, sqlSentence);
   }
 
   /**
@@ -117,6 +120,7 @@ public class Rule {
         && Objects.equals(description, other.description)
         && Objects.equals(shortCode, other.shortCode)
         && Objects.equals(uniqueConstraintId, other.uniqueConstraintId)
-        && Objects.equals(integrityConstraintId, other.integrityConstraintId);
+        && Objects.equals(integrityConstraintId, other.integrityConstraintId)
+        && Objects.equals(sqlSentence, other.sqlSentence);
   }
 }

@@ -18,6 +18,8 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -33,8 +35,10 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.SQLValitaionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +86,16 @@ public class RulesServiceImpl implements RulesService {
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
+
+  @Autowired
+  private SQLValitaionUtils sqlValitaionUtils;
+
+  @Autowired
+  private SqlRulesService sqlRulesService;
+
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -306,14 +320,32 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
+
+    } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
+      rule.setWhenCondition(
+          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
+              .append("',").append(datasetId).append(")").toString());
+
+      Map<String, Object> event = new HashMap<>();
+      event.put("dataset_id", String.valueOf(datasetId));
+      event.put("rule_id", ruleVO.getRuleId());
+      event.put("rule_type", "SQL");
+      event.put("event_type", "CREATE");
+      sentEvent(event);
+
+      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
+
     }
+
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
 
-    // Check if rule is valid
-    kieBaseManager.validateRule(datasetSchemaId, rule);
+    // Check if rule is valid if not sql
+    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
   }
 
   /**
@@ -544,14 +576,30 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
+    } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
+      rule.setWhenCondition(
+          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
+              .append("',").append(datasetId).append(")").toString());
+
+      Map<String, Object> event = new HashMap<>();
+      event.put("dataset_id", String.valueOf(datasetId));
+      event.put("rule_id", ruleVO.getRuleId());
+      event.put("rule_type", "SQL");
+      event.put("event_type", "UPDATE");
+      sentEvent(event);
+
+      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
+
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
 
-    // Check if rule is valid
-    kieBaseManager.validateRule(datasetSchemaId, rule);
+    // Check if rule is valid if not sql
+    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
   }
 
   /**
@@ -1002,5 +1050,15 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public Long updateSequence(String datasetSchemaId) {
     return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+  }
+
+
+  /**
+   * Sent event.
+   *
+   * @param event the event
+   */
+  private void sentEvent(Map<String, Object> event) {
+    kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
   }
 }
