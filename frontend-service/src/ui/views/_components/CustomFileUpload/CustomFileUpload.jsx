@@ -1,119 +1,92 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import styles from './CustomFileUpload.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
+import { Dialog } from 'ui/views/_components/Dialog';
 
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 import ReactTooltip from 'react-tooltip';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { customFileUploadReducer } from './_functions/customFileUploadReducer';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
-export class CustomFileUpload extends Component {
-  static defaultProps = {
-    accept: undefined,
-    auto: false,
-    cancelLabel: 'Reset',
-    chooseLabel: 'Choose',
-    className: null,
-    disabled: false,
-    fileLimit: 1,
-    id: null,
-    infoTooltip: '',
-    invalidExtensionMessage: '',
-    invalidFileSizeMessageDetail: 'maximum upload size is {0}.',
-    invalidFileSizeMessageSummary: '{0}: Invalid file size, ',
-    maxFileSize: null,
-    mode: 'advanced',
-    multiple: false,
-    name: null,
-    onBeforeSend: null,
-    onBeforeUpload: null,
-    onClear: null,
-    onError: null,
-    onProgress: null,
-    onSelect: null,
-    onUpload: null,
-    operation: 'POST',
-    previewWidth: 50,
-    replaceCheck: false,
-    replaceCheckLabel: 'Replace data',
-    style: null,
-    uploadLabel: 'Upload',
-    url: null,
-    widthCredentials: false
-  };
+export const CustomFileUpload = ({
+  accept = undefined,
+  auto = false,
+  cancelLabel = 'Reset',
+  chooseLabel = 'Choose',
+  className = null,
+  dialogClassName = null,
+  dialogFooter = null,
+  dialogHeader = null,
+  dialogOnHide = null,
+  dialogVisible = null,
+  disabled = false,
+  fileLimit = 1,
+  id = null,
+  infoTooltip = '',
+  invalidExtensionMessage = '',
+  invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
+  invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
+  isDialog = false,
+  manageDialogs,
+  maxFileSize = null,
+  mode = 'advanced',
+  multiple = false,
+  name = null,
+  onBeforeSend = null,
+  onBeforeUpload = null,
+  onClear = null,
+  onError = null,
+  onProgress = null,
+  onSelect = null,
+  onUpload = null,
+  operation = 'POST',
+  previewWidth = 50,
+  replaceCheck = false,
+  replaceCheckLabel = 'Replace data',
+  style = null,
+  uploadLabel = 'Upload',
+  url = null,
+  withCredentials = false
+}) => {
+  const resourcesContext = useContext(ResourcesContext);
 
-  static propTypes = {
-    accept: PropTypes.string,
-    auto: PropTypes.bool,
-    cancelLabel: PropTypes.string,
-    chooseLabel: PropTypes.string,
-    className: PropTypes.string,
-    disabled: PropTypes.bool,
-    fileLimit: PropTypes.number,
-    id: PropTypes.string,
-    infoTooltip: PropTypes.string,
-    invalidExtensionMessage: PropTypes.string,
-    invalidFileSizeMessageDetail: PropTypes.string,
-    invalidFileSizeMessageSummary: PropTypes.string,
-    maxFileSize: PropTypes.number,
-    mode: PropTypes.string,
-    multiple: PropTypes.bool,
-    name: PropTypes.string,
-    onBeforeSend: PropTypes.func,
-    onBeforeUpload: PropTypes.func,
-    onClear: PropTypes.func,
-    onError: PropTypes.func,
-    onProgress: PropTypes.func,
-    onSelect: PropTypes.func,
-    onUpload: PropTypes.func,
-    operation: PropTypes.string,
-    previewWidth: PropTypes.number,
-    replaceCheck: PropTypes.bool,
-    style: PropTypes.object,
-    uploadLabel: PropTypes.string,
-    url: PropTypes.string,
-    widthCredentials: PropTypes.bool
-  };
+  const [state, dispatch] = useReducer(customFileUploadReducer, {
+    files: [],
+    isUploading: false,
+    isValid: true,
+    msgs: [],
+    replace: false
+  });
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      files: [],
-      isUploading: false,
-      isValid: true,
-      msgs: [],
-      replace: false
-    };
+  const _files = useRef([]);
+  const content = useRef(null);
+  const fileInput = useRef(null);
+  const messagesUI = useRef(null);
 
-    this.upload = this.upload.bind(this);
-    this.clear = this.clear.bind(this);
-    this.onFileSelect = this.onFileSelect.bind(this);
-    this.onDragEnter = this.onDragEnter.bind(this);
-    this.onDragOver = this.onDragOver.bind(this);
-    this.onDragLeave = this.onDragLeave.bind(this);
-    this.onDrop = this.onDrop.bind(this);
-    this.onFocus = this.onFocus.bind(this);
-    this.onBlur = this.onBlur.bind(this);
-    this.onSimpleUploaderClick = this.onSimpleUploaderClick.bind(this);
-  }
+  useEffect(() => {
+    if (hasFiles() && auto) upload();
+  }, [state]);
 
-  checkValidExtension(file) {
-    const acceptedExtensions = this.props.accept.toLowerCase().split(', ');
+  const checkValidExtension = file => {
+    const acceptedExtensions = accept.toLowerCase().split(', ');
+
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
       return acceptedExtensions.includes('*') || acceptedExtensions.includes(`.${extension.toLowerCase()}`);
     }
 
-    if (this.hasFiles()) {
-      const selectedExtension = this.state.files.map(
+    if (hasFiles()) {
+      const selectedExtension = state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
 
@@ -123,291 +96,268 @@ export class CustomFileUpload extends Component {
       );
     }
     return false;
-  }
+  };
 
-  clearInputElement() {
-    if (this.fileInput) {
-      this.fileInput.value = '';
-      if (this.props.mode === 'basic') {
-        this.fileInput.style.display = 'inline';
+  const clearInputElement = () => {
+    if (fileInput.current) {
+      fileInput.current.value = '';
+      if (mode === 'basic') {
+        fileInput.current.style.display = 'inline';
       }
     }
-  }
+  };
 
-  hasFiles() {
-    return this.state.files && this.state.files.length > 0;
-  }
+  const hasFiles = () => state.files && state.files.length > 0;
 
-  isImage(file) {
-    return /^image\//.test(file.type);
-  }
+  const isImage = file => /^image\//.test(file.type);
 
-  remove(index) {
-    this.clearInputElement();
-    let currentFiles = [...this.state.files];
-    currentFiles.splice(index, 1);
-    this.setState({ files: currentFiles });
-  }
+  const formatSize = bytes => {
+    if (bytes === 0) return '0 B';
 
-  formatSize(bytes) {
-    if (bytes === 0) {
-      return '0 B';
-    }
     let k = 1000,
       dm = 2,
       sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
       i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-  }
+  };
 
-  onFileSelect(event) {
-    this.setState({ msgs: [] });
-    this.files = this.state.files || [];
-    let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+  const onFileSelect = event => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [] } });
+    _files.current = state.files || [];
+    let cFiles = event.dataTransfer ? event.dataTransfer.files : event.target.files;
 
-    if (this.props.fileLimit > 1) {
-      for (let i = 0; i < files.length; i++) {
-        let file = files[i];
+    if (fileLimit > 1) {
+      for (let i = 0; i < cFiles.length; i++) {
+        let file = cFiles[i];
 
-        if (!this.isFileSelected(file)) {
-          if (this.validate(file)) {
-            if (this.isImage(file)) {
+        if (!isFileSelected(file)) {
+          if (validate(file)) {
+            if (isImage(file)) {
               file.objectURL = window.URL.createObjectURL(file);
             }
-            this.files.push(file);
+            _files.current.push(file);
           }
         }
       }
     } else {
-      let file = files[0];
-      if (!this.isFileSelected(file)) {
-        if (this.validate(file)) {
-          if (this.isImage(file)) {
+      let file = cFiles[0];
+      if (!isFileSelected(file)) {
+        if (validate(file)) {
+          if (isImage(file)) {
             file.objectURL = window.URL.createObjectURL(file);
           }
-          this.files = [];
-          this.files.push(file);
+          _files.current = [];
+          _files.current.push(file);
         }
       }
     }
 
-    this.setState({ files: this.files }, () => {
-      if (this.hasFiles() && this.props.auto) {
-        this.upload();
-      }
-    });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: _files.current } });
 
-    if (this.props.onSelect) {
-      this.props.onSelect({ originalEvent: event, files: files });
+    if (onSelect) {
+      onSelect({ originalEvent: event, files: _files.current });
     }
 
-    this.clearInputElement();
+    clearInputElement();
 
-    if (this.props.mode === 'basic') {
-      this.fileInput.style.display = 'none';
+    if (mode === 'basic') {
+      fileInput.current.style.display = 'none';
     }
-  }
+  };
 
-  isFileSelected(file) {
-    for (let sFile of this.state.files) {
+  const isFileSelected = file => {
+    for (let sFile of state.files) {
       if (sFile.name + sFile.type + sFile.size === file.name + file.type + file.size) return true;
     }
     return false;
-  }
+  };
 
-  validate(file) {
-    if (this.props.maxFileSize && file.size > this.props.maxFileSize) {
-      this.messagesUI.show({
+  const validate = file => {
+    if (maxFileSize && file.size > maxFileSize) {
+      messagesUI.current.show({
         severity: 'error',
-        summary: this.props.invalidFileSizeMessageSummary.replace('{0}', file.name),
-        detail: this.props.invalidFileSizeMessageDetail.replace('{0}', this.formatSize(this.props.maxFileSize))
+        summary: invalidFileSizeMessageSummary.replace('{0}', file.name),
+        detail: invalidFileSizeMessageDetail.replace('{0}', formatSize(maxFileSize))
       });
 
       return false;
     }
-    if (this.props.accept) {
-      if (!this.checkValidExtension(file)) {
-        this.setState({ isValid: false });
+    if (accept) {
+      if (!checkValidExtension(file)) {
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: false } });
         return false;
       }
     }
 
-    this.setState({ isValid: true });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: true } });
     return true;
-  }
+  };
 
-  upload() {
-    this.setState({ msgs: [], isUploading: true });
+  const upload = () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
-    if (this.props.onBeforeUpload) {
-      this.props.onBeforeUpload({
-        xhr: xhr,
-        formData: formData
-      });
+    if (onBeforeUpload) {
+      onBeforeUpload({ xhr: xhr, formData: formData });
     }
 
-    for (let file of this.state.files) {
-      formData.append(this.props.name, file, file.name);
+    for (let file of state.files) {
+      formData.append(name, file, file.name);
     }
 
     xhr.upload.addEventListener('progress', event => {
       if (event.lengthComputable) {
-        this.setState({ progress: Math.round((event.loaded * 100) / event.total) });
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
       }
 
-      if (this.props.onProgress) {
-        this.props.onProgress({
-          originalEvent: event,
-          progress: this.progress
-        });
+      if (onProgress) {
+        onProgress({ originalEvent: event, progress: state.progress });
       }
     });
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        this.setState({ progress: 0 });
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (this.props.onUpload) {
-            this.props.onUpload({ xhr: xhr, files: this.files });
+          if (onUpload) {
+            onUpload({ xhr: xhr, files: _files.current });
           }
         } else {
-          if (this.props.onError) {
-            this.props.onError({ xhr: xhr, files: this.files });
+          if (onError) {
+            onError({ xhr: xhr, files: _files.current });
           }
         }
 
-        this.clear();
+        clear();
       }
     };
 
-    let url = this.props.url;
+    let nUrl = url;
 
-    if (this.props.replaceCheck) {
-      url += url.indexOf('?') !== -1 ? '&' : '?';
-      url += 'replace=' + this.state.replace;
+    if (replaceCheck) {
+      nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
+      nUrl += 'replace=' + state.replace;
     }
 
-    xhr.open(this.props.operation, url, true);
+    xhr.open(operation, nUrl, true);
     const tokens = userStorage.get();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
-    if (this.props.onBeforeSend) {
-      this.props.onBeforeSend({
-        xhr: xhr,
-        formData: formData
-      });
+    if (onBeforeSend) {
+      onBeforeSend({ xhr: xhr, formData: formData });
     }
 
-    xhr.withCredentials = this.props.withCredentials;
+    xhr.withCredentials = withCredentials;
 
     xhr.send(formData);
-  }
+  };
 
-  clear() {
-    this.setState({ files: [], isUploading: false });
-    if (this.props.onClear) {
-      this.props.onClear();
+  const clear = () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: [], isUploading: false } });
+    if (onClear) {
+      onClear();
     }
-    this.clearInputElement();
-  }
+    clearInputElement();
+  };
 
-  onFocus(event) {
-    DomHandler.addClass(event.currentTarget.parentElement, 'p-focus');
-  }
+  const onFocus = event => DomHandler.addClass(event.currentTarget.parentElement, 'p-focus');
 
-  onBlur(event) {
-    DomHandler.removeClass(event.currentTarget.parentElement, 'p-focus');
-  }
+  const onBlur = event => DomHandler.removeClass(event.currentTarget.parentElement, 'p-focus');
 
-  onDragEnter(event) {
-    if (!this.props.disabled) {
+  const onDragEnter = event => {
+    if (!disabled) {
       event.stopPropagation();
       event.preventDefault();
     }
-  }
+  };
 
-  onDragOver(event) {
-    if (!this.props.disabled) {
-      DomHandler.addClass(this.content, 'p-fileupload-highlight');
+  const onDragOver = event => {
+    if (!disabled) {
+      DomHandler.addClass(content.current, 'p-fileupload-highlight');
       event.stopPropagation();
       event.preventDefault();
     }
-  }
+  };
 
-  onDragLeave(event) {
-    if (!this.props.disabled) {
-      DomHandler.removeClass(this.content, 'p-fileupload-highlight');
+  const onDragLeave = () => {
+    if (!disabled) {
+      DomHandler.removeClass(content.current, 'p-fileupload-highlight');
     }
-  }
+  };
 
-  onDrop(event) {
-    if (!this.props.disabled) {
-      DomHandler.removeClass(this.content, 'p-fileupload-highlight');
+  const onDrop = event => {
+    if (!disabled) {
+      DomHandler.removeClass(content.current, 'p-fileupload-highlight');
       event.stopPropagation();
       event.preventDefault();
 
       let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-      let allowDrop = this.props.multiple || (files && files.length === 1);
+      let allowDrop = multiple || (files && files.length === 1);
 
-      if (allowDrop) {
-        this.onFileSelect(event);
-      }
+      if (allowDrop) onFileSelect(event);
     }
-  }
+  };
 
-  onSimpleUploaderClick() {
-    if (this.hasFiles()) {
-      this.upload();
-    }
-  }
+  const onSimpleUploaderClick = () => {
+    if (hasFiles()) upload();
+  };
 
-  renderChooseButton() {
+  const remove = index => {
+    clearInputElement();
+    let currentFiles = [...state.files];
+    currentFiles.splice(index, 1);
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: currentFiles } });
+  };
+
+  const renderChooseButton = () => {
     let className = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left');
 
     return (
       <span className={styles.chooseButton}>
-        <span icon="pi pi-plus" className={className}>
-          <input
-            ref={el => (this.fileInput = el)}
-            type="file"
-            onChange={this.onFileSelect}
-            onFocus={this.onFocus}
-            onBlur={this.onBlur}
-            multiple={this.props.multiple}
-            accept={this.props.accept}
-            disabled={this.props.disabled}
-          />
-          <span className="p-button-icon p-button-icon-left p-clickable pi pi-fw pi-plus" />
-          <span className="p-button-text p-clickable">{this.props.chooseLabel}</span>
-        </span>
+        <input
+          id="file"
+          className={styles.chooseInput}
+          accept={accept}
+          disabled={disabled}
+          multiple={multiple}
+          onBlur={onBlur}
+          onChange={onFileSelect}
+          onFocus={onFocus}
+          ref={fileInput}
+          type="file"
+        />
+        <label for="file" className={className}>
+          <span className="pi pi-fw pi-plus" />
+          <span>{chooseLabel}</span>
+        </label>
+
         <Button
           className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
           icon="infoCircle"
-          tooltip={this.props.infoTooltip}
+          tooltip={infoTooltip}
           tooltipOptions={{ position: 'top' }}
         />
       </span>
     );
-  }
+  };
 
-  renderFiles() {
+  const renderFiles = () => {
     return (
       <div className="p-fileupload-files">
-        {this.state.files.map((file, index) => {
-          let preview = this.isImage(file) ? (
+        {state.files.map((file, index) => {
+          let preview = isImage(file) ? (
             <div>
-              <img alt={file.name} role="presentation" src={file.objectURL} width={this.props.previewWidth} />
+              <img alt={file.name} role="presentation" src={file.objectURL} width={previewWidth} />
             </div>
           ) : null;
           let fileName = <div>{file.name}</div>;
-          let size = <div>{this.formatSize(file.size)}</div>;
+          let size = <div>{formatSize(file.size)}</div>;
           let removeButton = (
             <div>
-              <Button type="button" icon="cancel" onClick={() => this.remove(index)} />
+              <Button type="button" icon="cancel" onClick={() => remove(index)} />
             </div>
           );
 
@@ -422,135 +372,177 @@ export class CustomFileUpload extends Component {
         })}
       </div>
     );
-  }
+  };
 
-  renderReplaceCheck() {
+  const renderReplaceCheck = () => {
     return (
       <div className={styles.checkboxWrapper}>
         <Checkbox
           id="replaceCheckbox"
           inputId="replaceCheckbox"
-          isChecked={this.state.replace}
-          onChange={() => this.setState({ replace: !this.state.replace })}
+          isChecked={state.replace}
+          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}
           role="checkbox"
         />
         <label htmlFor="replaceCheckbox">
-          <a onClick={() => this.setState({ replace: !this.state.replace })}>{this.props.replaceCheckLabel}</a>
+          <a onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}>
+            {replaceCheckLabel}
+          </a>
         </label>
       </div>
     );
-  }
+  };
 
-  renderAdvanced() {
-    let className = classNames('p-fileupload p-component', this.props.className);
+  const renderAdvanced = () => {
+    const cClassName = classNames('p-fileupload p-component', className);
     let uploadButton, cancelButton, filesList, progressBar;
-    let chooseButton = this.renderChooseButton();
-    let replaceCheck = this.renderReplaceCheck();
 
-    if (!this.props.auto) {
+    if (!auto) {
       uploadButton = (
         <Fragment>
           <span data-tip data-for="inValidExtension">
             <Button
-              disabled={this.props.disabled || !this.hasFiles() || this.checkValidExtension() || this.state.isUploading}
-              icon={this.state.isUploading ? 'spinnerAnimate' : 'upload'}
-              label={this.props.uploadLabel}
-              onClick={this.upload}
+              disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
+              icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
+              label={uploadLabel}
+              onClick={upload}
             />
           </span>
 
-          {this.props.accept && this.checkValidExtension() && (
+          {accept && checkValidExtension() && (
             <ReactTooltip effect="solid" id="inValidExtension" place="top">
-              {this.props.invalidExtensionMessage}
+              {invalidExtensionMessage}
             </ReactTooltip>
           )}
+        </Fragment>
+      );
+    }
+
+    if (hasFiles()) {
+      filesList = renderFiles();
+      progressBar = <ProgressBar value={state.progress} showValue={false} />;
+    }
+
+    return (
+      <Fragment>
+        <div id={id} className={cClassName} style={style}>
+          <div className="p-fileupload-buttonbar">{renderChooseButton()}</div>
+          <div
+            ref={content}
+            className="p-fileupload-content"
+            onDragEnter={onDragEnter}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}>
+            {progressBar}
+            <Messages ref={messagesUI} />
+            {filesList}
+          </div>
+          {replaceCheck && renderReplaceCheck()}
+        </div>
+        <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
+          {invalidExtensionMessage}
+        </p>
+      </Fragment>
+    );
+  };
+
+  const renderAdvancedFooter = () => {
+    const cClassName = classNames('p-fileupload p-component', className);
+    let uploadButton;
+    let cancelButton;
+    let filesList;
+    let progressBar;
+
+    if (!auto) {
+      uploadButton = (
+        <Fragment>
+          <span data-tip data-for="invalidExtension">
+            <Button
+              disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
+              icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
+              label={uploadLabel}
+              onClick={upload}
+            />
+          </span>
         </Fragment>
       );
       cancelButton = (
         <Button
           className={'p-button-secondary'}
-          label={this.props.cancelLabel}
+          label={cancelLabel}
           icon="undo"
-          onClick={this.clear}
-          disabled={this.props.disabled || !this.hasFiles()}
+          onClick={clear}
+          disabled={disabled || !hasFiles()}
         />
       );
     }
 
-    if (this.hasFiles()) {
-      filesList = this.renderFiles();
-      progressBar = <ProgressBar value={this.state.progress} showValue={false} />;
+    if (hasFiles()) {
+      FileList = renderFiles();
+      progressBar = <ProgressBar value={state.progress} showValue={false} />;
     }
 
     return (
-      <Fragment>
-        <div id={this.props.id} className={className} style={this.props.style}>
-          <div className="p-fileupload-buttonbar">
-            <div>
-              {chooseButton}
-              {this.props.replaceCheck && replaceCheck}
-            </div>
-            <div className="p-toolbar-group-right">
-              {uploadButton}
-              {cancelButton}
-            </div>
-          </div>
-          <div
-            ref={el => {
-              this.content = el;
-            }}
-            className="p-fileupload-content"
-            onDragEnter={this.onDragEnter}
-            onDragOver={this.onDragOver}
-            onDragLeave={this.onDragLeave}
-            onDrop={this.onDrop}>
-            {progressBar}
-            <Messages ref={el => (this.messagesUI = el)} />
-            {filesList}
-          </div>
+      <div className={styles.dialogFooter}>
+        <div className={styles.secondaryZone}>{cancelButton}</div>
+        <div className={styles.primaryZone}>
+          {uploadButton}
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            icon={'cancel'}
+            label={resourcesContext.messages['close']}
+            onClick={() => dialogOnHide()}
+          />
         </div>
-        <p className={`${styles.invalidExtensionMsg} ${this.state.isValid ? styles.isValid : undefined}`}>
-          {this.props.invalidExtensionMessage}
-        </p>
-      </Fragment>
+      </div>
     );
-  }
+  };
 
-  renderBasic() {
-    let buttonClassName = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left', {
-      'p-fileupload-choose-selected': this.hasFiles()
+  const renderBasic = () => {
+    const buttonClassName = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left', {
+      'p-fileupload-choose-selected': hasFiles()
     });
-    let iconClassName = classNames('p-button-icon-left pi', {
-      'pi-plus': !this.hasFiles() || this.props.auto,
-      'pi-upload': this.hasFiles() && !this.props.auto
+    const iconClassName = classNames('p-button-icon-left pi', {
+      'pi-plus': !hasFiles() || auto,
+      'pi-upload': hasFiles() && !auto
     });
 
     return (
-      <span className={buttonClassName} onMouseUp={this.onSimpleUploaderClick}>
+      <span className={buttonClassName} onMouseUp={onSimpleUploaderClick}>
         <span className={iconClassName} />
         <span className="p-button-text p-clickable">
-          {this.props.auto
-            ? this.props.chooseLabel
-            : this.hasFiles()
-            ? this.state.files[0].name
-            : this.props.chooseLabel}
+          {auto ? chooseLabel : hasFiles() ? state.files[0].name : chooseLabel}
         </span>
         <input
-          ref={el => (this.fileInput = el)}
+          accept={accept}
+          disabled={disabled}
+          multiple={multiple}
+          onBlur={onBlur}
+          onChange={onFileSelect}
+          onFocus={onFocus}
+          ref={fileInput}
           type="file"
-          multiple={this.props.multiple}
-          accept={this.props.accept}
-          disabled={this.props.disabled}
-          onChange={this.onFileSelect}
-          onFocus={this.onFocus}
-          onBlur={this.onBlur}
         />
       </span>
     );
-  }
+  };
 
-  render() {
-    if (this.props.mode === 'advanced') return this.renderAdvanced();
-    else if (this.props.mode === 'basic') return this.renderBasic();
+  if (isDialog) {
+    return (
+      <Dialog
+        className={dialogClassName}
+        footer={renderAdvancedFooter()}
+        header={dialogHeader}
+        onHide={dialogOnHide}
+        visible={dialogVisible}
+        style={{ width: '35vw' }}>
+        {mode === 'advanced' && renderAdvanced()}
+        {mode === 'basic' && renderBasic()}
+      </Dialog>
+    );
+  } else {
+    if (mode === 'advanced') return renderAdvanced();
+    if (mode === 'basic') return renderBasic();
   }
-}
+};
