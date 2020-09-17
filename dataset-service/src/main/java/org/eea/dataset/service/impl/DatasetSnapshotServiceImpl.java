@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.data.domain.Validation;
@@ -55,6 +56,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -172,6 +174,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The unique constraint repository. */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
+
+  /** The release mapper. */
+  @Autowired
+  private ReleaseMapper releaseMapper;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -842,6 +848,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteria.add(dataflowId);
     lockService.removeLockByCriteria(criteria);
+  }
+
+  /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) throws EEAException {
+    List<Snapshot> snapshots =
+        snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId);
+    return releaseMapper.entityListToClass(snapshots.stream()
+        .filter(snapshot -> snapshot.getDateReleased() != null).collect(Collectors.toList()));
   }
 
 }
