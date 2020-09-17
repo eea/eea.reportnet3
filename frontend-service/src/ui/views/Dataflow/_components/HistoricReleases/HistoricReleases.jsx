@@ -23,33 +23,6 @@ import { ReleaseService } from 'core/services/Release';
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
 export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName }) => {
-  const data = [
-    {
-      countryCode: 'EN',
-      releasedDate: 1599565444237,
-      isDataCollectionReleased: true,
-      isEUReleased: true
-    },
-    {
-      countryCode: 'ES',
-      releasedDate: 1599565434866,
-      isDataCollectionReleased: false,
-      isEUReleased: true
-    },
-    {
-      countryCode: 'FR',
-      releasedDate: 1599565484237,
-      isDataCollectionReleased: false,
-      isEUReleased: false
-    },
-    {
-      countryCode: 'GR',
-      releasedDate: 1599563434866,
-      isDataCollectionReleased: true,
-      isEUReleased: true
-    }
-  ];
-
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -62,9 +35,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
 
   useEffect(() => {
     Array.isArray(datasetId)
-      ? datasetId.forEach((datasetId, index) => {
-          onLoadHistoricReleases(datasetId, datasetName[index]);
-        })
+      ? datasetId.forEach(datasetId => onLoadHistoricReleases(datasetId))
       : onLoadHistoricReleases(datasetId);
   }, []);
 
@@ -72,31 +43,18 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
 
   const onLoadFilteredData = data => historicReleasesDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const response = [];
   const historicReleases = [];
-  const onLoadHistoricReleases = async (datasetId, datasetName) => {
+  const onLoadHistoricReleases = async datasetId => {
     try {
-      data.forEach(historicRelease => {
-        historicRelease.datasetId = datasetId;
-        historicRelease.datasetName = datasetName;
-        response.push(historicRelease);
-      });
+      isLoading(true);
+      const response = await ReleaseService.allDataCollectionHistoricReleases(141);
+      response.forEach(historicRelease => historicReleases.push(historicRelease));
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: response, filteredData: response }
+        payload: { data: historicReleases, filteredData: historicReleases }
       });
-
-      // isLoading(true);
-      // const response = await ReleaseService.allDataCollectionHistoricReleases(141);
-      // response.forEach(historicRelease => {
-      //   historicRelease.datasetId = datasetId;
-      //   historicRelease.datasetName = datasetName;
-      //   historicReleases.push(historicRelease);
-      // });
-      // historicReleasesDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
-      console.log('error', error);
     } finally {
       isLoading(false);
     }
