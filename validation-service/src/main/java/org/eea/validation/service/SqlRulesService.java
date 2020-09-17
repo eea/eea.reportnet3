@@ -1,5 +1,6 @@
 package org.eea.validation.service;
 
+import java.sql.SQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
@@ -22,7 +23,7 @@ public interface SqlRulesService {
    * @param query the query
    * @return the string
    */
-  String queryTreat(String query);
+  String queryTreat(String query, Long datasetId, String idTableSchema);
 
   /**
    * Gets the rule.
@@ -38,7 +39,8 @@ public interface SqlRulesService {
    *
    * @param query the query
    * @return the table value
+   * @throws SQLException
    */
-  TableValue retrivedata(String query);
+  TableValue retrivedata(String query) throws SQLException;
 
 }

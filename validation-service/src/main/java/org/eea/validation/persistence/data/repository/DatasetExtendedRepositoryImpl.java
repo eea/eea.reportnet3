@@ -27,7 +27,7 @@ import org.hibernate.jdbc.ReturningWork;
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
   /** The entity manager. */
-  @PersistenceContext
+  @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
   /**
@@ -37,7 +37,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    * @return the table value
    */
   @Override
-  public TableValue queryRSExecution(String query) {
+  public TableValue queryRSExecution(String query) throws SQLException {
     Session session = (Session) entityManager.getDelegate();
     return session.doReturningWork(new ReturningWork<TableValue>() {
       @Override
