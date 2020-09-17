@@ -859,6 +859,7 @@
     "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
     "validationsDataColumn": "Validations",
     "userSettingsBasemapLayerSubtitle": "Configure the defaul basemap layer for your maps",
-    "basemapLayer": "Basemap layer"
+    "basemapLayer": "Basemap layer",
+    "srid": "SRID: "
   }
 }

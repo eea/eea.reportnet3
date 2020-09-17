@@ -2,6 +2,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -53,6 +54,7 @@ import {
   useRecordErrorPosition,
   useSetColumns
 } from './_functions/Hooks/DataViewerHooks';
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
   ({
@@ -122,7 +124,9 @@ const DataViewer = withRouter(
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
-      mapCoordinates: '',
+      mapGeoJson: '',
+      newPoint: '',
+      newPointCRS: 'EPSG:4326',
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
@@ -199,6 +203,8 @@ const DataViewer = withRouter(
       );
       return getIconsValidationsErrors(validationsGroup);
     };
+
+    const onChangeNewPointCRS = crs => dispatchRecords({ type: 'SET_MAP_NEW_POINT_CRS', payload: crs });
 
     const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
@@ -283,10 +289,18 @@ const DataViewer = withRouter(
       getMetadata();
     }, []);
 
-    // useEffect(() => {
-    //   if (records.mapCoordinates !== '')
-    //     onChangePointCRS(records.mapCoordinates === '' ? 'EPSG:4326' : records.mapCoordinates.split(', ')[2]);
-    // }, [records.mapCoordinates]);
+    useEffect(() => {
+      if (records.mapGeoJson !== '') {
+        // onChangePointCRS(records.mapGeoJson === '' ? 'EPSG:4326' : records.mapGeoJson.split(', ')[2]);
+        onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
+
+        const inmMapGeoJson = cloneDeep(records.mapGeoJson);
+        console.log({ inmMapGeoJson });
+        const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
+        parsedInmMapGeoJson.geometry.coordinates = MapUtils.lngLatToLatLng(parsedInmMapGeoJson.geometry.coordinates);
+        onEditorSubmitValue(records.selectedMapCells, JSON.stringify(parsedInmMapGeoJson), records.selectedRecord);
+      }
+    }, [records.mapGeoJson]);
 
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
@@ -344,7 +358,19 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
+        console.log({ tableData });
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
+          //TODO: DELETE
+          tableData.records.forEach(record => {
+            record.fields.forEach(field => {
+              if (field.type === 'POINT') {
+                //Swap coordinates
+                field.value = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[40.916881,-4.2033552]}, "properties": {"rsid": "EPSG:4326"}}`;
+              }
+            });
+          });
+          //
+
           onLoadTableData(true);
         }
 
@@ -760,22 +786,18 @@ const DataViewer = withRouter(
     };
 
     const onSavePoint = coordinates => {
-      dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+      console.log({ coordinates });
       console.log({ coordinates, crs: records.crs }, records.selectedMapCells);
-      onEditorValueChange(
-        records.selectedMapCells,
-        `${coordinates !== '' ? coordinates : '55.6811608, 12.5844761'}, ${records.crs}`
-      );
-      onEditorSubmitValue(
-        records.selectedMapCells,
-        `${coordinates !== '' ? coordinates : '55.6811608, 12.5844761'}, ${records.crs}`,
-        records.selectedRecord
-      );
+      if (coordinates !== '') {
+        dispatchRecords({ type: 'SAVE_MAP_COORDINATES', payload: coordinates });
+      } else {
+        dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+      }
     };
 
     const onSelectPoint = (coordinates, crs) => {
       console.log({ coordinates, crs });
-      dispatchRecords({ type: 'SET_MAP_COORDINATES', payload: { coordinates, crs } });
+      dispatchRecords({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, crs } });
     };
 
     const onSetVisible = (fnUseState, visible) => {
@@ -883,14 +905,14 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const saveMapCoordinatesDialogFooter = (
+    const saveMapGeoJsonDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className="p-button-animated-blink"
           // disabled={isSaving}
           label={resources.messages['save']}
           icon={'check'}
-          onClick={() => onSavePoint(records.mapCoordinates)}
+          onClick={() => onSavePoint(records.newPoint)}
         />
         <Button
           className="p-button-secondary"
@@ -901,7 +923,7 @@ const DataViewer = withRouter(
             //   type: 'SET_NEW_RECORD',
             //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
             // });
-            dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+            dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
           }}
         />
       </div>
@@ -934,19 +956,19 @@ const DataViewer = withRouter(
 
     const mapRender = () => {
       console.log(
-        records.mapCoordinates,
+        records.mapGeoJson,
         records.crs
-        // !Array.isArray(records.mapCoordinates)
-        //   ? records.mapCoordinates.split('*')[0].split(',')
-        //   : Array.isArray(records.mapCoordinates[0])
-        //   ? records.mapCoordinates[0]
-        //   : records.mapCoordinates
+        // !Array.isArray(records.mapGeoJson)
+        //   ? records.mapGeoJson.split('*')[0].split(',')
+        //   : Array.isArray(records.mapGeoJson[0])
+        //   ? records.mapGeoJson[0]
+        //   : records.mapGeoJson
       );
       return (
         <Map
-          coordinates={records.mapCoordinates}
+          geoJson={records.mapGeoJson}
+          onChangeNewPointCRS={onChangeNewPointCRS}
           onSelectPoint={onSelectPoint}
-          selectButton={true}
           selectedCRS={records.crs}></Map>
       );
     };
@@ -1127,7 +1149,7 @@ const DataViewer = withRouter(
             value={fetchedData}>
             {columns}
           </DataTable>
-          {/* <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map> */}
+          {/* <Map coordinates={records.mapGeoJson} onSelectPoint={onSelectPoint} selectButton={true}></Map> */}
         </div>
 
         {isColumnInfoVisible && (
@@ -1365,16 +1387,10 @@ const DataViewer = withRouter(
           <Dialog
             className={'map-data'}
             blockScroll={false}
-            // contentStyle={
-            //   isMapOpen
-            //     ? { height: '80%', maxHeight: '80%', width: '100%' }
-            //     : { height: '80%', maxHeight: '80%', overflow: 'auto' }
-            // }
-            footer={saveMapCoordinatesDialogFooter}
+            footer={saveMapGeoJsonDialogFooter}
             header={resources.messages['geospatialData']}
             modal={true}
             onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
-            // style={isMapOpen ? { width: '80%' } : { width: '50%', height: '80%' }}
             visible={records.isMapOpen}>
             <div className="p-grid p-fluid">{mapRender()}</div>
           </Dialog>

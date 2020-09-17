@@ -151,8 +151,8 @@ export const useSetColumns = (
   };
 
   const renderPoint = (value = '') => {
-    // console.log({ value });
-    return value !== '' ? `${value.split(', ')[0]}, ${value.split(', ')[1]} - ${value.split(', ')[2]}` : '';
+    const parsedGeoJson = JSON.parse(value);
+    return value !== '' ? `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}` : '';
   };
 
   const getTooltipMessage = column => {

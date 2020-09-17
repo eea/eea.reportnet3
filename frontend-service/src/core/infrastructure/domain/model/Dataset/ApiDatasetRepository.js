@@ -356,6 +356,8 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
           value: DataTableFieldDTO.value
         });
 
+        //TODO: Swap coordinates if type POINT ^
+
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
           field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
             return new Validation({

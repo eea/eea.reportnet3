@@ -1,5 +1,7 @@
 import { RecordUtils } from 'ui/views/_functions/Utils';
-import { isUndefined } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isUndefined from 'lodash/isUndefined';
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 export const recordReducer = (state, { type, payload }) => {
   const getRecordIdByIndex = (tableData, recordIdx) => {
@@ -11,6 +13,13 @@ export const recordReducer = (state, { type, payload }) => {
   };
 
   switch (type) {
+    case 'CANCEL_SAVE_MAP_NEW_POINT':
+      return {
+        ...state,
+        isMapOpen: false,
+        newPoint: '',
+        newPointCRS: 'EPSG:4326'
+      };
     case 'COPY_RECORDS':
       return {
         ...state,
@@ -82,13 +91,25 @@ export const recordReducer = (state, { type, payload }) => {
         selectedMaxSize: payload.maxSize
       };
     case 'OPEN_MAP':
-      return { ...state, isMapOpen: true, mapCoordinates: payload.coordinates, selectedMapCells: payload.mapCells };
-    case 'SET_MAP_COORDINATES':
-      // console.log({ payload });
+      return { ...state, isMapOpen: true, mapGeoJson: payload.coordinates, selectedMapCells: payload.mapCells };
+    case 'SAVE_MAP_COORDINATES':
+      const inmMapGeoJson = cloneDeep(state.mapGeoJson);
+      console.log({ inmMapGeoJson });
+      const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
+      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinatesToFloat(payload.split(','));
+      parsedInmMapGeoJson.properties.rsid = state.newPointCRS;
+      return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson) };
+    case 'SET_MAP_NEW_POINT':
+      console.log({ payload });
       return {
         ...state,
-        mapCoordinates: `${payload.coordinates[0]}, ${payload.coordinates[1]}`,
-        crs: payload.crs
+        newPoint: `${payload.coordinates[0]}, ${payload.coordinates[1]}`,
+        newPointCRS: payload.crs
+      };
+    case 'SET_MAP_NEW_POINT_CRS':
+      return {
+        ...state,
+        newPointCRS: payload
       };
     case 'SET_MAP_CRS':
       console.log({ payload });

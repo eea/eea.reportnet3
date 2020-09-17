@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
 
+import styles from './FieldEditor.module.scss';
+
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -17,6 +19,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 proj4.defs([
   ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
@@ -50,7 +53,9 @@ const FieldEditor = ({
 
   const [currentCRS, setCurrentCRS] = useState(
     RecordUtils.getCellValue(cells, cells.field) !== ''
-      ? crs.filter(crsItem => crsItem.value === RecordUtils.getCellValue(cells, cells.field).split(', ')[2])[0]
+      ? crs.filter(
+          crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
+        )[0]
       : { label: 'WGS84', value: 'EPSG:4326' }
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
@@ -64,7 +69,6 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
-    console.log({ currentCRS });
     if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
       onChangePointCRS(currentCRS.value);
     }
@@ -109,6 +113,21 @@ const FieldEditor = ({
       });
     }
     setLinkItemsOptions(linkItems);
+  };
+
+  const changePoint = (geoJson, coordinates, crs, withCRS = true) => {
+    if (geoJson !== '') {
+      if (withCRS) {
+        const projectedCoordinates = projectCoordinates(coordinates, crs.value);
+        geoJson.geometry.coordinates = projectedCoordinates;
+        geoJson.properties.rsid = crs.value;
+        return JSON.stringify(geoJson);
+      } else {
+        geoJson.geometry.coordinates = MapUtils.parseCoordinatesToFloat(coordinates.split(', '));
+        return JSON.stringify(geoJson);
+      }
+      //withCRS ? `${projectedCoordinates.join(', ')}, ${crs.value}` : `${projectedCoordinates.join(', ')}`;
+    }
   };
 
   const formatDate = (date, isInvalidDate) => {
@@ -161,20 +180,18 @@ const FieldEditor = ({
     }
   };
 
-  const parsePoint = (coordinates, crs, withCRS = true) => {
-    console.log({ coordinates });
-    if (coordinates !== '') {
-      const projectedCoordinates = projectCoordinates(coordinates, crs.value);
-      return withCRS ? `${projectedCoordinates.join(', ')}, ${crs.value}` : `${projectedCoordinates.join(', ')}`;
+  const parsePoint = (geoJson, crs, withCRS = true) => {
+    console.log({ geoJson });
+    if (geoJson !== '') {
+      const projectedCoordinates = projectCoordinates(geoJson.geometry.coordinates, crs.value);
+      geoJson.geometry.coordinates = projectedCoordinates;
+      return JSON.stringify(geoJson);
+      //withCRS ? `${projectedCoordinates.join(', ')}, ${crs.value}` : `${projectedCoordinates.join(', ')}`;
     }
   };
 
-  const parseCoordinates = coordinates => {
-    return [parseFloat(coordinates.split(', ')[0]), parseFloat(coordinates.split(', ')[1])];
-  };
-
   const projectCoordinates = (coordinates, newCRS) => {
-    return proj4(proj4(currentCRS.value), proj4(newCRS), parseCoordinates(coordinates));
+    return proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
   };
 
   const renderField = type => {
@@ -252,50 +269,80 @@ const FieldEditor = ({
         );
       case 'POINT':
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className={styles.pointWrapper}>
             <InputText
               keyfilter={getFilter(type)}
-              onBlur={e => onEditorSubmitValue(cells, `${e.target.value}, ${currentCRS.value}`, record)}
-              onChange={e => onEditorValueChange(cells, `${e.target.value}, ${currentCRS.value}`)}
+              onBlur={e => {
+                onEditorSubmitValue(
+                  cells,
+                  changePoint(
+                    JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                    e.target.value,
+                    currentCRS.value,
+                    false
+                  ),
+                  record
+                );
+              }}
+              onChange={e =>
+                onEditorValueChange(
+                  cells,
+                  changePoint(
+                    JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                    e.target.value,
+                    currentCRS.value,
+                    false
+                  )
+                )
+              }
               onFocus={e => {
                 e.preventDefault();
                 onEditorValueFocus(cells, `${e.target.value}, ${currentCRS.value}`);
               }}
               onKeyDown={e => onEditorKeyChange(cells, e, record)}
-              style={{ marginRight: '2rem' }}
+              // style={{ marginRight: '2rem' }}
               type="text"
-              value={parsePoint(RecordUtils.getCellValue(cells, cells.field), currentCRS, false)}
+              value={JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')}
             />
-            <Dropdown
-              ariaLabel={'crs'}
-              appendTo={document.body}
-              // className={styles.crsSwitcherSplitButton}
-              options={crs}
-              optionLabel="label"
-              onChange={e => {
-                onEditorValueChange(cells, parsePoint(RecordUtils.getCellValue(cells, cells.field), e.target.value));
-                setCurrentCRS(e.target.value);
-                onChangePointCRS(e.target.value.value);
-              }}
-              placeholder="Select a CRS"
-              value={currentCRS}
-              style={{ width: '30%', marginRight: '1rem' }}
-            />
-            <Button
-              className={`p-button-secondary-transparent button`}
-              icon="marker"
-              onClick={e => {
-                if (!isNil(onMapOpen)) {
-                  onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
-                }
-              }}
-              style={{ width: '2.357em', marginRight: '1rem' }}
-              tooltip={resources.messages['selectGeographicalDataOnMap']}
-              tooltipOptions={{ position: 'bottom' }}
-            />
+            <div className={styles.pointSridWrapper}>
+              <label className={styles.srid}>{resources.messages['srid']}</label>
+              <Dropdown
+                ariaLabel={'crs'}
+                appendTo={document.body}
+                className={styles.sridSwitcher}
+                options={crs}
+                optionLabel="label"
+                onChange={e => {
+                  onEditorValueChange(
+                    cells,
+                    changePoint(
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                      e.target.value
+                    ),
+                    e.target.value
+                  );
+                  setCurrentCRS(e.target.value);
+                  onChangePointCRS(e.target.value.value);
+                }}
+                placeholder="Select a CRS"
+                value={currentCRS}
+              />
+              <Button
+                className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                icon="marker"
+                onClick={e => {
+                  if (!isNil(onMapOpen)) {
+                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                  }
+                }}
+                style={{ width: '35%' }}
+                tooltip={resources.messages['selectGeographicalDataOnMap']}
+                tooltipOptions={{ position: 'bottom' }}
+              />
+            </div>
           </div>
         );
-      // <Map coordinates={RecordUtils.getCellValue(cells, cells.field)}></Map>;
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return (
