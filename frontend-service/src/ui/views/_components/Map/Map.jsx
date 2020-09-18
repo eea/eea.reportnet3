@@ -59,7 +59,6 @@ let NewMarkerIcon = L.icon({
 export const Map = ({
   centerToCoordinates = false,
   geoJson = '',
-  onChangeNewPointCRS,
   onSelectPoint,
   options = {
     zoom: [15],
@@ -68,11 +67,10 @@ export const Map = ({
     center:
       geoJson !== ''
         ? JSON.parse(geoJson)
-        : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[12.5844761, 55.6811608]}, "properties": {"rsid": "EPSG:4326"}}`
+        : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
   },
   selectedCRS = { label: 'WGS84', value: 'EPSG:4326' }
 }) => {
-  console.log({ geoJson }, options.center, selectedCRS);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -100,10 +98,7 @@ export const Map = ({
   const [currentTheme, setCurrentTheme] = useState(
     themes.filter(theme => theme.value === userContext.userProps.basemapLayer)[0] || themes[0]
   );
-  console.log(
-    { selectedCRS },
-    !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
-  );
+
   const [currentCRS, setCurrentCRS] = useState(
     !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
   );
@@ -119,7 +114,6 @@ export const Map = ({
 
   useEffect(() => {
     const map = mapRef.current.leafletElement;
-    console.log('map crs: ' + map.options.crs.code, map.options.crs);
     esri.basemapLayer(currentTheme.value).addTo(map);
 
     // const geojsonLayer = L.geoJson(geojson, {
@@ -192,7 +186,6 @@ export const Map = ({
     //   [12.5944761, 55.6811578]
     // ]);
     // let map = L.map(element).setView([-41.2858, 174.78682], 14);
-    console.log('ESRI::', esri);
 
     // esri
     //   .featureLayer({
@@ -203,7 +196,6 @@ export const Map = ({
 
   useEffect(() => {
     const inmMapGeoJson = JSON.parse(cloneDeep(mapGeoJson));
-    console.log(inmMapGeoJson.geometry.coordinates);
     if (inmMapGeoJson.properties.rsid !== 'EPSG:4326') {
       inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
@@ -215,15 +207,6 @@ export const Map = ({
       setIsNewPositionMarkerVisible(true);
     }
   }, [newPositionMarker]);
-
-  useEffect(() => {
-    console.log({ newPositionMarker, marker });
-    // if (isNewPositionMarkerVisible && !isNil(newPositionMarker)) {
-    //   console.log({ newPositionMarker });
-    //   console.log(projectPointCoordinates(newPositionMarker));
-    //   setNewPositionMarker(`${projectPointCoordinates(newPositionMarker).join(', ')}, ${currentCRS.value}`);
-    // }
-  }, [currentCRS]);
 
   useEffect(() => {
     const map = mapRef.current.leafletElement;
@@ -247,10 +230,8 @@ export const Map = ({
   const onEachFeature = (feature, layer) => {
     layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
     layer.on({
-      click: () => {
-        console.log(feature.geometry.coordinates);
-        mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom);
-      }
+      click: () =>
+        mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
     });
   };
 
@@ -269,7 +250,6 @@ export const Map = ({
   // const lngLatToLatLngPoint = coordinates => [coordinates[0], coordinates[1]];
 
   const projectGeoJsonCoordinates = geoJsonData => {
-    console.log({ geoJsonData });
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
     return proj4(
       proj4(!isNil(parsedGeoJsonData) ? parsedGeoJsonData.properties.rsid : currentCRS.value),
@@ -282,7 +262,7 @@ export const Map = ({
     return proj4(
       proj4(!isNil(coordinates.split(', ')[2]) ? coordinates.split(', ')[2] : currentCRS.value),
       proj4('EPSG:4326'),
-      MapUtils.parseCoordinatesToFloat(coordinates.split(', '))
+      MapUtils.parseCoordinates(coordinates.split(', '))
     );
   };
 
@@ -306,8 +286,6 @@ export const Map = ({
         className={styles.crsSwitcherSplitButton}
         onChange={e => {
           onCRSChange(e.target.value);
-          // onChangeNewPointCRS(e.target.value.value);
-          console.log(JSON.parse(mapGeoJson).geometry.coordinates);
           onSelectPoint(
             proj4(proj4('EPSG:4326'), proj4(e.target.value.value), JSON.parse(mapGeoJson).geometry.coordinates),
             e.target.value.value
@@ -338,14 +316,13 @@ export const Map = ({
         // }}
         onDblclick={e => {
           setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
-          console.log(e.latlng);
           onSelectPoint(
             proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
             currentCRS.value
           );
           mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
         }}>
-        <LayersControl position="topright">
+        {/* <LayersControl position="topright">
           <BaseLayer checked name="EEA Countries">
             <TileLayer
               // attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
@@ -356,14 +333,12 @@ export const Map = ({
           <BaseLayer name="None">
             <TileLayer url="" />
           </BaseLayer>
-        </LayersControl>
-        {
-          <GeoJSON
-            data={JSON.parse(mapGeoJson)}
-            onEachFeature={onEachFeature}
-            coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
-          />
-        }
+        </LayersControl> */}
+        <GeoJSON
+          data={JSON.parse(mapGeoJson)}
+          onEachFeature={onEachFeature}
+          coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
+        />
         {isNewPositionMarkerVisible && (
           <Marker
             // className={`${styles.marker} ${styles.bounce}`}

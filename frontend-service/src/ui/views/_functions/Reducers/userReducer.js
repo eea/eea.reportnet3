@@ -26,7 +26,6 @@ export const userReducer = (state, { type, payload }) => {
         }
       };
     case 'BASEMAP_LAYER':
-      console.log(payload);
       return {
         ...state,
         userProps: {
@@ -35,7 +34,6 @@ export const userReducer = (state, { type, payload }) => {
         }
       };
     case 'DEFAULT_ROW_SELECTED':
-      console.log(payload);
       return {
         ...state,
         userProps: {

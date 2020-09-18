@@ -91,16 +91,15 @@ export const recordReducer = (state, { type, payload }) => {
         selectedMaxSize: payload.maxSize
       };
     case 'OPEN_MAP':
+      console.log(payload);
       return { ...state, isMapOpen: true, mapGeoJson: payload.coordinates, selectedMapCells: payload.mapCells };
     case 'SAVE_MAP_COORDINATES':
       const inmMapGeoJson = cloneDeep(state.mapGeoJson);
-      console.log({ inmMapGeoJson });
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
-      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinatesToFloat(payload.split(','));
+      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(payload.split(','));
       parsedInmMapGeoJson.properties.rsid = state.newPointCRS;
       return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson) };
     case 'SET_MAP_NEW_POINT':
-      console.log({ payload });
       return {
         ...state,
         newPoint: `${payload.coordinates[0]}, ${payload.coordinates[1]}`,
@@ -112,7 +111,6 @@ export const recordReducer = (state, { type, payload }) => {
         newPointCRS: payload
       };
     case 'SET_MAP_CRS':
-      console.log({ payload });
       return {
         ...state,
         crs: payload

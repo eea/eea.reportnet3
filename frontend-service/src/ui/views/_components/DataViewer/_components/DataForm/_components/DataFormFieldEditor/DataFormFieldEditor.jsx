@@ -51,17 +51,18 @@ const DataFormFieldEditor = ({
   const inputRef = useRef(null);
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
-  // const [crs, setCRS] = useState('EPSG:4326');
+
   const [currentCRS, setCurrentCRS] = useState(
-    fieldValue !== '' && field.type === 'POINT'
+    fieldValue !== '' && type === 'POINT'
       ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
       : { label: 'WGS84', value: 'EPSG:4326' }
   );
   // const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
   // const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
+  const [isMapDisabled, setIsMapDisabled] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
-  const [newPointCRS, setNewPointCRS] = useState('');
-  const [mapCoordinates, setMapCoordinates] = useState();
+  const [mapCoordinates, setMapCoordinates] = useState('');
+  const [newPoint, setNewPoint] = useState('');
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
@@ -74,8 +75,6 @@ const DataFormFieldEditor = ({
       inputRef.current.element.focus();
     }
   }, [inputRef.current, isVisible]);
-
-  const onChangeNewPointCRS = crs => setNewPointCRS(crs);
 
   const onFilter = async filter => {
     onLoadColsSchema(filter);
@@ -99,78 +98,42 @@ const DataFormFieldEditor = ({
   };
 
   const onSavePoint = coordinates => {
-    console.log({ coordinates });
+    console.log(MapUtils.parseCoordinates(coordinates), coordinates);
     if (coordinates !== '') {
       const inmMapGeoJson = cloneDeep(fieldValue);
-      console.log({ inmMapGeoJson });
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
-      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinatesToFloat(coordinates);
-      parsedInmMapGeoJson.properties.rsid = currentCRS;
-      console.log(parsedInmMapGeoJson);
+      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
+      parsedInmMapGeoJson.properties.rsid = currentCRS.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
     setIsMapOpen(false);
-
-    // onEditorSubmitValue(cells, coordinates.join(', '));
   };
 
-  const onSelectPoint = (coordinates, crs) => {
-    console.log({ coordinates, crs });
+  const onSelectPoint = (coordinates, selectedCrs) => {
     setMapCoordinates(coordinates);
-    setCurrentCRS(crs);
+    setNewPoint(coordinates);
+    console.log({ coordinates });
+    const filteredCrs = crs.filter(crsItem => crsItem.value === selectedCrs)[0];
+    setCurrentCRS(filteredCrs);
   };
 
-  const changePoint = (geoJson, coordinates, crs, withCRS = true) => {
+  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
     if (geoJson !== '') {
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
         geoJson.properties.rsid = crs.value;
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates));
         return JSON.stringify(geoJson);
       } else {
-        geoJson.geometry.coordinates = MapUtils.parseCoordinatesToFloat(coordinates.split(', '));
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
+        geoJson.geometry.coordinates = MapUtils.parseCoordinates(
+          coordinates.replace(', ', ',').split(','),
+          parseToFloat
+        );
         return JSON.stringify(geoJson);
       }
       //withCRS ? `${projectedCoordinates.join(', ')}, ${crs.value}` : `${projectedCoordinates.join(', ')}`;
-    }
-  };
-
-  const formatDate = (date, isInvalidDate) => {
-    if (isInvalidDate) return '';
-    let d = new Date(date),
-      month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-  };
-
-  const getFilter = type => {
-    switch (type) {
-      case 'NUMBER_INTEGER':
-        return 'int';
-      case 'NUMBER_DECIMAL':
-      case 'POINT':
-        return 'money';
-      case 'COORDINATE_LONG':
-      case 'COORDINATE_LAT':
-        return 'num';
-      case 'DATE':
-        return 'date';
-      case 'TEXT':
-      case 'RICH_TEXT':
-        return 'any';
-      case 'EMAIL':
-        return 'email';
-      case 'PHONE':
-        return 'phone';
-      // case 'URL':
-      //   return 'url';
-      default:
-        return 'any';
     }
   };
 
@@ -269,8 +232,6 @@ const DataFormFieldEditor = ({
       case 'NUMBER_DECIMAL':
         return decimalCharacters;
       case 'POINT':
-      case 'COORDINATE_LONG':
-      case 'COORDINATE_LAT':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -311,7 +272,7 @@ const DataFormFieldEditor = ({
       <InputText
         disabled={column.readOnly && reporting}
         id={field}
-        keyfilter={getFilter(type)}
+        keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         // type={type === 'DATE' ? 'date' : 'text'}
@@ -367,14 +328,14 @@ const DataFormFieldEditor = ({
   const renderCalendar = (field, fieldValue) => {
     return (
       <Calendar
-        onChange={e => onChangeForm(field, formatDate(e.target.value, isNil(e.target.value)))}
+        onChange={e => onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)))}
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         disabled={column.readOnly && reporting}
         monthNavigator={true}
         style={{ width: '60px' }}
-        value={new Date(formatDate(fieldValue, isNil(fieldValue)))}
+        value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
         yearRange="2010:2030"
       />
@@ -434,8 +395,11 @@ const DataFormFieldEditor = ({
 
   const renderMap = () => (
     <Map
-      geoJson={fieldValue}
-      onChangeNewPointCRS={onChangeNewPointCRS}
+      geoJson={
+        fieldValue !== ''
+          ? fieldValue
+          : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+      }
       onSelectPoint={onSelectPoint}
       selectedCRS={currentCRS.value}></Map>
   );
@@ -446,11 +410,16 @@ const DataFormFieldEditor = ({
         <label className={styles.srid}>{'Coords:'}</label>
         <InputText
           disabled={column.readOnly && reporting}
-          keyfilter={getFilter(type)}
-          // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-          onChange={e =>
+          keyfilter={RecordUtils.getFilter(type)}
+          onBlur={e =>
             onChangeForm(field, changePoint(JSON.parse(fieldValue), e.target.value, currentCRS.value, false))
           }
+          onChange={e => {
+            if (fieldValue === '') {
+              fieldValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+            }
+            onChangeForm(field, changePoint(JSON.parse(fieldValue), e.target.value, currentCRS.value, false, false));
+          }}
           // onFocus={e => {
           //   e.preventDefault();
           //   onEditorValueFocus(cells, e.target.value);
@@ -458,15 +427,23 @@ const DataFormFieldEditor = ({
           // onKeyDown={e => onEditorKeyChange(cells, e, record)}
           style={{ width: '50%' }}
           type="text"
-          value={JSON.parse(fieldValue).geometry.coordinates.join(', ')}
+          value={
+            fieldValue !== ''
+              ? JSON.parse(fieldValue).geometry.coordinates.join(', ')
+              : JSON.parse(
+                  `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+                ).geometry.coordinates.join(', ')
+          }
         />
       </div>
+      {console.log({ currentCRS })}
       <div className={styles.pointSridWrapper}>
         <label className={styles.srid}>{resources.messages['srid']}</label>
         <Dropdown
           ariaLabel={'crs'}
           appendTo={document.body}
           className={styles.sridSwitcher}
+          disabled={isMapDisabled}
           options={crs}
           optionLabel="label"
           onChange={e => {
@@ -483,6 +460,7 @@ const DataFormFieldEditor = ({
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
+          disabled={isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}
@@ -499,7 +477,7 @@ const DataFormFieldEditor = ({
         // disabled={isSaving}
         label={resources.messages['save']}
         icon={'check'}
-        onClick={() => onSavePoint(mapCoordinates)}
+        onClick={() => onSavePoint(newPoint)}
       />
       <Button
         className="p-button-secondary"

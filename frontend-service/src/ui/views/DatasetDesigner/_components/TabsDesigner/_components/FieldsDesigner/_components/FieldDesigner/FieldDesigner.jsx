@@ -63,8 +63,6 @@ export const FieldDesigner = ({
     { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
-    // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
@@ -89,12 +87,6 @@ export const FieldDesigner = ({
   ];
 
   const getFieldTypeValue = value => {
-    // if (value.toUpperCase() === 'COORDINATE_LONG') {
-    //   value = 'Longitude';
-    // }
-    // if (value.toUpperCase() === 'COORDINATE_LAT') {
-    //   value = 'Latitude';
-    // }
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
   const initialFieldDesignerState = {
@@ -651,15 +643,7 @@ export const FieldDesigner = ({
     }
   };
 
-  const parseGeospatialTypes = value => {
-    // if (value.toUpperCase() === 'LONGITUDE') {
-    //   return 'COORDINATE_LONG';
-    // }
-    // if (value.toUpperCase() === 'LATITUDE') {
-    //   return 'COORDINATE_LAT';
-    // }
-    return value.toUpperCase();
-  };
+  const parseGeospatialTypes = value => value.toUpperCase();
 
   const fieldTypeTemplate = option => {
     if (!option.value) {

@@ -204,8 +204,6 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const onChangeNewPointCRS = crs => dispatchRecords({ type: 'SET_MAP_NEW_POINT_CRS', payload: crs });
-
     const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
     const onFileDownload = async (fileName, fieldId) => {
@@ -295,7 +293,6 @@ const DataViewer = withRouter(
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
 
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
-        console.log({ inmMapGeoJson });
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
         parsedInmMapGeoJson.geometry.coordinates = MapUtils.lngLatToLatLng(parsedInmMapGeoJson.geometry.coordinates);
         onEditorSubmitValue(records.selectedMapCells, JSON.stringify(parsedInmMapGeoJson), records.selectedRecord);
@@ -358,7 +355,6 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
-        console.log({ tableData });
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
           //TODO: DELETE
           tableData.records.forEach(record => {
@@ -786,8 +782,6 @@ const DataViewer = withRouter(
     };
 
     const onSavePoint = coordinates => {
-      console.log({ coordinates });
-      console.log({ coordinates, crs: records.crs }, records.selectedMapCells);
       if (coordinates !== '') {
         dispatchRecords({ type: 'SAVE_MAP_COORDINATES', payload: coordinates });
       } else {
@@ -795,10 +789,8 @@ const DataViewer = withRouter(
       }
     };
 
-    const onSelectPoint = (coordinates, crs) => {
-      console.log({ coordinates, crs });
+    const onSelectPoint = (coordinates, crs) =>
       dispatchRecords({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, crs } });
-    };
 
     const onSetVisible = (fnUseState, visible) => {
       fnUseState(visible);
@@ -954,24 +946,9 @@ const DataViewer = withRouter(
       return <div className={styles.iconTooltipWrapper}>{icons}</div>;
     };
 
-    const mapRender = () => {
-      console.log(
-        records.mapGeoJson,
-        records.crs
-        // !Array.isArray(records.mapGeoJson)
-        //   ? records.mapGeoJson.split('*')[0].split(',')
-        //   : Array.isArray(records.mapGeoJson[0])
-        //   ? records.mapGeoJson[0]
-        //   : records.mapGeoJson
-      );
-      return (
-        <Map
-          geoJson={records.mapGeoJson}
-          onChangeNewPointCRS={onChangeNewPointCRS}
-          onSelectPoint={onSelectPoint}
-          selectedCRS={records.crs}></Map>
-      );
-    };
+    const mapRender = () => (
+      <Map geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
+    );
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;

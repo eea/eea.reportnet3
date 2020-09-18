@@ -42,7 +42,6 @@ const UserConfiguration = () => {
         options={resources.userParameters['defaultBasemapLayer']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
-          console.log(e.target.value);
           inmUserProperties.basemapLayer = e.target.value;
           const response = await changeUserProperties(inmUserProperties);
           if (response.status >= 200 && response.status <= 299) {
@@ -175,7 +174,6 @@ const UserConfiguration = () => {
         options={resources.userParameters['defaultRowsPage']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
-          console.log(e.target.value);
           inmUserProperties.rowsPerPage = e.target.value;
           const response = await changeUserProperties(inmUserProperties);
           if (response.status >= 200 && response.status <= 299) {
@@ -198,7 +196,6 @@ const UserConfiguration = () => {
         options={resources.userParameters['dateFormat']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
-          console.log(e.target.value);
           inmUserProperties.dateFormat = e.target.value;
           const response = await changeUserProperties(inmUserProperties);
           if (response.status >= 200 && response.status <= 299) {
