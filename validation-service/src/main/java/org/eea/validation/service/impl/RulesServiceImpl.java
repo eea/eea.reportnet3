@@ -87,12 +87,15 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
+  /** The sql valitaion utils. */
   @Autowired
   private SQLValitaionUtils sqlValitaionUtils;
 
+  /** The sql rules service. */
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -297,6 +300,31 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (null == ruleVO.getWhenCondition()) {
+      rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
+
+    } else {
+      validateRule(rule);
+      if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+      }
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
+
+  }
+
+  /**
+   * Rules when condition null.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void rulesWhenConditionNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
+      Rule rule) throws EEAException {
     // we create the whencondition Integrity for the rule
     if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
       ObjectId integrityConstraintId = new ObjectId();
@@ -322,9 +350,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
-              .append("',").append(datasetId).append(")").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
 
       Map<String, Object> event = new HashMap<>();
       event.put("dataset_id", String.valueOf(datasetId));
@@ -332,19 +359,11 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
-
-      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
-
+      // sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
-
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-    }
-
-    // Check if rule is valid if not sql
-    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
-      kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
 
@@ -561,6 +580,29 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
+    if (null == ruleVO.getWhenCondition()) {
+      ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule);
+    } else {
+      validateRule(rule);
+      if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
+      }
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
+
+  }
+
+  /**
+   * Rule when condtion update null.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void ruleWhenCondtionUpdateNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
+      Rule rule) throws EEAException {
     if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
 
       IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
@@ -577,28 +619,20 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
-              .append("',").append(datasetId).append(")").toString());
-
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
       Map<String, Object> event = new HashMap<>();
       event.put("dataset_id", String.valueOf(datasetId));
       event.put("rule_id", ruleVO.getRuleId());
       event.put("rule_type", "SQL");
-      event.put("event_type", "UPDATE");
+      event.put("event_type", "CREATE");
       sentEvent(event);
-
-      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
+      // sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
-    }
-
-    // Check if rule is valid if not sql
-    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
-      kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
 

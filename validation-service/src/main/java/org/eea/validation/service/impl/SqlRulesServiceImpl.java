@@ -77,7 +77,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Async
   @SuppressWarnings("unchecked")
   @Override
-  public void validateSQLRule(String datasetSchemaId, Rule rule) {
+  public void validateSQLRule(Long datasetId, String datasetSchemaId, Rule rule) {
 
     EventType notificationEventType = null;
     NotificationVO notificationVO = NotificationVO.builder()
@@ -85,7 +85,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
 
 
-    if (validateRule("", 1L, "") == Boolean.TRUE) {
+    if (validateRule(rule.getSqlSentence(), datasetId, "") == Boolean.TRUE) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
