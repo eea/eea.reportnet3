@@ -90,8 +90,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
           header={resourcesContext.messages.tabMenuTableRelations}
           headerClassName={showErrorOnRelationsTab ? styles.error : ''}
           key="datasetValidationRelations"
-          leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>        
-
+          leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>
           <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
@@ -601,7 +600,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                     <Button
                       className={`p-button-primary p-button-text-icon-left ${
                         !creationFormState.isValidationCreationDisabled && !isSubmitDisabled
-                          ? 'p-button-animated-blin'
+                          ? 'p-button-animated-blink'
                           : ''
                       }`}
                       disabled={getIsCreationDisabled()}

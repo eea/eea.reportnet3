@@ -48,7 +48,7 @@ export const ExpressionsTab = ({
             icon="plus"
             id={`${componentName}__addExpresion`}
             label={resourcesContext.messages.addNewRule}
-            onClick={e => onAddNewExpression()}
+            onClick={() => onAddNewExpression()}
             type="button"
           />
           {creationFormState.groupExpressionsActive >= 2 && (
@@ -57,7 +57,7 @@ export const ExpressionsTab = ({
               icon="plus"
               id={`${componentName}__groupExpresions`}
               label="Group"
-              onClick={e => onExpressionGroup()}
+              onClick={() => onExpressionGroup()}
               type="button"
             />
           )}
