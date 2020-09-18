@@ -18,7 +18,7 @@ export const PrivateRoute = ({ component: Component, path }) => {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
       return <Route path={path} render={() => <Component />} />;
     } else {
-      LocalStorageUtils.set({ redirectUrl: path });
+      LocalStorageUtils.set({ redirectUrl: window.location.href });
       window.location.href = AccessPointWebConfig.euloginUrl;
     }
   } else {
