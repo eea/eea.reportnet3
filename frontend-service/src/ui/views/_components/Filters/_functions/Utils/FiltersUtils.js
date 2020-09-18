@@ -110,14 +110,9 @@ const getSelectedKeys = (state, select, selectOptions = []) => {
   return Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
 };
 
-const getCheckedKeys = (state, select, checkboxOptions = []) => {
-  return Object.keys(state.filterBy).filter(key => key !== select && checkboxOptions.includes(key));
-};
-
 export const FiltersUtils = {
   getCheckboxFilterInitialState,
   getCheckboxState,
-  getCheckedKeys,
   getFilterInitialState,
   getFilterKeys,
   getLabelInitialState,

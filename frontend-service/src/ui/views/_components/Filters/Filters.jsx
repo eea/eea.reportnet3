@@ -50,8 +50,6 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
-    // checkbox: { property: '', state: false },
-    checkbox: { property: '', isChecked: false },
     checkboxes: [],
     data: data,
     filterBy: {},
@@ -193,7 +191,7 @@ export const Filters = ({
     const sortedData = SortUtils.onSortData([...filterState.data], order, property);
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
     const orderBy = order === 0 ? -1 : order;
-    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
+    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
 
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
   };
@@ -463,7 +461,7 @@ export const Filters = ({
           <Fragment />
         )}
 
-        {(inputOptions || selectOptions || dateOptions) && (
+        {(inputOptions || selectOptions || dateOptions || checkboxOptions) && (
           <Button
             className={`${
               sendData ? 'p-button-secondary' : 'p-button-secondary'

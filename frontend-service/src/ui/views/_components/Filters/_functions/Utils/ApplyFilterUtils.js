@@ -99,12 +99,10 @@ const onApplyFilters = ({
   value
 }) => [
   ...state.data.filter(data => {
-    if (selectOptions.includes(filter) && !isNil(data[filter])) {
-      return (
-        onApplySelected(data, filter, state, value) &&
-        onCheckFilters(data, dateOptions, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state)
-      );
-    } else if (checkboxOptions.includes(filter) && !isNil(data[filter])) {
+    if (
+      (selectOptions.includes(filter) && !isNil(data[filter])) ||
+      (checkboxOptions.includes(filter) && !isNil(data[filter]))
+    ) {
       return (
         onApplySelected(data, filter, state, value) &&
         onCheckFilters(data, dateOptions, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state)
