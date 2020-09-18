@@ -5,7 +5,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Webform.module.scss';
 
-import webformJson from './webform.config.json';
+// import webformJson from './webform.config.json';
+import article15 from './article15.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from '../_components/Calendar/Calendar';
@@ -25,7 +26,7 @@ import { webformReducer } from './_functions/Reducers/webformReducer';
 
 export const Webform = ({ dataflowId, datasetId, state }) => {
   const notificationContext = useContext(NotificationContext);
-  const { datasetSchema } = state;
+  const { datasetSchema, tableSchemaNames } = state;
 
   const [webformState, webformDispatch] = useReducer(webformReducer, {
     data: [],
@@ -34,19 +35,29 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
     multipleView: [{ id: 0 }]
   });
 
-  console.log('webformState.data', webformState.data);
-
   useEffect(() => {
     if (isEmpty(webformState.isVisible)) initialLoad();
   }, [webformState.isVisible]);
 
   useEffect(() => {
     if (!isEmpty(datasetSchema)) {
-      const data = webformJson.map((item, i) => Object.assign({}, item, datasetSchema.tables[i]));
+      const data = WebformUtils.mergeArrays(article15, datasetSchema.tables, 'webformTitle', 'tableSchemaName');
 
-      const parsedData = data.map(element => {
-        element.data = element.records[0].fields.map((item, i) => Object.assign({}, item, element.body[0].content[i]));
-        return element;
+      const parsedData = data.map((element, i) => {
+        if (element.records) {
+          const fields = element.records[0].fields;
+          const webformFields = element.webformRecords[0].webformFields;
+          element.webformRecords[0].webformFields = WebformUtils.mergeArrays(
+            fields,
+            webformFields,
+            'name',
+            'fieldName'
+          );
+
+          // WebformUtils.mergeArrays(fields, webformFields, 'fieldName', 'name');
+
+          return element;
+        } else return data[i];
       });
 
       webformDispatch({ type: 'ON_LOAD_DATA', payload: { data: parsedData } });
@@ -91,26 +102,32 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
     webformDispatch({ type: 'ON_DELETE_MULTIPLE_WEBFORM', payload: { list: multipleList } });
   };
 
-  const renderWebformBody = () => {
-    var visibleTab = WebformUtils.getUrlParamValue('tab');
+  const renderWebform = () => {
+    const visibleTab = WebformUtils.getUrlParamValue('tab');
 
-    return webformJson[visibleTab].body.map((webform, i) => (
-      <div className={styles.body} key={i}>
-        <h3 className={styles.title}>
-          {webform.title}
-          {webform.multiple ? (
-            <Button label={'Add'} icon={'plus'} onClick={() => onAddMultipleWebform()} />
-          ) : (
-            <Fragment />
-          )}
-        </h3>
-        {webform.description ? <h3 className={styles.description}>{webform.description}</h3> : <Fragment />}
+    if (!isEmpty(webformState.data)) {
+      return webformState.data[visibleTab].webformRecords.map((webform, i) => {
+        return (
+          <div className={styles.body} key={i}>
+            <h3 className={styles.title}>
+              {webform.title}
+              {webform.multiple ? (
+                <Button label={'Add'} icon={'plus'} onClick={() => onAddMultipleWebform()} />
+              ) : (
+                <Fragment />
+              )}
+            </h3>
+            {webform.description ? <h3 className={styles.description}>{webform.description}</h3> : <Fragment />}
 
-        {webform.multiple
-          ? webformState.multipleView.map(element => renderContent(webform.content, webform.multiple, element.id))
-          : renderContent(webform.content, webform.multiple)}
-      </div>
-    ));
+            {webform.multiple
+              ? webformState.multipleView.map(element =>
+                  renderContent(webform.webformFields, webform.multiple, element.id)
+                )
+              : renderContent(webform.webformFields, webform.multiple)}
+          </div>
+        );
+      });
+    }
   };
 
   const onChangeInputValue = value => webformDispatch({ type: 'ON_CHANGE_VALUE', payload: { value } });
@@ -135,24 +152,20 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
     // // }
   };
 
-  const renderTemplate = (selectedTemplate, options = []) => {
+  const renderTemplate = (selectedTemplate, options = [], value = '') => {
     const template = {
-      date: <Calendar />,
-      input: (
-        <InputText
-          onChange={event => onChangeInputValue(event.target.value)}
-          // onBlur={event => onSavaValue(_, event.target.value)}
-        />
-      ),
-      multiSelect: <MultiSelect />,
-      selector: <Dropdown options={options} />,
-      textarea: <InputTextarea />
+      DATE: <Calendar />,
+      LINK: <Fragment />,
+      MULTISELECT: <MultiSelect />,
+      SELECT: <Dropdown options={options} />,
+      TEXT: <InputText value={value} />,
+      TEXTAREA: <InputTextarea />
     };
 
     return template[selectedTemplate];
   };
 
-  const renderContent = (content, multiple, element) => {
+  const renderContent = (fields, multiple, element) => {
     return (
       <div className={styles.contentWrap}>
         {multiple ? (
@@ -171,25 +184,28 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
           <Fragment />
         )}
 
-        {content.map((form, i) => (
+        {fields.map((form, i) => (
           <div key={i} className={styles.content}>
-            <p>{form.title}</p>
-            <div>{renderTemplate(form.type, form.options)}</div>
+            <p>{form.fieldName}</p>
+            <div>{renderTemplate(form.fieldType, form.options, form.value)}</div>
           </div>
         ))}
       </div>
     );
   };
 
-  const renderWebformHeader = () => {
-    return webformJson.map((webform, i) => (
+  const renderWebFormHeaders = () => {
+    // Check if the table exists
+    const headers = article15.filter(header => tableSchemaNames.includes(header.webformTitle));
+
+    return headers.map((webform, i) => (
       <Button
         className={`${styles.headerButton} ${
-          webformState.isVisible[webform.index] ? 'p-button-primary' : 'p-button-secondary'
+          webformState.isVisible[webform.webformIndex] ? 'p-button-primary' : 'p-button-secondary'
         }`}
         key={i}
-        label={webform.title}
-        onClick={() => onChangeWebformTab(webform.index)}
+        label={webform.webformTitle}
+        onClick={() => onChangeWebformTab(webform.webformIndex)}
       />
     ));
   };
@@ -197,9 +213,10 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
   return (
     <div className={styles.webform}>
       <Toolbar className={styles.toolbar}>
-        <div className="p-toolbar-group-left">{renderWebformHeader()}</div>
+        <div className="p-toolbar-group-left">{renderWebFormHeaders()}</div>
       </Toolbar>
-      {renderWebformBody()}
+      {/* {renderWebformBody()} */}
+      {renderWebform()}
     </div>
   );
 };

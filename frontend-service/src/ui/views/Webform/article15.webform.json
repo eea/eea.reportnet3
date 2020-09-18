@@ -1,0 +1,75 @@
+[
+  {
+    "webformId": 1,
+    "webformIndex": 0,
+    "webformTitle": "QA_QC_C0",
+    "webformRecords": [
+      {
+        "title": "QA_QC_C0",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "EuMemberState", "fieldType": "TEXT" },
+          { "fieldName": "UpdateDate", "fieldType": "DATE" },
+          { "fieldName": "ReportingUnderArt19", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 2,
+    "webformIndex": 1,
+    "webformTitle": "QA_QC_C1",
+    "webformRecords": [
+      {
+        "title": "QA_QC_C1",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "NationalCircumstances", "fieldType": "TEXT" },
+          { "fieldName": "BiogeophysicalCharacteristics", "fieldType": "TEXT" },
+          { "fieldName": "DemographicSituation", "fieldType": "TEXT" },
+          { "fieldName": "EconomicInfrastructuralSituation", "fieldType": "TEXT" },
+          { "fieldName": "AssessmentsIntroDocument", "fieldType": "FILE" },
+          { "fieldName": "GeneralAspectsClimateMonitoring", "fieldType": "TEXT" },
+          { "fieldName": "MainActivitiesClimateMonitoring", "fieldType": "TEXT" },
+          { "fieldName": "ApproachesMethodologiesTools", "fieldType": "TEXT" },
+          { "fieldName": "AssessmentsObservationDocument", "fieldType": "FILE" },
+          { "fieldName": "GeneralAspectsAssessment", "fieldType": "TEXT" },
+          { "fieldName": "TemperatureRelatedAcute", "fieldType": "MULTISELECT" },
+          { "fieldName": "TemperatureAcuteOther", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 3,
+    "webformIndex": 2,
+    "webformTitle": "Meteorological_Observations",
+    "webformRecords": [
+      {
+        "title": "Meteorological_Observations",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Name", "fieldType": "TEXT" },
+          { "fieldName": "Status", "fieldType": "SELECT" },
+          { "fieldName": "WebLink", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 4,
+    "webformIndex": 3,
+    "webformTitle": "Climate_Projections_Services",
+    "webformRecords": [
+      {
+        "title": "Climate_Projections_Services",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Description", "fieldType": "TEXT" },
+          { "fieldName": "Status", "fieldType": "SELECT" },
+          { "fieldName": "WebLink", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  }
+]
