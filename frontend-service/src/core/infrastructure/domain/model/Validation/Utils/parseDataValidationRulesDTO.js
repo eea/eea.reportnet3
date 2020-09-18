@@ -11,46 +11,49 @@ export const parseDataValidationRulesDTO = validations => {
   const entityTypes = [];
   try {
     validationsData.validations = validations.map(validationDTO => {
-      let newExpressions = [];
       let newAllExpressions = [];
-      let newExpressionsIf = [];
       let newAllExpressionsIf = [];
-      let newExpressionsThen = [];
       let newAllExpressionsThen = [];
+      let newExpressions = [];
+      let newExpressionsIf = [];
+      let newExpressionsThen = [];
       let newRelations = {};
       entityTypes.push(validationDTO.type);
 
-      if (validationDTO.type === 'FIELD') {
+      if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'FIELD') {
         const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
         newExpressions = expressions;
         newAllExpressions = allExpressions;
       }
 
       if (validationDTO.type === 'RECORD') {
-        if (validationDTO.whenCondition.operator === 'RECORD_IF') {
-          const { expressions: expressionsIf, allExpressions: allExpressionsIf } = parseRowExpressionFromDTO(
-            validationDTO.whenCondition.params[0]
-          );
-          const { expressions: expressionsThen, allExpressions: allExpressionsThen } = parseRowExpressionFromDTO(
-            validationDTO.whenCondition.params[1]
-          );
-          newExpressionsIf = expressionsIf;
-          newAllExpressionsIf = allExpressionsIf;
-          newExpressionsThen = expressionsThen;
-          newAllExpressionsThen = allExpressionsThen;
-        } else {
-          const { expressions, allExpressions } = parseRowExpressionFromDTO(validationDTO.whenCondition);
-          newExpressions = expressions;
-          newAllExpressions = allExpressions;
+        if (isNil(validationDTO.sqlSentence)) {
+          if (validationDTO.whenCondition.operator === 'RECORD_IF') {
+            const { expressions: expressionsIf, allExpressions: allExpressionsIf } = parseRowExpressionFromDTO(
+              validationDTO.whenCondition.params[0]
+            );
+            const { expressions: expressionsThen, allExpressions: allExpressionsThen } = parseRowExpressionFromDTO(
+              validationDTO.whenCondition.params[1]
+            );
+            newExpressionsIf = expressionsIf;
+            newAllExpressionsIf = allExpressionsIf;
+            newExpressionsThen = expressionsThen;
+            newAllExpressionsThen = allExpressionsThen;
+          } else {
+            const { expressions, allExpressions } = parseRowExpressionFromDTO(validationDTO.whenCondition);
+            newExpressions = expressions;
+            newAllExpressions = allExpressions;
+          }
         }
       }
 
-      if (validationDTO.type === 'DATASET') {
+      if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'DATASET') {
         const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
         newRelations = relations;
       }
 
       return new Validation({
+        sqlSentence: validationDTO.sqlSentence,
         activationGroup: validationDTO.activationGroup,
         automatic: validationDTO.automatic,
         condition: validationDTO.whenCondition,
