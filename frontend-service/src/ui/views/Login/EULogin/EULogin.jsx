@@ -28,7 +28,7 @@ const EULogin = ({ location, history }) => {
           redirectUrl = rnLocalStorage.redirectUrl;
           LocalStorageUtils.remove();
         }
-        history.push(redirectUrl);
+        window.location.href = redirectUrl;
       } else {
         history.push(getUrl(routes.ACCESS_POINT));
       }
