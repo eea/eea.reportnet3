@@ -570,7 +570,7 @@ export const FieldsDesigner = ({
               inputId={`${table.tableSchemaId}_check_readOnly`}
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
-              style={{ width: '70px' }}
+              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_readOnly`} className="srOnly">
               {resources.messages['readOnlyTable']}
@@ -586,7 +586,7 @@ export const FieldsDesigner = ({
               inputId={`${table.tableSchemaId}_check_to_prefill`}
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
-              style={{ width: '70px' }}
+              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
@@ -601,7 +601,7 @@ export const FieldsDesigner = ({
               inputId={`${table.tableSchemaId}_check_fixed_number`}
               label="Default"
               onChange={e => onChangeFixedNumber(e.checked)}
-              style={{ width: '70px' }}
+              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_fixed_number`} className="srOnly">
               {resources.messages['fixedNumber']}
@@ -616,7 +616,7 @@ export const FieldsDesigner = ({
               inputId={`${table.tableSchemaId}_check_not_empty`}
               label="Default"
               onChange={e => onChangeNotEmpty(e.checked)}
-              style={{ width: '70px' }}
+              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_not_empty`} className="srOnly">
               {resources.messages['notEmpty']}

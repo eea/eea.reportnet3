@@ -358,7 +358,7 @@ const ValidationViewer = React.memo(
     };
 
     return (
-      <>
+      <div className={styles.validationWrapper}>
         {!isUndefined(buttonsList) ? (
           buttonsList
         ) : (
@@ -482,7 +482,7 @@ const ValidationViewer = React.memo(
             {columns}
           </DataTable>
         </>
-      </>
+      </div>
     );
   }
 );

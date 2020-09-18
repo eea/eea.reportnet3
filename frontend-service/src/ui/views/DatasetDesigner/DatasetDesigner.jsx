@@ -717,6 +717,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </Fragment>
   );
 
+  const renderValidationsFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isValidationViewerVisible', false)}
+    />
+  );
+
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
       <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
@@ -1042,6 +1051,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {designerState.isValidationViewerVisible && (
           <Dialog
             className={styles.paginatorValidationViewer}
+            footer={renderValidationsFooter}
             header={resources.messages['titleValidations']}
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
             style={{ width: '80%' }}
@@ -1059,29 +1069,27 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         )}
 
         {designerState.isImportDatasetDialogVisible && (
-          <Dialog
-            className={styles.Dialog}
-            footer={renderCustomFileUploadFooter}
-            header={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
-            onHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
-            visible={designerState.isImportDatasetDialogVisible}>
-            <CustomFileUpload
-              accept={getImportExtensions}
-              chooseLabel={resources.messages['selectFile']}
-              className={styles.FileUpload}
-              fileLimit={1}
-              infoTooltip={infoExtensionsTooltip}
-              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-              mode="advanced"
-              multiple={false}
-              name="file"
-              onUpload={onUpload}
-              replaceCheck={true}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
-                datasetId: datasetId
-              })}`}
-            />
-          </Dialog>
+          <CustomFileUpload
+            dialogClassName={styles.Dialog}
+            dialogHeader={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
+            dialogOnHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
+            dialogVisible={designerState.isImportDatasetDialogVisible}
+            isDialog={true}
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
+            fileLimit={1}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onUpload={onUpload}
+            replaceCheck={true}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+              datasetId: datasetId
+            })}`}
+          />
         )}
 
         {designerState.isImportOtherSystemsDialogVisible && (

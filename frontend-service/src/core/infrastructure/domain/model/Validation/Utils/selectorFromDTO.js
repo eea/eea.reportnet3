@@ -4,7 +4,6 @@ import { config } from 'conf';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';
 import { getGroupFromDTO } from './getGroupFromDTO';
-import isNil from 'lodash/isNil';
 
 export const selectorFromDTO = (expression, expressions, allExpressions, parentOperator = null) => {
   const {

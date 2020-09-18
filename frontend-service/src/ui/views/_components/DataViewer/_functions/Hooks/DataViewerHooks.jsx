@@ -188,7 +188,7 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-    if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+    if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
@@ -339,7 +339,7 @@ export const useSetColumns = (
     let validationCol = (
       <Column
         body={validationsTemplate}
-        header={resources.messages['errors']}
+        header={resources.messages['validationsDataColumn']}
         field="validations"
         key="recordValidation"
         sortable={false}
