@@ -16,7 +16,7 @@ export const PrivateRoute = ({ component: Component, path }) => {
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
-      return <Component />;
+      return <Route path={path} render={() => <Component />} />;
     } else {
       LocalStorageUtils.set({ redirectUrl: path });
       window.location.href = AccessPointWebConfig.euloginUrl;
