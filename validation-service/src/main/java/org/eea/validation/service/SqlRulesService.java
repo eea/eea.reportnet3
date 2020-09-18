@@ -15,7 +15,7 @@ public interface SqlRulesService {
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    */
-  void validateSQLRule(String datasetSchemaId, Rule rule);
+  void validateSQLRule(Long datasetId, String datasetSchemaId, Rule rule);
 
   /**
    * Query treat.

@@ -25,13 +25,25 @@ public class SQLValitaionUtils {
     SQLValitaionUtils.sqlRulesService = sqlRulesService;
   }
 
-  public static void executeValidationSQLRule(Long datasetId, String ruleId) {
+  /**
+   * Execute validation SQL rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+<<<<<<< Updated upstream
+   */
+  public static void executeValidationSQLRule(Long datasetId, String ruleId, String tableSchemaId) {
+=======
+   * @param dataSchemaId the data schema id
+   */
+  public static void executeValidationSQLRule(Long datasetId, String ruleId, String dataSchemaId) {
+>>>>>>> Stashed changes
     // retrive the rule
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     // retrive sql sentence
     String query = rule.getSqlSentence();
     // adapt query to our data model
-    String preparedStatement = sqlRulesService.queryTreat(query, datasetId, "");
+    String preparedStatement = sqlRulesService.queryTreat(query, datasetId, tableSchemaId);
     // Execute query
     try {
       sqlRulesService.retrivedata(preparedStatement);
