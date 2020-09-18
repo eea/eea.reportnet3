@@ -54,7 +54,7 @@ export const ExpressionSelector = ({
     if (validationContext.level === 'field') {
       return [
         { label: resources.messages['fieldComparisonLabel'], value: 'fieldTab' },
-        { label: resources.messages['SQLsentence'], value: 'SQLsentence' }
+        { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
       ];
     }
 
@@ -62,13 +62,13 @@ export const ExpressionSelector = ({
       return [
         { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
         { label: resources.messages['ifThenLabel'], value: 'ifThenClause' },
-        { label: resources.messages['SQLsentence'], value: 'SQLsentence' }
+        { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
       ];
     }
 
     return [
       { label: resources.messages['datasetComparison'], value: 'fieldRelations' },
-      { label: resources.messages['SQLsentence'], value: 'SQLsentence' }
+      { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
     ];
   };
 
@@ -159,7 +159,7 @@ export const ExpressionSelector = ({
       );
     }
 
-    if (!isEmpty(expressionType) && expressionType === 'SQLsentence') {
+    if (!isEmpty(expressionType) && expressionType === 'sqlSentence') {
       return <SQLsentence creationFormState={creationFormState} onSetSQLsentence={onSetSQLsentence} />;
     }
     return <></>;

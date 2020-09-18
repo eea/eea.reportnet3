@@ -554,11 +554,11 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   );
 
   const getIsCreationDisabled = () => {
-    if (creationFormState.candidateRule.expressionType === 'SQLsentence') {
+    if (creationFormState.candidateRule.expressionType === 'sqlSentence') {
       return (
         creationFormState.isValidationCreationDisabled ||
         isSubmitDisabled ||
-        !checkComparisonSQLsentence(creationFormState?.candidateRule?.SQLsentence)
+        !checkComparisonSQLsentence(creationFormState?.candidateRule?.sqlSentence)
       );
     }
     return (

@@ -21,7 +21,7 @@ export const checkComparisonValidation = candidateRule => {
     if (
       ruleKey === 'expressions' &&
       !isEmpty(candidateRule.expressions) &&
-      candidateRule.expressionType !== 'SQLsentence'
+      candidateRule.expressionType !== 'sqlSentence'
     ) {
       if (checkComparisonExpressions(candidateRule[ruleKey])) {
         isValidated = false;
@@ -39,9 +39,9 @@ export const checkComparisonValidation = candidateRule => {
     }
 
     if (
-      ruleKey === 'SQLsentence' &&
-      candidateRule.expressionType === 'SQLsentence' &&
-      (isNil(candidateRule['SQLsentence']) || isEmpty(candidateRule['SQLsentence']))
+      ruleKey === 'sqlSentence' &&
+      candidateRule.expressionType === 'sqlSentence' &&
+      (isNil(candidateRule['sqlSentence']) || isEmpty(candidateRule['sqlSentence']))
     ) {
       isValidated = false;
     }

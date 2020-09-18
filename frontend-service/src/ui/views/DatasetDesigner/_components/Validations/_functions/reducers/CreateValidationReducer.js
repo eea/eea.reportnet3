@@ -356,7 +356,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           rowOptions.expressionType = 'fieldTab';
         }
       } else {
-        rowOptions.expressionType = 'SQLsentence';
+        rowOptions.expressionType = 'sqlSentence';
       }
 
       return {

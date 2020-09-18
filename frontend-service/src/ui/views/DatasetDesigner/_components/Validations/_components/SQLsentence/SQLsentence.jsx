@@ -8,7 +8,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence }) => {
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    return () => onSetSQLsentence('SQLsentence', '');
+    return () => onSetSQLsentence('sqlSentence', '');
   }, []);
 
   return (
@@ -20,9 +20,9 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence }) => {
           cols={30}
           id="SQLsentenceTextarea"
           name=""
-          onChange={e => onSetSQLsentence('SQLsentence', e.target.value)}
+          onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
           rows={10}
-          value={creationFormState.candidateRule['SQLsentence']}
+          value={creationFormState.candidateRule['sqlSentence']}
         />
       </div>
     </React.Fragment>

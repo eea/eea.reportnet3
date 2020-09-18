@@ -16,15 +16,15 @@ export const checkFieldValidation = candidateRule => {
     } else if (
       ruleKey === 'expressions' &&
       !isEmpty(candidateRule.expressions) &&
-      candidateRule.expressionType !== 'SQLsentence'
+      candidateRule.expressionType !== 'sqlSentence'
     ) {
       if (checkExpressions(candidateRule[ruleKey])) {
         isValidated = false;
       }
     } else if (
       ruleKey === 'expressions' &&
-      candidateRule.expressionType === 'SQLsentence' &&
-      (isNil(candidateRule['SQLsentence']) || isEmpty(candidateRule['SQLsentence']))
+      candidateRule.expressionType === 'sqlSentence' &&
+      (isNil(candidateRule['sqlSentence']) || isEmpty(candidateRule['sqlSentence']))
     ) {
       isValidated = false;
     }

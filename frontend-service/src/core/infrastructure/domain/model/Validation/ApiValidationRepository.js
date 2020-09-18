@@ -11,7 +11,7 @@ import { parseDataValidationRulesDTO } from './Utils/parseDataValidationRulesDTO
 const create = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
-    sqlSentence: validationRule.SQLsentence,
+    sqlSentence: validationRule.sqlSentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
@@ -21,14 +21,14 @@ const create = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'FIELD',
     whenCondition:
-      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence) ? getCreationDTO(expressions) : null
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence) ? getCreationDTO(expressions) : null
   };
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
   const validation = {
-    sqlSentence: validationRule.SQLsentence,
+    sqlSentence: validationRule.sqlSentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
@@ -36,7 +36,7 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     integrityVO:
-      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence)
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
         ? {
             isDoubleReferenced: validationRule.relations.isDoubleReferenced,
             originDatasetSchemaId: validationRule.relations.originDatasetSchema,
@@ -55,7 +55,7 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
 const createRowRule = async (datasetSchemaId, validationRule) => {
   const { expressions, expressionsIf, expressionsThen, expressionType } = validationRule;
   const validation = {
-    sqlSentence: validationRule.SQLsentence,
+    sqlSentence: validationRule.sqlSentence,
     whenCondition: null,
     automatic: false,
     description: validationRule.description,
@@ -106,7 +106,7 @@ const getAll = async (datasetSchemaId, reporting = false) => {
 const update = async (datasetId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
-    sqlSentence: validationRule.SQLsentence,
+    sqlSentence: validationRule.sqlSentence,
     ruleId: validationRule.id,
     description: validationRule.description,
     automatic: validationRule.automatic,
@@ -119,7 +119,7 @@ const update = async (datasetId, validationRule) => {
   };
   if (!validationRule.automatic) {
     validation.whenCondition =
-      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence) ? getCreationDTO(expressions) : null;
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence) ? getCreationDTO(expressions) : null;
   }
   return await apiValidation.update(datasetId, validation);
 };
@@ -127,7 +127,7 @@ const update = async (datasetId, validationRule) => {
 const updateRowRule = async (datasetId, validationRule) => {
   const { expressions, expressionType, expressionsIf, expressionsThen } = validationRule;
   const validation = {
-    sqlSentence: validationRule.SQLsentence,
+    sqlSentence: validationRule.sqlSentence,
     whenCondition: null,
     ruleId: validationRule.id,
     description: validationRule.description,
@@ -155,7 +155,7 @@ const updateRowRule = async (datasetId, validationRule) => {
 
 const updateDatasetRule = async (datasetId, validationRule) => {
   const validation = {
-    sqlSentence: validationRule.SQLsentence,
+    sqlSentence: validationRule.sqlSentence,
     ruleId: validationRule.id,
     description: validationRule.description,
     automatic: validationRule.automatic,
@@ -166,7 +166,7 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     type: 'DATASET',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     integrityVO:
-      isNil(validationRule.SQLsentence) || isEmpty(validationRule.SQLsentence)
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
         ? {
             id: validationRule.relations.id,
             isDoubleReferenced: validationRule.relations.isDoubleReferenced,
