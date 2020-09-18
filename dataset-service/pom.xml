@@ -84,6 +84,11 @@
 			<artifactId>fontbox</artifactId>
 			<version>2.0.19</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-spatial --> 
+		<dependency> 
+			<groupId>org.hibernate</groupId> 
+			<artifactId>hibernate-spatial</artifactId> 
+		</dependency>		
 	</dependencies>
 	<distributionManagement>
 		<snapshotRepository>
