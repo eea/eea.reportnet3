@@ -45,6 +45,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The Constant COMMA: {@value}. */
   private static final String COMMA = ", ";
 
+  private static final String SELECT = "SELECT";
+
+  private static final String FROM = "FROM";
+
+  /** The Constant KEYWORDS: {@value}. */
+  private static final String KEYWORDS = "INNER,JOIN,COALESCE,DELETE,INSERT";
+
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
@@ -109,16 +116,47 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
 
+  /**
+   * Validate rule.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the boolean
+   */
   private Boolean validateRule(String query, Long datasetId, String idTableSchema) {
-    String preparedquery = queryTreat(query, datasetId, idTableSchema) + " limit 5";
-    Boolean isSQLrun = Boolean.TRUE;
-    try {
-      retrivedata(preparedquery);
-    } catch (SQLException e) {
-      LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
-      isSQLrun = Boolean.FALSE;
+    Boolean isSQLCorrect = Boolean.TRUE;
+    // validate query sintax
+    if (checkQuerySintax(query)) {
+      String preparedquery = queryTreat(query, datasetId, idTableSchema) + " limit 5";
+      try {
+        retrivedata(preparedquery);
+      } catch (SQLException e) {
+        LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+        isSQLCorrect = Boolean.FALSE;
+      }
+    } else {
+      isSQLCorrect = Boolean.FALSE;
     }
-    return isSQLrun;
+    return isSQLCorrect;
+  }
+
+  /**
+   * Check query sintax.
+   *
+   * @param query the query
+   * @return the boolean
+   */
+  private Boolean checkQuerySintax(String query) {
+    Boolean queryContainsKeyword = Boolean.TRUE;
+    String[] queryKeywords = KEYWORDS.split(",");
+    for (String word : queryKeywords) {
+      if (query.toLowerCase().contains(word.toLowerCase())) {
+        queryContainsKeyword = Boolean.FALSE;
+        break;
+      }
+    }
+    return queryContainsKeyword;
   }
 
   /**
@@ -132,14 +170,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Override
   @Transactional
   public String queryTreat(String query, Long datasetId, String idTableSchema) {
-
-    List<String> userQueryColumnList = getColumsFromRuleQuery(query);
+    String queryUpperCase = query.toUpperCase();
+    List<String> userQueryColumnList = getColumsFromRuleQuery(queryUpperCase);
     List<String> tableColumnList = getColumnsNameFromSchema(datasetId, idTableSchema);
     List<String> queryColumnList = extractQueryColumns(userQueryColumnList, tableColumnList);
-    String queryLastPart = getLastPartFromQuery(datasetId, query);
+    String queryLastPart = getLastPartFromQuery(datasetId, queryUpperCase);
 
-
-    StringBuilder preparedStatement = new StringBuilder("SELECT ");
+    StringBuilder preparedStatement = new StringBuilder(SELECT + " ");
     if (queryColumnList.isEmpty()) {
       preparedStatement.append(" * ");
     } else {
@@ -179,11 +216,38 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @return the last part from query
    */
   private String getLastPartFromQuery(Long datasetId, String query) {
-    int from = query.toLowerCase().indexOf("from");
-    return query.substring(from);
+    int from = query.indexOf(FROM);
+    List<String> tables = getTablesFromRuleQuery(query.substring(from));
+
+    for (int index = 0; index < tables.size(); index++) {
+      if (!tables.get(index).trim().equalsIgnoreCase("INNER")
+          && !tables.get(index).trim().equalsIgnoreCase("JOIN")
+          && !tables.get(index).trim().equalsIgnoreCase(" ")
+          && !tables.get(index).trim().equalsIgnoreCase("CROSS")
+          && !tables.get(index).trim().equalsIgnoreCase("LEFT")
+          && !tables.get(index).trim().equalsIgnoreCase("RIGHT")) {
+
+      }
+    }
+    return query;
   }
 
 
+  private List<String> getTablesFromRuleQuery(String query) {
+    List<String> tableList = new ArrayList<>();
+    String preparedQuery = query.replaceAll(",", ", ");
+    String[] tables = preparedQuery.substring(preparedQuery.indexOf(FROM)).split("(?=\\s)");
+    for (String table : tables) {
+      if (!table.trim().equalsIgnoreCase(FROM)) {
+        tableList.add(table);
+      }
+      if (!table.trim().equalsIgnoreCase("WHERE") && !table.trim().equalsIgnoreCase("LIMIT")
+          && !table.trim().equalsIgnoreCase("OFFSET")) {
+        break;
+      }
+    }
+    return tableList;
+  }
 
   /**
    * Extract query columns.
@@ -215,13 +279,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     } else {
       List<String> columnList = new ArrayList<>();
       String preparedQuery = query.replaceAll(",", ", ");
-      String[] palabras = preparedQuery.split("(?=\\s)");
-      for (String palabra : palabras) {
-        if (!palabra.trim().equalsIgnoreCase("select")
-            && !palabra.trim().equalsIgnoreCase("from")) {
-          columnList.add(palabra);
+      String[] fields = preparedQuery.split("(?=\\s)");
+      for (String field : fields) {
+        if (!field.trim().equalsIgnoreCase(SELECT) && !field.trim().equalsIgnoreCase(FROM)) {
+          columnList.add(field);
         }
-        if (palabra.trim().equalsIgnoreCase("FROM")) {
+        if (field.trim().equalsIgnoreCase(FROM)) {
           break;
         }
       }
