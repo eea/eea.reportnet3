@@ -14,8 +14,11 @@ public final class JavaType {
   /** The Constant DATE: {@value}. */
   public static final String DATE = "Date";
 
-  /** The Constant STRING. */
+  /** The Constant STRING: {@value}. */
   public static final String STRING = "String";
+
+  /** The Constant JSON: {@value}. */
+  public static final String JSON = "JsonNode";
 
   /** The Constant UNSUPPORTED: {@value}. */
   public static final String UNSUPPORTED = "Unsupported";

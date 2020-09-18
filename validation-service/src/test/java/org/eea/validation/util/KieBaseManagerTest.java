@@ -240,58 +240,6 @@ public class KieBaseManagerTest {
   }
 
   @Test
-  public void testReloadRulesFieldCoordinateLat() throws FileNotFoundException {
-    RulesSchema schemaRules = new RulesSchema();
-    List<Rule> rules = new ArrayList<>();
-    List<String> thenCondition = new ArrayList<>();
-    thenCondition.add("");
-    thenCondition.add("");
-    Rule rule = new Rule();
-    rule.setType(EntityTypeEnum.FIELD);
-    rule.setReferenceId(id);
-    rule.setRuleId(id);
-    rule.setThenCondition(thenCondition);
-    rules.add(rule);
-    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
-    schemaRules.setRules(rules);
-    fieldSchema.setType(DataType.COORDINATE_LAT);
-    Document fieldDocument = new Document();
-    fieldDocument.put("typeData", DataType.COORDINATE_LAT);
-    Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
-    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(fieldDocument);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString()));
-  }
-
-  @Test
-  public void testReloadRulesFieldCoordinateLong() throws FileNotFoundException {
-    RulesSchema schemaRules = new RulesSchema();
-    List<Rule> rules = new ArrayList<>();
-    List<String> thenCondition = new ArrayList<>();
-    thenCondition.add("");
-    thenCondition.add("");
-    Rule rule = new Rule();
-    rule.setType(EntityTypeEnum.FIELD);
-    rule.setReferenceId(id);
-    rule.setRuleId(id);
-    rule.setThenCondition(thenCondition);
-    rules.add(rule);
-    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
-    schemaRules.setRules(rules);
-    fieldSchema.setType(DataType.COORDINATE_LONG);
-    Document fieldDocument = new Document();
-    fieldDocument.put("typeData", DataType.COORDINATE_LONG);
-    Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
-    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(fieldDocument);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString()));
-  }
-
-
-
-  @Test
   public void testTextRuleCorrectTable() throws EEAException {
     Rule rule = new Rule();
     List<String> thenCondition = new ArrayList<>();
