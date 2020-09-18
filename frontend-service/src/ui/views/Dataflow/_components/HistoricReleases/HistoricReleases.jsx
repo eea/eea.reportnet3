@@ -13,6 +13,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -188,8 +189,18 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
     return fieldColumns;
   };
 
+  if (historicReleasesState.isLoading) {
+    return (
+      <div className={styles.historicReleasesWithoutTable}>
+        <div className={styles.spinner}>
+          <Spinner style={{ top: 0, left: 0 }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className={styles.historicReleases}>
       {historicReleasesView === 'dataCollection' && (
         <Filters
           data={historicReleasesState.data}
@@ -199,7 +210,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
         />
       )}
 
-      {Array.isArray(datasetName) && (
+      {Array.isArray(datasetId) && (
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
@@ -209,6 +220,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
 
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
+          className={Array.isArray(datasetId) || historicReleasesView === 'dataCollection' ? '' : styles.noFilters}
           autoLayout={true}
           paginator={true}
           paginatorRight={`${resources.messages['totalRecords']} ${historicReleasesState.filteredData.length}`}

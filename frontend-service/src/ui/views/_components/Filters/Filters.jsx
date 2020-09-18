@@ -295,21 +295,23 @@ export const Filters = ({
 
   const renderCheckboxFilter = (property, i) => {
     return (
-      <span key={i} className={`${styles.dataflowInput}`}>
+      <span key={i} className={styles.checkboxWrap}>
         <div>
           <span className={styles.switchTextInput}>{resources.messages[property]}</span>
-          <Checkbox
-            // className={styles.checkRequired}
-            id={property}
-            inputId={property}
-            isChecked={getCheckboxFilterState(property)}
-            label={property}
-            onChange={() => onChangeCheckboxFilter(property)}
-            style={{ marginRight: '50px' }}
-          />
-          <label htmlFor={property} className="srOnly">
-            {resources.messages[property]}
-          </label>
+          <span className={styles.checkbox}>
+            <Checkbox
+              // className={styles.checkRequired}
+              id={property}
+              inputId={property}
+              isChecked={getCheckboxFilterState(property)}
+              label={property}
+              onChange={() => onChangeCheckboxFilter(property)}
+              style={{ marginRight: '50px' }}
+            />
+            <label htmlFor={property} className="srOnly">
+              {resources.messages[property]}
+            </label>
+          </span>
         </div>
       </span>
     );
