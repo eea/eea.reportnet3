@@ -45,7 +45,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, isLoadingFile: payload.value };
 
     case 'SET_REPLACE_DATA':
-      return { ...state, replaceData: payload.value }
+      return { ...state, replaceData: payload.value };
 
     case 'IS_PREVIEW_MODE_ON':
       return { ...state, isPreviewModeOn: payload.value };

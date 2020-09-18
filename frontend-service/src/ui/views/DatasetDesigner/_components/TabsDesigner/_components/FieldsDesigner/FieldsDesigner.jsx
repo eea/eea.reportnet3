@@ -18,8 +18,8 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
-import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 

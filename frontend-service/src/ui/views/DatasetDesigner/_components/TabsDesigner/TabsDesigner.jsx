@@ -477,7 +477,6 @@ export const TabsDesigner = withRouter(
         }
       } catch (error) {
         console.error(`There has been an error while ordering tables ${error}`);
-      } finally {
       }
     };
 
@@ -497,10 +496,10 @@ export const TabsDesigner = withRouter(
         {renderErrors(errorMessageTitle, errorMessage)}
         {datasetSchema && tabs && validationContext.isVisible && (
           <Validations
+            datasetId={datasetId}
             datasetSchema={datasetSchema}
             datasetSchemas={datasetSchemas}
             tabs={tabs}
-            datasetId={datasetId}
           />
         )}
       </Fragment>

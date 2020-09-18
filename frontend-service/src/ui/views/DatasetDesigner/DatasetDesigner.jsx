@@ -9,9 +9,9 @@ import uniq from 'lodash/uniq';
 import styles from './DatasetDesigner.module.scss';
 
 import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
@@ -53,8 +53,8 @@ import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
@@ -203,9 +203,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.validationListDialogVisible]);
 
   useEffect(() => {
-    if (window.location.search !== '') {
-      changeUrl();
-    }
+    if (window.location.search !== '') changeUrl();
   }, [designerState.isPreviewModeOn]);
 
   useEffect(() => {
@@ -236,9 +234,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const changeMode = previewMode => {
-    designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
-  };
+  const changeMode = previewMode => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
 
   const changeUrl = () => {
     window.history.replaceState(
@@ -286,9 +282,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: {
-        exportList: internalExtensionList.concat(externalExtensions)
-      }
+      payload: { exportList: internalExtensionList.concat(externalExtensions) }
     });
   };
 
@@ -298,9 +292,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const importFromFile = !isEmpty(externalOperationsList.import)
       ? [
           {
-            label: resources.messages['importFromFile'],
+            command: () => manageDialogs('isImportDatasetDialogVisible', true),
             icon: config.icons['import'],
-            command: () => manageDialogs('isImportDatasetDialogVisible', true)
+            label: resources.messages['importFromFile']
           }
         ]
       : [];
@@ -321,12 +315,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           }
         ]
       : [];
-    designerDispatch({
-      type: 'GET_IMPORT_LIST',
-      payload: {
-        importList: importFromFile.concat(importOtherSystems)
-      }
-    });
+
+    designerDispatch({ type: 'GET_IMPORT_LIST', payload: { importList: importFromFile.concat(importOtherSystems) } });
   };
 
   const getFileExtensions = async () => {
@@ -471,18 +461,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     notificationContext.add({
       type: exportNotification,
-      content: {
-        dataflowName: dataflowName,
-        datasetName: datasetName
-      }
+      content: { dataflowName: dataflowName, datasetName: datasetName }
     });
   };
 
   const onExportDataExternalExtension = async fileExtension => {
     setIsLoadingFile(true);
-    notificationContext.add({
-      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
-    });
+    notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
+
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
@@ -602,7 +588,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
     } catch (error) {
       console.error('Error during datasetSchema Description update: ', error);
-    } finally {
     }
   };
 
@@ -630,19 +615,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       console.log('error', error);
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
-        content: {
-          dataflowName: designerState.dataflowName,
-          datasetName: designerState.datasetSchemaName
-        }
+        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
       });
     }
   };
 
   const cleanImportOtherSystemsDialog = () => {
-    designerDispatch({
-      type: 'SET_REPLACE_DATA',
-      payload: { value: false }
-    });
+    designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: false } });
     manageDialogs('isImportOtherSystemsDialogVisible', false);
   };
 
@@ -665,10 +644,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
-        content: {
-          dataflowName: designerState.dataflowName,
-          datasetName: designerState.datasetSchemaName
-        }
+        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
       });
     }
   };
@@ -679,27 +655,21 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createFieldValidationBtn']}
-        onClick={() => {
-          validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
-        }}
+        onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
-        onClick={() => {
-          validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
-        }}
+        onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createDatasetValidationBtn']}
-        onClick={() => {
-          validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog');
-        }}
+        onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
 
@@ -734,11 +704,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        label={resources.messages['import']}
         icon={'check'}
-        onClick={() => {
-          onImportOtherSystems();
-        }}
+        label={resources.messages['import']}
+        onClick={() => onImportOtherSystems()}
       />
       <Button
         className="p-button-secondary"
@@ -886,13 +854,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                   />
                   {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
                     <Menu
+                      id="importDataSetMenu"
                       model={designerState.importButtonsList}
+                      onShow={e => getPosition(e)}
                       popup={true}
                       ref={importMenuRef}
-                      id="importDataSetMenu"
-                      onShow={e => {
-                        getPosition(e);
-                      }}
                     />
                   )}
                 </Fragment>
@@ -933,10 +899,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 }`}
                 disabled={!designerState.datasetStatistics.datasetErrors}
                 icon={'warning'}
+                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: true })}
                 ownButtonClasses={null}
-                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
               />
 
               <Button
@@ -1067,8 +1033,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             style={{ width: '70vw' }}
             visible={designerState.dashDialogVisible}>
             <Dashboard
-              refresh={designerState.dashDialogVisible}
               levelErrorTypes={designerState.levelErrorTypes}
+              refresh={designerState.dashDialogVisible}
               tableSchemaNames={designerState.tableSchemaNames}
             />
           </Dialog>
@@ -1132,20 +1098,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 inputId="replaceCheckbox"
                 isChecked={designerState.replaceData}
                 onChange={() =>
-                  designerDispatch({
-                    type: 'SET_REPLACE_DATA',
-                    payload: { value: !designerState.replaceData }
-                  })
+                  designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                 }
                 role="checkbox"
               />
               <label htmlFor="replaceCheckbox">
                 <a
                   onClick={() =>
-                    designerDispatch({
-                      type: 'SET_REPLACE_DATA',
-                      payload: { value: !designerState.replaceData }
-                    })
+                    designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                   }>
                   {resources.messages['replaceData']}
                 </a>

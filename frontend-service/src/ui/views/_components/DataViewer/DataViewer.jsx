@@ -593,13 +593,7 @@ const DataViewer = withRouter(
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
             notificationContext.add({
               type: 'UPDATE_FIELD_BY_ID_ERROR',
-              content: {
-                dataflowId,
-                datasetId,
-                dataflowName,
-                datasetName,
-                tableName
-              }
+              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
             });
           }
         }
@@ -886,7 +880,7 @@ const DataViewer = withRouter(
     };
 
     const mapRender = () => (
-      <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>
+      <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true} />
     );
 
     const rowClassName = rowData => {
