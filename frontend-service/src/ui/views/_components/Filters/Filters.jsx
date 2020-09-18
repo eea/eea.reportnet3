@@ -108,11 +108,7 @@ export const Filters = ({
       dropdownOptions,
       checkboxOptions
     );
-    const initialCheckboxes = [];
-    !isEmpty(checkboxOptions) &&
-      checkboxOptions.forEach(checkboxOption => {
-        initialCheckboxes.push({ property: checkboxOption, isChecked: false });
-      });
+    const initialCheckboxes = FiltersUtils.getCheckboxFilterInitialState(checkboxOptions);
 
     filterDispatch({
       type: 'INITIAL_STATE',
@@ -165,7 +161,8 @@ export const Filters = ({
           dropdownOptions,
           checkboxOptions
         ),
-        searchBy: ''
+        searchBy: '',
+        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions)
       }
     });
   };
