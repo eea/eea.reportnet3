@@ -1,0 +1,34 @@
+.contentWrap {
+  background: var(--gray-10);
+  padding: 1rem;
+  position: relative;
+
+  .actionButtons {
+    padding: 1rem;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    .collapse,
+    .delete {
+      border-radius: 5px;
+      border: 1px solid var(--c-custom-gray);
+      margin: 0 0.5rem;
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    .delete {
+      color: var(--errors);
+    }
+  }
+
+  .content {
+  }
+}

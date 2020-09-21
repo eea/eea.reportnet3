@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } 
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import isNil from 'lodash/isNil';
 
 import styles from './Webform.module.scss';
 
@@ -32,12 +33,13 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
     data: [],
     inputData: '',
     isVisible: {},
-    multipleView: [{ id: 0 }]
+    multipleView: [{ id: 0 }],
+    newRecord: {}
   });
 
   useEffect(() => {
     if (isEmpty(webformState.isVisible)) initialLoad();
-  }, [webformState.isVisible]);
+  }, [webformState.isVisible, webformState.data]);
 
   useEffect(() => {
     if (!isEmpty(datasetSchema)) {
@@ -73,10 +75,39 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
   };
 
   const initialLoad = () => {
-    webformDispatch({
-      type: 'INITIAL_LOAD',
-      payload: { isVisible: WebformUtils.getWebformTabs(state.datasetSchemaAllTables) }
-    });
+    // dispatchRecords({
+    //   type: 'SET_NEW_RECORD',
+    //   payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+    // });
+
+    if (!isEmpty(webformState.data)) {
+      const tableSchemaColumns = !isNil(webformState.data[0].webformRecords[0].webformFields)
+        ? webformState.data[0].webformRecords[0].webformFields.map(field => ({
+            codelistItems: field.codelistItems,
+            description: field.description,
+            field: field['fieldId'],
+            header: field['name'],
+            maxSize: field['maxSize'],
+            pk: field['pk'],
+            pkHasMultipleValues: field['pkHasMultipleValues'],
+            readOnly: field['readOnly'],
+            recordId: field['recordId'],
+            referencedField: field['referencedField'],
+            required: field.required,
+            // table: table['tableSchemaName'],
+            type: field['type'],
+            validExtensions: field['validExtensions']
+          }))
+        : [];
+
+      webformDispatch({
+        type: 'INITIAL_LOAD',
+        payload: {
+          isVisible: WebformUtils.getWebformTabs(state.datasetSchemaAllTables),
+          newRecord: WebformUtils.parseRecordData(tableSchemaColumns)
+        }
+      });
+    }
   };
 
   const onAddMultipleWebform = () => {
@@ -132,7 +163,28 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
 
   const onChangeInputValue = value => webformDispatch({ type: 'ON_CHANGE_VALUE', payload: { value } });
 
-  const onSavaValue = async value => {
+  const onSavaValue = async (tableId, record, value) => {
+    const data = [{ fields: [{ type: '', id: null, value, idFieldSchema: null }], idRecordSchema: null, id: null }];
+
+    const another = [
+      {
+        dataRow: [
+          {
+            fieldData: { '5f60e93b35e6220001aeafff': 'value', fieldSchemaId: '5f60e93b35e6220001aeafff', type: 'TEXT' },
+            fieldData: { '5f60e93b35e6220001aeafff': null, fieldSchemaId: '5f60e93b35e6220001aeafff', type: 'TEXT' },
+            fieldData: { '5f60e93b35e6220001aeafff': null, fieldSchemaId: '5f60e93b35e6220001aeafff', type: 'TEXT' }
+          }
+        ],
+        datasetPartitionId: null,
+        recordSchemaId: 'asdkjfhasidunbekajrh8'
+      }
+    ];
+
+    try {
+      await DatasetService.addRecordsById(datasetId, tableId, data);
+    } catch (error) {
+      console.log('error', error);
+    }
     // // if (!isEmpty(record)) {
     // let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
     // try {
@@ -152,13 +204,19 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
     // // }
   };
 
-  const renderTemplate = (selectedTemplate, options = [], value = '') => {
+  const renderTemplate = (selectedTemplate, options = [], value = '', form) => {
     const template = {
       DATE: <Calendar />,
       LINK: <Fragment />,
       MULTISELECT: <MultiSelect />,
       SELECT: <Dropdown options={options} />,
-      TEXT: <InputText value={value} />,
+      TEXT: (
+        <InputText
+          onChange={event => onChangeInputValue(event.target.value)}
+          onBlur={() => onSavaValue(888, form, value)}
+          value={value}
+        />
+      ),
       TEXTAREA: <InputTextarea />
     };
 
@@ -187,7 +245,7 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
         {fields.map((form, i) => (
           <div key={i} className={styles.content}>
             <p>{form.fieldName}</p>
-            <div>{renderTemplate(form.fieldType, form.options, form.value)}</div>
+            <div>{renderTemplate(form.fieldType, form.options, form.value, form)}</div>
           </div>
         ))}
       </div>
@@ -215,7 +273,6 @@ export const Webform = ({ dataflowId, datasetId, state }) => {
       <Toolbar className={styles.toolbar}>
         <div className="p-toolbar-group-left">{renderWebFormHeaders()}</div>
       </Toolbar>
-      {/* {renderWebformBody()} */}
       {renderWebform()}
     </div>
   );

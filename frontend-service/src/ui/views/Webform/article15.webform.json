@@ -3,6 +3,7 @@
     "webformId": 1,
     "webformIndex": 0,
     "webformTitle": "QA_QC_C0",
+    "multipleRecords": false,
     "webformRecords": [
       {
         "title": "QA_QC_C0",
@@ -19,6 +20,7 @@
     "webformId": 2,
     "webformIndex": 1,
     "webformTitle": "QA_QC_C1",
+    "multipleRecords": false,
     "webformRecords": [
       {
         "title": "QA_QC_C1",
@@ -44,6 +46,7 @@
     "webformId": 3,
     "webformIndex": 2,
     "webformTitle": "Meteorological_Observations",
+    "multipleRecords": true,
     "webformRecords": [
       {
         "title": "Meteorological_Observations",
@@ -60,6 +63,7 @@
     "webformId": 4,
     "webformIndex": 3,
     "webformTitle": "Climate_Projections_Services",
+    "multipleRecords": true,
     "webformRecords": [
       {
         "title": "Climate_Projections_Services",
