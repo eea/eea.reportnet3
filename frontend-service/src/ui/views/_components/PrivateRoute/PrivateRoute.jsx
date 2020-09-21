@@ -16,6 +16,7 @@ export const PrivateRoute = ({ component: Component, path }) => {
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
+      LocalStorageUtils.remove();
       return <Route path={path} render={() => <Component />} />;
     } else {
       LocalStorageUtils.set({ redirectUrl: window.location.href });
