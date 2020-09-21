@@ -79,7 +79,6 @@ const parseConfigurationDTO = userConfigurationDTO => {
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
-    console.log(userDefaultConfiguration.basemapLayer);
     userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;

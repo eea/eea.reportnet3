@@ -311,7 +311,6 @@ const FieldEditor = ({
                 icon="marker"
                 onClick={e => {
                   if (!isNil(onMapOpen)) {
-                    console.log(RecordUtils.getCellValue(cells, cells.field));
                     onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
                   }
                 }}

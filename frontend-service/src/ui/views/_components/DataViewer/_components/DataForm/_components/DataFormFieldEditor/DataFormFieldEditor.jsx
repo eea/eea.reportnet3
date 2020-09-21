@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 // import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
@@ -23,6 +23,8 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { mapReducer } from './_functions/Reducers/mapReducer';
 
 // import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
@@ -50,20 +52,21 @@ const DataFormFieldEditor = ({
 
   const inputRef = useRef(null);
 
-  const [columnWithLinks, setColumnWithLinks] = useState([]);
+  const [map, dispatchMap] = useReducer(mapReducer, {
+    currentCRS:
+      fieldValue !== '' && type === 'POINT'
+        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
+        : { label: 'WGS84', value: 'EPSG:4326' },
+    // isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+    // isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
+    isMapDisabled: false,
+    isMapOpen: false,
+    mapCoordinates: '',
+    newPoint: '',
+    newPointCRS: { label: 'WGS84', value: 'EPSG:4326' }
+  });
 
-  const [currentCRS, setCurrentCRS] = useState(
-    fieldValue !== '' && type === 'POINT'
-      ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
-      : { label: 'WGS84', value: 'EPSG:4326' }
-  );
-  // const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
-  // const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
-  const [isMapDisabled, setIsMapDisabled] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const [mapCoordinates, setMapCoordinates] = useState('');
-  const [newPoint, setNewPoint] = useState('');
-  const [newPointCRS, setNewPointCRS] = useState('EPSG:4326');
+  const [columnWithLinks, setColumnWithLinks] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
@@ -94,12 +97,10 @@ const DataFormFieldEditor = ({
   };
 
   const onMapOpen = coordinates => {
-    setIsMapOpen(true);
-    setMapCoordinates(coordinates);
+    dispatchMap({ type: 'OPEN_MAP', payload: { coordinates } });
   };
 
   const onSavePoint = (coordinates, crs) => {
-    console.log(MapUtils.parseCoordinates(coordinates), coordinates, crs);
     if (coordinates !== '') {
       const inmMapGeoJson = cloneDeep(fieldValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
@@ -107,17 +108,13 @@ const DataFormFieldEditor = ({
       parsedInmMapGeoJson.properties.rsid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
-    setCurrentCRS(crs);
-    setIsMapOpen(false);
+    // dispatchMap({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+    dispatchMap({ type: 'SAVE_MAP_COORDINATES', payload: { crs } });
   };
 
   const onSelectPoint = (coordinates, selectedCrs) => {
-    setMapCoordinates(coordinates);
-    setNewPoint(coordinates);
-    console.log({ coordinates });
-    const filteredCrs = crs.filter(crsItem => crsItem.value === selectedCrs)[0];
-    // setCurrentCRS(filteredCrs);
-    setNewPointCRS(filteredCrs);
+    const filteredCRS = crs.filter(crsItem => crsItem.value === selectedCrs)[0];
+    dispatchMap({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, filteredCRS } });
   };
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
@@ -126,10 +123,10 @@ const DataFormFieldEditor = ({
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
         geoJson.properties.rsid = crs.value;
-        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates));
+        dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(projectedCoordinates) });
         return JSON.stringify(geoJson);
       } else {
-        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
+        dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coordinates) });
         geoJson.geometry.coordinates = MapUtils.parseCoordinates(
           coordinates.replace(', ', ',').split(','),
           parseToFloat
@@ -181,7 +178,7 @@ const DataFormFieldEditor = ({
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
-    return proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
+    return proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates);
   };
 
   const renderCodelistDropdown = (field, fieldValue) => {
@@ -404,7 +401,7 @@ const DataFormFieldEditor = ({
           : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
       }
       onSelectPoint={onSelectPoint}
-      selectedCRS={currentCRS.value}></Map>
+      selectedCRS={map.currentCRS.value}></Map>
   );
 
   const renderMapType = (field, fieldValue) => (
@@ -415,13 +412,16 @@ const DataFormFieldEditor = ({
           disabled={column.readOnly && reporting}
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
-            onChangeForm(field, changePoint(JSON.parse(fieldValue), e.target.value, currentCRS.value, false))
+            onChangeForm(field, changePoint(JSON.parse(fieldValue), e.target.value, map.currentCRS.value, false))
           }
           onChange={e => {
             if (fieldValue === '') {
               fieldValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
             }
-            onChangeForm(field, changePoint(JSON.parse(fieldValue), e.target.value, currentCRS.value, false, false));
+            onChangeForm(
+              field,
+              changePoint(JSON.parse(fieldValue), e.target.value, map.currentCRS.value, false, false)
+            );
           }}
           // onFocus={e => {
           //   e.preventDefault();
@@ -439,14 +439,14 @@ const DataFormFieldEditor = ({
           }
         />
       </div>
-      {console.log({ currentCRS })}
+
       <div className={styles.pointSridWrapper}>
         <label className={styles.srid}>{resources.messages['srid']}</label>
         <Dropdown
           ariaLabel={'crs'}
           appendTo={document.body}
           className={styles.sridSwitcher}
-          disabled={isMapDisabled}
+          disabled={map.isMapDisabled}
           options={crs}
           optionLabel="label"
           onChange={e => {
@@ -454,16 +454,16 @@ const DataFormFieldEditor = ({
               field,
               changePoint(JSON.parse(fieldValue), JSON.parse(fieldValue).geometry.coordinates, e.target.value)
             );
-            setCurrentCRS(e.target.value);
+            dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
             // onChangePointCRS(e.target.value.value);
           }}
           placeholder="Select a CRS"
           style={{ width: '50%', minWidth: '50%' }}
-          value={currentCRS}
+          value={map.currentCRS}
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
-          disabled={isMapDisabled}
+          disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}
@@ -480,20 +480,17 @@ const DataFormFieldEditor = ({
         // disabled={isSaving}
         label={resources.messages['save']}
         icon={'check'}
-        onClick={() => onSavePoint(newPoint, newPointCRS)}
+        onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}
       />
       <Button
         className="p-button-secondary"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {
-          // dispatchRecords({
-          //   type: 'SET_NEW_RECORD',
-          //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-          // });
-          setNewPoint('');
-          setNewPointCRS(currentCRS.value);
-          setIsMapOpen(false);
+          dispatchMap({
+            type: 'CANCEL_SAVE_MAP_NEW_POINT',
+            payload: { newPointCRS: map.currentCRS.value }
+          });
         }}
       />
     </div>
@@ -540,7 +537,7 @@ const DataFormFieldEditor = ({
         </ConfirmDialog>
       )} */}
 
-      {isMapOpen && (
+      {map.isMapOpen && (
         <Dialog
           className={'map-data'}
           blockScroll={false}
@@ -548,9 +545,9 @@ const DataFormFieldEditor = ({
           footer={saveMapCoordinatesDialogFooter}
           header={resources.messages['geospatialData']}
           modal={true}
-          onHide={() => setIsMapOpen(false)}
+          onHide={() => dispatchMap({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
           // style={{ height: '90vh', width: '80%' }}
-          visible={isMapOpen}>
+          visible={map.isMapOpen}>
           <div className="p-grid p-fluid">{renderMap()}</div>
         </Dialog>
       )}
