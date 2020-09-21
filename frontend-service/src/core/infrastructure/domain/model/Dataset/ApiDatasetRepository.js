@@ -403,8 +403,7 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
   datasetTableField.type = fieldType;
   datasetTableField.value = fieldValue;
 
-  const fieldUpdated = await apiDataset.updateFieldById(datasetId, datasetTableField);
-  return fieldUpdated;
+  return await apiDataset.updateFieldById(datasetId, datasetTableField);
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {

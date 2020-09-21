@@ -701,13 +701,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         } finally {
           if (!addAnotherOne) {
@@ -727,13 +721,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'UPDATE_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         } finally {
           onCancelRowEdit();
@@ -800,19 +788,14 @@ const DataViewer = withRouter(
           disabled={isSaving}
           label={resources.messages['save']}
           icon={!isSaving ? 'check' : 'spinnerAnimate'}
-          onClick={() => {
-            onSaveRecord(records.newRecord);
-          }}
+          onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
           className="p-button-secondary"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            dispatchRecords({
-              type: 'SET_NEW_RECORD',
-              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            });
+            dispatchRecords({ type: 'SET_NEW_RECORD', payload: RecordUtils.createEmptyObject(colsSchema, undefined) });
             setAddDialogVisible(false);
           }}
         />
@@ -821,13 +804,7 @@ const DataViewer = withRouter(
 
     const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          icon="check"
-          label={resources.messages['ok']}
-          onClick={() => {
-            setIsColumnInfoVisible(false);
-          }}
-        />
+        <Button icon="check" label={resources.messages['ok']} onClick={() => setIsColumnInfoVisible(false)} />
       </div>
     );
 
@@ -866,9 +843,7 @@ const DataViewer = withRouter(
 
     const getIconsValidationsErrors = validations => {
       let icons = [];
-      if (isNull(validations)) {
-        return icons;
-      }
+      if (isNull(validations)) return icons;
 
       const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
       const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
@@ -885,10 +860,7 @@ const DataViewer = withRouter(
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
-      return {
-        'p-highlight': id === selectedRecordErrorId,
-        'p-highlight-contextmenu': ''
-      };
+      return { 'p-highlight': id === selectedRecordErrorId, 'p-highlight-contextmenu': '' };
     };
 
     const requiredTemplate = rowData => {
@@ -955,9 +927,7 @@ const DataViewer = withRouter(
     }`;
 
     const onImportTableError = async ({ xhr, files }) => {
-      if (xhr.status === 423) {
-        notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
-      }
+      if (xhr.status === 423) notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
     };
 
     return (

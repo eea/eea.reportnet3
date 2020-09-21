@@ -23,7 +23,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataflowName: payload.dataflowName,
         datasetSchemaName: payload.schemaName,
-        metaData: payload.metaData
+        metaData: payload.metaData,
+        isWebformDataflow: payload.isWebformDataflow
       };
 
     case 'GET_UNIQUES':
@@ -115,6 +116,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
       return { ...state, isValidationViewerVisible: payload };
+
+    case 'ON_CHANGE_VIEW':
+      return { ...state, viewType: payload.viewType };
 
     default:
       return state;

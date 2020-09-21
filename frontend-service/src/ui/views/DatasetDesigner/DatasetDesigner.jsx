@@ -27,6 +27,7 @@ import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'primereact/menu';
+import { RadioButton } from 'ui/views/_components/RadioButton';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -35,6 +36,8 @@ import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
+import { Webform } from 'ui/views/Webform';
+import { Article15 } from 'ui/views/Webform/Article15';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -120,7 +123,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     tableSchemaNames: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
-    validationListDialogVisible: false
+    validationListDialogVisible: false,
+    isWebformDataflow: false,
+    viewType: { design: true, table: false, webform: false }
   });
 
   const exportMenuRef = useRef();
@@ -147,7 +152,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      setIsLoading(true);
+      // setIsLoading(true);
       const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
@@ -160,7 +165,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       ) {
         history.push(getUrl(routes.DATAFLOWS));
       }
-      setIsLoading(true);
+      // setIsLoading(true);
     }
   }, [userContext.contextRoles, designerState.metaData]);
 
@@ -230,7 +235,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
       type: 'GET_METADATA',
-      payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
+      payload: {
+        metaData,
+        dataflowName: metaData.dataflow.name,
+        schemaName: metaData.dataset.name,
+        isWebformDataflow: metaData.dataflow.name === 'Webform -- DEVELOP'
+      }
     });
   };
 
@@ -420,6 +430,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: inmDatasetSchemas } });
   };
 
+  const onChangeView = value => {
+    const viewType = { ...designerState.viewType };
+    Object.keys(viewType).forEach(view => {
+      viewType[view] = false;
+      viewType[value] = true;
+    });
+
+    designerDispatch({ type: 'ON_CHANGE_VIEW', payload: { viewType } });
+  };
+
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
@@ -450,8 +470,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       });
     }
   };
-
-  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
   const onExportError = async exportNotification => {
     const {
@@ -726,9 +744,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
-  const renderSwitchView = () => (
-    <div className={styles.switchDivInput}>
-      <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+  const renderRadioButtons = () =>
+    Object.keys(designerState.viewType).map((view, index) => (
+      <div className={styles.radioButton} key={index}>
+        <RadioButton
+          className={styles.button}
+          checked={designerState.viewType[view]}
+          inputId={view}
+          onChange={event => {
+            onChangeView(event.target.value);
+            if (view !== 'webform') changeMode(event.target.value === 'table');
+          }}
+          value={view}
+        />
+        <label className={styles.label} htmlFor={view}>
+          {view}
+        </label>
+      </div>
+    ));
+
+  const renderSwitchView = () => {
+    const swtichView = (
+      <Fragment>
         <span className={styles.switchTextInput}>{resources.messages['design']}</span>
         <InputSwitch
           checked={designerState.isPreviewModeOn}
@@ -738,9 +775,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onChange={event => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: event.value } })}
         />
         <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
+      </Fragment>
+    );
+
+    return (
+      <div className={styles.switchDivInput}>
+        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+          {designerState.isWebformDataflow ? renderRadioButtons() : swtichView}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderUniqueConstraintsDialog = () => (
     <Fragment>
@@ -970,34 +1015,39 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </Toolbar>
         </div>
         {renderSwitchView()}
-        <TabsDesigner
-          activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
-          changeMode={changeMode}
-          datasetSchemaDTO={designerState.datasetSchema}
-          datasetSchemas={designerState.datasetSchemas}
-          datasetStatistics={designerState.datasetStatistics}
-          editable={true}
-          history={history}
-          isPreviewModeOn={designerState.isPreviewModeOn}
-          isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
-          manageDialogs={manageDialogs}
-          manageUniqueConstraint={manageUniqueConstraint}
-          onChangeReference={onChangeReference}
-          onLoadTableData={onLoadTableData}
-          onTabChange={onTabChange}
-          onUpdateTable={onUpdateTable}
-          recordPositionId={designerState.dataViewerOptions.recordPositionId}
-          selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
-          setActiveIndex={index =>
-            designerDispatch({
-              type: 'SET_DATAVIEWER_OPTIONS',
-              payload: { ...designerState.dataViewerOptions, activeIndex: index }
-            })
-          }
-          setIsValidationSelected={isVisible =>
-            designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
-          }
-        />
+        {designerState.isWebformDataflow && designerState.viewType['webform'] ? (
+          // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+          <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+        ) : (
+          <TabsDesigner
+            activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
+            changeMode={changeMode}
+            datasetSchemaDTO={designerState.datasetSchema}
+            datasetSchemas={designerState.datasetSchemas}
+            datasetStatistics={designerState.datasetStatistics}
+            editable={true}
+            history={history}
+            isPreviewModeOn={designerState.isPreviewModeOn}
+            isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
+            manageDialogs={manageDialogs}
+            manageUniqueConstraint={manageUniqueConstraint}
+            onChangeReference={onChangeReference}
+            onLoadTableData={onLoadTableData}
+            onTabChange={onTabChange}
+            onUpdateTable={onUpdateTable}
+            recordPositionId={designerState.dataViewerOptions.recordPositionId}
+            selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
+            setActiveIndex={index =>
+              designerDispatch({
+                type: 'SET_DATAVIEWER_OPTIONS',
+                payload: { ...designerState.dataViewerOptions, activeIndex: index }
+              })
+            }
+            setIsValidationSelected={isVisible =>
+              designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
+            }
+          />
+        )}
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}
           isSnapshotDialogVisible={isSnapshotDialogVisible}
