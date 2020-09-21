@@ -55,6 +55,7 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
         payload: { data: historicReleases, filteredData: historicReleases }
       });
     } catch (error) {
+      console.log('error', error);
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
     } finally {
       isLoading(false);
@@ -199,7 +200,11 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
     );
   }
 
-  return (
+  return isEmpty(historicReleasesState.data) ? (
+    <div className={styles.historicReleasesWithoutTable}>
+      <div className={styles.noHistoricReleases}>{resources.messages['noHistoricReleases']}</div>
+    </div>
+  ) : (
     <div className={styles.historicReleases}>
       {historicReleasesView === 'dataCollection' && (
         <Filters

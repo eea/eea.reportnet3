@@ -862,10 +862,11 @@
     "isEUReleased": "EU Dataset",
     "releasedDate": "Release Date",
     "isDataCollectionReleased": "Data collection",
-    "noHistoricReleasesWithSelectedParameters": "There are no releases with the selected parameters",
+    "noHistoricReleasesWithSelectedParameters": "There are no historic releases with the selected parameters",
     "validationsDataColumn": "Validations",
     "datasetId": "Dataset Id",
     "datasetName": "Dataset Name",
-    "loadHistoricReleasesError": "Error loading integrations"
+    "loadHistoricReleasesError": "Error loading historic releases",
+    "noHistoricReleases": "There are no historic releases yet"
   }
 }
