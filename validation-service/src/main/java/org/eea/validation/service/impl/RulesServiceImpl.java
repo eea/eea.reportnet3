@@ -410,14 +410,6 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
-        case COORDINATE_LAT:
-          ruleList.add(AutomaticRules.createLatAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
-        case COORDINATE_LONG:
-          ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level

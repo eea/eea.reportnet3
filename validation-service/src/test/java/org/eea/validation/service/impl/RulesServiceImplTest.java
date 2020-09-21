@@ -363,39 +363,6 @@ public class RulesServiceImplTest {
   }
 
   /**
-   * Creates the automatic rules long test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createAutomaticRulesLongTest() throws EEAException {
-    RulesSchema ruleSchema = new RulesSchema();
-    ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
-    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        DataType.COORDINATE_LAT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
-
-  }
-
-
-  /**
-   * Creates the automatic rules lat test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createAutomaticRulesLatTest() throws EEAException {
-    RulesSchema ruleSchema = new RulesSchema();
-    ruleSchema.setRules(new ArrayList<Rule>());
-    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
-    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        DataType.COORDINATE_LONG, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
-
-  }
-
-  /**
    * Creates the automatic rules date test.
    *
    * @throws EEAException the EEA exception
@@ -408,9 +375,7 @@ public class RulesServiceImplTest {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.DATE, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
-
   }
-
 
   /**
    * Creates the automatic rules number decimal test.
@@ -431,7 +396,6 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
-
   /**
    * Creates the automatic rules URL test.
    *
@@ -450,7 +414,6 @@ public class RulesServiceImplTest {
         DataType.URL, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
-
 
   /**
    * Creates the automatic rules email test.
@@ -522,7 +485,6 @@ public class RulesServiceImplTest {
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.TEXT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesSequenceRepository, times(1)).updateSequence(Mockito.any());
-
   }
 
   /**
@@ -551,7 +513,6 @@ public class RulesServiceImplTest {
   public void deleteEmptyRulesScehmaNoSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
     rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
-
     Mockito.verify(rulesRepository, times(1)).findByIdDatasetSchema(Mockito.any());
   }
 
