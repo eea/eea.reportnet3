@@ -18,7 +18,7 @@
 
   <artifactId>validation-service</artifactId>
   <groupId>org.eea.validation</groupId>
-  <version>1.0-SNAPSHOT</version>
+  <version>${validation.version}</version>
 
   <dependencies>
 
