@@ -95,6 +95,7 @@ const TabsValidations = withRouter(
       try {
         const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
 
+
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
             const additionalInfo = getAdditionalValidationInfo(
@@ -280,8 +281,7 @@ const TabsValidations = withRouter(
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
-        visible={tabsValidationsState.isDeleteDialogVisible}
-        >
+        visible={tabsValidationsState.isDeleteDialogVisible}>
         {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );
@@ -358,17 +358,18 @@ const TabsValidations = withRouter(
     const validationList = () => {
       if (tabsValidationsState.isLoading) {
         return (
-        <div className={styles.validationsWithoutTable}>
-          <div className={styles.loadingSpinner}><Spinner style={{ top: 0, left: 0 }} /></div>
-        </div>);
+          <div className={styles.validationsWithoutTable}>
+            <div className={styles.loadingSpinner}>
+              <Spinner style={{ top: 0, left: 0 }} />
+            </div>
+          </div>
+        );
       }
 
       if (checkIsEmptyValidations()) {
         return (
           <div className={styles.validationsWithoutTable}>
-            <div className={styles.noValidations}>
-              {resources.messages['emptyValidations']}
-            </div>
+            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
           </div>
         );
       }

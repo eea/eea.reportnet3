@@ -154,8 +154,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [relationsErrors]);
 
   useEffect(() => {
-    if (validationContext.referenceId) {
+    if (validationContext.referenceId && isNil(validationContext.ruleToEdit.sqlSentence)) {
       const table = getSelectedTableByFieldId(validationContext.ruleToEdit.relations.links[0].originField.code, tabs);
+
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
@@ -200,7 +201,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
-        payload: parseRuleToEdit(validationContext.ruleToEdit)
+        payload: isNil(validationContext.ruleToEdit.sqlSentence)
+          ? parseRuleToEdit(validationContext.ruleToEdit)
+          : validationContext.ruleToEdit
       });
     }
   }, [validationContext.ruleEdit]);
