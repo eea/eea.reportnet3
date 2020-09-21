@@ -19,14 +19,14 @@
     <dataflow.version>3.0.1</dataflow.version>
     <dataset.version>3.0.1</dataset.version>
     <document.version>3.0.1</document.version>
-    <frontend.version>3.0.1</frontend.version>
+    <frontend.version>3.0.2</frontend.version>
     <indexsearch.version>3.0.0</indexsearch.version>
     <inspire.version>3.0.0</inspire.version>
     <recordstore.version>3.0.1</recordstore.version>
-    <ums.version>3.0.2</ums.version>
+    <ums.version>3.0.3</ums.version>
     <validation.version>3.0.1</validation.version>
-    <common-interfaces.version>3.0.1</common-interfaces.version>
-    <common-utitlities.version>3.0.1</common-utitlities.version>
+    <common-interfaces.version>3.0.2</common-interfaces.version>
+    <common-utitlities.version>3.0.2</common-utitlities.version>
     <rod.version>3.0.0</rod.version>
   </properties>
 </project>

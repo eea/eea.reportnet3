@@ -748,6 +748,89 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Mockito.verify(keycloakConnectorService, Mockito.times(1))
         .addUserToGroup(Mockito.eq("user1"), Mockito.eq("group1"));
   }
+
+  @Test
+  public void authenticateEmail() {
+    ReflectionTestUtils
+        .setField(keycloakSecurityProviderInterfaceService, "users", new ArrayList<>());
+    // Configuration of user representations for "userId1"
+    UserRepresentation[] userRepresentations = new UserRepresentation[1];
+    UserRepresentation userRepresentation = new UserRepresentation();
+    userRepresentations[0] = userRepresentation;
+    Map<String, List<String>> attributes = new HashMap<>();
+
+    userRepresentation.setAttributes(attributes);
+    userRepresentation.setId("userId1");
+    userRepresentation.setUsername("userName1");
+    userRepresentation.setEmail("userName1@reportnet.net");
+    when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
+
+    // Configuration of group info for the user "userId1"
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
+    groupInfo.setPath("/Dataflow-1-LEAD_REPORTER");
+    groupInfos[0] = groupInfo;
+    when(keycloakConnectorService.getGroupsByUser(Mockito.eq("userId1"))).thenReturn(groupInfos);
+
+    // Configuration of user roles for user "userId1"
+    RoleRepresentation[] roleRepresentations = new RoleRepresentation[1];
+    RoleRepresentation roleRepresentation = new RoleRepresentation();
+    roleRepresentation.setName("LEAD_REPORTER");
+    roleRepresentations[0] = roleRepresentation;
+    when(keycloakConnectorService.getUserRoles(Mockito.eq("userId1")))
+        .thenReturn(roleRepresentations);
+
+    TokenVO result = keycloakSecurityProviderInterfaceService
+        .authenticateEmail("userName1@reportnet.net");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("userId1", result.getUserId());
+    Assert.assertEquals("userName1", result.getPreferredUsername());
+    Assert.assertEquals(1, result.getGroups().size());
+    Assert.assertEquals(1, result.getRoles().size());
+    Assert.assertEquals("Dataflow-1-LEAD_REPORTER", result.getGroups().iterator().next());
+    Assert.assertEquals("LEAD_REPORTER", result.getRoles().iterator().next());
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).getUsers();
+  }
+
+  @Test
+  public void authenticateEmailAuthFail() {
+    ReflectionTestUtils
+        .setField(keycloakSecurityProviderInterfaceService, "users", new ArrayList<>());
+    // Configuration of user representations for "userId1"
+    UserRepresentation[] userRepresentations = new UserRepresentation[1];
+    UserRepresentation userRepresentation = new UserRepresentation();
+    userRepresentations[0] = userRepresentation;
+    Map<String, List<String>> attributes = new HashMap<>();
+
+    userRepresentation.setAttributes(attributes);
+    userRepresentation.setId("otherUser");
+    userRepresentation.setUsername("otherUser");
+    userRepresentation.setEmail("otherUser@reportnet.net");
+    when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
+
+    // Configuration of group info for the user "userId1"
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
+    groupInfo.setPath("/Dataflow-1-LEAD_REPORTER");
+    groupInfos[0] = groupInfo;
+    when(keycloakConnectorService.getGroupsByUser(Mockito.eq("userId1"))).thenReturn(groupInfos);
+
+    // Configuration of user roles for user "userId1"
+    RoleRepresentation[] roleRepresentations = new RoleRepresentation[1];
+    RoleRepresentation roleRepresentation = new RoleRepresentation();
+    roleRepresentation.setName("LEAD_REPORTER");
+    roleRepresentations[0] = roleRepresentation;
+    when(keycloakConnectorService.getUserRoles(Mockito.eq("userId1")))
+        .thenReturn(roleRepresentations);
+
+    TokenVO result = keycloakSecurityProviderInterfaceService
+        .authenticateEmail("userName1@reportnet.net");
+    Assert.assertNull(result);
+
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).getUsers();
+  }
 }
 
 
