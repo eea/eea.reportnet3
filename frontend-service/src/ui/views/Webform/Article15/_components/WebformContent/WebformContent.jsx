@@ -1,6 +1,8 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
+import isNil from 'lodash/isNil';
+
 import styles from './WebformContent.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -9,9 +11,7 @@ import { WebformRecord } from './_components/WebformRecord';
 import { DatasetService } from 'core/services/Dataset';
 
 export const WebformContent = ({ datasetId, webform }) => {
-  const [webformData, setWebformData] = useState(webform);
-  console.log('webformData', webformData);
-
+  console.log('webform', webform);
   useEffect(() => {
     onLoadTableData();
   }, []);
@@ -28,31 +28,24 @@ export const WebformContent = ({ datasetId, webform }) => {
         'BLOCKER'
       ]);
 
-      console.log('tableData', tableData);
+      let filteredFields = webform.webformRecords.map(record =>
+        tableData.records.filter(tableRecord => tableRecord.recordSchemaId === record.webformFields[0].recordId)
+      )[0];
 
-      // const result = [];
-
-      // for (let i = 0; i < webformData.records.length; i++) {
-      //   const tableFields = tableData.records.find(
-      //     element => element['recordSchemaId'] === webformData.records[i]['recordSchemaId']
-      //   ).fields;
-
-      //   const webformFields = webformData.records[i].fields;
-
-      //   result.push({
-      //     ...webformData.records[i],
-      //     ...tableData.records.find(element => element['recordSchemaId'] === webformData.records[i]['recordSchemaId']),
-      //     allFields: tableFields.map(element => {
-      //       const field = Object.assign({}, element);
-      //       field['name'] = webformFields.filter(wffield => wffield.fieldId === field.fieldSchemaId)[0].name;
-      //       // TODO: Continue adding parameters
-      //       return field;
-      //     })
-      //   });
-      // }
-
-      // // console.log('result', result);
-      // return result;
+      webform.webformRecords.forEach(record => {
+        record.webformFields.forEach((field, i) => {
+          if (!isNil(filteredFields)) {
+            let filteredTableField = filteredFields[0].fields.filter(
+              filteredField => filteredField.fieldSchemaId === field.fieldId
+            );
+            if (!isNil(filteredTableField)) {
+              field.recordSchemaId = filteredFields[0].recordId;
+              field.fieldSchemaId = filteredTableField[0].fieldId;
+              field.value = filteredFields[0].fields[i].value;
+            }
+          }
+        });
+      });
     } catch (error) {
       console.log('error', error);
     }

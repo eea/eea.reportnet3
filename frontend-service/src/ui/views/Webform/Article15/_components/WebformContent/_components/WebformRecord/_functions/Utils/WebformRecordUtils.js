@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
 const getFormInitialValues = fields => {
@@ -20,23 +21,25 @@ const getFormInitialValues = fields => {
 };
 
 const parseNewRecordData = (columnsSchema = [{ recordId: null }], data) => {
-  let fields;
+  if (!isEmpty(columnsSchema)) {
+    let fields;
 
-  if (!isUndefined(columnsSchema)) {
-    fields = columnsSchema.map(column => {
-      return {
-        fieldData: { [column.fieldId]: null, type: column.type, fieldSchemaId: column.fieldId }
-      };
-    });
+    if (!isUndefined(columnsSchema)) {
+      fields = columnsSchema.map(column => {
+        return {
+          fieldData: { [column.fieldId]: null, type: column.type, fieldSchemaId: column.fieldId }
+        };
+      });
+    }
+
+    const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
+
+    obj.datasetPartitionId = null;
+    //dataSetPartitionId is needed for checking the rows owned by delegated contributors
+    if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
+
+    return obj;
   }
-
-  const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
-
-  obj.datasetPartitionId = null;
-  //dataSetPartitionId is needed for checking the rows owned by delegated contributors
-  if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
-  return obj;
 };
 
 export const WebformRecordUtils = { getFormInitialValues, parseNewRecordData };

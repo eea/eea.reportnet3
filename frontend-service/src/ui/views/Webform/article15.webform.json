@@ -75,5 +75,55 @@
         ]
       }
     ]
+  },
+  {
+    "webformId": 6,
+    "webformIndex": 5,
+    "webformTitle": "QA_QC_C2",
+    "multipleRecords": false,
+    "webformRecords": [
+      {
+        "title": "QA_QC_C2",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "LegalPolicyFrameworks", "fieldType": "TEXT" },
+          { "fieldName": "ArrangementsCCIV_assessments", "fieldType": "TEXT" },
+          { "fieldName": "DescribeInstitutionalArrangements", "fieldType": "TEXT" },
+          { "fieldName": "DescribeClimateChangeResilience", "fieldType": "TEXT" },
+          { "fieldName": "DescribeCollection", "fieldType": "TEXT" },
+          { "fieldName": "DescribeClimateChangeImpacts and adaptation", "fieldType": "TEXT" },
+          { "fieldName": "SummarizeLegalRequirements", "fieldType": "TEXT" },
+          { "fieldName": "ArrangementsCCIV_assessments", "fieldType": "TEXT" },
+          { "fieldName": "SummarizeNetworks", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 7,
+    "webformIndex": 6,
+    "webformTitle": "NAS",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "NAS",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Title", "fieldType": "TEXT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              "being developed",
+              "completed and submitted for adoption",
+              "actual NAS - adopted",
+              "previous NAS - superseded"
+            ]
+          },
+          { "fieldName": "Year", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "WebLink", "fieldType": "LINK" }
+        ]
+      }
+    ]
   }
 ]
