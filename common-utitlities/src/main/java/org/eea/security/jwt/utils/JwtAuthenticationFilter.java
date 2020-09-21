@@ -60,28 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       TokenDataVO token = null;
       if (StringUtils.hasText(jwt) && (token = tokenProvider.retrieveToken(jwt)) != null) {
-        String username = token.getPreferredUsername();
-        Map<String, Object> otherClaims = token.getOtherClaims();
-
-        Set<String> roles = token.getRoles();
-        List<String> groups = (List<String>) otherClaims.get("user_groups");
-        if (null != groups && !groups.isEmpty()) {
-          groups.stream().map(group -> {
-            if (group.startsWith("/")) {
-              group = group.substring(1);
-            }
-            return group.toUpperCase();
-          }).forEach(roles::add);
-        }
-        UserDetails userDetails = EeaUserDetails.create(username, roles);
-        //Adding again the toke type so it can be used in EeaFeignSecurityInterceptor regardless the token type
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(userDetails, BEARER_TOKEN + jwt,
-                userDetails.getAuthorities());
-        Map<String, String> details = new HashMap<>();
-        details.put(AuthenticationDetails.USER_ID, token.getUserId());
-        authentication.setDetails(details);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        AuthenticationUtils.performAuthentication(token, BEARER_TOKEN + jwt);
       }
     } catch (VerificationException e) {
       //before showing error check if invocation came from feign client and toke was dued during the previous process

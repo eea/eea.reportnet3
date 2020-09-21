@@ -689,6 +689,56 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  @Override
+  public TokenVO authenticateEmail(String email) {
+    List<UserRepresentation> userRepresentations = new ArrayList<>();
+
+    synchronized (this.users) {
+      int usersReload = 0;
+
+      do {
+        for (UserRepresentation userRepresentation : this.users) {
+          if (email.equals(userRepresentation.getEmail())) {
+            userRepresentations.add(userRepresentation);
+            usersReload = 2;
+            break;
+          }
+        }
+        if (userRepresentations.size() == 0) {
+          usersReload++;
+          if (usersReload
+              < 2) { //ensure that there is only one invocation to Keycloak to retrieve users
+            users.clear(); // just in case the user was not found in
+            users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
+          }
+        }
+      } while (usersReload < 2);
+    }
+    TokenVO tokenVO = null;
+    if (1 == userRepresentations.size()) {
+      UserRepresentation user = userRepresentations.get(0);
+      LOG.info("Found user {} with email {}", user.getUsername(), email);
+      tokenVO = new TokenVO();
+      tokenVO.setUserId(user.getId());
+      tokenVO.setPreferredUsername(user.getUsername());
+      Set<String> userGroups = new HashSet<>();
+      for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
+        userGroups.add(groupInfo.getName());
+      }
+      tokenVO.setGroups(userGroups);
+
+      tokenVO.setRoles(Arrays.asList(keycloakConnectorService.getUserRoles(user.getId())).stream()
+          .map(RoleRepresentation::getName).collect(Collectors.toSet()));
+
+      LOG.info("User {} logged in and cached succesfully via email {}",
+          tokenVO.getPreferredUsername(), email);
+    } else {
+      LOG_ERROR.error("{} users found with email {} ", userRepresentations.size(), email);
+    }
+
+    return tokenVO;
+  }
+
   /**
    * Creates the api key.
    *
