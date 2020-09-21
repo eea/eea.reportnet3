@@ -105,11 +105,6 @@ export const recordReducer = (state, { type, payload }) => {
         newPoint: `${payload.coordinates[0]}, ${payload.coordinates[1]}`,
         newPointCRS: payload.crs
       };
-    case 'SET_MAP_NEW_POINT_CRS':
-      return {
-        ...state,
-        newPointCRS: payload
-      };
     case 'SET_MAP_CRS':
       return {
         ...state,

@@ -63,6 +63,7 @@ const DataFormFieldEditor = ({
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState('');
   const [newPoint, setNewPoint] = useState('');
+  const [newPointCRS, setNewPointCRS] = useState('EPSG:4326');
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
@@ -97,15 +98,16 @@ const DataFormFieldEditor = ({
     setMapCoordinates(coordinates);
   };
 
-  const onSavePoint = coordinates => {
-    console.log(MapUtils.parseCoordinates(coordinates), coordinates);
+  const onSavePoint = (coordinates, crs) => {
+    console.log(MapUtils.parseCoordinates(coordinates), coordinates, crs);
     if (coordinates !== '') {
       const inmMapGeoJson = cloneDeep(fieldValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
-      parsedInmMapGeoJson.properties.rsid = currentCRS.value;
+      parsedInmMapGeoJson.properties.rsid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
+    setCurrentCRS(crs);
     setIsMapOpen(false);
   };
 
@@ -114,7 +116,8 @@ const DataFormFieldEditor = ({
     setNewPoint(coordinates);
     console.log({ coordinates });
     const filteredCrs = crs.filter(crsItem => crsItem.value === selectedCrs)[0];
-    setCurrentCRS(filteredCrs);
+    // setCurrentCRS(filteredCrs);
+    setNewPointCRS(filteredCrs);
   };
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
@@ -477,7 +480,7 @@ const DataFormFieldEditor = ({
         // disabled={isSaving}
         label={resources.messages['save']}
         icon={'check'}
-        onClick={() => onSavePoint(newPoint)}
+        onClick={() => onSavePoint(newPoint, newPointCRS)}
       />
       <Button
         className="p-button-secondary"
@@ -488,6 +491,8 @@ const DataFormFieldEditor = ({
           //   type: 'SET_NEW_RECORD',
           //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
           // });
+          setNewPoint('');
+          setNewPointCRS(currentCRS.value);
           setIsMapOpen(false);
         }}
       />
