@@ -150,8 +150,12 @@ export const TabsDesigner = withRouter(
           table.showContextMenu = false;
           table.toPrefill = table.tableSchemaToPrefill;
         });
-        //Add tab Button/Tab
+        //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
+        inmDatasetSchema.tables = inmDatasetSchema.tables.filter(
+          table => table.tableSchemaId !== undefined && table.addTab === false
+        );
         inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
+
         setDatasetSchema(inmDatasetSchema);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
