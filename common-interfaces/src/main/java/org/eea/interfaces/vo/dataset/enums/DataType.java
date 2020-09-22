@@ -37,6 +37,7 @@ public enum DataType {
    * Cast in JPA: CAST(fv.value as java.math.BigDecimal)
    */
   NUMBER_DECIMAL("NUMBER_DECIMAL", JavaType.NUMBER),
+
   /**
    * The Date.
    *
@@ -52,12 +53,60 @@ public enum DataType {
   BOOLEAN("BOOLEAN", JavaType.BOOLEAN),
 
   /**
-   * The geometry.
+   * The position.
    * 
-   * A String representing a GeoJSON object. ObjectMapper.readTree(...) should be used to transform
-   * into JSON.
+   * A String representing a GeoJSON Position object. ObjectMapper.readTree(...) should be used to
+   * transform into JSON.
    */
-  GEOMETRY("GEOMETRY", JavaType.JSON),
+  POSITION("POSITION", JavaType.JSON),
+
+  /**
+   * The linestring.
+   * 
+   * A String representing a GeoJSON LineString object. ObjectMapper.readTree(...) should be used to
+   * transform into JSON.
+   */
+  LINESTRING("LINESTRING", JavaType.JSON),
+
+  /**
+   * The multilinestring.
+   * 
+   * A String representing a GeoJSON MultiLineString object. ObjectMapper.readTree(...) should be
+   * used to transform into JSON.
+   */
+  MULTILINESTRING("MULTILINESTRING", JavaType.JSON),
+
+  /**
+   * The point.
+   * 
+   * A String representing a GeoJSON Point object. ObjectMapper.readTree(...) should be used to
+   * transform into JSON.
+   */
+  POINT("POINT", JavaType.JSON),
+
+  /**
+   * The MultiPoint.
+   * 
+   * A String representing a GeoJSON MultiPoint object. ObjectMapper.readTree(...) should be used to
+   * transform into JSON.
+   */
+  MULTIPOINT("MULTIPOINT", JavaType.JSON),
+
+  /**
+   * The polygon.
+   * 
+   * A String representing a GeoJSON Polygon object. ObjectMapper.readTree(...) should be used to
+   * transform into JSON.
+   */
+  POLYGON("POLYGON", JavaType.JSON),
+
+  /**
+   * The geometrycollection.
+   * 
+   * A String representing a GeoJSON GeometryCollection object. ObjectMapper.readTree(...) should be
+   * used to transform into JSON.
+   */
+  GEOMETRYCOLLECTION("POLYGON", JavaType.JSON),
 
   /**
    * The codelist.
