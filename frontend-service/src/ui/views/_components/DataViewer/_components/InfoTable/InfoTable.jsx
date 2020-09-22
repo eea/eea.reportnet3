@@ -52,7 +52,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         return decimalCharacters;
       case 'CODELIST':
         return codelistTextCharacters;
-      case 'POINT':
+      case 'GEOMETRY':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -196,7 +196,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       />
     ) : null;
   };
-
+  console.log({ filteredColumns, data });
   return (
     <React.Fragment>
       <InfoTableMessages data={data} filteredColumns={filteredColumns} numCopiedRecords={numCopiedRecords} />

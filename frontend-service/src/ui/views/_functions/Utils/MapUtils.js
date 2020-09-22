@@ -1,4 +1,6 @@
 const checkValidCoordinates = coordinates => {
+  console.log({ coordinates });
+  if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.indexOf(',') === -1) return false;
   }

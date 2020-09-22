@@ -151,8 +151,11 @@ export const useSetColumns = (
   };
 
   const renderPoint = (value = '') => {
-    const parsedGeoJson = JSON.parse(value);
-    return value !== '' ? `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}` : '';
+    if (value !== '') {
+      const parsedGeoJson = JSON.parse(value);
+      return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+    }
+    return '';
   };
 
   const getTooltipMessage = column => {
@@ -205,7 +208,7 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'GEOMETRY'
               ? field.fieldData[column.field].sort().join(', ')
               : // : Array.isArray(field.fieldData[column.field])
               // ? field.fieldData[column.field].join(', ')
@@ -218,7 +221,7 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'POINT'
+              : field.fieldData.type === 'GEOMETRY'
               ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
@@ -234,7 +237,7 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'GEOMETRY'
               ? // ? field.fieldData[column.field].sort().join(', ')
                 // : Array.isArray(field.fieldData[column.field])
                 field.fieldData[column.field].join(', ')
@@ -247,7 +250,7 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'POINT'
+              : field.fieldData.type === 'GEOMETRY'
               ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}

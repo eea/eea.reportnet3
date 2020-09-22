@@ -58,7 +58,11 @@ const FieldEditor = ({
         )[0]
       : { label: 'WGS84', value: 'EPSG:4326' }
   );
-  const [isMapDisabled, setIsMapDisabled] = useState(false);
+  const [isMapDisabled, setIsMapDisabled] = useState(
+    !MapUtils.checkValidCoordinates(
+      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+    )
+  );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
@@ -70,7 +74,7 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
-    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
+    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'GEOMETRY') {
       onChangePointCRS(currentCRS.value);
     }
   }, []);
@@ -223,7 +227,7 @@ const FieldEditor = ({
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
-      case 'POINT':
+      case 'GEOMETRY':
         return (
           <div className={styles.pointWrapper}>
             <InputText

@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -270,6 +271,15 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
   return tableOrdered;
 };
 
+const parseValue = (type, value) => {
+  if (type === 'GEOMETRY' && value !== '') {
+    const inmValue = JSON.parse(cloneDeep(value));
+    inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
+    return JSON.stringify(inmValue);
+  }
+  return value;
+};
+
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   const rulesDTO = await apiValidation.getAll(datasetSchemaDTO.idDataSetSchema);
@@ -347,13 +357,14 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 
     const records = tableDataDTO.records.map(dataTableRecordDTO => {
       const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
+        console.log(DataTableFieldDTO.value);
         field = new DatasetTableField({
           fieldId: DataTableFieldDTO.id,
           fieldSchemaId: DataTableFieldDTO.idFieldSchema,
           name: DataTableFieldDTO.name,
           recordId: dataTableRecordDTO.idRecordSchema,
           type: DataTableFieldDTO.type,
-          value: DataTableFieldDTO.value
+          value: parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
         });
 
         //TODO: Swap coordinates if type POINT ^

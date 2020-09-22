@@ -52,9 +52,11 @@ const DataFormFieldEditor = ({
 
   const inputRef = useRef(null);
 
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
-      fieldValue !== '' && type === 'POINT'
+      fieldValue !== '' && type === 'GEOMETRY'
         ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
         : { label: 'WGS84', value: 'EPSG:4326' },
     // isAttachFileVisible, setIsAttachFileVisible] = useState(false);
@@ -71,6 +73,14 @@ const DataFormFieldEditor = ({
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
       if (type === 'LINK') onLoadColsSchema(fieldValue);
+      if (type === 'GEOMETRY') {
+        dispatchMap({
+          type: 'TOGGLE_MAP_DISABLED',
+          payload: !MapUtils.checkValidCoordinates(
+            fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''
+          )
+        });
+      }
     }
   }, []);
 
@@ -231,7 +241,7 @@ const DataFormFieldEditor = ({
         return longCharacters;
       case 'NUMBER_DECIMAL':
         return decimalCharacters;
-      case 'POINT':
+      case 'GEOMETRY':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -264,7 +274,7 @@ const DataFormFieldEditor = ({
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)
-    ) : type === 'POINT' ? (
+    ) : type === 'GEOMETRY' ? (
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
@@ -395,11 +405,7 @@ const DataFormFieldEditor = ({
 
   const renderMap = () => (
     <Map
-      geoJson={
-        fieldValue !== ''
-          ? fieldValue
-          : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
-      }
+      geoJson={fieldValue !== '' ? fieldValue : fieldEmptyPointValue}
       onSelectPoint={onSelectPoint}
       selectedCRS={map.currentCRS.value}></Map>
   );
@@ -412,17 +418,28 @@ const DataFormFieldEditor = ({
           disabled={column.readOnly && reporting}
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
-            onChangeForm(field, changePoint(JSON.parse(fieldValue), e.target.value, map.currentCRS.value, false))
-          }
-          onChange={e => {
-            if (fieldValue === '') {
-              fieldValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
-            }
             onChangeForm(
               field,
-              changePoint(JSON.parse(fieldValue), e.target.value, map.currentCRS.value, false, false)
-            );
-          }}
+              changePoint(
+                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+                e.target.value,
+                map.currentCRS.value,
+                false
+              )
+            )
+          }
+          onChange={e =>
+            onChangeForm(
+              field,
+              changePoint(
+                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+                e.target.value,
+                map.currentCRS.value,
+                false,
+                false
+              )
+            )
+          }
           // onFocus={e => {
           //   e.preventDefault();
           //   onEditorValueFocus(cells, e.target.value);
@@ -430,13 +447,7 @@ const DataFormFieldEditor = ({
           // onKeyDown={e => onEditorKeyChange(cells, e, record)}
           style={{ width: '50%' }}
           type="text"
-          value={
-            fieldValue !== ''
-              ? JSON.parse(fieldValue).geometry.coordinates.join(', ')
-              : JSON.parse(
-                  `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
-                ).geometry.coordinates.join(', ')
-          }
+          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''}
         />
       </div>
 
@@ -452,7 +463,11 @@ const DataFormFieldEditor = ({
           onChange={e => {
             onChangeForm(
               field,
-              changePoint(JSON.parse(fieldValue), JSON.parse(fieldValue).geometry.coordinates, e.target.value)
+              changePoint(
+                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+                JSON.parse(fieldValue).geometry.coordinates,
+                e.target.value
+              )
             );
             dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
             // onChangePointCRS(e.target.value.value);

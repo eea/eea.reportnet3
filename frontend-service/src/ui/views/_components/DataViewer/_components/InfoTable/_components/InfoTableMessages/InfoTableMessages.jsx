@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import colors from 'conf/colors.json';
 

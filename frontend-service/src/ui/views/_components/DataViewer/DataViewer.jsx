@@ -357,14 +357,14 @@ const DataViewer = withRouter(
         );
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
           //TODO: DELETE
-          tableData.records.forEach(record => {
-            record.fields.forEach(field => {
-              if (field.type === 'POINT') {
-                //Swap coordinates
-                field.value = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[40.916881,-4.2033552]}, "properties": {"rsid": "EPSG:4326"}}`;
-              }
-            });
-          });
+          // tableData.records.forEach(record => {
+          //   record.fields.forEach(field => {
+          //     if (field.type === 'GEOMETRY') {
+          //       //Swap coordinates
+          //       field.value = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[40.916881,-4.2033552]}, "properties": {"rsid": "EPSG:4326"}}`;
+          //     }
+          //   });
+          // });
           //
 
           onLoadTableData(true);
