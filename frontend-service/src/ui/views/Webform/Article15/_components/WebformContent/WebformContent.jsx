@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './WebformContent.module.scss';
@@ -11,7 +12,6 @@ import { WebformRecord } from './_components/WebformRecord';
 import { DatasetService } from 'core/services/Dataset';
 
 export const WebformContent = ({ datasetId, webform }) => {
-  console.log('webform', webform);
   useEffect(() => {
     onLoadTableData();
   }, []);
@@ -34,7 +34,7 @@ export const WebformContent = ({ datasetId, webform }) => {
 
       webform.webformRecords.forEach(record => {
         record.webformFields.forEach((field, i) => {
-          if (!isNil(filteredFields)) {
+          if (!isNil(filteredFields) && !isEmpty(filteredFields)) {
             let filteredTableField = filteredFields[0].fields.filter(
               filteredField => filteredField.fieldSchemaId === field.fieldId
             );

@@ -1,6 +1,6 @@
 export const webformRecordReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'typeName':
+    case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
     case 'ON_FILL_FIELD':

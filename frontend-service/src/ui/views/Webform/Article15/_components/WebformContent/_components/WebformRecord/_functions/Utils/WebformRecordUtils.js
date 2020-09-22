@@ -6,18 +6,35 @@ const getFormInitialValues = fields => {
 
   fields.forEach(field => {
     initialValues[field.fieldId] = {
-      fieldId: field.fieldId,
-      fieldSchemaId: field.fieldId,
+      fieldId: field.fieldSchemaId,
       fieldName: field.fieldName,
+      fieldSchemaId: field.fieldId,
       fieldType: field.fieldType,
       newValue: '',
-      recordId: field.recordId,
+      recordId: field.recordSchemaId,
+      recordSchemaId: field.recordId,
       required: field.required,
-      value: ''
+      value: field.value
     };
   });
 
   return initialValues;
+};
+
+const getRecordsInitialValues = (records = {}) => {
+  console.log('records', records);
+  records.webformFields = records.webformFields.map(field => ({
+    fieldId: field.fieldSchemaId,
+    fieldName: field.fieldName,
+    fieldSchemaId: field.fieldId,
+    fieldType: field.fieldType,
+    newValue: '',
+    recordId: field.recordSchemaId,
+    recordSchemaId: field.recordId,
+    required: field.required,
+    value: field.value
+  }));
+  return records;
 };
 
 const parseNewRecordData = (columnsSchema = [{ recordId: null }], data) => {
@@ -42,4 +59,4 @@ const parseNewRecordData = (columnsSchema = [{ recordId: null }], data) => {
   }
 };
 
-export const WebformRecordUtils = { getFormInitialValues, parseNewRecordData };
+export const WebformRecordUtils = { getFormInitialValues, parseNewRecordData, getRecordsInitialValues };
