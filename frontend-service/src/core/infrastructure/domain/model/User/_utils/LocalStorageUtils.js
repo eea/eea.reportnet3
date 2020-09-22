@@ -1,6 +1,6 @@
 import isNil from 'lodash/isNil';
 
-import { config } from 'conf';
+import { config } from 'conf/index';
 
 const { storage: storageConfig } = config;
 
