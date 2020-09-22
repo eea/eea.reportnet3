@@ -12,6 +12,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.service.SqlRulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,10 @@ public class RulesControllerImpl implements RulesController {
   /** The rules service. */
   @Autowired
   private RulesService rulesService;
+
+  /** The sql rules service. */
+  @Autowired
+  private SqlRulesService sqlRulesService;
 
   /**
    * Creates the empty rules schema.
@@ -448,6 +453,21 @@ public class RulesControllerImpl implements RulesController {
   public List<RuleVO> findSqlSentencesByDatasetSchemaId(
       @RequestParam("datasetSchemaId") String datasetSchemaId) {
     return rulesService.findSqlSentencesByDatasetSchemaId(datasetSchemaId);
+  }
+
+  /**
+   * Validate sql rule data collection.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   */
+  @Override
+  @GetMapping("/private/validateSqlRuleDataCollection")
+  public void validateSqlRuleDataCollection(@RequestParam("query") String query,
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("ruleVO") RuleVO ruleVO) {
+    sqlRulesService.validateSQLRuleFromDatacollection(query, datasetId, datasetSchemaId, ruleVO);
   }
 
 

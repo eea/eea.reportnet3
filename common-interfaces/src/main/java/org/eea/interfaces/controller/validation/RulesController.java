@@ -268,4 +268,19 @@ public interface RulesController {
   @GetMapping("/private/findSqlSentencesByDatasetSchemaId")
   List<RuleVO> findSqlSentencesByDatasetSchemaId(
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Validate sql rule data collection.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @GetMapping("/private/validateSqlRuleDataCollection")
+  void validateSqlRuleDataCollection(@RequestParam("query") String query,
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("ruleVO") RuleVO ruleVO);
+
 }

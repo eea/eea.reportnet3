@@ -9,10 +9,12 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -70,6 +72,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
+  @Autowired
+  private RuleMapper ruleMapper;
+
   /**
    * Validate SQL rule.
    *
@@ -101,6 +106,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     releaseNotification(notificationEventType, notificationVO);
   }
 
+  /**
+   * Validate SQL rule from datacollection.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   */
+  @Override
+  public void validateSQLRuleFromDatacollection(String query, Long datasetId,
+      String datasetSchemaId, RuleVO ruleVO) {
+    if (validateRule(query, datasetId).equals(Boolean.FALSE)) {
+      Rule rule = ruleMapper.classToEntity(ruleVO);
+      rule.setVerified(false);
+      rule.setEnabled(false);
+      LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    }
+
+
+  }
 
   /**
    * Release notification.
@@ -384,6 +410,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   public TableValue retrivedata(String query) throws SQLException {
     return datasetRepository.queryRSExecution(query);
   }
+
 
 
 }
