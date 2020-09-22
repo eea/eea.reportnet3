@@ -45,8 +45,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The Constant COMMA: {@value}. */
   private static final String COMMA = ", ";
 
+  /** The Constant SELECT: {@value}. */
   private static final String SELECT = "SELECT";
 
+  /** The Constant FROM: {@value}. */
   private static final String FROM = "FROM";
 
   /** The Constant KEYWORDS: {@value}. */
@@ -71,11 +73,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Validate SQL rule.
    *
+   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    */
   @Async
-  @SuppressWarnings("unchecked")
   @Override
   public void validateSQLRule(Long datasetId, String datasetSchemaId, Rule rule) {
 
@@ -84,8 +86,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
         .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
 
-
-    if (validateRule(rule.getSqlSentence(), datasetId, "") == Boolean.TRUE) {
+    if (validateRule(rule.getSqlSentence(), datasetId).equals(Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
@@ -121,14 +122,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param query the query
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
    * @return the boolean
    */
-  private Boolean validateRule(String query, Long datasetId, String idTableSchema) {
+  private Boolean validateRule(String query, Long datasetId) {
     Boolean isSQLCorrect = Boolean.TRUE;
     // validate query sintax
     if (checkQuerySintax(query)) {
-      String preparedquery = queryTreat(query, datasetId, idTableSchema) + " limit 5";
+      String preparedquery = queryTreat(query, datasetId) + " limit 5";
       try {
         retrivedata(preparedquery);
       } catch (SQLException e) {
@@ -160,19 +160,42 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
+   * Gets the table name.
+   *
+   * @param query the query
+   * @return the table name
+   */
+  private String getTableName(String query) {
+    int from = query.indexOf(FROM);
+    List<String> tables = getTablesFromRuleQuery(query.substring(from));
+    for (int index = 0; index < tables.size(); index++) {
+      if (!tables.get(index).trim().equalsIgnoreCase("INNER")
+          && !tables.get(index).trim().equalsIgnoreCase("JOIN")
+          && !tables.get(index).trim().equalsIgnoreCase(" ")
+          && !tables.get(index).trim().equalsIgnoreCase("CROSS")
+          && !tables.get(index).trim().equalsIgnoreCase("LEFT")
+          && !tables.get(index).trim().equalsIgnoreCase("RIGHT")
+          && !tables.get(index).trim().equalsIgnoreCase(FROM)) {
+        return tables.get(index);
+      }
+    }
+    return "";
+  }
+
+  /**
    * Query treat.
    *
    * @param query the query
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
    * @return the string
    */
   @Override
   @Transactional
-  public String queryTreat(String query, Long datasetId, String idTableSchema) {
+  public String queryTreat(String query, Long datasetId) {
     String queryUpperCase = query.toUpperCase();
     List<String> userQueryColumnList = getColumsFromRuleQuery(queryUpperCase);
-    List<String> tableColumnList = getColumnsNameFromSchema(datasetId, idTableSchema);
+    String tableName = getTableName(queryUpperCase);
+    List<String> tableColumnList = getColumnsNameFromSchema(datasetId, tableName);
     List<String> queryColumnList = extractQueryColumns(userQueryColumnList, tableColumnList);
     String queryLastPart = getLastPartFromQuery(datasetId, queryUpperCase);
 
@@ -203,36 +226,53 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       }
     }
     preparedStatement.append(queryLastPart);
+    try {
+      retrivedata(preparedStatement.toString());
+    } catch (SQLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return preparedStatement.toString();
   }
 
 
   /**
    * Gets the last part from query.
-   * 
-   * @param datasetId
    *
+   * @param datasetId the dataset id
    * @param query the query
    * @return the last part from query
    */
   private String getLastPartFromQuery(Long datasetId, String query) {
     int from = query.indexOf(FROM);
     List<String> tables = getTablesFromRuleQuery(query.substring(from));
-
+    StringBuilder finalQueryPart = new StringBuilder(FROM);
     for (int index = 0; index < tables.size(); index++) {
       if (!tables.get(index).trim().equalsIgnoreCase("INNER")
           && !tables.get(index).trim().equalsIgnoreCase("JOIN")
           && !tables.get(index).trim().equalsIgnoreCase(" ")
           && !tables.get(index).trim().equalsIgnoreCase("CROSS")
           && !tables.get(index).trim().equalsIgnoreCase("LEFT")
-          && !tables.get(index).trim().equalsIgnoreCase("RIGHT")) {
-
+          && !tables.get(index).trim().equalsIgnoreCase("RIGHT")
+          && !tables.get(index).trim().equalsIgnoreCase(FROM)) {
+        finalQueryPart.append(" dataset_" + datasetId + "." + tables.get(index).trim());
+      }
+      if (!tables.get(index).trim().equalsIgnoreCase("WHERE")) {
+        finalQueryPart.append(" ");
+        finalQueryPart.append(query.substring(query.indexOf("WHERE")));
+        break;
       }
     }
-    return query;
+    return finalQueryPart.toString();
   }
 
 
+  /**
+   * Gets the tables from rule query.
+   *
+   * @param query the query
+   * @return the tables from rule query
+   */
   private List<String> getTablesFromRuleQuery(String query) {
     List<String> tableList = new ArrayList<>();
     String preparedQuery = query.replaceAll(",", ", ");
@@ -241,8 +281,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!table.trim().equalsIgnoreCase(FROM)) {
         tableList.add(table);
       }
-      if (!table.trim().equalsIgnoreCase("WHERE") && !table.trim().equalsIgnoreCase("LIMIT")
-          && !table.trim().equalsIgnoreCase("OFFSET")) {
+      if (table.trim().equals("WHERE") && table.trim().equals("LIMIT")
+          && table.trim().equals("OFFSET")) {
         break;
       }
     }
@@ -296,14 +336,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Gets the columns name from schema.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableName the table name
    * @return the columns name from schema
    */
-  private List<String> getColumnsNameFromSchema(Long datasetId, String idTableSchema) {
+  private List<String> getColumnsNameFromSchema(Long datasetId, String tableName) {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     List<String> fieldNameList = new ArrayList<>();
-    schema.getTableSchemas().stream()
-        .filter(table -> table.getIdTableSchema().equals(idTableSchema)).forEach(table -> {
+    schema.getTableSchemas().stream().filter(table -> table.getNameTableSchema().equals(tableName))
+        .forEach(table -> {
           table.getRecordSchema().getFieldSchema().stream().forEach(field -> {
             fieldNameList.add(field.getName());
           });
@@ -337,7 +377,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param query the query
    * @return the table value
-   * @throws SQLException
+   * @throws SQLException the SQL exception
    */
 
   @Override

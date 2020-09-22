@@ -31,7 +31,7 @@ public class SQLValitaionUtils {
     // retrive sql sentence
     String query = rule.getSqlSentence();
     // adapt query to our data model
-    String preparedStatement = sqlRulesService.queryTreat(query, datasetId, "");
+    String preparedStatement = sqlRulesService.queryTreat(query, datasetId);
     // Execute query
     try {
       sqlRulesService.retrivedata(preparedStatement);

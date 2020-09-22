@@ -23,7 +23,7 @@ public interface SqlRulesService {
    * @param query the query
    * @return the string
    */
-  String queryTreat(String query, Long datasetId, String idTableSchema);
+  String queryTreat(String query, Long datasetId);
 
   /**
    * Gets the rule.
