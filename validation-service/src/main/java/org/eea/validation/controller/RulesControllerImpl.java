@@ -1,5 +1,6 @@
 package org.eea.validation.controller;
 
+import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -434,4 +435,20 @@ public class RulesControllerImpl implements RulesController {
   public Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId) {
     return rulesService.updateSequence(datasetSchemaId);
   }
+
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  @Override
+  @GetMapping("/private/findSqlSentencesByDatasetSchemaId")
+  public List<RuleVO> findSqlSentencesByDatasetSchemaId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.findSqlSentencesByDatasetSchemaId(datasetSchemaId);
+  }
+
+
 }

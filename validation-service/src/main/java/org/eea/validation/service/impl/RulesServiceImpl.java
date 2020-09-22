@@ -1095,4 +1095,12 @@ public class RulesServiceImpl implements RulesService {
   private void sentEvent(Map<String, Object> event) {
     kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
   }
+
+
+
+  @Override
+  public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
+    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+    return ruleMapper.entityListToClass(rules);
+  }
 }
