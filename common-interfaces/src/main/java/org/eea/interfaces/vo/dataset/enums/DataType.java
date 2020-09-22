@@ -61,6 +61,22 @@ public enum DataType {
   POSITION("POSITION", JavaType.JSON),
 
   /**
+   * The linestring.
+   * 
+   * A String representing a GeoJSON LineString object. ObjectMapper.readTree(...) should be used to
+   * transform into JSON.
+   */
+  LINESTRING("LINESTRING", JavaType.JSON),
+
+  /**
+   * The multilinestring.
+   * 
+   * A String representing a GeoJSON MultiLineString object. ObjectMapper.readTree(...) should be
+   * used to transform into JSON.
+   */
+  MULTILINESTRING("MULTILINESTRING", JavaType.JSON),
+
+  /**
    * The point.
    * 
    * A String representing a GeoJSON Point object. ObjectMapper.readTree(...) should be used to
