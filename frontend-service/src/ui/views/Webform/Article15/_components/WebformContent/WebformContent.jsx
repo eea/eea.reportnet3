@@ -41,11 +41,12 @@ export const WebformContent = ({ datasetId, webform }) => {
         webform.webformRecords = tableData.records.map(record => {
           const records = { ...webform.webformRecords[0], ...record };
           records['webformFields'] = record.fields.map((field, i) => {
+            const webformField = getFieldIndexById(field, webform.webformRecords[0].webformFields);
             return {
               fieldId: field.fieldId,
-              fieldName: webform.webformRecords[0].webformFields[i].fieldName,
+              fieldName: webformField.fieldName,
               fieldSchemaId: field.fieldSchemaId,
-              fieldType: field.type || webform.webformRecords[0].webformFields[i].fieldType,
+              fieldType: field.type || webformField.fieldType,
               recordId: record.recordId,
               recordSchemaId: field.recordId,
               validations: field.validations,
@@ -89,6 +90,9 @@ export const WebformContent = ({ datasetId, webform }) => {
       console.log('error', error);
     }
   };
+
+  const getFieldIndexById = (field, allFields) =>
+    allFields.filter(completeField => completeField.fieldId === field.fieldSchemaId)[0];
 
   const renderWebformRecords = multiple => {
     return multiple ? (
