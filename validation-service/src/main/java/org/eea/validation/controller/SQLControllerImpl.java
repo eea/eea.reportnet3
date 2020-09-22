@@ -19,10 +19,9 @@ public class SQLControllerImpl {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @PutMapping(value = "/checkquery", produces = MediaType.APPLICATION_JSON_VALUE)
   public void validateDataSetData(@RequestParam("query") String query,
-      @RequestParam("datasetId") Long datasetId,
-      @RequestParam("idTableSchema") String idTableSchema) {
+      @RequestParam("datasetId") Long datasetId) {
 
-    sqlRulesService.queryTreat(query, datasetId, idTableSchema);
+    sqlRulesService.queryTreat(query, datasetId);
   }
 
 

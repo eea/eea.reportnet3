@@ -31,7 +31,6 @@ public enum DataType {
    */
   NUMBER_INTEGER("NUMBER_INTEGER", JavaType.NUMBER),
 
-
   /**
    * The Number Decimal.
    *
@@ -53,50 +52,12 @@ public enum DataType {
   BOOLEAN("BOOLEAN", JavaType.BOOLEAN),
 
   /**
-   * The coordinate lat. that value is a float
-   *
-   * Cast in JPA. CAST(fv.value as java.lang.Double)
+   * The geometry.
+   * 
+   * A String representing a GeoJSON object. ObjectMapper.readTree(...) should be used to transform
+   * into JSON.
    */
-  COORDINATE_LAT("COORDINATE_LAT", JavaType.NUMBER),
-
-  /**
-   * The coordinate long. that value is a float
-   *
-   * Cast in JPA. CAST(fv.value as java.lang.Double)
-   */
-  COORDINATE_LONG("COORDINATE_LONG", JavaType.NUMBER),
-
-  /**
-   * The point.
-   *
-   * Cast in JPA: org.postgresql.geometric.PGpoint
-   *
-   * select point(1.0,1.0); select ST_GeomFromText('point(1.0 1.0)');
-   */
-  POINT("POINT", JavaType.UNSUPPORTED),
-
-  /**
-   * The circle.
-   *
-   * Cast in JPA: java.lang.Object
-   *
-   * in this function the point is the center of the circle, and the other is the radius. select
-   * circle(point(10,10),5); select ST_GeomFromText('CIRCULARSTRING(1 1 , 10 1 , 10 30)');
-   */
-  CIRCLE("CIRCLE", JavaType.UNSUPPORTED),
-
-  /**
-   * The polygon.
-   *
-   * Cast in JPA: org.postgresql.geometric.PGpolygon
-   *
-   * In this function the first and the last value(point) must be the same. select
-   * ST_GeomFromText('POLYGON((17.0 30.0 , 15.0 12.0 , -15.0 -30.0 , 17.0 30.0))');
-   *
-   *
-   * select POLYGON(path'((17.0,30.0) , (15.0,12.0) , (-15.0,-30.0) , (17.0,30.0))');
-   */
-  POLYGON("POLYGON", JavaType.UNSUPPORTED),
+  GEOMETRY("GEOMETRY", JavaType.JSON),
 
   /**
    * The codelist.
@@ -111,6 +72,7 @@ public enum DataType {
    * Cast in JPA: java.lang.String
    */
   MULTISELECT_CODELIST("MULTISELECT_CODELIST", JavaType.STRING),
+
   /**
    * The link data with PK.
    *
@@ -153,18 +115,17 @@ public enum DataType {
    */
   ATTACHMENT("ATTACHMENT", JavaType.STRING);
 
-
-  /**
-   * The value.
-   */
+  /** The value. */
   private final String value;
 
+  /** The java type. */
   private final String javaType;
 
   /**
    * Instantiates a new type entity enum.
    *
    * @param value the value
+   * @param javaType the java type
    */
   DataType(String value, String javaType) {
     this.value = value;
@@ -180,15 +141,19 @@ public enum DataType {
     return value;
   }
 
+  /**
+   * Gets the java type.
+   *
+   * @return the java type
+   */
   public String getJavaType() {
     return javaType;
   }
 
   /**
-   * From value data type.
+   * From value.
    *
    * @param value the value
-   *
    * @return the data type
    */
   @JsonCreator

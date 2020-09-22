@@ -27,7 +27,7 @@ import org.hibernate.jdbc.ReturningWork;
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
   /** The entity manager. */
-  @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
+  @PersistenceContext(unitName = "readDataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
   /**
