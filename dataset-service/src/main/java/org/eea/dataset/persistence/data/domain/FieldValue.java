@@ -17,6 +17,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.geolatte.geom.G2D;
+import org.geolatte.geom.Geometry;
 import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,8 +33,6 @@ import lombok.ToString;
 @ToString
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
-
-
 
   /**
    * The id.
@@ -64,12 +64,29 @@ public class FieldValue {
   private String idFieldSchema;
 
   /**
+   * The geometry.
+   * 
+   * WARNING! This property should not be used. Its function is to retrieve the Geometry type stored
+   * in the DB, but updates must be done within "value" property following the GeoJSON standard.
+   */
+  @Column(name = "GEOMETRY")
+  private Geometry<G2D> geometry;
+
+  /**
+   * The rsid.
+   * 
+   * WARNING! This property should not be used. Its function is to retrieve the Geometry type stored
+   * in the DB, but updates must be done within "value" property following the GeoJSON standard.
+   */
+  @Column(name = "RSID")
+  private Integer rsid;
+
+  /**
    * The record.
    */
   @ManyToOne
   @JoinColumn(name = "ID_RECORD")
   private RecordValue record;
-
 
   /**
    * The field validations.
@@ -77,9 +94,9 @@ public class FieldValue {
   @OneToMany(mappedBy = "fieldValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
 
+  /** The level error. */
   @Transient
   private ErrorTypeEnum levelError;
-
 
   /**
    * Hash code.
@@ -110,5 +127,4 @@ public class FieldValue {
     return id.equals(field.id) && type.equals(field.type) && value.equals(field.value)
         && idFieldSchema.equals(field.idFieldSchema) && record.equals(field.record);
   }
-
 }
