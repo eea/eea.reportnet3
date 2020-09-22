@@ -299,6 +299,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate) {
+
+    // // 1. Get the design datasets
+    // List<DesignDatasetVO> designs =
+    // designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
+    //
+    // List<RuleVO> rulesVO = new ArrayList();
+    // designs.stream().forEach(dataset -> {
+    // rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema()).stream()
+    // .forEach(ruleVO -> {
+    // rulesControllerZuul.validateSqlRuleDataCollection(ruleVO.getSqlSentence(),
+    // dataset.getId(), dataset.getDatasetSchema(), ruleVO);
+    // });
+    // });
+
+
     manageDataCollection(dataflowId, dueDate, true);
   }
 
@@ -314,6 +329,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
+
+    // // we look if all SQL QC's are working correctly, if not we disable it before do a dc
+    // designs.stream().forEach(dataset -> {
+    // rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema()).stream()
+    // .forEach(ruleVO -> {
+    // rulesControllerZuul.validateSqlRuleDataCollection(ruleVO.getSqlSentence(),
+    // dataset.getId(), dataset.getDatasetSchema(), ruleVO);
+    // });
+    // });
 
     // 2. Get the representatives who are going to provide data
     List<RepresentativeVO> representatives = representativeControllerZuul
