@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
+import isNil from 'lodash/isNil';
 
 import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 import { routes } from 'ui/routes';

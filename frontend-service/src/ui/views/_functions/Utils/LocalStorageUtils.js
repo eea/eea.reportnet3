@@ -7,11 +7,11 @@ const { storage: storageConfig } = config;
 const get = () => {
   const rnLocalStorage = JSON.parse(localStorage.getItem(storageConfig.LOCAL_KEY));
   if (!isNil(rnLocalStorage)) return rnLocalStorage;
-  return;
+  return null;
 };
 
 const remove = () => {
-  localStorage.removeItem(storageConfig.LOCAL_KEY);
+  localStorage.clear();
 };
 
 const set = value => {

@@ -11,7 +11,7 @@ const get = () => {
 };
 
 const remove = () => {
-  localStorage.removeItem(storageConfig.LOCAL_KEY);
+  localStorage.reset();
 };
 
 const set = value => {
