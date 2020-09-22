@@ -8,7 +8,9 @@ import styles from './WebformRecord.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -18,22 +20,18 @@ import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({ datasetId, record, tableId }) => {
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
-    fields: {},
+    // fields: {},
     isNewRecord: false,
     newRecord: {},
-    record: {}
+    record
   });
 
-  console.log('webformRecordState', webformRecordState);
-
   useEffect(() => {
-    console.log('column record.webformFields', record.webformFields);
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
       payload: {
-        fields: WebformRecordUtils.getFormInitialValues(record.webformFields),
-        newRecord: WebformRecordUtils.parseNewRecordData(record.webformFields, undefined),
-        record: WebformRecordUtils.getRecordsInitialValues(record)
+        // fields: WebformRecordUtils.getFormInitialValues(record.webformFields),
+        newRecord: WebformRecordUtils.parseNewRecordData(record.webformFields, undefined)
       }
     });
   }, [record]);
@@ -44,6 +42,8 @@ export const WebformRecord = ({ datasetId, record, tableId }) => {
     webformRecordState.newRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === option)[0].fieldData[
       option
     ] = value;
+
+    webformRecordState.record.webformFields.filter(field => field.fieldSchemaId === option)[0].value = value;
 
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { option, value } });
   };
@@ -74,25 +74,31 @@ export const WebformRecord = ({ datasetId, record, tableId }) => {
 
   const renderTemplate = (field, option, type) => {
     switch (type) {
+      case 'DATE':
+        return <Calendar />;
+
+      case 'LINK':
+        return <a href=""></a>;
+
+      case 'MULTISELECT':
+        return <MultiSelect />;
+
+      case 'SELECT':
+        return <Dropdown />;
+
       case 'TEXT':
         return (
           <InputText
             onBlur={event => {
               console.log('field.recordId', field.recordId);
-              if (isNil(field.recordId)) {
-                onSaveField(option, event.target.value);
-              } else {
-                onEditorSubmitValue(field, option, event.target.value);
-              }
+              if (isNil(field.recordId)) onSaveField(option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value);
             }}
             onChange={event => onFillField(option, event.target.value)}
             type="text"
             value={field.value}
           />
         );
-
-      case 'DATE':
-        return <Calendar />;
 
       default:
         break;
@@ -101,7 +107,7 @@ export const WebformRecord = ({ datasetId, record, tableId }) => {
 
   return (
     <div className={styles.contentWrap}>
-      {record.multiple ? (
+      {webformRecordState.record.multiple && !isEmpty(webformRecordState.record.webformFields) ? (
         <div className={styles.actionButtons}>
           <Button
             className={`${styles.collapse} p-button-rounded p-button-secondary p-button-animated-blink`}
@@ -116,16 +122,17 @@ export const WebformRecord = ({ datasetId, record, tableId }) => {
       ) : (
         <Fragment />
       )}
-
-      {!isEmpty(webformRecordState.record) &&
-        webformRecordState.record.webformFields.map((field, i) => {
-          return (
-            <div key={i} className={styles.content}>
-              <p>{field.fieldName}</p>
-              <div>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
-            </div>
-          );
-        })}
+      {!isEmpty(webformRecordState.record.webformFields)
+        ? webformRecordState.record.webformFields.map((field, i) => {
+            console.log('field', field);
+            return (
+              <div key={i} className={styles.content}>
+                <p>{field.fieldName}</p>
+                <div>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
+              </div>
+            );
+          })
+        : 'There are no fields'}
     </div>
   );
 };

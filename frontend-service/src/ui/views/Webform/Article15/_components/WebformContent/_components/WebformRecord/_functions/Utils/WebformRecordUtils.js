@@ -1,50 +1,49 @@
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
-const getFormInitialValues = fields => {
-  const initialValues = {};
+// const getFormInitialValues = fields => {
+//   const initialValues = {};
 
-  fields.forEach(field => {
-    initialValues[field.fieldId] = {
-      fieldId: field.fieldSchemaId,
-      fieldName: field.fieldName,
-      fieldSchemaId: field.fieldId,
-      fieldType: field.fieldType,
-      newValue: '',
-      recordId: field.recordSchemaId,
-      recordSchemaId: field.recordId,
-      required: field.required,
-      value: field.value
-    };
-  });
+//   fields.forEach(field => {
+//     initialValues[field.fieldId] = {
+//       fieldId: field.fieldSchemaId,
+//       fieldName: field.fieldName,
+//       fieldSchemaId: field.fieldId,
+//       fieldType: field.fieldType,
+//       newValue: '',
+//       recordId: field.recordSchemaId,
+//       recordSchemaId: field.recordId,
+//       required: field.required,
+//       value: field.value
+//     };
+//   });
 
-  return initialValues;
-};
+//   return initialValues;
+// };
 
-const getRecordsInitialValues = (records = {}) => {
-  console.log('records', records);
-  records.webformFields = records.webformFields.map(field => ({
-    fieldId: field.fieldSchemaId,
-    fieldName: field.fieldName,
-    fieldSchemaId: field.fieldId,
-    fieldType: field.fieldType,
-    newValue: '',
-    recordId: field.recordSchemaId,
-    recordSchemaId: field.recordId,
-    required: field.required,
-    value: field.value
-  }));
-  return records;
-};
+// const getRecordsInitialValues = (records = {}) => {
+//   records.webformFields = records.webformFields.map(field => ({
+//     fieldId: field.fieldSchemaId,
+//     fieldName: field.fieldName,
+//     fieldSchemaId: field.fieldId,
+//     fieldType: field.fieldType,
+//     newValue: '',
+//     recordId: field.recordSchemaId,
+//     recordSchemaId: field.recordId,
+//     required: field.required,
+//     value: field.value
+//   }));
+//   return records;
+// };
 
-const parseNewRecordData = (columnsSchema = [{ recordId: null }], data) => {
+const parseNewRecordData = (columnsSchema, data) => {
   if (!isEmpty(columnsSchema)) {
     let fields;
 
     if (!isUndefined(columnsSchema)) {
       fields = columnsSchema.map(column => {
         return {
-          fieldData: { [column.fieldId]: null, type: column.type, fieldSchemaId: column.fieldId }
+          fieldData: { [column.fieldSchemaId]: null, type: column.type, fieldSchemaId: column.fieldSchemaId }
         };
       });
     }
@@ -59,4 +58,4 @@ const parseNewRecordData = (columnsSchema = [{ recordId: null }], data) => {
   }
 };
 
-export const WebformRecordUtils = { getFormInitialValues, parseNewRecordData, getRecordsInitialValues };
+export const WebformRecordUtils = { parseNewRecordData };

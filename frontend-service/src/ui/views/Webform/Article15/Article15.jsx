@@ -11,11 +11,6 @@ import styles from './Article15.module.scss';
 import article15 from '../article15.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
-import { Calendar } from 'ui/views/_components/Calendar';
-import { Dropdown } from 'ui/views/_components/Dropdown/Dropdown';
-import { InputText } from 'ui/views/_components/InputText';
-import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { MultiSelect } from 'ui/views/_components/MultiSelect';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformContent } from './_components/WebformContent';
@@ -31,10 +26,7 @@ import { Article15Utils } from './_functions/Utils/Article15Utils';
 export const Article15 = ({ dataflowId, datasetId, state }) => {
   const { datasetSchema, tableSchemaNames } = state;
 
-  const [article15State, article15Dispatch] = useReducer(article15Reducer, {
-    data: [],
-    isVisible: {}
-  });
+  const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
 
   useEffect(() => {
     initialLoad();
