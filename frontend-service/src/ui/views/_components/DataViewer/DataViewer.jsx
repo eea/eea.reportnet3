@@ -359,7 +359,7 @@ const DataViewer = withRouter(
           //TODO: DELETE
           // tableData.records.forEach(record => {
           //   record.fields.forEach(field => {
-          //     if (field.type === 'GEOMETRY') {
+          //     if (field.type === 'POINT') {
           //       //Swap coordinates
           //       field.value = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[40.916881,-4.2033552]}, "properties": {"rsid": "EPSG:4326"}}`;
           //     }
@@ -587,16 +587,25 @@ const DataViewer = withRouter(
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
-    const onEditorKeyChange = (props, event, record) => {
+    const onEditorKeyChange = (props, event, record, isGeometry = false, geoJson = '') => {
       if (event.key === 'Escape') {
         let updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
-        onEditorSubmitValue(props, event.target.value, record);
+        console.log(props, event.target.value, record, geoJson);
+        if (!isGeometry) {
+          onEditorSubmitValue(props, event.target.value, record);
+        } else {
+          onEditorSubmitValue(props, geoJson, record);
+        }
       } else if (event.key === 'Tab') {
         event.preventDefault();
-        onEditorSubmitValue(props, event.target.value, record);
+        if (!isGeometry) {
+          onEditorSubmitValue(props, event.target.value, record);
+        } else {
+          onEditorSubmitValue(props, geoJson, record);
+        }
       }
     };
 
@@ -672,7 +681,11 @@ const DataViewer = withRouter(
     const onPasteAccept = async () => {
       try {
         setIsPasting(true);
-        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
+        const recordsAdded = await DatasetService.addRecordsById(
+          datasetId,
+          tableId,
+          MapUtils.parseGeometryData(records.pastedRecords)
+        );
         if (!recordsAdded) {
           throw new Error('ADD_RECORDS_BY_ID_ERROR');
         } else {

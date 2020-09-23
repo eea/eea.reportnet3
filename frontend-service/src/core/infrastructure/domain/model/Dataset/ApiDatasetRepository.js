@@ -37,7 +37,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
 };
 
 const addRecordsById = async (datasetId, tableSchemaId, records) => {
-  console.log('add records');
+  console.log('add records', { records });
   const datasetTableRecords = [];
   records.forEach(record => {
     let fields = record.dataRow.map(dataTableFieldDTO => {
@@ -267,6 +267,20 @@ const getAllLevelErrorsFromRuleValidations = rulesDTO =>
     ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
   ]);
 
+const isValidJSON = value => {
+  if (value.indexOf('{') === -1) {
+    return false;
+  }
+  try {
+    console.log({ value });
+    JSON.parse(value);
+    console.log('VALID');
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
 const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
   const fieldOrdered = await apiDataset.orderFieldSchema(datasetId, position, fieldSchemaId);
   return fieldOrdered;
@@ -278,7 +292,12 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 };
 
 const parseValue = (type, value, feToBe = false) => {
-  if (type === 'GEOMETRY' && value !== '' && !isNil(value)) {
+  console.log(type, value);
+  if (type === 'POINT' && value !== '' && !isNil(value)) {
+    if (!isValidJSON(value)) {
+      return '';
+    }
+    console.log(value);
     // debugger;
     const inmValue = JSON.parse(cloneDeep(value));
     inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
@@ -380,8 +399,6 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
           value: parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
         });
 
-        //TODO: Swap coordinates if type POINT ^
-
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
           field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
             return new Validation({
@@ -455,12 +472,16 @@ const updateRecordFieldDesign = async (datasetId, record) => {
 };
 
 const updateRecordsById = async (datasetId, record) => {
-  const fields = record.dataRow.map(DataTableFieldDTO => {
+  const fields = record.dataRow.map(dataTableFieldDTO => {
     let newField = new DatasetTableField({});
-    newField.id = DataTableFieldDTO.fieldData.id;
-    newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
-    newField.type = DataTableFieldDTO.fieldData.type;
-    newField.value = DataTableFieldDTO.fieldData[DataTableFieldDTO.fieldData.fieldSchemaId];
+    newField.id = dataTableFieldDTO.fieldData.id;
+    newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+    newField.type = dataTableFieldDTO.fieldData.type;
+    newField.value = parseValue(
+      dataTableFieldDTO.fieldData.type,
+      dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+      true
+    );
 
     return newField;
   });

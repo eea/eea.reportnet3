@@ -8,6 +8,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) => {
   const resources = useContext(ResourcesContext);
+  console.log(data, filteredColumns, numCopiedRecords);
+  const checkValidCoordinates = () => {
+    console.log('EEE');
+    return false;
+  };
 
   const checkPastedColumnsErrors = () => {
     const numCopiedCols = data.map(rows => rows.copiedCols);
@@ -17,7 +22,7 @@ export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) =
 
     if (!isUndefined(data)) {
       if (data.length > 0) {
-        if (equalNumberColumns.length > 0) {
+        if (equalNumberColumns.length > 0 || !checkValidCoordinates()) {
           return (
             <div>
               <p style={{ fontWeight: 'bold', color: colors.errors }}>
@@ -28,6 +33,16 @@ export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) =
                   {resources.messages['pasteRecordsWarningMessage']}
                 </p>
               ) : null}
+              {!checkValidCoordinates() && (
+                <>
+                  <p style={{ fontWeight: 'bold', color: colors.errors }}>
+                    {resources.messages['pasteRecordsWarningCoordinatesMessage']}
+                  </p>
+                  <p style={{ fontStyle: 'italic', fontSize: '0.9em', fontWeight: 'bold' }}>
+                    {`${resources.messages['pasteRecordsCoordinatesMessage']}(${resources.messages['pasteRecordsCoordinatesStructureMessage']})`}
+                  </p>
+                </>
+              )}
               <p>{resources.messages['pasteColumnWarningConfirmMessage']}</p>
             </div>
           );

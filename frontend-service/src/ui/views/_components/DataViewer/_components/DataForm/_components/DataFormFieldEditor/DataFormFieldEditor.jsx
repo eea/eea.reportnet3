@@ -56,7 +56,7 @@ const DataFormFieldEditor = ({
 
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
-      fieldValue !== '' && type === 'GEOMETRY'
+      fieldValue !== '' && type === 'POINT'
         ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
         : { label: 'WGS84', value: 'EPSG:4326' },
     // isAttachFileVisible, setIsAttachFileVisible] = useState(false);
@@ -73,7 +73,7 @@ const DataFormFieldEditor = ({
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
       if (type === 'LINK') onLoadColsSchema(fieldValue);
-      if (type === 'GEOMETRY') {
+      if (type === 'POINT') {
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',
           payload: !MapUtils.checkValidCoordinates(
@@ -241,7 +241,7 @@ const DataFormFieldEditor = ({
         return longCharacters;
       case 'NUMBER_DECIMAL':
         return decimalCharacters;
-      case 'GEOMETRY':
+      case 'POINT':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -274,7 +274,7 @@ const DataFormFieldEditor = ({
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)
-    ) : type === 'GEOMETRY' ? (
+    ) : type === 'POINT' ? (
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)

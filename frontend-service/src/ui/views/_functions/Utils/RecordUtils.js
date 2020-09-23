@@ -155,7 +155,7 @@ const getFieldTypeValue = fieldType => {
     { fieldType: 'Email', value: 'Email' },
     { fieldType: 'URL', value: 'URL' },
     { fieldType: 'Phone', value: 'Phone number' },
-    { fieldType: 'Geometry', value: 'Geometry', fieldTypeIcon: 'point' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Codelist', value: 'Single select' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
     { fieldType: 'Link', value: 'Link' },
@@ -175,7 +175,7 @@ const getFilter = type => {
     case 'NUMBER_INTEGER':
       return 'int';
     case 'NUMBER_DECIMAL':
-    case 'GEOMETRY':
+    case 'POINT':
       return 'coordinates';
     case 'DATE':
       return 'date';

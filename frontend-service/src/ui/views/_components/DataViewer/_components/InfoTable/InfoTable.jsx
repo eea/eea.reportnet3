@@ -12,6 +12,7 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
 
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -52,7 +53,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         return decimalCharacters;
       case 'CODELIST':
         return codelistTextCharacters;
-      case 'GEOMETRY':
+      case 'POINT':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -89,6 +90,13 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       const valueMaxLength = getMaxCharactersValueByFieldType(field.fieldData.type);
       field.fieldData[column.field] = value.substring(0, valueMaxLength);
       value = field.fieldData[column.field];
+      if (field.fieldData.type === 'POINT') {
+        if (MapUtils.isValidJSON(value)) {
+          const parsedGeoJson = JSON.parse(value);
+          console.log({ value, parsedGeoJson });
+          value = `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+        }
+      }
       return <div className={styles.infoTableCellCorrect}>{field ? value : null}</div>;
     }
   };
@@ -202,14 +210,14 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       <InfoTableMessages data={data} filteredColumns={filteredColumns} numCopiedRecords={numCopiedRecords} />
       {!isUndefined(data) && data.length > 0 ? (
         <DataTable
-          className={styles.infoTableData}
-          value={data}
           autoLayout={true}
+          className={styles.infoTableData}
           paginator={true}
           paginatorRight={totalCount}
-          rowsPerPageOptions={[5, 10]}
           rows={5}
-          totalRecords={numCopiedRecords}>
+          rowsPerPageOptions={[5, 10]}
+          totalRecords={numCopiedRecords}
+          value={data}>
           {getColumns()}
         </DataTable>
       ) : (
@@ -221,6 +229,8 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           <div className={styles.lineBreak}></div>
           <div className={styles.infoTableItem}>
             <p>{resources.messages['pasteRecordsMaxMessage']}</p>
+            <p>{resources.messages['pasteRecordsCoordinatesMessage']}</p>
+            <p style={{ fontStyle: 'italic' }}>{resources.messages['pasteRecordsCoordinatesStructureMessage']}</p>
           </div>
         </div>
       )}

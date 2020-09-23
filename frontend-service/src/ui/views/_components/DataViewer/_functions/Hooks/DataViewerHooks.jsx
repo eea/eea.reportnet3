@@ -208,7 +208,7 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'GEOMETRY'
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
               ? field.fieldData[column.field].sort().join(', ')
               : // : Array.isArray(field.fieldData[column.field])
               // ? field.fieldData[column.field].join(', ')
@@ -221,7 +221,7 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'GEOMETRY'
+              : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
@@ -237,7 +237,7 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'GEOMETRY'
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
               ? // ? field.fieldData[column.field].sort().join(', ')
                 // : Array.isArray(field.fieldData[column.field])
                 field.fieldData[column.field].join(', ')
@@ -250,7 +250,7 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'GEOMETRY'
+              : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}

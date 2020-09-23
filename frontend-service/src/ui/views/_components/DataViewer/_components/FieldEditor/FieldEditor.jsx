@@ -54,18 +54,22 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
 
   const [currentCRS, setCurrentCRS] = useState(
-    RecordUtils.getCellValue(cells, cells.field) !== ''
-      ? crs.filter(
-          crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
-        )[0]
-      : { label: 'WGS84', value: 'EPSG:4326' }
+    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
+      ? RecordUtils.getCellValue(cells, cells.field) !== ''
+        ? crs.filter(
+            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
+          )[0]
+        : { label: 'WGS84', value: 'EPSG:4326' }
+      : {}
   );
   const [isMapDisabled, setIsMapDisabled] = useState(
-    !MapUtils.checkValidCoordinates(
-      RecordUtils.getCellValue(cells, cells.field) !== ''
-        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
-        : ''
-    )
+    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
+      ? !MapUtils.checkValidCoordinates(
+          RecordUtils.getCellValue(cells, cells.field) !== ''
+            ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+            : ''
+        )
+      : true
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
@@ -78,7 +82,7 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
-    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'GEOMETRY') {
+    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
       onChangePointCRS(currentCRS.value);
     }
   }, []);
@@ -125,6 +129,7 @@ const FieldEditor = ({
   };
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, isCommaEntered = false) => {
+    console.log('CHANGE POINT');
     if (geoJson !== '') {
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
@@ -231,7 +236,7 @@ const FieldEditor = ({
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
-      case 'GEOMETRY':
+      case 'POINT':
         return (
           <div className={styles.pointWrapper}>
             <InputText
@@ -277,7 +282,7 @@ const FieldEditor = ({
               }
               onFocus={e => {
                 e.preventDefault();
-                onEditorValueFocus(cells, `${e.target.value}, ${currentCRS.value}`);
+                onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field));
               }}
               onKeyDown={e => {
                 changePoint(
@@ -287,10 +292,25 @@ const FieldEditor = ({
                   e.target.value,
                   currentCRS.value,
                   false,
-                  false,
+                  true,
                   true
                 );
-                onEditorKeyChange(cells, e, record);
+                onEditorKeyChange(
+                  cells,
+                  e,
+                  record,
+                  true,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false,
+                    true,
+                    true
+                  )
+                );
               }}
               // style={{ marginRight: '2rem' }}
               type="text"
