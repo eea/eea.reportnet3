@@ -401,9 +401,8 @@ public class UniqueValidationUtils {
    * @param integrityId the integrity id
    * @param idRule the id rule
    *
-   * @return the boolean
    */
-  public static Boolean isIntegrityConstraint(DatasetValue datasetId, String integrityId,
+  public static void checkIntegrityConstraint(DatasetValue datasetId, String integrityId,
       String idRule) {
     // Retrieving basic data for validation process
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
@@ -466,8 +465,6 @@ public class UniqueValidationUtils {
     }
     tableValue.setTableValidations(tableValidations);
     saveTableValidations(tableValue);
-    return notUtilizedRecords.isEmpty() && notUtilizedRecords2.isEmpty();
-
   }
 
 }

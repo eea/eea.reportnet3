@@ -200,7 +200,7 @@ public class RulesServiceImpl implements RulesService {
     }
     Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
 
-    if (null != rule && EntityTypeEnum.DATASET.equals(rule.getType())
+    if (null != rule && EntityTypeEnum.TABLE.equals(rule.getType())
         && rule.getIntegrityConstraintId() != null) {
       Optional<IntegritySchema> integritySchema =
           integritySchemaRepository.findById(rule.getIntegrityConstraintId());
@@ -315,7 +315,8 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Rules when condition null.
+   * Rules when condition null.That kind of rules is diferent from manual rules, this method is for
+   * any of manual rules about record or field
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
@@ -326,7 +327,7 @@ public class RulesServiceImpl implements RulesService {
   private void rulesWhenConditionNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
       Rule rule) throws EEAException {
     // we create the whencondition Integrity for the rule
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
       ObjectId integrityConstraintId = new ObjectId();
       IntegrityVO integrityVO = ruleVO.getIntegrityVO();
       integrityVO.setId(integrityConstraintId.toString());
@@ -336,8 +337,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integrityConstraintId.toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
+          + integrityConstraintId.toString() + "','" + rule.getRuleId().toString() + "')");
       Long datasetReferencedId = dataSetMetabaseControllerZuul
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
@@ -350,8 +351,9 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
-          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(
+          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
+              .append("',").append(datasetId).append(")").toString());
 
       Map<String, Object> event = new HashMap<>();
       event.put("dataset_id", String.valueOf(datasetId));
@@ -359,11 +361,16 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
-      // sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
+
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    }
+
+    // Check if rule is valid if not sql
+    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
+      kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
 
@@ -585,7 +592,8 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Rule when condtion update null.
+   * Rules when condition null.That kind of rules is diferent from manual rules, this method is for
+   * any of manual rules about record or field
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
@@ -595,7 +603,7 @@ public class RulesServiceImpl implements RulesService {
    */
   private void ruleWhenCondtionUpdateNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
       Rule rule) throws EEAException {
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
 
       IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
       integritySchemaRepository.deleteById(new ObjectId(ruleVO.getIntegrityVO().getId()));
@@ -619,7 +627,6 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
-      // sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     }
     validateRule(rule);
@@ -952,7 +959,7 @@ public class RulesServiceImpl implements RulesService {
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
-      if (EntityTypeEnum.DATASET.equals(rule.getType())) {
+      if (EntityTypeEnum.TABLE.equals(rule.getType())) {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 
@@ -1088,8 +1095,12 @@ public class RulesServiceImpl implements RulesService {
     kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
   }
 
-
-
+  /**
+   * Find sql sentences by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
   @Override
   public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
     List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
