@@ -16,7 +16,8 @@ const userSettingsDefaultState = {
     showLogoutConfirmation: true,
     userImage: [],
     visualTheme: 'light'
-  }
+  },
+  isLoggedOut: null
 };
 
 export const UserProvider = ({ children }) => {
@@ -60,11 +61,11 @@ export const UserProvider = ({ children }) => {
 
         onChangeRowsPerPage: rowNumber => userDispatcher({ type: 'DEFAULT_ROW_SELECTED', payload: rowNumber }),
 
-        onLogin: user => userDispatcher({ type: 'LOGIN', payload: { user } }),
+        onLogin: user => userDispatcher({ type: 'LOGIN', payload: user }),
 
         onLogout: () => {
           notificationContext.deleteAll();
-          userDispatcher({ type: 'LOGOUT', payload: userSettingsDefaultState });
+          userDispatcher({ type: 'LOGOUT', payload: { userSettingsDefaultState } });
         },
 
         onToggleAmPm24hFormat: hoursFormat => {
