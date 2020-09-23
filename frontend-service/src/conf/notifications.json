@@ -434,6 +434,10 @@
         },
         {
           "key": "DOWNLOAD_FME_FILE_ERROR"
+        },
+        {
+          "key": "NOT_ALLOWED_ERROR",
+          "lifeTime": 5000
         }
       ]
     },

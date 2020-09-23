@@ -682,6 +682,13 @@ public class UserManagementControllerImpl implements UserManagementController {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
   }
 
+  @Override
+  @HystrixCommand
+  @PostMapping("/authenticateByEmail")
+  @ApiOperation(value = "Authenticate an User by its email.", response = TokenVO.class)
+  public TokenVO authenticateUserByEmail(@RequestParam("email") String email) {
+    return securityProviderInterfaceService.authenticateEmail(email);
+  }
 
   /**
    * Gets the users by group.
