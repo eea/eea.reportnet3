@@ -65,7 +65,7 @@ export const UserProvider = ({ children }) => {
 
         onLogout: () => {
           notificationContext.deleteAll();
-          userDispatcher({ type: 'LOGOUT', payload: { userSettingsDefaultState } });
+          userDispatcher({ type: 'LOGOUT', payload: userSettingsDefaultState });
         },
 
         onToggleAmPm24hFormat: hoursFormat => {
