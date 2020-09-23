@@ -2,29 +2,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 
-const checkChecked = (state, data, checkedKeys = []) => {
-  for (let index = 0; index < checkedKeys.length; index++) {
-    const checkedKey = checkedKeys[index];
-    const value = state.filterBy[checkedKey];
-
-    if (!isEmpty(value)) {
-      if (!isNil(data[checkedKey])) {
-        const checkedData = data[checkedKey];
-
-        if (Array.isArray(checkedData)) return onApplyGroupFilters(data, checkedKey, state.matchMode, value);
-        else {
-          const isFiltered = ![...value.map(option => option.toString().toLowerCase())].includes(
-            checkedData.toString().toLowerCase()
-          );
-
-          if (isFiltered) return false;
-        }
-      }
-    }
-  }
-  return true;
-};
-
 const checkDates = (betweenDates, data) => {
   if (!isEmpty(betweenDates)) {
     const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
@@ -116,11 +93,11 @@ const onApplyFilters = ({
             checkFilters(filteredKeys, data, state) &&
             checkSearched(state, data, searchedKeys) &&
             checkSelected(state, data, selectedKeys) &&
-            checkChecked(state, data, checkedKeys)
+            checkSelected(state, data, checkedKeys)
         : checkFilters(filteredKeys, data, state) &&
             checkSearched(state, data, searchedKeys) &&
             checkSelected(state, data, selectedKeys) &&
-            checkChecked(state, data, checkedKeys);
+            checkSelected(state, data, checkedKeys);
     } else {
       return (
         !isNil(data[filter]) &&
@@ -128,7 +105,7 @@ const onApplyFilters = ({
         checkFilters(filteredKeys, data, state) &&
         checkSearched(state, data, searchedKeys) &&
         checkSelected(state, data, selectedKeys) &&
-        checkChecked(state, data, checkedKeys) &&
+        checkSelected(state, data, checkedKeys) &&
         checkDates(state.filterBy[dateOptions], data[dateOptions])
       );
     }
@@ -161,7 +138,7 @@ const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKey
       filteredData.includes(true) &&
       checkFilters(inputKeys, data, state) &&
       checkSelected(state, data, selectedKeys) &&
-      checkChecked(state, data, checkedKeys)
+      checkSelected(state, data, checkedKeys)
     );
   })
 ];
@@ -181,7 +158,7 @@ const onCheckFilters = (data, dateOptions, filteredKeys, searchedKeys, selectedK
     checkFilters(filteredKeys, data, state) &&
     checkSearched(state, data, searchedKeys) &&
     checkSelected(state, data, selectedKeys) &&
-    checkChecked(state, data, checkedKeys)
+    checkSelected(state, data, checkedKeys)
   );
 };
 
