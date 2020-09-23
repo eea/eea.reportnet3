@@ -59,7 +59,7 @@ export const WebformContent = ({ datasetId, webform }) => {
               fieldType: field.type || webformField.fieldType,
               recordId: record.recordId,
               recordSchemaId: field.recordId,
-              validations: field.validations,
+              validations: field.validations || [],
               value: field.value || ''
             };
           });
@@ -74,7 +74,7 @@ export const WebformContent = ({ datasetId, webform }) => {
               fieldSchemaId: field.fieldId,
               fieldType: field.type,
               recordSchemaId: field.recordId,
-              validations: field.validations,
+              validations: field.validations || [],
               value: field.value || ''
             };
           });

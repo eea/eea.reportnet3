@@ -6,6 +6,8 @@ import isUndefined from 'lodash/isUndefined';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 
+import { config } from 'conf';
+
 import styles from './Article15.module.scss';
 
 import article15 from '../article15.webform.json';
@@ -25,6 +27,7 @@ import { Article15Utils } from './_functions/Utils/Article15Utils';
 
 export const Article15 = ({ dataflowId, datasetId, state }) => {
   const { datasetSchema, tableSchemaNames } = state;
+  console.log('datasetSchema', datasetSchema);
 
   const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
 
@@ -97,9 +100,13 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
         className={`${styles.headerButton} ${
           article15State.isVisible[webform.webformTitle] ? 'p-button-primary' : 'p-button-secondary'
         }`}
+        icon={webform.hasErrors ? 'warning' : null}
+        iconClasses={!article15State.isVisible[webform.webformTitle] ? 'warning' : ''}
+        iconPos={'right'}
         key={i}
         label={webform.webformTitle}
         onClick={() => onChangeWebformTab(webform.webformTitle)}
+        style={{ padding: webform.hasErrors ? '0.2rem' : '0.5rem' }}
       />
     ));
   };

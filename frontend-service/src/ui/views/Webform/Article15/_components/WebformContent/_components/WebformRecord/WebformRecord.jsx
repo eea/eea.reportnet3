@@ -9,6 +9,7 @@ import styles from './WebformRecord.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
@@ -104,6 +105,12 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
 
   return (
     <div className={styles.contentWrap}>
+      <div className={styles.actionButtons}>
+        {!isEmpty(webformRecordState.record.validations) &&
+          webformRecordState.record.validations.map((validation, index) => (
+            <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+          ))}
+      </div>
       {webformRecordState.record.multiple && !isEmpty(webformRecordState.record.webformFields) ? (
         <div className={styles.actionButtons}>
           <Button
@@ -124,7 +131,12 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
             return (
               <div key={i} className={styles.content}>
                 <p>{field.fieldName}</p>
-                <div>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
+                <div>
+                  {renderTemplate(field, field.fieldSchemaId, field.fieldType)}
+                  {field.validations.map((validation, index) => (
+                    <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+                  ))}
+                </div>
               </div>
             );
           })
