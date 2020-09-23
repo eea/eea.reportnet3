@@ -21,7 +21,6 @@ export const WebformContent = ({ datasetId, webform }) => {
   const onAddMultipleWebform = () => {};
 
   const onLoadTableData = async () => {
-    console.log('webform.tableSchemaId', webform.tableSchemaId);
     try {
       const tableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', '', undefined, [
         'CORRECT',
@@ -34,8 +33,6 @@ export const WebformContent = ({ datasetId, webform }) => {
       // let filteredFields = webform.webformRecords.map(record =>
       //   tableData.records.filter(tableRecord => tableRecord.recordSchemaId === record.webformFields[0].recordId)
       // )[0];
-
-      console.log('tableData', tableData);
 
       if (!isNil(tableData.records)) {
         webform.webformRecords = tableData.records.map(record => {
@@ -116,10 +113,6 @@ export const WebformContent = ({ datasetId, webform }) => {
       </h3>
       {webformData.description ? <h3 className={styles.description}>{webformData.description}</h3> : <Fragment />}
       {renderWebformRecords(webformData.multipleRecords)}
-
-      {/* {webform.multiple
-        ? webformState.multipleView.map(element => renderContent(webform.webformFields, webform.multiple, element.id))
-        : renderContent(webform.webformFields, webform.multiple)} */}
     </div>
   ) : (
     'hey'

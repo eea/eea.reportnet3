@@ -19,24 +19,20 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({ datasetId, record, tableId }) => {
-  const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
-    // fields: {},
-    isNewRecord: false,
-    newRecord: {},
-    record
-  });
+  const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, { newRecord: {}, record });
 
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: {
-        // fields: WebformRecordUtils.getFormInitialValues(record.webformFields),
-        newRecord: WebformRecordUtils.parseNewRecordData(record.webformFields, undefined)
-      }
+      payload: { newRecord: WebformRecordUtils.parseNewRecordData(record.webformFields, undefined) }
     });
   }, [record]);
 
-  const onDeleteMultipleWebform = () => {};
+  const onDeleteMultipleWebform = async () => {
+    try {
+      await DatasetService.deleteRecordById(datasetId, webformRecordState.record.recordId);
+    } catch (error) {}
+  };
 
   const onFillField = (option, value) => {
     webformRecordState.newRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === option)[0].fieldData[
@@ -90,7 +86,6 @@ export const WebformRecord = ({ datasetId, record, tableId }) => {
         return (
           <InputText
             onBlur={event => {
-              console.log('field.recordId', field.recordId);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
@@ -124,7 +119,6 @@ export const WebformRecord = ({ datasetId, record, tableId }) => {
       )}
       {!isEmpty(webformRecordState.record.webformFields)
         ? webformRecordState.record.webformFields.map((field, i) => {
-            console.log('field', field);
             return (
               <div key={i} className={styles.content}>
                 <p>{field.fieldName}</p>
