@@ -1,5 +1,6 @@
 package org.eea.validation.util;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,33 +34,47 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+/**
+ * The Class UniqueValidationUtilsTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class UniqueValidationUtilsTest {
 
+  /** The unique validation utils. */
   @InjectMocks
   private UniqueValidationUtils uniqueValidationUtils;
 
+  /** The dataset schema controller zuul. */
   @Mock
   private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
+  /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
 
+  /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
 
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
 
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The rules service. */
   @Mock
   private RulesService rulesService;
 
+  /** The data set metabase controller zuul. */
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
 
@@ -130,25 +145,34 @@ public class UniqueValidationUtilsTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Unique constraint test.
+   */
   @Test
   public void uniqueConstraintTest() {
     Assert.assertFalse(uniqueValidationUtils.uniqueConstraint("5ece3de73fd71093b81eb4e6",
         "5ece3de73fd71093b81eb4e6"));
   }
 
+  /**
+   * Unique constraint error test.
+   */
   @Test
   public void uniqueConstraintErrorTest() {
     Assert.assertFalse(uniqueValidationUtils.uniqueConstraint("5ece3de73fd71093b81eb4e6",
         "5ece3de73fd71093b81eb4e6"));
   }
 
+  /**
+   * Integrity constraint test.
+   */
   @Test
   public void integrityConstraintTest() {
     DatasetValue datasetValue = new DatasetValue();
     datasetValue.setId(1L);
-    uniqueValidationUtils.isIntegrityConstraint(datasetValue, "5ece3de73fd71093b81eb4e6",
+    uniqueValidationUtils.checkIntegrityConstraint(datasetValue, "5ece3de73fd71093b81eb4e6",
         "5ece3de73fd71093b81eb4e6");
-
+    assertNotNull(datasetValue);
   }
 
 }

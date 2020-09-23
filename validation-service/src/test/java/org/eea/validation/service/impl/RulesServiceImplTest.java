@@ -882,6 +882,7 @@ public class RulesServiceImplTest {
     ruleVO.setEnabled(true);
     IntegrityVO integrityVO = new IntegrityVO();
     integrityVO.setId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setWhenCondition(null);
     ruleVO.setIntegrityVO(integrityVO);
     IntegritySchema integritySchema = new IntegritySchema();
     integritySchema.setId(new ObjectId("5e44110d6a9e3a270ce13fac"));

@@ -402,7 +402,7 @@ public class UniqueValidationUtils {
    * @param idRule the id rule
    *
    */
-  public static void isIntegrityConstraint(DatasetValue datasetId, String integrityId,
+  public static void checkIntegrityConstraint(DatasetValue datasetId, String integrityId,
       String idRule) {
     // Retrieving basic data for validation process
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
