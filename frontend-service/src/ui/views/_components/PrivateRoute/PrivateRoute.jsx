@@ -17,11 +17,9 @@ export const PrivateRoute = ({ component: Component, path }) => {
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
-      console.log('[PrivateRoute]: hasToken or userId redirect to Component');
       LocalStorageUtils.remove();
       return <Route path={path} render={() => <Component />} />;
     } else {
-      console.log('[PrivateRoute]: not token or userId save url to localStorage', window.location.href);
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
         LocalStorageUtils.set({ redirectUrl: window.location.href });
       }

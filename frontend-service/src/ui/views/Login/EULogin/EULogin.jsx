@@ -25,11 +25,9 @@ const EULogin = ({ location, history }) => {
         userContext.onLogin(userObject);
         const rnLocalStorage = LocalStorageUtils.get();
         if (!isNil(rnLocalStorage)) {
-          console.log('[EULogin]: there is LocalStorage', rnLocalStorage);
           LocalStorageUtils.remove();
           window.location.href = rnLocalStorage.redirectUrl;
         } else {
-          console.log('[EULogin]: there is no localStorage redirect to dataflow');
           history.push(getUrl(routes.DATAFLOWS));
         }
       } else {
