@@ -209,7 +209,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
-          selectOptions={['countryCode']}
+          selectOptions={['countryCode', 'isDataCollectionReleased', 'isEUReleased']}
           checkboxOptions={['isDataCollectionReleased', 'isEUReleased']}
         />
       )}

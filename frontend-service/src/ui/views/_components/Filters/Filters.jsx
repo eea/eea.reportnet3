@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
+import difference from 'lodash/difference';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -295,7 +296,6 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{resources.messages[property]}</span>
           <span className={styles.checkbox}>
             <Checkbox
-              // className={styles.checkRequired}
               id={property}
               inputId={property}
               isChecked={getCheckboxFilterState(property)}
@@ -443,12 +443,16 @@ export const Filters = ({
     <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
-      {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
+      {/* {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))} */}
+      {/* {selectOptions &&
+        selectOptions
+          .filter(option => option !== 'isEUReleased' && option !== 'isDataCollectionReleased')
+          .map((option, i) => renderSelectFilter(option, i))} */}
+      {selectOptions && difference(selectOptions, checkboxOptions).map((option, i) => renderSelectFilter(option, i))}}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
       {matchMode && renderCheckbox()}
       {checkboxOptions && checkboxOptions.map((option, i) => renderCheckboxFilter(option, i))}
-
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
           <Button
