@@ -80,10 +80,8 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   public void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
-    // we create that if because we need to control if the rule comes from manual, record and field
-    // to convert the whencondition
-    // if not, we dindt fill the datas in whencondition because we dont need to work the rule with
-    // it
+    // We have to convert the rule's when condition, in case of it's a manual and record or field
+    // rule
     if (StringUtils.isBlank(ruleVO.getSqlSentence())
         && (!rule.isAutomatic() && !EntityTypeEnum.DATASET.equals(rule.getType())
             && !EntityTypeEnum.TABLE.equals(rule.getType()))) {
