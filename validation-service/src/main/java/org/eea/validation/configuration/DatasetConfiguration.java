@@ -89,10 +89,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.datasource.dataset.username}")
   private String username;
 
-  /** The read username. */
-  @Value("${spring.datasource.dataset.read.username}")
-  private String readUsername;
-
   /**
    * The password.
    */
@@ -124,20 +120,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return dataSource;
   }
 
-
-
-  @Bean
-  public DataSource readDatasetDataSource() {
-    final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
-    DataSource dataSource = null;
-    if (null != connections && !connections.isEmpty()) {
-      dataSource = readDataSetsDataSource(connections.get(0));
-    }
-    return dataSource;
-  }
-
-
-
   /**
    * Data sets data source.
    *
@@ -158,18 +140,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   }
 
 
-  private DataSource readDataSetsDataSource(final ConnectionDataVO connectionDataVO) {
-    EeaDataSource ds = new EeaDataSource();
-    ds.setUrl(connectionDataVO.getConnectionString());
-    // set validation microservice credentials
-    ds.setUsername(this.readUsername);
-    ds.setPassword(this.password);
-    ds.setDriverClassName("org.postgresql.Driver");
-
-    return ds;
-  }
-
-
   /**
    * Data sets entity manager factory.
    *
@@ -182,22 +152,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     final LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean =
         new LocalContainerEntityManagerFactoryBean();
     localContainerEntityManagerFactoryBean.setDataSource(datasetDataSource());
-    localContainerEntityManagerFactoryBean
-        .setPackagesToScan("org.eea.validation.persistence.data.domain");
-    final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    localContainerEntityManagerFactoryBean.setJpaVendorAdapter(vendorAdapter);
-
-    localContainerEntityManagerFactoryBean.setJpaProperties(additionalProperties());
-    return localContainerEntityManagerFactoryBean;
-  }
-
-
-  @Bean
-  @Qualifier("readDataSetsEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean readDataSetsEntityManagerFactory() {
-    final LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean =
-        new LocalContainerEntityManagerFactoryBean();
-    localContainerEntityManagerFactoryBean.setDataSource(readDatasetDataSource());
     localContainerEntityManagerFactoryBean
         .setPackagesToScan("org.eea.validation.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
@@ -239,12 +193,4 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return schemastransactionManager;
   }
 
-  @Bean
-  public PlatformTransactionManager readDataSetsTransactionManager() {
-
-    final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
-    schemastransactionManager
-        .setEntityManagerFactory(readDataSetsEntityManagerFactory().getObject());
-    return schemastransactionManager;
-  }
 }

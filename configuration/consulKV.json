@@ -1330,9 +1330,5 @@
   {
     "key": "config/recordstore/snapshot.task.parallelism",
     "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
-  },
-  {
-    "key": "config/application/spring.datasource.dataset.read.username",
-    "value": "JHtEQVRBU0VUU19SRUFEX1VTRVJOQU1FOmRhdGFzZXRyZWFkfQ=="
-  },
+  }
 ]
