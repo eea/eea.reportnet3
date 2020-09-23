@@ -47,20 +47,26 @@ export const parseDataValidationRulesDTO = validations => {
         }
       }
 
-      if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'DATASET') {
+      // if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'DATASET') {
+      if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'TABLE') {
         const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
         newRelations = relations;
       }
 
       return new Validation({
-        sqlSentence: validationDTO.sqlSentence,
         activationGroup: validationDTO.activationGroup,
+        allExpressions: newAllExpressions,
+        allExpressionsIf: newAllExpressionsIf,
+        allExpressionsThen: newAllExpressionsThen,
         automatic: validationDTO.automatic,
         condition: validationDTO.whenCondition,
         date: validationDTO.activationGroup,
         description: validationDTO.description,
         enabled: validationDTO.enabled,
         entityType: validationDTO.type,
+        expressions: newExpressions,
+        expressionsIf: newExpressionsIf,
+        expressionsThen: newExpressionsThen,
         id: validationDTO.ruleId,
         isCorrect: validationDTO.verified,
         levelError:
@@ -73,14 +79,9 @@ export const parseDataValidationRulesDTO = validations => {
             : '',
         name: validationDTO.ruleName,
         referenceId: validationDTO.referenceId,
+        relations: newRelations,
         shortCode: validationDTO.shortCode,
-        expressions: newExpressions,
-        allExpressions: newAllExpressions,
-        expressionsIf: newExpressionsIf,
-        allExpressionsIf: newAllExpressionsIf,
-        expressionsThen: newExpressionsThen,
-        allExpressionsThen: newAllExpressionsThen,
-        relations: newRelations
+        sqlSentence: validationDTO.sqlSentence
       });
     });
   } catch (error) {

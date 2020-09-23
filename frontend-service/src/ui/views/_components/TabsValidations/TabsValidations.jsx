@@ -247,7 +247,8 @@ const TabsValidations = withRouter(
 
       if (row.entityType === 'RECORD' || row.entityType === 'TABLE') {
         rowType = 'row';
-      } else if (row.entityType === 'DATASET') {
+      // } else if (row.entityType === 'DATASET') {
+      } else if (row.entityType === 'TABLE') {
         rowType = 'dataset';
       }
 

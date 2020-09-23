@@ -27,12 +27,14 @@ const create = async (datasetSchemaId, validationRule) => {
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
+  console.log('validationRule', validationRule);
   const validation = {
     sqlSentence: validationRule.sqlSentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
-    referenceId: validationRule.relations.originDatasetSchema,
+    // referenceId: validationRule.relations.originDatasetSchema,
+    referenceId: validationRule.table.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     integrityVO:
@@ -46,7 +48,8 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
           }
         : null,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    type: 'DATASET',
+    // type: 'DATASET',
+    type: 'TABLE',
     whenCondition: null
   };
   return await apiValidation.create(datasetSchemaId, validation);
@@ -100,6 +103,9 @@ const getAll = async (datasetSchemaId, reporting = false) => {
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
+  /* 
+  console.log('validationsListDTO', validationsListDTO);
+  console.log('validationsList', validationsList); */
   return validationsList;
 };
 
@@ -160,10 +166,12 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     description: validationRule.description,
     automatic: validationRule.automatic,
     enabled: validationRule.active ? validationRule.active : false,
-    referenceId: validationRule.relations.originDatasetSchema,
+    // referenceId: validationRule.relations.originDatasetSchema,
+    referenceId: validationRule.table.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    type: 'DATASET',
+    // type: 'DATASET',
+    type: 'TABLE',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     integrityVO:
       isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)

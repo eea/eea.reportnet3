@@ -34,7 +34,8 @@ import { getDatasetSchemaTableFieldsBySchema } from 'ui/views/DatasetDesigner/_c
 import { getEmptyLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyLink';
 import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getReferencedTables } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getReferencedTables';
-import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
+// import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
+import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
 import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleRelationCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
 import { setValidationRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationRelation';
@@ -155,7 +156,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
   useEffect(() => {
     if (validationContext.referenceId && isNil(validationContext.ruleToEdit.sqlSentence)) {
-      const table = getSelectedTableByFieldId(validationContext.ruleToEdit.relations.links[0].originField.code, tabs);
+      // const table = getSelectedTableByFieldId(validationContext.ruleToEdit.relations.links[0].originField.code, tabs);
+      const table = getSelectedTableByTableSchemaId(validationContext.ruleToEdit.referenceId, tabs);
 
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
@@ -448,6 +450,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
+    console.log('fieldKey', fieldKey);
+    console.log('fieldValue', fieldValue);
     onDeleteFromClickedFields(fieldKey);
     creationFormDispatch({
       type: fieldKey === 'table' ? 'SET_FORM_FIELD_RELATION' : 'SET_FORM_FIELD',
@@ -465,6 +469,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       setClickedFields(cClickedFields);
     }
   };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
     if (cClickedFields.includes(field)) {
