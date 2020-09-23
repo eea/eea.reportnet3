@@ -418,4 +418,10 @@ public class DataCollectionServiceTest {
     dataCollectionService.addForeignRelationsFromNewReportings(Arrays.asList(fkData));
     Mockito.verify(foreignRelationsRepository, times(1)).saveAll(Mockito.any());
   }
+
+  @Test
+  public void isDataCollectionTest() {
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertTrue(dataCollectionService.isDataCollection(1L));
+  }
 }

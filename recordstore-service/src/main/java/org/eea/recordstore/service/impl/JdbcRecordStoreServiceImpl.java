@@ -784,6 +784,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+        dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         Map<String, Object> valueEU = new HashMap<>();
         valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
         valueEU.put(LiteralConstants.DATASET_ID, idReportingDataset);

@@ -55,4 +55,12 @@ public interface DataCollectionService {
    * @param dataflowId the dataflow id
    */
   void updateDataCollection(Long dataflowId);
+
+  /**
+   * Checks if is data collection.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if is data collection
+   */
+  boolean isDataCollection(Long datasetId);
 }

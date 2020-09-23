@@ -173,4 +173,29 @@ public interface DatasetSnapshotService {
    */
   List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) throws EEAException;
 
+  /**
+   * Gets the snapshots released by id data collection.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the snapshots released by id data collection
+   * @throws EEAException the EEA exception
+   */
+  List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId) throws EEAException;
+
+  /**
+   * Gets the snapshots released by id EU dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id EU dataset
+   * @throws EEAException the EEA exception
+   */
+  List<ReleaseVO> getSnapshotsReleasedByIdEUDataset(Long datasetId) throws EEAException;
+
+  /**
+   * Update snapshot EU release.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  void updateSnapshotEURelease(Long datasetId) throws EEAException;
 }

@@ -980,4 +980,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+  /**
+   * Checks if is data collection.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is data collection
+   */
+  @Override
+  public boolean isDataCollection(Long datasetId) {
+    return dataCollectionRepository.existsById(datasetId);
+  }
+
 }
