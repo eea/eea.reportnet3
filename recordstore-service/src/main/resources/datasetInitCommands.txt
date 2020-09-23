@@ -3,15 +3,13 @@ CREATE schema %dataset_name% AUTHORIZATION %user%;
 CREATE TABLE %dataset_name%.DATASET_VALUE (ID bigint, ID_DATASET_SCHEMA text, PRIMARY key (ID))  TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.TABLE_VALUE (ID bigint, ID_TABLE_SCHEMA text, DATASET_ID bigint, PRIMARY key (ID), FOREIGN KEY (dataset_id) REFERENCES %dataset_name%.dataset_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.RECORD_VALUE(ID text, ID_RECORD_SCHEMA text, ID_TABLE bigint, DATASET_PARTITION_ID bigint, DATA_PROVIDER_CODE text, PRIMARY key (ID), FOREIGN KEY (id_table) REFERENCES %dataset_name%.table_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.FIELD_VALUE (ID text, TYPE text, VALUE text, ID_FIELD_SCHEMA text, ID_RECORD text, PRIMARY key (ID), FOREIGN KEY (id_record) REFERENCES %dataset_name%.record_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
-CREATE TABLE  %dataset_name%.VALIDATION (ID bigint,ID_RULE text,LEVEL_ERROR text, MESSAGE text, TYPE_ENTITY text, VALIDATION_DATE text, ORIGIN_NAME TEXT, PRIMARY KEY (id));
+CREATE TABLE %dataset_name%.FIELD_VALUE (ID text, TYPE text, VALUE text, ID_FIELD_SCHEMA text, ID_RECORD text, GEOMETRY geometry null, RSID int4 NULL, PRIMARY key (ID), FOREIGN KEY (id_record) REFERENCES %dataset_name%.record_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.VALIDATION (ID bigint,ID_RULE text,LEVEL_ERROR text, MESSAGE text, TYPE_ENTITY text, VALIDATION_DATE text, ORIGIN_NAME TEXT, PRIMARY KEY (id));
 CREATE TABLE %dataset_name%.DATASET_VALIDATION (ID bigint,ID_DATASET bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_DATASET) REFERENCES %dataset_name%.DATASET_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.TABLE_VALIDATION (ID bigint,ID_TABLE bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_TABLE) REFERENCES %dataset_name%.TABLE_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.RECORD_VALIDATION (ID bigint,ID_RECORD text,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_RECORD) REFERENCES %dataset_name%.RECORD_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.FIELD_VALIDATION (ID bigint,ID_FIELD text,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE ,FOREIGN KEY (ID_FIELD) REFERENCES %dataset_name%.FIELD_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.ATTACHMENT_VALUE (ID text, FILE_NAME text, CONTENT BYTEA , FIELD_VALUE_ID text,  PRIMARY KEY (ID), FOREIGN KEY (FIELD_VALUE_ID) REFERENCES %dataset_name%.FIELD_VALUE(ID) ON DELETE CASCADE) TABLESPACE pg_default;
-
-
 
 ALTER TABLE %dataset_name%.DATASET_VALUE  OWNER to %user%;
 ALTER TABLE %dataset_name%.TABLE_VALUE  OWNER to %user%;
@@ -24,7 +22,6 @@ ALTER TABLE %dataset_name%.RECORD_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.ATTACHMENT_VALUE OWNER TO %user%;
 
-
 CREATE SEQUENCE %dataset_name%.field_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.record_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.table_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
@@ -33,8 +30,6 @@ CREATE SEQUENCE %dataset_name%.record_validation_sequence INCREMENT BY 1 MINVALU
 CREATE SEQUENCE %dataset_name%.table_validation_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.dataset_validation_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
 CREATE SEQUENCE %dataset_name%.validation_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
-
-	
 
 ALTER SEQUENCE %dataset_name%.field_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.field_sequence TO %user%;
@@ -59,7 +54,7 @@ CREATE INDEX idx_field_validation_validation ON %dataset_name%.field_validation(
 CREATE INDEX idx_record_validation_record ON %dataset_name%.record_validation(id_record);
 CREATE INDEX idx_record_validation_validation ON %dataset_name%.record_validation(id_validation);
 CREATE INDEX idx_validation_level_error ON %dataset_name%.validation(level_error);
-
+CREATE INDEX geometry_field_value ON %dataset_name%.field_value USING gist (geometry);
 
 ALTER SEQUENCE %dataset_name%.field_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.field_validation_sequence TO %user%;
@@ -76,11 +71,13 @@ GRANT ALL ON SEQUENCE %dataset_name%.validation_sequence TO %user%;
 ALTER SEQUENCE %dataset_name%.dataset_validation_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.dataset_validation_sequence TO %user%;
 
-
-CREATE OR REPLACE FUNCTION %dataset_name%.is_numeric(text) RETURNS boolean  LANGUAGE plpgsql  IMMUTABLE STRICT AS $function$ DECLARE x NUMERIC; BEGIN x = $1::NUMERIC; RETURN TRUE; EXCEPTION WHEN others THEN RETURN FALSE; END; $function$;
+CREATE OR REPLACE FUNCTION %dataset_name%.insert_geometry_function() RETURNS trigger LANGUAGE plpgsql AS $function$ begin NEW.rsid:=((NEW.value::json->'properties')::json->>'rsid')::integer; NEW.geometry:=public.ST_SetSRID(public.ST_GeomFromGeoJSON(NEW.value::json->'geometry'),NEW.rsid); return new; exception when others then NEW.geometry:=null; NEW.rsid:=null; return new; END; $function$;
+CREATE OR REPLACE FUNCTION %dataset_name%.is_numeric(text) RETURNS boolean LANGUAGE plpgsql IMMUTABLE STRICT AS $function$ DECLARE x NUMERIC; BEGIN x = $1::NUMERIC; RETURN TRUE; EXCEPTION WHEN others THEN RETURN FALSE; END; $function$;
 CREATE OR REPLACE FUNCTION %dataset_name%.is_double(text) RETURNS boolean LANGUAGE plpgsql IMMUTABLE STRICT AS $function$ DECLARE x double precision;BEGIN    x = $1::double precision;    RETURN TRUE;EXCEPTION WHEN others THEN    RETURN FALSE;END;$function$;
 CREATE OR REPLACE FUNCTION %dataset_name%.is_date(s character varying) RETURNS boolean LANGUAGE plpgsql AS $function$ begin   perform s::date;  return true; exception when others then  return false; end; $function$;
 
+ALTER FUNCTION %dataset_name%.insert_geometry_function OWNER TO %user%;
+GRANT EXECUTE ON FUNCTION %dataset_name%.insert_geometry_function() TO %user%, dataset;
 ALTER FUNCTION %dataset_name%.is_numeric OWNER TO %user%;
 GRANT EXECUTE ON FUNCTION %dataset_name%.is_numeric(text) TO %user%;
 ALTER FUNCTION %dataset_name%.is_double OWNER TO %user%;
@@ -88,5 +85,6 @@ GRANT EXECUTE ON FUNCTION %dataset_name%.is_double(text) TO %user%;
 ALTER FUNCTION %dataset_name%.is_date OWNER TO %user%;
 GRANT EXECUTE ON FUNCTION %dataset_name%.is_date(varchar) TO %user%;
 
+CREATE TRIGGER insert_geometry_trigger BEFORE INSERT OR UPDATE ON %dataset_name%.field_value FOR EACH ROW WHEN ((NEW.type in ('POSITION','POINT', 'LINESTRING', 'MULTILINESTRING','MULTIPOINT','POLYGON','GEOMETRYCOLLECTION'))) EXECUTE FUNCTION %dataset_name%.insert_geometry_function();
 
 commit;

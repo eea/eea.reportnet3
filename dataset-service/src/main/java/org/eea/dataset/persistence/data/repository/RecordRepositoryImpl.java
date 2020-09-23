@@ -276,10 +276,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("Init Order");
       for (SortField field : sortFields) {
         switch (field.getTypefield()) {
-          case COORDINATE_LAT:
-          case COORDINATE_LONG:
-            sortQuery = SORT_COORDINATE_QUERY;
-            break;
           case NUMBER_INTEGER:
           case NUMBER_DECIMAL:
             sortQuery = SORT_NUMERIC_QUERY;
