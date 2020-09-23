@@ -16,7 +16,8 @@ const userSettingsDefaultState = {
     showLogoutConfirmation: true,
     userImage: [],
     visualTheme: 'light'
-  }
+  },
+  isLoggedOut: null
 };
 
 export const UserProvider = ({ children }) => {

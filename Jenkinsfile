@@ -147,7 +147,7 @@ pipeline {
         stage('Push to EEA GitHub') {
             when {
                 expression {
-                   BRANCH_NAME == "release/3.0.0-OP-SPRINT_20"
+                   BRANCH_NAME == "release/3.0.0-OP-Hotfix-121843"
                 }
             }
             steps {
@@ -187,7 +187,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   BRANCH_NAME == "release/3.0.0-OP-SPRINT_20"
+                   BRANCH_NAME == "release/3.0.0-OP-Hotfix-121843"
                 }
             }
             parallel {

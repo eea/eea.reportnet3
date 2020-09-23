@@ -21,6 +21,13 @@
           }
         },
         {
+          "key": "RESTORE_DATASETSCHEMA_SNAPSHOT_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "UPLOAD_DOCUMENT_FAILED_EVENT",
           "navigateTo": {
             "section": "DOCUMENTS",
@@ -181,6 +188,9 @@
         },
         {
           "key": "RELEASED_BY_ID_REPORTER_ERROR"
+        },
+        {
+          "key": "RESTORED_BY_ID_REPORTER_ERROR"
         },
         {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
@@ -426,53 +436,8 @@
           "key": "DOWNLOAD_FME_FILE_ERROR"
         },
         {
-          "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "EXTERNAL_IMPORT_DESIGN_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "EXTERNAL_IMPORT_REPORTING_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "EXTERNAL_EXPORT_DESIGN_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "EXTERNAL_EXPORT_REPORTING_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "SNAPSHOT_ACTION_BLOCKED_ERROR",
+          "key": "NOT_ALLOWED_ERROR",
           "lifeTime": 5000
-        },
-        {
-          "key": "FILE_UPLOAD_BLOCKED_ERROR"
         }
       ]
     },
@@ -503,14 +468,7 @@
           }
         },
         {
-          "key": "EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT",
+          "key": "EXTERNAL_IMPORT_COMPLETE_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -535,6 +493,13 @@
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "RESTORE_DATASETSCHEMA_SNAPSHOT_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
           }
         },
         {
@@ -576,8 +541,7 @@
           "key": "VALIDATION_FINISHED_EVENT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"],
-            "hasQueryString": true
+            "parameters": ["dataflowId", "datasetId"]
           }
         },
         {
@@ -681,8 +645,7 @@
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"],
-            "hasQueryString": true
+            "parameters": ["dataflowId", "datasetId"]
           }
         },
 
@@ -700,9 +663,6 @@
         },
         {
           "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
-        },
-        {
-          "key": "DATASET_IMPORT_INIT"
         }
       ]
     }

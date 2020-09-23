@@ -838,6 +838,7 @@
     "exportExternalIntegrationDataset": "Exporting dataset data",
     "noNotifications": "There are no notifications yet",
     "webLinkDescriptionValidationMax": "Web link description is too long",
+    "notAllowedError": "You are not allowed to see the requested page"
     "importPreviousData": "Import previous data",
     "importPreviousDataHeader": "Import previous data",
     "importPreviousDataConfirm": "Do you want to import previous data?",

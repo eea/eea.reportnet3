@@ -7,6 +7,7 @@ import notifications from './notifications';
 import permissions from './permissions';
 import primeIcons from './prime.icons';
 import publicFrontpage from './publicFrontpage.json';
+import storage from './storage.config.json';
 import validations from './validation.config.json';
 
 const config = {};
@@ -28,6 +29,7 @@ config.languages = languages;
 config.notifications = notifications;
 config.permissions = permissions;
 config.publicFrontpage = publicFrontpage;
+config.storage = storage;
 config.validations = validations;
 
 export { config };

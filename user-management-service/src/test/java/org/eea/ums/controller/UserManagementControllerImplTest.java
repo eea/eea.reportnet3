@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -104,8 +105,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -691,4 +692,17 @@ public class UserManagementControllerImplTest {
     Assert.assertNotNull(result);
     Assert.assertEquals("user1", result.getUserId());
   }
+
+  @Test
+  public void authenticateUserByEmail() {
+    TokenVO tokenVO = new TokenVO();
+    tokenVO.setUserId("user1");
+    Mockito
+        .when(securityProviderInterfaceService.authenticateEmail(Mockito.eq("user1@reportnet.net")))
+        .thenReturn(tokenVO);
+    TokenVO result = userManagementController.authenticateUserByEmail("user1@reportnet.net");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("user1", result.getUserId());
+  }
+
 }
