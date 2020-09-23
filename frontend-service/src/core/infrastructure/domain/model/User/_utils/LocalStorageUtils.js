@@ -11,7 +11,7 @@ const get = () => {
 };
 
 const remove = () => {
-  localStorage.reset();
+  localStorage.clear();
 };
 
 const set = value => {
