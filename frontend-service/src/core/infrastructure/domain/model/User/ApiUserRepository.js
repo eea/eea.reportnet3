@@ -1,15 +1,15 @@
-import jwt_decode from 'jwt-decode';
 import moment from 'moment';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
+
+import { config } from 'conf/index';
 
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { config } from 'conf/index';
+
+import { LocalStorageUtils } from './_utils/LocalStorageUtils';
 
 const timeOut = time => {
   setTimeout(() => {
@@ -38,6 +38,7 @@ const login = async code => {
 const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
+  LocalStorageUtils.remove();
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };

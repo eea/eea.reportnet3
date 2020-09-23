@@ -21,15 +21,22 @@ import { UserService } from 'core/services/User';
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
+import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 const Dataflows = withRouter(({ match, history }) => {
+  const {
+    params: { errorType: dataflowsErrorType }
+  } = match;
+
   const leftSideBarContext = useContext(LeftSideBarContext);
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -59,6 +66,12 @@ const Dataflows = withRouter(({ match, history }) => {
     isLoading: true,
     pending: []
   });
+
+  useEffect(() => {
+    if (!isNil(dataflowsErrorType)) {
+      notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
+    }
+  }, []);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
