@@ -56,7 +56,8 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     ruleVO.setReferenceId(rule.getReferenceId().toString());
 
     if ((null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty())
-        && (!rule.isAutomatic() && !EntityTypeEnum.DATASET.equals(rule.getType()))) {
+        && (!rule.isAutomatic() && !EntityTypeEnum.DATASET.equals(rule.getType())
+            && !EntityTypeEnum.TABLE.equals(rule.getType()))) {
       ruleVO.setWhenCondition(ruleExpressionService.convertToDTO(rule.getWhenCondition()));
     }
   }

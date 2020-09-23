@@ -87,12 +87,15 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
+  /** The sql valitaion utils. */
   @Autowired
   private SQLValitaionUtils sqlValitaionUtils;
 
+  /** The sql rules service. */
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -197,7 +200,7 @@ public class RulesServiceImpl implements RulesService {
     }
     Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
 
-    if (null != rule && EntityTypeEnum.DATASET.equals(rule.getType())
+    if (null != rule && EntityTypeEnum.TABLE.equals(rule.getType())
         && rule.getIntegrityConstraintId() != null) {
       Optional<IntegritySchema> integritySchema =
           integritySchemaRepository.findById(rule.getIntegrityConstraintId());
@@ -297,8 +300,33 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (null == ruleVO.getWhenCondition()) {
+      rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
+
+    } else {
+      validateRule(rule);
+      if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+      }
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
+
+  }
+
+  /**
+   * Rules when condition null.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void rulesWhenConditionNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
+      Rule rule) throws EEAException {
     // we create the whencondition Integrity for the rule
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
       ObjectId integrityConstraintId = new ObjectId();
       IntegrityVO integrityVO = ruleVO.getIntegrityVO();
       integrityVO.setId(integrityConstraintId.toString());
@@ -308,8 +336,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integrityConstraintId.toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("isIntegrityConstraint(this.datasetId,'"
+          + integrityConstraintId.toString() + "','" + rule.getRuleId().toString() + "')");
       Long datasetReferencedId = dataSetMetabaseControllerZuul
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
@@ -333,8 +361,7 @@ public class RulesServiceImpl implements RulesService {
       event.put("event_type", "CREATE");
       sentEvent(event);
 
-      sqlRulesService.validateSQLRule(datasetSchemaId, rule);
-
+      // sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
     validateRule(rule);
@@ -553,7 +580,7 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
 
       IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
       integritySchemaRepository.deleteById(new ObjectId(ruleVO.getIntegrityVO().getId()));
@@ -562,8 +589,8 @@ public class RulesServiceImpl implements RulesService {
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integritySchema.getId().toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("isIntegrityConstraint(this.datasetId,'"
+          + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
@@ -918,7 +945,7 @@ public class RulesServiceImpl implements RulesService {
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
-      if (EntityTypeEnum.DATASET.equals(rule.getType())) {
+      if (EntityTypeEnum.TABLE.equals(rule.getType())) {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 

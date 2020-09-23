@@ -187,7 +187,8 @@ function boolean isUniqueConstraint(String uniqueIdConstraint,String idRule){
 
  //////////////////////////////////////////VALIDATION DATASET INTEGRITY////////////////////////////////////////////////////////////
 function boolean isIntegrityConstraint(DatasetValue datasetId,String integrityId, String idRule){
-	return UniqueValidationUtils.isIntegrityConstraint(datasetId,integrityId,idRule);
+	 UniqueValidationUtils.isIntegrityConstraint(datasetId,integrityId,idRule);
+	 return true;
 }
 
 //////////////////////////////////////////VALIDATION TABLE FILLED////////////////////////////////////////////////////////////

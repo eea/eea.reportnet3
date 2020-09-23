@@ -146,8 +146,8 @@ public class UniqueValidationUtilsTest {
   public void integrityConstraintTest() {
     DatasetValue datasetValue = new DatasetValue();
     datasetValue.setId(1L);
-    Assert.assertTrue(uniqueValidationUtils.isIntegrityConstraint(datasetValue,
-        "5ece3de73fd71093b81eb4e6", "5ece3de73fd71093b81eb4e6"));
+    uniqueValidationUtils.isIntegrityConstraint(datasetValue, "5ece3de73fd71093b81eb4e6",
+        "5ece3de73fd71093b81eb4e6");
 
   }
 
