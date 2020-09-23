@@ -34,7 +34,7 @@ public class SQLValitaionUtils {
     String preparedStatement = sqlRulesService.queryTreat(query, datasetId);
     // Execute query
     try {
-      sqlRulesService.retrivedata(preparedStatement);
+      sqlRulesService.retrivedata(preparedStatement, datasetId);
     } catch (SQLException e) {
       e.printStackTrace();
     }

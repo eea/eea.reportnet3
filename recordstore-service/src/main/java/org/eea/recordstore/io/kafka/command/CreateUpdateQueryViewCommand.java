@@ -120,13 +120,15 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
       String schemaId = iterator.next();
       // id
       stringQuery.append("(select fv.id from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName()).append("_id");
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_id")
+          .append("\" ");
       stringQuery.append(COMMA);
       // _id_field_schema
       stringQuery
           .append(
               "(select fv.id_field_schema from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName()).append("_id_field_schema");
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+          .append("_id_field_schema").append("\" ");
       stringQuery.append(COMMA);
       // value
       DataType type = DataType.TEXT;
@@ -140,7 +142,8 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
           stringQuery
               .append("(select CAST(fv.value as date) from dataset_" + datasetId
                   + QUERY_FILTER_BY_ID_RECORD)
-              .append(schemaId).append(AS).append(columns.get(i).getName());
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
           stringQuery.append(COMMA);
           break;
         case NUMBER_DECIMAL:
@@ -148,19 +151,22 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
           stringQuery
               .append("(select CAST(fv.value as numeric) from dataset_" + datasetId
                   + QUERY_FILTER_BY_ID_RECORD)
-              .append(schemaId).append(AS).append(columns.get(i).getName());
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
           stringQuery.append(COMMA);
           break;
         default:
           stringQuery
               .append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-              .append(schemaId).append(AS).append(columns.get(i).getName());
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
           stringQuery.append(COMMA);
           break;
       }
       // type
       stringQuery.append("(select fv.type from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName()).append("_type");
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_type")
+          .append("\" ");
       if (iterator.hasNext()) {
         stringQuery.append(COMMA);
       }

@@ -53,9 +53,11 @@ public interface SqlRulesService {
    * Retrivedata.
    *
    * @param query the query
+   * @param datasetId the dataset id
    * @return the table value
    * @throws SQLException the SQL exception
    */
-  TableValue retrivedata(String query) throws SQLException;
+  TableValue retrivedata(String query, Long datasetId) throws SQLException;
+
 
 }

@@ -2,12 +2,16 @@ package org.eea.validation.service.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
@@ -15,6 +19,9 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.mapper.RuleMapper;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -53,8 +60,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The Constant FROM: {@value}. */
   private static final String FROM = "FROM";
 
+  /** The Constant WHERE: {@value}. */
+  private static final String WHERE = "WHERE";
+
   /** The Constant KEYWORDS: {@value}. */
-  private static final String KEYWORDS = "INNER,JOIN,COALESCE,DELETE,INSERT";
+  private static final String KEYWORDS = "INNER,JOIN,COALESCE,DELETE,INSERT,DROP";
 
   /** The dataset repository. */
   @Autowired
@@ -156,7 +166,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (checkQuerySintax(query)) {
       String preparedquery = queryTreat(query, datasetId) + " limit 5";
       try {
-        retrivedata(preparedquery);
+        retrivedata(preparedquery, datasetId);
       } catch (SQLException e) {
         LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
         isSQLCorrect = Boolean.FALSE;
@@ -253,7 +263,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     preparedStatement.append(queryLastPart);
     try {
-      retrivedata(preparedStatement.toString());
+      retrivedata(preparedStatement.toString(), datasetId);
     } catch (SQLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -283,10 +293,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           && !tables.get(index).trim().equalsIgnoreCase(FROM)) {
         finalQueryPart.append(" dataset_" + datasetId + "." + tables.get(index).trim());
       }
-      if (!tables.get(index).trim().equalsIgnoreCase("WHERE")) {
-        finalQueryPart.append(" ");
-        finalQueryPart.append(query.substring(query.indexOf("WHERE")));
-        break;
+      if (query.contains(WHERE)) {
+        if (!tables.get(index).trim().equalsIgnoreCase(WHERE)) {
+          finalQueryPart.append(" ");
+          finalQueryPart.append(query.substring(query.indexOf(WHERE)));
+          break;
+        }
       }
     }
     return finalQueryPart.toString();
@@ -307,7 +319,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!table.trim().equalsIgnoreCase(FROM)) {
         tableList.add(table);
       }
-      if (table.trim().equals("WHERE") && table.trim().equals("LIMIT")
+      if (table.trim().equals(WHERE) && table.trim().equals("LIMIT")
           && table.trim().equals("OFFSET")) {
         break;
       }
@@ -407,10 +419,121 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
 
   @Override
-  public TableValue retrivedata(String query) throws SQLException {
-    return datasetRepository.queryRSExecution(query);
+  public TableValue retrivedata(String query, Long datasetId) throws SQLException {
+    TableValue table = datasetRepository.queryRSExecution(query);
+    retrieveValidations(table.getRecords(), datasetId);
+    return table;
   }
 
 
+  private void retrieveValidations(List<RecordValue> records, Long datasetId) {
+    // retrieve validations to set them into the final result
+    List<String> recordIds = records.stream().map(RecordValue::getId).collect(Collectors.toList());
+    Map<String, List<FieldValidation>> fieldValidations = getFieldValidations(recordIds, datasetId);
+    Map<String, List<RecordValidation>> recordValidations =
+        getRecordValidations(recordIds, datasetId);
+    records.stream().forEach(record -> {
+      record.getFields().stream().filter(field -> null != field).forEach(field -> {
+        List<FieldValidation> validations = fieldValidations.get(field.getId());
+        field.setFieldValidations(validations);
+        if (null != validations && !validations.isEmpty()) {
+          field.setLevelError(
+              validations.stream().map(validation -> validation.getValidation().getLevelError())
+                  .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                  .orElse(ErrorTypeEnum.WARNING));
+        }
+      });
+
+      List<RecordValidation> validations = recordValidations.get(record.getId());
+      record.setRecordValidations(validations);
+      if (null != validations && !validations.isEmpty()) {
+        record.setLevelError(
+            validations.stream().map(validation -> validation.getValidation().getLevelError())
+                .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                .orElse(ErrorTypeEnum.WARNING));
+      }
+    });
+  }
+
+  private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds,
+      Long datasetId) {
+
+    StringBuilder query = new StringBuilder("select fval.ID as field_val_id," + "v.ID as val_id,"
+        + "fv.ID as field_id," + "fval.ID_FIELD as field_validation_id_field,"
+        + "fval.ID_VALIDATION as field_validation_id_validation," + "v.ID_RULE as rule_id,"
+        + "v.LEVEL_ERROR as level_error, " + "v.MESSAGE as message,"
+        + "v.ORIGIN_NAME as origin_name," + "v.TYPE_ENTITY as type_entity,"
+        + "v.VALIDATION_DATE as validation_date," + "fv.ID_FIELD_SCHEMA as id_field_schema,"
+        + "fv.ID_RECORD as id_record," + "fv.TYPE as field_value_type," + "fv.VALUE as value "
+        + "from dataset_" + datasetId + ".FIELD_VALIDATION fval " + "inner join dataset_"
+        + datasetId + ".VALIDATION v " + "on fval.ID_VALIDATION=v.ID " + "inner join dataset_"
+        + datasetId + ".FIELD_VALUE fv " + "on fval.ID_FIELD=fv.ID " + "where fv.ID_RECORD "
+        + "in (");
+
+    for (int i = 0; i < recordIds.size(); i++) {
+      query.append("'" + recordIds.get(i) + "'");
+      if (recordIds.size() > i + 1) {
+        query.append(",");
+      }
+    }
+    query.append(")");
+    List<FieldValidation> fieldValidations =
+        datasetRepository.queryFieldValidationExecution(query.toString());
+
+    Map<String, List<FieldValidation>> result = new HashMap<>();
+
+    fieldValidations.stream().forEach(fieldValidation -> {
+      if (!result.containsKey(fieldValidation.getFieldValue().getId())) {
+        result.put(fieldValidation.getFieldValue().getId(), new ArrayList<>());
+      }
+      result.get(fieldValidation.getFieldValue().getId()).add(fieldValidation);
+    });
+
+    return result;
+  }
+
+  /**
+   * Gets the record validations.
+   *
+   * @param recordIds the record ids
+   * @param datasetId the dataset id
+   * @return the record validations
+   */
+  private Map<String, List<RecordValidation>> getRecordValidations(final List<String> recordIds,
+      Long datasetId) {
+
+    StringBuilder query = new StringBuilder("select rval.ID as record_val_id," + "v.ID as val_id,"
+        + "rv.ID as record_id," + "rval.ID_RECORD as record_validation_id_field,"
+        + "rval.ID_VALIDATION as record_validation_id_validation," + "v.ID_RULE as rule_id,"
+        + "v.LEVEL_ERROR as level_error," + "v.MESSAGE as message,"
+        + "v.ORIGIN_NAME as origin_name," + "v.TYPE_ENTITY as type_entity,"
+        + "v.VALIDATION_DATE as validation_date," + "rv.DATA_PROVIDER_CODE as data_provider_code,"
+        + "rv.DATASET_PARTITION_ID as dataset_partition, "
+        + "rv.ID_RECORD_SCHEMA as record_schema, " + "rv.ID_TABLE as id_table " + "from dataset_"
+        + datasetId + ".RECORD_VALIDATION rval " + "inner join dataset_" + datasetId
+        + ".VALIDATION v " + "on rval.ID_VALIDATION=v.ID " + "inner join dataset_" + datasetId
+        + ".RECORD_VALUE rv " + "on rval.ID_RECORD=rv.ID " + "where rv.ID in (");
+
+    for (int i = 0; i < recordIds.size(); i++) {
+      query.append("'" + recordIds.get(i) + "'");
+      if (recordIds.size() > i + 1) {
+        query.append(",");
+      }
+    }
+    query.append(")");
+    List<RecordValidation> recordValidations =
+        datasetRepository.queryRecordValidationExecution(query.toString());
+
+    Map<String, List<RecordValidation>> result = new HashMap<>();
+
+    recordValidations.stream().forEach(recordValidation -> {
+      if (!result.containsKey(recordValidation.getRecordValue().getId())) {
+        result.put(recordValidation.getRecordValue().getId(), new ArrayList<>());
+      }
+      result.get(recordValidation.getRecordValue().getId()).add(recordValidation);
+    });
+
+    return result;
+  }
 
 }
