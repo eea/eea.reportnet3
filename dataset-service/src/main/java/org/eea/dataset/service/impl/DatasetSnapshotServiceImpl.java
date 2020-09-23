@@ -247,6 +247,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, String description, Boolean released,
       Long partitionIdDestination) {
 
+
     List<Validation> isBlocked = null;
     try {
       setTenant(idDataset);
@@ -456,7 +457,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         if (!representatives.isEmpty()) {
           RepresentativeVO representative = representatives.get(0);
           // We only update the representative if the receipt is not outdated
-          if (false == representative.getReceiptOutdated()) {
+          if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
             representative.setReceiptOutdated(true);
             representativeControllerZuul.updateRepresentative(representative);
             LOG.info("Receipt from the representative {} marked as outdated",
@@ -542,7 +543,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description) {
-
     try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
       // 1. Create the snapshot in the metabase
       SnapshotSchema snap = new SnapshotSchema();

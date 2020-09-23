@@ -59,7 +59,7 @@ const App = () => {
                             <PrivateRoute exact path={routes.DATASET} component={Dataset} />
                             <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
                             <PrivateRoute exact path={routes.EU_DATASET} component={EUDataset} />
-                            <PrivateRoute exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
+                            <Route exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
                             <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
                           </Switch>
                         </Router>

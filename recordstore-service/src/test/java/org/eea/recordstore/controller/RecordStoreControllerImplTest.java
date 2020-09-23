@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.recordstore.service.impl.JdbcRecordStoreServiceImpl;
+import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
@@ -51,6 +52,9 @@ public class RecordStoreControllerImplTest {
 
   @Mock
   private JdbcRecordStoreServiceImpl jdbcRecordStoreServiceImpl;
+
+  @Mock
+  private SnapshotHelper restoreSnapshotHelper;
 
 
   /** The Constant TEST. */
@@ -194,11 +198,12 @@ public class RecordStoreControllerImplTest {
   }
 
   @Test
-  public void testRestoreSnapshot() throws SQLException, IOException, RecordStoreAccessException {
+  public void testRestoreSnapshot()
+      throws SQLException, IOException, RecordStoreAccessException, EEAException {
     recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "", true,
         false);
-    Mockito.verify(recordStoreService, times(1)).restoreDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(restoreSnapshotHelper, times(1)).processRestoration(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test

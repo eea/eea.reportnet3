@@ -14,16 +14,17 @@ const useReporterDataset = (datasetId, dataflowId) => {
   const [snapshotListData, setSnapshotListData] = useState([]);
 
   const snapshotInitialState = {
+    action: () => {},
     apiCall: '',
     createdAt: '',
-    description: '',
-    dialogMessage: '',
-    dialogConfirmMessage: '',
-    dialogConfirmQuestion: '',
     dataflowId,
     datasetId,
-    snapShotId: '',
-    action: () => {}
+    description: '',
+    dialogConfirmMessage: '',
+    dialogConfirmQuestion: '',
+    dialogMessage: '',
+    isConfirmDisabled: false,
+    snapShotId: ''
   };
 
   useEffect(() => {
@@ -37,10 +38,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'CREATE_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'CREATE_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -51,10 +58,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.deleteByIdReporter(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'DELETED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'DELETED_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -86,10 +99,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'RELEASED_BY_ID_REPORTER_ERROR',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }
@@ -99,10 +118,16 @@ const useReporterDataset = (datasetId, dataflowId) => {
     try {
       await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {
-      notificationContext.add({
-        type: 'RESTORED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT',
+          content: {}
+        });
+      }
     } finally {
       setIsSnapshotDialogVisible(false);
     }

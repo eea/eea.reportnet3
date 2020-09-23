@@ -22,6 +22,26 @@ const Snapshots = ({
   const snapshotContext = useContext(SnapshotContext);
   const userContext = useContext(UserContext);
 
+  const getConfirmBtnClassnames = () => {
+    let classNames = '';
+
+    if (snapshotContext.snapshotState.dialogMessage === 'Delete copy') {
+      classNames = 'p-button-danger';
+    }
+
+    if (snapshotContext.snapshotState.isConfirmDisabled) {
+      classNames = `${classNames} p-button-animated-blink`;
+    }
+    return classNames;
+  };
+
+  const onSnapshotAction = () => {
+    snapshotContext.snapshotDispatch({
+      type: 'ON_SNAPSHOT_ACTION'
+    });
+    snapshotContext.snapshotState.action();
+  };
+
   return (
     <>
       <SnapshotSlideBar
@@ -34,13 +54,13 @@ const Snapshots = ({
       {isSnapshotDialogVisible && (
         <ConfirmDialog
           className={styles.snapshotDialog}
-          classNameConfirm={
-            snapshotContext.snapshotState.dialogMessage === 'Delete copy' ? 'p-button-danger' : undefined
-          }
+          classNameConfirm={getConfirmBtnClassnames()}
           header={snapshotContext.snapshotState.dialogMessage}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={snapshotContext.snapshotState.action}
+          iconConfirm={snapshotContext.snapshotState.isConfirmDisabled && 'spinnerAnimate'}
+          disabledConfirm={snapshotContext.snapshotState.isConfirmDisabled}
+          onConfirm={onSnapshotAction}
           onHide={() => setIsSnapshotDialogVisible(false)}
           showHeader={false}
           visible={isSnapshotDialogVisible}>

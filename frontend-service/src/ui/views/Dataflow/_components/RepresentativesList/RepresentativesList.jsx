@@ -49,7 +49,7 @@ const RepresentativesList = ({
     initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
     refresher: false,
-    representativeHasError: [],
+    representativesHaveError: [],
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
@@ -63,7 +63,7 @@ const RepresentativesList = ({
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativeHasError)) {
+    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
       formDispatcher({
         type: 'REFRESH'
       });
@@ -82,7 +82,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     autofocusOnEmptyInput(formState);
-  }, [formState.representativeHasError]);
+  }, [formState.representativesHaveError]);
 
   useEffect(() => {
     if (!isEmpty(formState.representatives)) {
@@ -109,7 +109,7 @@ const RepresentativesList = ({
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
 
-    let hasError = formState.representativeHasError.includes(representative.representativeId);
+    let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
     const labelId = uuid.v4();
 
@@ -119,30 +119,32 @@ const RepresentativesList = ({
       const [thisRepresentative] = representatives.filter(
         thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
       );
+
       thisRepresentative.providerAccount = account;
 
-      let representativeHasError;
+      let representativesHaveError;
+
       if (isValidEmail(account)) {
-        representativeHasError = formState.representativeHasError.filter(
+        representativesHaveError = formState.representativesHaveError.filter(
           representativeId => representativeId !== thisRepresentative.representativeId
         );
       } else {
-        representativeHasError = formState.representativeHasError;
-        representativeHasError.unshift(thisRepresentative.representativeId);
+        representativesHaveError = formState.representativesHaveError;
+        representativesHaveError.unshift(thisRepresentative.representativeId);
       }
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
         payload: {
           representatives,
-          representativeHasError: uniq(representativeHasError)
+          representativesHaveError: uniq(representativesHaveError)
         }
       });
     };
 
     return (
       <>
-        <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
+        <div className={`formField ${hasError ? 'error' : undefined}`} style={{ marginBottom: '0rem' }}>
           <input
             autoFocus={isNil(representative.representativeId)}
             className={representative.hasDatasets ? styles.disabled : undefined}

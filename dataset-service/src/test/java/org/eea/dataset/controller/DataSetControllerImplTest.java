@@ -22,6 +22,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -117,6 +118,14 @@ public class DataSetControllerImplTest {
   /** The file mock. */
   private MockMultipartFile fileMock;
 
+
+  /**
+   * The delete helper.
+   */
+  @Mock
+  private DeleteHelper deleteHelper;
+
+
   /**
    * Inits the mocks.
    */
@@ -147,7 +156,7 @@ public class DataSetControllerImplTest {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
     try {
-      dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
+      dataSetControllerImpl.loadTableData(null, fileNoExtension, null, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -165,7 +174,7 @@ public class DataSetControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     try {
-      dataSetControllerImpl.loadTableData(1L, null, null);
+      dataSetControllerImpl.loadTableData(1L, null, null, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -182,7 +191,7 @@ public class DataSetControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      dataSetControllerImpl.loadTableData(1L, null, null);
+      dataSetControllerImpl.loadTableData(1L, null, null, false);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, 1L), e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
@@ -203,10 +212,10 @@ public class DataSetControllerImplTest {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadTableData(1L, file, "example");
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+    dataSetControllerImpl.loadTableData(1L, file, "example", true);
     Mockito.verify(fileTreatmentHelper, times(1)).executeFileProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   /**
@@ -227,7 +236,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
       final EEAMockMultipartFile file =
           new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
-      dataSetControllerImpl.loadTableData(1L, file, "example");
+      dataSetControllerImpl.loadTableData(1L, file, "example", false);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -247,7 +256,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
       final EEAMockMultipartFile file =
           new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
-      dataSetControllerImpl.loadTableData(1L, file, "example");
+      dataSetControllerImpl.loadTableData(1L, file, "example", false);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "example"),
           e.getReason());
@@ -528,11 +537,7 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
   }
 
-  /**
-   * The delete helper.
-   */
-  @Mock
-  private DeleteHelper deleteHelper;
+
 
   /**
    * Test delete import table.
@@ -1066,37 +1071,11 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
     Mockito.when(file.isEmpty()).thenReturn(false);
     Mockito.when(file.getOriginalFilename()).thenReturn("fileName");
-    Mockito.doNothing().when(fileTreatmentHelper)
-        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadDatasetData(1L, file);
-    Mockito.verify(fileTreatmentHelper, times(1))
-        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.loadDatasetData(1L, file, true);
+    Mockito.verify(fileTreatmentHelper, times(1)).executeExternalIntegrationFileProcess(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
-  /**
-   * Load dataset data test integration exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void loadDatasetDataTestIntegrationException() throws EEAException {
-    MultipartFile file = Mockito.mock(MultipartFile.class);
-    Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
-    Mockito.when(file.isEmpty()).thenReturn(false);
-    Mockito.when(file.getOriginalFilename()).thenReturn("fileName");
-    Mockito
-        .doThrow(new EEAException(
-            String.format("Error loading data into dataset %s via external integration", 1L)))
-        .when(fileTreatmentHelper)
-        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
-    try {
-      dataSetControllerImpl.loadDatasetData(1L, file);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(e.getReason(),
-          String.format("Error loading data into dataset %s via external integration", 1L));
-      throw e;
-    }
-  }
 
   /**
    * Load dataset data empty file.
@@ -1107,7 +1086,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
     Mockito.when(file.isEmpty()).thenReturn(true);
     try {
-      dataSetControllerImpl.loadDatasetData(1L, file);
+      dataSetControllerImpl.loadDatasetData(1L, file, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.FILE_FORMAT, e.getReason());
       throw e;
@@ -1122,7 +1101,7 @@ public class DataSetControllerImplTest {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.FALSE);
     try {
-      dataSetControllerImpl.loadDatasetData(1L, file);
+      dataSetControllerImpl.loadDatasetData(1L, file, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(e.getReason(), String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, 1L));
       throw e;
@@ -1341,5 +1320,15 @@ public class DataSetControllerImplTest {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void deleteDataToReplaceTest() {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    dataSetControllerImpl.deleteDataBeforeReplacing(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteImportDataAsyncBeforeReplacing(
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 }

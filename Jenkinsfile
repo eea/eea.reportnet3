@@ -47,7 +47,7 @@ pipeline {
                 }
             }
         }
-        /*stage('Static Code Analysis') {
+        stage('Static Code Analysis') {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+

@@ -1,14 +1,56 @@
-.sectionMainContent {
-  margin-bottom: 5rem;
-
-  h3 {
-    font-size: 2rem;
-    color: var(--subtitle-color);
-    margin-bottom: 1rem;
-    margin-top: 4rem;
+.contentMain {
+  display: flex;
+  justify-content: center;
+  aside {
+    width: 15%;
+    margin-right: 4rem;
+    ul {
+      list-style: none;
+      padding: 0px;
+      li {
+        margin-bottom: 1rem;
+        a {
+          &:hover {
+            font-weight: bold;
+          }
+        }
+      }
+    }
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 2rem;
+    }
   }
+  .privacyStatementContent {
+    width: 50%;
+    section {
+      h3 {
+        font-size: 2rem;
+        color: var(--subtitle-color);
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+      }
 
-  p {
-    color: var(--title-color);
+      p {
+        color: var(--title-color);
+      }
+      &:nth-of-type(1) {
+        h3 {
+          margin-top: 0px;
+        }
+      }
+    }
+    @media (max-width: 1440px) {
+      width: 60%;
+    }
+    @media (max-width: 1280px) {
+      width: 70%;
+    }
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+  @media (max-width: 768px) {
+    flex-direction: column;
   }
 }

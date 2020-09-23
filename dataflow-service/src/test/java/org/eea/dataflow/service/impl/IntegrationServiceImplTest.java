@@ -1,6 +1,6 @@
 package org.eea.dataflow.service.impl;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +18,13 @@ import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +70,14 @@ public class IntegrationServiceImplTest {
   /** The integration executor factory. */
   @Mock
   private IntegrationExecutorFactory integrationExecutorFactory;
+
+  /** The dataset controller zuul. */
+  @Mock
+  private DataSetControllerZuul datasetControllerZuul;
+
+  /** The kafka sender utils. */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Inits the mocks.
@@ -150,7 +160,7 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setName("name");
     integrationVOList.add(integrationVO);
-    assertNull(
+    assertNotNull(
         integrationService.getOnlyExtensionsAndOperations(integrationVOList).get(0).getName());
   }
 
@@ -303,5 +313,29 @@ public class IntegrationServiceImplTest {
     integrationService.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
     Mockito.verify(integrationRepository, times(1)).deleteByParameterAndValue(Mockito.anyString(),
         Mockito.anyString());
+  }
+
+  @Test
+  public void executeExternalIntegrationTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+    integrationService.executeExternalIntegration(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
+    Mockito.verify(integrationExecutorFactory, times(1)).getExecutor(Mockito.any());
+  }
+
+  @Test
+  public void executeExternalIntegrationReplacingDataTest() throws EEAException {
+
+    Mockito.doNothing().when(datasetControllerZuul).deleteDataBeforeReplacing(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
+    integrationService.executeExternalIntegration(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, true);
+    Mockito.verify(datasetControllerZuul, times(1)).deleteDataBeforeReplacing(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 }
