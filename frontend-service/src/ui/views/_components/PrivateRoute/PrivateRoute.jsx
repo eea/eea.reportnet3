@@ -4,6 +4,7 @@ import { Redirect, Route } from 'react-router-dom';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 import { routes } from 'ui/routes';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
