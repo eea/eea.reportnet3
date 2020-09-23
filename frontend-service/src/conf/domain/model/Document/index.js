@@ -1,2 +1,3 @@
 import DocumentConfig from './Document.web.config';
-export { DocumentConfig };
+import DocumentHelpConfig from './Document.help.config';
+export { DocumentConfig, DocumentHelpConfig };

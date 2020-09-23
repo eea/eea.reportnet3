@@ -3,7 +3,7 @@ package org.eea.validation.configuration;
 import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.validation.configuration.util.EeaDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,13 +83,23 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
-
+  /**
+   * /** The username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String username;
 
   /**
-   * The record store controller zull.
+   * The password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String password;
+
+  /**
+   * The record store controller zuul.
    */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
 
   /**
@@ -101,7 +111,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
   @Bean
   public DataSource datasetDataSource() {
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
+    final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
     DataSource dataSource = null;
     if (null != connections && !connections.isEmpty()) {
       dataSource = dataSetsDataSource(connections.get(0));
@@ -127,8 +137,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
     EeaDataSource ds = new EeaDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
-    ds.setUsername(connectionDataVO.getUser());
-    ds.setPassword(connectionDataVO.getPassword());
+    // set validation microservice credentials
+    ds.setUsername(this.username);
+    ds.setPassword(this.password);
     ds.setDriverClassName("org.postgresql.Driver");
 
     return ds;
@@ -187,6 +198,4 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
   }
-
-
 }

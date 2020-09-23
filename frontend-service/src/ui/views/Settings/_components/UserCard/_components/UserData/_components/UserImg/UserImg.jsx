@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -28,8 +28,8 @@ const UserImg = () => {
 
   const [isAvatarDialogVisible, setIsAvatarDialogVisible] = useState(false);
 
-  const imageUploader = React.useRef(null);
-  const uploadedImage = React.useRef();
+  const imageUploader = useRef(null);
+  const uploadedImage = useRef();
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
@@ -64,9 +64,10 @@ const UserImg = () => {
   };
 
   const listOfImages = () =>
-    config.avatars.map(avatar => (
-      <div className={styles.gridItem}>
+    config.avatars.map((avatar, i) => (
+      <div className={styles.gridItem} key={i}>
         <img
+          alt="Image to choose"
           className={styles.gridItem}
           src={avatar.base64}
           onClick={() => {
@@ -109,6 +110,7 @@ const UserImg = () => {
       <div className={styles.imageWrapper}>
         <input
           accept="image/*"
+          id={'userIcon'}
           onChange={handleImageUpload}
           ref={imageUploader}
           style={{
@@ -116,25 +118,31 @@ const UserImg = () => {
           }}
           type="file"
         />
+        <label htmlFor="userIcon" className="srOnly">
+          {resources.messages['selectImage']}
+        </label>
         <img
+          alt="User profile image"
+          className={styles.userDataIcon}
           data-tip
           data-for="addAvatar"
           data-event="click"
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
           src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
-          className={styles.userDataIcon}
           // onClick={() => imageUploader.current.click()}
         />
         <Icon icon="edit" className={styles.editIcon} />
       </div>
-      <Dialog
-        header={resources.messages['selectImage']}
-        visible={isAvatarDialogVisible}
-        style={{ width: '80%' }}
-        onHide={e => setIsAvatarDialogVisible(false)}>
-        <div className={styles.gridContainer}>{listOfImages()}</div>
-      </Dialog>
+      {isAvatarDialogVisible && (
+        <Dialog
+          header={resources.messages['selectImage']}
+          visible={isAvatarDialogVisible}
+          style={{ width: '80%' }}
+          onHide={e => setIsAvatarDialogVisible(false)}>
+          <div className={styles.gridContainer}>{listOfImages()}</div>
+        </Dialog>
+      )}
       <ReactTooltip
         className={styles.tooltipClass}
         clickable={true}

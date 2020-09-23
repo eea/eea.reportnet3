@@ -2,12 +2,8 @@ package org.eea.interfaces.controller.rod;
 
 import java.util.List;
 import org.eea.interfaces.vo.rod.IssueVO;
-import org.eea.interfaces.vo.rod.ObligationVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
 
 
 /**
@@ -23,14 +19,12 @@ public interface IssueController {
 
   }
 
-
   /**
    * Find all issues.
    *
    * @return the list
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @GetMapping(value = "/")
   List<IssueVO> findAll();
-
 
 }

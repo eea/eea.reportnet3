@@ -33,6 +33,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   width: 30em !important;
+  height: auto;
 }
 .newContainer {
   display: flex;
@@ -60,7 +61,6 @@
 .createSnapshotButton {
   border-radius: 5px !important;
   padding: 0 !important;
-  color: white !important;
   width: 30px !important;
   height: 32px !important;
   &:focus {

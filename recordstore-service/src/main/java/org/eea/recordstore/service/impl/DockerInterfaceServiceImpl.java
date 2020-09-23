@@ -1,13 +1,5 @@
 package org.eea.recordstore.service.impl;
 
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.model.Binds;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.core.command.ExecStartResultCallback;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,12 +18,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.model.Binds;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
 
 
 /**
  * The type Docker interface service.
  */
-//@Service
+// @Service
 public class DockerInterfaceServiceImpl implements DockerInterfaceService, Closeable {
 
   /**
@@ -83,7 +83,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   public Container createContainer(final String containerName, final String imageName,
       final String portBinding) {
 
-    try (final CreateContainerCmd command = dockerClient.dockerClient()
+    try (CreateContainerCmd command = dockerClient.dockerClient()
         .createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1").withEnv(envs)
         .withName(containerName)) {
       // Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));// NO MAPEA... INVESTIGAR
@@ -135,7 +135,8 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     final ExecCreateCmdResponse execCreateCmdResponse =
         dockerClient.dockerClient().execCreateCmd(container.getId()).withAttachStdout(true)
             .withCmd(command).withTty(true).exec();
-    ExecStartResultCallback result = null;// Esto sirve para gestión de eventos. Interesante
+    // This works for event management. Interesting
+    ExecStartResultCallback result = null;
     result =
         dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
 
@@ -174,7 +175,8 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
             "psql", "-h", "localhost", "-U", "root", "-p", "5432", "-d", "datasets", "-c",
             "select * from pg_namespace where nspname like 'dataset%'")
         .withTty(true).exec();
-    ExecStartResultCallback execResult = null;// Esto sirve para gestión de eventos. Interesante
+    // This works for event management. Interesting
+    ExecStartResultCallback execResult = null;
     execResult = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId())
         .withDetach(false).exec(new ExecStartResultCallback(output, errorOutput));
 
@@ -183,6 +185,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
     } catch (final InterruptedException e) {
       LOG_ERROR.error(e.getMessage());
+      Thread.currentThread().interrupt();
     }
     final String outcomeOk = new String(((ByteArrayOutputStream) output).toByteArray());
     final String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
@@ -242,6 +245,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       // start
     } catch (final InterruptedException e) {
       LOG_ERROR.error("Error starting container {}", container.getId(), e);
+      Thread.currentThread().interrupt();
     }
   }
 

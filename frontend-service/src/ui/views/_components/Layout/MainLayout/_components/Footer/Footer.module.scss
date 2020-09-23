@@ -1,0 +1,40 @@
+.Footer {
+  background-color: var(--bg);
+  border-top: 4px solid var(--c-corporate-blue);
+  .footerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .reportnetLogo {
+      a {
+        display: flex;
+        align-items: center;
+        h1 {
+          margin-left: 0.5rem;
+          color: var(--c-corporate-blue);
+        }
+      }
+    }
+    .helpDesk {
+      a {
+        font-weight: bold;
+      }
+    }
+    @media (max-width: 768px) {
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      margin: 1rem 0;
+      .reportnetLogo {
+        &:nth-of-type(1) {
+          img {
+            width: 200px;
+            height: auto;
+          }
+        }
+        &:nth-of-type(2) {
+        }
+      }
+    }
+  }
+}

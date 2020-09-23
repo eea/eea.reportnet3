@@ -156,7 +156,7 @@ public class ExtendedRulesRepositoryImplTest {
   @Test
   public void updateRuleFalseTest() {
     Mockito.when(mongoTemplate.updateFirst(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+        .thenReturn(UpdateResult.acknowledged(0L, 0L, null));
     Assert.assertFalse(extendedRulesRepositoryImpl.updateRule(new ObjectId(), new Rule()));
   }
 
@@ -290,7 +290,7 @@ public class ExtendedRulesRepositoryImplTest {
     Mockito.when(
         mongoTemplate.aggregate(Mockito.any(), Mockito.any(Class.class), Mockito.any(Class.class)))
         .thenReturn(aggregationResults);
-    Mockito.when(aggregationResults.getMappedResults()).thenReturn(new ArrayList<Object>());
+    Mockito.when(aggregationResults.getMappedResults()).thenReturn(new ArrayList<>());
     Assert.assertNull(
         extendedRulesRepositoryImpl.getRulesWithTypeRuleCriteria(new ObjectId(), false));
   }
@@ -323,5 +323,57 @@ public class ExtendedRulesRepositoryImplTest {
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     Assert.assertFalse(extendedRulesRepositoryImpl
         .deleteRuleByReferenceFieldSchemaPKId(new ObjectId(), new ObjectId()));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void getActiveAndVerifiedRulesTest() {
+    RulesSchema rulesSchema = new RulesSchema();
+    List<Object> rulesSchemas = new ArrayList<>();
+    rulesSchemas.add(rulesSchema);
+    Mockito.when(
+        mongoTemplate.aggregate(Mockito.any(), Mockito.any(Class.class), Mockito.any(Class.class)))
+        .thenReturn(aggregationResults);
+    Mockito.when(aggregationResults.getMappedResults()).thenReturn(rulesSchemas);
+    Assert.assertEquals(rulesSchema,
+        extendedRulesRepositoryImpl.getActiveAndVerifiedRules(new ObjectId()));
+  }
+
+  @Test
+  public void deleteByUniqueConstraintIdTest() {
+    Mockito.when(mongoTemplate.updateMulti(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertEquals(false,
+        extendedRulesRepositoryImpl.deleteByUniqueConstraintId(new ObjectId(), new ObjectId()));
+  }
+
+  @Test
+  public void deleteRuleHighLevelLikeTrueTest() {
+    Mockito.when(mongoTemplate.updateMulti(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(extendedRulesRepositoryImpl.deleteRuleHighLevelLike(new ObjectId(), ""));
+  }
+
+  @Test
+  public void deleteRuleHighLevelLikeFalseTest() {
+    Mockito.when(mongoTemplate.updateMulti(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertFalse(extendedRulesRepositoryImpl.deleteRuleHighLevelLike(new ObjectId(), ""));
+  }
+
+  @Test
+  public void deleteNotEmptyRuleTrueTest() {
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert
+        .assertTrue(extendedRulesRepositoryImpl.deleteNotEmptyRule(new ObjectId(), new ObjectId()));
+  }
+
+  @Test
+  public void deleteNotEmptyRuleFalseTest() {
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertFalse(
+        extendedRulesRepositoryImpl.deleteNotEmptyRule(new ObjectId(), new ObjectId()));
   }
 }

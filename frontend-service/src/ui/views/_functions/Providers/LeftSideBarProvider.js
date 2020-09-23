@@ -1,6 +1,8 @@
-import React, { useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
+import isNil from 'lodash/isNil';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext.js';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const leftSideBarReducer = (state, { type, payload }) => {
   switch (type) {
@@ -31,7 +33,45 @@ const leftSideBarReducer = (state, { type, payload }) => {
 };
 
 const LeftSideBarProvider = ({ children }) => {
+  const resources = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(leftSideBarReducer, { models: [], steps: [], helpTitle: '' });
+
+  const getSteps = (config, component) => {
+    const steps = [
+      {
+        content: <h2>{resources.messages[component]}</h2>,
+        locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
+        placement: 'center',
+        target: 'body'
+      }
+    ];
+    if (!isNil(config)) {
+      config.steps.forEach(step =>
+        steps.push({
+          content: <h3>{step.content}</h3>,
+          target: step.target
+        })
+      );
+    }
+    // Object.keys(config).forEach(key => {
+    //   if (roles.indexOf(key) > -1) {
+    //     config[key].forEach(step =>
+    //       steps.push({
+    //         content: <h3>{resources.messages[step.content]}</h3>,
+    //         target: step.target
+    //       })
+    //     );
+    //   }
+    // });
+
+    const loadedClassesSteps = [...steps].filter(
+      step =>
+        !isNil(document.getElementsByClassName(step.target.substring(1, step.target.length))[0]) ||
+        step.target === 'body'
+    );
+
+    return loadedClassesSteps;
+  };
 
   return (
     <LeftSideBarContext.Provider
@@ -43,10 +83,11 @@ const LeftSideBarProvider = ({ children }) => {
             payload: models
           });
         },
-        addHelpSteps: (helpTitle, steps) => {
+        addHelpSteps: (config, component) => {
+          const steps = getSteps(config, component);
           dispatch({
             type: 'ADD_HELP_STEPS',
-            payload: { helpTitle, steps }
+            payload: { component, steps }
           });
         },
         removeModels: () => {

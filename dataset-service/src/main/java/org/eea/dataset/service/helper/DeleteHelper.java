@@ -12,6 +12,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,15 +53,17 @@ public class DeleteHelper {
   }
 
 
+
   /**
-   * Execute delete process.
+   * Execute delete table process.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @throws EEAException the EEA exception
    */
   @Async
-  public void executeDeleteProcess(final Long datasetId, String tableSchemaId) throws EEAException {
+  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId)
+      throws EEAException {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
 
@@ -80,8 +83,38 @@ public class DeleteHelper {
     NotificationVO notificationVO =
         NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
             .datasetId(datasetId).tableSchemaId(tableSchemaId).build();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
   }
+
+
+  /**
+   * Execute delete dataset process.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Async
+  public void executeDeleteDatasetProcess(final Long datasetId) throws EEAException {
+    LOG.info("Deleting data from dataset {}", datasetId);
+    datasetService.deleteImportData(datasetId);
+
+    // Release the lock manually
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.DELETE_DATASET_VALUES.getValue());
+    criteria.add(datasetId);
+    lockService.removeLockByCriteria(criteria);
+
+    // after the dataset values have been deleted, an event is sent to notify it
+    Map<String, Object> value = new HashMap<>();
+    NotificationVO notificationVO =
+        NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
+            .datasetId(datasetId).build();
+    value.put(LiteralConstants.DATASET_ID, datasetId);
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
+        value, notificationVO);
+  }
+
 }

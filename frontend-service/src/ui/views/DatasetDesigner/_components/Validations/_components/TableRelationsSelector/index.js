@@ -1,0 +1,1 @@
+export { TableRelationsSelector } from './TableRelationsSelector';

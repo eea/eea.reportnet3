@@ -1,15 +1,17 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './MainLayout.module.css';
 
+import { EuFooter } from './_components/EuFooter';
 import { Footer } from './_components';
 import { Header } from './_components/Header';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { NotificationsList } from './_components/NotificationsList';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -18,12 +20,43 @@ import { UserService } from 'core/services/User';
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children }) => {
+  const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
 
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [margin, setMargin] = useState('50px');
+  const [mainContentStyle, setMainContentStyle] = useState({
+    height: `auto`,
+    minHeight: `${window.innerHeight - 180}px`,
+    marginTop: '180px'
+  });
+  const [pageContentStyle, setPageContentStyle] = useState({
+    maxWidth: `${element.clientWidth - 50}px`
+  });
+
+  useEffect(() => {
+    window.addEventListener('resize', calculateMainContentWidth);
+    return () => {
+      window.removeEventListener('resize', calculateMainContentWidth);
+    };
+  });
+
+  const calculateMainContentWidth = () => {
+    const clientWidth = element.clientWidth;
+
+    const maxWidth = leftSideBarContext.isLeftSideBarOpened
+      ? { maxWidth: `${clientWidth - 200}px` }
+      : { maxWidth: `${clientWidth - 50}px` };
+
+    setPageContentStyle({ ...maxWidth });
+  };
+
+  useEffect(() => {
+    calculateMainContentWidth();
+  }, [leftSideBarContext.isLeftSideBarOpened]);
 
   const getUserConfiguration = async () => {
     try {
@@ -34,10 +67,12 @@ const MainLayout = ({ children }) => {
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
       userContext.onToggleVisualTheme(userConfiguration.visualTheme);
       userContext.onUserFileUpload(userConfiguration.userImage);
+      userContext.onToggleAmPm24hFormat(userConfiguration.amPm24h);
       themeContext.onToggleTheme(userConfiguration.visualTheme);
       userContext.onToggleSettingsLoaded(true);
+      userContext.onToggleTypeView(userConfiguration.listView);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       userContext.onToggleSettingsLoaded(false);
       notifications.add({
         type: 'GET_CONFIGURATION_USER_SERVICE_ERROR'
@@ -79,19 +114,38 @@ const MainLayout = ({ children }) => {
     } else {
       setMargin('50px');
     }
-  }, [leftSideBarContext]);
+  }, [leftSideBarContext.isLeftSideBarOpened]);
 
   const onToggleSideBar = hover => {};
+
+  const onMainContentStyleChange = updatedMainContentStyle => {
+    const newMainContentStyle = { ...mainContentStyle, ...updatedMainContentStyle };
+
+    setMainContentStyle(newMainContentStyle);
+  };
 
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
-      <Header />
-      <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
-        <LeftSideBar onToggleSideBar={onToggleSideBar} />
-        {children}
+      {isNotificationVisible && (
+        <NotificationsList
+          isNotificationVisible={isNotificationVisible}
+          setIsNotificationVisible={setIsNotificationVisible}
+        />
+      )}
+      <Header onMainContentStyleChange={onMainContentStyleChange} />
+      <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
+        <LeftSideBar
+          onToggleSideBar={onToggleSideBar}
+          setIsNotificationVisible={setIsNotificationVisible}
+        />
+        <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
+          {children}
+        </div>
       </div>
-      <Footer />
+
+      <Footer leftMargin={margin} />
+      <EuFooter leftMargin={margin} />
     </div>
   );
 };

@@ -1,75 +1,42 @@
-import React, { useReducer, useContext } from 'react';
+import React, { useContext, useReducer } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
-import { camelCase } from 'lodash';
+import camelCase from 'lodash/camelCase';
+
+import { NotificationService } from 'core/services/Notification';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { NotificationService } from 'core/services/Notification';
-
-const notificationReducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'ADD':
-      return {
-        ...state,
-        toShow: [...state.toShow, payload],
-        all: [...state.all, payload],
-        newNotification: true
-      };
-    case 'READ':
-      return {
-        ...state,
-        toShow: [...state.toShow, payload],
-        all: [...state.all, payload],
-        newNotification: false
-      };
-    case 'REMOVE':
-      return {
-        toShow: [...state.toShow, payload],
-        all: [...state.all, payload]
-      };
-    case 'CLEAR_TO_SHOW':
-      return {
-        ...state,
-        toShow: []
-      };
-    case 'DESTROY':
-      return {
-        ...state,
-        toShow: [],
-        all: []
-      };
-    case 'NEW_NOTIFICATION_ADDED':
-      return {
-        ...state,
-        newNotification: false
-      };
-    default:
-      return state;
-  }
-};
+import { notificationReducer } from 'ui/views/_functions/Reducers/notificationReducer';
 
 const NotificationProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(notificationReducer, { toShow: [], all: [], newNotification: false });
   const resourcesContext = useContext(ResourcesContext);
+
+  const [state, dispatch] = useReducer(notificationReducer, {
+    all: [],
+    hidden: [],
+    newNotification: false,
+    toShow: []
+  });
 
   return (
     <NotificationContext.Provider
       value={{
         ...state,
         add: notificationDTO => {
-          const { type, content } = notificationDTO;
+          const { content, onClick, type } = notificationDTO;
           const notification = NotificationService.parse({
-            type,
+            config: config.notifications.notificationSchema,
             content,
             message: resourcesContext.messages[camelCase(type)],
-            config: config.notifications.notificationSchema,
-            routes
+            onClick,
+            routes,
+            type
           });
-          console.log('notification', notification);
+
           dispatch({
             type: 'ADD',
             payload: notification
@@ -78,6 +45,7 @@ const NotificationProvider = ({ children }) => {
             type: 'NEW_NOTIFICATION_ADDED'
           });
         },
+
         read: notificationId => {
           dispatch({
             type: 'READ',
@@ -94,16 +62,32 @@ const NotificationProvider = ({ children }) => {
             }
           });
         },
+
         clearToShow: () => {
           dispatch({
             type: 'CLEAR_TO_SHOW',
             payload: {}
           });
         },
+
         deleteAll: () => {
           dispatch({
             type: 'DESTROY'
           });
+        },
+
+        clearHiddenNotifications: () => dispatch({ type: 'CLEAR_HIDDEN' }),
+
+        hide: notificationDTO => {
+          const { type, content } = notificationDTO;
+
+          const notification = NotificationService.parseHidden({
+            type,
+            content,
+            config: config.notifications.hiddenNotifications
+          });
+
+          dispatch({ type: 'HIDE', payload: notification });
         }
       }}>
       {children}

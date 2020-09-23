@@ -26,51 +26,88 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import com.github.dockerjava.api.model.Container;
 
-/** The Class RecordStoreServiceImpl. */
+/**
+ * The Class RecordStoreServiceImpl.
+ */
 public class RecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
 
-  /** The Constant DATASET_NAME_PATTERN. */
+  /**
+   * The Constant DATASET_NAME_PATTERN.
+   */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
 
-  /** The docker interface service. */
+  /** The Constant OPERATION_NOT_IMPLEMENTED_YET. */
+  private static final String OPERATION_NOT_IMPLEMENTED_YET = "Operation not implemented yet";
+
+
+  /** The Constant ERROR_EXECUTING_DOCKER_COMMAND. */
+  private static final String ERROR_EXECUTING_DOCKER_COMMAND =
+      "Error executing docker command to create the dataset. %s";
+
+  /** The Constant ERROR_EXECUTING_DOCKER_COMMAND_LOG. */
+  private static final String ERROR_EXECUTING_DOCKER_COMMAND_LOG =
+      "Error executing docker command to create the dataset. {}";
+  /**
+   * The docker interface service.
+   */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
 
-  /** The container name. */
+  /**
+   * The container name.
+   */
   @Value("${dockerContainerName}")
   private String containerName;
 
-  /** The ip postgre db. */
+  /**
+   * The ip postgre db.
+   */
   @Value("${ipPostgre}")
   private String ipPostgreDb;
 
-  /** The user postgre db. */
+  /**
+   * The user postgre db.
+   */
   @Value("${userPostgre}")
   private String userPostgreDb;
 
-  /** The pass postgre db. */
+  /**
+   * The pass postgre db.
+   */
   @Value("${passwordPostgre}")
   private String passPostgreDb;
 
-  /** The conn string postgre. */
+  /**
+   * The conn string postgre.
+   */
   @Value("${connStringPostgree}")
   private String connStringPostgre;
 
-  /** The sql get datasets name. */
+  /**
+   * The sql get datasets name.
+   */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /** The path snapshot. */
+  /**
+   * The path snapshot.
+   */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Autowired
   private KafkaSender kafkaSender;
 
@@ -100,20 +137,13 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     dockerInterfaceService.copyFileFromHostToContainer(containerName, fileInitSql.getPath(),
         "/pgwal");
 
-    /*
-     * dockerInterfaceService //TODO need to determine where to find the init.sql file and where to
-     * store inside the container .copyFileFromHostToContainer(CONTAINER_NAME,
-     * "C:\\opt\\dump\\init.sql", "/pgwal");
-     */
-    // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql "
     try {
       dockerInterfaceService.executeCommandInsideContainer(container, "/bin/bash", "-c", "psql -h "
           + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
     } catch (final InterruptedException e) {
-      LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
+      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       throw new RecordStoreAccessException(
-          String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
-          e);
+          String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
   }
 
@@ -122,17 +152,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
   public void createEmptyDataSet(final String datasetName, final String idDatasetSchema)
       throws RecordStoreAccessException {
-    // line to run a crunchy container
-    // docker run -d -e PG_DATABASE=datasets -e PG_PRIMARY_PORT=5432 -e PG_MODE=primary -e
-    // PG_USER=root -e PG_PASSWORD=root -e PGPASSWORD=root -e PG_PRIMARY_USER=root -e
-    // PG_PRIMARY_PASSWORD=root
-    // -e PG_ROOT_PASSWORD=root -e PGBACKREST=true -p 5432:5432 --name crunchy-postgres
-    // crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1
     final Container container = dockerInterfaceService.getContainer(containerName);
 
     final ClassLoader classLoader = this.getClass().getClassLoader();
@@ -141,7 +166,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
-    try (final Stream<String> stream = Files.lines(fileInitCommands.toPath())) {
+    try (Stream<String> stream = Files.lines(fileInitCommands.toPath())) {
 
       stream.forEach(commands::add);
 
@@ -157,9 +182,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
             "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
       } catch (final InterruptedException e) {
-        LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
-        throw new RecordStoreAccessException(String
-            .format("Error executing docker command to create the dataset. %s", e.getMessage()), e);
+        LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+        throw new RecordStoreAccessException(
+            String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
       }
     }
 
@@ -184,7 +209,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createDataSetFromOther(final String sourceDatasetName,
       final String destinationDataSetName) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -253,10 +278,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         }
       }
     } catch (final InterruptedException e) {
-      LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
+      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       throw new RecordStoreAccessException(
-          String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
-          e);
+          String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
     return datasets;
   }
@@ -284,6 +308,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
@@ -291,7 +316,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException, RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -303,6 +328,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
@@ -311,19 +337,32 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException, RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
+  /**
+   * Restore data snapshot poc.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   /**
    * Delete data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -333,7 +372,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void deleteDataset(String datasetSchemaName) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -345,6 +384,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 }

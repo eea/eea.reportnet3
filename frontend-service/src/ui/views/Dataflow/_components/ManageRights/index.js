@@ -1,0 +1,1 @@
+export { ManageRights } from './ManageRights';

@@ -1,9 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
-import java.util.List;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 /**
  * The Interface TableRepository.
@@ -11,12 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 public interface TableRepository extends JpaRepository<TableValue, Long> {
 
   /**
-   * Find all tables.
+   * Find by id table schema.
    *
-   * @return the list
+   * @param idTableSchema the id table schema
+   * @return the table value
    */
-  @Query(value = "SELECT u FROM TableValue u")
-  List<TableValue> findAllTables();
+  TableValue findByIdTableSchema(String idTableSchema);
 
 }
 

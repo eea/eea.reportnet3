@@ -1,5 +1,8 @@
 import React, { useContext } from 'react';
+import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
+
+import uuid from 'uuid';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isNil from 'lodash/isNil';
@@ -8,7 +11,6 @@ import moment from 'moment';
 import styles from './DataflowsItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 
@@ -54,7 +56,9 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       <div
         className={
           type === 'accepted' || type === 'completed'
-            ? `${styles.container} ${styles.accepted} ${styles[itemContent.status]}`
+            ? `${styles.container} ${styles.accepted} ${
+                styles[itemContent.status]
+              } dataflowList-first-dataflow-help-step`
             : `${styles.container} ${styles[itemContent.status]}`
         }>
         {type === 'accepted' ? (
@@ -76,6 +80,8 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
     );
   };
 
+  const idTooltip = uuid.v4();
+
   return layout(
     <>
       <div className={`${styles.icon}`}>
@@ -83,18 +89,30 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
-        {itemContent.status == DataflowConf.dataflowStatus['DRAFT'] ? (
+        <p>
           <>
-            <span>{resources.messages['deliveryDate']}:</span>{' '}
-            {moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+            <span>{`${resources.messages['deliveryDate']}: `}</span>
+            <span className={`${styles.dateBlock}`}>
+              {itemContent.expirationDate == '-'
+                ? resources.messages['pending']
+                : moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+            </span>
           </>
-        ) : null}
+        </p>
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
+        <h3 className={`${styles.title}`} data-tip data-for={idTooltip}>
+          {itemContent.name}
+        </h3>
         <p>{itemContent.description}</p>
+        {itemContent.name.length > 70 && (
+          <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+            {itemContent.name}
+          </ReactTooltip>
+        )}
       </div>
+
       <div className={`${styles.status}  dataflowList-status-help-step`}>
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
@@ -107,7 +125,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
 
       <div className={`${styles.obligation} `}>
-        <p>
+        <p className="dataflowList-obligation-description-help-step">
           {!isNil(itemContent.legalInstrument) ? (
             <>
               <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span> {itemContent.legalInstrument}

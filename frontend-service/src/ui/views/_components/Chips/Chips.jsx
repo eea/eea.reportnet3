@@ -16,7 +16,11 @@ const Chips = ({
   ariaLabelledBy = null,
   checkForDuplicates = false,
   className = null,
+  clearOnPaste = false,
   disabled = null,
+  deleteWhiteSpaces = false,
+  errorMessage = 'Error',
+  forbiddenCommas = false,
   id = null,
   inputClassName = null,
   itemTemplate = null,
@@ -28,6 +32,7 @@ const Chips = ({
   onFocus = null,
   onRemove = null,
   placeholder = null,
+  showErrorMessage = false,
   style = null,
   tooltip = null,
   tooltipOptions = null,
@@ -45,13 +50,15 @@ const Chips = ({
   }, []);
 
   const onKeyDownChips = event => {
-    const inputValue = event.target.value;
+    const inputValue = deleteWhiteSpaces ? event.target.value.trim() : event.target.value;
 
     switch (event.which) {
       //backspace
       case 8:
         if (inputElement.current.element.value.length === 0 && value && value.length > 0) {
           removeItem(event, value.length - 1);
+        } else {
+          if (checkForDuplicates) setHasErrors(false);
         }
         break;
 
@@ -113,6 +120,48 @@ const Chips = ({
   const onBlurChips = event => {
     DomHandler.removeClass(listElement.current, 'p-focus');
 
+    const inputValue = deleteWhiteSpaces
+      ? forbiddenCommas
+        ? event.target.value.trim().split(',').join('')
+        : event.target.value.trim()
+      : event.target.value;
+
+    if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
+      let values = [...value];
+      if (checkForDuplicates && values.indexOf(inputValue) > -1) {
+        setHasErrors(true);
+        return;
+      } else {
+        values.push(inputValue);
+        //   setValues({ values: values });
+
+        if (!isNil(onAdd)) {
+          onAdd({
+            originalEvent: event,
+            value: inputValue
+          });
+        }
+
+        if (!isNil(onChange)) {
+          onChange({
+            originalEvent: event,
+            value: values,
+            stopPropagation: () => {},
+            preventDefault: () => {},
+            target: {
+              name: name,
+              id: id,
+              value: values
+            }
+          });
+        }
+        setHasErrors(false);
+      }
+    }
+
+    inputElement.current.element.value = '';
+    event.preventDefault();
+
     if (!isNil(onBlur)) {
       onBlur(event);
     }
@@ -153,7 +202,11 @@ const Chips = ({
   };
 
   const focusInput = () => {
-    inputElement.current.element.focus();
+    !isNil(inputElement.current) && inputElement.current.element.focus();
+  };
+
+  const renderErrorMessage = () => {
+    return <span className={styles.errorMessage}>{errorMessage}</span>;
   };
 
   const renderInputElement = () => {
@@ -161,16 +214,25 @@ const Chips = ({
       <li className="p-chips-input-token">
         <InputText
           aria-labelledby={ariaLabelledBy}
+          aria-hidden={disabled || isMaxedOut()}
           className={hasErrors ? styles.chipsTokenError : ''}
           disabled={disabled || isMaxedOut()}
+          id={name}
+          keyfilter={forbiddenCommas ? 'noComma' : ''}
           name={name}
           onBlur={onBlurChips}
           onFocus={onFocusChips}
           onKeyDown={onKeyDownChips}
+          onPaste={e => {
+            if (clearOnPaste) e.preventDefault();
+          }}
           placeholder={placeholder}
           ref={inputElement}
           type="text"
         />
+        <label htmlFor={name} className="srOnly">
+          {name}
+        </label>
       </li>
     );
   };
@@ -215,7 +277,8 @@ const Chips = ({
       return (
         <ul ref={listElement} className={className} onClick={focusInput}>
           {items}
-          {inputElement}
+          {!disabled && inputElement}
+          {hasErrors && showErrorMessage && renderErrorMessage()}
         </ul>
       );
     } else {
@@ -240,23 +303,26 @@ const Chips = ({
 };
 
 Chips.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  placeholder: PropTypes.string,
-  value: PropTypes.array,
-  max: PropTypes.number,
-  disabled: PropTypes.bool,
-  style: PropTypes.object,
-  className: PropTypes.string,
-  tooltip: PropTypes.string,
-  tooltipOptions: PropTypes.object,
   ariaLabelledBy: PropTypes.string,
+  className: PropTypes.string,
+  clearOnPaste: PropTypes.bool,
+  disabled: PropTypes.bool,
+  errorMessage: PropTypes.string,
+  id: PropTypes.string,
   itemTemplate: PropTypes.func,
+  max: PropTypes.number,
+  name: PropTypes.string,
   onAdd: PropTypes.func,
-  onRemove: PropTypes.func,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func,
   onFocus: PropTypes.func,
-  onBlur: PropTypes.func
+  onRemove: PropTypes.func,
+  placeholder: PropTypes.string,
+  showErrorMessage: PropTypes.bool,
+  style: PropTypes.object,
+  tooltip: PropTypes.string,
+  tooltipOptions: PropTypes.object,
+  value: PropTypes.array
 };
 
 export { Chips };

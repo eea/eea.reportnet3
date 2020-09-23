@@ -356,7 +356,7 @@ body .p-multiselect-panel .p-multiselect-header {
 }
 body .p-multiselect-panel .p-multiselect-header .p-multiselect-filter-container {
   float: none;
-  width: 70%;
+  width: 80%;
   display: inline-block;
   vertical-align: middle;
   margin-left: 0;
@@ -778,6 +778,8 @@ body .p-fileupload .p-fileupload-buttonbar {
   -moz-border-radius-topright: 3px;
   -webkit-border-top-right-radius: 3px;
   border-top-right-radius: 3px;
+  display: flex;
+  justify-content: space-between;
 }
 body .p-fileupload .p-fileupload-buttonbar .p-button {
   margin: 3px;
@@ -1099,7 +1101,7 @@ body .p-splitbutton.p-buttonset .p-menu {
 body .p-splitbutton.p-buttonset .p-splitbutton-menubutton .p-button-icon-left:before {
   content: '';
 }
-/*TODO: Here?*/
+
 body .warning {
   color: var(--errors);
 }
@@ -3385,4 +3387,15 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
+}
+
+/* Accessibility */
+
+body .srOnly {
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute;
+  white-space: nowrap;
 }

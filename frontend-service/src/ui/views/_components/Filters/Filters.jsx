@@ -8,6 +8,7 @@ import styles from './Filters.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
@@ -19,17 +20,24 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { useOnClickOutside } from 'ui/views/_functions/Hooks/useOnClickOutside';
 
-import { FilterUtils } from './_functions/Utils/FilterUtils';
+import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
+import { ErrorUtils } from 'ui/views/_functions/Utils';
+import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
-  data,
+  className,
+  data = [],
   dateOptions,
   dropDownList,
   dropdownOptions,
   filterByList,
-  getFiltredData,
+  getFilteredData,
   inputOptions,
+  matchMode,
+  searchAll,
+  searchBy = [],
   selectList,
   selectOptions,
   sendData,
@@ -41,11 +49,13 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
-    data: [],
+    data: data,
     filterBy: {},
-    filteredData: [],
+    filteredData: data,
     labelAnimations: {},
-    orderBy: {}
+    matchMode: true,
+    orderBy: {},
+    searchBy: ''
   });
 
   useEffect(() => {
@@ -53,14 +63,18 @@ export const Filters = ({
   }, [data]);
 
   useEffect(() => {
-    if (getFiltredData) getFiltredData(filterState.filteredData);
+    if (getFilteredData) getFilteredData(filterState.filteredData);
   }, [filterState.filteredData]);
+
+  useEffect(() => {
+    onReApplyFilters();
+  }, [filterState.matchMode]);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
-    const initialFilterBy = FilterUtils.getFilterInitialState(
+    const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
       inputOptions,
       selectOptions,
@@ -68,8 +82,8 @@ export const Filters = ({
       dropdownOptions,
       filterByList
     );
-    const initialFilteredData = cloneDeep(data);
-    const initialLabelAnimations = FilterUtils.getLabelInitialState(
+    const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
+    const initialLabelAnimations = FiltersUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
       dateOptions,
@@ -85,40 +99,37 @@ export const Filters = ({
   };
 
   const onAnimateLabel = (property, value) => {
-    filterDispatch({
-      type: 'ANIMATE_LABEL',
-      payload: {
-        animatedProperty: property,
-        isAnimated: value
-      }
-    });
+    filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
+        filterBy: FiltersUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: FilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
-        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
+        labelAnimations: ApplyFilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        searchBy: ''
       }
     });
   };
 
   const onFilterData = (filter, value) => {
-    const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
-    const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
-    const filteredData = FilterUtils.onApplyFilters(
-      filter,
-      inputKeys,
-      filterState,
-      selectedKeys,
-      value,
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
+    const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+    const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
+      dropdownOptions,
+      filter,
+      filteredKeys: inputKeys,
+      searchedKeys,
+      selectedKeys,
       selectOptions,
-      dropdownOptions
-    );
+      state: filterState,
+      value
+    });
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
@@ -129,10 +140,34 @@ export const Filters = ({
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
 
-    filterDispatch({
-      type: 'ORDER_DATA',
-      payload: { filteredSortedData, orderBy, property, resetOrder, sortedData }
-    });
+    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
+  };
+
+  const onSearchData = value => {
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const searchedValues = ApplyFilterUtils.onApplySearch(
+      filterState.data,
+      searchBy,
+      value,
+      filterState,
+      inputKeys,
+      selectedKeys
+    );
+
+    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
+  };
+
+  const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
+
+  const onReApplyFilters = () => {
+    const keys = Object.keys(filterState.filterBy);
+    for (let index = 0; index < keys.length; index++) {
+      const filter = keys[index];
+      const value = filterState.filterBy[filter];
+
+      if (!isEmpty(value)) onFilterData(filter, filterState.filterBy[filter]);
+    }
   };
 
   const renderCalendarFilter = (property, i) => (
@@ -140,8 +175,8 @@ export const Filters = ({
       {renderOrderFilter(property)}
       <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
         <Calendar
-          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           className={styles.calendarFilter}
+          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           inputClassName={styles.inputFilter}
           inputId={property}
           monthNavigator={true}
@@ -153,6 +188,7 @@ export const Filters = ({
           value={filterState.filterBy[property]}
           yearNavigator={true}
           yearRange="2015:2030"
+          style={{ zoom: '0.95' }}
         />
         {!isEmpty(filterState.filterBy[property]) && (
           <Button
@@ -164,19 +200,46 @@ export const Filters = ({
             }}
           />
         )}
-        <label className={!filterState.labelAnimations[property] ? styles.labelDown : ''} htmlFor={property}>
+        <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={property}>
           {resources.messages[property]}
         </label>
       </span>
     </span>
   );
 
+  const renderCheckbox = () => (
+    <Fragment>
+      <span className={styles.checkboxWrap} data-tip data-for="checkboxTooltip">
+        {resources.messages['strictModeCheckboxFilter']}
+        <Button
+          className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
+          icon="infoCircle"
+          tooltip={resources.messages['strictModeTooltip']}
+          tooltipOptions={{ position: 'top' }}
+        />
+        <span className={styles.checkbox}>
+          <Checkbox
+            id={`matchMode_checkbox`}
+            inputId={`matchMode_checkbox`}
+            isChecked={filterState.matchMode}
+            onChange={() => onToggleMatchMode()}
+            role="checkbox"
+          />
+          <label htmlFor={`matchMode_checkbox`} className="srOnly">
+            {resources.messages['strictModeCheckboxFilter']}
+          </label>
+        </span>
+      </span>
+    </Fragment>
+  );
+
   const renderDropdown = (property, i) => (
     <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
+        ariaLabel={property}
         className={styles.dropdownFilter}
-        filter={FilterUtils.getOptionTypes(data, property, dropDownList).length > 10}
+        filter={FiltersUtils.getOptionTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
@@ -188,7 +251,7 @@ export const Filters = ({
           event.stopPropagation();
         }}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property, dropDownList)}
+        options={FiltersUtils.getOptionTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
         showFilterClear={true}
         value={filterState.filterBy[property]}
@@ -213,7 +276,9 @@ export const Filters = ({
             onClick={() => onFilterData(property, '')}
           />
         )}
-        <label htmlFor={property}>{resources.messages[property]}</label>
+        <label className={styles.label} htmlFor={property}>
+          {resources.messages[property]}
+        </label>
       </span>
     </span>
   );
@@ -229,6 +294,7 @@ export const Filters = ({
         style={{ fontSize: '12pt' }}
         tooltip={resources.messages['sort']}
         tooltipOptions={{ position: 'bottom' }}
+        value={`${property}_sortOrder`}
       />
     ) : (
       <Fragment />
@@ -238,35 +304,70 @@ export const Filters = ({
     <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
+        ariaLabelledBy={property}
         checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
         headerClassName={styles.selectHeader}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
+        isFilter={true}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property, selectList)}
+        options={FiltersUtils.getOptionTypes(data, property, selectList, ErrorUtils.orderLevelErrors)}
         value={filterState.filterBy[property]}
       />
     </span>
   );
 
+  const renderSearchAll = () => (
+    <span className={`p-float-label ${styles.dataflowInput}`}>
+      <InputText
+        className={styles.searchInput}
+        id={'searchInput'}
+        onChange={event => onSearchData(event.target.value)}
+        value={filterState.searchBy}
+      />
+      {filterState.searchBy && (
+        <Button
+          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+          icon="cancel"
+          onClick={() => onSearchData('')}
+        />
+      )}
+
+      <label
+        className={styles.label}
+        htmlFor={'searchInput'}
+        dangerouslySetInnerHTML={{
+          __html: TextUtils.parseText(resources.messages['searchAllLabel'], {
+            searchData: !isEmpty(searchBy) ? `(${searchBy.join(', ')})` : ''
+          })
+        }}></label>
+    </span>
+  );
+
   const selectTemplate = option => {
-    if (!isNil(option.value)) {
-      return <span className={`${styles[option.type.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
+    if (!isNil(option.type)) {
+      return (
+        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>
+          {option.type.toString().toUpperCase()}
+        </span>
+      );
     }
   };
 
   return (
-    <div className={styles.header}>
+    <div className={className ? styles[className] : styles.header}>
+      {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
+      {matchMode && renderCheckbox()}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
@@ -286,8 +387,8 @@ export const Filters = ({
               sendData ? 'p-button-secondary' : 'p-button-secondary'
             } p-button-rounded  p-button-animated-blink`}
             icon="undo"
-            onClick={() => onClearAllFilters()}
             label={resources.messages['reset']}
+            onClick={() => onClearAllFilters()}
             style={{ marginLeft: sendData ? '1rem' : '' }}
           />
         )}

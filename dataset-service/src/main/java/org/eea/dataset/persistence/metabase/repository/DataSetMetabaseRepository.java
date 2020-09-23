@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface DataSetMetabaseRepository.
  *
- * 
+ *
  */
 public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Long> {
 
@@ -61,5 +62,16 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   @Modifying
   @Query(nativeQuery = true, value = "delete from dataset where id = :datasetId ")
   void deleteNativeDataset(@Param("datasetId") Long datasetId);
+
+
+  /**
+   * Find first by dataset schema and data provider id.
+   *
+   * @param idDatasetSchemaReferenced the id dataset schema referenced
+   * @param dataProviderId the data provider id
+   * @return the data set metabase
+   */
+  Optional<DataSetMetabase> findFirstByDatasetSchemaAndDataProviderId(
+      @Param("datasetSchema") String datasetSchema, @Param("dataProviderId") Long dataProviderId);
 
 }

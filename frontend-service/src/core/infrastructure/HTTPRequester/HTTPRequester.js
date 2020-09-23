@@ -35,8 +35,9 @@ export const HTTPRequester = (() => {
       return axios.put(`${baseURL}${options.url}`, options.data, { headers });
     },
     delete: options => {
+      const data = options.data;
       const headers = options.headers;
-      return axios.delete(`${baseURL}${options.url}`, { headers });
+      return axios.delete(`${baseURL}${options.url}`, { data }, { headers });
     },
     postWithFiles: options => {
       const headers = options.headers;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -29,6 +30,7 @@ public interface RecordStoreService {
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws RecordStoreAccessException the record store access exception
    */
   void createEmptyDataSet(String datasetName, String idDatasetSchema)
@@ -73,9 +75,10 @@ public interface RecordStoreService {
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
+   * @throws EEAException the EEA exception
    */
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
-      throws SQLException, IOException, RecordStoreAccessException;
+      throws SQLException, IOException, RecordStoreAccessException, EEAException;
 
 
   /**
@@ -87,6 +90,7 @@ public interface RecordStoreService {
    * @param typeDataset the type dataset
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
@@ -100,6 +104,7 @@ public interface RecordStoreService {
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
@@ -122,4 +127,5 @@ public interface RecordStoreService {
    * @param isCreation the is creation
    */
   void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation);
+
 }

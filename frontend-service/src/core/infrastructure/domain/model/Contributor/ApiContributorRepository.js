@@ -1,27 +1,29 @@
 import { apiContributor } from 'core/infrastructure/api/domain/model/Contributor';
 import { Contributor } from 'core/domain/model/Contributor/Contributor';
 
-const all = async dataflowId => {
-  const contributorsDTO = await apiContributor.all(dataflowId);
-  return contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
+import sortBy from 'lodash/sortBy';
+
+const all = async (dataflowId, dataProviderId) => {
+  const contributorsDTO = await apiContributor.all(dataflowId, dataProviderId);
+
+  const contributors = contributorsDTO.map((contributorDTO, i) => {
+    contributorDTO.id = i + 1;
+    return new Contributor(contributorDTO);
+  });
+
+  return sortBy(contributors, ['account']);
 };
 
-const addByLogin = async (dataflowId, login, role) => {
-  return await apiContributor.addByLogin(dataflowId, login, role);
+const deleteContributor = async (account, dataflowId, dataProviderId) => {
+  return await apiContributor.delete(account, dataflowId, dataProviderId);
 };
 
-const deleteById = async (dataflowId, contributorId) => {
-  const dataDeleted = await apiContributor.deleteById(dataflowId, contributorId);
-  return dataDeleted;
-};
-
-const updateById = async (dataflowId, contributorId, contributorRole) => {
-  return await apiContributor.updateById(dataflowId, contributorId, contributorRole);
+const update = async (contributor, dataflowId, dataProviderId) => {
+  return await apiContributor.update(contributor, dataflowId, dataProviderId);
 };
 
 export const ApiContributorRepository = {
   all,
-  addByLogin,
-  deleteById,
-  updateById
+  deleteContributor,
+  update
 };

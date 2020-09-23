@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef } from 'react';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isPlainObject from 'lodash/isPlainObject';
 import isUndefined from 'lodash/isUndefined';
@@ -24,7 +25,6 @@ const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
   isEditForm = false,
-  isFormReset,
   isUploadDialogVisible,
   onUpload,
   setIsUploadDialogVisible
@@ -33,10 +33,21 @@ const DocumentFileUpload = ({
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
-  const inputRef = useRef();
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!isNil(form.current)) {
+      form.current.resetForm();
+      document.querySelector('.uploadFile').value = '';
+    }
+  }, [form.current]);
+
+  useEffect(() => {
+    if (isUploadDialogVisible) inputRef.current.focus();
+  }, [isUploadDialogVisible]);
 
   const validationSchema = Yup.object().shape({
-    description: Yup.string().required(),
+    description: Yup.string().required(' ').max(255, resources.messages['documentDescriptionValidationMax']),
     lang: Yup.string().required(),
     uploadFile: isEditForm
       ? Yup.mixed()
@@ -57,19 +68,6 @@ const DocumentFileUpload = ({
           })
   });
 
-  useEffect(() => {
-    if (isUploadDialogVisible) {
-      if (!isUndefined(inputRef)) {
-        inputRef.current.focus();
-      }
-    }
-  }, [isUploadDialogVisible]);
-
-  if (!isNull(form.current) && !isFormReset) {
-    form.current.resetForm();
-    document.querySelector('.uploadFile').value = '';
-  }
-
   const buildInitialValue = documentInitialValues => {
     let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
     if (isEditForm) {
@@ -86,16 +84,14 @@ const DocumentFileUpload = ({
 
   const initialValuesWithLangField = buildInitialValue(documentInitialValues);
 
-  const IsPublicCheckbox = ({ field, type, checked }) => {
-    return (
-      <>
-        <input id="isPublic" {...field} type={type} checked={checked} />
-        <label htmlFor="isPublic" style={{ display: 'block' }}>
-          {resources.messages['documentUploadCheckboxIsPublic']}
-        </label>
-      </>
-    );
-  };
+  const IsPublicCheckbox = ({ checked, field, type }) => (
+    <Fragment>
+      <input id="isPublic" {...field} type={type} checked={checked} />
+      <label htmlFor="isPublic" style={{ display: 'block' }}>
+        {resources.messages['documentUploadCheckboxIsPublic']}
+      </label>
+    </Fragment>
+  );
 
   return (
     <Formik
@@ -150,20 +146,25 @@ const DocumentFileUpload = ({
           setIsUploadDialogVisible(false);
         }
       }}>
-      {({ isSubmitting, setFieldValue, errors, touched, values }) => (
+      {({ errors, isSubmitting, setFieldValue, touched, values }) => (
         <Form>
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
+                id={'descriptionDocumentFileUpload'}
                 innerRef={inputRef}
                 name="description"
                 placeholder={resources.messages['fileDescription']}
                 type="text"
                 value={values.description}
               />
+              <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
+                {resources.messages['description']}
+              </label>
+              <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
-              <Field name="lang" component="select" value={values.lang}>
+              <Field id={'selectLanguage'} name="lang" component="select" value={values.lang}>
                 <option value="">{resources.messages['selectLang']}</option>
                 {sortBy(config.languages, ['name']).map(language => (
                   <option key={language.code} value={language.code}>
@@ -171,21 +172,30 @@ const DocumentFileUpload = ({
                   </option>
                 ))}
               </Field>
+              <label htmlFor="selectLanguage" className="srOnly">
+                {resources.messages['selectLang']}
+              </label>
             </div>
           </fieldset>
           <fieldset>
             <div className={`formField${!isEmpty(errors.uploadFile) && touched.uploadFile ? ' error' : ''}`}>
               <Field name="uploadFile">
                 {() => (
-                  <input
-                    className="uploadFile"
-                    name="uploadFile"
-                    onChange={event => {
-                      setFieldValue('uploadFile', event.currentTarget.files[0]);
-                    }}
-                    placeholder="file upload"
-                    type="file"
-                  />
+                  <span>
+                    <input
+                      className="uploadFile"
+                      id={'uploadDocument'}
+                      name="uploadFile"
+                      onChange={event => {
+                        setFieldValue('uploadFile', event.currentTarget.files[0]);
+                      }}
+                      placeholder="file upload"
+                      type="file"
+                    />
+                    <label htmlFor="uploadDocument" className="srOnly">
+                      {resources.messages['uploadDocument']}
+                    </label>
+                  </span>
                 )}
               </Field>
               <ErrorMessage name="uploadFile" component="div" />
@@ -207,7 +217,7 @@ const DocumentFileUpload = ({
                     : styles.disabledButton
                 }
                 disabled={isSubmitting}
-                icon={isEditForm ? 'save' : 'add'}
+                icon={isEditForm ? 'check' : 'add'}
                 label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 type={isSubmitting ? '' : 'submit'}
               />

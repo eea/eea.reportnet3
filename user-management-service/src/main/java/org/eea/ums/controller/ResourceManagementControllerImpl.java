@@ -8,27 +8,42 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The type Resource management controller implementation.
  */
 @RestController
 @RequestMapping(value = "/resource")
+@Api(tags = "Resources : Resources Manager")
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
-  /** The security provider interface service. */
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * The security provider interface service.
+   */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
@@ -39,14 +54,20 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping(value = "/create")
   @ResponseStatus(HttpStatus.CREATED)
-  public void createResource(@RequestBody ResourceInfoVO resourceInfoVO) {
+  @ApiOperation(value = "Create a Resource")
+  @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
+  public void createResource(@ApiParam(type = "Object",
+      value = "ResourceInfoVO Object") @RequestBody ResourceInfoVO resourceInfoVO) {
     try {
       securityProviderInterfaceService.createResourceInstance(resourceInfoVO);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error creating resource {} due to reason {}", resourceInfoVO.getName(),
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED);
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
 
@@ -57,9 +78,12 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+  @PreAuthorize("isAuthenticated()")
+  @DeleteMapping(value = "/delete")
   @ResponseStatus(HttpStatus.OK)
-  public void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO) {
+  @ApiOperation(value = "Delete a list of Resources")
+  public void deleteResource(@ApiParam(type = "List<Object>",
+      value = "ResourceInfoVO Object List") @RequestBody List<ResourceInfoVO> resourceInfoVO) {
     securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
   }
 
@@ -70,16 +94,27 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/delete_by_name", method = RequestMethod.DELETE)
+  @PreAuthorize("isAuthenticated()")
+  @DeleteMapping(value = "/delete_by_name")
   @ResponseStatus(HttpStatus.OK)
-  public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
+  @ApiOperation(value = "Delete a list of Resources by their Names")
+  public void deleteResourceByName(@ApiParam(type = "List<String>",
+      value = "Resource name String List ") @RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
   }
 
+  /**
+   * Delete resource by dataset id.
+   *
+   * @param datasetIds the dataset ids
+   */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/delete_by_dataset_id")
-  public void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds) {
+  @ApiOperation(value = "Delete a Resource its Dataset Id")
+  public void deleteResourceByDatasetId(@ApiParam(type = "Object",
+      value = "Dataset ids Long list") @RequestParam("datasetIds") List<Long> datasetIds) {
     securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
   }
 
@@ -88,13 +123,18 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @param idResource the id resource
    * @param resourceGroupEnum the resource group enum
+   *
    * @return the resource detail
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/details")
-  public ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
+  @ApiOperation(value = "Get a Resource details")
+  public ResourceInfoVO getResourceDetail(
+      @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
+      @ApiParam(type = "Object",
+          value = "Resource group enum") @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
     return securityProviderInterfaceService
         .getResourceDetails(resourceGroupEnum.getGroupName(idResource));
   }
@@ -105,13 +145,19 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @param idResource the id resource
    * @param resourceType the resource type
+   *
    * @return the groups by id resource type
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/getResourceInfoVOByResource")
-  public List<ResourceInfoVO> getGroupsByIdResourceType(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceType") ResourceTypeEnum resourceType) {
+  @ApiOperation(value = "Get Resources by their Type", response = ResourceInfoVO.class,
+      responseContainer = "List")
+  public List<ResourceInfoVO> getGroupsByIdResourceType(
+      @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
+      @ApiParam(type = "Object",
+          value = "Resource type enum") @RequestParam("resourceType") ResourceTypeEnum resourceType) {
     return securityProviderInterfaceService.getGroupsByIdResourceType(idResource, resourceType);
   }
 
@@ -123,14 +169,19 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/createList", method = RequestMethod.POST)
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping(value = "/createList")
   @ResponseStatus(HttpStatus.CREATED)
-  public void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs) {
+  @ApiOperation(value = "Create Resources at same time")
+  @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
+  public void createResources(@ApiParam(type = "List<Objects>",
+      value = "ResourceInfoVOs List objects") @RequestBody List<ResourceInfoVO> resourceInfoVOs) {
     try {
       securityProviderInterfaceService.createResourceInstance(resourceInfoVOs);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error creating resources due to reason {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED);
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
 }

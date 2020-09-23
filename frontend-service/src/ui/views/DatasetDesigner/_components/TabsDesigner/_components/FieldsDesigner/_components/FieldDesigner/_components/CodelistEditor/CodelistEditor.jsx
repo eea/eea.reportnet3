@@ -8,10 +8,20 @@ import { Dialog } from 'ui/views/_components/Dialog';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist }) => {
+const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist, type }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
+
+  const onPasteChips = event => {
+    if (event) {
+      const clipboardData = event.clipboardData;
+      const pastedData = clipboardData.getData('Text');
+      const inmCodelistItems = [...codelistItems];
+      inmCodelistItems.push(...pastedData.split(',').filter(value => value.trim() !== ''));
+      setCodelistItems([...new Set(inmCodelistItems.map(value => value.trim()))]);
+    }
+  };
 
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -39,39 +49,62 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
 
   const renderChips = () => {
     return (
-      <React.Fragment>
+      <div onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
-          <span>{resources.messages['codelistEditorItems']} </span>
-          <span className={styles.subIndex}>{resources.messages['codelistEditorItemsMessage']}</span>
+          {/* <span>
+            {type.toUpperCase() === 'SINGLE SELECT'
+              ? resources.messages['codelistEditorItems']
+              : resources.messages['multiselectCodelists']}
+          </span> */}
+          <span
+            dangerouslySetInnerHTML={{
+              __html: resources.messages['codelistEditorItemsMessage']
+            }}></span>
+          {/* <span>{resources.messages['codelistEditorItemsMessage']}</span> */}
         </div>
         <Chips
           checkForDuplicates={true}
+          clearOnPaste={true}
+          deleteWhiteSpaces={true}
+          errorMessage={resources.messages['duplicatedItem']}
+          forbiddenCommas={true}
           inputClassName={styles.codelistChips}
           onChange={e => setCodelistItems(e.value)}
-          tooltip={resources.messages['codelistEditorMessage']}
+          showErrorMessage={true}
+          tooltip={
+            type.toUpperCase() === 'SINGLE SELECT'
+              ? resources.messages['codelistEditorMessage']
+              : resources.messages['multiselectCodelistEditorMessage']
+          }
           tooltipOptions={{ position: 'bottom' }}
           value={codelistItems}></Chips>
-      </React.Fragment>
+      </div>
     );
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      contentStyle={{ overflow: 'auto' }}
-      closeOnEscape={false}
-      footer={codelistDialogFooter}
-      header={resources.messages['codelistEditor']}
-      modal={true}
-      onHide={() => {
-        onCancelSaveCodelist();
-        setIsVisible(false);
-      }}
-      style={{ width: '40%' }}
-      visible={isVisible}
-      zIndex={3003}>
-      {renderChips()}
-    </Dialog>
+    isVisible && (
+      <Dialog
+        blockScroll={false}
+        contentStyle={{ overflow: 'auto' }}
+        focusOnShow={false}
+        footer={codelistDialogFooter}
+        header={
+          type.toUpperCase() === 'SINGLE SELECT'
+            ? resources.messages['codelistEditor']
+            : resources.messages['multiselectCodelistEditor']
+        }
+        modal={true}
+        onHide={() => {
+          onCancelSaveCodelist();
+          setIsVisible(false);
+        }}
+        style={{ width: '40%' }}
+        visible={isVisible}
+        zIndex={3003}>
+        {renderChips()}
+      </Dialog>
+    )
   );
 };
 

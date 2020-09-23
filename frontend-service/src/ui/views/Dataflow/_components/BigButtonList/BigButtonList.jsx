@@ -1,22 +1,28 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
-import remove from 'lodash/remove';
 import moment from 'moment';
+import remove from 'lodash/remove';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './BigButtonList.module.css';
 
-import { BigButton } from './_components/BigButton';
+import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
-import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
+import { EuDatasetService } from 'core/services/EuDataset';
+import { IntegrationService } from 'core/services/Integration';
+import { ManageIntegrations } from 'ui/views/_components/ManageIntegrations/ManageIntegrations';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -26,98 +32,115 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { IntegrationsUtils } from 'ui/views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
-  dataflowData,
-  dataflowDataState,
-  dataflowId,
-  dataProviderId,
-  designDatasetSchemas,
+  dataflowState,
   handleRedirect,
-  hasWritePermissions,
-  isCustodian,
-  isDataSchemaCorrect,
+  onCleanUpReceipt,
   onSaveName,
+  onShowManageReportersDialog,
+  onShowSnapshotDialog,
   onUpdateData,
-  receiptDispatch,
-  receiptState,
+  setIsCopyDataCollectionToEuDatasetLoading,
+  setIsExportEuDatasetLoading,
+  setIsReceiptLoading,
   setUpdatedDatasetSchema,
-  showReleaseSnapshotDialog,
   updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
+  const [errorDialogData, setErrorDialogData] = useState({ isVisible: false, message: '' });
+
+  const [cloneDataflow, setCloneDataflow] = useState({});
+  const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
+  const [datasetId, setDatasetId] = useState(null);
+  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
-  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+  const [euDatasetExportIntegration, setEuDatasetExportIntegration] = useState({});
   const [isActiveButton, setIsActiveButton] = useState(true);
-  const [isDuplicated, setIsDuplicated] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
-  const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
+  const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
+  const [isCopyDataCollectionToEuDatasetDialogVisible, setIsCopyDataCollectionToEuDatasetDialogVisible] = useState(
+    false
+  );
+  const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
+  const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
+  const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
 
+  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
+
+  const dataflowId = dataflowState.id;
+  const dataflowName = dataflowState.name;
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(
+    ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
+    setIsCopyDataCollectionToEuDatasetLoading,
+    false
+  );
+  useCheckNotifications(
+    ['EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT', 'EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT'],
+    setIsExportEuDatasetLoading,
+    false
+  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
     if (response) {
-      receiptDispatch({ type: 'ON_DOWNLOAD', payload: { isLoading: false } });
+      setIsReceiptLoading(false);
     }
   }, [notificationContext]);
 
   useEffect(() => {
     getExpirationDate();
-  }, [dataflowDataState.obligations.expirationDate]);
+  }, [dataflowState.obligations.expirationDate]);
 
-  const downloadPdf = response => {
-    if (!isNil(response)) {
-      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+  const cloneDatasetSchemas = async () => {
+    setCloneDialogVisible(false);
 
-      const url = window.URL.createObjectURL(new Blob([response]));
+    notificationContext.add({
+      type: 'CLONE_DATASET_SCHEMAS_INIT',
+      content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName }
+    });
 
-      const link = document.createElement('a');
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+    try {
+      await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const removeNew = () => {
-    receiptDispatch({
-      type: 'ON_CLEAN_UP',
-      payload: { isLoading: false, isOutdated: false }
-    });
+  const downloadPdf = response => {
+    if (!isNil(response)) {
+      DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
+    }
   };
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['ok']}
-        icon="check"
-        onClick={() => {
-          setErrorDialogVisible(false);
-          setIsDuplicated(false);
-        }}
-      />
+      <Button label={resources.messages['ok']} icon="check" onClick={() => onHideErrorDialog()} />
     </div>
   );
+
+  const getCloneDataflow = value => setCloneDataflow(value);
+
+  const getDatasetData = (datasetId, datasetSchemaId) => {
+    setDatasetSchemaId(datasetSchemaId);
+    setDatasetId(datasetId);
+  };
 
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
@@ -126,9 +149,9 @@ export const BigButtonList = ({
 
   const getExpirationDate = () => {
     setDataCollectionDueDate(
-      !isNil(dataflowDataState.obligations.expirationDate) &&
-        new Date(dataflowDataState.obligations.expirationDate) > new Date()
-        ? new Date(dataflowDataState.obligations.expirationDate)
+      !isNil(dataflowState.obligations.expirationDate) &&
+        new Date(dataflowState.obligations.expirationDate) > new Date()
+        ? new Date(dataflowState.obligations.expirationDate)
         : null
     );
   };
@@ -137,26 +160,23 @@ export const BigButtonList = ({
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      notificationContext.add({
-        type: 'GET_METADATA_ERROR',
-        content: {
-          dataflowId
-        }
-      });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
     }
   };
 
-  const onCreateDatasetSchema = () => {
-    setNewDatasetDialog(false);
+  const handleExportEuDataset = value => setIsIntegrationManageDialogVisible(value);
+
+  const onCloneDataflow = async () => {
+    setCloneDialogVisible(true);
   };
 
+  const onCreateDatasetSchema = () => setNewDatasetDialog(false);
+
   const onCreateDataCollection = async date => {
+    setIsConfirmCollectionDialog(false);
     setDataCollectionDialog(false);
 
-    notificationContext.add({
-      type: 'CREATE_DATA_COLLECTION_INIT',
-      content: {}
-    });
+    notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
 
     setIsActiveButton(false);
 
@@ -167,33 +187,33 @@ export const BigButtonList = ({
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
-      notificationContext.add({
-        type: 'CREATE_DATA_COLLECTION_ERROR',
-        content: {
-          dataflowId,
-          dataflowName
-        }
-      });
+
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
 
       setIsActiveButton(true);
     }
   };
 
+  const onLoadEuDatasetIntegration = async datasetSchemaId => {
+    try {
+      const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
+
+      setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
+    }
+  };
+
   const onUpdateDataCollection = async () => {
-    setIsUpdateDatacollectionDialogVisible(false);
+    setIsUpdateDataCollectionDialogVisible(false);
 
     setIsActiveButton(false);
 
     try {
-      const result = await DataCollectionService.update(dataflowId);
-      return result;
+      return await DataCollectionService.update(dataflowId);
     } catch (error) {
       console.error(error);
     }
-  };
-
-  const onDatasetSchemaNameError = () => {
-    setErrorDialogVisible(true);
   };
 
   const onDeleteDatasetSchema = async index => {
@@ -201,7 +221,7 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
+      const response = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
         onUpdateData();
         setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
@@ -209,183 +229,298 @@ export const BigButtonList = ({
     } catch (error) {
       console.error(error.response);
       if (error.response.status === 401) {
-        notificationContext.add({
-          type: 'DELETE_DATASET_SCHEMA_LINK_ERROR'
-        });
+        notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
       }
     } finally {
       hideLoading();
     }
   };
 
-  const onDuplicateName = () => {
-    setIsDuplicated(true);
+  const onHideErrorDialog = () => {
+    setErrorDialogData({ isVisible: false, message: '' });
   };
 
-  const onHideErrorDialog = () => {
-    setErrorDialogVisible(false);
-    setIsDuplicated(false);
+  const onCopyDataCollectionToEuDataset = async () => {
+    setIsCopyDataCollectionToEuDatasetDialogVisible(false);
+    setIsCopyDataCollectionToEuDatasetLoading(true);
+
+    try {
+      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+      }
+    } catch (error) {
+      setIsCopyDataCollectionToEuDatasetLoading(false);
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+      }
+    }
+  };
+
+  const onExportEuDataset = async () => {
+    setIsExportEuDatasetDialogVisible(false);
+    setIsExportEuDatasetLoading(true);
+
+    try {
+      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
+      }
+    } catch (error) {
+      setIsExportEuDatasetLoading(false);
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+      }
+    }
   };
 
   const onLoadReceiptData = async () => {
     try {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: true }
-      });
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      setIsReceiptLoading(true);
+      const response = await ConfirmationReceiptService.download(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
-      removeNew();
+      onCleanUpReceipt();
     } catch (error) {
       console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
     } finally {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
-      });
+      setIsReceiptLoading(false);
     }
   };
 
-  const onShowNewSchemaDialog = () => {
-    setNewDatasetDialog(true);
-    setIsFormReset(true);
-  };
+  const onShowCopyDataCollectionToEuDatasetModal = () => setIsCopyDataCollectionToEuDatasetDialogVisible(true);
 
-  const onShowDataCollectionModal = () => {
-    setDataCollectionDialog(true);
-  };
+  const onShowDataCollectionModal = () => setDataCollectionDialog(true);
 
-  const onShowUpdateDataCollectionModal = () => {
-    setIsUpdateDatacollectionDialogVisible(true);
-  };
+  const onShowExportEuDatasetModal = () => setIsExportEuDatasetDialogVisible(true);
 
-  const bigButtonList = useBigButtonList({
-    dataflowData,
-    dataflowDataState,
-    dataflowId,
-    getDeleteSchemaIndex,
-    handleRedirect,
-    hasWritePermissions,
-    isActiveButton,
-    isCustodian,
-    isDataSchemaCorrect,
-    onDatasetSchemaNameError,
-    onDuplicateName,
-    onLoadReceiptData,
-    onSaveName,
-    onShowDataCollectionModal,
-    onShowNewSchemaDialog,
-    onShowUpdateDataCollectionModal,
-    receiptState,
-    showReleaseSnapshotDialog,
-    updatedDatasetSchema
-  })
+  const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
+
+  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
+
+  const renderDialogFooter = (
+    <Fragment>
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        disabled={isNil(cloneDataflow.id)}
+        icon={'plus'}
+        label={resources.messages['cloneSelectedDataflow']}
+        onClick={() => cloneDatasetSchemas()}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setCloneDialogVisible(false)}
+      />
+    </Fragment>
+  );
+
+  const bigButtonList = uniqBy(
+    useBigButtonList({
+      dataflowId,
+      dataflowState,
+      getDatasetData,
+      getDeleteSchemaIndex,
+      handleExportEuDataset,
+      handleRedirect,
+      isActiveButton,
+      onCloneDataflow,
+      onLoadEuDatasetIntegration,
+      onLoadReceiptData,
+      onSaveName,
+      onShowCopyDataCollectionToEuDatasetModal,
+      onShowDataCollectionModal,
+      onShowExportEuDatasetModal,
+      onShowManageReportersDialog,
+      onShowNewSchemaDialog,
+      onShowSnapshotDialog,
+      onShowUpdateDataCollectionModal,
+      setErrorDialogData,
+      updatedDatasetSchema
+    }),
+    'caption'
+  )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
 
   return (
-    <>
+    <Fragment>
       <div className={styles.buttonsWrapper}>
-        <div className={styles.splitButtonWrapper}>
+        <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
 
-      <Dialog
-        header={resources.messages['newDatasetSchema']}
-        visible={newDatasetDialog}
-        className={styles.dialog}
-        dismissableMask={false}
-        onHide={() => {
-          setNewDatasetDialog(false);
-          setIsFormReset(false);
-        }}>
-        <NewDatasetSchemaForm
+      {isIntegrationManageDialogVisible && (
+        <ManageIntegrations
           dataflowId={dataflowId}
-          datasetSchemaInfo={updatedDatasetSchema}
-          isFormReset={isFormReset}
-          onCreate={onCreateDatasetSchema}
-          onUpdateData={onUpdateData}
-          setNewDatasetDialog={setNewDatasetDialog}
+          datasetId={datasetId}
+          datasetType={'dataflow'}
+          manageDialogs={handleExportEuDataset}
+          state={{ datasetSchemaId, isIntegrationManageDialogVisible }}
+          updatedData={euDatasetExportIntegration}
         />
-      </Dialog>
+      )}
 
-      <Dialog
-        footer={errorDialogFooter}
-        header={resources.messages['error'].toUpperCase()}
-        onHide={onHideErrorDialog}
-        visible={isDuplicated}>
-        <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
-      </Dialog>
+      {newDatasetDialog && (
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          header={resources.messages['newDatasetSchema']}
+          onHide={() => setNewDatasetDialog(false)}
+          visible={newDatasetDialog}>
+          <NewDatasetSchemaForm
+            dataflowId={dataflowId}
+            datasetSchemaInfo={updatedDatasetSchema}
+            onCreate={onCreateDatasetSchema}
+            onUpdateData={onUpdateData}
+            setNewDatasetDialog={setNewDatasetDialog}
+          />
+        </Dialog>
+      )}
 
-      <Dialog
-        footer={errorDialogFooter}
-        header={resources.messages['error'].toUpperCase()}
-        onHide={onHideErrorDialog}
-        visible={errorDialogVisible}>
-        <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
-      </Dialog>
+      {cloneDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={resources.messages['dataflowsList']}
+          onHide={() => setCloneDialogVisible(false)}
+          style={{ width: '95%' }}
+          visible={cloneDialogVisible}>
+          <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
+        </Dialog>
+      )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete'].toUpperCase()}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
-        onHide={() => setDeleteDialogVisible(false)}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDatasetSchema']}
-      </ConfirmDialog>
+      {errorDialogData.isVisible && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={onHideErrorDialog}
+          visible={errorDialogData.isVisible}>
+          <div className="p-grid p-fluid">{errorDialogData.message}</div>
+        </Dialog>
+      )}   
 
-      <ConfirmDialog
-        header={resources.messages['updateDataCollectionHeader']}
-        labelCancel={resources.messages['close']}
-        labelConfirm={resources.messages['create']}
-        onConfirm={() => onUpdateDataCollection()}
-        onHide={() => setIsUpdateDatacollectionDialogVisible(false)}
-        visible={isUpdateDatacollectionDialogVisible}>
-        <p>{resources.messages['updateDataCollectionMessage']}</p>
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
+          onHide={() => setDeleteDialogVisible(false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetSchema']}
+        </ConfirmDialog>
+      )}
 
-      <ConfirmDialog
-        header={resources.messages['createDataCollection']}
-        disabledConfirm={isNil(dataCollectionDueDate)}
-        labelCancel={resources.messages['close']}
-        labelConfirm={resources.messages['create']}
-        onConfirm={() =>
-          onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
-        }
-        onHide={() => setDataCollectionDialog(false)}
-        visible={dataCollectionDialog}>
-        {hasExpirationDate ? (
-          <p
-            dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                expirationData: moment(dataflowDataState.obligations.expirationDate).format(user.userProps.dateFormat)
-              })
-            }}></p>
-        ) : (
-          <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
-        )}
-        <Calendar
-          className={styles.calendar}
-          disabledDates={[new Date()]}
-          inline={true}
-          monthNavigator={true}
-          minDate={new Date()}
-          onChange={event => setDataCollectionDueDate(event.target.value)}
-          showWeek={true}
-          value={dataCollectionDueDate}
-          yearNavigator={true}
-          yearRange="2020:2030"
-        />
-      </ConfirmDialog>
+      {isUpdateDataCollectionDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['updateDataCollectionHeader']}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['create']}
+          onConfirm={() => onUpdateDataCollection()}
+          onHide={() => setIsUpdateDataCollectionDialogVisible(false)}
+          visible={isUpdateDataCollectionDialogVisible}>
+          <p>{resources.messages['updateDataCollectionMessage']}</p>
+        </ConfirmDialog>
+      )}
 
-      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-    </>
+      {dataCollectionDialog && (
+        <ConfirmDialog
+          className={styles.calendarConfirm}
+          disabledConfirm={isNil(dataCollectionDueDate)}
+          header={resources.messages['createDataCollection']}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['create']}
+          onConfirm={() => setIsConfirmCollectionDialog(true)}
+          onHide={() => setDataCollectionDialog(false)}
+          visible={dataCollectionDialog}>
+          {hasExpirationDate ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
+                  expirationData: moment(dataflowState.obligations.expirationDate).format(
+                    userContext.userProps.dateFormat
+                  )
+                })
+              }}></p>
+          ) : (
+            <p>
+              <div>{`${resources.messages['chooseExpirationDate']} `}</div>
+              <div>{`${resources.messages['chooseExpirationDateSecondLine']} `}</div>
+            </p>
+          )}
+          <Calendar
+            className={styles.calendar}
+            disabledDates={[new Date()]}
+            inline={true}
+            minDate={new Date()}
+            monthNavigator={true}
+            onChange={event => setDataCollectionDueDate(event.target.value)}
+            showWeek={true}
+            value={dataCollectionDueDate}
+            yearNavigator={true}
+            yearRange="2020:2030"
+          />
+        </ConfirmDialog>
+      )}
+
+      {isCopyDataCollectionToEuDatasetDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['copyDataCollectionToEuDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onCopyDataCollectionToEuDataset()}
+          onHide={() => setIsCopyDataCollectionToEuDatasetDialogVisible(false)}
+          visible={isCopyDataCollectionToEuDatasetDialogVisible}>
+          <p>{resources.messages['copyDataCollectionToEuDatasetMessage']}</p>
+        </ConfirmDialog>
+      )}
+
+      {isExportEuDatasetDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['exportEuDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onExportEuDataset()}
+          onHide={() => setIsExportEuDatasetDialogVisible(false)}
+          visible={isExportEuDatasetDialogVisible}>
+          <p>{resources.messages['exportEuDatasetMessage']}</p>
+        </ConfirmDialog>
+      )}
+
+      {isConfirmCollectionDialog && (
+        <ConfirmDialog
+          header={resources.messages['createDataCollection']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() =>
+            onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
+          }
+          onHide={() => setIsConfirmCollectionDialog(false)}
+          visible={isConfirmCollectionDialog}>
+          <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
+          {resources.messages['createDataCollectionConfirm']}
+        </ConfirmDialog>
+      )}
+
+      <button
+        className="dataflow-big-buttons-confirmation-receipt-help-step"
+        ref={receiptBtnRef}
+        style={{ display: 'none' }}>
+        <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
+      </button>
+    </Fragment>
   );
 };

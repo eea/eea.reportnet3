@@ -1,6 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined, isNull, pick } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
+import pick from 'lodash/pick';
 
 import styles from './DatasetSchemas.module.css';
 
@@ -10,91 +14,288 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
+import { IntegrationService } from 'core/services/Integration';
+import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
 
-const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
+  const [extensionsOperationsList, setExtensionsOperationsList] = useState();
+  const [uniqueList, setUniqueList] = useState();
   const [validationList, setValidationList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
       getValidationList(datasetsSchemas);
+      getUniqueList(datasetsSchemas);
+      getExtensionsOperations(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
   useEffect(() => {
-    renderDatasetSchemas();
-  }, [validationList]);
+    if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(validationList)) {
+      setIsLoading(false);
+    }
+  }, [extensionsOperationsList, uniqueList, validationList]);
 
-  const getValidationList = async datasetsSchemas => {
+  const filterData = (designDataset, data) => {
+    if (!isUndefined(data)) {
+      const filteredData = data.filter(list => list.datasetSchemaId === designDataset.datasetSchemaId);
+      if (!isUndefined(filteredData[0])) {
+        return filteredData;
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+  };
+
+  const getAdditionalValidationInfo = (referenceId, entityType, relations, datasets, datasetSchemaId) => {
+    const additionalInfo = {};
+    const dataset = datasets.filter(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId);
+    if (dataset.length > 0) {
+      if (!isUndefined(dataset[0].tables)) {
+        dataset[0].tables.forEach(table => {
+          if (!isUndefined(table.records)) {
+            if (entityType.toUpperCase() === 'TABLE') {
+              if (table.tableSchemaId === referenceId)
+                additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            } else if (entityType.toUpperCase() === 'RECORD') {
+              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
+              table.records.forEach(record =>
+                record.fields.forEach(field => {
+                  if (!isNil(field)) {
+                    if (entityType.toUpperCase() === 'FIELD') {
+                      if (field.fieldId === referenceId) {
+                        additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                          ? table.tableSchemaName
+                          : table.header;
+                        additionalInfo.fieldName = field.name;
+                      }
+                    } else {
+                      if (!isEmpty(relations)) {
+                        if (field.fieldId === relations.links[0].originField.code) {
+                          additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                            ? table.tableSchemaName
+                            : table.header;
+                          additionalInfo.fieldName = field.name;
+                        }
+                      }
+                    }
+                  }
+                })
+              );
+            }
+          }
+        });
+      }
+    }
+    return additionalInfo;
+  };
+
+  const getExtensionsOperations = async datasetsSchemas => {
     try {
-      const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        return await ValidationService.getAll(datasetSchema.datasetSchemaId);
-      });
-      Promise.all(datasetValidations).then(allValidations => {
-        setValidationList(
-          !isUndefined(allValidations[0])
-            ? allValidations[0].validations.map(validation =>
-                pick(
-                  validation,
-                  'shortCode',
-                  'name',
-                  'description',
-                  'entityType',
-                  'levelError',
-                  'message',
-                  'automatic',
-                  'enabled'
-                )
-              )
-            : []
-        );
+      const datasetExtensionsOperations = datasetsSchemas.map(async datasetSchema => {
+        return await IntegrationService.allExtensionsOperations(datasetSchema.datasetSchemaId);
       });
 
-      // setValidationList([
-      //   {
-      //     automatic: 'true',
-      //     datasetSchemaId: '5e450733a268b2000140ad7c',
-      //     date: '2018-01-01',
-      //     enabled: 'true',
-      //     entityType: 'FIELD',
-      //     id: 0,
-      //     levelError: 'ERROR',
-      //     message: 'This is an error message',
-      //     ruleName: 'Test rule'
-      //   },
-      //   {
-      //     automatic: 'false',
-      //     datasetSchemaId: '5e450733a268b2000140ad7c',
-      //     date: '2018-01-01',
-      //     enabled: 'true',
-      //     entityType: 'TABLE',
-      //     id: 0,
-      //     levelError: 'WARNING',
-      //     message: 'This is a warning message 2',
-      //     ruleName: 'Test rule 2'
-      //   }
-      // ]);
+      Promise.all(datasetExtensionsOperations).then(allExtensionsOperations => {
+        const parseExtensionsOperations = extensionsOperations => {
+          const parsedExtensionsOperations = [];
+          extensionsOperations.forEach(extensionOperation => {
+            parsedExtensionsOperations.push(pick(extensionOperation, 'datasetSchemaId', 'operation', 'fileExtension'));
+          });
+          return parsedExtensionsOperations;
+        };
+
+        const parsedExtensionsOperations = parseExtensionsOperations(allExtensionsOperations.flat());
+        setExtensionsOperationsList(!isUndefined(parsedExtensionsOperations) ? parsedExtensionsOperations : []);
+      });
     } catch (error) {
       const schemaError = {
         type: error.message
       };
       notificationContext.add(schemaError);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
+    }
+  };
+
+  const getFieldName = (referenceId, datasetSchemaId, datasets) => {
+    const fieldObj = {};
+    const dataset = datasets.filter(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId);
+    if (dataset.length > 0) {
+      if (!isUndefined(dataset[0].tables)) {
+        dataset[0].tables.forEach(table => {
+          table.records.filter(record => {
+            record.fields.forEach(field => {
+              if (field.fieldId === referenceId) {
+                fieldObj.tableName = table.tableSchemaName;
+                fieldObj.fieldName = field.name;
+              }
+            });
+          });
+        });
+        return fieldObj;
+      }
+    }
+  };
+
+  const getUniqueList = async datasetsSchemas => {
+    try {
+      const datasetUniques = datasetsSchemas.map(async datasetSchema => {
+        return await UniqueConstraintsService.all(dataflowId, datasetSchema.datasetSchemaId);
+      });
+
+      Promise.all(datasetUniques).then(allUniques => {
+        const parseUniques = uniques => {
+          const parsedUniques = [];
+          uniques.forEach(unique => {
+            unique.fieldSchemaIds.forEach(fieldSchema => {
+              parsedUniques.push({
+                referenceId: fieldSchema,
+                datasetSchemaId: unique.datasetSchemaId,
+                tableSchemaId: unique.tableSchemaId
+              });
+            });
+          });
+
+          return parsedUniques;
+        };
+
+        const parsedUniques = parseUniques(allUniques.flat());
+        setUniqueList(
+          !isUndefined(parsedUniques)
+            ? parsedUniques.map(unique => {
+                if (!isEmpty(unique)) {
+                  const uniqueTableAndField = getFieldName(unique.referenceId, unique.datasetSchemaId, datasetsSchemas);
+                  if (!isUndefined(uniqueTableAndField)) {
+                    unique.tableName = uniqueTableAndField.tableName;
+                    unique.fieldName = uniqueTableAndField.fieldName;
+                  }
+                  return pick(unique, 'tableName', 'fieldName', 'datasetSchemaId');
+                }
+              })
+            : []
+        );
+      });
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      // setIsLoading(false);
+    }
+  };
+
+  const getValidationList = async datasetsSchemas => {
+    try {
+      setIsLoading(true);
+      const datasetValidations = datasetsSchemas.map(async datasetSchema => {
+        return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
+      });
+      Promise.all(datasetValidations).then(allValidations => {
+        allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));
+        if (!isCustodian) {
+          allValidations.forEach(
+            allValidation =>
+              (allValidation = allValidation.validations.filter(validation => validation.enabled !== false))
+          );
+        }
+        setValidationList(
+          !isUndefined(allValidations[0])
+            ? allValidations
+                .map(allValidation =>
+                  allValidation.validations.map(validation => {
+                    const datasetSchema = datasetsSchemas.filter(
+                      datasetSchema => datasetSchema.datasetSchemaId === allValidation.datasetSchemaId
+                    );
+
+                    const additionalInfo = getAdditionalValidationInfo(
+                      validation.referenceId,
+                      validation.entityType,
+                      validation.relations,
+                      datasetsSchemas,
+                      allValidation.datasetSchemaId
+                    );
+                    validation.tableName = additionalInfo.tableName || '';
+                    validation.fieldName = additionalInfo.fieldName || '';
+                    validation.expression = getExpressionString(validation, datasetSchema[0].tables);
+                    validation.datasetSchemaId = allValidation.datasetSchemaId;
+                    if (!isCustodian) {
+                      return pick(
+                        validation,
+                        'tableName',
+                        'fieldName',
+                        'shortCode',
+                        'name',
+                        'description',
+                        'expression',
+                        'entityType',
+                        'levelError',
+                        'message',
+                        'datasetSchemaId'
+                      );
+                    } else {
+                      return pick(
+                        validation,
+                        'tableName',
+                        'fieldName',
+                        'shortCode',
+                        'name',
+                        'description',
+                        'expression',
+                        'entityType',
+                        'levelError',
+                        'message',
+                        'automatic',
+                        'enabled',
+                        'datasetSchemaId'
+                      );
+                    }
+                  })
+                )
+                .flat()
+            : []
+        );
+      });
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      // setIsLoading(false);
     }
   };
 
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
-      datasetsSchemas.map((designDataset, i) => {
-        return <DatasetSchema designDataset={designDataset} key={i} index={i} validationList={validationList} />;
-      })
+      <div className="dataflowHelp-datasetSchema-help-step">
+        {datasetsSchemas.map((designDataset, i) => {
+          return (
+            <DatasetSchema
+              designDataset={designDataset}
+              key={i}
+              index={i}
+              isCustodian={isCustodian}
+              extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+              uniqueList={filterData(designDataset, uniqueList)}
+              validationList={filterData(designDataset, validationList)}
+            />
+          );
+        })}
+      </div>
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
     );

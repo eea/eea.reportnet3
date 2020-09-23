@@ -25,7 +25,7 @@ public class ReleaseDatasetSnapshotCompletedEventTest {
   private DataSetControllerZuul dataSetControllerZuul;
 
   @Mock
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   @Mock
   private DataSetMetabaseVO datasetVO;
@@ -59,12 +59,12 @@ public class ReleaseDatasetSnapshotCompletedEventTest {
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
     Assert.assertEquals(5, releaseDatasetSnapshotCompletedEvent
-        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());;
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }

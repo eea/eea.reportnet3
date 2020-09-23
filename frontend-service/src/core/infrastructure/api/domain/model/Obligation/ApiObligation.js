@@ -1,58 +1,43 @@
 import { ObligationConfig } from 'conf/domain/model/Obligation';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiObligation = {
   getCountries: async () => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.countries),
-      queryString: {},
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      url: getUrl(ObligationConfig.countries)
     });
 
     return response.data;
   },
 
   getIssues: async () => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.issues),
-      queryString: {},
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      url: getUrl(ObligationConfig.issues)
     });
 
     return response.data;
   },
 
   getOrganizations: async () => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.organizations),
-      queryString: {},
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      url: getUrl(ObligationConfig.organizations)
     });
 
     return response.data;
   },
 
   obligationById: async obligationId => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.obligationById, { obligationId }),
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      url: getUrl(ObligationConfig.obligationById, { obligationId })
     });
 
     return response.data;
   },
 
   openedObligations: async (countryId = '', dateFrom = '', dateTo = '', issueId = '', organizationId = '') => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.openedObligations, { countryId, dateFrom, dateTo, issueId, organizationId }),
-      queryString: {},
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      url: getUrl(ObligationConfig.openedObligations, { countryId, dateFrom, dateTo, issueId, organizationId })
     });
 
     return response.data;

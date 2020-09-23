@@ -4,6 +4,7 @@ spring:
       discovery:
         preferIpAddress: true
         instanceId: ${spring.application.name}:${random.value}
+
       config:
         name: recordstore
       host: ${CONSUL_HOST:localhost}

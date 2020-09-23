@@ -18,17 +18,12 @@ public interface DesignDatasetService {
    */
   List<DesignDatasetVO> getDesignDataSetIdByDataflowId(Long idFlow);
 
-
   /**
-   * Gets the file name design.
+   * Copy design datasets.
    *
-   * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   * @param datasetId the dataset id
-   * @return the file name design
+   * @param idDataflowOrigin the id dataflow origin
+   * @param idDataflowDestination the id dataflow destination
    * @throws EEAException the EEA exception
    */
-  String getFileNameDesign(String mimeType, String idTableSchema, Long datasetId)
-      throws EEAException;
-
+  void copyDesignDatasets(Long idDataflowOrigin, Long idDataflowDestination) throws EEAException;
 }

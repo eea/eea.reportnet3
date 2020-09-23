@@ -287,7 +287,7 @@ public class DocumentServiceImplTest {
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadSchemaSnapshot(fileMock.getInputStream(), fileMock.getContentType(),
         fileMock.getOriginalFilename(), 1L);
-
+    Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
   }
 
 
@@ -445,6 +445,7 @@ public class DocumentServiceImplTest {
     doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.deleteSnapshotDocument("filename", 1L);
+    Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
 
   }
 

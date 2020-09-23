@@ -4,6 +4,7 @@ spring:
       discovery:
         preferIpAddress: true
         instanceId: ${spring.application.name}:${random.value}
+
       config:
         name: dataset
       host: ${CONSUL_HOST:localhost}

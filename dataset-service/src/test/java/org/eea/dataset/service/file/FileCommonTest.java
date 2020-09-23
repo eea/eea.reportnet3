@@ -62,6 +62,9 @@ public class FileCommonTest {
    */
   private static DataSetSchemaVO dataset;
 
+  /** The field schemas. */
+  private static List<FieldSchemaVO> fieldSchemas;
+
   /**
    * Inits the mocks.
    *
@@ -70,7 +73,7 @@ public class FileCommonTest {
   @Before
   public void initMocks() throws IOException {
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
-    List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
+    fieldSchemas = new ArrayList<>();
     RecordSchemaVO recordSchema = new RecordSchemaVO();
     fieldSchema = new FieldSchemaVO();
     TableSchemaVO tableSchema = new TableSchemaVO();
@@ -182,7 +185,7 @@ public class FileCommonTest {
    */
   @Test
   public void getTableNameTest() {
-    fileCommon.getTableName(ID, dataset);
+    assertEquals("fail", ID, fileCommon.getTableName(ID, dataset));
   }
 
   /**
@@ -192,7 +195,7 @@ public class FileCommonTest {
    */
   @Test
   public void getFieldSchemasTest() {
-    fileCommon.getFieldSchemas(ID, dataset);
+    assertEquals("fail", fieldSchemas, fileCommon.getFieldSchemas(ID, dataset));
   }
 
   /**
@@ -212,18 +215,18 @@ public class FileCommonTest {
     records.add(record);
 
     when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(records);
-    fileCommon.getRecordValues(1L, ID);
+    assertEquals("fail", records, fileCommon.getRecordValues(1L, ID));
   }
 
   @Test
   public void findFieldSchemasTest() {
     ArrayList fields = new ArrayList<>();
     fields.add(fieldSchema);
-    assertEquals(fields, fileCommon.findFieldSchemas(ID, dataset));
+    assertEquals("fail", fields, fileCommon.findFieldSchemas(ID, dataset));
   }
 
   @Test
   public void findFieldSchemasNullTest() {
-    assertEquals(null, fileCommon.findFieldSchemas(ID, null));
+    assertEquals("fail", null, fileCommon.findFieldSchemas(ID, null));
   }
 }

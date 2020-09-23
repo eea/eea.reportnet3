@@ -6,6 +6,10 @@
   list-style: none;
 }
 
+.dataProvidersDropdown {
+  max-width: 16rem;
+}
+
 .btnDelete {
   border: 1px solid var(--c-custom-gray) !important;
   box-shadow: 0em var(--blue-100) !important;
@@ -44,4 +48,25 @@
 
 .disabled {
   color: #5f5f5f !important;
+}
+
+.emptyTableHeader {
+  :global .p-column-title {
+    display: none;
+  }
+}
+
+.table {
+  .spinner {
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    user-select: none;
+    width: 100%;
+
+    svg {
+      width: 100px;
+    }
+  }
 }

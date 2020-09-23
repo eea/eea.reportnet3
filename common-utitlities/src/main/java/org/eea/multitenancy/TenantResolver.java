@@ -3,6 +3,7 @@ package org.eea.multitenancy;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 
 /**
  * The type Tenant resolver.
@@ -16,7 +17,7 @@ public final class TenantResolver extends ThreadPropertiesManager {
    * @param tenantName the tenant name
    */
   public static void setTenantName(String tenantName) {
-    setVariable("datasetName", tenantName);
+    setVariable(LiteralConstants.DATASET_NAME, tenantName);
   }
 
   /**
@@ -28,7 +29,7 @@ public final class TenantResolver extends ThreadPropertiesManager {
     Map<String, Object> properties = thread.get();
     String datasetName = "";
     if (null != properties && !properties.isEmpty()) {
-      Object value = properties.get("datasetName");
+      Object value = properties.get(LiteralConstants.DATASET_NAME);
       if (null != value && StringUtils.isNotEmpty(value.toString())) {
         datasetName = value.toString();
       }
@@ -44,7 +45,7 @@ public final class TenantResolver extends ThreadPropertiesManager {
   public static void clean() {
     Map<String, Object> properties = thread.get();
     if (null != properties) {
-      properties.remove("datasetName");
+      properties.remove(LiteralConstants.DATASET_NAME);
     }
   }
 }

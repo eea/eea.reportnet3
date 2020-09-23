@@ -11,19 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class CreateConnectionCommand.
+ * The Class SendNotificationCommand.
  */
 @Component
 public class SendNotificationCommand extends DefaultEventHandlerCommand {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The notification service.
-   */
+  /** The notification service. */
   @Autowired
   private NotificationService notificationService;
 
@@ -37,7 +33,7 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
     if (eeaEventVO.getData().containsKey("notification")) {
       Object object = eeaEventVO.getData().get("notification");
       if (object instanceof Map) {
-        Map<?, ?> notification = (HashMap<?, ?>) object;
+        Map<String, Object> notification = (HashMap<String, Object>) object;
         String user = (String) notification.remove("user");
         if (notificationService.send(user, eeaEventVO.getEventType(), notification)) {
           return;
@@ -47,5 +43,4 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
     }
   }
 }
-
 

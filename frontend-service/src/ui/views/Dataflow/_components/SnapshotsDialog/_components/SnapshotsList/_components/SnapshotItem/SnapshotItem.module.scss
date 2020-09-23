@@ -28,7 +28,7 @@ p {
       padding: 0;
       margin: 0 3.5px;
       border-radius: 5px;
-      width: 30px;
+      width: 32px;
       height: 32px;
       border-color: transparent;
       &:focus {
@@ -38,7 +38,7 @@ p {
   }
 }
 .is_released_snapshot {
-  color: green;
+  color: var(--font-release-date);
 }
 .listItemData .listActions button:nth-last-of-type(1) {
   margin-right: 0;

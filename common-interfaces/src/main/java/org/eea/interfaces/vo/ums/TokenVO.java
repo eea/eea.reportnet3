@@ -1,5 +1,6 @@
 package org.eea.interfaces.vo.ums;
 
+import java.io.Serializable;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,8 +15,9 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class TokenVO {
+public class TokenVO implements Serializable {
 
+  private static final long serialVersionUID = -5557056744359972573L;
   /**
    * The access token.
    */

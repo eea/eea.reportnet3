@@ -9,55 +9,72 @@ import { Button as PrimeButton } from 'primereact/button';
 import { Icon } from 'ui/views/_components/Icon';
 
 export const Button = ({
-  id = null,
+  className = null,
   disabled = false,
+  helpClassName = '',
   icon = null,
   iconClasses = null,
   iconPos = 'left',
+  id = null,
   label = null,
+  layout = null,
   onClick = () => {},
   onMouseDown = () => {},
-  className = null,
-  type = 'button',
+  style = null,
+  tabIndex = null,
+  title = undefined,
   tooltip = null,
   tooltipOptions = null,
-  style = null,
-  layout = null,
+  type = 'button',
+  value = '',
   visible = true
 }) => {
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
   if (layout === 'simple') {
     return (
       <button
-        className={className}
+        className={`${className} ${helpClassName}`}
         disabled={disabled}
         id={id}
         label={label}
         onClick={onClick}
         onMouseDown={onMouseDown}
         style={style}
-        type={type}>
+        tabIndex={tabIndex}
+        type={type}
+        value={value}>
         {icon ? <Icon icon={icon} /> : ''}
+        <span className="srOnly">{value}</span>
         {label}
       </button>
     );
   }
   if (isNull(layout)) {
     return visible ? (
-      <PrimeButton
-        id={id}
-        className={className}
-        disabled={disabled}
-        icon={iconClassName}
-        iconPos={icon ? iconPos : null}
-        label={label}
-        onClick={onClick}
-        onMouseDown={onMouseDown}
-        style={style}
-        tooltip={tooltip}
-        type={type}
-        tooltipOptions={tooltipOptions}
-      />
+      <>
+        <PrimeButton
+          id={id}
+          className={`${className} ${helpClassName}`}
+          disabled={disabled}
+          icon={iconClassName}
+          iconPos={icon ? iconPos : null}
+          label={label}
+          onClick={onClick}
+          onMouseDown={onMouseDown}
+          style={style}
+          tabIndex={tabIndex}
+          title={title}
+          tooltip={tooltip}
+          type={type}
+          tooltipOptions={tooltipOptions}
+          value={value}
+        />
+        {/* {!title && (
+          <label htmlFor={id} className="srOnly">
+            {tooltip}
+          </label>
+        )} */}
+      </>
     ) : null;
   }
 };

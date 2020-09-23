@@ -1,7 +1,5 @@
 package org.eea.validation.persistence.data.domain;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -63,9 +61,6 @@ public class FieldValue {
   @Transient
   private ErrorTypeEnum levelError;
 
-  /** The Constant DATE_FORMAT. */
-  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
   /**
    * Hash code.
    *
@@ -104,83 +99,5 @@ public class FieldValue {
     final FieldValue field = (FieldValue) obj;
     return id.equals(field.id) && type.equals(field.type) && value.equals(field.value)
         && idFieldSchema.equals(field.idFieldSchema) && record.equals(field.record);
-  }
-
-  /**
-   * Equal date used by drools. Value must not be null.
-   *
-   * @param date the date, not null
-   * @return true, if passes the validation
-   */
-  public boolean equalDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.equals(ruleDate);
-  }
-
-  /**
-   * Distinct date used by drools. Value must not be null.
-   *
-   * @param date the date, not null
-   * @return true, if passes the validation
-   */
-  public boolean distinctDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return !fieldDate.equals(ruleDate);
-  }
-
-  /**
-   * Greater than date used by drools. Value must not be null.
-   *
-   * @param date the date, not null
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isAfter(ruleDate);
-  }
-
-  /**
-   * Less than date used by drools. Value must not be null.
-   *
-   * @param date the date, not null
-   * @return true, if passes the validation
-   */
-  public boolean lessThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isBefore(ruleDate);
-  }
-
-  /**
-   * Greater than or equals than date used by drools. Value must not be null.
-   *
-   * @param date the date, not null
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanOrEqualsThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
-  }
-
-  /**
-   * Less than or equals than date used by drools. Value must not be null.
-   *
-   * @param date the date, not null
-   * @return true, if passes the validation
-   */
-  public boolean lessThanOrEqualsThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
   }
 }

@@ -23,7 +23,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -41,6 +42,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ import org.springframework.stereotype.Service;
  */
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
   /** The representative repository. */
   @Autowired
@@ -90,9 +95,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data set schema controller zuul. */
+  /** The dataset schema controller zuul. */
   @Autowired
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   /** The document controller zuul. */
   @Autowired
@@ -110,14 +115,17 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ObligationController obligationController;
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
+  /** The eu dataset controller zuul. */
+  @Autowired
+  private EUDatasetControllerZuul euDatasetControllerZuul;
 
   /**
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -130,7 +138,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Get the dataflow by its id filtering representatives by the user email.
    *
    * @param id the id
+   *
    * @return the by id no representatives
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -144,7 +154,9 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param id the id
    * @param includeAllRepresentatives the include representatives
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
@@ -162,6 +174,8 @@ public class DataflowServiceImpl implements DataflowService {
     // also, add to the filter the data collection
     datasets
         .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
+    // and the eu datasets
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
@@ -178,12 +192,16 @@ public class DataflowServiceImpl implements DataflowService {
         dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
+    // Add the EU datasets
+    dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
     // Add the representatives
     if (includeAllRepresentatives) {
       dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
     } else {
       String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
-          .getDetails()).get("userId");
+          .getDetails()).get(AuthenticationDetails.USER_ID);
       UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
       dataflowVO.setRepresentatives(
           representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
@@ -263,6 +281,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the opened obligations.
    *
    * @param dataflowVOs the dataflow V os
+   *
    * @return the opened obligations
    */
   private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
@@ -271,8 +290,8 @@ public class DataflowServiceImpl implements DataflowService {
     List<ObligationVO> obligations =
         obligationController.findOpenedObligations(null, null, null, null, null);
 
-    Map<Integer, ObligationVO> obligationMap = obligations.stream().collect(
-        Collectors.toMap(obligation -> obligation.getObligationId(), obligation -> obligation));
+    Map<Integer, ObligationVO> obligationMap = obligations.stream()
+        .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
 
     for (DataFlowVO dataFlowVO : dataflowVOs) {
       if (dataFlowVO.getObligation() != null
@@ -287,6 +306,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the obligation.
    *
    * @param dataflow the dataflow
+   *
    * @return the obligation
    */
   private void getObligation(DataFlowVO dataflow) {
@@ -368,7 +388,7 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowId = df.getId();
         }
         userManagementControllerZull.addUserToResource(dataflowId,
-            ResourceGroupEnum.DATAFLOW_PROVIDER);
+            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER);
         LOG.info("The dataflow {} has been added into keycloak", dataflowId);
       }
     }
@@ -429,16 +449,21 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.setCreationDate(new Date());
       dataflowVO.setStatus(TypeStatusEnum.DESIGN);
       dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
-      LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
+      LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
     }
     // With that method we create the group in keycloack
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
 
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
-        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.LEAD_REPORTER));
 
-    // // with that service we assing the group created to a user who create it
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_READ));
+
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
+
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
@@ -466,7 +491,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowSave.get().setDescription(dataflowVO.getDescription());
         dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
         dataflowRepository.save(dataflowSave.get());
-        LOG.info("The dataflow {} has been saved.", dataflowSave.get().getName());
+        LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
     }
   }
@@ -532,7 +557,7 @@ public class DataflowServiceImpl implements DataflowService {
     Dataflow result = dataflowRepository.findById(id).orElse(null);
     DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(result);
 
-    LOG.info("Get the dataflow metabaser with id {}", id);
+    LOG.info("Get the dataflow metabase with id {}", id);
 
     return dataflowVO;
   }
@@ -551,50 +576,21 @@ public class DataflowServiceImpl implements DataflowService {
     DataFlowVO dataflowVO = getById(idDataflow);
     // use it to take all datasets Desing
 
-    LOG.info("Get the dataflow metabaser with id {}", idDataflow);
+    LOG.info("Get the dataflow metabase with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
     if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
-      for (DocumentVO document : dataflowVO.getDocuments()) {
-        try {
-          documentControllerZuul.deleteDocument(document.getId(), Boolean.TRUE);
-        } catch (EEAException e) {
-          LOG.error("Error deleting document with id {}", document.getId());
-          throw new EEAException(new StringBuilder().append("Error Deleting document ")
-              .append(document.getName()).append(" with ").append(document.getId()).toString(), e);
-        }
-      }
-      LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
+      deleteDocuments(idDataflow, dataflowVO);
     }
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
     if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
-      for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
-        try {
-          dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
-        } catch (Exception e) {
-
-          LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId(), e);
-          throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
-              .append(designDatasetVO.getDataSetName()).append(" with ")
-              .append(designDatasetVO.getId()).toString(), e);
-        }
-      }
-      LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
+      deleteDatasetSchemas(idDataflow, dataflowVO);
     }
-
 
     // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
     if (null != dataflowVO.getRepresentatives() && !dataflowVO.getRepresentatives().isEmpty()) {
-      for (RepresentativeVO representative : dataflowVO.getRepresentatives()) {
-        try {
-          representativeRepository.deleteById(representative.getId());
-        } catch (Exception e) {
-          LOG.error("Error deleting representative with id {}", representative.getId(), e);
-          throw new EEAException(new StringBuilder().append("Error Deleting representative")
-              .append(" with id ").append(representative.getId()).toString(), e);
-        }
-      }
+      deleteRepresentatives(dataflowVO);
     }
     try {
       // Delete the dataflow metabase info. Also by the foreign keys of the database, entities like
@@ -620,14 +616,13 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
-
-
   /**
    * Update data flow status.
    *
    * @param id the id
    * @param status the status
    * @param deadlineDate the deadline date
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -645,5 +640,66 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  /**
+   * Delete documents.
+   *
+   * @param idDataflow the id dataflow
+   * @param dataflowVO the dataflow VO
+   *
+   * @throws Exception the exception
+   */
+  private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
+    for (DocumentVO document : dataflowVO.getDocuments()) {
+      try {
+        documentControllerZuul.deleteDocument(document.getId(), Boolean.TRUE);
+      } catch (EEAException e) {
+        LOG.error("Error deleting document with id {}", document.getId());
+        throw new EEAException(new StringBuilder().append("Error Deleting document ")
+            .append(document.getName()).append(" with ").append(document.getId()).toString(), e);
+      }
+    }
+    LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
+  }
+
+  /**
+   * Delete dataset schemas.
+   *
+   * @param idDataflow the id dataflow
+   * @param dataflowVO the dataflow VO
+   *
+   * @throws EEAException the EEA exception
+   */
+  private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
+    for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
+      try {
+        datasetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
+      } catch (Exception e) {
+        LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId(), e);
+        throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
+            .append(designDatasetVO.getDataSetName()).append(" with ")
+            .append(designDatasetVO.getId()).toString(), e);
+      }
+    }
+    LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
+  }
+
+  /**
+   * Delete representatives.
+   *
+   * @param dataflowVO the dataflow VO
+   *
+   * @throws EEAException the EEA exception
+   */
+  private void deleteRepresentatives(DataFlowVO dataflowVO) throws EEAException {
+    for (RepresentativeVO representative : dataflowVO.getRepresentatives()) {
+      try {
+        representativeRepository.deleteById(representative.getId());
+      } catch (Exception e) {
+        LOG.error("Error deleting representative with id {}", representative.getId(), e);
+        throw new EEAException(new StringBuilder().append("Error Deleting representative")
+            .append(" with id ").append(representative.getId()).toString(), e);
+      }
+    }
+  }
 
 }

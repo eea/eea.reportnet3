@@ -1,60 +1,63 @@
 package org.eea.ums.service.keycloak.admin;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.annotation.concurrent.ThreadSafe;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
-import org.springframework.beans.factory.DisposableBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Token monitor.
  */
 @ThreadSafe
 @Component
-public class TokenMonitor implements DisposableBean {
+@Slf4j
+public class TokenMonitor {
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
+  /** The keycloak connector service. */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
+
+  /** The admin user. */
   @Value("${eea.keycloak.admin.user}")
   private String adminUser;
+
+  /** The admin pass. */
   @Value("${eea.keycloak.admin.password}")
   private String adminPass;
+
+  /** The token expiration time. */
   @Value("${eea.keycloak.admin.token.expiration}")
   private Long tokenExpirationTime;
 
-  private static String adminToken;
-  private TokenGeneratorThread tokenGeneratorThread;
-  private ExecutorService executor = Executors.newSingleThreadExecutor();
+  /** The last update time. */
+  private Long lastUpdateTime = 0l;
 
-  @PostConstruct
-  private void startTokenGeneratorThread() {
-    tokenGeneratorThread = new TokenGeneratorThread(keycloakConnectorService, adminUser,
-        adminPass, tokenExpirationTime);
-    executor.submit(tokenGeneratorThread);
-  }
+  /** The admin token. */
+  private String adminToken;
 
-
-  @Override
-  public void destroy() {
-    if (tokenGeneratorThread != null) {
-      tokenGeneratorThread.stopThread();
-    }
-    if (!executor.isShutdown()) {
-      executor.shutdown();
-    }
-  }
+  /** The refresh token. */
+  private String refreshToken;
 
   /**
-   * Update admin token.
-   *
-   * @param token the token
+   * Inits the.
    */
-  synchronized public static void updateAdminToken(String token) {
-    adminToken = token;
+  @PostConstruct
+  private void init() {
+    manageTokenInfo(keycloakConnectorService.generateAdminToken(adminUser, adminPass));
+    lastUpdateTime = System.currentTimeMillis();
   }
 
   /**
@@ -62,7 +65,39 @@ public class TokenMonitor implements DisposableBean {
    *
    * @return the token
    */
-  synchronized public static String getToken() {
+  public synchronized String getToken() {
+    Long currentTime = System.currentTimeMillis();
+    Long difference = currentTime - lastUpdateTime;
+    if ((difference) > tokenExpirationTime) {
+      log.info("Renewing admin token");
+      TokenInfo tokenInfo = null;
+      try {
+        tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
+        log.info("New admin and refresh token generated with values {}", tokenInfo);
+      } catch (Exception e) {
+        log.warn(
+            "Error trying to refresh admin token, using admin credentials to get a new admin token due to {}",
+            e.getMessage(), e);
+        tokenInfo = keycloakConnectorService.generateAdminToken(adminUser, adminPass);
+      }
+      manageTokenInfo(tokenInfo);
+      lastUpdateTime = currentTime;
+      log.info("Admin Token refreshed successfully");
+    }
     return adminToken;
+  }
+
+  /**
+   * Manage token info.
+   *
+   * @param tokenInfo the token info
+   */
+  private void manageTokenInfo(TokenInfo tokenInfo) {
+    if (null != tokenInfo) {
+      this.adminToken = Optional.ofNullable(tokenInfo.getAccessToken()).orElse("");
+      this.refreshToken = Optional.ofNullable(tokenInfo.getRefreshToken()).orElse("");
+    } else {
+      LOG_ERROR.error("Error getting admin access token");
+    }
   }
 }

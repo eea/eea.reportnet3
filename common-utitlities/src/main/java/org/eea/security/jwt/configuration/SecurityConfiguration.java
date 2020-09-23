@@ -4,8 +4,12 @@ package org.eea.security.jwt.configuration;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eea.security.jwt.utils.ApiKeyAuthenticationFilter;
+import org.eea.security.jwt.utils.ExternalJwtAuthenticationFilter;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +46,19 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
   private JwtAuthenticationFilter jwtAuthenticationFilter;
 
   /**
+   * The api key authentication filter.
+   */
+  @Autowired
+  private ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+
+  @Autowired
+  private ExternalJwtAuthenticationFilter externalJwtAuthenticationFilter;
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * Inits the security.
    */
   @PostConstruct
@@ -75,18 +92,21 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
     }
 
     List<Pair<String[], String>> roleProtectedRequest = getRoleProtectedRequest();
-    if (null != roleProtectedRequest && roleProtectedRequest.size() > 0) {
+    if (null != roleProtectedRequest && !roleProtectedRequest.isEmpty()) {
       roleProtectedRequest.stream().forEach(pair -> {
         try {
           http.authorizeRequests().antMatchers(pair.getLeft()).hasRole(pair.getRight());
         } catch (Exception e) {
-          e.printStackTrace();
+          LOG_ERROR.error("Exception in security configuration. Message: {}", e.getMessage(), e);
         }
       });
 
     }
     // Add our custom JWT security filter
     http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(externalJwtAuthenticationFilter,
+        UsernamePasswordAuthenticationFilter.class);
 
 
   }

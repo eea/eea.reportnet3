@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset.schemas.rule;
 
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,9 @@ public class RuleVO {
   /** The enabled. */
   private boolean enabled;
 
+  /** The verified. */
+  private Boolean verified;
+
   /** The salience. */
   private Integer salience;
 
@@ -40,7 +44,7 @@ public class RuleVO {
   private EntityTypeEnum type;
 
   /** The when condition. */
-  private RuleExpressionVO whenCondition;
+  private RuleExpressionDTO whenCondition;
 
   /** The then condition. */
   private List<String> thenCondition;
@@ -51,6 +55,9 @@ public class RuleVO {
   /** The short code. */
   private String shortCode;
 
+  /** The integrity VO. */
+  private IntegrityVO integrityVO;
+
   /**
    * Hash code.
    *
@@ -59,7 +66,7 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition, description, shortCode);
+        activationGroup, type, whenCondition, thenCondition, description, shortCode, integrityVO);
   }
 
   /**
@@ -84,6 +91,7 @@ public class RuleVO {
         && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(description, other.description)
-        && Objects.equals(shortCode, other.shortCode);
+        && Objects.equals(shortCode, other.shortCode)
+        && Objects.equals(integrityVO, other.integrityVO);
   }
 }

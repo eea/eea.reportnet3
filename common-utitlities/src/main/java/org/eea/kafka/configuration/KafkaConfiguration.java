@@ -4,25 +4,18 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMI
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.TRANSACTIONAL_ID_CONFIG;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.DescribeClusterOptions;
-import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.eea.kafka.domain.EEAEventVO;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -145,30 +138,5 @@ public class KafkaConfiguration {
     return factory;
   }
 
-  /**
-   * Kafka health indicator.
-   *
-   * @return the health indicator
-   */
-  @Bean
-  public HealthIndicator kafkaHealthIndicator() {
-    final DescribeClusterOptions describeClusterOptions =
-        new DescribeClusterOptions().timeoutMs(1000);
-    final AdminClient adminClient = kafkaAdminClient();
-    return () -> {
-      final DescribeClusterResult describeCluster =
-          adminClient.describeCluster(describeClusterOptions);
-      try {
-        final String clusterId = describeCluster.clusterId().get();
-        final int nodeCount = describeCluster.nodes().get().size();
-        return Health.up().withDetail("clusterId", clusterId).withDetail("nodeCount", nodeCount)
-            .build();
-      } catch (final InterruptedException | ExecutionException e) {
-        // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
-        // Exception is managed by Spring Actuator
-        return Health.down().withException(e).build();
-      }
-    };
 
-  }
 }

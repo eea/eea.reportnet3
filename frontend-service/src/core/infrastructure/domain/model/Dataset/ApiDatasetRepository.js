@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -18,11 +19,18 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.pk = datasetTableRecordField.pk;
+  datasetTableFieldDesign.maxSize = !isNil(datasetTableRecordField.maxSize)
+    ? datasetTableRecordField.maxSize.toString()
+    : null;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
+  datasetTableFieldDesign.pk = datasetTableRecordField.pk;
+  datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
+  datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
+  datasetTableFieldDesign.readOnly = datasetTableRecordField.readOnly;
   datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
+  datasetTableFieldDesign.validExtensions = datasetTableRecordField.validExtensions;
 
   return await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
@@ -60,6 +68,8 @@ const createValidation = (entityType, id, levelError, message) =>
 
 const deleteDataById = async datasetId => await apiDataset.deleteDataById(datasetId);
 
+const deleteFileData = async (datasetId, fieldId) => await apiDataset.deleteFileData(datasetId, fieldId);
+
 const deleteRecordFieldDesign = async (datasetId, recordId) =>
   await apiDataset.deleteRecordFieldDesign(datasetId, recordId);
 
@@ -71,6 +81,11 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
+
+const downloadExportFile = async (datasetId, fileName, providerId) =>
+  await apiDataset.downloadExportFile(datasetId, fileName, providerId);
+
+const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
 
 const errorsById = async (
   datasetId,
@@ -168,14 +183,20 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
       tableSchemaName: datasetTableDTO.nameTableSchema
     });
   });
-  const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
+
+  //In design datasets the statistics are not generated until validation is executed, so we have to do a sanity check for those cases
+  const tableBarStatisticValues = !isEmpty(tableStatisticValues)
+    ? tableStatisticValuesWithErrors(tableStatisticValues)
+    : [];
   levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
-  let transposedValues = CoreUtils.transposeMatrix(tableStatisticValues);
+  let transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
 
-  dataset.tableStatisticValues = CoreUtils.transposeMatrix(tableBarStatisticValues);
-  dataset.tableStatisticPercentages = CoreUtils.getPercentage(transposedValues);
+  dataset.tableStatisticValues = !isEmpty(tableStatisticValues)
+    ? CoreUtils.transposeMatrix(tableBarStatisticValues)
+    : [];
+  dataset.tableStatisticPercentages = !isEmpty(tableStatisticValues) ? CoreUtils.getPercentage(transposedValues) : [];
 
   dataset.tables = datasetTables;
   return dataset;
@@ -201,6 +222,11 @@ const exportDataById = async (datasetId, fileType) => {
   return datasetData;
 };
 
+const exportDatasetDataExternal = async (datasetId, fileExtension) => {
+  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, fileExtension);
+  return datasetData;
+};
+
 const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   const datasetTableData = await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
   return datasetTableData;
@@ -208,8 +234,10 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
+
   const dataset = new Dataset({
-    datasetSchemaName: datasetTableDataDTO.dataSetName
+    datasetSchemaName: datasetTableDataDTO.dataSetName,
+    datasetSchemaId: datasetTableDataDTO.datasetSchema
   });
   return dataset;
 };
@@ -257,18 +285,25 @@ const schemaById = async datasetId => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
           const fields = !isNull(dataTableRecordDTO.fieldSchema)
-            ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+            ? dataTableRecordDTO.fieldSchema.map(dataTableFieldDTO => {
                 return new DatasetTableField({
-                  codelistItems: DataTableFieldDTO.codelistItems,
-                  description: DataTableFieldDTO.description,
-                  fieldId: DataTableFieldDTO.id,
-                  pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
-                  pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
-                  name: DataTableFieldDTO.name,
-                  recordId: DataTableFieldDTO.idRecord,
-                  referencedField: DataTableFieldDTO.referencedField,
-                  required: DataTableFieldDTO.required,
-                  type: DataTableFieldDTO.type
+                  codelistItems: dataTableFieldDTO.codelistItems,
+                  description: dataTableFieldDTO.description,
+                  fieldId: dataTableFieldDTO.id,
+                  maxSize: dataTableFieldDTO.maxSize,
+                  pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                  pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
+                    ? dataTableFieldDTO.pkHasMultipleValues
+                    : false,
+                  pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
+                  pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
+                  name: dataTableFieldDTO.name,
+                  readOnly: dataTableFieldDTO.readOnly,
+                  recordId: dataTableFieldDTO.idRecord,
+                  referencedField: dataTableFieldDTO.referencedField,
+                  required: dataTableFieldDTO.required,
+                  type: dataTableFieldDTO.type,
+                  validExtensions: !isNull(dataTableFieldDTO.validExtensions) ? dataTableFieldDTO.validExtensions : []
                 });
               })
             : null;
@@ -283,15 +318,17 @@ const schemaById = async datasetId => {
       hasPKReferenced: !isEmpty(
         records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
       ),
+      tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
+      tableSchemaFixedNumber: isNull(datasetTableDTO.fixedNumber) ? false : datasetTableDTO.fixedNumber,
       tableSchemaName: datasetTableDTO.nameTableSchema,
+      tableSchemaNotEmpty: isNull(datasetTableDTO.notEmpty) ? false : datasetTableDTO.notEmpty,
       tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
       records: records,
       recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
     });
   });
-
   dataset.tables = tables;
 
   return dataset;
@@ -359,95 +396,6 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   return table;
 };
 
-const webFormDataById = async (datasetId, tableSchemaId) => {
-  const webFormDataDTO = await apiDataset.webFormDataById(datasetId, tableSchemaId);
-  const webForm = new DatasetTable({});
-
-  const headerFieldSchemaId = '5d666d53460a1e0001b16717';
-  const valueFieldSchemaId = '5d666d53460a1e0001b16728';
-  const descriptionFieldSchemaId = '5d666d53460a1e0001b1671b';
-  const letterFieldSchemaId = '5d666d53460a1e0001b16721';
-  const numberFieldSchemaId = '5d666d53460a1e0001b16723';
-
-  const formData = {};
-  const columnHeaders = [];
-  const rows = [];
-  const letters = [];
-  const rowHeaders = [];
-  columnHeaders.unshift('GREENHOUSE GAS SOURCE');
-
-  if (webFormDataDTO.totalRecords > 0) {
-    webForm.tableSchemaId = webFormDataDTO.idTableSchema;
-    webForm.totalRecords = webFormDataDTO.totalRecords;
-
-    let field;
-
-    const records = webFormDataDTO.records.map(webFormRecordDTO => {
-      let row = {};
-      webFormRecordDTO.fields.forEach(webFormFieldDTO => {
-        field = new DatasetTableField({
-          fieldId: webFormFieldDTO.id,
-          fieldSchemaId: webFormFieldDTO.idFieldSchema,
-          name: webFormFieldDTO.name,
-          recordId: webFormRecordDTO.idRecordSchema,
-          type: webFormFieldDTO.type,
-          value: webFormFieldDTO.value
-        });
-
-        row.type = field.type;
-        row.fieldSchemaId = field.fieldSchemaId;
-
-        if (field.fieldSchemaId === letterFieldSchemaId) {
-          row.columnPosition = field.value;
-        } else if (field.fieldSchemaId === numberFieldSchemaId) {
-          row.rowPosition = field.value;
-        } else if (field.fieldSchemaId === valueFieldSchemaId) {
-          row.fieldId = webFormFieldDTO.id;
-          row.value = field.value;
-        } else if (field.fieldSchemaId === headerFieldSchemaId) {
-          row.columnHeader = field.value;
-          if (!columnHeaders.includes(field.value)) {
-            columnHeaders.push(field.value);
-          }
-        } else if (field.fieldSchemaId === descriptionFieldSchemaId) {
-          row.description = field.value;
-          if (!rowHeaders.includes(field.value)) {
-            rowHeaders.push(field.value);
-          }
-        }
-
-        return field;
-      });
-      rows.push(row);
-
-      row.recordId = field.recordId;
-
-      if (!letters.includes(row.columnPosition)) {
-        letters.push(row.columnPosition);
-      }
-    });
-    webForm.records = records;
-    webForm.rows = rows;
-  }
-  letters.sort();
-  let dataColumns = createDataColumns(rows, letters);
-
-  formData.columnHeaders = columnHeaders;
-  formData.dataColumns = dataColumns;
-  formData.rowHeaders = rowHeaders;
-
-  return formData;
-};
-
-const createDataColumns = (rowsData, letters) => {
-  let columns = [];
-  letters.forEach(function (value, i) {
-    let columnLetter = rowsData.filter(row => row.columnPosition === value);
-    columns.push(columnLetter);
-  });
-  return columns;
-};
-
 const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
   const datasetTableField = new DatasetTableField({});
   datasetTableField.id = fieldId;
@@ -461,14 +409,20 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
 
 const updateRecordFieldDesign = async (datasetId, record) => {
   const datasetTableFieldDesign = new DatasetTableField({});
-  datasetTableFieldDesign.id = record.fieldSchemaId;
-  datasetTableFieldDesign.name = record.name;
-  datasetTableFieldDesign.type = record.type;
-  datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
+  datasetTableFieldDesign.description = record.description;
+  datasetTableFieldDesign.id = record.fieldSchemaId;
+  datasetTableFieldDesign.idRecord = record.recordId;
+  datasetTableFieldDesign.maxSize = !isNil(record.maxSize) ? record.maxSize.toString() : null;
+  datasetTableFieldDesign.name = record.name;
+  datasetTableFieldDesign.pk = record.pk;
+  datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
+  datasetTableFieldDesign.pkMustBeUsed = record.pkMustBeUsed;
+  datasetTableFieldDesign.readOnly = record.readOnly;
   datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
-  datasetTableFieldDesign.pk = record.pk;
+  datasetTableFieldDesign.type = record.type;
+  datasetTableFieldDesign.validExtensions = record.validExtensions;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
 };
@@ -501,16 +455,22 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
   await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 
 const updateTableDescriptionDesign = async (
+  tableSchemaToPrefill,
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
-  datasetId
+  datasetId,
+  tableSchemaNotEmpty,
+  tableSchemaFixedNumber
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
+    tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
-    datasetId
+    datasetId,
+    tableSchemaNotEmpty,
+    tableSchemaFixedNumber
   );
   return tableSchemaUpdated;
 };
@@ -540,15 +500,19 @@ export const ApiDatasetRepository = {
   addTableDesign,
   createValidation,
   deleteDataById,
+  deleteFileData,
   deleteRecordById,
   deleteRecordFieldDesign,
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
-  errorsById,
+  downloadExportFile,
+  downloadFileData,
   errorPositionByObjectId,
+  errorsById,
   errorStatisticsById,
   exportDataById,
+  exportDatasetDataExternal,
   exportTableDataById,
   getMetaData,
   getReferencedFieldValues,
@@ -556,13 +520,12 @@ export const ApiDatasetRepository = {
   orderTableSchema,
   schemaById,
   tableDataById,
+  updateDatasetDescriptionDesign,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
-  updateDatasetDescriptionDesign,
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
-  validateDataById,
-  webFormDataById
+  validateDataById
 };

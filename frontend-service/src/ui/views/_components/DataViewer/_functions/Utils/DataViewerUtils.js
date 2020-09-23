@@ -24,8 +24,24 @@ const getFieldValues = (columns, header, filterColumns) => {
   const filteredValues = pick(filteredColumn, ...filterColumns);
   return Object.keys(filteredValues).map(key => {
     return {
-      field: key === 'codelistItems' ? 'Single select items' : capitalize(key),
-      value: filteredValues[key] === 'CODELIST' ? 'SINGLE SELECT' : filteredValues[key]
+      field:
+        key === 'codelistItems'
+          ? filteredValues.type === 'CODELIST'
+            ? 'Single select items'
+            : 'Multiple select items'
+          : key === 'validExtensions'
+          ? 'Valid extensions'
+          : key === 'maxSize'
+          ? 'Maximum file size'
+          : capitalize(key),
+      value:
+        filteredValues[key] === 'CODELIST'
+          ? 'SINGLE SELECT'
+          : filteredValues[key] === 'MULTISELECT_CODELIST'
+          ? 'MULTIPLE SELECT'
+          : Array.isArray(filteredValues[key])
+          ? filteredValues[key].join(', ')
+          : filteredValues[key]
     };
   });
 };
@@ -106,7 +122,7 @@ const groupValidations = (recordData, blockerMessage, errorMessage, warningMessa
   const getMessages = validationsType => {
     let messageType = '';
     validationsType.forEach(validation =>
-      validation.message ? (messageType += '- ' + capitalize(validation.message) + '\n') : ''
+      validation.message ? (messageType += '- ' + validation.message + '\n') : ''
     );
     return messageType;
   };
@@ -186,9 +202,9 @@ const parseData = data =>
 
 export const DataViewerUtils = {
   editLargeStringWithDots,
+  formatValidations,
   getColumnByHeader,
   getFieldValues,
-  formatValidations,
   getLevelError,
   groupValidations,
   orderValidationsByLevelError,

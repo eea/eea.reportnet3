@@ -98,6 +98,7 @@ public interface KeycloakConnectorService {
    * Create group detail.
    *
    * @param groupInfo the group info
+   *
    * @throws EEAException the EEA exception
    */
   void createGroupDetail(GroupInfo groupInfo) throws EEAException;
@@ -114,6 +115,7 @@ public interface KeycloakConnectorService {
    *
    * @param userId the user resourceId
    * @param groupId the group resourceId
+   *
    * @throws EEAException the EEA exception
    */
   void addUserToGroup(String userId, String groupId) throws EEAException;
@@ -136,9 +138,11 @@ public interface KeycloakConnectorService {
    * Gets the users by email.
    *
    * @param email the email
+   *
    * @return the users by email
    */
   UserRepresentation[] getUsersByEmail(String email);
+
 
   /**
    * Gets the role.
@@ -166,7 +170,42 @@ public interface KeycloakConnectorService {
    * Gets the user.
    *
    * @param userId the user id
+   *
    * @return the user
    */
   UserRepresentation getUser(String userId);
+
+  /**
+   * Gets the user roles.
+   *
+   * @param userId the user id
+   *
+   * @return the user roles
+   */
+  RoleRepresentation[] getUserRoles(String userId);
+
+  /**
+   * Gets the groups with search.
+   *
+   * @param value the value
+   * @return the group with search
+   */
+  GroupInfo[] getGroupsWithSearch(String value);
+
+  /**
+   * Gets the users by group id.
+   *
+   * @param groupId the group id
+   * @return the user by group id
+   */
+  UserRepresentation[] getUsersByGroupId(String groupId);
+
+  /**
+   * Removes the user from group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   * @throws EEAException the EEA exception
+   */
+  void removeUserFromGroup(String userId, String groupId) throws EEAException;
 }

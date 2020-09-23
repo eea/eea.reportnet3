@@ -11,12 +11,13 @@ import { config } from 'conf';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
+
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
-  const [columnOptions, setColumnOptions] = useState([{}]);
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
+  const [columnOptions, setColumnOptions] = useState([{}]);
 
   useEffect(() => {
     let colOptions = [];
@@ -44,24 +45,35 @@ export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   };
 };
 
-export const useContextMenu = (resources, records, setEditDialogVisible, setConfirmDeleteVisible) => {
+export const useContextMenu = (
+  resources,
+  records,
+  hideEdition,
+  hideDeletion,
+  setEditDialogVisible,
+  setConfirmDeleteVisible
+) => {
   const [menu, setMenu] = useState();
 
   useEffect(() => {
-    setMenu([
-      {
+    const menuItems = [];
+    if (!hideEdition) {
+      menuItems.push({
         label: resources.messages['edit'],
         icon: config.icons['edit'],
         command: () => {
           setEditDialogVisible(true);
         }
-      },
-      {
+      });
+    }
+    if (!hideDeletion) {
+      menuItems.push({
         label: resources.messages['delete'],
         icon: config.icons['trash'],
         command: () => setConfirmDeleteVisible(true)
-      }
-    ]);
+      });
+    }
+    setMenu(menuItems);
   }, [records.selectedRecord]);
   return { menu };
 };
@@ -71,39 +83,166 @@ export const useSetColumns = (
   cellDataEditor,
   colsSchema,
   columnOptions,
+  hasCountryCode,
   hasWritePermissions,
   initialCellValue,
-  isDataCollection,
-  isWebFormMMR,
+  onFileDeleteVisible,
+  onFileDownload,
+  onFileUploadVisible,
   records,
   resources,
+  setIsAttachFileVisible,
   setIsColumnInfoVisible,
-  validationsTemplate
+  validationsTemplate,
+  isReporting
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
   const [selectedHeader, setSelectedHeader] = useState();
 
+  const onShowFieldInfo = (header, visible) => {
+    setSelectedHeader(header);
+    setIsColumnInfoVisible(visible);
+  };
+
+  const providerCodeTemplate = rowData => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
+  );
+
+  const renderAttachment = (value = '', fieldId, fieldSchemaId) => {
+    const colSchema = colsSchema.filter(colSchema => colSchema.field === fieldSchemaId)[0];
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        {!isNil(value) && value !== '' && (
+          <Button
+            className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
+            icon="export"
+            iconPos="right"
+            label={value}
+            onClick={() => onFileDownload(value, fieldId)}
+          />
+        )}
+        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && (
+          <Button
+            className={`p-button-animated-blink p-button-secondary-transparent`}
+            icon="import"
+            onClick={() => {
+              setIsAttachFileVisible(true);
+              onFileUploadVisible(
+                fieldId,
+                fieldSchemaId,
+                !isNil(colSchema) ? colSchema.validExtensions : [],
+                colSchema.maxSize
+              );
+            }}
+          />
+        )}
+        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && !isNil(value) && value !== '' && (
+          <Button
+            className={`p-button-animated-blink p-button-secondary-transparent`}
+            icon="trash"
+            onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const getTooltipMessage = column => {
+    return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
+      ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
+        <span style="font-weight:bold">Description:</span> ${
+          !isNil(column.description) && column.description !== ''
+            ? column.description
+            : resources.messages['noDescription']
+        }<br/><span style="font-weight:bold">${
+          column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']
+        }: </span>
+        ${column.codelistItems
+          .map(codelistItem =>
+            !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
+          )
+          .join(', ')}`
+      : `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
+      <span style="font-weight:bold">Description:</span> ${
+        !isNil(column.description) && column.description !== '' && column.description.length > 35
+          ? column.description.substring(0, 35)
+          : isNil(column.description) || column.description === ''
+          ? resources.messages['noDescription']
+          : column.description
+      }${
+          column.type === 'ATTACHMENT'
+            ? `<br/><span style="font-weight:bold">${resources.messages['validExtensions']}</span> ${
+                !isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'
+              }
+    <span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
+                !isNil(column.maxSize) && column.maxSize.toString() !== '0'
+                  ? `${column.maxSize} ${resources.messages['MB']}`
+                  : resources.messages['maxSizeNotDefined']
+              }`
+            : ''
+        }`;
+  };
+
+  const dataTemplate = (rowData, column) => {
+    let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+      const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+      const message = DataViewerUtils.formatValidations(validations);
+      const levelError = DataViewerUtils.getLevelError(validations);
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+          }}>
+          {field
+            ? Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].sort().join(', ')
+              : (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData[column.field] !== '' &&
+                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
+                (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData.type === 'LINK' &&
+                  !Array.isArray(field.fieldData[column.field]))
+              ? field.fieldData[column.field].split(',').join(', ')
+              : field.fieldData.type === 'ATTACHMENT'
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              : field.fieldData[column.field]
+            : null}
+          <IconTooltip levelError={levelError} message={message} />
+        </div>
+      );
+    } else {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+          }}>
+          {field
+            ? Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].sort().join(', ')
+              : (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData[column.field] !== '' &&
+                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
+                (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData.type === 'LINK' &&
+                  !Array.isArray(field.fieldData[column.field]))
+              ? field.fieldData[column.field].split(',').join(', ')
+              : field.fieldData.type === 'ATTACHMENT'
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              : field.fieldData[column.field]
+            : null}
+        </div>
+      );
+    }
+  };
+
   useEffect(() => {
     const maxWidths = [];
-
-    const getTooltipMessage = column =>
-      !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
-        ? `<span style="font-weight:bold">Description:</span> ${
-            !isNil(column.description) ? column.description : 'No description'
-          }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
-          ${column.codelistItems
-            .map(codelistItem =>
-              !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
-            )
-            .join(', ')}`
-        : !isNil(column.description) && column.description !== '' && column.description.length > 35
-        ? column.description.substring(0, 35)
-        : column.description;
-
-    const providerCodeTemplate = rowData => (
-      <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
-    );
 
     // if (!isEditing) {
     //Calculate the max width of the shown data
@@ -118,29 +257,6 @@ export const useSetColumns = (
     //   }
     // });
     //Template for Field validation
-    const dataTemplate = (rowData, column) => {
-      let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
-        const message = DataViewerUtils.formatValidations(validations);
-        const levelError = DataViewerUtils.getLevelError(validations);
-        return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-            {field ? field.fieldData[column.field] : null}
-            <IconTooltip levelError={levelError} message={message} />
-          </div>
-        );
-      } else {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
-        );
-      }
-    };
 
     //Calculate the max width of data column
     const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
@@ -154,17 +270,22 @@ export const useSetColumns = (
         <Column
           body={dataTemplate}
           className={invisibleColumn}
-          editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
+          editor={
+            hasWritePermissions && column.type !== 'ATTACHMENT'
+              ? row => cellDataEditor(row, records.selectedRecord)
+              : null
+          }
           field={column.field}
           header={
             <React.Fragment>
               {column.header}
               <Button
-                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
                 icon="infoCircle"
                 onClick={() => {
-                  setSelectedHeader(column.header);
-                  setIsColumnInfoVisible(true);
+                  onShowFieldInfo(column.header, true);
+                  // setSelectedHeader(column.header);
+                  // setIsColumnInfoVisible(true);
                 }}
                 tooltip={getTooltipMessage(column)}
                 tooltipOptions={{ position: 'top' }}
@@ -215,11 +336,11 @@ export const useSetColumns = (
       />
     );
 
-    if (!isDataCollection && !isWebFormMMR) {
+    if (!hasCountryCode) {
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
-    if (isDataCollection && !isWebFormMMR) {
+    if (hasCountryCode) {
       columnsArr.unshift(providerCode);
     }
 
@@ -230,9 +351,11 @@ export const useSetColumns = (
 
   return {
     columns,
-    setColumns,
+    getTooltipMessage,
+    onShowFieldInfo,
     originalColumns,
-    selectedHeader
+    selectedHeader,
+    setColumns
   };
 };
 

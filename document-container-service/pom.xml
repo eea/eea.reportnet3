@@ -5,7 +5,7 @@
   <parent>
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0.0</version>
+    <version>3.0-SNAPSHOT</version>
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
@@ -15,8 +15,7 @@
   <artifactId>document-container-service</artifactId>
   <version>${document.version}</version>
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:document-container-service:${sonar.jenkins.branch}
-    </sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:document-container-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
 
   <dependencies>

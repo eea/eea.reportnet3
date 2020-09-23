@@ -70,7 +70,7 @@
   --c-purple-100: #dd7fd3;
   /* lilac */
   --c-lilac-400: #6f5091;
-  --c-lilac-300: #7474c1;
+  --c-lilac-300: #6d6dc0;
   --c-lilac-200: #b4b5df;
   --c-lilac-100: #dbe2e9;
   /* black-rose */
@@ -101,8 +101,26 @@
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
   --c-growl-info-blue: #8bc3ed;
+  /* level error statusbox colors */
+  --statusBox-blocker-bg: 194, 200, 207;
+  --statusBox-blocker-color: 0, 0, 0;
+  --statusBox-error-bg: #ffcdd2;
+  --statusBox-error-color: #a6093d;
+  --statusBox-info-bg: #b3e5fc;
+  --statusBox-info-color: #23547b;
+  --statusBox-warning-bg: #ffd8b2;
+  --statusBox-warning-color: #805b36;
+  /* boolean statusbox colors*/
+  --statusBox-true-bg: #c8e6c9;
+  --statusBox-true-color: #256029;
+  --statusBox-false-bg: #ffcdd2;
+  --statusBox-false-color: #c63737;
+  /* status  statusbox colors*/
+  --statusBox-draft-bg: #eccfff;
+  --statusBox-draft-color: #694382;
+  --statusBox-designer-bg: #c2c8cf;
 
-  --header-height: 4rem;
+  --header-height: 180px;
 
   /* Theme switcher */
   --bg: var(--white);
@@ -167,7 +185,7 @@
   --datatable-column-sortable-hightlight-color: var(--white);
   --datatable-column-sortable-hightlight-icon-color: var(--white);
   --datatable-column-sortable-hightlight-box-shadow-focus: inset 0 0 0 0.1em var(--gray-25);
-  --datatable-header-footer-bg: var(--gray-10);
+  --datatable-header-footer-bg: var(--white);
   --datatable-header-footer-color: var(--gray-110);
   --datatable-header-footer-border: 1px solid var(--gray-25);
   --datatable-header-info-button-color: var(--c-corporate-blue);
@@ -354,7 +372,7 @@
 
   /* Multiselect */
   --multiselect-bg: var(--white);
-  --multiselect-border: 1px solid var(--gray-15);
+  --multiselect-border: 1px solid var(--gray-50);
   --multiselect-bg-hover: var(--gray-110);
   --multiselect-label-color: var(--gray-110);
   --multiselect-trigger-bg: var(--white);
@@ -435,6 +453,8 @@
   --listbox-item-highlight-bg: var(--c-corporate-blue);
   --listbox-item-highlight-bg-hover: var(--gray-10);
   --listbox-item-highlight-color: var(--white);
+  --listbox-item-pk-indicator-bg: var(--gray-25);
+  --listbox-item-pk-indicator-color: var(--main-font-color);
 
   /* Tooltip */
   --tooltip-body-bg: var(--gray-110);
@@ -446,6 +466,31 @@
   /* User image */
   --user-image-bg-hover: var(--main-font-color);
   --user-image-bg-opacity: 0.6;
+
+  /* Calendar */
+  --calendar-bg: var(--bg);
+  --calendar-color: var(--gray-75);
+  --calendar-border-color: var(--c-custom-gray);
+  --calendar-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  --calendar-body-span-color: var(--gray-110);
+  --calendar-header-next-prev-color: var(--gray-75);
+  --calendar-header-bg: var(--bg);
+  --calendar-header-color: var(--gray-75);
+
+  /* Map */
+  --map-marker-color: var(--c-corporate-blue-lighter);
+
+  /*Eu header footer*/
+  --eu-footer-bottom-bg: #d9d9d9;
+  --eu-footer-bottom-font: #016394;
+  --eu-footer-bottom: var(--eu-footer-bottom-bg);
+  /* custom header */
+  --header-footer-bg: var(--gray-10);
+
+  /* Card */
+  --card-item-bg: var(--bg);
+  --card-item-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --card-item-box-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25);
 }
 body {
   margin: 0px;
@@ -2206,6 +2251,12 @@ textarea:focus {
   box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;
 }
+.formField.error .p-dropdown {
+  border-color: var(--errors);
+  box-shadow: none;
+  outline: none;
+  border-width: 2px;
+}
 .formField input {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
@@ -2217,6 +2268,17 @@ textarea:focus {
 
 form .error {
   color: var(--errors);
+  transition: color 0.2s;
+}
+
+.formField.error:hover {
+  color: var(--dialog-content-color);
+}
+
+.formField.error:hover input {
+  border-color: var(--dialog-content-color);
+  box-shadow: none;
+  outline: none;
 }
 
 /*Tooltip*/
@@ -2226,6 +2288,9 @@ form .error {
 /*dialog*/
 body .p-dialog.edit-table .p-dialog-content {
   max-height: 65vh;
+}
+body .p-dialog.edit-table.calendar-table .p-dialog-content {
+  overflow-y: visible !important;
 }
 /* buttons */
 
@@ -2254,6 +2319,6 @@ body .p-dialog.edit-table .p-dialog-content {
   z-index: 5100 !important;
 }
 
-.p-sidebar-right {
-  top: var(--header-height);
+.p-growl.p-growl-topright {
+  top: 75px !important;
 }

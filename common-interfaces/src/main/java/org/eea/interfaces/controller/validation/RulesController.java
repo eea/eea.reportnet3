@@ -1,15 +1,16 @@
 /*
- * 
+ *
  */
 package org.eea.interfaces.controller.validation;
 
+import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,9 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * The Interface RulesController.
- */
+/** The Interface RulesController. */
 public interface RulesController {
 
   /**
@@ -103,12 +102,9 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
-   * @return
    */
   @PutMapping("/createNewRule")
-  ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
-      @RequestBody RuleVO ruleVO);
-
+  void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
 
   /**
    * Creates the automatic rule.
@@ -145,7 +141,7 @@ public interface RulesController {
    * @return the boolean
    */
   @PutMapping("/private/existsRuleRequired")
-  public boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+  boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId);
 
   /**
@@ -165,10 +161,99 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    */
   @PutMapping("/updatePositionRule")
-  public void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
+  void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
 
+  /**
+   * Update automatic rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   */
+  @PutMapping("/updateAutomaticRule/{datasetId}")
+  void updateAutomaticRule(@PathVariable("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
+  @PostMapping("/private/createUniqueConstraintRule")
+  void createUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("uniqueId") String uniqueId);
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
+  @DeleteMapping("/private/deleteUniqueConstraintRule")
+  void deleteUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("uniqueId") String uniqueId);
 
 
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @DeleteMapping("/private/deleteRuleHighLevelLike")
+  void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fieldSchemaId") String fieldSchemaId);
+
+  /**
+   * Delete dataset rule and integrity by field schema id.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
+  void deleteDatasetRuleAndIntegrityByFieldSchemaId(
+      @RequestParam("fieldSchemaId") String fieldSchemaId,
+      @RequestParam("datasetId") Long datasetId);
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
+  void deleteDatasetRuleAndIntegrityByDatasetSchemaId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId);
+
+  /**
+   * Copy rules schema.
+   *
+   * @param copy the copy
+   * @return the map
+   */
+  @PostMapping("/private/copyRulesSchema")
+  Map<String, String> copyRulesSchema(@RequestBody CopySchemaVO copy);
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  @GetMapping("/private/deleteNotEmptyRule")
+  void deleteNotEmptyRule(@RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("datasetId") Long datasetId);
+
+  /**
+   * Update sequence.
+   *
+   * @param tableSchemaId the table schema id
+   * @return the long
+   */
+  @GetMapping("/private/updateSequence")
+  Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

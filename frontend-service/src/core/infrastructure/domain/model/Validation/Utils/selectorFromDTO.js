@@ -1,49 +1,31 @@
-import isNil from 'lodash/isNil';
-import isEmpty from 'lodash/isEmpty';
+import isObject from 'lodash/isObject';
+
+import { config } from 'conf';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';
 import { getGroupFromDTO } from './getGroupFromDTO';
-
-const isUnion = operator => {
-  return operator == 'AND' || operator == 'OR';
-};
-const isGroupOperator = operator => {
-  return operator == 'OR';
-};
+import isNil from 'lodash/isNil';
 
 export const selectorFromDTO = (expression, expressions, allExpressions, parentOperator = null) => {
-  if (!isUnion(expression.operator)) {
-    expressions.push(getExpressionFromDTO(expression, allExpressions, parentOperator));
-  } else {
-    if (
-      !isNil(expression.arg1.operator) &&
-      !isNil(expression.arg2.operator) &&
-      isUnion(parentOperator) &&
-      expression.operator != parentOperator &&
-      !isUnion(expression.arg1.operator) &&
-      isUnion(expression.arg2.operator)
-    ) {
-      selectorFromDTO(expression.arg1, expressions, allExpressions, parentOperator);
-      expressions.push(getGroupFromDTO(expression.arg2, allExpressions, expression.operator));
-    } else if (
-      !isNil(expression.arg1.operator) &&
-      !isNil(expression.arg2.operator) &&
-      isUnion(expression.arg1.operator) &&
-      isUnion(expression.arg2.operator) &&
-      expression.operator != expression.arg2.operator
-    ) {
-      expressions.push(getGroupFromDTO(expression.arg1, allExpressions, parentOperator));
-      expressions.push(getGroupFromDTO(expression.arg2, allExpressions, expression.operator));
-    } else if (
-      !isNil(expression.arg1.operator) &&
-      !isNil(expression.arg2.operator) &&
-      isUnion(expression.arg1.operator)
-    ) {
-      expressions.push(getGroupFromDTO(expression.arg1, allExpressions, parentOperator));
-      selectorFromDTO(expression.arg2, expressions, allExpressions, expression.operator);
+  const {
+    validations: { logicalOperatorFromDTO }
+  } = config;
+  const [firstParam, secondParam] = expression.params;
+  const { operator } = expression;
+
+  if (logicalOperatorFromDTO.includes(operator)) {
+    if (logicalOperatorFromDTO.includes(firstParam.operator)) {
+      expressions.push(getGroupFromDTO(firstParam, allExpressions, parentOperator));
     } else {
-      selectorFromDTO(expression.arg1, expressions, allExpressions, parentOperator);
-      selectorFromDTO(expression.arg2, expressions, allExpressions, expression.operator);
+      expressions.push(getExpressionFromDTO(firstParam, allExpressions, parentOperator));
     }
+
+    if (logicalOperatorFromDTO.includes(secondParam.operator)) {
+      selectorFromDTO(secondParam, expressions, allExpressions, operator);
+    } else {
+      expressions.push(getExpressionFromDTO(secondParam, allExpressions, operator));
+    }
+  } else {
+    expressions.push(getExpressionFromDTO(expression, allExpressions, null));
   }
 };

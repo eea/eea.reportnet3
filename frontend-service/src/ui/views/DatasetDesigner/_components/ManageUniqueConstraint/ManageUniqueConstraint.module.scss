@@ -1,0 +1,56 @@
+.listBoxWrap {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  padding: 1rem 0;
+
+  > div {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.4);
+    flex-grow: 1;
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+    max-width: 50%;
+    min-width: 25%;
+    height: 250px;
+  }
+  :global .p-listbox-title-wrapper {
+    overflow: hidden;
+  }
+}
+
+.pkField {
+  color: var(--main-font-color);
+  font-size: 8pt;
+  font-weight: 800;
+  background-color: var(--listbox-item-pk-indicator-bg);
+  color: var(--listbox-item-pk-indicator-color);
+  margin: 0.1rem 0 0.1rem 0.5rem;
+  padding: 0 0.2rem;
+  border-radius: 3px;
+  position: absolute;
+}
+
+.selected {
+  margin-top: 1rem;
+
+  .title {
+    font-weight: bold;
+  }
+}
+
+.listBoxWrap::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+.listBoxWrap::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.listBoxWrap::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+.listBoxWrap::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
+}

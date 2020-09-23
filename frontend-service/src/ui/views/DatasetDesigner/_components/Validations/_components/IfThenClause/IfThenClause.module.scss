@@ -1,0 +1,165 @@
+#QCFormWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  .body {
+    overflow: auto hidden;
+    min-height: 310px;
+    .tabView {
+      padding-bottom: 1rem;
+
+      > ul {
+        li {
+          border: var(--tabview-border);
+          background-color: var(--tabview-bg);
+          margin-right: 0.2rem;
+          border-radius: 3px 3px 0 0;
+          a {
+            color: var(--main-font-color);
+          }
+        }
+        :global .p-highlight {
+          background-color: var(--tabview-highlight-bg);
+          border-bottom: none;
+          a {
+            color: var(--tabview-highlight-color);
+          }
+        }
+        &:last-of-type {
+          margin-right: 0;
+        }
+        li {
+          &.error {
+            span {
+              color: var(--errors);
+            }
+          }
+        }
+      }
+    }
+  }
+  .footer {
+    height: 10%;
+    margin-bottom: 1rem;
+    .section {
+      &.footerToolBar {
+        margin-bottom: 0;
+        .subsection {
+          width: 100%;
+          &:last-of-type {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+          }
+          span {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
+  }
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 2rem 0;
+  h2 {
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: var(--title-color);
+  }
+  .fieldsGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+    .field {
+      --qcFieldm: 285px;
+      --qcFieldGap: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-left: 0.1rem;
+      margin-right: var(--qcFieldGap);
+      :global .p-dropdown {
+        padding-bottom: 1.2px;
+      }
+      > label {
+        margin-bottom: 0.2rem;
+      }
+      &.qcTable {
+        width: var(--qcFieldm);
+      }
+      &.qcField {
+        width: var(--qcFieldm);
+      }
+      &.qcShortCode {
+        width: calc(var(--qcFieldm) * 0.76);
+      }
+      &.qcEnabled {
+        width: calc(var(--qcFieldm) * 0.3);
+        margin-right: 0;
+        align-items: center;
+        :global .p-checkbox {
+          width: 2rem;
+          height: 2rem;
+        }
+        :global .p-checkbox-box {
+          width: 2rem;
+          height: 2rem;
+        }
+        :global .p-checkbox-icon {
+          font-size: calc(2rem - 4px);
+        }
+      }
+      &.qcName {
+        width: var(--qcFieldm);
+      }
+      &.qcDescription {
+        width: calc(100% - (var(--qcFieldm)) - var(--qcFieldGap) * 1);
+        margin-right: 0;
+      }
+      &.qcErrorType {
+        width: 285px;
+      }
+      &.qcErrorMessage {
+        width: calc(100% - (var(--qcFieldm)) - var(--qcFieldGap) * 1);
+        margin-right: 0;
+      }
+    }
+  }
+  ul {
+    list-style: none;
+  }
+  > ul {
+    margin: 0px;
+    padding-left: 0;
+    .expressionsHeader {
+      display: flex;
+      justify-content: flex-start;
+      span {
+        margin-right: 1rem;
+        width: 179px;
+        text-align: center;
+        &:first-of-type {
+          width: 53px;
+          margin-right: 0;
+          text-align: left;
+        }
+      }
+    }
+  }
+
+  .expressionsActionsBtns {
+    button {
+      margin-right: 0.5rem;
+      margin-top: 1.2rem;
+    }
+  }
+  textarea {
+    background-color: var(--inputtext-bg);
+    color: var(--inputtext-color);
+    height: 4rem;
+  }
+}

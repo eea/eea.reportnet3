@@ -8,9 +8,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -32,7 +31,7 @@ public interface ResourceManagementController {
    *
    * @param resourceInfoVO the resource info vo
    */
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  @PostMapping(value = "/create")
   void createResource(@RequestBody ResourceInfoVO resourceInfoVO);
 
   /**
@@ -40,7 +39,7 @@ public interface ResourceManagementController {
    *
    * @param resourceInfoVO the resource info vo
    */
-  @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+  @DeleteMapping(value = "/delete")
   @ResponseStatus(HttpStatus.OK)
   void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO);
 
@@ -50,7 +49,7 @@ public interface ResourceManagementController {
    *
    * @param resourceNames the resource names
    */
-  @RequestMapping(value = "/delete_by_name", method = RequestMethod.DELETE)
+  @DeleteMapping(value = "/delete_by_name")
   @ResponseStatus(HttpStatus.OK)
   void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceNames);
 
@@ -65,8 +64,6 @@ public interface ResourceManagementController {
   @GetMapping("/details")
   ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
-
-
 
   /**
    * Gets the groups by id resource type.
@@ -85,9 +82,14 @@ public interface ResourceManagementController {
    *
    * @param resourceInfoVOs the resource info V os
    */
-  @RequestMapping(value = "/createList", method = RequestMethod.POST)
+  @PostMapping(value = "/createList")
   void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs);
 
+  /**
+   * Delete resource by dataset id.
+   *
+   * @param datasetIds the dataset ids
+   */
   @DeleteMapping("/delete_by_dataset_id")
   void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds);
 }

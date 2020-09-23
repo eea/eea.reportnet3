@@ -1,5 +1,6 @@
 package org.eea.recordstore.service.impl;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.times;
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -58,6 +63,15 @@ public class JdbcRecordStoreServiceImplTest {
   @Mock
   private LockService lockService;
 
+  @Mock
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+  @Mock
+  private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
+
+  @Mock
+  private DataSetControllerZuul datasetControllerZuul;
+
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
@@ -72,7 +86,6 @@ public class JdbcRecordStoreServiceImplTest {
         "jdbc:postgresql://localhost/datasets");
     ReflectionTestUtils.setField(jdbcRecordStoreService, "sqlGetDatasetsName",
         "select * from pg_namespace where nspname like 'dataset%'");
-
   }
 
   @Rule
@@ -86,8 +99,7 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
-    Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
-    Mockito.verify(jdbcTemplate, Mockito.times(91)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(95)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -123,8 +135,10 @@ public class JdbcRecordStoreServiceImplTest {
 
 
   @Test
-  public void testCreateSnapshot() throws SQLException, IOException {
+  public void testCreateSnapshot() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
+    Mockito.when(dataSetSnapshotControllerZuul.getSchemaById(Mockito.any()))
+        .thenReturn(new SnapshotVO());
     datasets.add("dataset_1");
     PowerMockito.mockStatic(DriverManager.class);
 
@@ -147,12 +161,10 @@ public class JdbcRecordStoreServiceImplTest {
 
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
-    /*
-     * Mockito.when( DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
-     * Mockito.anyString())) .thenReturn(conexion);
-     */
 
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L);
+    Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
+        Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
 
   @Test
@@ -186,6 +198,10 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
     Mockito.doNothing().when(kafkaSender).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(),
         Mockito.any());
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    SnapshotVO snap = new SnapshotVO();
+    snap.setDatasetId(1L);
+    Mockito.when(dataSetSnapshotControllerZuul.getById(Mockito.any())).thenReturn(snap);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -196,7 +212,8 @@ public class JdbcRecordStoreServiceImplTest {
   public void testDeleteSnapshot() throws SQLException, IOException {
 
     jdbcRecordStoreService.deleteDataSnapshot(1L, 1L);
-
+    File file = new File("./snapshot_" + 1L + "-dataset_" + 1L + "_table_DatasetValue.snap");
+    assertFalse(file.exists());
   }
 
   @After
@@ -208,6 +225,8 @@ public class JdbcRecordStoreServiceImplTest {
     file = new File("./nullsnapshot_1_table_RecordValue.snap");
     file.delete();
     file = new File("./nullsnapshot_1_table_TableValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
     file.delete();
   }
 

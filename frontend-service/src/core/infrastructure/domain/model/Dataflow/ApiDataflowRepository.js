@@ -16,6 +16,7 @@ import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
+import { EuDataset } from 'core/domain/model/EuDataset/EuDataset';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Representative } from 'core/domain/model/Representative/Representative';
@@ -42,7 +43,7 @@ const all = async userData => {
     const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: DataflowConf.dataflowRoles[role] });
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: config.permissions[role] });
     });
 
     for (let i = 0; i < pendingDataflowsDTO.length; i++) {
@@ -52,7 +53,7 @@ const all = async userData => {
         ...(isDuplicated
           ? userRoles.filter(item =>
               item.duplicatedRoles
-                ? item.userRole === DataflowConf.dataflowRoles['DATA_CUSTODIAN'] && delete item.duplicatedRoles
+                ? item.userRole === config.permissions['DATA_CUSTODIAN'] && delete item.duplicatedRoles
                 : item
             )
           : userRoles
@@ -73,6 +74,9 @@ const all = async userData => {
 };
 
 const create = async (name, description, obligationId) => await apiDataflow.create(name, description, obligationId);
+
+const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
+  await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
 
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
@@ -261,8 +265,13 @@ const getAllSchemas = async dataflowId => {
                     description: DataTableFieldDTO.description,
                     fieldId: DataTableFieldDTO.id,
                     pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                    pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
+                      ? DataTableFieldDTO.pkHasMultipleValues
+                      : false,
+                    pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
                     pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
                     name: DataTableFieldDTO.name,
+                    readOnly: DataTableFieldDTO.readOnly,
                     recordId: DataTableFieldDTO.idRecord,
                     referencedField: DataTableFieldDTO.referencedField,
                     required: DataTableFieldDTO.required,
@@ -281,9 +290,12 @@ const getAllSchemas = async dataflowId => {
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
+        tableSchemaToPrefill: datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
+        tableSchemaFixedNumber: datasetTableDTO.fixedNumber,
         tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaNotEmpty: datasetTableDTO.notEmpty,
         tableSchemaReadOnly: datasetTableDTO.readOnly,
         records: records,
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
@@ -301,6 +313,12 @@ const getAllSchemas = async dataflowId => {
   });
   return datasetSchemas;
 };
+
+const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
+  await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
+
+const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
+  await apiDataflow.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
 const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
@@ -329,6 +347,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
+    euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
@@ -361,6 +380,29 @@ const parseDataCollectionDTO = dataCollectionDTO => {
     datasetSchemaId: dataCollectionDTO.datasetSchema,
     expirationDate: dataCollectionDTO.dueDate,
     status: dataCollectionDTO.status
+  });
+};
+
+const parseEuDatasetListDTO = euDatasetsDTO => {
+  if (!isNull(euDatasetsDTO) && !isUndefined(euDatasetsDTO)) {
+    const euDatasets = [];
+    euDatasetsDTO.forEach(euDatasetDTO => {
+      euDatasets.push(parseEuDatasetDTO(euDatasetDTO));
+    });
+    return euDatasets;
+  }
+  return;
+};
+
+const parseEuDatasetDTO = euDatasetDTO => {
+  return new EuDataset({
+    creationDate: euDatasetDTO.creationDate,
+    euDatasetId: euDatasetDTO.id,
+    euDatasetName: euDatasetDTO.dataSetName,
+    dataflowId: euDatasetDTO.idDataflow,
+    datasetSchemaId: euDatasetDTO.datasetSchema,
+    expirationDate: euDatasetDTO.dueDate,
+    status: euDatasetDTO.status
   });
 };
 
@@ -429,6 +471,8 @@ const parseObligationDTO = obligationDTO => {
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
       obligationId: obligationDTO.obligationId,
+      reportingFrequency: obligationDTO.reportFreq,
+      reportingFrequencyDetail: obligationDTO.reportFreqDetail,
       title: obligationDTO.oblTitle,
       validSince: obligationDTO.validSince,
       validTo: obligationDTO.validTo
@@ -501,16 +545,19 @@ const update = async (dataflowId, name, description, obligationId) =>
   await apiDataflow.update(dataflowId, name, description, obligationId);
 
 export const ApiDataflowRepository = {
-  all,
   accept,
   accepted,
-  create,
+  all,
+  cloneDatasetSchemas,
   completed,
+  create,
   dataflowDetails,
-  datasetsValidationStatistics,
   datasetsReleasedStatus,
+  datasetsValidationStatistics,
   deleteById,
+  generateApiKey,
   getAllSchemas,
+  getApiKey,
   newEmptyDatasetSchema,
   pending,
   reject,

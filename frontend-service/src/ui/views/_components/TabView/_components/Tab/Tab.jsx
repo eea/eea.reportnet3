@@ -167,7 +167,7 @@ const Tab = ({
       //currentTarget gets the child's target parent
       const childs = event.currentTarget.childNodes;
       for (let i = 0; i < childs.length; i++) {
-        if (childs[i].nodeName === 'SPAN') {
+        if (childs[i].nodeName === 'SPAN' && childs[i].className === 'p-tabview-title') {
           if (!isUndefined(onTabDragAndDrop)) {
             onTabDragAndDrop(draggedTabHeader, childs[i].textContent);
             setIsDragging(false);
@@ -194,7 +194,7 @@ const Tab = ({
         onInputBlur(event.target.value, index, initialTitleHeader);
       } else {
         if (!isUndefined(onTabNameError)) {
-          onTabAddCancel();
+          onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTitleValidationError']);
         }
       }
     }
@@ -266,7 +266,7 @@ const Tab = ({
           }}></div> */}
       </div>
       <li
-        className={`${className} p-tabview-nav-li`}
+        className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
           if (designMode && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
@@ -285,10 +285,15 @@ const Tab = ({
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
-            editable ? styles.p_tabview_design : addTab ? styles.p_tabview_design_add : styles.p_tabview_noDesign
+            editable
+              ? styles.p_tabview_design
+              : addTab
+              ? `${styles.p_tabview_design_add} datasetSchema-created-table-help-step`
+              : styles.p_tabview_noDesign
           }
           href={'#' + ariaControls}
           id={id}
+          onAuxClick={e => e.preventDefault()}
           onMouseDownCapture={e => {
             if (e.button === 1) {
               e.preventDefault();
@@ -322,7 +327,12 @@ const Tab = ({
           onDrop={e => onTabDrop(e)}
           onDoubleClick={onTabDoubleClick}
           role="tab"
-          style={{ pointerEvents: 'fill', display: 'inline-block', height: isNavigationHidden ? '2.6rem' : '2.7rem' }}
+          style={{
+            pointerEvents: 'fill',
+            display: 'inline-block',
+            height: isNavigationHidden ? '2.6rem' : '2.7rem',
+            minWidth: '3.6rem'
+          }}
           tabIndex={index}>
           {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
@@ -336,7 +346,14 @@ const Tab = ({
                   onInputBlur(e.target.value, index, initialTitleHeader);
                 } else {
                   if (!isUndefined(onTabNameError)) {
-                    onTabAddCancel();
+                    if (!newTab) {
+                      onTabNameError(
+                        resources.messages['emptyTabHeader'],
+                        resources.messages['emptyTitleValidationError']
+                      );
+                    } else {
+                      onTabAddCancel();
+                    }
                   }
                 }
               }}
@@ -347,7 +364,7 @@ const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
-          {rightIcon && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
+          {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
           {designMode && !hasPKReferenced ? (
             <div
               onClick={e => {

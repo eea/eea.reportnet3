@@ -21,6 +21,7 @@
     "clone": "pi pi-clone",
     "cloudUpload": "pi pi-cloud-upload",
     "comment": "pi pi-comment",
+    "copy": "pi pi-copy",
     "cross": "pi pi-times",
     "dashboard": "pi pi-chart-bar",
     "edit": "pi pi-pencil",
@@ -39,6 +40,7 @@
     "infoCircle": "pi pi-info-circle",
     "logout": "pi pi-power-off",
     "list": "pi pi-list",
+    "minus": "pi pi-minus",
     "openFolder": "pi pi-folder-open",
     "palette": "pi pi-palette",
     "pencil": "pi pi-pencil",
@@ -59,6 +61,7 @@
     "stepForward": "pi pi-step-forward",
     "table": "pi pi-table",
     "trash": "pi pi-trash",
+    "key": "pi pi-key",
     "undo": "pi pi-undo",
     "upload": "pi pi-upload",
     "user": "pi pi-user",
@@ -66,6 +69,8 @@
     "users": "pi pi-users",
     "validate": "pi pi-check-circle",
     "warning": "pi pi-exclamation-triangle",
-    "warningCircle": "pi pi-exclamation-circle"
+    "warningCircle": "pi pi-exclamation-circle",
+    "marker": "pi pi-map-marker",
+    "compass": "pi pi-compass"
   }
 }

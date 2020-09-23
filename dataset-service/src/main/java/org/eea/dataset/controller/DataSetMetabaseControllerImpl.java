@@ -1,3 +1,6 @@
+/*
+ *
+ */
 package org.eea.dataset.controller;
 
 import java.util.Arrays;
@@ -22,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -134,7 +138,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @PutMapping(value = "/updateDatasetName")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName) {
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
@@ -194,7 +198,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/globalStatistics/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')  OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId) {
 
@@ -221,4 +225,112 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public String findDatasetSchemaIdById(@RequestParam("datasetId") long datasetId) {
     return datasetMetabaseService.findDatasetSchemaIdById(datasetId);
   }
+
+
+  /**
+   * Gets the integrity dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetOriginSchemaId the dataset origin schema id
+   * @param datasetReferencedSchemaId the dataset referenced schema id
+   * @return the integrity dataset id
+   */
+  @Override
+  @GetMapping("/private/getIntegrityDatasetId")
+  public Long getIntegrityDatasetId(@RequestParam("id") Long datasetIdOrigin,
+      @RequestParam(value = "datasetOriginSchemaId") String datasetOriginSchemaId,
+      @RequestParam(value = "datasetReferencedSchemaId") String datasetReferencedSchemaId) {
+    return datasetMetabaseService.getIntegrityDatasetId(datasetIdOrigin, datasetOriginSchemaId,
+        datasetReferencedSchemaId);
+  }
+
+  /**
+   * Creates the dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @PostMapping("/private/createForeignRelationship")
+  public void createDatasetForeignRelationship(
+      @RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
+    datasetMetabaseService.createForeignRelationship(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+
+  }
+
+  /**
+   * Update dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @PutMapping("/private/updateForeignRelationship")
+  public void updateDatasetForeignRelationship(
+      @RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
+    datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @Override
+  @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
+  public Long getDesignDatasetIdByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId) {
+    return datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId,
+        null);
+  }
+
+
+  /**
+   * Delete foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteForeignRelationship")
+  public void deleteForeignRelationship(@RequestParam("datasetOriginId") Long datasetOriginId,
+      @RequestParam(value = "datasetReferencedId", required = false) Long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId) {
+
+    if (null == datasetReferencedId || datasetReferencedId.equals(datasetOriginId)) {
+      datasetReferencedId =
+          getIntegrityDatasetId(datasetOriginId, originDatasetSchemaId, referencedDatasetSchemaId);
+    }
+    datasetMetabaseService.deleteForeignRelation(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
+  /**
+   * Gets the type.
+   *
+   * @param datasetId the dataset id
+   * @return the type
+   */
+  @Override
+  @GetMapping("/private/getType/{datasetId}")
+  public DatasetTypeEnum getType(@PathVariable("datasetId") Long datasetId) {
+    return datasetMetabaseService.getDatasetType(datasetId);
+  }
+
 }

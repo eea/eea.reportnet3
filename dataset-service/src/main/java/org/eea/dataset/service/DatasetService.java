@@ -3,16 +3,18 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -20,7 +22,9 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
-/** The interface Dataset service. */
+/**
+ * The interface Dataset service.
+ */
 public interface DatasetService {
 
   /**
@@ -61,7 +65,9 @@ public interface DatasetService {
    * @param pageable the pageable
    * @param fields the fields
    * @param levelError the level error
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
@@ -110,10 +116,8 @@ public interface DatasetService {
    * @param datasetId the dataset id
    *
    * @return the data flow id by id
-   *
-   * @throws EEAException the EEA exception
    */
-  Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;
+  Long getDataFlowIdById(@DatasetId Long datasetId);
 
   /**
    * Update record.
@@ -148,29 +152,13 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   *
+   * @param tableSchemaId the table schema id
    * @return the byte[]
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
+  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String tableSchemaId)
       throws EEAException, IOException;
-
-  /**
-   * Gets the file name.
-   *
-   * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   * @param datasetId the dataset id
-   *
-   * @return the file name
-   *
-   * @throws EEAException the EEA exception
-   */
-  String getFileName(String mimeType, String idTableSchema, @DatasetId Long datasetId)
-      throws EEAException;
 
   /**
    * Creates the records.
@@ -225,6 +213,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idSchema the id schema
+   *
    * @return the long
    */
   Long findTableIdByTableSchema(@DatasetId Long datasetId, String idSchema);
@@ -234,6 +223,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param partitionId the partition id
+   *
    * @throws EEAException the EEA exception
    */
   void deleteRecordValuesToRestoreSnapshot(@DatasetId Long datasetId, Long partitionId)
@@ -243,6 +233,7 @@ public interface DatasetService {
    * Save statistics.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   void saveStatistics(@DatasetId Long datasetId) throws EEAException;
@@ -260,7 +251,9 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchema the table schema
+   *
    * @return the table VO
+   *
    * @throws EEAException the EEA exception
    */
   void saveTablePropagation(@DatasetId Long datasetId, TableSchemaVO tableSchema)
@@ -294,6 +287,7 @@ public interface DatasetService {
    * Checks if is reporting dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return true, if is reporting dataset
    */
   boolean isReportingDataset(Long datasetId);
@@ -303,6 +297,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   void prepareNewFieldPropagation(@DatasetId Long datasetId, FieldSchemaVO fieldSchemaVO)
@@ -334,6 +329,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param idPk the id pk
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
@@ -343,15 +339,184 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
+   *
    * @return the referenced dataset id
    */
   Long getReferencedDatasetId(Long datasetId, String idPk);
 
+
   /**
-   * Gets the dataset type.
+   * Etl export dataset.
    *
    * @param datasetId the dataset id
-   * @return the dataset type
+   *
+   * @return the ETL dataset VO
+   *
+   * @throws EEAException the EEA exception
    */
-  DatasetTypeEnum getDatasetType(Long datasetId);
+  ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
+
+
+  /**
+   * Etl import dataset.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @param providerId the provider id
+   *
+   * @throws EEAException the EEA exception
+   */
+  void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO, Long providerId)
+      throws EEAException;
+
+  /**
+   * Gets the table read only.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param type the type
+   *
+   * @return the table read only
+   */
+  Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
+
+
+  /**
+   * Release lock.
+   *
+   * @param criteria the criteria
+   */
+  void releaseLock(Object... criteria);
+
+  /**
+   * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
+   * status design or reportingDataset in state Draft.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
+  boolean isDatasetReportable(Long idDataset);
+
+  /**
+   * Gets the mimetype.
+   *
+   * @param file the file
+   * @return the mimetype
+   * @throws EEAException the EEA exception
+   */
+  String getMimetype(String file) throws EEAException;
+
+
+  /**
+   * Copy data.
+   *
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
+      Map<String, String> dictionaryOriginTargetObjectId);
+
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  AttachmentValue getAttachment(@DatasetId Long datasetId, String idField)
+      throws EEAException, IOException;
+
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @throws EEAException the EEA exception
+   */
+  void deleteAttachment(@DatasetId Long datasetId, String idField) throws EEAException;
+
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param fileName the file name
+   * @param is the is
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void updateAttachment(@DatasetId Long datasetId, String idField, String fileName, InputStream is)
+      throws EEAException, IOException;
+
+
+  /**
+   * Gets the field by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the field by id
+   * @throws EEAException the EEA exception
+   */
+  FieldVO getFieldById(@DatasetId Long datasetId, String idField) throws EEAException;
+
+
+  /**
+   * Delete attachment by field schema id.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
+      throws EEAException;
+
+  /**
+   * Export file through integration.
+   *
+   * @param datasetId the dataset id
+   * @param fileExtension the file extension
+   * @throws EEAException the EEA exception
+   */
+  void exportFileThroughIntegration(Long datasetId, String fileExtension) throws EEAException;
+
+  /**
+   * Checks if is design dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is design dataset
+   */
+  boolean isDesignDataset(Long datasetId);
+
+  /**
+   * Gets the table fixed number of records.
+   *
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table fixed number of records
+   */
+  Boolean getTableFixedNumberOfRecords(Long datasetId, String objectId, EntityTypeEnum type);
+
+
+  /**
+   * Find record schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idRecord the id record
+   * @return the string
+   */
+  String findRecordSchemaIdById(@DatasetId Long datasetId, String idRecord);
+
+
+  /**
+   * Find field schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the string
+   */
+  String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
+
 }

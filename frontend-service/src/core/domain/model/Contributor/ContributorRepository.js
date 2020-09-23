@@ -2,9 +2,12 @@ import { ApiContributorRepository } from 'core/infrastructure/domain/model/Contr
 
 export const ContributorRepository = {
   all: () => Promise.reject('[ContributorRepository#all] must be implemented'),
-  addByLogin: () => Promise.reject('[ContributorRepository#addByLogin] must be implemented'),
-  deleteById: () => Promise.reject('[ContributorRepository#deleteById] must be implemented'),
-  updateById: () => Promise.reject('[ContributorRepository#updateById] must be implemented')
+  allEditors: () => Promise.reject('[ContributorRepository#allEditors] must be implemented'),
+  allReporters: () => Promise.reject('[ContributorRepository#allReporters] must be implemented'),
+  deleteEditor: () => Promise.reject('[ContributorRepository#deleteEditor] must be implemented'),
+  deleteReporter: () => Promise.reject('[ContributorRepository#deleteReporter] must be implemented'),
+  updateEditor: () => Promise.reject('[ContributorRepository#updateEditor] must be implemented'),
+  updateReporter: () => Promise.reject('[ContributorRepository#updateReporter] must be implemented')
 };
 
 export const contributorRepository = Object.assign({}, ContributorRepository, ApiContributorRepository);

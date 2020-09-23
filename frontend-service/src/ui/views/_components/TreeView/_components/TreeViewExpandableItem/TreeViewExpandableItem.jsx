@@ -79,6 +79,7 @@ const TreeViewExpandableItem = ({
             key={i}
             label={button.label}
             onClick={button.onClick}
+            onMouseDown={button.onMouseDown}
             style={{ marginLeft: '0.5rem' }}
             tooltip={button.tooltip}
             tooltipOptions={{ position: 'bottom' }}

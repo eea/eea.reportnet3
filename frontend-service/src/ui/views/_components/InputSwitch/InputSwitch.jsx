@@ -160,19 +160,20 @@ export class InputSwitch extends Component {
         {...inputSwitchProps}>
         <div className="p-hidden-accessible">
           <input
-            ref={el => (this.input = el)}
-            type="checkbox"
-            id={this.props.inputId}
-            name={this.props.name}
-            checked={this.props.checked}
-            onChange={this.toggle}
-            onFocus={this.onFocus}
-            onBlur={this.onBlur}
-            onKeyDown={this.onKeyDown}
-            disabled={this.props.disabled}
-            role="switch"
             aria-checked={this.props.checked}
             aria-labelledby={this.props.ariaLabelledBy}
+            checked={this.props.checked}
+            disabled={this.props.disabled}
+            id={this.props.inputId}
+            name={this.props.name}
+            onBlur={this.onBlur}
+            onChange={this.toggle}
+            onFocus={this.onFocus}
+            onKeyDown={this.onKeyDown}
+            ref={el => (this.input = el)}
+            role="switch"
+            title={this.props.tooltip ? this.props.tooltip : 'switch'}
+            type="checkbox"
           />
         </div>
         <span

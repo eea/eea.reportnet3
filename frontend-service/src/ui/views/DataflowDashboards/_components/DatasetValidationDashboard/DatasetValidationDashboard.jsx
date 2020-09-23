@@ -18,14 +18,6 @@ import { filterReducer } from './_functions/filterReducer';
 import { DataflowService } from 'core/services/Dataflow';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 
-/* const SEVERITY_CODE = {
-  CORRECT: colors.dashboardCorrect,
-  INFO: colors.dashboardInfo,
-  WARNING: colors.dashboardWarning,
-  ERROR: colors.dashboardError,
-  BLOCKER: colors.dashboardBlocker
-}; */
-
 export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName, isVisible }) => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
@@ -56,28 +48,6 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
   }, [validationDashboardData]);
-
-  // useEffect(() => {
-  //   console.log(chartRef.current);
-  //   // chartRef.current.refresh();
-  // }, [themeContext.currentTheme]);
-
-  // const onChangeColor = (color, type) => {
-  //   setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
-  //   const filteredDatasets = filterState.originalData.datasets.filter(dataset => dataset.label === SEVERITY_CODE[type]);
-
-  //   const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
-  //     dataset => dataset.label === SEVERITY_CODE[type]
-  //   );
-  //   filteredDatasets.forEach(dataset => {
-  //     dataset.backgroundColor = `#${color}`;
-  //   });
-  //   filteredDatasetsCurrent.forEach(dataset => {
-  //     dataset.backgroundColor = `#${color}`;
-  //   });
-
-  //   chartRef.current.refresh();
-  // };
 
   const onErrorLoadingDashboard = error => {
     console.error('Dashboard error: ', error);
@@ -181,16 +151,12 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
       display: false
     },
     responsive: true,
+    datasets: { bar: { maxBarThickness: 100 } },
     scales: {
       xAxes: [
         {
-          stacked: true,
-          maxBarThickness: 100,
+          stacked: true,        
           gridLines: { display: false }
-          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' },
-          // ticks: {
-          //   fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
-          // }
         }
       ],
       yAxes: [
@@ -199,16 +165,13 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
           scaleLabel: {
             display: true,
             labelString: resources.messages['percentage']
-            // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
           },
           ticks: {
             min: 0,
             max: 100,
             callback: (value, index, values) => `${value}%`
-            // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
           },
           gridLines: { display: false }
-          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
         }
       ]
     }
@@ -246,29 +209,6 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
               />
             </>
           ) : (
-            //   <fieldset className={styles.colorPickerWrap}>
-            //   <legend>{resources.messages['chooseChartColor']}</legend>
-            //   <div className={styles.fieldsetContent}>
-            //     {Object.keys(SEVERITY_CODE).map((type, i) => {
-            //       return (
-            //         <div className={styles.colorPickerItem} key={i}>
-            //           <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
-            //             .slice(1)
-            //             .toLowerCase()}: `}</span>
-            //           <ColorPicker
-            //             className={styles.colorPicker}
-            //             //key={type}
-            //             value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
-            //             onChange={e => {
-            //               e.preventDefault();
-            //               onChangeColor(e.value, SEVERITY_CODE[type]);
-            //             }}
-            //           />
-            //         </div>
-            //       );
-            //     })}
-            //   </div>
-            // </fieldset>
             <>
               <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
               {onLoadStamp(resources.messages['empty'])}

@@ -23,10 +23,11 @@
   font-weight: bold;
   label {
     &:first-child {
-      width: 32px;
+      width: 75px;
+      margin-left: 32px;
     }
     &:nth-child(2) {
-      width: 70px;
+      width: 75px;
     }
     &:nth-child(3) {
       width: 35px;
@@ -44,6 +45,39 @@
       margin-right: 0.4rem;
     }
   }
+
+  .PKWrap {
+    > label {
+      margin-left: 0.5rem !important;
+    }
+
+    .PKInfoButton {
+      background-color: var(--white) !important;
+      border-radius: 50% !important;
+      color: var(--datatable-header-info-button-color) !important;
+      font-size: 12pt !important;
+      height: 0.7em !important;
+      width: 0.7em !important;
+      margin-left: 0.4rem !important;
+      margin-right: 0.9rem !important;
+      margin-top: -1rem !important;
+
+      :global .pi-info-circle {
+        padding: 0 !important;
+        top: 40%;
+      }
+
+      > span {
+        left: 46% !important;
+        margin-left: -0.48em !important;
+        margin-top: -0.5em !important;
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+  }
 }
 
 .positioning {
@@ -55,15 +89,25 @@
 }
 .switchDiv {
   display: flex;
-  align-items: center;
-  margin-left: auto;
-  display: none;
-  /* flex-direction: row-reverse; */
+  align-items: flex-end;
+  flex-direction: column;
+}
+
+.switchDiv div:nth-child(-n + 3) {
+  margin-bottom: 0.3rem;
 }
 .switchDivInput {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin: 0 0 2vw 1vw;
+
+  .constraintsButtons {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 35%;
+  }
 }
 .switchTextInput {
   font-weight: bold;
@@ -75,7 +119,7 @@
   color: var(--main-font-color);
 }
 .tableDescriptionInput {
-  width: 68vw;
+  width: 40vw;
   transition: 0.5s !important;
 }
 

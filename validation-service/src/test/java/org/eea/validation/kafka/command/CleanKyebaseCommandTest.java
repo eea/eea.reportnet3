@@ -2,6 +2,7 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,8 +77,9 @@ public class CleanKyebaseCommandTest {
    */
   @Test
   public void testData() throws EEAException {
-    doNothing().when(validationHelper).removeKieBase(Mockito.anyString());
+    doNothing().when(validationHelper).finishProcess(Mockito.anyString());
     cleanKyebaseCommand.execute(eeaEventVO);
+    Mockito.verify(validationHelper, times(1)).finishProcess(Mockito.any());
   }
 
 }

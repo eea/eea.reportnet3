@@ -1,5 +1,6 @@
 package org.eea.recordstore.docker;
 
+import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,7 @@ public class DockerClientBuilderBeanTest {
    */
   @Test
   public void testDockerClient() {
-    dockerClientBuilderBean.dockerClient();
+    assertNotNull("assertion error", dockerClientBuilderBean.dockerClient());
   }
 
 }

@@ -24,10 +24,12 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.NoArgsConstructor;
 
 /**
  * The Class ExcelReaderStrategy.
  */
+@NoArgsConstructor
 public class ExcelReaderStrategy implements ReaderStrategy {
 
   /** The file common. */
@@ -36,6 +38,9 @@ public class ExcelReaderStrategy implements ReaderStrategy {
   /** The dataset id. */
   private Long datasetId;
 
+  /** The field max length. */
+  private int fieldMaxLength;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
@@ -43,10 +48,13 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * Instantiates a new excel reader strategy.
    *
    * @param fileCommon the file common
+   * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
    */
-  public ExcelReaderStrategy(final FileCommonUtils fileCommon, Long datasetId) {
+  public ExcelReaderStrategy(final FileCommonUtils fileCommon, Long datasetId, int fieldMaxLength) {
     this.fileCommon = fileCommon;
     this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
   }
 
   /**
@@ -57,7 +65,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
@@ -169,12 +177,16 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       List<String> idSchema = new ArrayList<>();
 
       // Reads the same number of cells as headers we have
-
       for (int i = 0; i < headersSize; i++) {
+        String value = dataFormatter.formatCellValue(recordRow.getCell(i));
+        // Trim the string if it is too large
+        if (value.length() >= fieldMaxLength) {
+          value = value.substring(0, fieldMaxLength);
+        }
         FieldVO field = new FieldVO();
         field.setIdFieldSchema(headers.get(i).getId());
         field.setType(headers.get(i).getType());
-        field.setValue(dataFormatter.formatCellValue(recordRow.getCell(i)));
+        field.setValue(value);
         if (field.getIdFieldSchema() != null) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());

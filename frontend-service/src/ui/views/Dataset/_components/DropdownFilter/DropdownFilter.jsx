@@ -88,6 +88,9 @@ class DropdownFilter extends React.Component {
         };
       });
     }
+    if (this.props.hide) {
+      this.props.hide();
+    }
   }
 
   show(event) {

@@ -13,6 +13,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
- * 
+ *
  */
 @Component
 public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
@@ -41,6 +43,11 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
   /** The object mapper. */
   @Autowired
   private ObjectMapper objectMapper;
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -80,18 +87,18 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
 
 
     // Start Save Procces.
-    Map<String, Object> ElasticSearchDataMapper = objectMapper.convertValue(data, Map.class);
+    Map<String, Object> elasticSearchDataMapper = objectMapper.convertValue(data, Map.class);
 
     IndexRequest indexRequest =
-        new IndexRequest(INDEX, TYPE, data.getId()).source(ElasticSearchDataMapper);
+        new IndexRequest(INDEX, TYPE, data.getId()).source(elasticSearchDataMapper);
 
     IndexResponse indexResponse;
     try {
       indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
       new ResponseEntity(indexResponse.getResult().name(), HttpStatus.CREATED);
     } catch (IOException e) {
-      e.printStackTrace();
-    } ;
+      LOG_ERROR.error("Exception saving new data into indexsearch. Message: {}", e.getMessage(), e);
+    }
 
 
   }

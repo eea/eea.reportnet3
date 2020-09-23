@@ -1,5 +1,6 @@
 package org.eea.validation.io.notification.events;
 
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -48,25 +49,27 @@ public class ValidationFinishedEventTest {
         validationFinishedEvent.getEventType());
   }
 
-  @Test
-  public void getMapTest() throws EEAException {
-    Assert.assertEquals(6,
-        validationFinishedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
-            .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
-            .datasetType(DatasetTypeEnum.REPORTING).build()).size());
-  }
 
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(datasetVO.getDatasetTypeEnum()).thenReturn(DatasetTypeEnum.REPORTING);
+    Mockito.when(datasetVO.getDataflowId()).thenReturn(2L);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Mockito.when(dataSetControllerZuul.getDatasetType(Mockito.any()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
-    Assert.assertEquals(6, validationFinishedEvent
-        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
+
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Map<String, Object> result = validationFinishedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).build());
+    Assert.assertEquals(6, result.size());
+    Assert.assertEquals("user", result.get("user"));
+    Assert.assertEquals(1L, result.get("datasetId"));
+    Assert.assertEquals(2L, result.get("dataflowId"));
+    Assert.assertEquals("datasetName", result.get("datasetName"));
+    Assert.assertEquals("dataflowName", result.get("dataflowName"));
+    Assert.assertEquals(DatasetTypeEnum.REPORTING, result.get("type"));
   }
 }
+

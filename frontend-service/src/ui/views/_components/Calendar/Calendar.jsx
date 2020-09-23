@@ -12,6 +12,7 @@ export const Calendar = ({
   inline,
   inputClassName,
   inputId,
+  keepInvalid,
   key,
   maxDate,
   minDate,
@@ -22,6 +23,7 @@ export const Calendar = ({
   readOnlyInput,
   selectionMode,
   showWeek,
+  style,
   value,
   yearNavigator,
   yearRange
@@ -37,6 +39,7 @@ export const Calendar = ({
       inline={inline}
       inputClassName={inputClassName}
       inputId={inputId}
+      keepInvalid={keepInvalid}
       key={key}
       maxDate={maxDate}
       minDate={minDate}
@@ -47,6 +50,7 @@ export const Calendar = ({
       readOnlyInput={readOnlyInput}
       selectionMode={selectionMode}
       showWeek={showWeek}
+      style={style}
       value={value}
       yearNavigator={yearNavigator}
       yearRange={yearRange}

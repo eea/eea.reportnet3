@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -15,22 +14,35 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
+  //activeIndex,
   datasetId,
   datasetSchemas,
-  onChangeFields,
-  onChangeTableDescription,
-  onLoadTableData,
   isPreviewModeOn,
+  isValidationSelected,
+  manageDialogs,
+  manageUniqueConstraint,
+  onChangeFields,
+  onChangeTableProperties,
+  onLoadTableData,
+  recordPositionId,
+  selectedRecordErrorId,
+  setIsValidationSelected,
   table
 }) => {
+  const validationContext = useContext(ValidationContext);
+  const resources = useContext(ResourcesContext);
+
+  const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
@@ -41,10 +53,10 @@ export const FieldsDesigner = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [notEmpty, setNotEmpty] = useState(true);
+  const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
-
-  const resources = useContext(ResourcesContext);
 
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
@@ -53,14 +65,22 @@ export const FieldsDesigner = ({
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
+      setToPrefill(table.toPrefill || false);
+      table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
+      setFixedNumber(table.fixedNumber || false);
     }
   }, []);
 
   useEffect(() => {
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
-        fields.filter(field => field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK').length >
-          0
+        fields.filter(
+          field =>
+            field.type.toUpperCase() === 'CODELIST' ||
+            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
+            field.type.toUpperCase() === 'LINK' ||
+            field.type.toUpperCase() === 'ATTACHMENT'
+        ).length > 0
       );
     }
   }, [fields]);
@@ -69,29 +89,56 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
+          (field.type.toUpperCase() === 'CODELIST' ||
+            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
+            field.type.toUpperCase() === 'LINK' ||
+            field.type.toUpperCase() === 'ATTACHMENT') &&
+          field.fieldId !== fieldId
         );
       }).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'LINK'
+        selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
+        selectedField.fieldType.toUpperCase() === 'LINK' ||
+        selectedField.fieldType.toUpperCase() === 'ATTACHMENT'
     );
   };
 
-  const onFieldAdd = ({ codelistItems, description, fieldId, pk, name, recordId, referencedField, required, type }) => {
+  const onFieldAdd = ({
+    codelistItems,
+    description,
+    fieldId,
+    maxSize,
+    pk,
+    pkHasMultipleValues,
+    pkMustBeUsed,
+    name,
+    readOnly,
+    recordId,
+    referencedField,
+    required,
+    type,
+    validExtensions
+  }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
       description,
       fieldId,
+      maxSize,
       pk,
+      pkHasMultipleValues,
+      pkMustBeUsed,
       name,
+      readOnly,
       recordId,
       referencedField,
       required,
-      type
+      type,
+      validExtensions
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
+    // window.scrollTo(0, document.body.scrollHeight);
   };
 
   const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
@@ -105,23 +152,33 @@ export const FieldsDesigner = ({
     description,
     id,
     isLinkChange,
+    maxSize,
     pk,
+    pkHasMultipleValues,
+    pkMustBeUsed,
     name,
+    readOnly,
     referencedField,
     required,
-    type
+    type,
+    validExtensions
   }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
 
     if (fieldIndex > -1) {
-      inmFields[fieldIndex].name = name;
-      inmFields[fieldIndex].type = type;
-      inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
+      inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].maxSize = maxSize;
+      inmFields[fieldIndex].name = name;
+      inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].pkHasMultipleValues = pkHasMultipleValues;
+      inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
-      inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].readOnly = readOnly;
+      inmFields[fieldIndex].type = type;
+      inmFields[fieldIndex].validExtensions = validExtensions;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }
@@ -129,7 +186,38 @@ export const FieldsDesigner = ({
 
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
-    updateTableDesign(checked);
+    if (checked) {
+      setToPrefill(true);
+    }
+    updateTableDesign({
+      readOnly: checked,
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber,
+      notEmpty
+    });
+  };
+
+  const onChangeToPrefill = checked => {
+    setToPrefill(checked);
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber, notEmpty });
+  };
+
+  const onChangeFixedNumber = checked => {
+    setFixedNumber(checked);
+    if (checked) {
+      setToPrefill(true);
+    }
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber: checked,
+      notEmpty
+    });
+  };
+
+  const onChangeNotEmpty = checked => {
+    setNotEmpty(checked);
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -214,12 +302,17 @@ export const FieldsDesigner = ({
             codelistItems: field.codelistItems,
             description: field.description,
             field: field['fieldId'],
-            header: `${capitalize(field['name'])}`,
+            header: field['name'],
+            pk: field['pk'],
+            maxSize: field['maxSize'],
+            pkHasMultipleValues: field['pkHasMultipleValues'],
+            readOnly: field['readOnly'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
             table: table['tableSchemaName'],
-            type: field['type']
+            type: field['type'],
+            validExtensions: field['validExtensions']
           };
         })
       : [];
@@ -229,11 +322,16 @@ export const FieldsDesigner = ({
         <DataViewer
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
-          isWebFormMMR={false}
+          isExportable={true}
+          isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
+          recordPositionId={recordPositionId}
+          reporting={false}
+          selectedRecordErrorId={selectedRecordErrorId}
+          setIsValidationSelected={setIsValidationSelected}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
           tableName={table.tableSchemaName}
@@ -275,14 +373,16 @@ export const FieldsDesigner = ({
 
   const renderErrors = (errorTitle, error) => {
     return (
-      <Dialog
-        footer={errorDialogFooter}
-        header={errorTitle}
-        modal={true}
-        onHide={() => setIsErrorDialogVisible(false)}
-        visible={isErrorDialogVisible}>
-        <div className="p-grid p-fluid">{error}</div>
-      </Dialog>
+      isErrorDialogVisible && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={errorTitle}
+          modal={true}
+          onHide={() => setIsErrorDialogVisible(false)}
+          visible={isErrorDialogVisible}>
+          <div className="p-grid p-fluid">{error}</div>
+        </Dialog>
+      )
     );
   };
 
@@ -294,9 +394,13 @@ export const FieldsDesigner = ({
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
           datasetId={datasetId}
+          fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
           fieldLink={null}
+          fieldHasMultipleValues={false}
+          fieldMustBeUsed={false}
+          fieldReadOnly={false}
           fieldRequired={false}
           fieldType=""
           fieldValue=""
@@ -328,11 +432,15 @@ export const FieldsDesigner = ({
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 fieldDescription={field.description}
+                fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
+                fieldHasMultipleValues={field.pkHasMultipleValues}
+                fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
+                fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
@@ -387,21 +495,21 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async readOnly => {
-    // if (isUndefined(tableDescriptionValue)) {
-    //   return;
-    // }
+  const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
+        toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
         readOnly,
-        datasetId
+        datasetId,
+        notEmpty,
+        fixedNumber
       );
       if (!tableUpdated) {
         console.error('Error during table description update');
       } else {
-        onChangeTableDescription(table.tableSchemaId, tableDescriptionValue);
+        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
       }
     } catch (error) {
       console.error(`Error during table description update: ${error}`);
@@ -409,16 +517,17 @@ export const FieldsDesigner = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.switchDivInput}>
         <InputTextarea
           className={styles.tableDescriptionInput}
-          collapsedHeight={40}
+          collapsedHeight={55}
           expandableOnClick={true}
+          id="tableDescription"
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign(isReadOnlyTable)}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -427,23 +536,108 @@ export const FieldsDesigner = ({
           // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
-        <div className={styles.switchDiv}>
-          <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
-          <Checkbox
-            checked={isReadOnlyTable}
-            // className={styles.checkRequired}
-            inputId={`${table.tableId}_check`}
-            label="Default"
-            onChange={e => onChangeIsReadOnly(e.checked)}
-            style={{ width: '70px' }}
+        <div className={styles.constraintsButtons}>
+          <Button
+            className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+            icon={'key'}
+            label={resources.messages['addUniqueConstraint']}
+            onClick={() => {
+              manageDialogs('isManageUniqueConstraintDialogVisible', true);
+              manageUniqueConstraint({
+                isTableCreationMode: true,
+                tableSchemaId: table.tableSchemaId,
+                tableSchemaName: table.tableSchemaName
+              });
+            }}
           />
+
+          <Button
+            className="p-button-secondary p-button-animated-blink datasetSchema-rowConstraint-help-step"
+            icon={'horizontalSliders'}
+            label={resources.messages['addRowConstraint']}
+            onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
+          />
+        </div>
+        <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
+            <Checkbox
+              checked={isReadOnlyTable}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_readOnly`}
+              inputId={`${table.tableSchemaId}_check_readOnly`}
+              label="Default"
+              onChange={e => onChangeIsReadOnly(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_readOnly`} className="srOnly">
+              {resources.messages['readOnlyTable']}
+            </label>
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
+            <Checkbox
+              checked={toPrefill || fixedNumber}
+              disabled={isReadOnlyTable || fixedNumber}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_to_prefill`}
+              inputId={`${table.tableSchemaId}_check_to_prefill`}
+              label="Default"
+              onChange={e => onChangeToPrefill(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
+              {resources.messages['prefilled']}
+            </label>
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['fixedNumber']}</span>
+            <Checkbox
+              checked={fixedNumber}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_fixed_number`}
+              inputId={`${table.tableSchemaId}_check_fixed_number`}
+              label="Default"
+              onChange={e => onChangeFixedNumber(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_fixed_number`} className="srOnly">
+              {resources.messages['fixedNumber']}
+            </label>
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['notEmpty']}</span>
+            <Checkbox
+              checked={notEmpty}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_not_empty`}
+              inputId={`${table.tableSchemaId}_check_not_empty`}
+              label="Default"
+              onChange={e => onChangeNotEmpty(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_not_empty`} className="srOnly">
+              {resources.messages['notEmpty']}
+            </label>
+          </div>
         </div>
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
-          <label></label>
-          <label>{resources.messages['required']}</label>
-          <label>{resources.messages['pk']}</label>
+          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
+          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
+          <span className={styles.PKWrap}>
+            <label>{resources.messages['pk']}</label>
+            <Button
+              className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
+              icon="infoCircle"
+              id="infoPk"
+              title={resources.messages['PKTooltip']}
+              tooltip={resources.messages['PKTooltip']}
+              tooltipOptions={{ position: 'top' }}
+            />
+          </span>
+
           <label>{resources.messages['newFieldPlaceHolder']}</label>
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>
@@ -452,7 +646,7 @@ export const FieldsDesigner = ({
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
-    </React.Fragment>
+    </Fragment>
   );
 };
 FieldsDesigner.propTypes = {};

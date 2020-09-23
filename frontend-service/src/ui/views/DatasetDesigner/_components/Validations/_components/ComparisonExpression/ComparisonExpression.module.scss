@@ -1,0 +1,77 @@
+.expression {
+  display: flex;
+  --unionWidth: 80px;
+  --operatorsWidth: 130px;
+  --fieldsGap: 0.5rem;
+  list-style: none !important;
+  :global .p-dropdown {
+    padding-bottom: 2px;
+  }
+  .group {
+    display: flex;
+    align-self: baseline;
+    align-items: center;
+    margin-right: 1rem;
+    :global .p-checkbox {
+      width: 33px !important;
+      height: 33px !important;
+    }
+    :global .p-checkbox-box {
+      width: 33px !important;
+      height: 33px !important;
+      :global .p-checkbox-icon {
+        font-size: 27px;
+      }
+    }
+  }
+  .union {
+    width: var(--unionWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .operatorType {
+    width: var(--operatorsWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .operatorValue {
+    width: var(--operatorsWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .expressionValue {
+    flex: 1 auto;
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  > span {
+    margin-right: var(--fieldsGap);
+  }
+
+  .deleteButtonWrap {
+    margin-right: 0 auto;
+  }
+
+  .deleteButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    box-shadow: 0 0 0 0em var(--blue-120) !important;
+    color: var(--errors) !important;
+    margin: 0 !important;
+  }
+}
+
+.inputStringMatch {
+  display: flex;
+  align-items: flex-start;
+  width: 15rem;
+  .ccButton {
+    margin: 0 !important;
+    margin-left: 0.4rem !important;
+    border: 1px solid var(--c-custom-gray) !important;
+    padding: 0.37rem 0.45rem;
+  }
+}

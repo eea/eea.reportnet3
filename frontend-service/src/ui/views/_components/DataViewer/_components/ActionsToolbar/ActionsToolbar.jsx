@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
-import { isUndefined, isNull, capitalize } from 'lodash';
+
+import capitalize from 'lodash/capitalize';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { config } from 'conf';
 
-import styles from './ActionsToolbar.module.css';
+import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -22,27 +25,28 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 const ActionsToolbar = ({
   colsSchema,
-  datasetId,
   dataflowId,
+  datasetId,
   hasWritePermissions,
-  isTableDeleted,
+  hideValidationFilter,
+  isExportable,
   isFilterValidationsActive,
   isLoading,
+  isTableDeleted,
   isValidationSelected,
-  isWebFormMMR,
   levelErrorTypesWithCorrects,
-  onRefresh,
-  setColumns,
   onSetVisible,
+  onUpdateData,
   originalColumns,
   records,
+  setColumns,
   setDeleteDialogVisible,
-  setImportDialogVisible,
+  setImportTableDialogVisible,
   showValidationFilter,
+  showWriteButtons,
   tableHasErrors,
   tableId,
-  tableName,
-  tableReadOnly
+  tableName
 }) => {
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
@@ -92,6 +96,12 @@ const ActionsToolbar = ({
       DownloadFile(exportTableData, exportTableDataName);
     }
   }, [exportTableData]);
+
+  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
+    label: type.text,
+    icon: config.icons['archive'],
+    command: () => onExportTableData(type.code)
+  }));
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -162,60 +172,59 @@ const ActionsToolbar = ({
   };
 
   return (
-    <Toolbar className={styles.actionsToolbar}>
+    <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
       <div className="p-toolbar-group-left">
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
-          }`}
-          disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
-          icon={'export'}
-          label={resources.messages['import']}
-          onClick={() => setImportDialogVisible(true)}
-        />
-
-        <Button
-          id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions ? null : 'p-button-animated-blink'
-          }`}
-          disabled={!hasWritePermissions}
-          icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
-          label={resources.messages['exportTable']}
-          onClick={event => {
-            exportMenuRef.current.show(event);
-          }}
-        />
+        {(hasWritePermissions || showWriteButtons) && (
+          <Button
+            className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
+              !hasWritePermissions ? null : 'p-button-animated-blink'
+            }`}
+            disabled={!hasWritePermissions}
+            icon={'import'}
+            label={resources.messages['importTable']}
+            onClick={() => setImportTableDialogVisible(true)}
+          />
+        )}
+        {isExportable && (
+          <Button
+            id="buttonExportTable"
+            className="p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step p-button-animated-blink"
+            icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+            label={resources.messages['exportTable']}
+            onClick={event => {
+              onUpdateData();
+              exportMenuRef.current.show(event);
+            }}
+          />
+        )}
         <Menu
-          model={config.exportTypes.map(type => ({
-            label: type.text,
-            icon: config.icons['archive'],
-            command: () => onExportTableData(type.code)
-          }))}
+          className={styles.menu}
+          id="exportTableMenu"
+          model={exportExtensionItems}
+          onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
-          id="exportTableMenu"
-          onShow={e => getExportButtonPosition(e)}
         />
 
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
-              ? null
-              : 'p-button-animated-blink'
-          }`}
-          disabled={
-            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
-          }
-          icon={'trash'}
-          label={resources.messages['deleteTable']}
-          onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-        />
+        {(hasWritePermissions || showWriteButtons) && (
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
+              !hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted
+                ? null
+                : 'p-button-animated-blink'
+            }`}
+            disabled={!hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted}
+            icon={'trash'}
+            label={resources.messages['deleteTable']}
+            onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+          />
+        )}
 
         <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-showColumn-help-step`}
           disabled={false}
-          icon={filter.visibilityColumnIcon}
+          icon={'eye'}
+          iconClasses={filter.visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
           label={resources.messages['showHideColumns']}
           onClick={event => {
             dropdownFilterRef.current.show(event);
@@ -234,16 +243,14 @@ const ActionsToolbar = ({
         />
 
         <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
+          className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
             tableHasErrors ? 'p-button-animated-blink' : null
           }`}
           disabled={!tableHasErrors}
-          icon="filter"
-          iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
+          icon={'filter'}
+          iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
           label={resources.messages['validationFilter']}
-          onClick={event => {
-            filterMenuRef.current.show(event);
-          }}
+          onClick={event => filterMenuRef.current.show(event)}
         />
         <DropdownFilter
           className={!isLoading ? 'p-button-animated-blink' : null}
@@ -251,6 +258,7 @@ const ActionsToolbar = ({
           filters={filter.validationDropdown}
           popup={true}
           ref={filterMenuRef}
+          hide={hideValidationFilter}
           id="filterValidationDropdown"
           showFilters={showValidationFilter}
           onShow={e => {
@@ -280,7 +288,7 @@ const ActionsToolbar = ({
           onClick={() => {}
           /> */}
       </div>
-      <div className="p-toolbar-group-right">
+      {/* <div className="p-toolbar-group-right">
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
             isLoading ? 'p-button-animated-spin' : ''
@@ -289,7 +297,7 @@ const ActionsToolbar = ({
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
         />
-      </div>
+      </div> */}
     </Toolbar>
   );
 };

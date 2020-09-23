@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import { isNull } from 'lodash';
-import uuid from 'uuid';
 
 import './Dropdown.scss';
 
@@ -564,6 +563,7 @@ export class Dropdown extends Component {
       <div className="p-hidden-accessible p-dropdown-hidden-select">
         <select
           aria-hidden="true"
+          id={this.props.name}
           name={this.props.name}
           ref={el => (this.nativeSelect = el)}
           required={this.props.required}
@@ -571,6 +571,9 @@ export class Dropdown extends Component {
           {placeHolderOption}
           {option}
         </select>
+        <label htmlFor={this.props.name} className="srOnly">
+          {this.props.name}
+        </label>
       </div>
     );
   }
@@ -593,7 +596,7 @@ export class Dropdown extends Component {
           tabIndex={this.props.tabIndex}
           type="text"
         />
-        <label htmlFor={this.props.inputId}>{this.props.label}</label>
+        <label htmlFor={this.props.inputId}>{this.props.ariaLabel}</label>
       </div>
     );
   }

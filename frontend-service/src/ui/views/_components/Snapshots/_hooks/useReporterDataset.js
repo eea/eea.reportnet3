@@ -18,6 +18,8 @@ const useReporterDataset = (datasetId, dataflowId) => {
     createdAt: '',
     description: '',
     dialogMessage: '',
+    dialogConfirmMessage: '',
+    dialogConfirmQuestion: '',
     dataflowId,
     datasetId,
     snapShotId: '',
@@ -96,7 +98,6 @@ const useReporterDataset = (datasetId, dataflowId) => {
   const onRestoreSnapshot = async () => {
     try {
       await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
-      snapshotDispatch({ type: 'mark_as_restored', payload: {} });
     } catch (error) {
       notificationContext.add({
         type: 'RESTORED_BY_ID_REPORTER_ERROR',

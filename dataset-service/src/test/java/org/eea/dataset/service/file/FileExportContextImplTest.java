@@ -1,6 +1,7 @@
 package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
@@ -40,7 +41,8 @@ public class FileExportContextImplTest {
    */
   @Test
   public void testFileExportContextImpl() {
-    new FileExportContextImpl(writerStrategy);
+    FileExportContextImpl fileExportContextImpl = new FileExportContextImpl(writerStrategy);
+    assertNotNull("fail", fileExportContextImpl);
   }
 
   /**
@@ -52,9 +54,10 @@ public class FileExportContextImplTest {
   @Test
   public void testFileWriter() throws IOException, EEAException {
     byte[] expectedResult = "".getBytes();
-    Mockito.when(writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(
+        writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
         .thenReturn(expectedResult);
-    assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, ""));
+    assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, "", true));
   }
 
 }

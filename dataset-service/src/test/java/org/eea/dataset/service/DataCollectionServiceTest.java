@@ -12,7 +12,9 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataCollectionMapper;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.impl.DataCollectionServiceImpl;
@@ -20,14 +22,17 @@ import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.junit.Assert;
@@ -84,9 +89,9 @@ public class DataCollectionServiceTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The metabase data source. */
   @Mock
@@ -111,6 +116,14 @@ public class DataCollectionServiceTest {
   /** The foreign relations repository. */
   @Mock
   private ForeignRelationsRepository foreignRelationsRepository;
+
+  /** The rules controller zuul. */
+  @Mock
+  private RulesControllerZuul rulesControllerZuul;
+
+  /** The design dataset repository. */
+  @Mock
+  private DesignDatasetRepository designDatasetRepository;
 
   /**
    * Inits the mocks.
@@ -267,8 +280,10 @@ public class DataCollectionServiceTest {
   @Test
   public void createEmptyDataCollectionTest() throws SQLException {
     List<DesignDatasetVO> designs = new ArrayList<>();
+    List<DesignDataset> designsValue = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     List<DataProviderVO> dataProviders = new ArrayList<>();
+    DesignDataset designDataset = new DesignDataset();
     DesignDatasetVO design = new DesignDatasetVO();
     RepresentativeVO representative = new RepresentativeVO();
     DataProviderVO dataProvider = new DataProviderVO();
@@ -283,6 +298,7 @@ public class DataCollectionServiceTest {
     designs.add(design);
     representatives.add(representative);
     dataProviders.add(dataProvider);
+    designsValue.add(designDataset);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
@@ -299,12 +315,17 @@ public class DataCollectionServiceTest {
     Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
     Mockito.doNothing().when(userManagementControllerZuul)
         .addContributorsToResources(Mockito.any());
-    Mockito.doNothing().when(recordStoreControllerZull).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(designsValue);
+    Mockito.when(resourceManagementControllerZuul.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
+        .thenReturn(new RulesSchemaVO());
+    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
     dataCollectionService.createEmptyDataCollection(1L, new Date());
-    Mockito.verify(recordStoreControllerZull, times(1)).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
   }
 

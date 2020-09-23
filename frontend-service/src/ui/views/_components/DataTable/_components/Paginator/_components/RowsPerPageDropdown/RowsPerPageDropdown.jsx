@@ -22,7 +22,13 @@ export class RowsPerPageDropdown extends Component {
       });
 
       return (
-        <Dropdown appendTo={document.body} value={this.props.value} options={options} onChange={this.props.onChange} />
+        <Dropdown
+          appendTo={document.body}
+          ariaLabel={'rowsPerPage'}
+          onChange={this.props.onChange}
+          options={options}
+          value={this.props.value}
+        />
       );
     } else {
       return null;

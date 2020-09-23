@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 
@@ -8,10 +8,14 @@ import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
 
+import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
+
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
 
 import { UserService } from 'core/services/User';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
@@ -23,7 +27,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history }) => {
+const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -32,6 +36,60 @@ const Header = withRouter(({ history }) => {
   const avatarImage = useRef();
 
   const [confirmvisible, setConfirmVisible] = useState(false);
+
+  const [globanElementStyle, setGlobanElementStyle] = useState({
+    marginTop: 0,
+    transition: '0.5s'
+  });
+  const [euHeaderElementStyle, setEuHeaderElementStyle] = useState({
+    marginTop: 0,
+    transition: '0.5s'
+  });
+  const [headerElementStyle, setHeaderElementStyle] = useState({});
+  useEffect(() => {
+    window.onscroll = () => {
+      const innerWidth = window.innerWidth;
+      const currentScrollPos = window.pageYOffset;
+
+      if (innerWidth > 768) {
+        if (currentScrollPos === 0) {
+          setGlobanElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '180px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '180px',
+            transition: '0.5s'
+          });
+        } else {
+          setGlobanElementStyle({
+            marginTop: '-100px',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '-15px',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '70px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '70px',
+            transition: '0.5s'
+          });
+        }
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
@@ -48,8 +106,8 @@ const Header = withRouter(({ history }) => {
         e.preventDefault();
         history.push(getUrl(routes.DATAFLOWS));
       }}>
-      <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
-      <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
+      <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
+      {isPublic && <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>}
     </a>
   );
 
@@ -67,7 +125,7 @@ const Header = withRouter(({ history }) => {
     </div>
   );
 
-  const themeSwitcher = isLocalEnvironment() && (
+  const themeSwitcher = isLocalEnvironment() && !isPublic && (
     <InputSwitch
       checked={themeContext.currentTheme === 'dark'}
       onChange={e => {
@@ -108,10 +166,13 @@ const Header = withRouter(({ history }) => {
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        ref={avatarImage}
-        icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
-        src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
+        alt="User avatar"
         className={styles.userAvatar}
+        icon={
+          <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
+        }
+        ref={avatarImage}
+        src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />
       {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>{userContext.preferredUsername}</span>
@@ -119,15 +180,13 @@ const Header = withRouter(({ history }) => {
   );
 
   const logout = (
-    <div className={styles.logoutWrapper}>
-      <FontAwesomeIcon
-        className={styles.logoutButton}
-        onClick={async e => {
-          e.preventDefault();
-          userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
-        }}
-        icon={AwesomeIcons('logout')}
-      />
+    <div
+      className={styles.logoutWrapper}
+      onClick={async e => {
+        e.preventDefault();
+        userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
+      }}>
+      <FontAwesomeIcon aria-hidden={false} className={styles.logoutButton} icon={AwesomeIcons('logout')} />
     </div>
   );
 
@@ -139,8 +198,24 @@ const Header = withRouter(({ history }) => {
         {userProfileSettingsButton}
       </div>
 
-      <div className={styles.logoutWrapper}>{logout}</div>
+      <div className={styles.logoutBtnContainer}>{logout}</div>
     </>
+  );
+
+  const loadLogin = () => (
+    <div className={styles.loginWrapper}>
+      <Button
+        className="p-button-primary"
+        label={resources.messages.login}
+        style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
+        onClick={() => {
+          if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
+            window.location.href = AccessPointWebConfig.euloginUrl;
+          } else {
+            history.push(getUrl(routes.LOGIN));
+          }
+        }}></Button>
+    </div>
   );
 
   const onLoadImage = () => {
@@ -154,24 +229,30 @@ const Header = withRouter(({ history }) => {
   };
 
   return (
-    <div id="header" className={styles.header}>
-      {loadTitle()}
-      <BreadCrumb />
-      {loadUser()}
-      {userContext.userProps.showLogoutConfirmation && (
-        <ConfirmDialog
-          onConfirm={() => {
-            userLogout();
-          }}
-          onHide={() => setConfirmVisible(false)}
-          visible={confirmvisible}
-          header={resources.messages['logout']}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['userLogout']}
-        </ConfirmDialog>
-      )}
-    </div>
+    <Fragment>
+      <div id="header" style={headerElementStyle} className={styles.header}>
+        <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
+        <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
+          {loadTitle()}
+          {!isPublic && <BreadCrumb />}
+          {!isPublic && loadUser()}
+          {isPublic && loadLogin()}
+          {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
+            <ConfirmDialog
+              onConfirm={() => {
+                userLogout();
+              }}
+              onHide={() => setConfirmVisible(false)}
+              visible={confirmvisible}
+              header={resources.messages['logout']}
+              labelConfirm={resources.messages['yes']}
+              labelCancel={resources.messages['no']}>
+              {resources.messages['userLogout']}
+            </ConfirmDialog>
+          )}
+        </div>
+      </div>
+    </Fragment>
   );
 });
 export { Header };

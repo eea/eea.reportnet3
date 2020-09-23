@@ -1,13 +1,10 @@
 package org.eea.interfaces.controller.rod;
 
-import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -35,7 +32,7 @@ public interface ObligationController {
    *
    * @return the list
    */
-  @RequestMapping(value = "/findOpened", method = RequestMethod.GET)
+  @GetMapping(value = "/findOpened")
   List<ObligationVO> findOpenedObligations(
       @RequestParam(value = "clientId", required = false) Integer clientId,
       @RequestParam(value = "spatialId", required = false) Integer spatialId,
@@ -50,6 +47,6 @@ public interface ObligationController {
    *
    * @return the obligation vo
    */
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+  @GetMapping(value = "/{id}")
   ObligationVO findObligationById(@PathVariable(value = "id") Integer id);
 }

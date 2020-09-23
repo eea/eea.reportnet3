@@ -1,4 +1,29 @@
 {
+  "operatorByType": {
+    "CODELIST": ["LEN", "string"],
+    "DATE": ["date", "day", "month", "year"],
+    "EMAIL": ["LEN", "string"],
+    "LINK": ["LEN", "string"],
+    "RICH_TEXT": ["LEN", "string"],
+    "MULTISELECT_CODELIST": ["LEN", "string"],
+    "NUMBER_DECIMAL": ["number"],
+    "NUMBER_INTEGER": ["number"],
+    "PHONE": ["LEN", "string"],
+    "TEXT": ["LEN", "string"],
+    "URL": ["LEN", "string"]
+  },
+  "fieldByOperatorType": {
+    "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
+    "LEN": ["NUMBER_INTEGER"],
+    "string": ["EMAIL", "TEXT", "PHONE", "URL", "CODELIST"],
+    "stringMatch": ["TEXT"],
+    "numberMatch": ["TEXT"],
+    "date": ["DATE"],
+    "month": ["DATE", "NUMBER_INTEGER"],
+    "year": ["DATE", "NUMBER_INTEGER"],
+    "day": ["DATE", "NUMBER_INTEGER"]
+  },
+
   "operatorTypes": {
     "number": {
       "option": { "label": "Number", "value": "number" },
@@ -8,7 +33,8 @@
         { "label": ">=", "value": ">=" },
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
+        { "label": "!=", "value": "!=" },
+        { "label": "MATCH", "value": "MATCH" }
       ]
     },
     "LEN": {
@@ -40,67 +66,725 @@
         { "label": "=", "value": "=" },
         { "label": "!=", "value": "!=" }
       ]
+    },
+    "year": {
+      "option": { "label": "Year (Date)", "value": "year" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "month": {
+      "option": { "label": "Month (Date)", "value": "month" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "day": {
+      "option": { "label": "Day (Date)", "value": "day" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
     }
   },
   "nonNumericOperators": ["string", "date"],
   "operatorEquivalences": {
-    "default": {
-      ">": "GT",
-      "<": "LT",
-      ">=": "GTEQ",
-      "<=": "LTEQ",
-      "=": "EQ",
-      "!=": "DIST",
-      "GT": "GT",
-      "LT": "LT",
-      "LTEQ": "LTEQ",
-      "EQ": "EQ",
-      "DIST": "DIST",
-      "SEQ": "SEQ",
-      "=(Ignore case)": "SEQIC",
-      "GTEQ": "GTEQ",
-      "LEN=": "LEN=",
-      "MATCH": "MATCH"
+    "logicalOperators": {
+      "AND": "FIELD_AND",
+      "OR": "FIELD_OR"
+    },
+    "number": {
+      ">": "FIELD_GT",
+      "<": "FIELD_LT",
+      ">=": "FIELD_GTEQ",
+      "<=": "FIELD_LTEQ",
+      "=": "FIELD_EQ",
+      "!=": "FIELD_DIST",
+      "MATCH": "FIELD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "FIELD_LEN",
+      ">": "FIELD_GT",
+      "<": "FIELD_LT",
+      ">=": "FIELD_GTEQ",
+      "<=": "FIELD_LTEQ",
+      "=": "FIELD_EQ",
+      "!=": "FIELD_DIST"
     },
     "string": {
-      "=": "SEQ",
-      "=(Ignore case)": "SEQIC",
-      "MATCH": "MATCH"
+      "=": "FIELD_SEQ",
+      "=(Ignore case)": "FIELD_SEQIC",
+      "MATCH": "FIELD_MATCH"
     },
     "date": {
-      ">": "GT_DATE",
-      "<": "LT_DATE",
-      ">=": "GTEQ_DATE",
-      "<=": "LTEQ_DATE",
-      "=": "EQ_DATE",
-      "!=": "DIST_DATE"
+      ">": "FIELD_GT_DATE",
+      "<": "FIELD_LT_DATE",
+      ">=": "FIELD_GTEQ_DATE",
+      "<=": "FIELD_LTEQ_DATE",
+      "=": "FIELD_EQ_DATE",
+      "!=": "FIELD_DIST_DATE"
+    },
+    "day": {
+      ">": "FIELD_GT_DAY",
+      "<": "FIELD_LT_DAY",
+      ">=": "FIELD_GTEQ_DAY",
+      "<=": "FIELD_LTEQ_DAY",
+      "=": "FIELD_EQ_DAY",
+      "!=": "FIELD_DIST_DAY"
+    },
+    "month": {
+      ">": "FIELD_GT_MONTH",
+      "<": "FIELD_LT_MONTH",
+      ">=": "FIELD_GTEQ_MONTH",
+      "<=": "FIELD_LTEQ_MONTH",
+      "=": "FIELD_EQ_MONTH",
+      "!=": "FIELD_DIST_MONTH"
+    },
+    "year": {
+      ">": "FIELD_GT_YEAR",
+      "<": "FIELD_LT_YEAR",
+      ">=": "FIELD_GTEQ_YEAR",
+      "<=": "FIELD_LTEQ_YEAR",
+      "=": "FIELD_EQ_YEAR",
+      "!=": "FIELD_DIST_YEAR"
     }
   },
-  "operatorsTypesFromDTO": [
+  "comparisonOperatorEquivalences": {
+    "logicalOperators": {
+      "AND": "RECORD_AND",
+      "OR": "RECORD_OR"
+    },
+    "number": {
+      ">": "RECORD_GT_RECORD",
+      "<": "RECORD_LT_RECORD",
+      ">=": "RECORD_GTEQ_RECORD",
+      "<=": "RECORD_LTEQ_RECORD",
+      "=": "RECORD_EQ_RECORD",
+      "!=": "RECORD_DIST_RECORD",
+      "MATCH": "RECORD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "RECORD_LEN",
+      ">": "RECORD_LEN_GT_RECORD",
+      "<": "RECORD_LEN_LT_RECORD",
+      ">=": "RECORD_LEN_GTEQ_RECORD",
+      "<=": "RECORD_LEN_LTEQ_RECORD",
+      "=": "RECORD_LEN_EQ_RECORD",
+      "!=": "RECORD_LEN_DIST_RECORD"
+    },
+    "string": {
+      "=": "RECORD_SEQ_RECORD",
+      "=(Ignore case)": "RECORD_SEQIC_RECORD",
+      "MATCH": "RECORD_MATCH_RECORD"
+    },
+    "date": {
+      ">": "RECORD_GT_DATE_RECORD",
+      "<": "RECORD_LT_DATE_RECORD",
+      ">=": "RECORD_GTEQ_DATE_RECORD",
+      "<=": "RECORD_LTEQ_DATE_RECORD",
+      "=": "RECORD_EQ_DATE_RECORD",
+      "!=": "RECORD_DIST_DATE_RECORD"
+    },
+    "day": {
+      ">": "RECORD_GT_DAY_RECORD",
+      "<": "RECORD_LT_DAY_RECORD",
+      ">=": "RECORD_GTEQ_DAY_RECORD",
+      "<=": "RECORD_LTEQ_DAY_RECORD",
+      "=": "RECORD_EQ_DAY_RECORD",
+      "!=": "RECORD_DIST_DAY_RECORD"
+    },
+    "month": {
+      ">": "RECORD_GT_MONTH_RECORD",
+      "<": "RECORD_LT_MONTH_RECORD",
+      ">=": "RECORD_GTEQ_MONTH_RECORD",
+      "<=": "RECORD_LTEQ_MONTH_RECORD",
+      "=": "RECORD_EQ_MONTH_RECORD",
+      "!=": "RECORD_DIST_MONTH_RECORD"
+    },
+    "year": {
+      ">": "RECORD_GT_YEAR_RECORD",
+      "<": "RECORD_LT_YEAR_RECORD",
+      ">=": "RECORD_GTEQ_YEAR_RECORD",
+      "<=": "RECORD_LTEQ_YEAR_RECORD",
+      "=": "RECORD_EQ_YEAR_RECORD",
+      "!=": "RECORD_DIST_YEAR_RECORD"
+    },
+    "dayNumber": {
+      ">": "RECORD_GT_DAY_RECORD_NUMBER",
+      "<": "RECORD_LT_DAY_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_DAY_RECORD_NUMBER",
+      "=": "RECORD_EQ_DAY_RECORD_NUMBER",
+      "!=": "RECORD_DIST_DAY_RECORD_NUMBER"
+    },
+    "monthNumber": {
+      ">": "RECORD_GT_MONTH_RECORD_NUMBER",
+      "<": "RECORD_LT_MONTH_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_MONTH_RECORD_NUMBER",
+      "=": "RECORD_EQ_MONTH_RECORD_NUMBER",
+      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER"
+    },
+    "yearNumber": {
+      ">": "RECORD_GT_YEAR_RECORD_NUMBER",
+      "<": "RECORD_LT_YEAR_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_YEAR_RECORD_NUMBER",
+      "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
+      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
+    }
+  },
+  "comparisonValuesOperatorEquivalences": {
+    "logicalOperators": {
+      "AND": "RECORD_AND",
+      "OR": "RECORD_OR"
+    },
+    "number": {
+      ">": "RECORD_GT",
+      "<": "RECORD_LT",
+      ">=": "RECORD_GTEQ",
+      "<=": "RECORD_LTEQ",
+      "=": "RECORD_EQ",
+      "!=": "RECORD_DIST",
+      "MATCH": "RECORD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "RECORD_LEN",
+      ">": "RECORD_LEN_GT",
+      "<": "RECORD_LEN_LT",
+      ">=": "RECORD_LEN_GTEQ",
+      "<=": "RECORD_LEN_LTEQ",
+      "=": "RECORD_LEN_EQ",
+      "!=": "RECORD_LEN_DIST"
+    },
+    "string": {
+      "=": "RECORD_SEQ",
+      "=(Ignore case)": "RECORD_SEQIC",
+      "MATCH": "RECORD_MATCH"
+    },
+    "date": {
+      ">": "RECORD_GT_DATE",
+      "<": "RECORD_LT_DATE",
+      ">=": "RECORD_GTEQ_DATE",
+      "<=": "RECORD_LTEQ_DATE",
+      "=": "RECORD_EQ_DATE",
+      "!=": "RECORD_DIST_DATE"
+    },
+    "day": {
+      ">": "RECORD_GT_DAY",
+      "<": "RECORD_LT_DAY",
+      ">=": "RECORD_GTEQ_DAY",
+      "<=": "RECORD_LTEQ_DAY",
+      "=": "RECORD_EQ_DAY",
+      "!=": "RECORD_DIST_DAY"
+    },
+    "month": {
+      ">": "RECORD_GT_MONTH",
+      "<": "RECORD_LT_MONTH",
+      ">=": "RECORD_GTEQ_MONTH",
+      "<=": "RECORD_LTEQ_MONTH",
+      "=": "RECORD_EQ_MONTH",
+      "!=": "RECORD_DIST_MONTH"
+    },
+    "year": {
+      ">": "RECORD_GT_YEAR",
+      "<": "RECORD_LT_YEAR",
+      ">=": "RECORD_GTEQ_YEAR",
+      "<=": "RECORD_LTEQ_YEAR",
+      "=": "RECORD_EQ_YEAR",
+      "!=": "RECORD_DIST_YEAR"
+    },
+    "dayNumber": {
+      ">": "RECORD_GT_DAY_NUMBER",
+      "<": "RECORD_LT_DAY_NUMBER",
+      ">=": "RECORD_GTEQ_DAY_NUMBER",
+      "<=": "RECORD_LTEQ_DAY_NUMBER",
+      "=": "RECORD_EQ_DAY_NUMBER",
+      "!=": "RECORD_DIST_DAY_NUMBER"
+    },
+    "monthNumber": {
+      ">": "RECORD_GT_MONTH_NUMBER",
+      "<": "RECORD_LT_MONTH_NUMBER",
+      ">=": "RECORD_GTEQ_MONTH_NUMBER",
+      "<=": "RECORD_LTEQ_MONTH_NUMBER",
+      "=": "RECORD_EQ_MONTH_NUMBER",
+      "!=": "RECORD_DIST_MONTH_NUMBER"
+    },
+    "yearNumber": {
+      ">": "RECORD_GT_YEAR_NUMBER",
+      "<": "RECORD_LT_YEAR_NUMBER",
+      ">=": "RECORD_GTEQ_YEAR_NUMBER",
+      "<=": "RECORD_LTEQ_YEAR_NUMBER",
+      "=": "RECORD_EQ_YEAR_NUMBER",
+      "!=": "RECORD_DIST_YEAR_NUMBER"
+    }
+  },
+  "ifThenOperatorEquivalences": {
+    "logicalOperators": {
+      "AND": "RECORD_AND",
+      "OR": "RECORD_OR"
+    },
+
+    "number": {
+      ">": "RECORD_GT",
+      "<": "RECORD_LT",
+      ">=": "RECORD_GTEQ",
+      "<=": "RECORD_LTEQ",
+      "=": "RECORD_EQ",
+      "!=": "RECORD_DIST",
+      "MATCH": "RECORD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "RECORD_LEN",
+      ">": "RECORD_GT",
+      "<": "RECORD_LT",
+      ">=": "RECORD_GTEQ",
+      "<=": "RECORD_LTEQ",
+      "=": "RECORD_EQ",
+      "!=": "RECORD_DIST"
+    },
+    "string": {
+      "=": "RECORD_SEQ",
+      "=(Ignore case)": "RECORD_SEQIC",
+      "MATCH": "RECORD_MATCH"
+    },
+    "date": {
+      ">": "RECORD_GT_DATE",
+      "<": "RECORD_LT_DATE",
+      ">=": "RECORD_GTEQ_DATE",
+      "<=": "RECORD_LTEQ_DATE",
+      "=": "RECORD_EQ_DATE",
+      "!=": "RECORD_DIST_DATE"
+    },
+    "day": {
+      ">": "RECORD_GT_DAY",
+      "<": "RECORD_LT_DAY",
+      ">=": "RECORD_GTEQ_DAY",
+      "<=": "RECORD_LTEQ_DAY",
+      "=": "RECORD_EQ_DAY",
+      "!=": "RECORD_DIST_DAY"
+    },
+    "month": {
+      ">": "RECORD_GT_MONTH",
+      "<": "RECORD_LT_MONTH",
+      ">=": "RECORD_GTEQ_MONTH",
+      "<=": "RECORD_LTEQ_MONTH",
+      "=": "RECORD_EQ_MONTH",
+      "!=": "RECORD_DIST_MONTH"
+    },
+    "dayNumber": {
+      ">": "RECORD_GT_DAY_RECORD_NUMBER",
+      "<": "RECORD_LT_DAY_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_DAY_RECORD_NUMBER",
+      "=": "RECORD_EQ_DAY_RECORD_NUMBER",
+      "!=": "RECORD_DIST_DAY_RECORD_NUMBER"
+    },
+    "monthNumber": {
+      ">": "RECORD_GT_MONTH_RECORD_NUMBER",
+      "<": "RECORD_LT_MONTH_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_MONTH_RECORD_NUMBER",
+      "=": "RECORD_EQ_MONTH_RECORD_NUMBER",
+      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER"
+    },
+    "yearNumber": {
+      ">": "RECORD_GT_YEAR_RECORD_NUMBER",
+      "<": "RECORD_LT_YEAR_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_YEAR_RECORD_NUMBER",
+      "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
+      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
+    }
+  },
+  "fieldOperatorsTypesFromDTO": [
     {
       "operatorType": "number",
-      "operators": ["GT", "LT", "GTEQ", "LTEQ", "EQ", "DIST", "GT", "LT", "LTEQ", "EQ", "DIST", "SEQ"]
+      "operators": [
+        "FIELD_GT",
+        "FIELD_LT",
+        "FIELD_GTEQ",
+        "FIELD_LTEQ",
+        "FIELD_EQ",
+        "FIELD_DIST",
+        "FIELD_GT",
+        "FIELD_LT",
+        "FIELD_LTEQ",
+        "FIELD_EQ",
+        "FIELD_DIST",
+        "FIELD_NUM_MATCH"
+      ]
     },
-    { "operatorType": "string", "operators": ["SEQ", "SEQIC", "MATCH"] },
-    { "operatorType": "date", "operators": ["GT_DATE", "LT_DATE", "GTEQ_DATE", "LTEQ_DATE", "EQ_DATE", "DIST_DATE"] }
+    { "operatorType": "string", "operators": ["FIELD_SEQ", "FIELD_SEQIC", "FIELD_MATCH"] },
+    { "operatorType": "LEN", "operators": ["FIELD_LEN"] },
+    {
+      "operatorType": "date",
+      "operators": [
+        "FIELD_GT_DATE",
+        "FIELD_LT_DATE",
+        "FIELD_GTEQ_DATE",
+        "FIELD_LTEQ_DATE",
+        "FIELD_EQ_DATE",
+        "FIELD_DIST_DATE"
+      ]
+    },
+    {
+      "operatorType": "day",
+      "operators": [
+        "FIELD_GT_DAY",
+        "FIELD_LT_DAY",
+        "FIELD_GTEQ_DAY",
+        "FIELD_LTEQ_DAY",
+        "FIELD_EQ_DAY",
+        "FIELD_DIST_DAY"
+      ]
+    },
+    {
+      "operatorType": "month",
+      "operators": [
+        "FIELD_GT_MONTH",
+        "FIELD_LT_MONTH",
+        "FIELD_GTEQ_MONTH",
+        "FIELD_LTEQ_MONTH",
+        "FIELD_EQ_MONTH",
+        "FIELD_DIST_MONTH"
+      ]
+    },
+    {
+      "operatorType": "year",
+      "operators": [
+        "FIELD_GT_YEAR",
+        "FIELD_LT_YEAR",
+        "FIELD_GTEQ_YEAR",
+        "FIELD_LTEQ_YEAR",
+        "FIELD_EQ_YEAR",
+        "FIELD_DIST_YEAR"
+      ]
+    }
+  ],
+  "rowOperatorsTypesFromDTO": [
+    {
+      "operatorType": "number",
+      "operators": [
+        "RECORD_GT_RECORD",
+        "RECORD_LT_RECORD",
+        "RECORD_GTEQ_RECORD",
+        "RECORD_LTEQ_RECORD",
+        "RECORD_EQ_RECORD",
+        "RECORD_DIST_RECORD",
+        "RECORD_NUM_MATCH",
+        "RECORD_GT",
+        "RECORD_LT",
+        "RECORD_GTEQ",
+        "RECORD_LTEQ",
+        "RECORD_EQ",
+        "RECORD_DIST"
+      ]
+    },
+    {
+      "operatorType": "string",
+      "operators": [
+        "RECORD_SEQ_RECORD",
+        "RECORD_SEQIC_RECORD",
+        "RECORD_MATCH_RECORD",
+        "RECORD_SEQ",
+        "RECORD_SEQIC",
+        "RECORD_MATCH"
+      ]
+    },
+    {
+      "operatorType": "LEN",
+      "operators": [
+        "RECORD_LEN",
+        "RECORD_LEN_GT_RECORD",
+        "RECORD_LEN_LT_RECORD",
+        "RECORD_LEN_GTEQ_RECORD",
+        "RECORD_LEN_LTEQ_RECORD",
+        "RECORD_LEN_EQ_RECORD",
+        "RECORD_LEN_DIST_RECORD",
+        "RECORD_LEN_GT",
+        "RECORD_LEN_LT",
+        "RECORD_LEN_GTEQ",
+        "RECORD_LEN_LTEQ",
+        "RECORD_LEN_EQ",
+        "RECORD_LEN_DIST"
+      ]
+    },
+    {
+      "operatorType": "date",
+      "operators": [
+        "RECORD_GT_DATE_RECORD",
+        "RECORD_LT_DATE_RECORD",
+        "RECORD_GTEQ_DATE_RECORD",
+        "RECORD_LTEQ_DATE_RECORD",
+        "RECORD_EQ_DATE_RECORD",
+        "RECORD_DIST_DATE_RECORD",
+        "RECORD_GT_DATE",
+        "RECORD_LT_DATE",
+        "RECORD_GTEQ_DATE",
+        "RECORD_LTEQ_DATE",
+        "RECORD_EQ_DATE",
+        "RECORD_DIST_DATE"
+      ]
+    },
+    {
+      "operatorType": "day",
+      "operators": [
+        "RECORD_GT_DAY_RECORD",
+        "RECORD_LT_DAY_RECORD",
+        "RECORD_GTEQ_DAY_RECORD",
+        "RECORD_LTEQ_DAY_RECORD",
+        "RECORD_EQ_DAY_RECORD",
+        "RECORD_DIST_DAY_RECORD",
+        "RECORD_GT_DAY_RECORD_NUMBER",
+        "RECORD_LT_DAY_RECORD_NUMBER",
+        "RECORD_GTEQ_DAY_RECORD_NUMBER",
+        "RECORD_LTEQ_DAY_RECORD_NUMBER",
+        "RECORD_EQ_DAY_RECORD_NUMBER",
+        "RECORD_DIST_DAY_RECORD_NUMBER",
+        "RECORD_GT_DAY",
+        "RECORD_LT_DAY",
+        "RECORD_GTEQ_DAY",
+        "RECORD_LTEQ_DAY",
+        "RECORD_EQ_DAY",
+        "RECORD_DIST_DAY",
+        "RECORD_GT_DAY_NUMBER",
+        "RECORD_LT_DAY_NUMBER",
+        "RECORD_GTEQ_DAY_NUMBER",
+        "RECORD_LTEQ_DAY_NUMBER",
+        "RECORD_EQ_DAY_NUMBER",
+        "RECORD_DIST_DAY_NUMBER"
+      ]
+    },
+    {
+      "operatorType": "month",
+      "operators": [
+        "RECORD_GT_MONTH_RECORD",
+        "RECORD_LT_MONTH_RECORD",
+        "RECORD_GTEQ_MONTH_RECORD",
+        "RECORD_LTEQ_MONTH_RECORD",
+        "RECORD_EQ_MONTH_RECORD",
+        "RECORD_DIST_MONTH_RECORD",
+        "RECORD_GT_MONTH_RECORD_NUMBER",
+        "RECORD_LT_MONTH_RECORD_NUMBER",
+        "RECORD_GTEQ_MONTH_RECORD_NUMBER",
+        "RECORD_LTEQ_MONTH_RECORD_NUMBER",
+        "RECORD_EQ_MONTH_RECORD_NUMBER",
+        "RECORD_DIST_MONTH_RECORD_NUMBER",
+        "RECORD_GT_MONTH",
+        "RECORD_LT_MONTH",
+        "RECORD_GTEQ_MONTH",
+        "RECORD_LTEQ_MONTH",
+        "RECORD_EQ_MONTH",
+        "RECORD_DIST_MONTH",
+        "RECORD_GT_MONTH_NUMBER",
+        "RECORD_LT_MONTH_NUMBER",
+        "RECORD_GTEQ_MONTH_NUMBER",
+        "RECORD_LTEQ_MONTH_NUMBER",
+        "RECORD_EQ_MONTH_NUMBER",
+        "RECORD_DIST_MONTH_NUMBER"
+      ]
+    },
+    {
+      "operatorType": "year",
+      "operators": [
+        "RECORD_GT_YEAR_RECORD",
+        "RECORD_LT_YEAR_RECORD",
+        "RECORD_GTEQ_YEAR_RECORD",
+        "RECORD_LTEQ_YEAR_RECORD",
+        "RECORD_EQ_YEAR_RECORD",
+        "RECORD_DIST_YEAR_RECORD",
+        "RECORD_GT_YEAR_RECORD_NUMBER",
+        "RECORD_LT_YEAR_RECORD_NUMBER",
+        "RECORD_GTEQ_YEAR_RECORD_NUMBER",
+        "RECORD_LTEQ_YEAR_RECORD_NUMBER",
+        "RECORD_EQ_YEAR_RECORD_NUMBER",
+        "RECORD_DIST_YEAR_RECORD_NUMBER",
+        "RECORD_GT_YEAR",
+        "RECORD_LT_YEAR",
+        "RECORD_GTEQ_YEAR",
+        "RECORD_LTEQ_YEAR",
+        "RECORD_EQ_YEAR",
+        "RECORD_DIST_YEAR",
+        "RECORD_GT_YEAR_NUMBER",
+        "RECORD_LT_YEAR_NUMBER",
+        "RECORD_GTEQ_YEAR_NUMBER",
+        "RECORD_LTEQ_YEAR_NUMBER",
+        "RECORD_EQ_YEAR_NUMBER",
+        "RECORD_DIST_YEAR_NUMBER"
+      ]
+    }
   ],
   "reverseEquivalences": {
-    "GT": ">",
-    "LT": "<",
-    "GTEQ": ">=",
-    "LTEQ": "<=",
-    "EQ": "=",
-    "DIST": "!=",
-    "SEQ": "=",
-    "SEQIC": "=(Ignore case)",
-    "LEN": "LEN",
-    "MATCH": "MATCH",
-    "GT_DATE": ">",
-    "LT_DATE": "<",
-    "GTEQ_DATE": ">=",
-    "LTEQ_DATE": "<=",
-    "EQ_DATE": "=",
-    "DIST_DATE": "!="
+    "FIELD_GT": ">",
+    "FIELD_LT": "<",
+    "FIELD_GTEQ": ">=",
+    "FIELD_LTEQ": "<=",
+    "FIELD_EQ": "=",
+    "FIELD_DIST": "!=",
+    "FIELD_SEQ": "=",
+    "FIELD_SEQIC": "=(Ignore case)",
+    "FIELD_LEN": "LEN",
+    "FIELD_MATCH": "MATCH",
+    "FIELD_GT_DATE": ">",
+    "FIELD_LT_DATE": "<",
+    "FIELD_GTEQ_DATE": ">=",
+    "FIELD_LTEQ_DATE": "<=",
+    "FIELD_EQ_DATE": "=",
+    "FIELD_DIST_DATE": "!=",
+    "FIELD_NUM_MATCH": "MATCH",
+    "FIELD_GT_DAY": ">",
+    "FIELD_LT_DAY": "<",
+    "FIELD_GTEQ_DAY": ">=",
+    "FIELD_LTEQ_DAY": "<=",
+    "FIELD_EQ_DAY": "=",
+    "FIELD_DIST_DAY": "!=",
+    "FIELD_GT_MONTH": ">",
+    "FIELD_LT_MONTH": "<",
+    "FIELD_GTEQ_MONTH": ">=",
+    "FIELD_LTEQ_MONTH": "<=",
+    "FIELD_EQ_MONTH": "=",
+    "FIELD_DIST_MONTH": "!=",
+    "FIELD_GT_YEAR": ">",
+    "FIELD_LT_YEAR": "<",
+    "FIELD_GTEQ_YEAR": ">=",
+    "FIELD_LTEQ_YEAR": "<=",
+    "FIELD_EQ_YEAR": "=",
+    "FIELD_DIST_YEAR": "!=",
+    "FIELD_AND": "AND",
+    "FIELD_OR": "OR",
+    "RECORD_AND": "AND",
+    "RECORD_OR": "OR",
+    "RECORD_GT_RECORD": ">",
+    "RECORD_LT_RECORD": "<",
+    "RECORD_GTEQ_RECORD": ">=",
+    "RECORD_LTEQ_RECORD": "<=",
+    "RECORD_EQ_RECORD": "=",
+    "RECORD_DIST_RECORD": "!=",
+    "RECORD_NUM_MATCH": "MATCH",
+    "RECORD_LEN": "type",
+    "RECORD_LEN_GT": ">",
+    "RECORD_LEN_LT": "<",
+    "RECORD_LEN_GTEQ": ">=",
+    "RECORD_LEN_LTEQ": "<=",
+    "RECORD_LEN_EQ": "=",
+    "RECORD_LEN_DIST": "!=",
+    "RECORD_LEN_GT_RECORD": ">",
+    "RECORD_LEN_LT_RECORD": "<",
+    "RECORD_LEN_GTEQ_RECORD": ">=",
+    "RECORD_LEN_LTEQ_RECORD": "<=",
+    "RECORD_LEN_EQ_RECORD": "=",
+    "RECORD_LEN_DIST_RECORD": "!=",
+    "RECORD_SEQ_RECORD": "=",
+    "RECORD_SEQIC_RECORD": "=(Ignore case)",
+    "RECORD_MATCH_RECORD": "MATCH",
+    "RECORD_GT_DATE_RECORD": ">",
+    "RECORD_LT_DATE_RECORD": "<",
+    "RECORD_GTEQ_DATE_RECORD": ">=",
+    "RECORD_LTEQ_DATE_RECORD": "<=",
+    "RECORD_EQ_DATE_RECORD": "=",
+    "RECORD_DIST_DATE_RECORD": "!=",
+    "RECORD_GT_DAY_RECORD": ">",
+    "RECORD_LT_DAY_RECORD": "<",
+    "RECORD_GTEQ_DAY_RECORD": ">=",
+    "RECORD_LTEQ_DAY_RECORD": "<=",
+    "RECORD_EQ_DAY_RECORD": "=",
+    "RECORD_DIST_DAY_RECORD": "!=",
+    "RECORD_GT_MONTH_RECORD": ">",
+    "RECORD_LT_MONTH_RECORD": "<",
+    "RECORD_GTEQ_MONTH_RECORD": ">=",
+    "RECORD_LTEQ_MONTH_RECORD": "<=",
+    "RECORD_EQ_MONTH_RECORD": "=",
+    "RECORD_DIST_MONTH_RECORD": "!=",
+    "RECORD_GT_YEAR_RECORD": ">",
+    "RECORD_LT_YEAR_RECORD": "<",
+    "RECORD_GTEQ_YEAR_RECORD": ">=",
+    "RECORD_LTEQ_YEAR_RECORD": "<=",
+    "RECORD_EQ_YEAR_RECORD": "=",
+    "RECORD_DIST_YEAR_RECORD": "!=",
+    "RECORD_GT_DAY_RECORD_NUMBER": ">",
+    "RECORD_LT_DAY_RECORD_NUMBER": "<",
+    "RECORD_GTEQ_DAY_RECORD_NUMBER": ">=",
+    "RECORD_LTEQ_DAY_RECORD_NUMBER": "<=",
+    "RECORD_EQ_DAY_RECORD_NUMBER": "=",
+    "RECORD_DIST_DAY_RECORD_NUMBER": "!=",
+    "RECORD_GT_MONTH_RECORD_NUMBER": ">",
+    "RECORD_LT_MONTH_RECORD_NUMBER": "<",
+    "RECORD_GTEQ_MONTH_RECORD_NUMBER": ">=",
+    "RECORD_LTEQ_MONTH_RECORD_NUMBER": "<=",
+    "RECORD_EQ_MONTH_RECORD_NUMBER": "=",
+    "RECORD_DIST_MONTH_RECORD_NUMBER": "!=",
+    "RECORD_GT_YEAR_RECORD_NUMBER": ">",
+    "RECORD_LT_YEAR_RECORD_NUMBER": "<",
+    "RECORD_GTEQ_YEAR_RECORD_NUMBER": ">=",
+    "RECORD_LTEQ_YEAR_RECORD_NUMBER": "<=",
+    "RECORD_EQ_YEAR_RECORD_NUMBER": "=",
+    "RECORD_DIST_YEAR_RECORD_NUMBER": "!=",
+    "RECORD_SEQ": "=",
+    "RECORD_SEQIC": "=(Ignore case)",
+    "RECORD_MATCH": "MATCH",
+    "RECORD_GT_DATE": ">",
+    "RECORD_LT_DATE": "<",
+    "RECORD_GTEQ_DATE": ">=",
+    "RECORD_LTEQ_DATE": "<=",
+    "RECORD_EQ_DATE": "=",
+    "RECORD_DIST_DATE": "!=",
+    "RECORD_GT_DAY": ">",
+    "RECORD_LT_DAY": "<",
+    "RECORD_GTEQ_DAY": ">=",
+    "RECORD_LTEQ_DAY": "<=",
+    "RECORD_EQ_DAY": "=",
+    "RECORD_DIST_DAY": "!=",
+    "RECORD_GT_MONTH": ">",
+    "RECORD_LT_MONTH": "<",
+    "RECORD_GTEQ_MONTH": ">=",
+    "RECORD_LTEQ_MONTH": "<=",
+    "RECORD_EQ_MONTH": "=",
+    "RECORD_DIST_MONTH": "!=",
+    "RECORD_GT_YEAR": ">",
+    "RECORD_LT_YEAR": "<",
+    "RECORD_GTEQ_YEAR": ">=",
+    "RECORD_LTEQ_YEAR": "<=",
+    "RECORD_EQ_YEAR": "=",
+    "RECORD_DIST_YEAR": "!=",
+    "RECORD_GT_DAY_NUMBER": ">",
+    "RECORD_LT_DAY_NUMBER": "<",
+    "RECORD_GTEQ_DAY_NUMBER": ">=",
+    "RECORD_LTEQ_DAY_NUMBER": "<=",
+    "RECORD_EQ_DAY_NUMBER": "=",
+    "RECORD_DIST_DAY_NUMBER": "!=",
+    "RECORD_GT_MONTH_NUMBER": ">",
+    "RECORD_LT_MONTH_NUMBER": "<",
+    "RECORD_GTEQ_MONTH_NUMBER": ">=",
+    "RECORD_LTEQ_MONTH_NUMBER": "<=",
+    "RECORD_EQ_MONTH_NUMBER": "=",
+    "RECORD_DIST_MONTH_NUMBER": "!=",
+    "RECORD_GT_YEAR_NUMBER": ">",
+    "RECORD_LT_YEAR_NUMBER": "<",
+    "RECORD_GTEQ_YEAR_NUMBER": ">=",
+    "RECORD_LTEQ_YEAR_NUMBER": "<=",
+    "RECORD_EQ_YEAR_NUMBER": "=",
+    "RECORD_DIST_YEAR_NUMBER": "!=",
+    "RECORD_GT": ">",
+    "RECORD_LT": "<",
+    "RECORD_GTEQ": ">=",
+    "RECORD_LTEQ": "<=",
+    "RECORD_EQ": "=",
+    "RECORD_DIST": "!="
   },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
@@ -111,5 +795,13 @@
   "logicalOperators": [
     { "label": "AND", "value": "AND" },
     { "label": "OR", "value": "OR" }
-  ]
+  ],
+  "requiredFields": {
+    "field": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"],
+    "row": ["table", "shortCode", "name", "errorLevel", "errorMessage"],
+    "dataset": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
+  },
+  "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
+  "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
+  "bannedFields": ["attachment"]
 }

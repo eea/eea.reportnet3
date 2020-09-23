@@ -1,20 +1,23 @@
 package org.eea.validation.controller;
 
+import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.service.RulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -104,12 +107,11 @@ public class RulesControllerImpl implements RulesController {
    * Delete rule by id.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @DeleteMapping("/deleteRule")
   public void deleteRuleById(@RequestParam("datasetId") long datasetId,
       @RequestParam("ruleId") String ruleId) {
@@ -124,7 +126,6 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Delete rule by reference id.
    *
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
@@ -137,7 +138,6 @@ public class RulesControllerImpl implements RulesController {
     LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
         datasetSchemaId);
   }
-
 
   /**
    * Delete rule by reference field schema PK id.
@@ -156,30 +156,32 @@ public class RulesControllerImpl implements RulesController {
         referenceFieldSchemaPKId, datasetSchemaId);
   }
 
-
   /**
    * Creates the new rule.
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/createNewRule")
-  public ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
-      @RequestBody RuleVO ruleVO) {
-    String message = "";
-    HttpStatus status = HttpStatus.OK;
+  public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating rule: {}", e.getMessage());
-      message = e.getMessage();
-      status = HttpStatus.BAD_REQUEST;
+      LOG_ERROR.error(
+          "Error creating rule: {} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), ruleVO.getReferenceId(), ruleVO.getDescription(), ruleVO.getRuleName(),
+          ruleVO.getWhenCondition(), ruleVO.getThenCondition(), ruleVO.getShortCode(),
+          ruleVO.getType(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
-    return new ResponseEntity<>(message, status);
   }
 
   /**
@@ -189,6 +191,7 @@ public class RulesControllerImpl implements RulesController {
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param requiredRule the required rule
    */
   @Override
@@ -230,13 +233,41 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/updateRule")
   public void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
       rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error updating rule: {}", e.getMessage());
+      LOG_ERROR.error(
+          "Error updating rule: {} - ruleId={} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), ruleVO.getRuleId(), ruleVO.getReferenceId(), ruleVO.getDescription(),
+          ruleVO.getRuleName(), ruleVO.getWhenCondition(), ruleVO.getThenCondition(),
+          ruleVO.getShortCode(), ruleVO.getType(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  /**
+   * Update automatic rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PutMapping("/updateAutomaticRule/{datasetId}")
+  public void updateAutomaticRule(@PathVariable("datasetId") long datasetId,
+      @RequestBody RuleVO ruleVO) {
+    try {
+      rulesService.updateAutomaticRule(datasetId, ruleVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error updating automatic rule: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
@@ -285,5 +316,122 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+  }
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
+  @Override
+  @PostMapping("/private/createUniqueConstraintRule")
+  public void createUniqueConstraintRule(String datasetSchemaId, String tableSchemaId,
+      String uniqueId) {
+    rulesService.createUniqueConstraint(datasetSchemaId, tableSchemaId, uniqueId);
+  }
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
+  @Override
+  @DeleteMapping("/private/deleteUniqueConstraintRule")
+  public void deleteUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("uniqueId") String uniqueId) {
+
+    rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);
+  }
+
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteRuleHighLevelLike")
+  public void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fieldSchemaId") String fieldSchemaId) {
+    rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
+  }
+
+  /**
+   * Delete dataset rule and integrity by id field schema.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(
+      @RequestParam("fieldSchemaId") String fieldSchemaId,
+      @RequestParam("datasetId") Long datasetId) {
+    rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId, datasetId);
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId) {
+    rulesService.deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
+
+  }
+
+  /**
+   * Copy rules schema.
+   *
+   * @param copy the copy
+   * @return the map
+   */
+  @Override
+  @PostMapping("/private/copyRulesSchema")
+  public Map<String, String> copyRulesSchema(@RequestBody CopySchemaVO copy) {
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
+      return rulesService.copyRulesSchema(copy);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error copying rule: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @GetMapping("/private/deleteNotEmptyRule")
+  public void deleteNotEmptyRule(@RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("datasetId") Long datasetId) {
+    rulesService.deleteNotEmptyRule(tableSchemaId, datasetId);
+  }
+
+  /**
+   * Update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  @Override
+  @GetMapping("/private/updateSequence")
+  public Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.updateSequence(datasetSchemaId);
   }
 }

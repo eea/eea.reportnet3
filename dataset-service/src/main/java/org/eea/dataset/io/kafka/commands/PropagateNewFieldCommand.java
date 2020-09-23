@@ -6,8 +6,6 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +16,6 @@ import org.springframework.stereotype.Component;
 public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
 
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The update record helper.

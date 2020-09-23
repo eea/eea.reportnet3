@@ -19,7 +19,7 @@ import { routes } from 'ui/routes';
 
 const ReportnetLogin = ({ history }) => {
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
   const [loginError, setLoginError] = useState();
   const initialValues = {
@@ -37,7 +37,7 @@ const ReportnetLogin = ({ history }) => {
           <div className={styles.logo}>
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
-            {!isEmpty(loginError) && <div class={styles.error}>{loginError}</div>}
+            {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
             {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
           <Formik
@@ -47,8 +47,7 @@ const ReportnetLogin = ({ history }) => {
               setSubmitting(true);
               try {
                 const userObject = await UserService.oldLogin(values.userName, values.password);
-                console.log('userObject', userObject);
-                user.onLogin(userObject);
+                userContext.onLogin(userObject);
                 history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
                 console.error(error);
@@ -56,7 +55,7 @@ const ReportnetLogin = ({ history }) => {
                   type: 'USER_SERVICE_OLD_LOGIN_ERROR',
                   content: {}
                 });
-                user.onLogout();
+                userContext.onLogout();
                 const errorResponse = error.response;
                 if (!isUndefined(errorResponse) && errorResponse.status === 500) {
                   setLoginError('Incorrect username or password');
@@ -71,6 +70,7 @@ const ReportnetLogin = ({ history }) => {
                 <fieldset>
                   <label htmlFor="userName">{resources.messages.loginUserName}</label>
                   <Field
+                    id={'userName'}
                     name="userName"
                     type="text"
                     placeholder={resources.messages.loginUserName}
@@ -84,6 +84,7 @@ const ReportnetLogin = ({ history }) => {
                 <fieldset>
                   <label htmlFor="password">{resources.messages.loginPassword}</label>
                   <Field
+                    id={'password'}
                     name="password"
                     type="password"
                     placeholder={resources.messages.loginPassword}

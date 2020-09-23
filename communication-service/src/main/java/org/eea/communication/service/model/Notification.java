@@ -7,16 +7,12 @@ import org.eea.kafka.domain.EventType;
  * The type Notification.
  */
 public class Notification {
-  /**
-   * The Class Notification.
-   */
 
+  /** The Class Notification. */
   private EventType type;
 
-  /**
-   * The content.
-   */
-  private Map<?, ?> content;
+  /** The content. */
+  private Map<String, Object> content;
 
   /**
    * Instantiates a new notification.
@@ -24,7 +20,7 @@ public class Notification {
    * @param type the type
    * @param content the content
    */
-  public Notification(EventType type, Map<?, ?> content) {
+  public Notification(EventType type, Map<String, Object> content) {
     this.type = type;
     this.content = content;
   }
@@ -43,8 +39,7 @@ public class Notification {
    * 
    * @return the content
    */
-  public Map<?, ?> getContent() {
+  public Map<String, Object> getContent() {
     return content;
   }
-
 }

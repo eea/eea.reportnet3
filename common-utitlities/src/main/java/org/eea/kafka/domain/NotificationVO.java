@@ -52,4 +52,13 @@ public class NotificationVO implements Serializable {
 
   /** The dataset type. */
   private DatasetTypeEnum datasetType;
+
+  /** The dataset schema id. */
+  private String datasetSchemaId;
+
+  /** The short code. */
+  private String shortCode;
+
+  /** The provider id. */
+  private Long providerId;
 }

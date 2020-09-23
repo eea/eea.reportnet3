@@ -13,20 +13,13 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 /**
  * The Interface DatasetMetabaseService.
  */
-/**
- * @author vicente.cano
- *
- */
-/**
- * @author vicente.cano
- *
- */
 public interface DatasetMetabaseService {
 
   /**
    * Gets the data set id by dataflow id.
    *
    * @param idFlow the id flow
+   *
    * @return the data set id by dataflow id
    */
   List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
@@ -36,6 +29,7 @@ public interface DatasetMetabaseService {
    * Gets the dataset name.
    *
    * @param idDataset the id dataset
+   *
    * @return the dataset name
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
@@ -53,17 +47,19 @@ public interface DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @param datasetName the dataset name
+   *
    * @return true, if successful
    */
   boolean updateDatasetName(Long datasetId, String datasetName);
-
 
 
   /**
    * Gets the statistics.
    *
    * @param datasetId the dataset id
+   *
    * @return the statistics
+   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -76,7 +72,9 @@ public interface DatasetMetabaseService {
    * Gets the global statistics.
    *
    * @param idDataschema the id dataschema
+   *
    * @return the global statistics
+   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -96,7 +94,7 @@ public interface DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    */
-  void createSchemaGroupAndAddUser(Long datasetId);
+  void createSchemaGroup(Long datasetId);
 
   /**
    * Creates the empty dataset.
@@ -108,7 +106,9 @@ public interface DatasetMetabaseService {
    * @param dueDate the due date
    * @param representatives the representatives
    * @param iterationDC the iteration DC
+   *
    * @return the future
+   *
    * @throws EEAException the EEA exception
    */
   Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
@@ -127,6 +127,7 @@ public interface DatasetMetabaseService {
    * Find dataset schema id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the string
    */
   String findDatasetSchemaIdById(long datasetId);
@@ -147,6 +148,7 @@ public interface DatasetMetabaseService {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
+   *
    * @return the dataset destination foreign relation
    */
   Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
@@ -162,4 +164,59 @@ public interface DatasetMetabaseService {
   void deleteForeignRelation(Long datasetIdOrigin, Long datasetIdDestination, String idPk,
       String idFkOrigin);
 
+  /**
+   * Gets dataset type.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the dataset type
+   */
+  DatasetTypeEnum getDatasetType(Long datasetId);
+
+
+
+  /**
+   * Gets the integrity dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetOriginSchemaId the dataset origin schema id
+   * @param datasetReferencedSchemaId the dataset referenced schema id
+   * @return the integrity dataset id
+   */
+  Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
+      String datasetReferencedSchemaId);
+
+
+  /**
+   * Creates the foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @return the object
+   */
+  void createForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId);
+
+  /**
+   * Update foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  void updateForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId);
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  Long getDatasetIdByDatasetSchemaIdAndDataProviderId(String referencedDatasetSchemaId,
+      Long dataProviderId);
 }

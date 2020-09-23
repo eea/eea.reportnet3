@@ -16,15 +16,24 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        opener: payload.opener
+        level: payload.level
       };
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
       return {
         ...state,
         isVisible: true,
-        fieldId: payload.fieldId,
+        referenceId: payload.fieldId,
         tableSchemaId: payload.tableSchemaId,
-        opener: null
+        opener: null,
+        level: 'field'
+      };
+    case 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW':
+      return {
+        ...state,
+        isVisible: true,
+        referenceId: payload.recordId,
+        opener: null,
+        level: 'row'
       };
     case 'ON_OPENER_RESET':
       return {
@@ -36,7 +45,7 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: false,
-        fieldId: null,
+        referenceId: null,
         tableSchemaId: null,
         reOpenOpener: !isNil(state.opener) ? true : false,
         ruleEdit: false,
@@ -46,12 +55,12 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        fieldId: payload.fieldId,
-        opener: payload.opener,
+        referenceId: payload.referenceId,
         ruleEdit: true,
-        ruleToEdit: payload.ruleToEdit
+        ruleToEdit: payload.ruleToEdit,
+        level: payload.level
       };
-    case 'RESET_REOPENOPENER':
+    case 'RESET_REOPEN_OPENER':
       return {
         ...state,
         reOpenOpener: false
@@ -63,8 +72,9 @@ const validationReducer = (state, { type, payload }) => {
 
 const initialState = {
   isVisible: false,
-  fieldId: null,
+  referenceId: null,
   opener: null,
+  level: null,
   reOpenOpener: false,
   ruleEdit: false
 };
@@ -74,16 +84,16 @@ export const ValidationProvider = ({ children }) => {
     <ValidationContext.Provider
       value={{
         ...state,
-        onOpenModal: () => {
+        onOpenModal: level => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL'
           });
         },
-        onOpenModalFronOpener: opener => {
+        onOpenModalFromOpener: (level, opener) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER',
             payload: {
-              opener
+              level
             }
           });
         },
@@ -91,6 +101,12 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD',
             payload: { fieldId, tableSchemaId }
+          });
+        },
+        onOpenModalFromRow: recordId => {
+          dispatch({
+            type: 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW',
+            payload: { recordId }
           });
         },
         onCloseModal: () => {
@@ -103,19 +119,19 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPENER_RESET'
           });
         },
-        onOpenToEdit: (rule, opener) => {
+        onOpenToEdit: (rule, level) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {
               ruleToEdit: { ...rule },
-              fieldId: rule.referenceId,
-              opener
+              referenceId: rule.referenceId,
+              level
             }
           });
         },
         resetReOpenOpener: () => {
           dispatch({
-            type: 'RESET_REOPENOPENER'
+            type: 'RESET_REOPEN_OPENER'
           });
         }
       }}>

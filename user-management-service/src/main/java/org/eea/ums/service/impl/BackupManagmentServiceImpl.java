@@ -33,7 +33,7 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
 
   /** The Constant ROLE. */
-  private static final String ROLE = "DATA_PROVIDER";
+  private static final String ROLE = "LEAD_REPORTER";
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -130,7 +130,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
         LOG.info("Finish save Roles");
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("Role not saved");
-        e.printStackTrace();
       }
     });
 
@@ -194,7 +193,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
       keycloakConnectorService.addUser(json);
     } catch (JsonProcessingException e) {
       LOG_ERROR.error("User not saved");
-      e.printStackTrace();
     }
     LOG.info("User saved");
 

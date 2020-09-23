@@ -1,8 +1,14 @@
+import intersection from 'lodash/intersection';
 import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
+
+const allAttachments = colsSchema => {
+  const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
+  return notAttachment.length === 0;
+};
 
 const changeCellValue = (tableData, rowIndex, field, value) => {
   tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
@@ -43,6 +49,11 @@ const getCellId = (tableData, field) => {
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
 };
 
+const getCellInfo = (colSchemaData, field) => {
+  const completeField = colSchemaData.filter(data => data.field === field)[0];
+  return !isUndefined(completeField) ? completeField : undefined;
+};
+
 const getCellItems = (colSchemaData, field) => {
   const completeField = colSchemaData.filter(data => data.field === field)[0];
   return !isUndefined(completeField) ? completeField.codelistItems : undefined;
@@ -53,7 +64,7 @@ const getCellValue = (tableData, field) => {
   return value.length > 0 ? value[0].fieldData[field] : '';
 };
 
-const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow) => {
+const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow, reporting) => {
   //Delete double quotes from strings
   const copiedClipboardRecords = pastedData
     .split('\r\n')
@@ -61,11 +72,27 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
     .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
   //Maximum number of records to paste should be 500
   const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
+
+  const readOnlyFieldsIndex = [];
+  colsSchema.forEach((col, i) => {
+    if (col.readOnly) {
+      readOnlyFieldsIndex.push(i);
+    }
+  });
+
   copiedClipboardRecords.forEach(row => {
     let emptyRecord = RecordUtils.createEmptyObject(colsSchema, fetchedDataFirstRow);
     const copiedCols = row.split('\t');
+    // emptyRecord.dataRow.forEach((record, i) => {}
+
     emptyRecord.dataRow.forEach((record, i) => {
-      emptyRecord = RecordUtils.changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
+      emptyRecord = RecordUtils.changeRecordValue(
+        emptyRecord,
+        record.fieldData.fieldSchemaId,
+        (readOnlyFieldsIndex.indexOf(i) > -1 && reporting) || record.fieldData.type === 'ATTACHMENT'
+          ? ''
+          : copiedCols[i]
+      );
     });
 
     emptyRecord.dataRow = emptyRecord.dataRow.filter(
@@ -83,7 +110,7 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
   return !isNil(codelistItems)
-    ? codelistItems.map(codelistItem => {
+    ? codelistItems.sort().map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })
     : [];
@@ -92,7 +119,7 @@ const getCodelistItems = (colsSchema, field) => {
 const getCodelistItemsInSingleColumn = column => {
   const codelistItems = column.codelistItems;
   return !isNil(codelistItems)
-    ? codelistItems.map(codelistItem => {
+    ? codelistItems.sort().map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })
     : [];
@@ -101,6 +128,31 @@ const getCodelistItemsInSingleColumn = column => {
 const getCodelistValue = (codelistItemsOptions, value) => {
   if (!isUndefined(value)) {
     return codelistItemsOptions.filter(item => item.value === value)[0];
+  }
+};
+
+const getFieldTypeValue = fieldType => {
+  const fieldTypes = [
+    { fieldType: 'Number_Integer', value: 'Number - Integer' },
+    { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
+    { fieldType: 'Date', value: 'Date' },
+    { fieldType: 'Text', value: 'Text' },
+    { fieldType: 'Rich_Text', value: 'Rich text' },
+    { fieldType: 'Email', value: 'Email' },
+    { fieldType: 'URL', value: 'URL' },
+    { fieldType: 'Phone', value: 'Phone number' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Codelist', value: 'Single select' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
+    { fieldType: 'Link', value: 'Link' },
+    { fieldType: 'Attachment', value: 'Attachment' }
+  ];
+
+  if (!isUndefined(fieldType)) {
+    const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
+    return filteredTypes.value;
+  } else {
+    return '';
   }
 };
 
@@ -125,6 +177,16 @@ const getInitialRecordValues = (record, colsSchema) => {
 const getLinkValue = (linkOptions, value) => {
   if (!isUndefined(value) && !isUndefined(linkOptions)) {
     return linkOptions.filter(item => item.value === value)[0];
+  }
+};
+
+const getMultiselectValues = (multiselectItemsOptions, value) => {
+  if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
+    const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
+    return intersection(
+      splittedValue,
+      multiselectItemsOptions.map(item => item.value)
+    );
   }
 };
 
@@ -180,20 +242,24 @@ const createEmptyObject = (columnsSchema, data) => {
 };
 
 export const RecordUtils = {
+  allAttachments,
   changeCellValue,
   changeRecordInTable,
   changeRecordValue,
   createEmptyObject,
   getCellFieldSchemaId,
   getCellId,
+  getCellInfo,
   getCellItems,
   getCellValue,
   getClipboardData,
   getCodelistItems,
   getCodelistItemsInSingleColumn,
   getCodelistValue,
+  getFieldTypeValue,
   getInitialRecordValues,
   getLinkValue,
+  getMultiselectValues,
   getNumCopiedRecords,
   getRecordId,
   getTextWidth

@@ -26,4 +26,13 @@ public interface PartitionDataSetMetabaseRepository
   Optional<PartitionDataSetMetabase> findFirstByIdDataSet_idAndUsername(Long idDataset,
       String username);
 
+
+  /**
+   * Find first by id data set id.
+   *
+   * @param idDataset the id dataset
+   * @return the optional
+   */
+  Optional<PartitionDataSetMetabase> findFirstByIdDataSet_id(Long idDataset);
+
 }

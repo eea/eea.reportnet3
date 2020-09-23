@@ -29,11 +29,14 @@
 .propertyTitle {
   color: var(--treeview-property-title-color);
   font-size: 14px;
-  font-weight: bold;
 }
 
 .propertyValue {
   color: var(--treeview-property-value-color);
+}
+
+.propertyValueTableName {
+  font-weight: bold;
 }
 
 .slider-enter {

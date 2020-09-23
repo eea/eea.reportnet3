@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -37,6 +38,12 @@ public class FileCommonUtils {
    */
   @Autowired
   private RecordRepository recordRepository;
+
+  /**
+   * The design dataset repository.
+   */
+  @Autowired
+  private DesignDatasetRepository designDatasetRepository;
 
   /**
    * The Constant LOG.
@@ -156,9 +163,9 @@ public class FileCommonUtils {
    * Gets the data set schema.
    *
    * @param dataflowId the dataflow id
-   *
+   * @param datasetId the dataset id
    * @return the data set schema
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   public DataSetSchemaVO getDataSetSchema(Long dataflowId, Long datasetId) throws EEAException {
     LOG.info("Getting DataSchema from Mongo DB");
@@ -231,6 +238,16 @@ public class FileCommonUtils {
     }
     return sanitizedRecords;
 
+  }
+
+  /**
+   * Checks if is design dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is design dataset
+   */
+  public boolean isDesignDataset(Long datasetId) {
+    return designDatasetRepository.existsById(datasetId);
   }
 
 

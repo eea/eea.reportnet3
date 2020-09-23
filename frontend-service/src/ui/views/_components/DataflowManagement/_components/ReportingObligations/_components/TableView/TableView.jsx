@@ -16,23 +16,33 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagination, pagination }) => {
   const resources = useContext(ResourcesContext);
 
+  const headerTableTemplate = obligation => {
+    if (obligation === 'dueDate') return resources.messages['nextReportDue'];
+    else return resources.messages[obligation];
+  };
+
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
   const onLoadCheckButton = row => (
     <div className={styles.checkColum}>
       <Checkbox
         id={`${row.id}_checkbox`}
+        inputId={`${row.id}_checkbox`}
         isChecked={checkedObligation.id === row.id}
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
+      <label htmlFor={`${row.id}_checkbox`} className="srOnly">
+        {resources.messages['selectedObligation']}
+      </label>
     </div>
   );
 
   const onLoadTitleTemplate = row => (
-    <div className={styles.titleColum}>
+    <div className={styles.titleColumn}>
       {row.title}
       <FontAwesomeIcon
+        aria-hidden={false}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalLink')}
         onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${row.id}`)}
@@ -42,7 +52,14 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
 
   const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
-  const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
+  const renderCheckColum = (
+    <Column
+      key="checkId"
+      className={styles.emptyTableHeader}
+      header={resources.messages['selectedObligation']}
+      body={row => onLoadCheckButton(row)}
+    />
+  );
 
   const renderColumns = data => {
     const repOblCols = [];
@@ -53,12 +70,13 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
         .map(obligation => {
           let template = null;
           if (obligation === 'title') template = onLoadTitleTemplate;
+
           return (
             <Column
               body={template}
               columnResizeMode="expand"
               field={obligation}
-              header={resources.messages[obligation]}
+              header={headerTableTemplate(obligation)}
               key={obligation}
               sortable={true}
             />
@@ -75,6 +93,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
       autoLayout={true}
       first={pagination.first}
       getPageChange={onLoadPagination}
+      onRowClick={event => onSelectObl(event.data)}
       paginator={true}
       paginatorRight={paginatorRightText}
       rows={pagination.rows}

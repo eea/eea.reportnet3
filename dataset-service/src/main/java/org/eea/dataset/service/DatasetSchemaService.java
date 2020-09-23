@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
@@ -8,8 +9,10 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
 /**
  * The Interface DataschemaService.
@@ -52,23 +55,17 @@ public interface DatasetSchemaService {
    * Delete dataset schema.
    *
    * @param schemaId the schema id
-   */
-  void deleteDatasetSchema(String schemaId);
-
-  /**
-   * Creates the group and add user.
-   *
    * @param datasetId the dataset id
    */
-  void createGroupAndAddUser(Long datasetId);
+  void deleteDatasetSchema(String schemaId, Long datasetId);
 
   /**
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
-   * @param role the role
+   * @param resourceTypeEnum the resource type enum
    */
-  void deleteGroup(Long datasetId, ResourceGroupEnum... role);
+  void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum);
 
   /**
    * Replace schema.
@@ -106,22 +103,22 @@ public interface DatasetSchemaService {
   /**
    * Update name table schema.
    *
-   * @param datasetSchemaid the dataset schemaid
+   * @param datasetId the dataset id
    * @param tableSchema the table schema
-   *
    * @throws EEAException the EEA exception
    */
-  void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchema) throws EEAException;
+  void updateTableSchema(Long datasetId, TableSchemaVO tableSchema) throws EEAException;
 
   /**
    * Delete table schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param idTableSchema the id table schema
-   *
+   * @param tableSchemaId the id table schema
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException;
+  void deleteTableSchema(String datasetSchemaId, String tableSchemaId, Long datasetId)
+      throws EEAException;
 
   /**
    * Order table schema.
@@ -167,12 +164,12 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
-   *
+   * @param datasetId the dataset id
    * @return true, if 1 and only 1 fieldSchema has been removed
-   *
    * @throws EEAException the EEA exception
    */
-  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
+  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId, Long datasetId)
+      throws EEAException;
 
   /**
    * Order field schema.
@@ -352,5 +349,118 @@ public interface DatasetSchemaService {
    */
   void updatePKCatalogueAndForeignsAfterSnapshot(String idDatasetSchema, Long idDataset)
       throws EEAException;
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  void createUniqueConstraint(UniqueConstraintVO uniqueConstraint);
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @throws EEAException the EEA exception
+   */
+  void deleteUniqueConstraint(String uniqueId) throws EEAException;
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  void updateUniqueConstraint(UniqueConstraintVO uniqueConstraint);
+
+  /**
+   * Gets the unique constraints.
+   *
+   * @param schemaId the schema id
+   * @return the unique constraints
+   */
+  List<UniqueConstraintVO> getUniqueConstraints(String schemaId);
+
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   * @throws EEAException the EEA exception
+   */
+  UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException;
+
+  /**
+   * Delete uniques constraint from table.
+   *
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteUniquesConstraintFromTable(String tableSchemaId) throws EEAException;
+
+  /**
+   * Delete uniques constraint from dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteUniquesConstraintFromDataset(String datasetSchemaId) throws EEAException;
+
+  /**
+   * Delete uniques constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteUniquesConstraintFromField(String schemaId, String fieldSchemaId) throws EEAException;
+
+  /**
+   * Creates the unique constraint PK.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   */
+  void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
+
+  /**
+   * Delete only unique constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
+      throws EEAException;
+
+
+  /**
+   * Copy unique constraints catalogue.
+   *
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId);
+
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @return the simple schema
+   * @throws EEAException the EEA exception
+   */
+  SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException;
+
+
+  /**
+   * Check clear attachments.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
+  Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
+      FieldSchemaVO fieldSchemaVO);
 
 }

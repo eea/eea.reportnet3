@@ -43,6 +43,10 @@ public class Rule {
   @Field(value = "enabled")
   private boolean enabled;
 
+  /** The verified. */
+  @Field(value = "verified")
+  private Boolean verified;
+
   /** The activation_group. */
   @Field(value = "activationGroup")
   private String activationGroup;
@@ -56,7 +60,7 @@ public class Rule {
   private String whenCondition;
 
   /**
-   * The then condition. is a list with 2 redords first is a ERROR message second is a Level ERROR
+   * The then condition. is a list with 2 records first is a ERROR message second is a Level ERROR
    */
   @Field(value = "thenCondition")
   private List<String> thenCondition;
@@ -69,6 +73,14 @@ public class Rule {
   @Field(value = "shortCode")
   private String shortCode;
 
+  /** The unique constraint id. */
+  @Field(value = "uniqueConstraintId")
+  private ObjectId uniqueConstraintId;
+
+  /** The integrity constraint id. */
+  @Field(value = "integrityConstraintId")
+  private ObjectId integrityConstraintId;
+
   /**
    * Hash code.
    *
@@ -77,7 +89,8 @@ public class Rule {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
-        whenCondition, thenCondition, description, shortCode);
+        whenCondition, thenCondition, description, shortCode, uniqueConstraintId,
+        integrityConstraintId);
   }
 
   /**
@@ -102,6 +115,8 @@ public class Rule {
         && Objects.equals(type, other.type) && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(description, other.description)
-        && Objects.equals(shortCode, other.shortCode);
+        && Objects.equals(shortCode, other.shortCode)
+        && Objects.equals(uniqueConstraintId, other.uniqueConstraintId)
+        && Objects.equals(integrityConstraintId, other.integrityConstraintId);
   }
 }

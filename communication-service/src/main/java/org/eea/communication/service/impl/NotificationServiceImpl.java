@@ -16,15 +16,11 @@ import org.springframework.stereotype.Service;
 @Service("notificationService")
 public class NotificationServiceImpl implements NotificationService {
 
-  /**
-   * The messaging template.
-   */
+  /** The template. */
   @Autowired
   private SimpMessagingTemplate template;
 
-  /**
-   * The logger.
-   */
+  /** The logger. */
   private final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
   /**
@@ -36,7 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
    * @return true, if successful
    */
   @Override
-  public boolean send(String user, EventType type, Map<?, ?> notification) {
+  public boolean send(String user, EventType type, Map<String, Object> notification) {
     if (user != null && !user.isEmpty() && notification != null) {
       logger.info("Notification sent to user: user={}, type={}, message={}", user, type,
           notification);

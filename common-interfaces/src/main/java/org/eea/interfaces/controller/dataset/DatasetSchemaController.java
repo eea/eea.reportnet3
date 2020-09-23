@@ -4,7 +4,9 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,8 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -23,22 +23,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DatasetSchemaController {
 
   /**
-   * The Interface DataSetSchemaControllerZuul.
+   * The Interface DatasetSchemaControllerZuul.
    */
   @FeignClient(value = "dataset", contextId = "dataschema", path = "/dataschema")
-  interface DataSetSchemaControllerZuul extends DatasetSchemaController {
+  interface DatasetSchemaControllerZuul extends DatasetSchemaController {
 
   }
 
   /**
-   * Creates the empty data schema.
+   * Creates the empty dataset schema.
    *
    * @param dataflowId the dataflow id
    * @param datasetSchemaName the dataset schema name
    */
   @PostMapping(value = "/createEmptyDatasetSchema")
-  void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
-      @RequestParam("datasetSchemaName") final String datasetSchemaName);
+  void createEmptyDatasetSchema(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("datasetSchemaName") String datasetSchemaName);
 
   /**
    * Find data schema by id.
@@ -55,8 +55,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the data set schema VO
    */
-  @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -65,8 +64,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the dataset schema id
    */
-  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/getDataSchema/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -211,4 +209,84 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);
 
+
+
+  /**
+   * Gets the unique constraints.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the unique constraints
+   */
+  @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<UniqueConstraintVO> getUniqueConstraints(@PathVariable("schemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @PostMapping(value = "/createUniqueConstraint")
+  void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
+
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueConstraintId the unique constraint id
+   * @param dataflowId the dataflow id
+   */
+  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
+  void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @PutMapping(value = "/updateUniqueConstraint")
+  void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
+
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   */
+  @GetMapping(value = "/private/getUniqueConstraint/{uniqueId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId);
+
+
+
+  /**
+   * Copy designs from dataflow.
+   *
+   * @param dataflowIdOrigin the dataflow id origin
+   * @param dataflowIdDestination the dataflow id destination
+   *
+   *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
+   *        an async call. It sends a notification when all the process it's done
+   */
+  @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
+  void copyDesignsFromDataflow(@RequestParam("sourceDataflow") Long dataflowIdOrigin,
+      @RequestParam("targetDataflow") Long dataflowIdDestination);
+
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the simple schema
+   */
+  @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 }

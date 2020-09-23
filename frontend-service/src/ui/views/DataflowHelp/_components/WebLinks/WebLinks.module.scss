@@ -1,25 +1,3 @@
-.dialog {
-  height: auto !important;
-}
-.crudColumn {
-  text-align: center;
-}
-.editRowButton {
-  border: 1px solid var(--c-custom-gray) !important;
-  box-shadow: 0 0 0 0em var(--blue-100) !important;
-  margin-left: 3px !important;
-}
-
-.deleteRowButton {
-  border: 1px solid var(--c-custom-gray) !important;
-  box-shadow: 0 0 0 0em var(--blue-100) !important;
-  color: var(--errors) !important;
-  margin-left: 3px !important;
-}
-.webLinkEditButtons {
-  display: flex;
-  justify-content: center;
-}
 .buttonWrap {
   display: flex;
   flex-direction: row;
@@ -27,6 +5,34 @@
 }
 .cancelButton {
   margin-left: 0.5rem !important;
+}
+.crudColumn {
+  text-align: center;
+}
+.deleteRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  box-shadow: 0 0 0 0em var(--blue-100) !important;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
+}
+.dialog {
+  height: auto !important;
+}
+.editRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  box-shadow: 0 0 0 0em var(--blue-100) !important;
+  margin-left: 3px !important;
+}
+.noDataWrapper {
+  display: flex;
+  justify-content: center;
+  h4 {
+    font-style: italic;
+  }
+}
+.webLinkEditButtons {
+  display: flex;
+  justify-content: center;
 }
 
 .weblinksToolbar {

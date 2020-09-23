@@ -1,6 +1,5 @@
 package org.eea.validation.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -8,18 +7,23 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -39,6 +43,24 @@ public class RulesControllerImplTest {
   /** The rule mapper. */
   @Mock
   private RuleMapper ruleMapper;
+
+  /** The security context. */
+  SecurityContext securityContext;
+
+  /** The authentication. */
+  Authentication authentication;
+
+  /**
+   * Inits the mocks.
+   */
+  @Before
+  public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    MockitoAnnotations.initMocks(this);
+  }
 
   /**
    * Delete rule by id test.
@@ -295,6 +317,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createNewRuleTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doNothing().when(rulesService).createNewRule(Mockito.anyLong(), Mockito.any());
     rulesControllerImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesService, times(1)).createNewRule(Mockito.anyLong(), Mockito.any());
@@ -305,14 +329,19 @@ public class RulesControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void createNewRuleExceptionTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doThrow(EEAException.class).when(rulesService).createNewRule(Mockito.anyLong(),
         Mockito.any());
 
-    ResponseEntity<?> value = rulesControllerImpl.createNewRule(1L, new RuleVO());
-    assertEquals(null, value.getBody());
-    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    try {
+      rulesControllerImpl.createNewRule(1L, new RuleVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -322,6 +351,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void updateRuleTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doNothing().when(rulesService).updateRule(Mockito.anyLong(), Mockito.any());
     rulesControllerImpl.updateRule(1L, new RuleVO());
     Mockito.verify(rulesService, times(1)).updateRule(Mockito.anyLong(), Mockito.any());
@@ -334,6 +365,8 @@ public class RulesControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateRuleExceptionTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doThrow(EEAException.class).when(rulesService).updateRule(Mockito.anyLong(),
         Mockito.any());
     try {
@@ -427,4 +460,108 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).deleteRuleByReferenceFieldSchemaPKId(Mockito.any(),
         Mockito.any());
   }
+
+  /**
+   * Update automatic rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateAutomaticRuleTest() throws EEAException {
+    Mockito.doNothing().when(rulesService).updateAutomaticRule(Mockito.anyLong(), Mockito.any());
+    rulesControllerImpl.updateAutomaticRule(1L, new RuleVO());
+    Mockito.verify(rulesService, times(1)).updateAutomaticRule(Mockito.anyLong(), Mockito.any());
+  }
+
+  /**
+   * Update automatic rule exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateAutomaticRuleExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(rulesService).updateAutomaticRule(Mockito.anyLong(),
+          Mockito.any());
+      rulesControllerImpl.updateAutomaticRule(1L, new RuleVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the unique constraint test.
+   */
+  @Test
+  public void createUniqueConstraintTest() {
+    rulesControllerImpl.createUniqueConstraintRule("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).createUniqueConstraint(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Delete unique constraint test.
+   */
+  @Test
+  public void deleteUniqueConstraintTest() {
+    rulesControllerImpl.deleteUniqueConstraintRule("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteUniqueConstraint(Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Delete rule high level like.
+   */
+  @Test
+  public void deleteRuleHighLevelLikeTest() {
+    rulesControllerImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteRuleHighLevelLike(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Delete dataset rule and integrity by field schema id test.
+   */
+  @Test
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaIdTest() {
+    rulesControllerImpl.deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, times(1))
+        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaIdTest() {
+    rulesControllerImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any(),
+        Mockito.any());
+    Mockito.verify(rulesService, times(1))
+        .deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testCopyRules() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    rulesControllerImpl.copyRulesSchema(new CopySchemaVO());
+    Mockito.verify(rulesService, times(1)).copyRulesSchema(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCopyRulesException() throws EEAException {
+
+    try {
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      Mockito.doThrow(EEAException.class).when(rulesService).copyRulesSchema(Mockito.any());
+      rulesControllerImpl.copyRulesSchema(new CopySchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+
+  }
+
 }

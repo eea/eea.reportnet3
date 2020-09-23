@@ -71,7 +71,7 @@ public interface RepresentativeController {
    * @return the response entity
    */
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<?> updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
+  ResponseEntity updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 
   /**
    * Delete representative.

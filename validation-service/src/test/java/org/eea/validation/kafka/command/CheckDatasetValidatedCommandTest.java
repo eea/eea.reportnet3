@@ -1,9 +1,8 @@
 package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +33,6 @@ public class CheckDatasetValidatedCommandTest {
   private CheckDatasetValidatedCommand checkDatasetValidatedCommand;
 
   /**
-   * The kafka sender utils.
-   */
-  @Mock
-  private KafkaSenderUtils kafkaSenderUtils;
-
-  /**
    * The validation helper.
    */
   @Mock
@@ -56,10 +48,6 @@ public class CheckDatasetValidatedCommandTest {
    */
   private EEAEventVO eeaEventVO;
 
-  /**
-   * The processes map.
-   */
-  private ConcurrentHashMap<String, Integer> processesMap;
 
   /**
    * Inits the mocks.
@@ -72,7 +60,6 @@ public class CheckDatasetValidatedCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_DATASET_COMPLETED);
     eeaEventVO.setData(data);
-    processesMap = new ConcurrentHashMap<>();
     MockitoAnnotations.initMocks(this);
 
   }
@@ -95,14 +82,11 @@ public class CheckDatasetValidatedCommandTest {
    */
   @Test
   public void executeSelfTest() throws EEAException {
-    // self uuid
-    processesMap.put("uuid", 1);
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any());
+    Mockito.when(validationHelper.isProcessCoordinator(Mockito.eq("uuid"))).thenReturn(true);
+
     checkDatasetValidatedCommand.execute(eeaEventVO);
 
-    Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
+    Mockito.verify(validationHelper, times(1)).reducePendingTasks(Mockito.any(),
         Mockito.any());
   }
 
@@ -111,11 +95,12 @@ public class CheckDatasetValidatedCommandTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EEAException.class)
   public void executeThrowTest() throws EEAException {
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
+    Mockito.when(validationHelper.isProcessCoordinator(Mockito.eq("uuid"))).thenReturn(true);
+    doThrow(new EEAException("Error")).when(validationHelper)
+        .reducePendingTasks(Mockito.eq(1l), Mockito.anyString());
     checkDatasetValidatedCommand.execute(eeaEventVO);
-    Mockito.verify(validationHelper, times(1)).getProcessesMap();
   }
 
 }

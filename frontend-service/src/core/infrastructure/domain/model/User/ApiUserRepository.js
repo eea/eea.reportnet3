@@ -1,15 +1,15 @@
-import jwt_decode from 'jwt-decode';
 import moment from 'moment';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
+
+import { config } from 'conf/index';
 
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { config } from 'conf/index';
+
+import { LocalStorageUtils } from './_utils/LocalStorageUtils';
 
 const timeOut = time => {
   setTimeout(() => {
@@ -38,6 +38,7 @@ const login = async code => {
 const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
+  LocalStorageUtils.remove();
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
@@ -56,11 +57,13 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
-    dateFormat: 'MM-DD-YYYY',
+    dateFormat: 'YYYY-MM-DD',
     showLogoutConfirmation: true,
     rowsPerPage: 10,
     visualTheme: 'light',
-    userImage: []
+    userImage: [],
+    amPm24h: true,
+    listView: true
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
@@ -69,6 +72,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
     userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
     userConfiguration.userImage = userDefaultConfiguration.userImage;
+    userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
+    userConfiguration.listView = userDefaultConfiguration.listView;
   } else {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
@@ -91,6 +96,18 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.userImage = !isNil(userConfigurationDTO.userImage)
       ? userConfigurationDTO.userImage
       : userDefaultConfiguration.userImage;
+
+    userConfiguration.amPm24h = isNil(userConfigurationDTO.amPm24h)
+      ? userDefaultConfiguration.amPm24h
+      : userConfigurationDTO.amPm24h[0] === 'false'
+      ? (userConfiguration.amPm24h = false)
+      : (userConfiguration.amPm24h = true);
+
+    userConfiguration.listView = isNil(userConfigurationDTO.listView)
+      ? userDefaultConfiguration.listView
+      : userConfigurationDTO.listView[0] === 'false'
+      ? (userConfiguration.listView = false)
+      : (userConfiguration.listView = true);
   }
   return userConfiguration;
 };
@@ -138,19 +155,6 @@ const refreshToken = async () => {
   }
 };
 
-const hasPermission = (user, permissions, entity) => {
-  let allow = false;
-  if (isUndefined(entity)) {
-    if (permissions.filter(permission => user.accessRole.includes(permission)).length > 0) allow = true;
-  } else {
-    permissions.forEach(permission => {
-      const role = `${entity}-${permission}`;
-      if (user.contextRoles.includes(role)) allow = true;
-    });
-  }
-  return allow;
-};
-
 const userRole = (user, entity) => {
   const roleDTO = user.contextRoles.filter(role => role.includes(entity));
   if (roleDTO.length) {
@@ -171,7 +175,6 @@ export const ApiUserRepository = {
   logout,
   oldLogin,
   refreshToken,
-  hasPermission,
   getToken,
   userRole,
   uploadImg

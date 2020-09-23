@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 
+import { isEmpty, isNil } from 'lodash';
+
 import styles from './EULogin.module.css';
 import logo from 'assets/images/logo-spinner.gif';
 
@@ -8,18 +10,25 @@ import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
+import { LocalStorageUtils } from 'ui/views/_functions/Utils';
 
 const EULogin = ({ location, history }) => {
   const [isLoading] = useState(true);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const onLogin = async () => {
     try {
       const params = new URLSearchParams(location.hash);
       const code = params.get('code');
       if (code) {
         const userObject = await UserService.login(code);
-        user.onLogin(userObject);
-        history.push(getUrl(routes.DATAFLOWS));
+        userContext.onLogin(userObject);
+        const rnLocalStorage = LocalStorageUtils.get();
+        if (!isNil(rnLocalStorage)) {
+          LocalStorageUtils.remove();
+          window.location.href = rnLocalStorage.redirectUrl;
+        } else {
+          history.push(getUrl(routes.DATAFLOWS));
+        }
       } else {
         history.push(getUrl(routes.ACCESS_POINT));
       }

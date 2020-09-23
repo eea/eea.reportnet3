@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import isNull from 'lodash/isNull';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
@@ -240,6 +241,9 @@ export class ScrollableView extends Component {
             className="p-datatable-scrollable-header-box"
             ref={el => {
               this.scrollHeaderBox = el;
+            }}
+            style={{
+              overflow: this.props.totalRecords === 0 || isNull(this.props.totalRecords) ? 'auto' : 'hidden'
             }}>
             <table className={tableHeaderClassName} style={this.props.tableStyle}>
               {colGroup}

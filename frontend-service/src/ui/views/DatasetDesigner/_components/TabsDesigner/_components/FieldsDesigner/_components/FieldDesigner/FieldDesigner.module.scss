@@ -1,5 +1,18 @@
+.checkReadOnly {
+  width: 70px;
+  div:nth-child(2) {
+    margin-left: 33%;
+  }
+}
 .checkRequired {
   width: 70px;
+  div:nth-child(2) {
+    margin-left: 33%;
+  }
+}
+.checkPK {
+  margin-right: 1.5rem !important;
+  margin-left: 0.5rem !important;
   div:nth-child(2) {
     margin-left: 33%;
   }

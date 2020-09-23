@@ -1,7 +1,6 @@
 package org.eea.multitenancy;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +42,7 @@ public class TenantResolverTest {
   @Test
   public void testSetTenantName() {
     tenantResolver.setTenantName(NAME);
+    assertEquals("not the same name", NAME, tenantResolver.getTenantName());
   }
 
   /**
@@ -60,7 +60,7 @@ public class TenantResolverTest {
   @Test
   public void testGetTenantNameNull() {
     tenantResolver.setTenantName(null);
-
+    assertEquals("not the same name", "", tenantResolver.getTenantName());
   }
 
   /**
@@ -69,6 +69,7 @@ public class TenantResolverTest {
   @Test
   public void testClean() {
     tenantResolver.clean();
+    assertEquals("not the same name", "", tenantResolver.getTenantName());
   }
 
 }

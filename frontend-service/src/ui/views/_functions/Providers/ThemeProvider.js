@@ -1,5 +1,5 @@
 import React, { useContext, useReducer } from 'react';
-import { isNull } from 'lodash';
+
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -75,7 +75,7 @@ export const ThemeProvider = ({ children }) => {
         'datatable-column-sortable-hightlight-color': 'var(--white)',
         'datatable-column-sortable-hightlight-icon-color': 'var(--white)',
         'datatable-column-sortable-hightlight-box-shadow-focus': ' inset 0 0 0 0.1em var(--gray-25)',
-        'datatable-header-footer-bg': 'var(--gray-10)',
+        'datatable-header-footer-bg': 'var(--white)',
         'datatable-header-footer-color': 'var(--gray-110)',
         'datatable-header-footer-border': ' 1px solid var(--gray-25)',
         'datatable-header-info-button-color': 'var(--blue-75)',
@@ -216,7 +216,7 @@ export const ThemeProvider = ({ children }) => {
         'chart-bg': 'var(--bg)',
         'chart-color': 'var(--main-font-color)',
         'multiselect-bg': 'var(--white)',
-        'multiselect-border': '1px solid var(--gray-15)',
+        'multiselect-border': '1px solid var(--gray-50)',
         'multiselect-bg-hover': 'var(--gray-110)',
         'multiselect-label-color': 'var(--gray-110)',
         'multiselect-trigger-bg': 'var(--white)',
@@ -278,6 +278,8 @@ export const ThemeProvider = ({ children }) => {
         'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
         'listbox-item-highlight-bg-hover': 'var(--gray-10)',
         'listbox-item-highlight-color': 'var(--white)',
+        'listbox-item-pk-indicator-bg': 'var(--gray-25)',
+        'listbox-item-pk-indicator-color': 'var(--main-font-color)',
         'card-item-bg': 'var(--bg)',
         'card-item-box-shadow': ' 0 1px 3px rgba(0, 0, 0, 0.20), 0 1px 2px rgba(0, 0, 0, 0.40)',
         'card-item-box-shadow-hover': '0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25)',
@@ -287,7 +289,15 @@ export const ThemeProvider = ({ children }) => {
         'tooltip-arrow-border-color': 'var(--gray-110)',
         'tooltip-arrow-bg': 'var(--gray-110)',
         'user-image-bg-hover': 'var(--main-font-color)',
-        'user-image-bg-opacity': '0.6'
+        'user-image-bg-opacity': '0.6',
+        'map-marker-color': 'var(--c-corporate-blue-lighter)',
+        'font-filters': 'var(--gray-75)',
+        'header-footer-bg': 'var(--gray-10)',
+        'eu-footer-bottom': 'var(--eu-footer-bottom-bg)',
+        'eu-footer-title': 'var(--gray-110)',
+        'font-release-date': 'var(--c-green)',
+        'eu-link-footer-bottom': 'var(--eu-footer-bottom-font)',
+        'eu-link-hover-footer-bottom': 'var(--c-corporate-blue-lighter)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -541,6 +551,8 @@ export const ThemeProvider = ({ children }) => {
         'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
         'listbox-item-highlight-bg-hover': 'var(--gray-110)',
         'listbox-item-highlight-color': 'var(--black)',
+        'listbox-item-pk-indicator-bg': 'var(--gray-50)',
+        'listbox-item-pk-indicator-color': 'var(--main-font-color)',
         'card-item-bg': 'var(--c-dark-blue)',
         'card-item-box-shadow': ' 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6)',
         'card-item-box-shadow-hover': '0 10px 20px rgba(0, 0, 0, 0.29), 0 6px 6px rgba(0, 0, 0, 0.33)',
@@ -550,7 +562,15 @@ export const ThemeProvider = ({ children }) => {
         'tooltip-arrow-border-color': 'var(--white)',
         'tooltip-arrow-bg': 'var(--gray-110)',
         'user-image-bg-hover': 'var(--main-font-color)',
-        'user-image-bg-opacity': '0.6'
+        'user-image-bg-opacity': '0.6',
+        'map-marker-color': 'var(--white)',
+        'font-filters': 'var(--white)',
+        'header-footer-bg': 'var(--c-dark-blue)',
+        'eu-footer-bottom': 'var(--c-dark-blue)',
+        'eu-footer-title': 'var(--white)',
+        'font-release-date': 'var(--success-color-darker)',
+        'eu-link-footer-bottom': 'var(--c-corporate-yellow)',
+        'eu-link-hover-footer-bottom': 'var(--c-corporate-yellow-lighter)'
       }
     }
   });

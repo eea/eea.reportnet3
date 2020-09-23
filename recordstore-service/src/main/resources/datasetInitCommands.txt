@@ -9,6 +9,7 @@ CREATE TABLE %dataset_name%.DATASET_VALIDATION (ID bigint,ID_DATASET bigint,ID_V
 CREATE TABLE %dataset_name%.TABLE_VALIDATION (ID bigint,ID_TABLE bigint,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_TABLE) REFERENCES %dataset_name%.TABLE_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.RECORD_VALIDATION (ID bigint,ID_RECORD text,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE,FOREIGN KEY (ID_RECORD) REFERENCES %dataset_name%.RECORD_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.FIELD_VALIDATION (ID bigint,ID_FIELD text,ID_VALIDATION bigint, PRIMARY KEY (ID), FOREIGN KEY (ID_VALIDATION) REFERENCES %dataset_name%.VALIDATION(ID) ON DELETE CASCADE ,FOREIGN KEY (ID_FIELD) REFERENCES %dataset_name%.FIELD_VALUE(id) ON DELETE CASCADE) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.ATTACHMENT_VALUE (ID text, FILE_NAME text, CONTENT BYTEA , FIELD_VALUE_ID text,  PRIMARY KEY (ID), FOREIGN KEY (FIELD_VALUE_ID) REFERENCES %dataset_name%.FIELD_VALUE(ID) ON DELETE CASCADE) TABLESPACE pg_default;
 
 
 
@@ -21,6 +22,7 @@ ALTER TABLE %dataset_name%.TABLE_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.FIELD_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.RECORD_VALIDATION OWNER TO %user%;
 ALTER TABLE %dataset_name%.VALIDATION OWNER TO %user%;
+ALTER TABLE %dataset_name%.ATTACHMENT_VALUE OWNER TO %user%;
 
 
 CREATE SEQUENCE %dataset_name%.field_sequence INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1 NO CYCLE;
@@ -47,7 +49,6 @@ CREATE INDEX idx_record_value ON %dataset_name%.field_value(id_record);
 CREATE INDEX idx_field_schema ON %dataset_name%.field_value(id_field_schema);
 CREATE INDEX idx_dataset_value ON %dataset_name%.table_value(dataset_id);
 CREATE INDEX idx_table_schema ON %dataset_name%.table_value(id_table_schema);
-CREATE INDEX idx_table_value ON %dataset_name%.record_value(id_table);
 CREATE INDEX idx_record_schema ON %dataset_name%.record_value(id_record_schema);
 CREATE INDEX idx_table_validation_table ON %dataset_name%.table_validation(id_table);
 CREATE INDEX idx_table_validation_validation ON %dataset_name%.table_validation(id_validation);

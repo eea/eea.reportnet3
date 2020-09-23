@@ -19,9 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * The Class Record.
- */
+/** The Class RecordValue. */
 @Entity
 @Getter
 @Setter
@@ -29,9 +27,7 @@ import lombok.ToString;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
-  /**
-   * The id.
-   */
+  /** The id. */
   @Id
   @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
       allocationSize = 1)
@@ -39,50 +35,37 @@ public class RecordValue {
   @Column(name = "ID", columnDefinition = "serial")
   private String id;
 
-  /**
-   * The id mongo.
-   */
+  /** The id record schema. */
   @Column(name = "ID_RECORD_SCHEMA")
   private String idRecordSchema;
 
-  /**
-   * The id partition.
-   */
+  /** The dataset partition id. */
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
-
 
   /** The data provider code. */
   @Column(name = "DATA_PROVIDER_CODE")
   private String dataProviderCode;
 
-
-  /**
-   * The table value.
-   */
+  /** The table value. */
   @ManyToOne
   @JoinColumn(name = "ID_TABLE")
   private TableValue tableValue;
 
-  /**
-   * The fields.
-   */
+  /** The fields. */
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
-  /**
-   * The record validations.
-   */
+  /** The record validations. */
   @OneToMany(mappedBy = "recordValue",
       cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
-  /**
-   * The sort criteria.
-   */
+  /** The sort criteria. */
   @Transient
   private String sortCriteria;
 
+  /** The level error. */
   @Transient
   private ErrorTypeEnum levelError;
 
@@ -100,7 +83,6 @@ public class RecordValue {
    * Equals.
    *
    * @param obj the obj
-   *
    * @return true, if successful
    */
   @Override
@@ -120,6 +102,4 @@ public class RecordValue {
         && Objects.equals(idRecordSchema, other.idRecordSchema)
         && Objects.equals(tableValue, other.tableValue);
   }
-
-
 }

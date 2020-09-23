@@ -1,0 +1,44 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 2rem 0;
+  h2 {
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: var(--title-color);
+  }
+  ul {
+    list-style: none;
+  }
+  > ul {
+    margin: 0px;
+    padding-left: 0;
+    .expressionsHeader {
+      display: flex;
+      justify-content: flex-start;
+      span {
+        margin-right: 1rem;
+        width: 179px;
+        text-align: center;
+        &:first-of-type {
+          width: 53px;
+          margin-right: 0;
+          text-align: left;
+        }
+      }
+    }
+  }
+
+  .expressionsActionsBtns {
+    button {
+      margin-right: 0.5rem;
+      margin-top: 1.2rem;
+    }
+  }
+  textarea {
+    background-color: var(--inputtext-bg);
+    color: var(--inputtext-color);
+    height: 4rem;
+  }
+}

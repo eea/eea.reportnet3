@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsSchema.module.css';
 
@@ -13,17 +13,19 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
-  hasWritePermissions,
-  isDataCollection,
+  hasWritePermissions = false,
+  hasCountryCode,
   isDatasetDeleted,
+  isExportable = true,
   isValidationSelected,
-  isWebFormMMR,
   levelErrorTypes,
   onLoadTableData,
   onTabChange,
   recordPositionId,
+  reporting,
   selectedRecordErrorId,
   setIsValidationSelected,
+  showWriteButtons = true,
   tables,
   tableSchemaColumns
 }) => {
@@ -39,14 +41,17 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
+                  hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
-                  isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
+                  isExportable={isExportable}
                   isValidationSelected={isValidationSelected}
-                  isWebFormMMR={isWebFormMMR}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onLoadTableData={onLoadTableData}
+                  reporting={reporting}
+                  showWriteButtons={showWriteButtons}
+                  tableFixedNumber={table.fixedNumber}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}

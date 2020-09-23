@@ -26,12 +26,12 @@ import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.RepresentativeService;
-import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -42,6 +42,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -133,10 +134,10 @@ public class DataFlowServiceImplTest {
   private DocumentMapper documentMapper;
 
   /**
-   * The data set schema controller zuul.
+   * The dataset schema controller zuul.
    */
   @Mock
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   /**
    * The document controller zuul.
@@ -156,6 +157,9 @@ public class DataFlowServiceImplTest {
 
   @Mock
   private ObligationController obligationController;
+
+  @Mock
+  private EUDatasetControllerZuul euDatasetControllerZuul;
 
   /**
    * The dataflows.
@@ -458,7 +462,7 @@ public class DataFlowServiceImplTest {
     doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(), Mockito.any());
     when(dataflowRepository.save(dataflow)).thenReturn(new Dataflow());
     dataflowServiceImpl.createDataFlow(dataflowVO);
-    Mockito.verify(resourceManagementControllerZull, times(2)).createResource(Mockito.any());
+    Mockito.verify(resourceManagementControllerZull, times(4)).createResource(Mockito.any());
   }
 
   /**
@@ -509,8 +513,11 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void testGetDatasetsId() throws EEAException {
-
-    dataflowServiceImpl.getReportingDatasetsId("");
+    List<ReportingDatasetVO> reportings = new ArrayList<>();
+    Mockito.when(datasetMetabaseController.getReportingsIdBySchemaId(Mockito.any()))
+        .thenReturn(reportings);
+    assertEquals("failed assertion", reportings,
+        dataflowServiceImpl.getReportingDatasetsId("").getReportingDatasets());
   }
 
 
@@ -591,7 +598,7 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-    doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L, true);
+    doNothing().when(datasetSchemaControllerZuul).deleteDatasetSchema(1L, true);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -710,7 +717,7 @@ public class DataFlowServiceImplTest {
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    doThrow(MockitoException.class).when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L, true);
+    doThrow(MockitoException.class).when(datasetSchemaControllerZuul).deleteDatasetSchema(1L, true);
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {
@@ -749,6 +756,10 @@ public class DataFlowServiceImplTest {
     DataCollectionVO dcVO = new DataCollectionVO();
     dcVO.setId(1L);
     dataFlowVO.setDataCollections(Arrays.asList(dcVO));
+    EUDatasetVO euDatasetVO = new EUDatasetVO();
+    euDatasetVO.setId(3L);
+    List<EUDatasetVO> euDatasetVOs = new ArrayList<>();
+    euDatasetVOs.add(euDatasetVO);
 
     Dataflow dataflowEntity = new Dataflow();
     Set<Representative> representatives = new HashSet<>();
@@ -765,6 +776,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(designDatasetVOs);
     when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
         .thenReturn(Arrays.asList(dcVO));
+    when(euDatasetControllerZuul.findEUDatasetByDataflowId(1L)).thenReturn(euDatasetVOs);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
     dataflowServiceImpl.deleteDataFlow(1L);
     doThrow(MockitoException.class).when(dataflowRepository).deleteNativeDataflow(Mockito.any());

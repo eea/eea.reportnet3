@@ -1,0 +1,31 @@
+.constraints {
+  height: 50vh;
+}
+
+.constraintsWithoutTable {
+  height: 53.5vh;
+}
+
+.emptyFilteredData,
+.noConstraints {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.emptyFilteredData {
+  height: 75%;
+}
+
+.noConstraints {
+  height: 100%;
+}
+
+.spinner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

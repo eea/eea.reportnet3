@@ -40,8 +40,6 @@ import classNames from 'classnames';
 
 import './InputText.css';
 
-import logo from 'assets/images/logo.png';
-
 import KeyFilter from 'ui/views/_functions/PrimeReact/KeyFilter';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
@@ -56,6 +54,7 @@ export class InputText extends Component {
   static defaultProps = {
     autoFocus: false,
     expandable: false,
+    id: '',
     onInput: null,
     onKeyPress: null,
     keyfilter: null,
@@ -68,6 +67,7 @@ export class InputText extends Component {
   static propTypes = {
     autoFocus: PropTypes.bool,
     expandable: PropTypes.bool,
+    id: PropTypes.string,
     onInput: PropTypes.func,
     onKeyPress: PropTypes.func,
     keyfilter: PropTypes.any,
@@ -154,6 +154,7 @@ export class InputText extends Component {
           ref={el => (this.element = el)}
           {...inputProps}
           className={className}
+          id={this.props.id}
           onInput={this.onInput}
           onKeyPress={this.onKeyPress}
         />

@@ -25,9 +25,17 @@ class CSVFeeder(csvFileName: String) {
   }
 
   def apply(): Iterator[Map[String, Any]] = {
-    val position = Random.nextInt(data.size - 1)
-    val value = data(position)
+    // val position = Random.nextInt(data.size - 1)
+    //val value = data(position)
+    var count = -1
 
-    Iterator.continually(data(Random.nextInt(data.size - 1)))
+    def complexCompute(): Int = {
+      if (count < data.size - 1) {
+        count += 1;
+      }
+      return count;
+    }
+
+    Iterator.continually(data(complexCompute()))
   }
 }

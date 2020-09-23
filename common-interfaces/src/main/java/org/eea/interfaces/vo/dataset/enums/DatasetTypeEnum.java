@@ -1,24 +1,21 @@
 package org.eea.interfaces.vo.dataset.enums;
 
-
-
 /**
  * The Enum TypeDatasetEnum.
  */
 public enum DatasetTypeEnum {
 
-
-
   /** The reporting. */
   REPORTING("REPORTING"),
-
 
   /** The design. */
   DESIGN("DESIGN"),
 
-
   /** The collection. */
-  COLLECTION("COLLECTION");
+  COLLECTION("COLLECTION"),
+
+  /** The eudataset. */
+  EUDATASET("EUDATASET");
 
 
   /** The value. */

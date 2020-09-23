@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import styles from './userConfiguration.module.scss';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -30,7 +30,7 @@ const UserConfiguration = () => {
   };
 
   const themeSwitch = (
-    <React.Fragment>
+    <Fragment>
       <span className={styles.switchTextInput}>{resources.messages['light']}</span>
       <InputSwitch
         checked={userContext.userProps.visualTheme === 'dark'}
@@ -46,7 +46,6 @@ const UserConfiguration = () => {
           }
         }}
         sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-        style={{ marginRight: '1rem' }}
         tooltip={
           userContext.userProps.visualTheme === 'light'
             ? resources.messages['toggleDarkTheme']
@@ -55,39 +54,83 @@ const UserConfiguration = () => {
         tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
       />
       <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
-    </React.Fragment>
+    </Fragment>
+  );
+
+  const amPmSwitch = (
+    <Fragment>
+      <span className={styles.switchTextInput}>AM/PM</span>
+      <InputSwitch
+        checked={userContext.userProps.amPm24h}
+        onChange={async e => {
+          userContext.onToggleAmPm24hFormat(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.amPm24h = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleAmPm24hFormat(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.amPm24h === true ? resources.messages['amPmFormat'] : resources.messages['24hFormat']
+        }
+      />
+      <span className={styles.switchTextInput}>24H</span>
+    </Fragment>
   );
 
   const confirmationLogoutSwitch = (
-    <React.Fragment>
+    <Fragment>
       <span className={styles.switchTextInput}>No popup</span>
       <InputSwitch
         checked={userContext.userProps.showLogoutConfirmation}
-        style={{ marginRight: '1rem' }}
         onChange={async e => {
           userContext.onToggleLogoutConfirm(e.value);
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.showLogoutConfirmation = e.value;
           const response = await changeUserProperties(inmUserProperties);
-          console.log({ response });
           if (response.status < 200 || response.status > 299) {
-            console.log(inmUserProperties.showLogoutConfirmation);
             userContext.onToggleLogoutConfirm(!e.value);
           }
         }}
         tooltip={
           userContext.userProps.showLogoutConfirmation === true
-            ? resources.messages['toogleConfirmationOff']
-            : resources.messages['toogleConfirmationOn']
+            ? resources.messages['toggleConfirmationOff']
+            : resources.messages['toggleConfirmationOn']
         }
       />
       <span className={styles.switchTextInput}>Popup</span>
-    </React.Fragment>
+    </Fragment>
+  );
+
+  const chooseTypeViewSwitch = (
+    <Fragment>
+      <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
+      <InputSwitch
+        checked={userContext.userProps.listView}
+        onChange={async e => {
+          userContext.onToggleTypeView(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.listView = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleTypeView(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.listView === true
+            ? resources.messages['toggleMagazineView']
+            : resources.messages['toggleListView']
+        }
+      />
+      <span className={styles.switchTextInput}>{`${resources.messages['listView']}`}</span>
+    </Fragment>
   );
 
   const rowsInPaginationDropdown = (
-    <React.Fragment>
+    <Fragment>
       <Dropdown
+        id={`rowsPage`}
         name="rowPerPage"
         options={resources.userParameters['defaultRowsPage']}
         onChange={async e => {
@@ -101,11 +144,14 @@ const UserConfiguration = () => {
         placeholder="select"
         value={userContext.userProps.rowsPerPage}
       />
-    </React.Fragment>
+      <label htmlFor="rowsPage" className="srOnly">
+        {resources.messages['defaultRowsPage']}
+      </label>
+    </Fragment>
   );
 
   const dateFormatDropdown = (
-    <React.Fragment>
+    <Fragment>
       <Dropdown
         name="dateFormat"
         options={resources.userParameters['dateFormat']}
@@ -120,7 +166,7 @@ const UserConfiguration = () => {
         placeholder="select"
         value={userContext.userProps.dateFormat}
       />
-    </React.Fragment>
+    </Fragment>
   );
 
   const themeConfiguration = (
@@ -129,7 +175,7 @@ const UserConfiguration = () => {
       icon="palette"
       iconSize="2rem"
       subtitle={resources.messages['userSettingsThemeSubtitle']}
-      item={themeSwitch}
+      items={[themeSwitch]}
     />
   );
 
@@ -139,7 +185,7 @@ const UserConfiguration = () => {
       icon="power-off"
       iconSize="2rem"
       subtitle={resources.messages['userSettingsConfirmSubtitle']}
-      item={confirmationLogoutSwitch}
+      items={[confirmationLogoutSwitch]}
     />
   );
 
@@ -149,7 +195,17 @@ const UserConfiguration = () => {
       icon="list-ol"
       iconSize="2rem"
       subtitle={resources.messages['userSettingsRowsPerPageSubtitle']}
-      item={rowsInPaginationDropdown}
+      items={[rowsInPaginationDropdown]}
+    />
+  );
+
+  const viewConfiguration = (
+    <TitleWithItem
+      title={resources.messages['userTypeOfView']}
+      icon="eye"
+      iconSize="2rem"
+      subtitle={resources.messages['userTypeOfViewSubtitle']}
+      items={[chooseTypeViewSwitch]}
     />
   );
 
@@ -166,7 +222,7 @@ const UserConfiguration = () => {
       icon="calendar"
       iconSize="2rem"
       subtitle={dateFormatSubtitle}
-      item={dateFormatDropdown}
+      items={[dateFormatDropdown, amPmSwitch]}
     />
   );
 
@@ -176,6 +232,7 @@ const UserConfiguration = () => {
         {rowsInPaginationConfiguration}
         {dateFormatConfiguration}
         {themeConfiguration}
+        {viewConfiguration}
         {logoutConfiguration}
       </div>
     </React.Fragment>

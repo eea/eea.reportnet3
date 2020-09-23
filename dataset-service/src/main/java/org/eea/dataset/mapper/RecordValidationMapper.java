@@ -12,9 +12,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface RecordValidationMapper extends IMapper<RecordValidation, RecordValidationVO> {
 
-  /** The Constant RECORD_VALUE. */
-  String RECORD_VALUE = "recordValue";
-
   /**
    * Class to entity.
    *
@@ -22,9 +19,8 @@ public interface RecordValidationMapper extends IMapper<RecordValidation, Record
    * @return the record validation
    */
   @Override
-  @Mapping(source = RECORD_VALUE, target = RECORD_VALUE, ignore = true)
+  @Mapping(source = "recordValue", target = "recordValue", ignore = true)
   RecordValidation classToEntity(RecordValidationVO vo);
-
 
   /**
    * Entity to class.
@@ -33,7 +29,6 @@ public interface RecordValidationMapper extends IMapper<RecordValidation, Record
    * @return the record validation VO
    */
   @Override
-  @Mapping(source = RECORD_VALUE, target = RECORD_VALUE, ignore = true)
+  @Mapping(source = "recordValue", target = "recordValue", ignore = true)
   RecordValidationVO entityToClass(RecordValidation entity);
-
 }

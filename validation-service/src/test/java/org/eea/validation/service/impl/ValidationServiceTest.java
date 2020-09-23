@@ -79,7 +79,9 @@ public class ValidationServiceTest {
   private ValidationServiceImpl validationServiceImpl;
 
 
-  /** The resource management controller. */
+  /**
+   * The resource management controller.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementController;
   /**
@@ -118,11 +120,6 @@ public class ValidationServiceTest {
   @Mock
   private ValidationDatasetRepository validationDatasetRepository;
 
-  /**
-   * The validation table repository.
-   */
-  @Mock
-  private TableValidationRepository validationTableRepository;
 
   /**
    * The record repository.
@@ -211,26 +208,38 @@ public class ValidationServiceTest {
   private Validation validation;
 
 
-  /** The id list. */
+  /**
+   * The id list.
+   */
   List<Long> idList;
 
 
-  /** The attributes. */
+  /**
+   * The attributes.
+   */
   private Map<String, List<String>> attributes;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   @Mock
   private FieldRepository fieldRepository;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   @Mock
   private TableRepository tableRepository;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Mock
   private DatasetSchemaController datasetSchemaController;
 
-  /** The rules error utils. */
+  /**
+   * The rules error utils.
+   */
   @Mock
   private RulesErrorUtils rulesErrorUtils;
 
@@ -508,7 +517,7 @@ public class ValidationServiceTest {
     KieBase kiebase = kieHelper.build();
     when(datasetSchemaController.getDatasetSchemaId(Mockito.any())).thenReturn("");
     when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
-    validationServiceImpl.loadRulesKnowledgeBase(1L);
+    assertEquals("assertion error", kiebase, validationServiceImpl.loadRulesKnowledgeBase(1L));
   }
 
 
@@ -537,8 +546,9 @@ public class ValidationServiceTest {
     doNothing().when(datasetRepository).deleteValidationTable();
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setAttributes(attributes);
-    when(resourceManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
-        .thenReturn(resourceInfoVO);
+    when(
+        resourceManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_LEAD_REPORTER))
+            .thenReturn(resourceInfoVO);
 
     validationServiceImpl.deleteAllValidation(1L);
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();
@@ -802,7 +812,8 @@ public class ValidationServiceTest {
     datasetValidation.setDatasetValue(datasetValue);
     when(validationDatasetRepository.findByValidationIds(Mockito.any()))
         .thenReturn(datasetValue.getDatasetValidations());
-    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>());
+    assertNotNull("assertion error",
+        validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>()));
   }
 
   /**
@@ -839,6 +850,7 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
     validationServiceImpl.validateDataSet(1L, kieBase);
+    Mockito.verify(validationDatasetRepository, times(1)).saveAll(Mockito.any());
   }
 
 
@@ -852,6 +864,7 @@ public class ValidationServiceTest {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
     validationServiceImpl.validateTable(1L, Mockito.any(), kieBase);
+    Mockito.verify(tableValidationRepository, times(1)).saveAll(Mockito.any());
   }
 
 

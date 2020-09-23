@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import javax.annotation.CheckForNull;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -98,6 +99,7 @@ public interface ExtendedRulesRepository {
    * @param ruleId the rule id
    * @return the rule
    */
+  @CheckForNull
   Rule findRule(ObjectId datasetSchemaId, ObjectId ruleId);
 
   /**
@@ -117,4 +119,39 @@ public interface ExtendedRulesRepository {
    * @return the rules with type rule criteria
    */
   RulesSchema getRulesWithTypeRuleCriteria(ObjectId datasetSchemaId, boolean required);
+
+  /**
+   * Gets the active and verified rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the active and verified rules
+   */
+  RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId);
+
+  /**
+   * Delete by unique constraint id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueConstraintId the unique constraint id
+   * @return true, if successful
+   */
+  boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId);
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaLike the field schema like
+   * @return true, if successful
+   */
+  boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike);
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @return true, if successful
+   */
+  boolean deleteNotEmptyRule(ObjectId tableSchemaId, ObjectId datasetSchemaId);
 }

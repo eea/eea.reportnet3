@@ -43,9 +43,11 @@ public class DataSetMetabaseControllerImplTest {
   private ReportingDatasetService reportingDatasetService;
 
 
+  /** The design dataset service. */
   @Mock
   private DesignDatasetService designDatasetService;
 
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
@@ -197,4 +199,47 @@ public class DataSetMetabaseControllerImplTest {
     Assert.assertEquals("5ce524fad31fc52540abae73",
         dataSetMetabaseControllerImpl.findDatasetSchemaIdById(1L));
   }
+
+  @Test
+  public void getIntegrityDatasetIdTest() {
+    Mockito.when(
+        datasetMetabaseService.getIntegrityDatasetId(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals((Long) 1L,
+        dataSetMetabaseControllerImpl.getIntegrityDatasetId(1L, "1L", "1L"));
+  }
+
+  @Test
+  public void createDatasetForeignRelationshipTest() {
+    dataSetMetabaseControllerImpl.createDatasetForeignRelationship(1L, 1L, "1", "1");
+    Mockito.verify(datasetMetabaseService, times(1)).createForeignRelationship(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateDatasetForeignRelationshipTest() {
+    dataSetMetabaseControllerImpl.updateDatasetForeignRelationship(1L, 1L, "1", "1");
+    Mockito.verify(datasetMetabaseService, times(1)).updateForeignRelationship(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void getDesignDatasetIdByDatasetSchemaIdTest() {
+    Mockito.when(datasetMetabaseService
+        .getDatasetIdByDatasetSchemaIdAndDataProviderId(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals((Long) 1L,
+        dataSetMetabaseControllerImpl.getDesignDatasetIdByDatasetSchemaId("1L"));
+  }
+
+  @Test
+  public void deleteDatasetForeignRelationshipTest() {
+    Mockito.when(
+        datasetMetabaseService.getIntegrityDatasetId(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    dataSetMetabaseControllerImpl.deleteForeignRelationship(1L, 1L, "1", "1");
+    Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
 }

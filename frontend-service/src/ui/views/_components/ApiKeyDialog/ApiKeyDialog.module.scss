@@ -1,0 +1,51 @@
+.container {
+  min-height: 10em;
+  padding: 3em 0;
+}
+.row {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-basis: max-content;
+  flex-wrap: nowrap;
+  justify-content: center;
+
+  .label {
+    min-width: 10%;
+    padding-right: 1em;
+    align-self: end;
+    margin-top: 0.5em;
+  }
+  .textarea {
+    background-color: var(--gray-5);
+    border-radius: 4px 0px 0px 4px;
+    border: none;
+    box-shadow: 0 0 0 0 Transparent;
+    color: black;
+    font-weight: 600;
+    margin: 0;
+    width: 22em;
+    outline: none;
+    text-align: center;
+    flex-shrink: 0;
+  }
+}
+.input_api {
+  flex-shrink: 0;
+}
+.flex {
+  display: flex;
+}
+.ids_info {
+  padding-top: 0.8em;
+  margin: 0;
+}
+.ids_label {
+  margin-left: 1em;
+}
+
+.copyBtn {
+  align-self: center;
+  border-radius: 0px 4px 4px 0px !important;
+  border: 1.5px solid var(--button-primary-bg) !important;
+}

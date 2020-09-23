@@ -13,7 +13,7 @@
   <groupId>org.eea</groupId>
   <artifactId>microservice-pom</artifactId>
   <packaging>pom</packaging>
-  <version>3.0.0</version>
+  <version>3.0-SNAPSHOT</version>
   <properties>
     <java.version>1.8</java.version>
     <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
@@ -23,20 +23,9 @@
     <projectlombok.version>1.18.0</projectlombok.version>
     <mockito.version>2.27.0</mockito.version>
     <json.version>2.10.3</json.version>
-
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.eea.utils</groupId>
-      <artifactId>common-utitlities</artifactId>
-      <version>${common-utitlities.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eea.interfaces</groupId>
-      <artifactId>common-interfaces</artifactId>
-      <version>${common-interfaces.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
@@ -260,6 +249,16 @@
 
 
     <dependency>
+      <groupId>org.eea.utils</groupId>
+      <artifactId>common-utitlities</artifactId>
+      <version>${common-utitlities.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eea.interfaces</groupId>
+      <artifactId>common-interfaces</artifactId>
+      <version>${common-interfaces.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
@@ -325,9 +324,7 @@
             <exclude>
               org.eea.*.mapper
             </exclude>
-            <exclude>
-              org.eea.validation.util.**
-            </exclude>
+
             <exclude>
               org.eea.ums.service.keycloak.model.**
             </exclude>
@@ -405,7 +402,7 @@
         </sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
         <sonar.coverage.exclusions>
-          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,**/org/eea/validation/util/**,
+          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,
           **/org/eea/ums/service/keycloak/model/**,**/org/eea/indexsearch/io/kafka/domain/**
         </sonar.coverage.exclusions>
       </properties>

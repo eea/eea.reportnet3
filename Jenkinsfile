@@ -1,10 +1,8 @@
-String cron_working_branch = BRANCH_NAME != "develop" && BRANCH_NAME != "sandbox" ? "@daily" : ""
+
 
 pipeline {
 
-    triggers {
-        cron(cron_working_branch)
-    }
+
 
     agent {
         label 'java8'
@@ -36,6 +34,7 @@ pipeline {
                 }
                 stage('Compile NPM') {
                     steps {
+                        sh 'rm -rf frontend-service/node_modules/'
                         sh '''
                             npm install frontend-service/
                         '''                                
@@ -148,7 +147,7 @@ pipeline {
         stage('Push to EEA GitHub') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1"
+                   BRANCH_NAME == "release/3.0.0-OP-Hotfix-121843"
                 }
             }
             steps {
@@ -188,7 +187,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox" ||  BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1"
+                   BRANCH_NAME == "release/3.0.0-OP-Hotfix-121843"
                 }
             }
             parallel {
@@ -199,36 +198,42 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/dataflow-service:" + env.DATAFLOW_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/dataflow-service-" + env.DATAFLOW_VERSION + ".jar --build-arg MS_PORT=8020 -f ./Dockerfile ./dataflow-service")
                             app.push()
+
                         }
                         script {
                             echo 'Dataset Service'
                             def app
                             app = docker.build("k8s-swi001:5000/dataset-service:" + env.DATASET_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/dataset-service-" + env.DATAFLOW_VERSION + ".jar --build-arg MS_PORT=8030 -f ./Dockerfile ./dataset-service")
                             app.push()
+
                         }
                         script {
                             echo 'Recordstore Service'
                             def app
                             app = docker.build("k8s-swi001:5000/recordstore-service:" + env.RECORDSTORE_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/recordstore-service-" + env.RECORDSTORE_VERSION + ".jar --build-arg MS_PORT=8090 ./recordstore-service/")
                             app.push()
+
                         }
                         script {
                             echo 'Validation Service'
                             def app
                             app = docker.build("k8s-swi001:5000/validation-service:" + env.VALIDATION_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/validation-service-" + env.VALIDATION_VERSION + ".jar --build-arg MS_PORT=8015 -f ./Dockerfile ./validation-service")
                             app.push()
+
                         }
                         script {
                             echo 'Collaboration Service'
                             def app
                             app = docker.build("k8s-swi001:5000/collaboration-service:" + env.COLLABORATION_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/collaboration-service-" + env.COLLABORATION_VERSION + ".jar --build-arg MS_PORT=9010 -f ./Dockerfile ./collaboration-service")
                             app.push()
+
                         }
                         script {
                             echo 'Document Container Service'
                             def app
                             app = docker.build("k8s-swi001:5000/document-container-service:" + env.DOCUMENT_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/document-container-service-" + env.DOCUMENT_VERSION + ".jar --build-arg MS_PORT=9040 -f ./Dockerfile ./document-container-service")
                             app.push()
+
                         }
 
                     }
@@ -247,30 +252,35 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/inspire-harvester:" + env.INSPIRE_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/inspire-harvester-" + env.INSPIRE_VERSION + ".jar --build-arg MS_PORT=8050 -f ./Dockerfile ./inspire-harvester ")
                             app.push()
+
                         }
                          script {
                             echo 'Communication Service'
                             def app
                             app = docker.build("k8s-swi001:5000/communication-service:" + env.COMMUNICATION_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/communication-service-" + env.COMMUNICATION_VERSION + ".jar --build-arg MS_PORT=9020 -f ./Dockerfile ./communication-service")
                             app.push()
+
                          }
                         script {
                             echo 'IndexSearch Service'
                             def app
                             app = docker.build("k8s-swi001:5000/indexsearch-service:" + env.INDEXSEARCH_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/indexsearch-service-" + env.INDEXSEARCH_VERSION + ".jar --build-arg MS_PORT=9030 -f ./Dockerfile ./indexsearch-service")
                             app.push()
+
                         }
                         script {
                             echo 'User Management Service'
                             def app
                             app = docker.build("k8s-swi001:5000/user-management-service:" + env.UMS_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/user-management-service-" + env.UMS_VERSION + ".jar --build-arg MS_PORT=9010 -f ./Dockerfile ./user-management-service")
                             app.push()
+
                         }
                         script {
                             echo 'ROD Service'
                             def app
                             app = docker.build("k8s-swi001:5000/rod-service:" + env.ROD_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/rod-service-" + env.ROD_VERSION + ".jar --build-arg MS_PORT=9050 -f ./Dockerfile ./rod-service")
                             app.push()
+
                         }
 
 
@@ -285,11 +295,36 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/reportnet-frontend-service:" +env.$FRONTEND_VERSION + env.$TAG_SUFIX, " ./frontend-service/")
                             app.push()                    
+
                         }
                     }
                 }
             
             }
+        }
+        stage('Cleaning docker images'){
+          when {
+            expression {
+              return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+            }
+          }
+          steps {
+            script {
+              sh 'docker rmi k8s-swi001:5000/api-gateway:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/dataflow-service:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/dataset-service:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/recordstore-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/validation-service:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/collaboration-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/document-container-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/inspire-harvester:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/communication-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/indexsearch-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/user-management-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/rod-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/reportnet-frontend-service:3.0${TAG_SUFIX}'
+            }
+          }
         }
         
         

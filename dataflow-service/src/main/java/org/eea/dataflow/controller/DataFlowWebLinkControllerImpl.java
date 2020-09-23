@@ -23,6 +23,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 
 /**
@@ -30,6 +35,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  */
 @RestController
 @RequestMapping(value = "/weblink")
+@Api(tags = "Weblinks : Weblinks Manager")
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
@@ -48,26 +54,31 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Gets the link.
    *
    * @param idLink the id link
+   *
    * @return the link
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "{idLink}")
-  public WeblinkVO getLink(@PathVariable("idLink") Long idLink) {
+  @ApiOperation(value = "Find a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public WeblinkVO getLink(
+      @ApiParam(value = "Weblink Id", example = "0") @PathVariable("idLink") Long idLink) {
 
     try {
       return dataflowWebLinkService.getWebLink(idLink);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error("Access forbidden");
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
 
 
   }
@@ -81,19 +92,28 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PostMapping
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
-  public void saveLink(@RequestParam(value = "dataflowId") Long dataflowId, WeblinkVO weblinkVO) {
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
+  @ApiOperation(value = "Create a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Successfully created Weblink"),
+      @ApiResponse(code = 404, message = "Dataflow Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void saveLink(
+      @ApiParam(value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+      @ApiParam(type = "Object", value = "Weblink Object") WeblinkVO weblinkVO) {
 
     try {
       dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (WrongDataExceptions e) {
-      LOG_ERROR.error("Bad Request");
+      LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
@@ -107,18 +127,23 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idLink}")
-  public void removeLink(@PathVariable(value = "idLink") Long idLink) {
+  @ApiOperation(value = "Remove a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void removeLink(
+      @ApiParam(value = "Weblink Id", example = "0") @PathVariable(value = "idLink") Long idLink) {
 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error("Access forbidden");
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -131,20 +156,26 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PutMapping
-  public void updateLink(@RequestBody WeblinkVO weblinkVO) {
+  @ApiOperation(value = "Update a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 403, message = "Forbidden"),
+      @ApiResponse(code = 404, message = "Not Found"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void updateLink(
+      @ApiParam(type = "Object", value = "Weblink Object") @RequestBody WeblinkVO weblinkVO) {
     try {
       dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error("Access forbidden");
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (WrongDataExceptions e) {
-      LOG_ERROR.error("Bad Request");
+      LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 

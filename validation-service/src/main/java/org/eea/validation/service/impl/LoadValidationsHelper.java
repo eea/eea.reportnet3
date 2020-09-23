@@ -105,11 +105,15 @@ public class LoadValidationsHelper {
         errors.putAll(fieldErrors.get());
       } catch (InterruptedException | ExecutionException e) {
         LOG_ERROR.error("Error obtaining the errors ", e);
+        if (e instanceof InterruptedException) {
+          Thread.currentThread().interrupt();
+        }
       }
     }
-    validation
-        .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
-
+    if (!errors.isEmpty()) {
+      validation
+          .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
+    }
     validation.setTotalRecords(validationRepository.count());
     validation.setTotalFilteredRecords(validationRepository.countRecordsByFilter(datasetId,
         levelErrorsFilter, typeEntitiesFilter, originsFilter));

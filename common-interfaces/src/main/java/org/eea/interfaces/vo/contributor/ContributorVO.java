@@ -19,14 +19,16 @@ public class ContributorVO implements Serializable {
    */
   private static final long serialVersionUID = -6722104829767052100L;
 
-  /**
-   * The user id.
-   */
-  private String userId;
+  /** The account email. */
+  private String account;
 
-  /**
-   * The email.
-   */
-  private String email;
+  /** The role. */
+  private String role;
+
+  /** The write permission. */
+  private Boolean writePermission;
+
+  /** The data provider id. */
+  private Long dataProviderId;
 
 }

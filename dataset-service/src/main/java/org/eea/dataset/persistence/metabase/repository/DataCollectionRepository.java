@@ -32,6 +32,11 @@ public interface DataCollectionRepository extends CrudRepository<DataCollection,
    */
   Optional<DataCollection> findFirstByDatasetSchema(String datasetSchema);
 
+  /**
+   * Delete dataset by id.
+   *
+   * @param datasetIds the dataset ids
+   */
   @Transactional
   @Modifying
   @Query(nativeQuery = true, value = "delete from dataset where id in :datasetIds")

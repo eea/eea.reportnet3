@@ -7,11 +7,15 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -19,6 +23,7 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.RuleExpressionService;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
@@ -29,155 +34,106 @@ import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * The Class KieBaseManager.
- */
+/** The Class KieBaseManager. */
 @Component
 public class KieBaseManager {
 
-  /**
-   * The Constant REGULATION_TEMPLATE_FILE.
-   */
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
-  /**
-   * The rules repository.
-   */
+  /** The Constant REGULATION_TEMPLATE_FILE. */
+  private static final String TYPE_DATA = "typeData";
+
+  /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
-  /**
-   * The dataset metabase controller.
-   */
+
+  /** The dataset metabase controller. */
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The rule expression service. */
+  @Autowired
+  private RuleExpressionService ruleExpressionService;
 
   /**
    * Reload rules.
    *
    * @param datasetId the dataset id
-   * @param datasetSchema the dataset schema
+   * @param datasetSchemaId the dataset schema
    *
    * @return the kie base
    *
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
-    DataSetMetabaseVO dataSetMetabaseVO =
-        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+  public KieBase reloadRules(Long datasetId, String datasetSchemaId) throws FileNotFoundException {
 
-    // we take all actives kiebase
-    RulesSchema schemaRules =
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchema), true);
-
+    ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
 
+    // Get enabled and verified rules
+    RulesSchema schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
+
     // we bring the datasetschema
-    DataSetSchema dataSetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchema));
+    DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
 
     // here we have the mothod who compose the field in template
-    if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
+    if (null != schemaRules && null != schemaRules.getRules()
+        && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";
         String originName = "";
-        StringBuilder expression = new StringBuilder("");
         TypeValidation typeValidation = null;
         switch (rule.getType()) {
           case DATASET:
             schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
             typeValidation = TypeValidation.DATASET;
-            originName = dataSetMetabaseVO.getDataSetName();
+            originName =
+                datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
             break;
           case TABLE:
             schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
             typeValidation = TypeValidation.TABLE;
-            for (TableSchema table : dataSetSchema.getTableSchemas()) {
-              if (table.getIdTableSchema().equals(rule.getReferenceId())) {
-                originName = table.getNameTableSchema();
-              }
-            }
-
+            originName = fillTableOriginName(dataSetSchema, rule, originName);
             break;
           case RECORD:
             schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
             typeValidation = TypeValidation.RECORD;
-            for (TableSchema table : dataSetSchema.getTableSchemas()) {
-              if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
-                originName = table.getNameTableSchema();
-              }
-            }
+            originName = fillRecordOriginName(dataSetSchema, rule, originName);
             break;
           case FIELD:
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
-            for (TableSchema table : dataSetSchema.getTableSchemas()) {
-              for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-                if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
-                  originName = table.getNameTableSchema();
-                }
-              }
-            }
-
-            // if the type is field and isnt automatic we create the rules to validate check if
-            // the
-            // data are correct
-            Document documentField =
-                schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
-            DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
-
-            // that switch clear the validations , and check if the datas in values are correct
-            if (null != datatype && !rule.isAutomatic()) {
-              switch (datatype) {
-                case NUMBER:
-                  expression.append("( !isBlank(value) || isNumber(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
-                  break;
-                case DATE:
-                  expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
-                  break;
-                case BOOLEAN:
-                  expression.append("( !isBlank(value) || isBoolean(value) && ");
-                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
-                  break;
-                case COORDINATE_LAT:
-                  expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
-                  break;
-                case COORDINATE_LONG:
-                  expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
-                  break;
-                default:
-                  expression.append("( !isBlank(value) || ");
-                  break;
-              }
-            }
-            if (!StringUtils.isBlank(expression.toString())) {
-              String whenConditionWithParenthesis = new StringBuilder("").append("(")
-                  .append(rule.getWhenCondition()).append(")").toString();
-              rule.setWhenCondition(
-                  expression.append(whenConditionWithParenthesis).append(")").toString());
-            }
+            originName = fillFieldOriginName(dataSetSchema, rule, originName);
+            break;
+          default:
+            break;
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-            rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+            rule.getRuleId().toString(), typeValidation, schemasDrools,
+            "RuleOperators.setEntity(this) && " + rule.getWhenCondition(),
             rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
       });
     }
@@ -187,94 +143,156 @@ public class KieBaseManager {
     return kieHelper.build();
   }
 
+
   /**
-   * Text rule and put disable if is the rule have not correct format
+   * Fill table origin name.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   * @param originName the origin name
+   * @return the string
+   */
+  private String fillTableOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      if (table.getIdTableSchema().equals(rule.getReferenceId())) {
+        originName = table.getNameTableSchema();
+      }
+    }
+    return originName;
+  }
+
+  /**
+   * Fill record origin name.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   * @param originName the origin name
+   * @return the string
+   */
+  private String fillRecordOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
+        originName = table.getNameTableSchema();
+      }
+    }
+    return originName;
+  }
+
+  /**
+   * Fill field origin name.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   * @param originName the origin name
+   * @return the string
+   */
+  private String fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
+          originName = table.getNameTableSchema();
+        }
+      }
+    }
+    return originName;
+  }
+
+  /**
+   * Text rule correct.
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
+   */
+  @Async
+  @SuppressWarnings("unchecked")
+  public void validateRule(String datasetSchemaId, Rule rule) {
+
+    Map<String, DataType> dataTypeMap = new HashMap<>();
+    EntityTypeEnum ruleType = rule.getType();
+    String ruleExpressionString = rule.getWhenCondition();
+    EventType notificationEventType = null;
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
+        .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
+
+    switch (ruleType) {
+      case RECORD:
+        String recordSchemaId = rule.getReferenceId().toString();
+        Document recordSchema = schemasRepository.findRecordSchema(datasetSchemaId, recordSchemaId);
+        for (Document field : (ArrayList<Document>) recordSchema.get("fieldSchemas")) {
+          String fieldSchemaId = field.get("_id").toString();
+          DataType fieldDataType = DataType.valueOf(field.get(TYPE_DATA).toString());
+          dataTypeMap.put(fieldSchemaId, fieldDataType);
+        }
+        break;
+      case FIELD:
+        String fieldSchemaId = rule.getReferenceId().toString();
+        Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
+        dataTypeMap.put("VALUE", DataType.valueOf(fieldSchema.get(TYPE_DATA).toString()));
+        break;
+      default:
+        validateWithKiebase(datasetSchemaId, rule, notificationVO);
+        return;
+    }
+
+    if (ruleExpressionService.isDataTypeCompatible(ruleExpressionString, ruleType, dataTypeMap)) {
+      notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
+      rule.setVerified(true);
+      LOG.info("Rule validation passed: {}", rule);
+    } else {
+      notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
+      rule.setVerified(false);
+      rule.setEnabled(false);
+      LOG.info("Rule validation not passed: {}", rule);
+    }
+
+    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    releaseNotification(notificationEventType, notificationVO);
+  }
+
+  /**
+   * Text rule and put disable if is the rule have not correct format.
    *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @param notificationVO the notification VO
    * @return true, if successful
    */
   @Async
-  public void textRuleCorrect(String datasetSchemaId, Rule rule) {
+  public void validateWithKiebase(String datasetSchemaId, Rule rule,
+      NotificationVO notificationVO) {
 
-    KieServices kieServices = KieServices.Factory.get();
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
-    List<Map<String, String>> ruleAttribute = new ArrayList<>();
-    TypeValidation typeValidation = TypeValidation.DATASET;
-    String schemasDrools = "";
-    String whenCondition = rule.getWhenCondition();
-    StringBuilder expression = new StringBuilder("");
-    switch (rule.getType()) {
-      case DATASET:
-        schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
-        typeValidation = TypeValidation.DATASET;
-        break;
-      case TABLE:
-        schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
-        typeValidation = TypeValidation.TABLE;
-        break;
-      case RECORD:
-        schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
-        typeValidation = TypeValidation.RECORD;
-        break;
-      case FIELD:
-        schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
-        typeValidation = TypeValidation.FIELD;
-        break;
-    }
+    if (EntityTypeEnum.TABLE.equals(rule.getType())) {
+      EventType notificationEventType = null;
+      KieServices kieServices = KieServices.Factory.get();
+      ObjectDataCompiler compiler = new ObjectDataCompiler();
+      List<Map<String, String>> ruleAttribute = new ArrayList<>();
 
-    Document documentField =
-        schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-    DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+      ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
+          TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(), rule.getWhenCondition(),
+          rule.getThenCondition().get(0), rule.getThenCondition().get(1), ""));
 
-    // we do the same thing like in kiebase validation part
-    if (null != datatype) {
-      switch (datatype) {
-        case NUMBER:
-          expression.append("( !isBlank(value) || isNumber(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        case DATE:
-          expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
-          break;
-        case BOOLEAN:
-          expression.append("( !isBlank(value) || isBoolean(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
-          break;
-        case COORDINATE_LAT:
-          expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        case COORDINATE_LONG:
-          expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        default:
-          expression.append("( !isBlank(value) || ");
-          break;
+      // We create the same text like in kiebase and with that part we check if the rule is correct
+      KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
+
+      // Check rule integrity
+      Results results = kieHelperTest.verify();
+
+      if (results.hasMessages(Message.Level.ERROR)) {
+        notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
+        rule.setVerified(false);
+        rule.setEnabled(false);
+        LOG.info("Rule validation with Kiebase not passed: {}", rule);
+      } else {
+        notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
+        rule.setVerified(true);
+        LOG.info("Rule validation with Kiebase passed: {}", rule);
       }
-    }
-    if (!StringUtils.isBlank(expression.toString())) {
-      String whenConditionWithParenthesis =
-          new StringBuilder("").append("(").append(whenCondition).append(")").toString();
-      expression.append(whenConditionWithParenthesis).append(")").toString();
-    }
-    ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-        typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
-        rule.getThenCondition().get(1), ""));
 
-    // We create the same text like in kiebase and with that part we check if the rule is correct
-    KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
-
-    Results results = kieHelperTest.verify();
-    // if one rule is not correct we return a false and the rule
-    // will not be created
-    if (results.hasMessages(Message.Level.ERROR)) {
-      rule.setEnabled(Boolean.FALSE);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-
+      releaseNotification(notificationEventType, notificationVO);
+    } else {
+      LOG.info("Not a validable rule: {}", rule);
     }
   }
 
@@ -331,4 +349,17 @@ public class KieBaseManager {
     return ruleAdd;
   }
 
+  /**
+   * Release notification.
+   *
+   * @param eventType the event type
+   * @param notificationVO the notification VO
+   */
+  private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+    }
+  }
 }

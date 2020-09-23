@@ -5,14 +5,18 @@ export const DatasetRepository = {
   addTableDesign: () => Promise.reject('[DatasetRepository#addTableDesign] must be implemented'),
   createValidation: () => Promise.reject('[DatasetRepository#createValidation] must be implemented'),
   deleteDataById: () => Promise.reject('[DatasetRepository#deleteDataById] must be implemented'),
+  deleteFileData: () => Promise.reject('[DatasetRepository#deleteFileData] must be implemented'),
   deleteRecordById: () => Promise.reject('[DatasetRepository#deleteRecordById] must be implemented'),
   deleteSchemaById: () => Promise.reject('[DatasetRepository#deleteSchemaById] must be implemented'),
   deleteTableDataById: () => Promise.reject('[DatasetRepository#deleteTableDataById] must be implemented'),
   deleteTableDesign: () => Promise.reject('[DatasetRepository#deleteTableDesign] must be implemented'),
-  errorsById: () => Promise.reject('[DatasetRepository#errorsById] must be implemented'),
+  downloadExportFile: () => Promise.reject('[DatasetRepository#downloadExportFile] must be implemented'),
+  downloadFileData: () => Promise.reject('[DatasetRepository#downloadFileData] must be implemented'),
   errorPositionByObjectId: () => Promise.reject('[DatasetRepository#errorPositionByObjectId] must be implemented'),
+  errorsById: () => Promise.reject('[DatasetRepository#errorsById] must be implemented'),
   errorStatisticsById: () => Promise.reject('[DatasetRepository#errorStatisticsById] must be implemented'),
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
+  exportDatasetDataExternal: () => Promise.reject('[DatasetRepository#exportDatasetDataExternal] must be implemented'),
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
   getMetaData: () => Promise.reject('[DatasetRepository#getMetaData] must be implemented'),
   getReferencedFieldValues: () => Promise.reject('[DatasetRepository#getReferencedFieldValues] must be implemented'),
@@ -26,8 +30,7 @@ export const DatasetRepository = {
   updateDatasetSchemaDescriptionDesign: () =>
     Promise.reject('[DatasetRepository#updateDatasetSchemaDescriptionDesign] must be implemented'),
   updateTableDesign: () => Promise.reject('[DatasetRepository#updateTableDesign] must be implemented'),
-  validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented'),
-  webFormDataById: () => Promise.reject('[DatasetRepository#webFormDataById] must be implemented')
+  validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented')
 };
 
 export const datasetRepository = Object.assign({}, DatasetRepository, ApiDatasetRepository);

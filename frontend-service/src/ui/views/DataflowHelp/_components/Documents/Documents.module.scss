@@ -27,8 +27,15 @@
   padding-bottom: 0 !important;
 }
 
-.hideColumn {
+.emptyTableHeader {
   display: none;
+  :global .p-column-title {
+    display: none;
+  }
+}
+
+.iconStyle {
+  text-align: center;
 }
 
 .deleteRowButton {
@@ -47,6 +54,14 @@
   border: 1px solid var(--c-custom-gray) !important;
   box-shadow: 0 0 0 0em var(--blue-100) !important;
   margin-left: 3px !important;
+}
+
+.noDataWrapper {
+  display: flex;
+  justify-content: center;
+  h4 {
+    font-style: italic;
+  }
 }
 
 @keyframes downloadFile {
