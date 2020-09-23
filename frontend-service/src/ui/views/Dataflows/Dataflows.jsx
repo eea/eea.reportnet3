@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
-import snakeCase from 'lodash/snakeCase';
 
 import styles from './Dataflows.module.scss';
 
