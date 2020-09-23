@@ -255,11 +255,9 @@ const useBigButtonList = ({
     }
 
     const datasetsIdsArray = [];
-    const datasetsNamesArray = [];
 
     return allDatasets.map(representative => {
       datasetsIdsArray.push(representative.datasetId);
-      datasetsNamesArray.push(representative.datasetName);
 
       return {
         buttonClass: 'dataset',
@@ -277,7 +275,7 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleases(datasetsIdsArray, representative.name, datasetsNamesArray);
+              getDataHistoricReleases(datasetsIdsArray, representative.name, representative.id);
             }
           }
         ],

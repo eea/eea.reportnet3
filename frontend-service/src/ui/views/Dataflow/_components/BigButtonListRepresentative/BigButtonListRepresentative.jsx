@@ -33,6 +33,7 @@ export const BigButtonListRepresentative = ({
     bigButtonListRepresentativeReducer,
     {
       datasetId: null,
+      dataProviderId: null,
       historicReleasesDialogHeader: [],
       historicReleasesView: '',
       isHistoricReleasesDialogVisible: false
@@ -54,8 +55,11 @@ export const BigButtonListRepresentative = ({
     }
   };
 
-  const getDataHistoricReleases = (datasetId, value) => {
-    bigButtonListRepresentativeDispatch({ type: 'GET_HISTORIC_RELEASE_DATASET_DATA', payload: { datasetId, value } });
+  const getDataHistoricReleases = (datasetId, value, dataProviderId) => {
+    bigButtonListRepresentativeDispatch({
+      type: 'GET_HISTORIC_RELEASE_DATASET_DATA',
+      payload: { datasetId, value, dataProviderId }
+    });
   };
 
   const onCloseHistoricReleasesDialogVisible = value => {
@@ -123,6 +127,7 @@ export const BigButtonListRepresentative = ({
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
             datasetId={bigButtonListRepresentativeState.datasetId}
+            dataProviderId={bigButtonListRepresentativeState.dataProviderId}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
           />
         </Dialog>

@@ -1,6 +1,8 @@
-import { GetAllDataCollectionHistoricReleases } from './GetAllDataCollectionHistoricReleases';
+import { GetAllHistoricReleases } from './GetAllHistoricReleases';
+import { GetAllRepresentativeHistoricReleases } from './GetAllRepresentativeHistoricReleases';
 import { releaseRepository } from 'core/domain/model/Release/ReleaseRepository';
 
 export const ReleaseService = {
-  allDataCollectionHistoricReleases: GetAllDataCollectionHistoricReleases({ releaseRepository })
+  allHistoricReleases: GetAllHistoricReleases({ releaseRepository }),
+  allRepresentativeHistoricReleases: GetAllRepresentativeHistoricReleases({ releaseRepository })
 };

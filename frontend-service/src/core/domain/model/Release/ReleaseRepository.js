@@ -1,7 +1,8 @@
 import { ApiReleaseRepository } from 'core/infrastructure/domain/model/Release/ApiReleaseRepository';
 
 export const ReleaseRepository = {
-  allDataCollectionHistoricReleases: () =>
+  allHistoricReleases: () => Promise.reject('[ReleaseDatasetDesignerRepository#createById] must be implemented'),
+  allRepresentativeHistoricReleases: () =>
     Promise.reject('[ReleaseDatasetDesignerRepository#createById] must be implemented')
 };
 

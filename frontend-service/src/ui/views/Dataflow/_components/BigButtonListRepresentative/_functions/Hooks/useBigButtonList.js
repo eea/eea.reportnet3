@@ -75,6 +75,7 @@ const useBigButtonList = ({
     .map(dataset => {
       const datasetName = dataset.name;
       const datasetId = dataset.datasetId;
+      const dataProviderId = dataset.dataProviderId;
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
@@ -100,7 +101,7 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset', true);
-              getDataHistoricReleases(datasetId, datasetName);
+              getDataHistoricReleases(datasetId, datasetName, dataProviderId);
             }
           }
         ],

@@ -23,7 +23,7 @@ import { ReleaseService } from 'core/services/Release';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
-export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName }) => {
+export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -35,27 +35,26 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
   });
 
   useEffect(() => {
-    Array.isArray(datasetId)
-      ? datasetId.forEach(datasetId => onLoadHistoricReleases(datasetId))
-      : onLoadHistoricReleases(datasetId);
+    onLoadHistoricReleases();
   }, []);
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onLoadFilteredData = data => historicReleasesDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const historicReleases = [];
-  const onLoadHistoricReleases = async datasetId => {
+  const onLoadHistoricReleases = async () => {
     try {
       isLoading(true);
-      const response = await ReleaseService.allDataCollectionHistoricReleases(141);
-      response.forEach(historicRelease => historicReleases.push(historicRelease));
+      let response = null;
+      Array.isArray(datasetId)
+        ? (response = await ReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
+        : (response = await ReleaseService.allHistoricReleases(datasetId));
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: historicReleases, filteredData: historicReleases }
+        payload: { data: response, filteredData: response }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
     } finally {
       isLoading(false);
@@ -235,12 +234,10 @@ export const HistoricReleases = ({ datasetId, historicReleasesView, datasetName 
           value={historicReleasesState.filteredData}>
           {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
           {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(historicReleasesState.filteredData)}
-          {historicReleasesView === 'reportingDataset' &&
-            Array.isArray(datasetId) &&
-            renderReportingDatasetsColumns(historicReleasesState.filteredData)}
-          {historicReleasesView === 'reportingDataset' &&
-            !Array.isArray(datasetId) &&
-            renderReportingDatasetColumns(historicReleasesState.filteredData)}
+          {Array.isArray(datasetId)
+            ? renderReportingDatasetsColumns(historicReleasesState.filteredData)
+            : historicReleasesView === 'reportingDataset' &&
+              renderReportingDatasetColumns(historicReleasesState.filteredData)}
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>{resources.messages['noHistoricReleasesWithSelectedParameters']}</div>

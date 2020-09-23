@@ -1,3 +1,4 @@
 {
-  "loadDataCollectionHistoricReleases": "/snapshot/historicReleases?datasetId={:datasetId}"
+  "loadAllHistoricReleases": "/snapshot/historicReleases?datasetId={:datasetId}",
+  "loadAllRepresentativeHistoricReleases": "/snapshot/historicReleasesRepresentative?dataflowId={:dataflowId}&?representativeId={:representativeId}"
 }

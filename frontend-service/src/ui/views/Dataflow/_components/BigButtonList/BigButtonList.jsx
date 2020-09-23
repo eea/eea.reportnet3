@@ -63,6 +63,7 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
+  const [dataProviderId, setDataProviderId] = useState(null);
   const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -147,10 +148,10 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, datasetName) => {
+  const getDataHistoricReleases = (datasetId, value, dataProviderId) => {
     setDatasetId(datasetId);
     setHistoricReleasesDialogHeader(value);
-    setDatasetName(datasetName);
+    setDataProviderId(dataProviderId);
   };
 
   const getDeleteSchemaIndex = index => {
@@ -455,9 +456,10 @@ export const BigButtonList = ({
           // style={{ width: '80%' }}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
+            dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
-            datasetName={datasetName}
           />
         </Dialog>
       )}
