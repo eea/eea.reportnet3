@@ -37,14 +37,20 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
 };
 
 const addRecordsById = async (datasetId, tableSchemaId, records) => {
+  console.log('add records');
   const datasetTableRecords = [];
   records.forEach(record => {
-    let fields = record.dataRow.map(DataTableFieldDTO => {
+    let fields = record.dataRow.map(dataTableFieldDTO => {
+      console.log(dataTableFieldDTO);
       let newField = new DatasetTableField({});
       newField.id = null;
-      newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
-      newField.type = DataTableFieldDTO.fieldData.type;
-      newField.value = DataTableFieldDTO.fieldData[DataTableFieldDTO.fieldData.fieldSchemaId];
+      newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+      newField.type = dataTableFieldDTO.fieldData.type;
+      newField.value = parseValue(
+        dataTableFieldDTO.fieldData.type,
+        dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+        true
+      );
 
       return newField;
     });
@@ -271,10 +277,17 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
   return tableOrdered;
 };
 
-const parseValue = (type, value) => {
-  if (type === 'GEOMETRY' && value !== '') {
+const parseValue = (type, value, feToBe = false) => {
+  if (type === 'GEOMETRY' && value !== '' && !isNil(value)) {
+    // debugger;
     const inmValue = JSON.parse(cloneDeep(value));
     inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
+    if (!feToBe) {
+      inmValue.properties.rsid = `EPSG:${inmValue.properties.rsid}`;
+    } else {
+      console.log(inmValue.properties.rsid, inmValue.properties.rsid.split(':'));
+      inmValue.properties.rsid = inmValue.properties.rsid.split(':')[1];
+    }
     return JSON.stringify(inmValue);
   }
   return value;
@@ -410,11 +423,12 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 };
 
 const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
+  console.log('UPDATE');
   const datasetTableField = new DatasetTableField({});
   datasetTableField.id = fieldId;
   datasetTableField.idFieldSchema = fieldSchemaId;
   datasetTableField.type = fieldType;
-  datasetTableField.value = fieldValue;
+  datasetTableField.value = parseValue(fieldType, fieldValue, true);
 
   const fieldUpdated = await apiDataset.updateFieldById(datasetId, datasetTableField);
   return fieldUpdated;

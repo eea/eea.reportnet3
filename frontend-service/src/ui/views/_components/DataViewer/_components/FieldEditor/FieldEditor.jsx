@@ -47,6 +47,8 @@ const FieldEditor = ({
     { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
   ];
 
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
@@ -60,7 +62,9 @@ const FieldEditor = ({
   );
   const [isMapDisabled, setIsMapDisabled] = useState(
     !MapUtils.checkValidCoordinates(
-      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+      RecordUtils.getCellValue(cells, cells.field) !== ''
+        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+        : ''
     )
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
@@ -236,7 +240,9 @@ const FieldEditor = ({
                 onEditorSubmitValue(
                   cells,
                   changePoint(
-                    JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
                     e.target.value,
                     currentCRS.value,
                     false
@@ -246,7 +252,9 @@ const FieldEditor = ({
                 onEditorValueChange(
                   cells,
                   changePoint(
-                    JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
                     e.target.value,
                     currentCRS.value,
                     false
@@ -257,7 +265,9 @@ const FieldEditor = ({
                 onEditorValueChange(
                   cells,
                   changePoint(
-                    JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
                     e.target.value,
                     currentCRS.value,
                     false,
@@ -271,7 +281,9 @@ const FieldEditor = ({
               }}
               onKeyDown={e => {
                 changePoint(
-                  JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                  RecordUtils.getCellValue(cells, cells.field) !== ''
+                    ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                    : JSON.parse(fieldEmptyPointValue),
                   e.target.value,
                   currentCRS.value,
                   false,
@@ -282,7 +294,11 @@ const FieldEditor = ({
               }}
               // style={{ marginRight: '2rem' }}
               type="text"
-              value={JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')}
+              value={
+                RecordUtils.getCellValue(cells, cells.field) !== ''
+                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+                  : ''
+              }
             />
             <div className={styles.pointSridWrapper}>
               <label className={styles.srid}>{resources.messages['srid']}</label>
