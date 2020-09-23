@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -14,6 +14,7 @@ import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporte
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
@@ -74,21 +75,27 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
-  const [exportDatasetFileType, setExportDatasetFileType] = useState('');
-  const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
+  const [externalOperationsList, setExternalOperationsList] = useState({
+    export: [],
+    import: [],
+    importOtherSystems: []
+  });
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
-  const [hasValidations, setHasValidations] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
+  const [importButtonsList, setImportButtonsList] = useState([]);
+  const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
+  const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [metaData, setMetaData] = useState({});
+  const [replaceData, setReplaceData] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaId, setTableSchemaId] = useState();
@@ -98,6 +105,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
 
   let exportMenuRef = useRef();
+  let importMenuRef = useRef();
 
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
@@ -137,6 +145,14 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetName, externalExportExtensions]);
 
   useEffect(() => {
+    if (isEmpty(externalOperationsList.import)) {
+      setImportButtonsList(importFromOtherSystems);
+    } else {
+      setImportButtonsList(importFromFile.concat(importFromOtherSystems));
+    }
+  }, [externalOperationsList.import]);
+
+  useEffect(() => {
     if (!isUndefined(exportDatasetData)) {
       DownloadFile(exportDatasetData, exportDatasetDataName);
     }
@@ -144,10 +160,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const {
     isLoadingSnapshotListData,
-    isSnapshotsBarVisible,
-    setIsSnapshotsBarVisible,
     isSnapshotDialogVisible,
+    isSnapshotsBarVisible,
     setIsSnapshotDialogVisible,
+    setIsSnapshotsBarVisible,
     snapshotDispatch,
     snapshotListData,
     snapshotState
@@ -162,11 +178,11 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (datasetSchemaId) getFileExtensions();
-  }, [datasetSchemaId, importDatasetDialogVisible]);
+  }, [datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
-    getExportExtensions(extensionsOperationsList.export);
-  }, [extensionsOperationsList]);
+    getExportExtensions(externalOperationsList.export);
+  }, [externalOperationsList]);
 
   const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
@@ -179,6 +195,28 @@ export const Dataset = withRouter(({ match, history }) => {
     const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
     setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
   };
+
+  const importFromFile = [
+    {
+      label: resources.messages['importFromFile'],
+      icon: config.icons['import'],
+      command: () => setIsImportDatasetDialogVisible(true)
+    }
+  ];
+
+  const importFromOtherSystems = [
+    {
+      label: resources.messages['importPreviousData'],
+      items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
+        label: importOtherSystem.name,
+        icon: config.icons['import'],
+        command: () => {
+          setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
+          setIsImportOtherSystemsDialogVisible(true);
+        }
+      }))
+    }
+  ];
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
@@ -200,7 +238,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const getFileExtensions = async () => {
     try {
       const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-      setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
+      setExternalOperationsList(ExtensionUtils.groupOperations('operation', response));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
@@ -246,11 +284,11 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const getPosition = e => {
-    const exportButton = e.currentTarget;
-    const left = `${exportButton.offsetLeft}px`;
-    const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
+    const button = e.currentTarget;
+    const left = `${button.offsetLeft}px`;
+    const topValue = button.offsetHeight + button.offsetTop + 3;
     const top = `${topValue}px `;
-    const menu = exportButton.nextElementSibling;
+    const menu = button.nextElementSibling;
     menu.style.top = top;
     menu.style.left = left;
   };
@@ -305,48 +343,88 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const cleanImportOtherSystemsDialog = () => {
+    setReplaceData(false);
+    onSetVisible(setIsImportOtherSystemsDialogVisible, false);
+  };
+
+  const onImportOtherSystems = async () => {
+    try {
+      cleanImportOtherSystemsDialog();
+      const dataImported = await IntegrationService.runIntegration(
+        importFromOtherSystemSelectedIntegrationId,
+        datasetId,
+        replaceData
+      );
+      if (dataImported) {
+        setIsDataLoaded(true);
+      }
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'DATASET_IMPORT_INIT',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
+    } catch {
+      notificationContext.add({
+        type: 'EXTERNAL_IMPORT_REPORING_FROM_OTHER_SYSTEM_ERROR',
+        content: {
+          dataflowName: dataflowName,
+          datasetName: datasetName
+        }
+      });
+    }
+  };
+
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
-  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
+  useCheckNotifications(
+    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
+    setIsLoadingFile,
+    false
+  );
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
 
-  const onExportError = async () => {
+  const onExportError = async exportNotification => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = await getMetadata({ dataflowId, datasetId });
 
     notificationContext.add({
-      type: 'EXPORT_DATA_BY_ID_ERROR',
-      content: { dataflowId, datasetId, dataflowName, datasetName }
+      type: exportNotification,
+      content: {
+        dataflowName: dataflowName,
+        datasetName: datasetName
+      }
     });
   };
 
   const onExportDataExternalExtension = async fileExtension => {
     setIsLoadingFile(true);
-    setExportDatasetFileType(fileExtension);
     notificationContext.add({
       type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
     });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
-      onExportError();
+      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
   };
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    setExportDatasetFileType(fileType);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
-      onExportError();
+      onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {
       setIsLoadingFile(false);
     }
@@ -516,7 +594,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onUpload = async () => {
-    setImportDatasetDialogVisible(false);
+    setIsImportDatasetDialogVisible(false);
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
@@ -534,7 +612,7 @@ export const Dataset = withRouter(({ match, history }) => {
     //setIsTableDeleted(false);
   };
 
-  const getImportExtensions = extensionsOperationsList.import
+  const getImportExtensions = externalOperationsList.import
     .map(file => `.${file.fileExtension}`)
     .join(', ')
     .toLowerCase();
@@ -548,7 +626,7 @@ export const Dataset = withRouter(({ match, history }) => {
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
       label={resources.messages['close']}
-      onClick={() => setImportDatasetDialogVisible(false)}
+      onClick={() => setIsImportDatasetDialogVisible(false)}
     />
   );
 
@@ -561,16 +639,32 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
+  const renderImportOtherSystemsFooter = (
+    <Fragment>
+      <Button
+        className="p-button-animated-blink"
+        label={resources.messages['import']}
+        icon={'check'}
+        onClick={() => onImportOtherSystems()}
+      />
+      <Button
+        className="p-button-secondary"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => cleanImportOtherSystemsDialog()}
+      />
+    </Fragment>
+  );
+
   if (isLoading) return layout(<Spinner />);
 
   return layout(
     <SnapshotContext.Provider
       value={{
-        snapshotState: snapshotState,
-        snapshotDispatch: snapshotDispatch,
         isSnapshotsBarVisible: isSnapshotsBarVisible,
-
-        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
+        snapshotDispatch: snapshotDispatch,
+        snapshotState: snapshotState
       }}>
       <Title
         title={`${datasetTitle()}`}
@@ -581,17 +675,35 @@ export const Dataset = withRouter(({ match, history }) => {
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
-            {hasWritePermissions && !isEmpty(extensionsOperationsList.import) && (
-              <Button
-                className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
-                  !hasWritePermissions ? null : 'p-button-animated-blink'
-                }`}
-                disabled={!hasWritePermissions}
-                icon={'import'}
-                label={resources.messages['importDataset']}
-                onClick={() => setImportDatasetDialogVisible(true)}
-              />
-            )}
+            {hasWritePermissions &&
+              (!isEmpty(externalOperationsList.import) || !isEmpty(externalOperationsList.importOtherSystems)) && (
+                <Fragment>
+                  <Button
+                    className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
+                      !hasWritePermissions ? null : 'p-button-animated-blink'
+                    }`}
+                    disabled={!hasWritePermissions}
+                    icon={'import'}
+                    label={resources.messages['importDataset']}
+                    onClick={
+                      !isEmpty(externalOperationsList.importOtherSystems)
+                        ? event => importMenuRef.current.show(event)
+                        : () => setIsImportDatasetDialogVisible(true)
+                    }
+                  />
+                  {!isEmpty(externalOperationsList.importOtherSystems) && (
+                    <Menu
+                      model={importButtonsList}
+                      popup={true}
+                      ref={importMenuRef}
+                      id="importDataSetMenu"
+                      onShow={e => {
+                        getPosition(e);
+                      }}
+                    />
+                  )}
+                </Fragment>
+              )}
             <Button
               id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
@@ -739,18 +851,16 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetSchemaId={datasetSchemaId}
             onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
-            setHasValidations={setHasValidations}
           />
         </Dialog>
       )}
-      {importDatasetDialogVisible && (
+      {isImportDatasetDialogVisible && (
         <Dialog
           className={styles.Dialog}
-          dismissableMask={false}
           footer={renderCustomFileUploadFooter}
           header={`${resources.messages['uploadDataset']}${datasetName}`}
-          onHide={() => setImportDatasetDialogVisible(false)}
-          visible={importDatasetDialogVisible}>
+          onHide={() => setIsImportDatasetDialogVisible(false)}
+          visible={isImportDatasetDialogVisible}>
           <CustomFileUpload
             accept={getImportExtensions}
             chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
@@ -762,10 +872,33 @@ export const Dataset = withRouter(({ match, history }) => {
             multiple={false}
             name="file"
             onUpload={onUpload}
+            replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
               datasetId: datasetId
             })}`}
           />
+        </Dialog>
+      )}
+      {isImportOtherSystemsDialogVisible && (
+        <Dialog
+          className={styles.Dialog}
+          footer={renderImportOtherSystemsFooter}
+          header={resources.messages['importPreviousDataHeader']}
+          onHide={cleanImportOtherSystemsDialog}
+          visible={isImportOtherSystemsDialogVisible}>
+          <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              id="replaceCheckbox"
+              inputId="replaceCheckbox"
+              isChecked={replaceData}
+              onChange={() => setReplaceData(!replaceData)}
+              role="checkbox"
+            />
+            <label htmlFor="replaceCheckbox">
+              <a onClick={() => setReplaceData(!replaceData)}>{resources.messages['replaceData']}</a>
+            </label>
+          </div>
         </Dialog>
       )}
       {deleteDialogVisible && (
@@ -792,10 +925,10 @@ export const Dataset = withRouter(({ match, history }) => {
         </ConfirmDialog>
       )}
       <Snapshots
-        snapshotListData={snapshotListData}
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
         setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        snapshotListData={snapshotListData}
       />
     </SnapshotContext.Provider>
   );

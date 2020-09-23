@@ -260,8 +260,11 @@ public class UserManagementControllerImplTest {
    */
   @Test
   public void getUserByEmailTest() {
-    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any()))
-        .thenReturn(new UserRepresentation[1]);
+    UserRepresentation user = new UserRepresentation();
+    user.setEmail("sample@email.net");
+    UserRepresentation[] users = new UserRepresentation[1];
+    users[0] = user;
+    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any())).thenReturn(users);
     Mockito.when(userRepresentationMapper.entityToClass(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
     Assert.assertNotNull(userManagementController.getUserByEmail("sample@email.net"));
@@ -689,5 +692,7 @@ public class UserManagementControllerImplTest {
     Assert.assertNotNull(result);
     Assert.assertEquals("user1", result.getUserId());
   }
+
+
 
 }

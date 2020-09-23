@@ -186,8 +186,8 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
             field.pk = fieldDTO.pk;
-            field.readOnly = fieldDTO.readOnly;
             field.required = fieldDTO.required;
+            field.readOnly = fieldDTO.readOnly;
             field.name = fieldDTO.name;
             field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
             field.type = fieldDTO.type;

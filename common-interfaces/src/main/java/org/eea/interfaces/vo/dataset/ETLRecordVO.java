@@ -19,4 +19,7 @@ public class ETLRecordVO implements Serializable {
 
   /** The records. */
   private List<ETLFieldVO> fields;
+
+  /** The country code. */
+  private String countryCode;
 }

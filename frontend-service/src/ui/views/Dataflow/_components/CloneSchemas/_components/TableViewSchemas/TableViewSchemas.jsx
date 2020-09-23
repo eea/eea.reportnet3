@@ -50,7 +50,7 @@ export const TableViewSchemas = ({
 
   const onLoadCheckButton = row => {
     return (
-      <div className={styles.checkColum}>
+      <div className={styles.checkColumn}>
         <Checkbox
           id={`${row.id}_checkbox`}
           inputId={`${row.id}_checkbox`}
@@ -78,7 +78,7 @@ export const TableViewSchemas = ({
     </div>
   );
 
-  const renderCheckColum = (
+  const renderCheckColumn = (
     <Column
       key="checkId"
       className={styles.emptyTableHeader}
@@ -95,7 +95,7 @@ export const TableViewSchemas = ({
       return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
     });
 
-    fieldColumns.unshift(renderCheckColum);
+    fieldColumns.unshift(renderCheckColumn);
 
     return fieldColumns;
   };

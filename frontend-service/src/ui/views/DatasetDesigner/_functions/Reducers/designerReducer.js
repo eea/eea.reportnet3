@@ -3,6 +3,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_EXPORT_LIST':
       return { ...state, exportButtonsList: payload.exportList };
 
+    case 'GET_IMPORT_LIST':
+      return { ...state, importButtonsList: payload.importList };
+
     case 'GET_DATASET_DATA':
       return {
         ...state,
@@ -41,13 +44,21 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_IS_LOADING_FILE':
       return { ...state, isLoadingFile: payload.value };
 
+    case 'SET_REPLACE_DATA':
+      return { ...state, replaceData: payload.value }
+
     case 'IS_PREVIEW_MODE_ON':
       return { ...state, isPreviewModeOn: payload.value };
 
-    case 'LOAD_EXTERNAL_EXTENSIONS':
+    case 'LOAD_EXTERNAL_OPERATIONS':
       return {
         ...state,
-        extensionsOperationsList: { ...state.extensionsOperationsList, export: payload.export, import: payload.import }
+        externalOperationsList: {
+          ...state.externalOperationsList,
+          export: payload.export,
+          import: payload.import,
+          importOtherSystems: payload.importOtherSystems
+        }
       };
 
     case 'LOAD_DATASET_SCHEMAS':

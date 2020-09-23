@@ -36,7 +36,7 @@ public enum LockSignature {
   /** DataSetControllerImpl.deleteImportTable(..) */
   DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)"),
 
-  /** The delete dataset values. */
+  /** DataSetControllerImpl.deleteImportData(..) */
   DELETE_DATASET_VALUES("DataSetControllerImpl.deleteImportData(..)"),
 
   /** DataCollectionControllerImpl.updateDataCollection(..) */
@@ -47,6 +47,9 @@ public enum LockSignature {
 
   /** EUDatasetControllerImpl.populateDataFromDataCollection(..) */
   POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)"),
+
+  /** DataSetControllerImpl.loadDatasetData(..) */
+  LOAD_DATASET_DATA("DataSetControllerImpl.loadDatasetData(..)"),
 
   /** IntegrationControllerImpl.executeEUDatasetExport(..) */
   EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)");

@@ -19,7 +19,7 @@ import { UserService } from 'core/services/User';
 
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, isPublic = false }) => {
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
@@ -133,12 +133,9 @@ const MainLayout = ({ children }) => {
           setIsNotificationVisible={setIsNotificationVisible}
         />
       )}
-      <Header onMainContentStyleChange={onMainContentStyleChange} />
+      <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
-        <LeftSideBar
-          onToggleSideBar={onToggleSideBar}
-          setIsNotificationVisible={setIsNotificationVisible}
-        />
+        <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
         <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
           {children}
         </div>

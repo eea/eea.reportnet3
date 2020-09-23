@@ -739,6 +739,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+
   /**
    * Creates the api key.
    *
@@ -817,6 +818,41 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   }
 
+
+  /**
+   * Gets the user without keys.
+   *
+   * @param userId the user id
+   *
+   * @return the user without keys
+   */
+  @Override
+  public UserRepresentation getUserWithoutKeys(String userId) {
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null && user.getAttributes() != null) {
+      user.getAttributes().remove(API_KEYS);
+    }
+    return user;
+  }
+
+  /**
+   * Sets the attributes with ApiKeys.
+   *
+   * @param user the user
+   * @param attributes the attributes
+   *
+   * @return the user representation
+   */
+  @Override
+  public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
+      Map<String, List<String>> attributes) {
+    if (user.getAttributes() != null && user.getAttributes().get(API_KEYS) != null) {
+      attributes.put(API_KEYS, user.getAttributes().get(API_KEYS));
+    }
+    user.setAttributes(attributes);
+    return user;
+  }
+
   /**
    * Map token to VO.
    *
@@ -873,39 +909,4 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
     return key;
   }
-
-  /**
-   * Gets the user without keys.
-   *
-   * @param userId the user id
-   *
-   * @return the user without keys
-   */
-  @Override
-  public UserRepresentation getUserWithoutKeys(String userId) {
-    UserRepresentation user = keycloakConnectorService.getUser(userId);
-    if (user != null && user.getAttributes() != null) {
-      user.getAttributes().remove(API_KEYS);
-    }
-    return user;
-  }
-
-  /**
-   * Sets the attributes with ApiKeys.
-   *
-   * @param user the user
-   * @param attributes the attributes
-   *
-   * @return the user representation
-   */
-  @Override
-  public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
-      Map<String, List<String>> attributes) {
-    if (user.getAttributes() != null && user.getAttributes().get(API_KEYS) != null) {
-      attributes.put(API_KEYS, user.getAttributes().get(API_KEYS));
-    }
-    user.setAttributes(attributes);
-    return user;
-  }
-
 }

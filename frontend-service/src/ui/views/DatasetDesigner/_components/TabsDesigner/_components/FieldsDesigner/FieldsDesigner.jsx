@@ -44,7 +44,7 @@ export const FieldsDesigner = ({
 
   const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
-  const [fields, setFields] = useState([]);
+  const [fields, setFields] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
   const [fieldToDeleteType, setFieldToDeleteType] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
@@ -61,6 +61,8 @@ export const FieldsDesigner = ({
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
       setFields(table.records[0].fields);
+    } else {
+      setFields([]);
     }
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description || '');
@@ -415,7 +417,7 @@ export const FieldsDesigner = ({
           onShowDialogError={onShowDialogError}
           recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
           tableSchemaId={table.tableSchemaId}
-          totalFields={!isNil(fields) ? fields.length : 0}
+          totalFields={!isNil(fields) ? fields.length : undefined}
         />
       </div>
     );
@@ -457,7 +459,7 @@ export const FieldsDesigner = ({
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
                 tableSchemaId={table.tableSchemaId}
-                totalFields={fields.length}
+                totalFields={!isNil(fields) ? fields.length : undefined}
               />
             </div>
           );
@@ -624,8 +626,6 @@ export const FieldsDesigner = ({
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
-          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
-          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
             <Button
@@ -637,7 +637,8 @@ export const FieldsDesigner = ({
               tooltipOptions={{ position: 'top' }}
             />
           </span>
-
+          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
+          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
           <label>{resources.messages['newFieldPlaceHolder']}</label>
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>
