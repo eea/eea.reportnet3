@@ -17,20 +17,22 @@ import { DatasetService } from 'core/services/Dataset';
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
+import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
 
-export const WebformRecord = ({ datasetId, record, tableId }) => {
+export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, { newRecord: {}, record });
 
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: WebformRecordUtils.parseNewRecordData(record.webformFields, undefined) }
+      payload: { newRecord: Article15Utils.parseNewRecordData(record.webformFields, undefined) }
     });
   }, [record]);
 
   const onDeleteMultipleWebform = async () => {
     try {
-      await DatasetService.deleteRecordById(datasetId, webformRecordState.record.recordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, webformRecordState.record.recordId);
+      if (isDataDeleted) onRefresh();
     } catch (error) {}
   };
 

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebformContent.module.scss';
 
@@ -11,14 +12,26 @@ import { WebformRecord } from './_components/WebformRecord';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
+
 export const WebformContent = ({ datasetId, webform }) => {
+  const [refresh, setRefresh] = useState(false);
   const [webformData, setWebformData] = useState({});
 
   useEffect(() => {
     onLoadTableData();
-  }, []);
+  }, [refresh]);
 
-  const onAddMultipleWebform = () => {};
+  const onAddMultipleWebform = async () => {
+    if (!isEmpty(webformData.webformRecords)) {
+      const newEmptyRecord = Article15Utils.parseNewRecordData(webformData.webformRecords[0].webformFields);
+      console.log('newEmptyRecord', newEmptyRecord);
+
+      try {
+        await DatasetService.addRecordsById(datasetId, webformData.tableSchemaId, [newEmptyRecord]);
+      } catch (error) {}
+    }
+  };
 
   const onLoadTableData = async () => {
     try {
@@ -88,16 +101,31 @@ export const WebformContent = ({ datasetId, webform }) => {
     }
   };
 
+  const onRefresh = () => setRefresh(!refresh);
+
   const getFieldIndexById = (field, allFields) =>
     allFields.filter(completeField => completeField.fieldId === field.fieldSchemaId)[0];
 
   const renderWebformRecords = multiple => {
     return multiple ? (
       webformData.webformRecords.map((record, i) => {
-        return <WebformRecord key={i} record={record} datasetId={datasetId} tableId={webformData.tableSchemaId} />;
+        return (
+          <WebformRecord
+            datasetId={datasetId}
+            key={i}
+            onRefresh={onRefresh}
+            record={record}
+            tableId={webformData.tableSchemaId}
+          />
+        );
       })
     ) : (
-      <WebformRecord record={webformData.webformRecords[0]} datasetId={datasetId} tableId={webformData.tableSchemaId} />
+      <WebformRecord
+        datasetId={datasetId}
+        onRefresh={onRefresh}
+        record={webformData.webformRecords[0]}
+        tableId={webformData.tableSchemaId}
+      />
     );
   };
 

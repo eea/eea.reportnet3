@@ -1,5 +1,6 @@
 import compact from 'lodash/compact';
 import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 const getIndexFromName = (data = [], name) => {
   const table = data.filter(table => table.tableSchemaName === name);
@@ -46,4 +47,26 @@ const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') =
   return result;
 };
 
-export const Article15Utils = { getWebformTabs, mergeArrays, getIndexFromName };
+const parseNewRecordData = (columnsSchema, data) => {
+  if (!isEmpty(columnsSchema)) {
+    let fields;
+
+    if (!isUndefined(columnsSchema)) {
+      fields = columnsSchema.map(column => {
+        return {
+          fieldData: { [column.fieldSchemaId]: null, type: column.type, fieldSchemaId: column.fieldSchemaId }
+        };
+      });
+    }
+
+    const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
+
+    obj.datasetPartitionId = null;
+    //dataSetPartitionId is needed for checking the rows owned by delegated contributors
+    if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
+
+    return obj;
+  }
+};
+
+export const Article15Utils = { getIndexFromName, getWebformTabs, mergeArrays, parseNewRecordData };
