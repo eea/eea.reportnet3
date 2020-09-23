@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
-import isNil from 'lodash/isNil';
 
 import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 import { routes } from 'ui/routes';
@@ -17,9 +16,11 @@ export const PrivateRoute = ({ component: Component, path }) => {
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
+      console.log('[PrivateRoute]: hasToken or userId redirect to Component');
       LocalStorageUtils.remove();
       return <Route path={path} render={() => <Component />} />;
     } else {
+      console.log('[PrivateRoute]: not token or userId save url to localStorage', window.location.href);
       LocalStorageUtils.set({ redirectUrl: window.location.href });
       window.location.href = AccessPointWebConfig.euloginUrl;
     }
