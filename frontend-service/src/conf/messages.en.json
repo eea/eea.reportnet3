@@ -840,6 +840,7 @@
     "downloadFile": "Download file",
     "action": "Action",
     "exportExternalIntegrationDataset": "Exporting dataset data",
-    "noNotifications": "There are no notifications yet"
+    "noNotifications": "There are no notifications yet",
+    "notAllowedError": "You are not allowed to see the requested page"
   }
 }
