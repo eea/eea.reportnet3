@@ -339,6 +339,7 @@ public class AutomaticRules {
     rule.setType(typeEntityEnum);
     rule.setDescription(description);
     rule.setShortCode(shortCode);
+    rule.setSqlSentence("null");
     return rule;
   }
 }

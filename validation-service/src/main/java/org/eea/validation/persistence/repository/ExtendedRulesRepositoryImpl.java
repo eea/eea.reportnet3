@@ -350,15 +350,20 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
+  /**
+   * Find sql rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
   @Override
   public List<Rule> findSqlRules(ObjectId datasetSchemaId) {
-
     Document filterExpression = new Document();
     filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
 
     filterExpression.append("cond",
-        new Document("$eq", Arrays.asList("$$rule.sqlSentence", "null")));
+        new Document("$ne", Arrays.asList("$$rule.sqlSentence", "null")));
     Document filter = new Document(FILTER, filterExpression);
     RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
         Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
@@ -366,7 +371,6 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
             .as(LiteralConstants.RULES)),
         RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
 
-    // return result.isEmpty() ? null : result;
-    return null;
+    return rulesSchema.getRules();
   }
 }

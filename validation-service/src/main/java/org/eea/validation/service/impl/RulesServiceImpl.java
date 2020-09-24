@@ -361,16 +361,12 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-    }
-
-    // Check if rule is valid if not sql
-    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
-      kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
 
@@ -627,7 +623,7 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
-
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
