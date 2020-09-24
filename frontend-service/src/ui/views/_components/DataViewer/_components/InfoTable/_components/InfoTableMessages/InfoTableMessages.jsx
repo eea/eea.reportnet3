@@ -1,18 +1,14 @@
 import React, { useContext } from 'react';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) => {
+export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns, numCopiedRecords }) => {
   const resources = useContext(ResourcesContext);
-  console.log(data, filteredColumns, numCopiedRecords);
-  const checkValidCoordinates = () => {
-    console.log('EEE');
-    return false;
-  };
 
   const checkPastedColumnsErrors = () => {
     const numCopiedCols = data.map(rows => rows.copiedCols);

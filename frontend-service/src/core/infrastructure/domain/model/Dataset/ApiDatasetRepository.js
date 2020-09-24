@@ -37,11 +37,9 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
 };
 
 const addRecordsById = async (datasetId, tableSchemaId, records) => {
-  console.log('add records', { records });
   const datasetTableRecords = [];
   records.forEach(record => {
     let fields = record.dataRow.map(dataTableFieldDTO => {
-      console.log(dataTableFieldDTO);
       let newField = new DatasetTableField({});
       newField.id = null;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
@@ -272,9 +270,7 @@ const isValidJSON = value => {
     return false;
   }
   try {
-    console.log({ value });
     JSON.parse(value);
-    console.log('VALID');
   } catch (e) {
     return false;
   }
@@ -292,19 +288,15 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 };
 
 const parseValue = (type, value, feToBe = false) => {
-  console.log(type, value);
   if (type === 'POINT' && value !== '' && !isNil(value)) {
     if (!isValidJSON(value)) {
       return '';
     }
-    console.log(value);
-    // debugger;
     const inmValue = JSON.parse(cloneDeep(value));
     inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
     if (!feToBe) {
       inmValue.properties.rsid = `EPSG:${inmValue.properties.rsid}`;
     } else {
-      console.log(inmValue.properties.rsid, inmValue.properties.rsid.split(':'));
       inmValue.properties.rsid = inmValue.properties.rsid.split(':')[1];
     }
     return JSON.stringify(inmValue);
@@ -389,7 +381,6 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 
     const records = tableDataDTO.records.map(dataTableRecordDTO => {
       const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
-        console.log(DataTableFieldDTO.value);
         field = new DatasetTableField({
           fieldId: DataTableFieldDTO.id,
           fieldSchemaId: DataTableFieldDTO.idFieldSchema,
@@ -440,7 +431,6 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 };
 
 const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
-  console.log('UPDATE');
   const datasetTableField = new DatasetTableField({});
   datasetTableField.id = fieldId;
   datasetTableField.idFieldSchema = fieldSchemaId;

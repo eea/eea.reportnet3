@@ -91,7 +91,6 @@ export const recordReducer = (state, { type, payload }) => {
         selectedMaxSize: payload.maxSize
       };
     case 'OPEN_MAP':
-      console.log(payload);
       return { ...state, isMapOpen: true, mapGeoJson: payload.coordinates, selectedMapCells: payload.mapCells };
     case 'SAVE_MAP_COORDINATES':
       const inmMapGeoJson = cloneDeep(state.mapGeoJson);

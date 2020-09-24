@@ -35,6 +35,21 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
     );
   };
 
+  const checkValidCoordinates = () => {
+    let isValid = true;
+    data.forEach(row => {
+      row.dataRow.forEach(field => {
+        if (field.fieldData.type === 'POINT') {
+          const value = field.fieldData[Object.keys(field.fieldData)[0]];
+          if (!MapUtils.checkValidCoordinates(!isNil(value) ? value : '')) {
+            isValid = false;
+          }
+        }
+      });
+    });
+    return isValid;
+  };
+
   const getMaxCharactersValueByFieldType = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
@@ -93,7 +108,6 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       if (field.fieldData.type === 'POINT') {
         if (MapUtils.isValidJSON(value)) {
           const parsedGeoJson = JSON.parse(value);
-          console.log({ value, parsedGeoJson });
           value = `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
         }
       }
@@ -202,12 +216,20 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
             : resources.messages['pasteColumnErrorMoreMessage']
         }
       />
-    ) : null;
+    ) : (
+      !checkValidCoordinates() && (
+        <IconTooltip levelError="WARNING" message={resources.messages['pasteRecordsWarningCoordinatesMessage']} />
+      )
+    );
   };
-  console.log({ filteredColumns, data });
   return (
     <React.Fragment>
-      <InfoTableMessages data={data} filteredColumns={filteredColumns} numCopiedRecords={numCopiedRecords} />
+      <InfoTableMessages
+        checkValidCoordinates={checkValidCoordinates}
+        data={data}
+        filteredColumns={filteredColumns}
+        numCopiedRecords={numCopiedRecords}
+      />
       {!isUndefined(data) && data.length > 0 ? (
         <DataTable
           autoLayout={true}

@@ -18,7 +18,7 @@ const checkValidCoordinates = coordinates => {
   let isValid = true;
   const splittedCoordinates = Array.isArray(coordinates) ? coordinates : coordinates.split(',');
   splittedCoordinates.forEach(coordinate => {
-    if (coordinate.toString().trim() === '') isValid = false;
+    if (isNil(coordinate) || coordinate.toString().trim() === '') isValid = false;
   });
   return isValid;
 };
@@ -33,6 +33,14 @@ const isValidJSON = value => {
     return false;
   }
   return true;
+};
+
+const checkValidJSONCoordinates = json => {
+  if (isValidJSON(json)) {
+    const parsedJSON = JSON.parse(json);
+    return checkValidCoordinates(parsedJSON.geometry.coordinates);
+  }
+  return false;
 };
 
 const latLngToLngLat = (coordinates = []) =>
@@ -77,6 +85,7 @@ const parseGeometryData = records => {
 
 export const MapUtils = {
   checkValidCoordinates,
+  checkValidJSONCoordinates,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,

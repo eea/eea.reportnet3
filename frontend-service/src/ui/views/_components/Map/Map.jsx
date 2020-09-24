@@ -6,27 +6,21 @@ import styles from './Map.module.scss';
 import 'leaflet/dist/leaflet.css';
 import 'esri-leaflet-geocoder/dist/esri-leaflet-geocoder.css';
 
-import { config } from 'conf';
-
-import { Button } from 'ui/views/_components/Button';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 
 import 'proj4leaflet';
 import L from 'leaflet';
 import proj4 from 'proj4';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
-import { Map as MapComponent, GeoJSON, TileLayer, Marker, LayersControl, Popup } from 'react-leaflet';
+import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import newMarkerIcon from 'assets/images/newMarker.png';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-// import { svg } from 'assets/svg/marker';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -52,29 +46,25 @@ let NewMarkerIcon = L.icon({
   shadowUrl: iconShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 36]
-  // iconSize: [27, 31],
-  // iconAnchor: [13.5, 17.5],
-  // popupAnchor: [0, -11]
 });
 export const Map = ({
-  centerToCoordinates = false,
   geoJson = '',
   onSelectPoint,
   options = {
     zoom: [15],
     bearing: [0],
     pitch: [0],
-    center:
-      geoJson !== ''
-        ? JSON.parse(geoJson)
-        : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+    center: MapUtils.checkValidJSONCoordinates(geoJson)
+      ? typeof geoJson === 'object'
+        ? JSON.stringify(geoJson)
+        : geoJson
+      : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
   },
   selectedCRS = { label: 'WGS84', value: 'EPSG:4326' }
 }) => {
-  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { BaseLayer, Overlay } = LayersControl;
+  // const { BaseLayer, Overlay } = LayersControl;
 
   const crs = [
     { label: 'WGS84', value: 'EPSG:4326' },
@@ -103,9 +93,8 @@ export const Map = ({
     !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
   );
 
-  const [marker, setMarker] = useState(options.center);
   const [newPositionMarker, setNewPositionMarker] = useState();
-  const [mapGeoJson, setMapGeoJson] = useState(geoJson);
+  const [mapGeoJson, setMapGeoJson] = useState(options.center);
 
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
@@ -160,7 +149,10 @@ export const Map = ({
       results.clearLayers();
       for (let i = data.results.length - 1; i >= 0; i--) {
         setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}, EPSG:4326`);
-        // results.addLayer(L.marker(data.results[i].latlng));
+        onSelectPoint(
+          proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [data.results[i].latlng.lat, data.results[i].latlng.lng]),
+          currentCRS.value
+        );
       }
     });
 
@@ -217,14 +209,6 @@ export const Map = ({
   const onCRSChange = item => {
     const selectedCRS = crs.filter(t => t.value === item.value)[0];
     setCurrentCRS(selectedCRS);
-    // if (!isNewPositionMarkerVisible) {
-    //   console.log(options.center, parseCoordinates(options.center));
-    //   console.log(proj4(proj4('EPSG:4326'), proj4(selectedCRS.value), parseCoordinates(options.center)));
-    //   onSelectPoint(
-    //     proj4(proj4('EPSG:4326'), proj4(selectedCRS.value), parseCoordinates(options.center)),
-    //     selectedCRS.value
-    //   );
-    // }
   };
 
   const onEachFeature = (feature, layer) => {
@@ -241,13 +225,6 @@ export const Map = ({
     const selectedTheme = themes.filter(t => t.value === item.value)[0];
     setCurrentTheme(selectedTheme);
   };
-
-  // const lngLatToLatLng = geoJsonData => {
-  //   geoJsonData.geometry.coordinates = [geoJsonData.geometry.coordinates[1], geoJsonData.geometry.coordinates[0]];
-  //   return JSON.stringify(geoJsonData);
-  // };
-
-  // const lngLatToLatLngPoint = coordinates => [coordinates[0], coordinates[1]];
 
   const projectGeoJsonCoordinates = geoJsonData => {
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
@@ -271,7 +248,6 @@ export const Map = ({
       <Dropdown
         ariaLabel={'themes'}
         className={styles.themeSwitcherSplitButton}
-        // itemTemplate={basemapTemplate}
         onChange={e => {
           onThemeChange(e.target.value);
         }}
@@ -298,22 +274,11 @@ export const Map = ({
         style={{ width: '20%' }}
       />
       <MapComponent
-        // crs={CRS[currentCRS.value]}
-        // crs={CRS.EPSG4326}
-        // continuousWorld={true}
-        // worldCopyJump={false}
         style={{ height: '60vh' }}
         doubleClickZoom={false}
-        // fitBounds={[[40.712, -74.227]]}
         center={projectGeoJsonCoordinates(options.center)}
-        // setView={([42.528, -12.68], 2)}
-        zoom="10"
+        zoom="4"
         ref={mapRef}
-        // onClick={e => {
-        //   // const inmMapGeoJson = JSON.parse(cloneDeep(mapGeoJson));
-        //   // inmMapGeoJson.geometry.coordinates = e.latlng;
-        //   // setMapGeoJson(JSON.stringify(inmMapGeoJson));
-        // }}
         onDblclick={e => {
           setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
           onSelectPoint(
@@ -341,7 +306,6 @@ export const Map = ({
         />
         {isNewPositionMarkerVisible && (
           <Marker
-            // className={`${styles.marker} ${styles.bounce}`}
             draggable={true}
             icon={NewMarkerIcon}
             position={projectPointCoordinates(newPositionMarker)}
@@ -355,18 +319,6 @@ export const Map = ({
             <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
           </Marker>
         )}
-        {/* <Marker
-          position={projectGeoJsonCoordinates(marker)}
-          onClick={e => {
-            if (!popUpVisible) {
-              setPopUpVisible(true);
-            }
-          }}>
-            <Popup>{onPrintCoordinates(marker)}</Popup>
-            </Marker> */}
-        {/* <div className={`${styles.marker} ${styles.bounce}`}></div>
-          <div className={styles.pulse}></div> */}
-        {/* <div className="pointer" /> */}
       </MapComponent>
     </>
   );

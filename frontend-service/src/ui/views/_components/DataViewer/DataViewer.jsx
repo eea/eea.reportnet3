@@ -175,7 +175,6 @@ const DataViewer = withRouter(
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
-          // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
           reporting={reporting}
@@ -289,9 +288,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (records.mapGeoJson !== '') {
-        // onChangePointCRS(records.mapGeoJson === '' ? 'EPSG:4326' : records.mapGeoJson.split(', ')[2]);
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
-
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
         parsedInmMapGeoJson.geometry.coordinates = MapUtils.lngLatToLatLng(parsedInmMapGeoJson.geometry.coordinates);
@@ -355,20 +352,7 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
-        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
-          //TODO: DELETE
-          // tableData.records.forEach(record => {
-          //   record.fields.forEach(field => {
-          //     if (field.type === 'POINT') {
-          //       //Swap coordinates
-          //       field.value = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[40.916881,-4.2033552]}, "properties": {"rsid": "EPSG:4326"}}`;
-          //     }
-          //   });
-          // });
-          //
-
-          onLoadTableData(true);
-        }
+        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
 
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
@@ -593,7 +577,6 @@ const DataViewer = withRouter(
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
-        console.log(props, event.target.value, record, geoJson);
         if (!isGeometry) {
           onEditorSubmitValue(props, event.target.value, record);
         } else {
@@ -992,15 +975,6 @@ const DataViewer = withRouter(
       );
     };
 
-    const renderCustomFileAttachFooter = (
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => setIsAttachFileVisible(false)}
-      />
-    );
-
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {isFilterValidationsActive && records.totalRecords !== records.totalFilteredRecords
@@ -1130,7 +1104,6 @@ const DataViewer = withRouter(
             value={fetchedData}>
             {columns}
           </DataTable>
-          {/* <Map coordinates={records.mapGeoJson} onSelectPoint={onSelectPoint} selectButton={true}></Map> */}
         </div>
 
         {isColumnInfoVisible && (

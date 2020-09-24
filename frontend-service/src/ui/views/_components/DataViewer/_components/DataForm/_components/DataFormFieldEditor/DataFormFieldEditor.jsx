@@ -12,8 +12,6 @@ import styles from './DataFormFieldEditor.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
-// import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-// import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -26,7 +24,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-// import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
@@ -36,7 +33,6 @@ const DataFormFieldEditor = ({
   datasetId,
   field,
   fieldValue = '',
-  hasWritePermissions,
   isVisible,
   onChangeForm,
   reporting,
@@ -59,8 +55,6 @@ const DataFormFieldEditor = ({
       fieldValue !== '' && type === 'POINT'
         ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
         : { label: 'WGS84', value: 'EPSG:4326' },
-    // isAttachFileVisible, setIsAttachFileVisible] = useState(false);
-    // isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     isMapDisabled: false,
     isMapOpen: false,
     mapCoordinates: '',
@@ -118,7 +112,6 @@ const DataFormFieldEditor = ({
       parsedInmMapGeoJson.properties.rsid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
-    // dispatchMap({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
     dispatchMap({ type: 'SAVE_MAP_COORDINATES', payload: { crs } });
   };
 
@@ -143,7 +136,6 @@ const DataFormFieldEditor = ({
         );
         return JSON.stringify(geoJson);
       }
-      //withCRS ? `${projectedCoordinates.join(', ')}, ${crs.value}` : `${projectedCoordinates.join(', ')}`;
     }
   };
 
@@ -165,7 +157,6 @@ const DataFormFieldEditor = ({
       })
       .sort((a, b) => a.value - b.value);
 
-    // const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
     if (!hasMultipleValues) {
       linkItems.unshift({
         itemType: resources.messages['noneCodelist'],
@@ -219,12 +210,9 @@ const DataFormFieldEditor = ({
         optionLabel="itemType"
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
-        // hasSelectedItemsLabel={false}
       />
     );
   };
-
-  // const getAttachExtensions = [{ fileExtension: '.csv, .txt, .pdf' }].map(file => `.${file.fileExtension}`).join(', ');
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
@@ -259,11 +247,6 @@ const DataFormFieldEditor = ({
         return null;
     }
   };
-
-  // const onConfirmDeleteAttachment = () => {
-  //   onChangeForm(field, []);
-  //   setIsDeleteAttachmentVisible(false);
-  // };
 
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
@@ -352,15 +335,6 @@ const DataFormFieldEditor = ({
     );
   };
 
-  // const renderCustomFileAttachFooter = (
-  //   <Button
-  //     className="p-button-secondary p-button-animated-blink"
-  //     icon={'cancel'}
-  //     label={resources.messages['close']}
-  //     onClick={() => setIsAttachFileVisible(false)}
-  //   />
-  // );
-
   const renderLinkDropdown = (field, fieldValue) => {
     if (column.pkHasMultipleValues) {
       return (
@@ -404,10 +378,7 @@ const DataFormFieldEditor = ({
   };
 
   const renderMap = () => (
-    <Map
-      geoJson={fieldValue !== '' ? fieldValue : fieldEmptyPointValue}
-      onSelectPoint={onSelectPoint}
-      selectedCRS={map.currentCRS.value}></Map>
+    <Map geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
   );
 
   const renderMapType = (field, fieldValue) => (
@@ -440,11 +411,6 @@ const DataFormFieldEditor = ({
               )
             )
           }
-          // onFocus={e => {
-          //   e.preventDefault();
-          //   onEditorValueFocus(cells, e.target.value);
-          // }}
-          // onKeyDown={e => onEditorKeyChange(cells, e, record)}
           style={{ width: '50%' }}
           type="text"
           value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''}
@@ -478,7 +444,6 @@ const DataFormFieldEditor = ({
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
-          disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}
@@ -561,7 +526,6 @@ const DataFormFieldEditor = ({
           header={resources.messages['geospatialData']}
           modal={true}
           onHide={() => dispatchMap({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
-          // style={{ height: '90vh', width: '80%' }}
           visible={map.isMapOpen}>
           <div className="p-grid p-fluid">{renderMap()}</div>
         </Dialog>

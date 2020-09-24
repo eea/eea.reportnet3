@@ -12,7 +12,6 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
-//'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -31,7 +30,6 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
-  hasWritePermissions,
   onChangePointCRS,
   onEditorKeyChange,
   onEditorSubmitValue,
@@ -128,8 +126,7 @@ const FieldEditor = ({
     setLinkItemsOptions(linkItems);
   };
 
-  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, isCommaEntered = false) => {
-    console.log('CHANGE POINT');
+  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
     if (geoJson !== '') {
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
@@ -292,7 +289,6 @@ const FieldEditor = ({
                   e.target.value,
                   currentCRS.value,
                   false,
-                  true,
                   true
                 );
                 onEditorKeyChange(
@@ -307,7 +303,6 @@ const FieldEditor = ({
                     e.target.value,
                     currentCRS.value,
                     false,
-                    true,
                     true
                   )
                 );
@@ -347,7 +342,6 @@ const FieldEditor = ({
               />
               <Button
                 className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                disabled={isMapDisabled}
                 icon="marker"
                 onClick={e => {
                   if (!isNil(onMapOpen)) {
