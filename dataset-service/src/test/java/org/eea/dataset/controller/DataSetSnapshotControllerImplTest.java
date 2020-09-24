@@ -385,7 +385,7 @@ public class DataSetSnapshotControllerImplTest {
     try {
       dataSetSnapshotControllerImpl.historicReleases(1L);
     } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
     }
 
