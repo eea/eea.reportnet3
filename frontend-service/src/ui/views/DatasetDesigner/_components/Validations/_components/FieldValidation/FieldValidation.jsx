@@ -532,21 +532,19 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   return dialogLayout(
-    <Fragment>
-      <form>
-        <div id={styles.QCFormWrapper}>
-          <div className={styles.body}>
-            <TabView
-              activeIndex={tabMenuActiveItem}
-              className={styles.tabView}
-              onTabChange={e => onTabChange(e.index)}
-              renderActiveOnly={false}>
-              {tabContents}
-            </TabView>
-          </div>
+    <form>
+      <div id={styles.QCFormWrapper}>
+        <div className={styles.body}>
+          <TabView
+            activeIndex={tabMenuActiveItem}
+            className={styles.tabView}
+            onTabChange={e => onTabChange(e.index)}
+            renderActiveOnly={false}>
+            {tabContents}
+          </TabView>
         </div>
-      </form>
-    </Fragment>
+      </div>
+    </form>
   );
 };
 
