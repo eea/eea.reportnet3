@@ -473,6 +473,10 @@
         },
         {
           "key": "FILE_UPLOAD_BLOCKED_ERROR"
+        },
+        {
+          "key": "NOT_ALLOWED_ERROR",
+          "lifeTime": 5000
         }
       ]
     },

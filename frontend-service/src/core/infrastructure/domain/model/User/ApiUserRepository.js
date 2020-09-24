@@ -3,10 +3,13 @@ import moment from 'moment';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf/index';
+
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { config } from 'conf/index';
+
+import { LocalStorageUtils } from './_utils/LocalStorageUtils';
 
 const timeOut = time => {
   setTimeout(() => {
@@ -39,6 +42,7 @@ const login = async code => {
 const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
+  LocalStorageUtils.remove();
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
@@ -68,6 +72,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
+    basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
     showLogoutConfirmation: true,
     rowsPerPage: 10,
@@ -78,6 +83,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
+    userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
@@ -86,6 +92,10 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
     userConfiguration.listView = userDefaultConfiguration.listView;
   } else {
+    userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer[0])
+      ? userConfigurationDTO.basemapLayer[0]
+      : userDefaultConfiguration.basemapLayer;
+
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;

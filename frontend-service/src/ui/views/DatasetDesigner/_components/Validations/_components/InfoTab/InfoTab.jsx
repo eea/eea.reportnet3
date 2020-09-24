@@ -130,6 +130,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__shortCode`}>{resourcesContext.messages['ruleShortCode']}</label>
           <InputText
             id={`${componentName}__shortCode`}
+            maxLength={255}
             onChange={e => onInfoFieldChange('shortCode', e.target.value)}
             placeholder={resourcesContext.messages['ruleShortCode']}
             value={creationFormState.candidateRule.shortCode}
@@ -154,6 +155,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__name`}>{resourcesContext.messages['ruleName']}</label>
           <InputText
             id={`${componentName}__name`}
+            maxLength={255}
             onChange={e => onInfoFieldChange('name', e.target.value)}
             placeholder={resourcesContext.messages['ruleName']}
             value={creationFormState.candidateRule.name}
@@ -164,6 +166,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__description`}>{resourcesContext.messages['description']}</label>
           <InputText
             id={`${componentName}__description`}
+            maxLength={255}
             onChange={e => onInfoFieldChange('description', e.target.value)}
             placeholder={resourcesContext.messages['description']}
             value={creationFormState.candidateRule.description}
@@ -197,6 +200,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__errorMessage`}>{resourcesContext.messages['ruleErrorMessage']}</label>
           <InputText
             id={`${componentName}__errorMessage`}
+            maxLength={255}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages['ruleErrorMessage']}
             value={creationFormState.candidateRule.errorMessage}

@@ -3,10 +3,14 @@ export const userReducer = (state, { type, payload }) => {
     case 'LOGIN':
       return {
         ...state,
-        ...payload.user
+        ...payload.user,
+        isLoggedOut: false
       };
     case 'LOGOUT':
-      return (state = payload);
+      return {
+        ...payload,
+        isLoggedOut: true
+      };
     case 'ADD_SOCKET':
       return {
         ...state,
@@ -23,6 +27,14 @@ export const userReducer = (state, { type, payload }) => {
         userProps: {
           ...state.userProps,
           showLogoutConfirmation: payload
+        }
+      };
+    case 'BASEMAP_LAYER':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          basemapLayer: payload
         }
       };
     case 'DEFAULT_ROW_SELECTED':
