@@ -532,7 +532,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   return dialogLayout(
-    <>
+    <Fragment>
       <form>
         <div id={styles.QCFormWrapper}>
           <div className={styles.body}>
@@ -546,7 +546,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
           </div>
         </div>
       </form>
-    </>
+    </Fragment>
   );
 };
 
