@@ -858,6 +858,7 @@
     "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension.",
     "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
     "validationsDataColumn": "Validations",
+    "notAllowedError": "You are not allowed to see the requested page",
     "userSettingsBasemapLayerSubtitle": "Configure the defaul basemap layer for your maps",
     "basemapLayer": "Basemap layer",
     "srid": "SRID: ",

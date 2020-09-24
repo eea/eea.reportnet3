@@ -3,10 +3,14 @@ export const userReducer = (state, { type, payload }) => {
     case 'LOGIN':
       return {
         ...state,
-        ...payload.user
+        ...payload.user,
+        isLoggedOut: false
       };
     case 'LOGOUT':
-      return (state = payload);
+      return {
+        ...payload,
+        isLoggedOut: true
+      };
     case 'ADD_SOCKET':
       return {
         ...state,
