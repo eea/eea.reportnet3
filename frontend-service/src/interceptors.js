@@ -42,6 +42,10 @@ axios.interceptors.response.use(
         }
       });
     }
+    if (error.response.status === 403) {
+      window.location.href = '/dataflows/error/notAllowed';
+      return;
+    }
 
     // return Error object with Promise
     return Promise.reject(error);
