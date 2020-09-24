@@ -12,19 +12,17 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence }) => {
   }, []);
 
   return (
-    <React.Fragment>
-      <div className={styles.section}>
-        <h3>{resources.messages['sqlSentence']}:</h3>
+    <div className={styles.section}>
+      <h3>{resources.messages['sqlSentence']}:</h3>
 
-        <textarea
-          cols={30}
-          id="SQLsentenceTextarea"
-          name=""
-          onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
-          rows={10}
-          value={creationFormState.candidateRule['sqlSentence']}
-        />
-      </div>
-    </React.Fragment>
+      <textarea
+        cols={30}
+        id="SQLsentenceTextarea"
+        name=""
+        onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
+        rows={10}
+        value={creationFormState.candidateRule['sqlSentence']}
+      />
+    </div>
   );
 };
