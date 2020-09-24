@@ -33,7 +33,6 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
-    // referenceId: validationRule.relations.originDatasetSchema,
     referenceId: validationRule.table.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
@@ -48,7 +47,6 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
           }
         : null,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    // type: 'DATASET',
     type: 'TABLE',
     whenCondition: null
   };
@@ -103,25 +101,23 @@ const getAll = async (datasetSchemaId, reporting = false) => {
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
-  /* 
-  console.log('validationsListDTO', validationsListDTO);
-  console.log('validationsList', validationsList); */
+
   return validationsList;
 };
 
 const update = async (datasetId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
-    sqlSentence: validationRule.sqlSentence,
-    ruleId: validationRule.id,
-    description: validationRule.description,
     automatic: validationRule.automatic,
+    description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.field.code,
+    ruleId: validationRule.id,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    type: 'FIELD',
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
+    sqlSentence: validationRule.sqlSentence,
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    type: 'FIELD'
   };
   if (!validationRule.automatic) {
     validation.whenCondition =
@@ -166,11 +162,9 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     description: validationRule.description,
     automatic: validationRule.automatic,
     enabled: validationRule.active ? validationRule.active : false,
-    // referenceId: validationRule.relations.originDatasetSchema,
     referenceId: validationRule.table.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    // type: 'DATASET',
     type: 'TABLE',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     integrityVO:

@@ -47,7 +47,6 @@ export const parseDataValidationRulesDTO = validations => {
         }
       }
 
-      // if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'DATASET') {
       if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'TABLE') {
         const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
         newRelations = relations;

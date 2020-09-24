@@ -322,7 +322,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: { ...payload },
         tableFields: []
       };
-    //Not in use?
+
     case 'UPDATE_EXPRESSIONS':
       return {
         ...state,
@@ -344,7 +344,6 @@ export const createValidationReducer = (state, { type, payload }) => {
           rowOptions.allExpressionsThen = payload.allExpressionsThen;
         }
 
-        // if (payload.entityType === 'DATASET') {
         if (payload.entityType === 'TABLE') {
           rowOptions.expressionType = 'fieldRelations';
         }
@@ -452,8 +451,6 @@ export const createValidationReducer = (state, { type, payload }) => {
         }
       };
     case 'SET_FORM_FIELD_RELATION':
-      /*       console.log('state.candidateRule,', state.candidateRule);
-      console.log('payload', payload); */
       return {
         ...state,
         candidateRule: {

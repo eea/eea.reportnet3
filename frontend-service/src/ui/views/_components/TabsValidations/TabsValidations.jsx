@@ -95,7 +95,6 @@ const TabsValidations = withRouter(
       try {
         const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
 
-
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
             const additionalInfo = getAdditionalValidationInfo(
@@ -247,7 +246,6 @@ const TabsValidations = withRouter(
 
       if (row.entityType === 'RECORD' || row.entityType === 'TABLE') {
         rowType = 'row';
-      // } else if (row.entityType === 'DATASET') {
       } else if (row.entityType === 'TABLE') {
         rowType = 'dataset';
       }

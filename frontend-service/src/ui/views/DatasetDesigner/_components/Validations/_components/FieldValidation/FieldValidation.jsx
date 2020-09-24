@@ -177,7 +177,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
       const fieldType = getFieldType(table, { code: validationContext.referenceId }, tabs);
       creationFormDispatch({
-        // type: 'SET_FIELD_AND_FIELD_TYPE',
         type: 'SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE',
         payload: {
           field: validationContext.referenceId,

@@ -156,7 +156,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
   useEffect(() => {
     if (validationContext.referenceId && isNil(validationContext.ruleToEdit.sqlSentence)) {
-      // const table = getSelectedTableByFieldId(validationContext.ruleToEdit.relations.links[0].originField.code, tabs);
       const table = getSelectedTableByTableSchemaId(validationContext.ruleToEdit.referenceId, tabs);
 
       creationFormDispatch({
