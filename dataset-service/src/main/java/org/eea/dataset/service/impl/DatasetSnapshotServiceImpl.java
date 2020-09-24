@@ -914,9 +914,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // find snapshots for the datacollection released in the eudataset
     List<Snapshot> snapshots =
         snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollection.getId());
-    return releaseMapper.entityListToClass(snapshots.stream()
-        .filter(snapshot -> snapshot.getDateReleased() != null && snapshot.getEuReleased())
-        .collect(Collectors.toList()));
+    return releaseMapper
+        .entityListToClass(snapshots.stream().filter(snapshot -> snapshot.getDateReleased() != null
+            && Boolean.TRUE.equals(snapshot.getEuReleased())).collect(Collectors.toList()));
   }
 
   /**
@@ -947,7 +947,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   public List<ReleaseVO> getReleases(Long datasetId) throws EEAException {
-    List<ReleaseVO> releases;
+    List<ReleaseVO> releases = new ArrayList<>();
     if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))) {
       // if dataset is reporting return released snapshots
       releases = getSnapshotsReleasedByIdDataset(datasetId);
@@ -955,8 +955,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // if the snapshot is a datacollection
       if (DatasetTypeEnum.COLLECTION.equals(datasetService.getDatasetType(datasetId))) {
         releases = getSnapshotsReleasedByIdDataCollection(datasetId);
-      } else {
-        // if the snapshot is an eudataset
+      } else
+      // if the snapshot is an eudataset
+      if (DatasetTypeEnum.EUDATASET.equals(datasetService.getDatasetType(datasetId))) {
         releases = getSnapshotsReleasedByIdEUDataset(datasetId);
       }
     }
