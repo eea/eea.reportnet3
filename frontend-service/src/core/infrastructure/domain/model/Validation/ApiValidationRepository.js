@@ -27,7 +27,6 @@ const create = async (datasetSchemaId, validationRule) => {
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
-  console.log('validationRule', validationRule);
   const validation = {
     sqlSentence: validationRule.sqlSentence,
     automatic: false,

@@ -448,8 +448,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
-    console.log('fieldKey', fieldKey);
-    console.log('fieldValue', fieldValue);
     onDeleteFromClickedFields(fieldKey);
     creationFormDispatch({
       type: fieldKey === 'table' ? 'SET_FORM_FIELD_RELATION' : 'SET_FORM_FIELD',
