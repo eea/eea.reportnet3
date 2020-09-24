@@ -15,6 +15,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -940,7 +941,7 @@ public class RulesServiceImplTest {
     rule.setShortCode("shortCode");
     rule.setDescription("description");
     rule.setRuleName("ruleName");
-    rule.setWhenCondition("whenCondition");
+    rule.setWhenCondition("testWhenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
     rule.setType(EntityTypeEnum.FIELD);
 
@@ -948,8 +949,16 @@ public class RulesServiceImplTest {
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(false);
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setWhenCondition(new RuleExpressionDTO());
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    ruleVO.setRuleName("ruleName");
+    ruleVO.setDescription("description");
+    ruleVO.setShortCode("shortCode");
+    ruleVO.setThenCondition(Arrays.asList("ERROR", "error message"));
     try {
-      rulesServiceImpl.updateRule(1L, new RuleVO());
+      rulesServiceImpl.updateRule(1L, ruleVO);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.ERROR_UPDATING_RULE, e.getMessage());
       throw e;
@@ -1377,4 +1386,20 @@ public class RulesServiceImplTest {
     Assert.assertEquals(1L,
         rulesServiceImpl.updateSequence("5e44110d6a9e3a270ce13fac").longValue());
   }
+
+
+
+  /**
+   * Find sql sentences by dataset schema id.
+   */
+  @Test
+  public void findSqlSentencesByDatasetSchemaIdTest() {
+    Mockito.when(rulesRepository.findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac")))
+        .thenReturn(new ArrayList());
+    rulesServiceImpl.findSqlSentencesByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1))
+        .findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+
 }

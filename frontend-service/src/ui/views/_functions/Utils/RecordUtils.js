@@ -39,6 +39,20 @@ const changeRecordInTable = (tableData, rowIndex, colsSchema, records) => {
   }
 };
 
+const formatDate = (date, isInvalidDate) => {
+  if (isInvalidDate) return '';
+
+  let d = new Date(date),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+
+  return [year, month, day].join('-');
+};
+
 const getCellFieldSchemaId = (tableData, field) => {
   const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
   return !isUndefined(completeField) ? completeField.fieldData.fieldSchemaId : undefined;
@@ -156,6 +170,29 @@ const getFieldTypeValue = fieldType => {
   }
 };
 
+const getFilter = type => {
+  switch (type) {
+    case 'NUMBER_INTEGER':
+      return 'int';
+    case 'NUMBER_DECIMAL':
+    case 'POINT':
+      return 'coordinates';
+    case 'DATE':
+      return 'date';
+    case 'TEXT':
+    case 'RICH_TEXT':
+      return 'any';
+    case 'EMAIL':
+      return 'email';
+    case 'PHONE':
+      return 'phone';
+    // case 'URL':
+    //   return 'url';
+    default:
+      return 'any';
+  }
+};
+
 const getInitialRecordValues = (record, colsSchema) => {
   const initialValues = [];
   const filteredColumns = colsSchema.filter(
@@ -247,6 +284,7 @@ export const RecordUtils = {
   changeRecordInTable,
   changeRecordValue,
   createEmptyObject,
+  formatDate,
   getCellFieldSchemaId,
   getCellId,
   getCellInfo,
@@ -257,6 +295,7 @@ export const RecordUtils = {
   getCodelistItemsInSingleColumn,
   getCodelistValue,
   getFieldTypeValue,
+  getFilter,
   getInitialRecordValues,
   getLinkValue,
   getMultiselectValues,

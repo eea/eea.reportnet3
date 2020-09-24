@@ -63,15 +63,13 @@ export const FieldDesigner = ({
     { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
-    // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
@@ -89,12 +87,6 @@ export const FieldDesigner = ({
   ];
 
   const getFieldTypeValue = value => {
-    // if (value.toUpperCase() === 'COORDINATE_LONG') {
-    //   value = 'Longitude';
-    // }
-    // if (value.toUpperCase() === 'COORDINATE_LAT') {
-    //   value = 'Latitude';
-    // }
     return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
   };
   const initialFieldDesignerState = {
@@ -123,6 +115,7 @@ export const FieldDesigner = ({
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
 
+  const fieldTypeRef = useRef();
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -249,6 +242,7 @@ export const FieldDesigner = ({
           fieldUpdate({ codelistItems: null, type: parseGeospatialTypes(type.fieldType) });
         } else {
           if (type !== '') {
+            fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
           }
         }
@@ -291,6 +285,7 @@ export const FieldDesigner = ({
             fieldDesignerState.fieldTypeValue !== '' &&
             !isUndefined(fieldDesignerState.fieldTypeValue)
           ) {
+            fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
           } else {
             if (!checkDuplicates(name, fieldId)) {
@@ -298,6 +293,7 @@ export const FieldDesigner = ({
                 onFieldAdd({ name });
               }
             } else {
+              fieldTypeRef.current.hide();
               onShowDialogError(
                 resources.messages['duplicatedFieldMessage'],
                 resources.messages['duplicatedFieldTitle']
@@ -307,6 +303,7 @@ export const FieldDesigner = ({
           }
         } else {
           if (name === '') {
+            fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
@@ -314,6 +311,7 @@ export const FieldDesigner = ({
               if (!checkDuplicates(name, fieldId)) {
                 fieldUpdate({ name });
               } else {
+                fieldTypeRef.current.hide();
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
                   resources.messages['duplicatedFieldTitle']
@@ -335,7 +333,7 @@ export const FieldDesigner = ({
         }
       }
     }
-    dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_ATTACHMENT' });
   };
 
   const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
@@ -582,6 +580,7 @@ export const FieldDesigner = ({
       payload: { validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize }
     });
     if (fieldDesignerState.fieldValue === '') {
+      fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
       if (!isUndefined(fieldId)) {
@@ -590,14 +589,15 @@ export const FieldDesigner = ({
         } else {
           fieldUpdate({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
         }
+        dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: false });
       }
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: false });
   };
 
   const onSaveCodelist = codelistItems => {
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
+      fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
       if (!isUndefined(fieldId)) {
@@ -606,9 +606,9 @@ export const FieldDesigner = ({
         } else {
           fieldUpdate({ codelistItems });
         }
+        dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
       }
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
   const onSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
@@ -616,6 +616,7 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
     dispatchFieldDesigner({ type: 'SET_PK_HAS_MULTIPLE_VALUES', payload: pkHasMultipleValues });
     if (fieldDesignerState.fieldValue === '') {
+      fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
       if (!isUndefined(fieldId)) {
@@ -637,21 +638,12 @@ export const FieldDesigner = ({
             pkHasMultipleValues
           });
         }
+        dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: false });
       }
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
-    dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: false });
   };
 
-  const parseGeospatialTypes = value => {
-    // if (value.toUpperCase() === 'LONGITUDE') {
-    //   return 'COORDINATE_LONG';
-    // }
-    // if (value.toUpperCase() === 'LATITUDE') {
-    //   return 'COORDINATE_LAT';
-    // }
-    return value.toUpperCase();
-  };
+  const parseGeospatialTypes = value => value.toUpperCase();
 
   const fieldTypeTemplate = option => {
     if (!option.value) {
@@ -956,6 +948,7 @@ export const FieldDesigner = ({
         }}
         optionLabel="value"
         options={fieldTypes}
+        ref={fieldTypeRef}
         required={true}
         placeholder={resources.messages['newFieldTypePlaceHolder']}
         scrollHeight="450px"

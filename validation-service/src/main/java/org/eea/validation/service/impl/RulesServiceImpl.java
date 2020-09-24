@@ -38,7 +38,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
-import org.eea.validation.util.SQLValitaionUtils;
+import org.eea.validation.util.SQLValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +89,7 @@ public class RulesServiceImpl implements RulesService {
 
   /** The sql valitaion utils. */
   @Autowired
-  private SQLValitaionUtils sqlValitaionUtils;
+  private SQLValidationUtils sqlValidationUtils;
 
   /** The sql rules service. */
   @Autowired
@@ -361,16 +361,12 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-    }
-
-    // Check if rule is valid if not sql
-    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
-      kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
 
@@ -612,8 +608,8 @@ public class RulesServiceImpl implements RulesService {
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integritySchema.getId().toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
+          + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
@@ -627,7 +623,7 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
-
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
@@ -1093,5 +1089,17 @@ public class RulesServiceImpl implements RulesService {
    */
   private void sentEvent(Map<String, Object> event) {
     kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
+  }
+
+  /**
+   * Find sql sentences by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  @Override
+  public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
+    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+    return ruleMapper.entityListToClass(rules);
   }
 }
