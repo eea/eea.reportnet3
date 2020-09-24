@@ -388,7 +388,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
 
   /**
-   * Historic releases.
+   * Obtain the dataset historic releases.
    *
    * @param datasetId the dataset id
    * @return the list
@@ -397,23 +397,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkApiKey(#datasetId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
   public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId) {
-    List<ReleaseVO> releases = new ArrayList<>();
+    List<ReleaseVO> releases;
     // get dataset type
     try {
-      if (datasetService.isReportingDataset(datasetId)) {
-        // if dataset is reporting return released snapshots
-        releases = datasetSnapshotService.getSnapshotsReleasedByIdDataset(datasetId);
-      } else {
-        // if the snapshot is a datacollection
-        if (dataCollectionService.isDataCollection(datasetId)) {
-          releases = datasetSnapshotService.getSnapshotsReleasedByIdDataCollection(datasetId);
-        } else {
-          // if the snapshot is an eudataset
-          releases = datasetSnapshotService.getSnapshotsReleasedByIdEUDataset(datasetId);
-        }
-      }
+      releases = datasetSnapshotService.getReleases(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error retreiving releases. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -423,6 +412,13 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     return releases;
   }
 
+  /**
+   * Datasets historic releases by representative for all datasets involved.
+   *
+   * @param dataflowId the dataflow id
+   * @param representativeId the representative id
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleasesRepresentative",

@@ -13,6 +13,7 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -371,31 +373,22 @@ public class DataSetSnapshotControllerImplTest {
 
   @Test
   public void historicReleasesReportingSuccessTest() throws Exception {
-    when(datasetService.isReportingDataset(Mockito.anyLong())).thenReturn(true);
-    when(datasetSnapshotService.getSnapshotsReleasedByIdDataset(Mockito.anyLong()))
-        .thenReturn(new ArrayList<>());
+    when(datasetSnapshotService.getReleases(Mockito.anyLong())).thenReturn(new ArrayList<>());
     assertEquals("not equals", dataSetSnapshotControllerImpl.historicReleases(1L),
         new ArrayList<>());
   }
 
-  @Test
-  public void historicReleasesDataCollectionSuccessTest() throws Exception {
-    when(datasetService.isReportingDataset(Mockito.anyLong())).thenReturn(false);
-    when(dataCollectionService.isDataCollection(Mockito.anyLong())).thenReturn(true);
-    when(datasetSnapshotService.getSnapshotsReleasedByIdDataCollection(Mockito.anyLong()))
-        .thenReturn(new ArrayList<>());
-    assertEquals("not equals", dataSetSnapshotControllerImpl.historicReleases(1L),
-        new ArrayList<>());
-  }
+  @Test(expected = ResponseStatusException.class)
+  public void historicReleasesExceptionTest() throws Exception {
+    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetSnapshotService)
+        .getReleases(Mockito.anyLong());
+    try {
+      dataSetSnapshotControllerImpl.historicReleases(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
 
-  @Test
-  public void historicReleasesEUDatasetSuccessTest() throws Exception {
-    when(datasetService.isReportingDataset(Mockito.anyLong())).thenReturn(false);
-    when(dataCollectionService.isDataCollection(Mockito.anyLong())).thenReturn(false);
-    when(datasetSnapshotService.getSnapshotsReleasedByIdEUDataset(Mockito.anyLong()))
-        .thenReturn(new ArrayList<>());
-    assertEquals("not equals", dataSetSnapshotControllerImpl.historicReleases(1L),
-        new ArrayList<>());
   }
 
   @Test

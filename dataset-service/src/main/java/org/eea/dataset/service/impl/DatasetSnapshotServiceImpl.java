@@ -266,7 +266,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDescription(description);
       DataSetMetabase dataset = new DataSetMetabase();
       dataset.setId(idDataset);
-      if (datasetService.isReportingDataset(idDataset)) {
+      if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(idDataset))) {
         dataset = metabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
         if (dataset.getDatasetSchema() != null) {
           DataCollection dataCollection = dataCollectionRepository
@@ -936,6 +936,31 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<Long> inactiveSnapshots = snapshots.stream().filter(snapshot -> !snapshot.getDcReleased())
         .map(Snapshot::getId).collect(Collectors.toList());
     snapshotRepository.releaseEUSnapshots(activeSnapshots, inactiveSnapshots);
+  }
+
+  /**
+   * Gets the historic releases per each dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ReleaseVO> getReleases(Long datasetId) throws EEAException {
+    List<ReleaseVO> releases;
+    if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))) {
+      // if dataset is reporting return released snapshots
+      releases = getSnapshotsReleasedByIdDataset(datasetId);
+    } else {
+      // if the snapshot is a datacollection
+      if (DatasetTypeEnum.COLLECTION.equals(datasetService.getDatasetType(datasetId))) {
+        releases = getSnapshotsReleasedByIdDataCollection(datasetId);
+      } else {
+        // if the snapshot is an eudataset
+        releases = getSnapshotsReleasedByIdEUDataset(datasetId);
+      }
+    }
+    return releases;
   }
 
 }

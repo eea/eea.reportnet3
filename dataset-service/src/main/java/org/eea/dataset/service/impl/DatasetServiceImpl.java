@@ -46,6 +46,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -237,6 +238,11 @@ public class DatasetServiceImpl implements DatasetService {
   /** The attachment repository. */
   @Autowired
   private AttachmentRepository attachmentRepository;
+
+  /** The data collection repository. */
+  @Autowired
+  private DataCollectionRepository dataCollectionRepository;
+
   /** The Constant DATASET_ID. */
   private static final String DATASET_ID = "dataset_%s";
 
@@ -659,7 +665,8 @@ public class DatasetServiceImpl implements DatasetService {
       Boolean readOnly = fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
           ? (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
           : Boolean.FALSE;
-      if (!readOnly && !isDesignDataset(datasetId) || isDesignDataset(datasetId)) {
+      if (!readOnly && !DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId))
+          || DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId))) {
         fieldValues.add(fieldValue);
       }
     }
@@ -826,7 +833,8 @@ public class DatasetServiceImpl implements DatasetService {
           : Boolean.FALSE;
     }
     if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY) && !isDesignDataset(datasetId)) {
+        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+        && !DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId))) {
       throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
     }
     // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
@@ -938,28 +946,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteAllTableValues(Long datasetId) {
     tableRepository.removeTableData(datasetId);
-  }
-
-  /**
-   * Checks if is reporting dataset.
-   *
-   * @param datasetId the dataset id
-   * @return true, if is reporting dataset
-   */
-  @Override
-  public boolean isReportingDataset(Long datasetId) {
-    return reportingDatasetRepository.existsById(datasetId);
-  }
-
-  /**
-   * Checks if is design dataset.
-   *
-   * @param datasetId the dataset id
-   * @return true, if is design dataset
-   */
-  @Override
-  public boolean isDesignDataset(Long datasetId) {
-    return designDatasetRepository.existsById(datasetId);
   }
 
   /**
@@ -1477,7 +1463,7 @@ public class DatasetServiceImpl implements DatasetService {
     Document fieldSchema = schemasRepository.findFieldSchema(
         field.getRecord().getTableValue().getDatasetId().getIdDatasetSchema(),
         field.getIdFieldSchema());
-    if (!isDesignDataset(datasetId) && fieldSchema != null
+    if (!DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId)) && fieldSchema != null
         && fieldSchema.get(LiteralConstants.READ_ONLY) != null
         && fieldSchema.getBoolean(LiteralConstants.READ_ONLY)) {
       throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
@@ -2269,7 +2255,7 @@ public class DatasetServiceImpl implements DatasetService {
     // If the field is readOnly and is not a design dataset the value is empty
     if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
         && (boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
-        && !isDesignDataset(metabase.getId())) {
+        && !DatasetTypeEnum.DESIGN.equals(getDatasetType(metabase.getId()))) {
       field.setValue("");
     }
 
@@ -2337,8 +2323,8 @@ public class DatasetServiceImpl implements DatasetService {
       FieldSchema fieldSchema =
           fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
       if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
-          && !isDesignDataset(dataset.getId())
-          || fieldSchema != null && isDesignDataset(dataset.getId())
+          && !DatasetTypeEnum.DESIGN.equals(getDatasetType(dataset.getId()))
+          || fieldSchema != null && DatasetTypeEnum.DESIGN.equals(getDatasetType(dataset.getId()))
           || fieldSchema != null && fieldSchema.getReadOnly() == null) {
         field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
         field.setType(fieldSchema.getType());
@@ -2575,5 +2561,25 @@ public class DatasetServiceImpl implements DatasetService {
     return recordDesignValuesList;
   }
 
+  /**
+   * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  @Override
+  public DatasetTypeEnum getDatasetType(Long datasetId) {
+    DatasetTypeEnum type = null;
+    if (reportingDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.REPORTING;
+    } else if (designDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.DESIGN;
+    } else if (dataCollectionRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.COLLECTION;
+    } else if (datasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.EUDATASET;
+    }
+    return type;
+  }
 
 }

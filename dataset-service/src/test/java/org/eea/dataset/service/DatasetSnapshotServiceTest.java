@@ -862,4 +862,53 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(snapshotRepository, times(1)).releaseEUSnapshots(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Gets the releases reporting success test.
+   *
+   * @return the releases reporting success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getReleasesReportingSuccessTest() throws Exception {
+
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.REPORTING);
+    when(snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
+  }
+
+  /**
+   * Gets the releases data collection success test.
+   *
+   * @return the releases data collection success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getReleasesDataCollectionSuccessTest() throws Exception {
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.COLLECTION);
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
+  }
+
+  /**
+   * Gets the releases EU dataset success test.
+   *
+   * @return the releases EU dataset success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getReleasesEUDatasetSuccessTest() throws Exception {
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.EUDATASET);
+    when(eUDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new EUDataset()));
+    when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new DataCollection()));
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
+  }
+
 }

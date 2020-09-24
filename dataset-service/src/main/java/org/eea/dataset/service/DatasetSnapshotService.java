@@ -198,4 +198,12 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void updateSnapshotEURelease(Long datasetId);
+
+  /**
+   * Gets the dataset historic releases per each type.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   */
+  List<ReleaseVO> getReleases(Long datasetId) throws EEAException;
 }
