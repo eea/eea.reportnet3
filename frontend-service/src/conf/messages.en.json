@@ -867,6 +867,13 @@
     "datasetId": "Dataset Id",
     "datasetName": "Dataset Name",
     "loadHistoricReleasesError": "Error loading historic releases",
-    "noHistoricReleases": "There are no historic releases yet"
+    "noHistoricReleases": "There are no historic releases yet",
+    "notAllowedError": "You are not allowed to see the requested page",
+    "userSettingsBasemapLayerSubtitle": "Configure the defaul basemap layer for your maps",
+    "basemapLayer": "Basemap layer",
+    "srid": "SRID: ",
+    "pasteRecordsCoordinatesMessage": "Point coordinates must have the following structure: ",
+    "pasteRecordsCoordinatesStructureMessage": "Latitude, Longitude - EPSG:4326/4258/3035. Example: 45.345, -2.344 - EPSG:4258",
+    "pasteRecordsWarningCoordinatesMessage": "Warning! There are columns with a wrong coordinate format"
   }
 }

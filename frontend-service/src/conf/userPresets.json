@@ -1,47 +1,32 @@
 {
-    "userParameters": {
-        "defaultRowsPage": [{
-                "label": "5",
-                "value": 5
-            },
-            {
-                "label": "10",
-                "value": 10
-            },
-            {
-                "label": "20",
-                "value": 20
-            },
-            {
-                "label": "100",
-                "value": 100
-            }
-        ],
-        "visualTheme": [{
-                "label": "Light",
-                "value": "light"
-            },
-            {
-                "label": "Dark",
-                "value": "dark"
-            }
-        ],
+  "userParameters": {
+    "defaultRowsPage": [
+      { "label": "5", "value": 5 },
+      { "label": "10", "value": 10 },
+      { "label": "20", "value": 20 },
+      { "label": "100", "value": 100 }
+    ],
+    "defaultBasemapLayer": [
+      { "label": "Topographic", "value": "Topographic" },
+      { "label": "Streets", "value": "Streets" },
+      { "label": "National Geographic", "value": "NationalGeographic" },
+      { "label": "Oceans", "value": "Oceans" },
+      { "label": "Gray", "value": "Gray" },
+      { "label": "Dark Gray", "value": "DarkGray" },
+      { "label": "Imagery", "value": "Imagery" },
+      { "label": "Imagery (Clarity)", "value": "ImageryClarity" },
+      { "label": "Imagery (Firefly)", "value": "ImageryFirefly" },
+      { "label": "Shaded Relief", "value": "ShadedRelief" }
+    ],
+    "visualTheme": [
+      { "label": "Light", "value": "light" },
+      { "label": "Dark", "value": "dark" }
+    ],
 
-        "dateFormat": [{
-                "label": "DD-MM-YYYY",
-                "value": "DD-MM-YYYY"
-            },
-            {
-                "label": "MM-DD-YYYY",
-                "value": "MM-DD-YYYY"
-            },
-            {
-                "label": "YYYY-MM-DD",
-                "value": "YYYY-MM-DD"
-            }
-
-
-        ]
-
-    }
+    "dateFormat": [
+      { "label": "DD-MM-YYYY", "value": "DD-MM-YYYY" },
+      { "label": "MM-DD-YYYY", "value": "MM-DD-YYYY" },
+      { "label": "YYYY-MM-DD", "value": "YYYY-MM-DD" }
+    ]
+  }
 }

@@ -150,6 +150,14 @@ export const useSetColumns = (
     );
   };
 
+  const renderPoint = (value = '') => {
+    if (value !== '') {
+      const parsedGeoJson = JSON.parse(value);
+      return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+    }
+    return '';
+  };
+
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
@@ -200,9 +208,11 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field])
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
               ? field.fieldData[column.field].sort().join(', ')
-              : (!isNil(field.fieldData[column.field]) &&
+              : // : Array.isArray(field.fieldData[column.field])
+              // ? field.fieldData[column.field].join(', ')
+              (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
                 (!isNil(field.fieldData[column.field]) &&
@@ -211,6 +221,8 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              : field.fieldData.type === 'POINT'
+              ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -225,8 +237,10 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field])
-              ? field.fieldData[column.field].sort().join(', ')
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+              ? // ? field.fieldData[column.field].sort().join(', ')
+                // : Array.isArray(field.fieldData[column.field])
+                field.fieldData[column.field].join(', ')
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
@@ -236,6 +250,8 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              : field.fieldData.type === 'POINT'
+              ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>
