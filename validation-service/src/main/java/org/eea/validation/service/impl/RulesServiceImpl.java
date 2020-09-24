@@ -38,7 +38,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
-import org.eea.validation.util.SQLValitaionUtils;
+import org.eea.validation.util.SQLValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +89,7 @@ public class RulesServiceImpl implements RulesService {
 
   /** The sql valitaion utils. */
   @Autowired
-  private SQLValitaionUtils sqlValitaionUtils;
+  private SQLValidationUtils sqlValidationUtils;
 
   /** The sql rules service. */
   @Autowired
@@ -608,7 +608,7 @@ public class RulesServiceImpl implements RulesService {
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setWhenCondition("isIntegrityConstraint(this.datasetId,,'"
+      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
           + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),

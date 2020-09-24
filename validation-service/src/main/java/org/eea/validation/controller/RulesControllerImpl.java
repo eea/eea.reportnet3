@@ -441,9 +441,8 @@ public class RulesControllerImpl implements RulesController {
     return rulesService.updateSequence(datasetSchemaId);
   }
 
-
   /**
-   * Delete not empty rule.
+   * Find sql sentences by dataset schema id.
    *
    * @param datasetSchemaId the dataset schema id
    * @return the list
