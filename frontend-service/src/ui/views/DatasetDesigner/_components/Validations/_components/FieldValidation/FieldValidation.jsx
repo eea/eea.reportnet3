@@ -376,7 +376,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
     onDeleteFromClickedFields(fieldKey);
-    let payload = {};
+
     if (fieldKey === 'field') {
       const fieldType = getFieldType(creationFormState.candidateRule.table, fieldValue, tabs);
       creationFormDispatch({
