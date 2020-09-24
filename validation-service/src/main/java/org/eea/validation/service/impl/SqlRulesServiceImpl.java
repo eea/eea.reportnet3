@@ -82,6 +82,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
+  /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
 
@@ -120,10 +121,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Validate SQL rule from datacollection.
    *
-   * @param query the query
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
-   * @param rule the rule
+   * @param ruleVO the rule VO
    */
   @Override
   public void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
@@ -172,10 +172,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private Boolean validateRule(String query, Long datasetId) {
     Boolean isSQLCorrect = Boolean.TRUE;
     // validate query sintax
-    if (checkQuerySintax(query)) {
+    if (checkQuerySyntax(query)) {
       try {
         String preparedquery = queryTreat(query, datasetId) + " limit 5";
-        retrivedata(preparedquery, datasetId);
+        retrieveTableData(preparedquery, datasetId);
       } catch (SQLException e) {
         LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
         isSQLCorrect = Boolean.FALSE;
@@ -190,13 +190,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return isSQLCorrect;
   }
 
+
   /**
-   * Check query sintax.
+   * Check query syntax.
    *
    * @param query the query
    * @return the boolean
    */
-  private Boolean checkQuerySintax(String query) {
+  private Boolean checkQuerySyntax(String query) {
     Boolean queryContainsKeyword = Boolean.TRUE;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
@@ -216,6 +217,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private String getTableName(String query) {
     int from = query.indexOf(FROM);
+    String table = "";
     List<String> tables = getTablesFromRuleQuery(query.substring(from));
     for (int index = 0; index < tables.size(); index++) {
       if (!tables.get(index).trim().equalsIgnoreCase("INNER")
@@ -225,10 +227,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           && !tables.get(index).trim().equalsIgnoreCase("LEFT")
           && !tables.get(index).trim().equalsIgnoreCase("RIGHT")
           && !tables.get(index).trim().equalsIgnoreCase(FROM)) {
-        return tables.get(index);
+        table = tables.get(index);
       }
     }
-    return "";
+    return table;
   }
 
   /**
@@ -247,11 +249,15 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<String> tableColumnList = getColumnsNameFromSchema(datasetId, tableName);
     List<String> queryColumnList = extractQueryColumns(userQueryColumnList, tableColumnList);
     String queryLastPart = getLastPartFromQuery(datasetId, queryUpperCase);
-
+    // the query begins to be rewritten
     StringBuilder preparedStatement = new StringBuilder(SELECT + " ");
     if (queryColumnList.isEmpty()) {
       preparedStatement.append(" * ");
     } else {
+      /*
+       * if we want the specific fields we need other data such as the id field Schema, the ID and
+       * the Type
+       */
       preparedStatement.append(FIRST_QUERY_PART);
       preparedStatement.append(COMMA);
       Iterator<String> iterator = queryColumnList.iterator();
@@ -275,12 +281,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       }
     }
     preparedStatement.append(queryLastPart);
-    try {
-      retrivedata(preparedStatement.toString(), datasetId);
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+
     return preparedStatement.toString();
   }
 
@@ -424,17 +425,23 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Retrivedata.
+   * Retrieve Table Data.
    *
    * @param query the query
+   * @param datasetId the dataset id
    * @return the table value
    * @throws SQLException the SQL exception
    */
 
   @Override
-  public TableValue retrivedata(String query, Long datasetId) throws SQLException {
-    TableValue table = datasetRepository.queryRSExecution(query);
-    if (null != table.getRecords() && table.getRecords().isEmpty()) {
+  public TableValue retrieveTableData(String query, Long datasetId) throws SQLException {
+    TableValue table = new TableValue();
+    try {
+      table = datasetRepository.queryRSExecution(query);
+    } catch (SQLException e) {
+      LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
+    }
+    if (null != table.getRecords() && !table.getRecords().isEmpty()) {
       retrieveValidations(table.getRecords(), datasetId);
     }
     return table;

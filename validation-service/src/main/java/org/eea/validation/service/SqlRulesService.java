@@ -25,7 +25,7 @@ public interface SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
-   * @param rule the rule
+   * @param ruleVO the rule VO
    */
   void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId, RuleVO ruleVO);
 
@@ -47,15 +47,17 @@ public interface SqlRulesService {
    */
   Rule getRule(Long datasetId, String ruleId);
 
+
   /**
-   * Retrivedata.
+   * Retrieve table data.
    *
    * @param query the query
    * @param datasetId the dataset id
    * @return the table value
    * @throws SQLException the SQL exception
    */
-  TableValue retrivedata(String query, Long datasetId) throws SQLException;
+  TableValue retrieveTableData(String query, Long datasetId) throws SQLException;
+
 
 
 }

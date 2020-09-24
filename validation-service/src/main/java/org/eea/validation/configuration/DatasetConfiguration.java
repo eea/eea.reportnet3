@@ -110,7 +110,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
 
   @Bean
-  @Primary
   public DataSource datasetDataSource() {
     final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
     DataSource dataSource = null;

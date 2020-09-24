@@ -315,7 +315,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
-    // // we look if all SQL QC's are working correctly, if not we disable it before do a dc
+    // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     designs.stream().forEach(dataset -> {
       List<RuleVO> rulesSql =
           rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());

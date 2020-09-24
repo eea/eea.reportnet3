@@ -1471,15 +1471,6 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Test is reporting dataset.
-   */
-  @Test
-  public void testIsReportingDataset() {
-    datasetService.isReportingDataset(1L);
-    Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
-  }
-
-  /**
    * Test save new field propagation.
    */
   @Test

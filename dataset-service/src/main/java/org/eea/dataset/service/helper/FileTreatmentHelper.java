@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -343,9 +344,9 @@ public class FileTreatmentHelper {
    */
   private void releaseSuccessEvents(String user, Long datasetId, String tableSchemaId,
       String fileName) {
-    EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
-            : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
+        : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -369,7 +370,7 @@ public class FileTreatmentHelper {
   private void releaseFailEvents(String user, Long datasetId, String tableSchemaId, String fileName,
       String error) {
     EventType eventType = null;
-    if (datasetService.isReportingDataset(datasetId)) {
+    if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))) {
       eventType = tableSchemaId == null ? EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT
           : EventType.IMPORT_REPORTING_FAILED_EVENT;
     } else {

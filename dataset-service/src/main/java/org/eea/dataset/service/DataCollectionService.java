@@ -55,4 +55,5 @@ public interface DataCollectionService {
    * @param dataflowId the dataflow id
    */
   void updateDataCollection(Long dataflowId);
+
 }

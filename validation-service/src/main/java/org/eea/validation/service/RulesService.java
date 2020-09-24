@@ -220,8 +220,9 @@ public interface RulesService {
   Long updateSequence(String datasetSchemaId);
 
 
+
   /**
-   * Update sequence.
+   * Find sql sentences by dataset schema id.
    *
    * @param datasetSchemaId the dataset schema id
    * @return the list
