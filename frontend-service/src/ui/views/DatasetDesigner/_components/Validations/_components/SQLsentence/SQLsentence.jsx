@@ -14,7 +14,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence }) => {
   return (
     <React.Fragment>
       <div className={styles.section}>
-        <h3>SQL sentence:</h3>
+        <h3>{resources.messages['sqlSentence']}:</h3>
 
         <textarea
           cols={30}
