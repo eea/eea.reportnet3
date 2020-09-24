@@ -421,11 +421,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Override
   public TableValue retrivedata(String query, Long datasetId) throws SQLException {
     TableValue table = datasetRepository.queryRSExecution(query);
-    retrieveValidations(table.getRecords(), datasetId);
+    if (null != table.getRecords() && table.getRecords().isEmpty()) {
+      retrieveValidations(table.getRecords(), datasetId);
+    }
     return table;
   }
 
 
+  /**
+   * Retrieve validations.
+   *
+   * @param records the records
+   * @param datasetId the dataset id
+   */
   private void retrieveValidations(List<RecordValue> records, Long datasetId) {
     // retrieve validations to set them into the final result
     List<String> recordIds = records.stream().map(RecordValue::getId).collect(Collectors.toList());
@@ -455,6 +463,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     });
   }
 
+  /**
+   * Gets the field validations.
+   *
+   * @param recordIds the record ids
+   * @param datasetId the dataset id
+   * @return the field validations
+   */
   private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds,
       Long datasetId) {
 
