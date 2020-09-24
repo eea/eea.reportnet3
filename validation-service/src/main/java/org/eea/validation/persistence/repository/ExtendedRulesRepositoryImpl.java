@@ -362,8 +362,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
 
-    filterExpression.append("cond",
-        new Document("$ne", Arrays.asList("$$rule.sqlSentence", "null")));
+    filterExpression.append("cond", new Document("$ne", Arrays.asList("$$rule.sqlSentence", "")));
     Document filter = new Document(FILTER, filterExpression);
     RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
         Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),

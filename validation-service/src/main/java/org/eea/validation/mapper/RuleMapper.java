@@ -67,7 +67,7 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
       rule.setReferenceId(new ObjectId(referenceId));
     }
     if (sqlSentence == null || sqlSentence.isEmpty()) {
-      rule.setSqlSentence("null");
+      rule.setSqlSentence("");
     }
     if (ruleExpressionDTO != null) {
       rule.setWhenCondition(ruleExpressionService.convertToString(ruleExpressionDTO));
