@@ -10,7 +10,7 @@ import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
-import { LocalStorageUtils } from 'ui/views/_functions/Utils';
+import { userStorage } from 'core/domain/model/User/UserStorage';
 
 const EULogin = ({ location, history }) => {
   const [isLoading] = useState(true);
@@ -23,9 +23,9 @@ const EULogin = ({ location, history }) => {
       if (code) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);
-        const rnLocalStorage = LocalStorageUtils.get();
+        const rnLocalStorage = userStorage.getLocalStorage();
         if (!isNil(rnLocalStorage)) {
-          LocalStorageUtils.remove();
+          userStorage.removeLocalStorage();
           window.location.href = rnLocalStorage.redirectUrl;
         } else {
           history.push(getUrl(routes.DATAFLOWS));

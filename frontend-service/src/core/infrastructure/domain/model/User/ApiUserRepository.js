@@ -9,8 +9,6 @@ import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-import { LocalStorageUtils } from './_utils/LocalStorageUtils';
-
 const timeOut = time => {
   setTimeout(() => {
     refreshToken();
@@ -42,7 +40,7 @@ const login = async code => {
 const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
-  LocalStorageUtils.remove();
+  userStorage.removeLocalStorage();
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
