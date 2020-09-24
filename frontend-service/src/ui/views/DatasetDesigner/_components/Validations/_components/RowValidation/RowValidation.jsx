@@ -662,7 +662,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const getRuleCreationBtn = () => {
     const options = {
       onClick: () => {},
-
       disabled: true,
       label: '',
       id: ''
