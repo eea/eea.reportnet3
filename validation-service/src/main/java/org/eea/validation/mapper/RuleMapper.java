@@ -59,11 +59,15 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     String ruleId = ruleVO.getRuleId();
     String referenceId = ruleVO.getReferenceId();
     RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
+    String sqlSentence = ruleVO.getSqlSentence();
     if (ruleId != null && !ruleId.isEmpty()) {
       rule.setRuleId(new ObjectId(ruleId));
     }
     if (referenceId != null && !referenceId.isEmpty()) {
       rule.setReferenceId(new ObjectId(referenceId));
+    }
+    if (sqlSentence == null || sqlSentence.isEmpty()) {
+      rule.setSqlSentence("null");
     }
     if (ruleExpressionDTO != null) {
       rule.setWhenCondition(ruleExpressionService.convertToString(ruleExpressionDTO));

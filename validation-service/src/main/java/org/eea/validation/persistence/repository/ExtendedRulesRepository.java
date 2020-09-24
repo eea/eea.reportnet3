@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import java.util.List;
 import javax.annotation.CheckForNull;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -154,4 +155,13 @@ public interface ExtendedRulesRepository {
    * @return true, if successful
    */
   boolean deleteNotEmptyRule(ObjectId tableSchemaId, ObjectId datasetSchemaId);
+
+
+  /**
+   * Find sql rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  List<Rule> findSqlRules(ObjectId datasetSchemaId);
 }

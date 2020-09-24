@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.data.repository;
 
+import java.sql.SQLException;
 import java.util.List;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.RecordValidation;
@@ -15,8 +16,9 @@ public interface DatasetExtendedRepository {
    *
    * @param query the query
    * @return the table value
+   * @throws SQLException
    */
-  TableValue queryRSExecution(String query);
+  TableValue queryRSExecution(String query) throws SQLException;
 
   /**
    * Query record validation execution.
