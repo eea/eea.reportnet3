@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -68,9 +69,9 @@ public class DeleteHelper {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
 
-    EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.DELETE_TABLE_COMPLETED_EVENT
-            : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        ? EventType.DELETE_TABLE_COMPLETED_EVENT
+        : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
