@@ -31,6 +31,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -283,10 +284,12 @@ public class DataCollectionServiceTest {
     List<DesignDataset> designsValue = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     List<DataProviderVO> dataProviders = new ArrayList<>();
+    List<RuleVO> rulesSql = new ArrayList();
     DesignDataset designDataset = new DesignDataset();
     DesignDatasetVO design = new DesignDatasetVO();
     RepresentativeVO representative = new RepresentativeVO();
     DataProviderVO dataProvider = new DataProviderVO();
+    RuleVO ruleVO = new RuleVO();
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
@@ -299,6 +302,7 @@ public class DataCollectionServiceTest {
     representatives.add(representative);
     dataProviders.add(dataProvider);
     designsValue.add(designDataset);
+    rulesSql.add(ruleVO);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
@@ -312,6 +316,8 @@ public class DataCollectionServiceTest {
     Mockito.when(statement.executeQuery(Mockito.any())).thenReturn(resultSet);
     Mockito.when(resultSet.next()).thenReturn(true);
     Mockito.when(statement.executeBatch()).thenReturn(null);
+    Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(Mockito.any()))
+        .thenReturn(rulesSql);
     Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
     Mockito.doNothing().when(userManagementControllerZuul)
         .addContributorsToResources(Mockito.any());

@@ -1386,4 +1386,20 @@ public class RulesServiceImplTest {
     Assert.assertEquals(1L,
         rulesServiceImpl.updateSequence("5e44110d6a9e3a270ce13fac").longValue());
   }
+
+
+
+  /**
+   * Find sql sentences by dataset schema id.
+   */
+  @Test
+  public void findSqlSentencesByDatasetSchemaId() {
+    Mockito.when(rulesRepository.findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac")))
+        .thenReturn(new ArrayList());
+    rulesServiceImpl.findSqlSentencesByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1))
+        .findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+
 }

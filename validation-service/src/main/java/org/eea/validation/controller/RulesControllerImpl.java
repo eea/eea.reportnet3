@@ -462,12 +462,10 @@ public class RulesControllerImpl implements RulesController {
    * @param datasetId the dataset id
    */
   @Override
-  @GetMapping("/private/validateSqlRuleDataCollection")
-  public void validateSqlRuleDataCollection(@RequestParam("query") String query,
-      @RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @RequestParam("ruleVO") RuleVO ruleVO) {
-    sqlRulesService.validateSQLRuleFromDatacollection(query, datasetId, datasetSchemaId, ruleVO);
+  @PostMapping("/private/validateSqlRuleDataCollection")
+  public void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
+    sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
   }
 
 

@@ -94,6 +94,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   @Async
   @Override
+  @Transactional
   public void validateSQLRule(Long datasetId, String datasetSchemaId, Rule rule) {
 
     EventType notificationEventType = null;
@@ -125,13 +126,20 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param rule the rule
    */
   @Override
-  public void validateSQLRuleFromDatacollection(String query, Long datasetId,
-      String datasetSchemaId, RuleVO ruleVO) {
-    if (validateRule(query, datasetId).equals(Boolean.FALSE)) {
-      Rule rule = ruleMapper.classToEntity(ruleVO);
+  public void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
+      RuleVO ruleVO) {
+    Rule rule = ruleMapper.classToEntity(ruleVO);
+    if (validateRule(ruleVO.getSqlSentence(), datasetId).equals(Boolean.FALSE)) {
       rule.setVerified(false);
       rule.setEnabled(false);
+      rule.setWhenCondition(
+          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
+              .append("',").append(datasetId).append(")").toString());
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    } else {
+      rule.setEnabled(true);
+      rule.setVerified(true);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     }
 
@@ -160,14 +168,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetId the dataset id
    * @return the boolean
    */
+
   private Boolean validateRule(String query, Long datasetId) {
     Boolean isSQLCorrect = Boolean.TRUE;
     // validate query sintax
     if (checkQuerySintax(query)) {
-      String preparedquery = queryTreat(query, datasetId) + " limit 5";
       try {
+        String preparedquery = queryTreat(query, datasetId) + " limit 5";
         retrivedata(preparedquery, datasetId);
       } catch (SQLException e) {
+        LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+        isSQLCorrect = Boolean.FALSE;
+
+      } catch (Exception e) {
         LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
         isSQLCorrect = Boolean.FALSE;
       }

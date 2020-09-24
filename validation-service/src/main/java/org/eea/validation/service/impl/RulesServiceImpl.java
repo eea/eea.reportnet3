@@ -361,16 +361,12 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-    }
-
-    // Check if rule is valid if not sql
-    if (null == ruleVO.getSqlSentence() || ruleVO.getSqlSentence().isEmpty()) {
-      kieBaseManager.validateRule(datasetSchemaId, rule);
     }
   }
 
@@ -612,8 +608,8 @@ public class RulesServiceImpl implements RulesService {
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integritySchema.getId().toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("isIntegrityConstraint(this.datasetId,,'"
+          + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
@@ -627,7 +623,7 @@ public class RulesServiceImpl implements RulesService {
       event.put("rule_type", "SQL");
       event.put("event_type", "CREATE");
       sentEvent(event);
-
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
