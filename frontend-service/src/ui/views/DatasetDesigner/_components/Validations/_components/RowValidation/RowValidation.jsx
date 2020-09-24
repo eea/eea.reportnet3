@@ -12,8 +12,8 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
-import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
+import ReactTooltip from 'react-tooltip';
 
 import { ValidationService } from 'core/services/Validation';
 
