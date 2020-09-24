@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useReducer, useContext, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -13,8 +13,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
 
 import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
-import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
+import ReactTooltip from 'react-tooltip';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -54,13 +54,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   const [clickedFields, setClickedFields] = useState([]);
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
-  const [tabContents, setTabContents] = useState();
-  const [tabsChanges, setTabsChanges] = useState({});
-  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
-  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
   const [expressionsErrors, setExpressionsErrors] = useState({});
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
+  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
+  const [tabContents, setTabContents] = useState();
+  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
+  const [tabsChanges, setTabsChanges] = useState({});
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -98,16 +98,16 @@ const FieldValidation = ({ datasetId, tabs }) => {
           <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
+            onAddNewExpression={onAddNewExpression}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
-            tabsChanges={tabsChanges}
-            onAddNewExpression={onAddNewExpression}
             onExpressionsErrors={onExpressionsErrors}
             onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
             onSetSQLsentence={onSetSQLsentence}
+            tabsChanges={tabsChanges}
           />
         </TabPanel>
       ]);

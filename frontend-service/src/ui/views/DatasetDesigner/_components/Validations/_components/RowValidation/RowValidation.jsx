@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -105,16 +105,16 @@ export const RowValidation = ({ datasetId, tabs }) => {
             onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
             onExpressionIfGroup={onExpressionIfGroup}
             onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
+            onExpressionMarkToGroup={onExpressionMarkToGroup}
             onExpressionsErrors={onExpressionsErrors}
             onExpressionThenDelete={onExpressionThenDelete}
             onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
             onExpressionThenGroup={onExpressionThenGroup}
-            onExpressionMarkToGroup={onExpressionMarkToGroup}
             onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
             onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
-            tabsChanges={tabsChanges}
             onSetSQLsentence={onSetSQLsentence}
+            tabsChanges={tabsChanges}
           />
         </TabPanel>
       ]);

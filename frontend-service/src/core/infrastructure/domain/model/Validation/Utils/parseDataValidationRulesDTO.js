@@ -2,9 +2,9 @@ import isNil from 'lodash/isNil';
 
 import { Validation } from 'core/domain/model/Validation/Validation';
 
+import { parseDatasetRelationFromDTO } from './parseDatasetRelationFromDTO';
 import { parseExpressionFromDTO } from './parseExpressionFromDTO';
 import { parseRowExpressionFromDTO } from './parseRowExpressionFromDTO';
-import { parseDatasetRelationFromDTO } from './parseDatasetRelationFromDTO';
 
 export const parseDataValidationRulesDTO = validations => {
   const validationsData = {};

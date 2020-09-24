@@ -4,8 +4,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 
-import { getCreationDTO } from './Utils/getCreationDTO';
 import { getCreationComparisonDTO } from './Utils/getCreationComparisonDTO';
+import { getCreationDTO } from './Utils/getCreationDTO';
 import { parseDataValidationRulesDTO } from './Utils/parseDataValidationRulesDTO';
 
 const create = async (datasetSchemaId, validationRule) => {
@@ -56,16 +56,16 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
 const createRowRule = async (datasetSchemaId, validationRule) => {
   const { expressions, expressionsIf, expressionsThen, expressionType } = validationRule;
   const validation = {
-    sqlSentence: validationRule.sqlSentence,
-    whenCondition: null,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.recordSchemaId,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
+    sqlSentence: validationRule.sqlSentence,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    type: 'RECORD'
+    type: 'RECORD',
+    whenCondition: null
   };
 
   if (expressionType === 'ifThenClause') {
@@ -129,17 +129,17 @@ const update = async (datasetId, validationRule) => {
 const updateRowRule = async (datasetId, validationRule) => {
   const { expressions, expressionType, expressionsIf, expressionsThen } = validationRule;
   const validation = {
-    sqlSentence: validationRule.sqlSentence,
-    whenCondition: null,
-    ruleId: validationRule.id,
-    description: validationRule.description,
     automatic: validationRule.automatic,
+    description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.recordSchemaId,
+    ruleId: validationRule.id,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
+    sqlSentence: validationRule.sqlSentence,
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: validationRule.ruleType,
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
+    whenCondition: null
   };
   if (!validationRule.automatic) {
     if (expressionType === 'ifThenClause') {

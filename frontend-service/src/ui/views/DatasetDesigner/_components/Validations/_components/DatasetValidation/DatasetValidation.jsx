@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -34,7 +34,6 @@ import { getDatasetSchemaTableFieldsBySchema } from 'ui/views/DatasetDesigner/_c
 import { getEmptyLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyLink';
 import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getReferencedTables } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getReferencedTables';
-// import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
 import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
 import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleRelationCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
@@ -105,9 +104,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
             onRelationDelete={onRelationDelete}
             onRelationFieldUpdate={onRelationFieldUpdate}
             onRelationsErrors={onRelationsErrors}
+            onSetSQLsentence={onSetSQLsentence}
             showRequiredFields={tabsChanges.expression}
             tabsChanges={tabsChanges}
-            onSetSQLsentence={onSetSQLsentence}
           />
         </TabPanel>
       ]);
