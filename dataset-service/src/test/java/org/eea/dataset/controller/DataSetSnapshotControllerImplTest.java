@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -399,19 +398,6 @@ public class DataSetSnapshotControllerImplTest {
         new ArrayList<>());
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void historicReleasesEUDatasetExceptionTest() throws Exception {
-    when(datasetService.isReportingDataset(Mockito.anyLong())).thenReturn(true);
-    doThrow(new EEAException()).when(datasetSnapshotService)
-        .getSnapshotsReleasedByIdDataset(Mockito.anyLong());
-    try {
-      dataSetSnapshotControllerImpl.historicReleases(1L);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      throw e;
-    }
-  }
-
   @Test
   public void getSchemaByIdSuccessTest() throws Exception {
     when(datasetSnapshotService.getSchemaById(Mockito.anyLong())).thenReturn(snapshotVO);
@@ -433,31 +419,9 @@ public class DataSetSnapshotControllerImplTest {
         dataSetSnapshotControllerImpl.historicReleasesByRepresentative(1L, 1L), new ArrayList<>());
   }
 
-
-  @Test
-  public void historicReleasesByRespresentativeExceptionTest() throws Exception {
-    when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(datasets);
-    doThrow(new EEAException()).when(datasetSnapshotService)
-        .getSnapshotsReleasedByIdDataset(Mockito.anyLong());
-    assertEquals("not equals",
-        dataSetSnapshotControllerImpl.historicReleasesByRepresentative(1L, 1L), new ArrayList<>());
-  }
-
   @Test
   public void updateSnapshotEUReleaseSuccessTest() throws Exception {
     dataSetSnapshotControllerImpl.updateSnapshotEURelease(Mockito.anyLong());
     Mockito.verify(datasetSnapshotService, times(1)).updateSnapshotEURelease(Mockito.anyLong());
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void updateSnapshotEUReleaseExceptionTest() throws Exception {
-    doThrow(new EEAException()).when(datasetSnapshotService)
-        .updateSnapshotEURelease(Mockito.anyLong());
-    try {
-      dataSetSnapshotControllerImpl.updateSnapshotEURelease(Mockito.anyLong());
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-      throw e;
-    }
   }
 }

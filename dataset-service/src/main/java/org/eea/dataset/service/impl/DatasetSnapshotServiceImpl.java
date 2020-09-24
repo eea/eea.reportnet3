@@ -868,7 +868,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) throws EEAException {
+  public List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) {
     List<Snapshot> snapshots =
         snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId);
     return releaseMapper.entityListToClass(snapshots.stream()
@@ -883,8 +883,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId)
-      throws EEAException {
+  public List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId) {
     List<Snapshot> snapshots =
         snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollectionId);
     return releaseMapper.entityListToClass(snapshots.stream()
@@ -927,7 +926,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateSnapshotEURelease(Long datasetId) throws EEAException {
+  public void updateSnapshotEURelease(Long datasetId) {
     // We have to set for the snapshots actives in this moment in the dataset, the field eu_released
     // to true, and the rest to false
     List<Snapshot> snapshots =

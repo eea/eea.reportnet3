@@ -437,12 +437,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     List<Long> datasetIds =
         datasets.stream().filter(dataset -> dataset.getDataProviderId().equals(representativeId))
             .map(ReportingDataset::getId).collect(Collectors.toList());
-    try {
-      for (Long id : datasetIds) {
-        releases.addAll(datasetSnapshotService.getSnapshotsReleasedByIdDataset(id));
-      }
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error retreiving releases. Error message: {}", e.getMessage(), e);
+    for (Long id : datasetIds) {
+      releases.addAll(datasetSnapshotService.getSnapshotsReleasedByIdDataset(id));
     }
     return releases;
   }
@@ -456,11 +452,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PutMapping("/private/eurelease/{idDataset}")
   public void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId) {
-    try {
-      datasetSnapshotService.updateSnapshotEURelease(datasetId);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    datasetSnapshotService.updateSnapshotEURelease(datasetId);
   }
 }
