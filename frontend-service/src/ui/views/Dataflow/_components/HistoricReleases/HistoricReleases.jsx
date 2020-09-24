@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -31,12 +31,28 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
     data: [],
     filteredData: [],
+    filtered: false,
     isLoading: true
   });
 
   useEffect(() => {
     onLoadHistoricReleases();
   }, []);
+
+  const getFiltered = value => historicReleasesDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+  const getPaginatorRecordsCount = () => (
+    <Fragment>
+      {historicReleasesState.filtered && historicReleasesState.data.length !== historicReleasesState.filteredData.length
+        ? `${resources.messages['filtered']} : ${historicReleasesState.filteredData.length} | `
+        : ''}
+      {resources.messages['totalRecords']} {historicReleasesState.data.length}{' '}
+      {resources.messages['records'].toLowerCase()}
+      {historicReleasesState.filtered && historicReleasesState.data.length === historicReleasesState.filteredData.length
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
+        : ''}
+    </Fragment>
+  );
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -51,7 +67,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         : (response = await ReleaseService.allHistoricReleases(datasetId));
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: response, filteredData: response }
+        payload: { data: response, filteredData: response, filtered: false }
       });
     } catch (error) {
       console.error('error', error);
@@ -207,10 +223,12 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     <div className={styles.historicReleases}>
       {historicReleasesView === 'dataCollection' && (
         <Filters
+          checkboxOptions={['isDataCollectionReleased', 'isEUReleased']}
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
-          selectOptions={['countryCode', 'isDataCollectionReleased', 'isEUReleased']}
-          checkboxOptions={['isDataCollectionReleased', 'isEUReleased']}
+          getFilteredSearched={getFiltered}
+          // selectOptions={['countryCode', 'isDataCollectionReleased', 'isEUReleased']}
+          selectOptions={['countryCode']}
         />
       )}
 
@@ -218,6 +236,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFiltered}
           selectOptions={['datasetName']}
         />
       )}
@@ -227,7 +246,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           className={Array.isArray(datasetId) || historicReleasesView === 'dataCollection' ? '' : styles.noFilters}
           autoLayout={true}
           paginator={true}
-          paginatorRight={`${resources.messages['totalRecords']} ${historicReleasesState.filteredData.length}`}
+          paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={historicReleasesState.filteredData.length}

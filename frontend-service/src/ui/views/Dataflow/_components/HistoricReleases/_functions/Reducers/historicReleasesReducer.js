@@ -6,6 +6,9 @@ export const historicReleasesReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'IS_FILTERED':
+      return { ...state, filtered: payload.value };
+
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 

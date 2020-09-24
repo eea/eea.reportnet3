@@ -44,6 +44,7 @@ const TabsValidations = withRouter(
     const validationContext = useContext(ValidationContext);
 
     const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+      filtered: false,
       filteredData: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
@@ -65,6 +66,23 @@ const TabsValidations = withRouter(
 
       if (response) onUpdateData();
     }, [notificationContext]);
+
+    const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+    const getPaginatorRecordsCount = () => (
+      <Fragment>
+        {tabsValidationsState.filtered &&
+        tabsValidationsState.validationList.validations.length !== tabsValidationsState.filteredData.length
+          ? `${resources.messages['filtered']} : ${tabsValidationsState.filteredData.length} | `
+          : ''}
+        {resources.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
+        {resources.messages['records'].toLowerCase()}
+        {tabsValidationsState.filtered &&
+        tabsValidationsState.validationList.validations.length === tabsValidationsState.filteredData.length
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          : ''}
+      </Fragment>
+    );
 
     const isDeleteDialogVisible = value =>
       tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
@@ -280,8 +298,7 @@ const TabsValidations = withRouter(
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
-        visible={tabsValidationsState.isDeleteDialogVisible}
-        >
+        visible={tabsValidationsState.isDeleteDialogVisible}>
         {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );
@@ -358,22 +375,21 @@ const TabsValidations = withRouter(
     const validationList = () => {
       if (tabsValidationsState.isLoading) {
         return (
-        <div className={styles.validationsWithoutTable}>
-          <div className={styles.loadingSpinner}><Spinner style={{ top: 0, left: 0 }} /></div>
-        </div>);
-      }
-
-      if (checkIsEmptyValidations()) {
-        return (
           <div className={styles.validationsWithoutTable}>
-            <div className={styles.noValidations}>
-              {resources.messages['emptyValidations']}
+            <div className={styles.loadingSpinner}>
+              <Spinner style={{ top: 0, left: 0 }} />
             </div>
           </div>
         );
       }
 
-      const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.filteredData.length}`;
+      if (checkIsEmptyValidations()) {
+        return (
+          <div className={styles.validationsWithoutTable}>
+            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
+          </div>
+        );
+      }
 
       return (
         <div className={styles.validations}>
@@ -382,6 +398,7 @@ const TabsValidations = withRouter(
               className="filter-lines"
               data={tabsValidationsState.validationList.validations}
               getFilteredData={onLoadFilteredData}
+              getFilteredSearched={getFilteredState}
               searchAll
               searchBy={['name', 'description', 'message']}
               selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
@@ -395,7 +412,7 @@ const TabsValidations = withRouter(
               loading={false}
               onRowClick={event => validationId(event.data.id)}
               paginator={true}
-              paginatorRight={paginatorRightText}
+              paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={tabsValidationsState.validationList.validations.length}

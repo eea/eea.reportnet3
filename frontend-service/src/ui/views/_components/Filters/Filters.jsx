@@ -4,6 +4,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import difference from 'lodash/difference';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
 
 import styles from './Filters.module.scss';
 
@@ -36,6 +37,7 @@ export const Filters = ({
   dropdownOptions,
   filterByList,
   getFilteredData,
+  getFilteredSearched,
   inputOptions,
   matchMode,
   searchAll,
@@ -54,11 +56,15 @@ export const Filters = ({
     checkboxes: [],
     data: data,
     filterBy: {},
+    filtered: false,
     filteredData: data,
+    filteredSearched: false,
     labelAnimations: {},
     matchMode: true,
     orderBy: {},
-    searchBy: ''
+    property: '',
+    searchBy: '',
+    searched: false
   });
 
   useEffect(() => {
@@ -73,11 +79,46 @@ export const Filters = ({
     onReApplyFilters();
   }, [filterState.matchMode]);
 
+  useEffect(() => {
+    getFilteredValue();
+  }, [filterState.filterBy]);
+
+  // useEffect(() => {
+  //   getSearchedValue();
+  // }, [filterState.searched]);
+
+  useEffect(() => {
+    getFilteredStateValue(filterState.filteredState);
+  }, [filterState.filtered, filterState.searched]);
+
+  useEffect(() => {
+    getFilteredSearched(filterState.filteredSearched);
+  }, [filterState.filteredSearched]);
+
+  useEffect(() => {
+    getChangedCheckboxes(filterState.property);
+  }, [JSON.stringify(filterState.checkboxes), filterState.property]);
+
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
   const getCheckboxFilterState = property => {
     const [checkBox] = filterState.checkboxes.filter(checkbox => checkbox.property === property);
     return isNil(checkBox) ? false : checkBox.isChecked;
+  };
+
+  const getFilteredStateValue = () => {
+    const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
+    filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
+  };
+
+  const getFilteredValue = () => {
+    const filteredByValues = Object.values(filterState.filterBy);
+    const filteredByValuesState = filteredByValues.map(filterBy =>
+      isNull(filterBy) ? false : filterBy.length === 0 ? false : true
+    );
+    const filteredValue = filteredByValuesState.includes(true) ? true : false;
+
+    filterDispatch({ type: 'FILTERED', payload: { filteredValue } });
   };
 
   const getInitialState = () => {
@@ -126,11 +167,14 @@ export const Filters = ({
     filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
-  const onChangeCheckboxFilter = property => {
-    filterDispatch({ type: 'ON_CHECKBOX_FILTER', payload: { property } });
+  const getChangedCheckboxes = property => {
     filterState.checkboxes.forEach(checkbox => {
       checkbox.property === property && onFilterData(checkbox.property, [checkbox.isChecked]);
     });
+  };
+
+  const onChangeCheckboxFilter = property => {
+    filterDispatch({ type: 'ON_CHECKBOX_FILTER', payload: { property } });
   };
 
   const onClearAllFilters = () => {
@@ -210,8 +254,9 @@ export const Filters = ({
       selectedKeys,
       checkedKeys
     );
+    const searched = isEmpty(value) ? false : true;
 
-    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
+    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value, searched } });
   };
 
   const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
@@ -443,12 +488,8 @@ export const Filters = ({
     <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
-      {/* {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))} */}
-      {/* {selectOptions &&
-        selectOptions
-          .filter(option => option !== 'isEUReleased' && option !== 'isDataCollectionReleased')
-          .map((option, i) => renderSelectFilter(option, i))} */}
-      {selectOptions && difference(selectOptions, checkboxOptions).map((option, i) => renderSelectFilter(option, i))}}
+      {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
+      {/* {selectOptions && difference(selectOptions, checkboxOptions).map((option, i) => renderSelectFilter(option, i))} */}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
       {matchMode && renderCheckbox()}
