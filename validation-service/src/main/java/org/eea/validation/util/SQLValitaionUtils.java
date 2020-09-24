@@ -7,6 +7,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
@@ -149,7 +150,9 @@ public class SQLValitaionUtils {
     switch (ruleType) {
       case DATASET:
         DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-        validation.setOriginName("");
+        DataSetMetabaseVO datasetMetabase =
+            datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        validation.setOriginName(datasetMetabase.getDataSetName());
         if (dataset.getDatasetValidations().isEmpty()) {
           DatasetValidation datasetValidation = new DatasetValidation();
           datasetValidation.setDatasetValue(dataset);
