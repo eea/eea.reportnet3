@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -171,22 +172,28 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   private Boolean validateRule(String query, Long datasetId) {
     Boolean isSQLCorrect = Boolean.TRUE;
-    // validate query sintax
-    if (checkQuerySyntax(query)) {
-      try {
-        String preparedquery = queryTreat(query, datasetId) + " limit 5";
-        retrieveTableData(preparedquery, datasetId);
-      } catch (SQLException e) {
-        LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
-        isSQLCorrect = Boolean.FALSE;
+    // validate query
+    if (!StringUtils.isBlank(query)) {
+      // validate query sintax
+      if (checkQuerySyntax(query)) {
+        try {
+          String preparedquery = queryTreat(query, datasetId) + " limit 5";
+          retrieveTableData(preparedquery, datasetId);
+        } catch (SQLException e) {
+          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          isSQLCorrect = Boolean.FALSE;
 
-      } catch (Exception e) {
-        LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+        } catch (Exception e) {
+          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          isSQLCorrect = Boolean.FALSE;
+        }
+      } else {
         isSQLCorrect = Boolean.FALSE;
       }
     } else {
       isSQLCorrect = Boolean.FALSE;
     }
+
     return isSQLCorrect;
   }
 
