@@ -67,6 +67,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           ? (response = await ReleaseService.allHistoricReleases(datasetId[0]))
           : (response = await ReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
         : (response = await ReleaseService.allHistoricReleases(datasetId));
+      response.sort((a, b) => b.releasedDate - a.releasedDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
         payload: { data: response, filteredData: response, filtered: false }
@@ -179,6 +180,15 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       { id: 'datasetName', index: 0 },
       { id: 'releasedDate', index: 1 }
     ];
+
+    console.log(
+      'historicReleases',
+      historicReleases
+        .map(error => historicReleasesWithPriority.filter(e => error === e.id))
+        .flat()
+        .sort((a, b) => a.index - b.index)
+        .map(orderedError => orderedError.id)
+    );
 
     return historicReleases
       .map(error => historicReleasesWithPriority.filter(e => error === e.id))
