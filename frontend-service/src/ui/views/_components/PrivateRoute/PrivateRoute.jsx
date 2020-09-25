@@ -10,18 +10,16 @@ import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-import { LocalStorageUtils } from 'ui/views/_functions/Utils';
-
 export const PrivateRoute = ({ component: Component, path }) => {
   const userContext = useContext(UserContext);
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
-      LocalStorageUtils.remove();
+      userStorage.removeLocalStorage();
       return <Route path={path} render={() => <Component />} />;
     } else {
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
-        LocalStorageUtils.set({ redirectUrl: window.location.href });
+        userStorage.setLocalStorage({ redirectUrl: window.location.href });
       }
       window.location.href = AccessPointWebConfig.euloginUrl;
     }
