@@ -30,6 +30,7 @@ export const FieldComparison = ({
               <ValidationExpressionSelector
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
+                fieldType={creationFormState.candidateRule.fieldType}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionDelete}
@@ -40,7 +41,6 @@ export const FieldComparison = ({
                 position={i}
                 rawTableFields={creationFormState.tableFields}
                 showRequiredFields={tabsChanges.expression}
-                fieldType={creationFormState.candidateRule.fieldType}
               />
             ))}
         </ul>
