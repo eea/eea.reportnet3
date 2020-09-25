@@ -319,10 +319,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     designs.stream().forEach(dataset -> {
       List<RuleVO> rulesSql =
           rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
-      rulesSql.stream().forEach(ruleVO -> {
-        rulesControllerZuul.validateSqlRuleDataCollection(dataset.getId(),
-            dataset.getDatasetSchema(), ruleVO);
-      });
+      if (null != rulesSql && !rulesSql.isEmpty()) {
+        rulesSql.stream().forEach(ruleVO -> {
+          rulesControllerZuul.validateSqlRuleDataCollection(dataset.getId(),
+              dataset.getDatasetSchema(), ruleVO);
+        });
+      }
     });
 
     // 2. Get the representatives who are going to provide data

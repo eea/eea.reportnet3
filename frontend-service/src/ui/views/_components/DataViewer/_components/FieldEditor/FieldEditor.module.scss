@@ -3,13 +3,13 @@
   width: 2.357em;
 }
 
-.pointSridWrapper {
+.pointEpsgWrapper {
   align-items: center;
   display: flex;
   margin-top: 0.5rem;
   width: 100%;
   label:first-child {
-    width: 25%;
+    width: 80px;
     color: var(--main-font-color);
     font-size: 0.9em;
     font-weight: bold;
@@ -26,6 +26,6 @@
   flex-direction: column;
 }
 
-.sridSwitcher {
+.epsgSwitcher {
   margin-right: 1rem;
 }
