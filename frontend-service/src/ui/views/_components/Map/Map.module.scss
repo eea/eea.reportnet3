@@ -1,7 +1,21 @@
+.crsSwitcherSplitButton {
+  width: 20% !important;
+  min-width: 20% !important;
+  margin-left: 3rem;
+  position: absolute;
+  top: 40px;
+  // float: left;
+  z-index: 9999;
+}
+
 .themeSwitcherSplitButton {
   width: 20% !important;
   min-width: 20% !important;
   margin-right: 1rem;
+  position: absolute;
+  top: 40px;
+  left: 55px;
+  z-index: 9999;
 }
 
 .mapButtonsBar {

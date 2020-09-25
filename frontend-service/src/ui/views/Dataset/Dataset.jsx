@@ -656,6 +656,15 @@ export const Dataset = withRouter(({ match, history }) => {
     </Fragment>
   );
 
+  const renderValidationsFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => setValidationsVisible(false)}
+    />
+  );
+
   if (isLoading) return layout(<Spinner />);
 
   return layout(
@@ -823,6 +832,7 @@ export const Dataset = withRouter(({ match, history }) => {
       {validationsVisible && (
         <Dialog
           className={styles.paginatorValidationViewer}
+          footer={renderValidationsFooter}
           header={resources.messages['titleValidations']}
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
@@ -855,29 +865,27 @@ export const Dataset = withRouter(({ match, history }) => {
         </Dialog>
       )}
       {isImportDatasetDialogVisible && (
-        <Dialog
-          className={styles.Dialog}
-          footer={renderCustomFileUploadFooter}
-          header={`${resources.messages['uploadDataset']}${datasetName}`}
-          onHide={() => setIsImportDatasetDialogVisible(false)}
-          visible={isImportDatasetDialogVisible}>
-          <CustomFileUpload
-            accept={getImportExtensions}
-            chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
-            className={styles.FileUpload}
-            fileLimit={1}
-            infoTooltip={infoExtensionsTooltip}
-            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-            mode="advanced"
-            multiple={false}
-            name="file"
-            onUpload={onUpload}
-            replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
-              datasetId: datasetId
-            })}`}
-          />
-        </Dialog>
+        <CustomFileUpload
+          dialogClassName={styles.Dialog}
+          dialogHeader={`${resources.messages['uploadDataset']}${datasetName}`}
+          dialogOnHide={() => setIsImportDatasetDialogVisible(false)}
+          dialogVisible={isImportDatasetDialogVisible}
+          isDialog={true}
+          accept={getImportExtensions}
+          chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+          className={styles.FileUpload}
+          fileLimit={1}
+          infoTooltip={infoExtensionsTooltip}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          mode="advanced"
+          multiple={false}
+          name="file"
+          onUpload={onUpload}
+          replaceCheck={true}
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+            datasetId: datasetId
+          })}`}
+        />
       )}
       {isImportOtherSystemsDialogVisible && (
         <Dialog

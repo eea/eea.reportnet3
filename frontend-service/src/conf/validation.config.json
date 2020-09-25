@@ -15,7 +15,7 @@
   "fieldByOperatorType": {
     "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
     "LEN": ["NUMBER_INTEGER"],
-    "string": ["EMAIL", "TEXT", "PHONE", "URL", "CODELIST"],
+    "string": ["EMAIL", "TEXT", "PHONE", "URL", "CODELIST", "LINK"],
     "stringMatch": ["TEXT"],
     "numberMatch": ["TEXT"],
     "date": ["DATE"],
@@ -803,5 +803,5 @@
   },
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
-  "bannedFields": ["attachment"]
+  "bannedFields": ["attachment", "point"]
 }

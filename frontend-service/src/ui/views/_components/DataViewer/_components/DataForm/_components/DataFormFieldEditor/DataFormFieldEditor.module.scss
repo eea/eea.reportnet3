@@ -1,0 +1,26 @@
+.mapButton {
+  margin-right: 1rem;
+  width: 2.357em;
+}
+
+.pointSridWrapper {
+  align-items: center;
+  display: flex;
+  margin-top: 0.5rem;
+  width: 50%;
+  button {
+    width: 35%;
+  }
+}
+
+.srid {
+  width: 10%;
+  color: var(--main-font-color);
+  font-size: 0.9em;
+  font-weight: bold;
+  padding: 5px;
+}
+
+.sridSwitcher {
+  margin-right: 1rem;
+}
