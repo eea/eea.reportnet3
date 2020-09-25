@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useReducer, useContext, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -11,9 +11,10 @@ import styles from './FieldValidation.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
-import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
-import ReactTooltip from 'react-tooltip';
+
+import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import { TabView, TabPanel } from 'primereact/tabview';
+import ReactTooltip from 'react-tooltip';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -27,7 +28,7 @@ import {
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
 import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkExpressions';
-import { checkValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkValidation';
+import { checkFieldValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkFieldValidation';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
@@ -53,13 +54,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   const [clickedFields, setClickedFields] = useState([]);
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
-  const [tabContents, setTabContents] = useState();
-  const [tabsChanges, setTabsChanges] = useState({});
-  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
-  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
   const [expressionsErrors, setExpressionsErrors] = useState({});
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
+  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
+  const [tabContents, setTabContents] = useState();
+  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
+  const [tabsChanges, setTabsChanges] = useState({});
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -94,16 +95,19 @@ const FieldValidation = ({ datasetId, tabs }) => {
           header={resourcesContext.messages.tabMenuExpression}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
-          <ExpressionsTab
+          <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
+            onAddNewExpression={onAddNewExpression}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
-            tabsChanges={tabsChanges}
-            onAddNewExpression={onAddNewExpression}
             onExpressionsErrors={onExpressionsErrors}
+            onExpressionTypeToggle={onExpressionTypeToggle}
+            onGetFieldType={onGetFieldType}
+            onSetSQLsentence={onSetSQLsentence}
+            tabsChanges={tabsChanges}
           />
         </TabPanel>
       ]);
@@ -173,7 +177,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
       const fieldType = getFieldType(table, { code: validationContext.referenceId }, tabs);
       creationFormDispatch({
-        // type: 'SET_FIELD_AND_FIELD_TYPE',
         type: 'SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE',
         payload: {
           field: validationContext.referenceId,
@@ -222,7 +225,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkValidation(creationFormState.candidateRule)
+      payload: !checkFieldValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);
 
@@ -252,6 +255,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
       }
     }
   }, [clickedFields]);
+
+  const onExpressionTypeToggle = expressionType => {
+    creationFormDispatch({
+      type: 'ON_EXPRESSION_TYPE_TOGGLE',
+      payload: expressionType
+    });
+  };
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
@@ -366,7 +376,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
     onDeleteFromClickedFields(fieldKey);
-    let payload = {};
+
     if (fieldKey === 'field') {
       const fieldType = getFieldType(creationFormState.candidateRule.table, fieldValue, tabs);
       creationFormDispatch({
@@ -437,6 +447,20 @@ const FieldValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onSetSQLsentence = (key, value) => {
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key,
+        value
+      }
+    });
+  };
+
+  const onGetFieldType = field => {
+    return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
+  };
+
   const renderFieldQCsFooter = (
     <div className={styles.footer}>
       <div className={`${styles.section} ${styles.footerToolBar}`}>
@@ -450,7 +474,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
                 type="button"
                 label={resourcesContext.messages.update}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                onClick={e => onUpdateValidationRule()}
+                onClick={() => onUpdateValidationRule()}
               />
             </span>
           ) : (
@@ -464,7 +488,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
                 type="button"
                 label={resourcesContext.messages.create}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                onClick={e => onCreateValidationRule()}
+                onClick={() => onCreateValidationRule()}
               />
             </span>
           )}
@@ -480,7 +504,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
             type="button"
             label={resourcesContext.messages.cancel}
             icon="cancel"
-            onClick={e => onHide()}
+            onClick={() => onHide()}
           />
         </div>
       </div>
@@ -498,9 +522,9 @@ const FieldValidation = ({ datasetId, tabs }) => {
               ? resourcesContext.messages.editFieldConstraint
               : resourcesContext.messages.createFieldConstraintTitle
           }
-          visible={validationContext.isVisible}
+          onHide={() => onHide()}
           style={{ width: '975px' }}
-          onHide={e => onHide()}>
+          visible={validationContext.isVisible}>
           {children}
         </Dialog>
       )}
@@ -508,21 +532,19 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   return dialogLayout(
-    <>
-      <form>
-        <div id={styles.QCFormWrapper}>
-          <div className={styles.body}>
-            <TabView
-              className={styles.tabView}
-              activeIndex={tabMenuActiveItem}
-              onTabChange={e => onTabChange(e.index)}
-              renderActiveOnly={false}>
-              {tabContents}
-            </TabView>
-          </div>
+    <form>
+      <div id={styles.QCFormWrapper}>
+        <div className={styles.body}>
+          <TabView
+            activeIndex={tabMenuActiveItem}
+            className={styles.tabView}
+            onTabChange={e => onTabChange(e.index)}
+            renderActiveOnly={false}>
+            {tabContents}
+          </TabView>
         </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 };
 

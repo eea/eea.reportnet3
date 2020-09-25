@@ -1,9 +1,25 @@
 import { isNil } from 'lodash';
 
-const USER_TOKEN = 'reportnet_03';
+import { config } from 'conf';
+
+const { storage: storageConfig } = config;
+
+const getLocalStorage = () => {
+  const rnLocalStorage = JSON.parse(localStorage.getItem(storageConfig.LOCAL_KEY));
+  if (!isNil(rnLocalStorage)) return rnLocalStorage;
+  return;
+};
+
+const removeLocalStorage = () => {
+  localStorage.clear();
+};
+
+const setLocalStorage = value => {
+  localStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify(value));
+};
 
 const get = () => {
-  const tokens = JSON.parse(sessionStorage.getItem(USER_TOKEN));
+  const tokens = JSON.parse(sessionStorage.getItem(storageConfig.LOCAL_KEY));
 
   if (isNil(tokens)) {
     return;
@@ -12,10 +28,10 @@ const get = () => {
 };
 
 const set = tokens => {
-  sessionStorage.setItem(USER_TOKEN, JSON.stringify(tokens));
+  sessionStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify(tokens));
 };
 
-const remove = () => sessionStorage.removeItem(USER_TOKEN);
+const remove = () => sessionStorage.removeItem(storageConfig.LOCAL_KEY);
 
 const hasToken = () => {
   const tokens = get();
@@ -27,5 +43,8 @@ export const LocalUserStorage = {
   get,
   set,
   remove,
-  hasToken
+  hasToken,
+  getLocalStorage,
+  removeLocalStorage,
+  setLocalStorage
 };

@@ -21,7 +21,9 @@ export class Validation {
     referenceId,
     relations,
     ruleId,
-    shortCode
+    shortCode,
+    sqlSentence
+    
   } = {}) {
     this.activationGroup = activationGroup;
     this.allExpressions = allExpressions;
@@ -45,5 +47,6 @@ export class Validation {
     this.relations = relations;
     this.ruleId = ruleId;
     this.shortCode = shortCode;
+    this.sqlSentence = sqlSentence;
   }
 }
