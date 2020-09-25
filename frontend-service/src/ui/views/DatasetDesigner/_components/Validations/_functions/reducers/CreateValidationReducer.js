@@ -439,6 +439,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           }
         }
       };
+
     case 'UPDATE_IS_DOUBLE_REFERENCED':
       return {
         ...state,
@@ -450,6 +451,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           }
         }
       };
+
     case 'SET_FORM_FIELD_RELATION':
       return {
         ...state,
@@ -458,9 +460,12 @@ export const createValidationReducer = (state, { type, payload }) => {
           [payload.key]: payload.value,
           relations: {
             ...state.candidateRule.relations,
-            links: state.candidateRule.relations.links.map(link => {
-              return { linkId: link.linkId, originField: '', referencedField: link.referencedField };
-            })
+            links:
+              state.candidateRule.expressionType !== 'sqlSentence'
+                ? state.candidateRule.relations.links.map(link => {
+                    return { linkId: link.linkId, originField: '', referencedField: link.referencedField };
+                  })
+                : null
           }
         }
       };

@@ -11,13 +11,13 @@ import { parseDataValidationRulesDTO } from './Utils/parseDataValidationRulesDTO
 const create = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
-    sqlSentence: validationRule.sqlSentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.field.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
+    sqlSentence: validationRule.sqlSentence,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'FIELD',
     whenCondition:
@@ -28,13 +28,9 @@ const create = async (datasetSchemaId, validationRule) => {
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
   const validation = {
-    sqlSentence: validationRule.sqlSentence,
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
-    referenceId: validationRule.table.code,
-    ruleName: validationRule.name,
-    shortCode: validationRule.shortCode,
     integrityVO:
       isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
         ? {
@@ -45,6 +41,10 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
             referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
           }
         : null,
+    referenceId: validationRule.table.code,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    sqlSentence: validationRule.sqlSentence,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'TABLE',
     whenCondition: null
@@ -73,6 +73,7 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
       params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
     };
   }
+
   if (expressionType === 'fieldComparison') {
     validation.whenCondition = getCreationComparisonDTO(expressions);
   }
@@ -147,6 +148,7 @@ const updateRowRule = async (datasetId, validationRule) => {
         params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
       };
     }
+
     if (expressionType === 'fieldComparison') {
       validation.whenCondition = getCreationComparisonDTO(expressions);
     }
@@ -156,16 +158,9 @@ const updateRowRule = async (datasetId, validationRule) => {
 
 const updateDatasetRule = async (datasetId, validationRule) => {
   const validation = {
-    sqlSentence: validationRule.sqlSentence,
-    ruleId: validationRule.id,
-    description: validationRule.description,
     automatic: validationRule.automatic,
+    description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
-    referenceId: validationRule.table.code,
-    ruleName: validationRule.name,
-    shortCode: validationRule.shortCode,
-    type: 'TABLE',
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     integrityVO:
       isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
         ? {
@@ -177,6 +172,13 @@ const updateDatasetRule = async (datasetId, validationRule) => {
             referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
           }
         : null,
+    referenceId: validationRule.table.code,
+    ruleId: validationRule.id,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    sqlSentence: validationRule.sqlSentence,
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    type: 'TABLE',
     whenCondition: null
   };
   return await apiValidation.update(datasetId, validation);

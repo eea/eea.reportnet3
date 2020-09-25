@@ -154,8 +154,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [relationsErrors]);
 
   useEffect(() => {
-    if (validationContext.referenceId && isNil(validationContext.ruleToEdit.sqlSentence)) {
-      const table = getSelectedTableByTableSchemaId(validationContext.ruleToEdit.referenceId, tabs);
+
+    if (validationContext.referenceId) {
+      const table = getSelectedTableByTableSchemaId(validationContext.referenceId, tabs);
 
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
@@ -198,6 +199,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [creationFormState.candidateRule]);
 
   useEffect(() => {
+
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
@@ -235,10 +237,14 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const checkDeactivateRules = () => {
-    return (
-      (!creationFormState.candidateRule.table || creationFormState.candidateRule.relations.links.length > 1) &&
-      !creationFormState.areRulesDisabled
-    );
+    if (!creationFormState.candidateRule.expressionType === 'sqlSentence') {
+      return (
+        (!creationFormState.candidateRule.table || creationFormState.candidateRule.relations.links.length > 1) &&
+        !creationFormState.areRulesDisabled
+      );
+    } else {
+      return false;
+    }
   };
 
   const getRecordIdByTableSchemaId = tableSchemaId => {

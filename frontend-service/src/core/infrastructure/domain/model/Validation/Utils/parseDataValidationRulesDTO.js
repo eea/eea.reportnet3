@@ -20,14 +20,14 @@ export const parseDataValidationRulesDTO = validations => {
       let newRelations = {};
       entityTypes.push(validationDTO.type);
 
-      if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'FIELD') {
+      if ((isNil(validationDTO.sqlSentence) || validationDTO.sqlSentence === '') && validationDTO.type === 'FIELD') {
         const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
         newExpressions = expressions;
         newAllExpressions = allExpressions;
       }
 
       if (validationDTO.type === 'RECORD') {
-        if (isNil(validationDTO.sqlSentence)) {
+        if (isNil(validationDTO.sqlSentence) || validationDTO.sqlSentence === '') {
           if (validationDTO.whenCondition.operator === 'RECORD_IF') {
             const { expressions: expressionsIf, allExpressions: allExpressionsIf } = parseRowExpressionFromDTO(
               validationDTO.whenCondition.params[0]
@@ -47,7 +47,7 @@ export const parseDataValidationRulesDTO = validations => {
         }
       }
 
-      if (isNil(validationDTO.sqlSentence) && validationDTO.type === 'TABLE') {
+      if ((isNil(validationDTO.sqlSentence) || validationDTO.sqlSentence === '') && validationDTO.type === 'TABLE') {
         const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
         newRelations = relations;
       }
@@ -80,7 +80,7 @@ export const parseDataValidationRulesDTO = validations => {
         referenceId: validationDTO.referenceId,
         relations: newRelations,
         shortCode: validationDTO.shortCode,
-        sqlSentence: validationDTO.sqlSentence
+        sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence
       });
     });
   } catch (error) {

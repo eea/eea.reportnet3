@@ -37,13 +37,12 @@ export const ExpressionSelector = ({
   onExpressionThenMarkToGroup,
   onExpressionTypeToggle,
   onGetFieldType,
-  onInfoFieldChange,
   onReferencedTableChange,
   onRelationDelete,
   onRelationFieldUpdate,
   onRelationsErrors,
-  tabsChanges,
-  onSetSQLsentence
+  onSetSQLsentence,
+  tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -126,7 +125,6 @@ export const ExpressionSelector = ({
           onDoubleReferencedChange={onDoubleReferencedChange}
           onExpressionTypeToggle={onExpressionTypeToggle}
           onGetFieldType={onGetFieldType}
-          onInfoFieldChange={onInfoFieldChange}
           onReferencedTableChange={onReferencedTableChange}
           onRelationDelete={onRelationDelete}
           onRelationFieldUpdate={onRelationFieldUpdate}
