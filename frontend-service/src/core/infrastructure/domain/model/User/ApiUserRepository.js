@@ -81,7 +81,6 @@ const parseConfigurationDTO = userConfigurationDTO => {
     amPm24h: true,
     listView: true
   };
-
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
     userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
@@ -92,7 +91,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
     userConfiguration.listView = userDefaultConfiguration.listView;
   } else {
-    userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer[0])
+    userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer)
       ? userConfigurationDTO.basemapLayer[0]
       : userDefaultConfiguration.basemapLayer;
 
@@ -106,11 +105,11 @@ const parseConfigurationDTO = userConfigurationDTO => {
       ? (userConfiguration.showLogoutConfirmation = false)
       : (userConfiguration.showLogoutConfirmation = true);
 
-    userConfiguration.rowsPerPage = !isNil(userConfigurationDTO.rowsPerPage[0])
+    userConfiguration.rowsPerPage = !isNil(userConfigurationDTO.rowsPerPage)
       ? parseInt(userConfigurationDTO.rowsPerPage[0])
       : userDefaultConfiguration.rowsPerPage;
 
-    userConfiguration.visualTheme = !isNil(userConfigurationDTO.visualTheme[0])
+    userConfiguration.visualTheme = !isNil(userConfigurationDTO.visualTheme)
       ? userConfigurationDTO.visualTheme[0]
       : userDefaultConfiguration.visualTheme;
 

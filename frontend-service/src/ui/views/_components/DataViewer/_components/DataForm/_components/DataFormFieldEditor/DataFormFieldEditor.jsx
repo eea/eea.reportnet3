@@ -106,7 +106,7 @@ const DataFormFieldEditor = ({
 
   const onSavePoint = (coordinates, crs) => {
     if (coordinates !== '') {
-      const inmMapGeoJson = cloneDeep(fieldValue);
+      const inmMapGeoJson = cloneDeep(fieldValue !== '' ? fieldValue : fieldEmptyPointValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
       parsedInmMapGeoJson.properties.rsid = crs.value;
@@ -383,8 +383,8 @@ const DataFormFieldEditor = ({
 
   const renderMapType = (field, fieldValue) => (
     <div>
-      <div className={styles.pointSridWrapper}>
-        <label className={styles.srid}>{'Coords:'}</label>
+      <div className={styles.pointEpsgWrapper}>
+        <label className={styles.epsg}>{'Coords:'}</label>
         <InputText
           disabled={column.readOnly && reporting}
           keyfilter={RecordUtils.getFilter(type)}
@@ -417,12 +417,12 @@ const DataFormFieldEditor = ({
         />
       </div>
 
-      <div className={styles.pointSridWrapper}>
-        <label className={styles.srid}>{resources.messages['srid']}</label>
+      <div className={styles.pointEpsgWrapper}>
+        <label className={styles.epsg}>{resources.messages['epsg']}</label>
         <Dropdown
           ariaLabel={'crs'}
           appendTo={document.body}
-          className={styles.sridSwitcher}
+          className={styles.epsgSwitcher}
           disabled={map.isMapDisabled}
           options={crs}
           optionLabel="label"

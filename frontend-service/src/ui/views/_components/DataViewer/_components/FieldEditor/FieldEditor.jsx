@@ -315,16 +315,28 @@ const FieldEditor = ({
                   : ''
               }
             />
-            <div className={styles.pointSridWrapper}>
-              <label className={styles.srid}>{resources.messages['srid']}</label>
+            <div className={styles.pointEpsgWrapper}>
+              <label className={styles.epsg}>{resources.messages['epsg']}</label>
               <Dropdown
                 ariaLabel={'crs'}
                 appendTo={document.body}
-                className={styles.sridSwitcher}
+                className={styles.epsgSwitcher}
                 disabled={isMapDisabled}
                 options={crs}
                 optionLabel="label"
                 onChange={e => {
+                  onEditorSubmitValue(
+                    cells,
+                    changePoint(
+                      RecordUtils.getCellValue(cells, cells.field) !== ''
+                        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                        : JSON.parse(fieldEmptyPointValue),
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                      e.target.value,
+                      true
+                    ),
+                    record
+                  );
                   onEditorValueChange(
                     cells,
                     changePoint(
@@ -334,6 +346,7 @@ const FieldEditor = ({
                     ),
                     e.target.value
                   );
+
                   setCurrentCRS(e.target.value);
                   onChangePointCRS(e.target.value.value);
                 }}

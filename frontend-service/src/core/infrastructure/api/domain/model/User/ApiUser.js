@@ -34,6 +34,8 @@ const parseUserImage = data => {
         data.userImage = data.userImage.map(token => token.split('~')[1]);
         return data;
       }
+    } else {
+      return data;
     }
   }
 };
