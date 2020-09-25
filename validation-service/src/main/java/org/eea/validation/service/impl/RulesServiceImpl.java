@@ -295,7 +295,8 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
+    if (!ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)
+        && EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
         && StringUtils.isBlank(ruleVO.getSqlSentence())) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
