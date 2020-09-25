@@ -63,7 +63,9 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       isLoading(true);
       let response = null;
       Array.isArray(datasetId)
-        ? (response = await ReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
+        ? datasetId.length === 1
+          ? (response = await ReleaseService.allHistoricReleases(datasetId[0]))
+          : (response = await ReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
         : (response = await ReleaseService.allHistoricReleases(datasetId));
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
