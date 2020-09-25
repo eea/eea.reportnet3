@@ -22,6 +22,7 @@ const parseUserConfiguration = userConfiguration => {
 };
 
 const parseUserImage = data => {
+  console.log({ data });
   if (!isUndefined(data) && !isEmpty(data)) {
     if (!isNil(data.userImage)) {
       const undefinedUserImage = data.userImage.filter(
@@ -34,6 +35,8 @@ const parseUserImage = data => {
         data.userImage = data.userImage.map(token => token.split('~')[1]);
         return data;
       }
+    } else {
+      return data;
     }
   }
 };

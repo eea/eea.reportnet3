@@ -869,7 +869,7 @@
     "loadHistoricReleasesError": "Error loading historic releases",
     "noHistoricReleases": "There are no historic releases yet",
     "notAllowedError": "You are not allowed to see the requested page",
-    "userSettingsBasemapLayerSubtitle": "Configure the defaul basemap layer for your maps",
+    "userSettingsBasemapLayerSubtitle": "Configure the default basemap layer for your map",
     "basemapLayer": "Basemap layer",
     "srid": "SRID: ",
     "pasteRecordsCoordinatesMessage": "Point coordinates must have the following structure: ",

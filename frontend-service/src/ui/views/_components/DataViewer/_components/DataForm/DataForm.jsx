@@ -1,6 +1,5 @@
 import React, { Fragment, useContext } from 'react';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataForm.module.css';
@@ -132,11 +131,7 @@ const DataForm = ({
                     column={column}
                     datasetId={datasetId}
                     field={column.field}
-                    fieldValue={
-                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                        ? ''
-                        : field.fieldData[column.field]
-                    }
+                    fieldValue={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                     hasWritePermissions={hasWritePermissions}
                     isVisible={addDialogVisible}
                     onChangeForm={onChangeForm}
