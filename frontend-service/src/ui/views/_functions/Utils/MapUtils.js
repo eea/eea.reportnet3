@@ -24,6 +24,8 @@ const checkValidCoordinates = coordinates => {
 };
 
 const isValidJSON = value => {
+  if (isNil(value)) return false;
+  if (value.trim() === '') return false;
   if (value.indexOf('{') === -1) {
     return false;
   }
@@ -65,7 +67,7 @@ const parseGeometryData = records => {
         const value = !isNil(row.fieldData[Object.keys(row.fieldData)[0]])
           ? row.fieldData[Object.keys(row.fieldData)[0]]
           : ',';
-        const splittedValue = value.split('-');
+        const splittedValue = value.split(/-EPSG|- EPSG| - EPSG/);
         if (!checkValidCoordinates(splittedValue.length === 0 ? value : splittedValue[0])) {
           parsedJSON.geometry.coordinates = [''];
         } else {

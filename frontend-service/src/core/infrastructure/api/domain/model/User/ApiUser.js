@@ -22,7 +22,6 @@ const parseUserConfiguration = userConfiguration => {
 };
 
 const parseUserImage = data => {
-  console.log({ data });
   if (!isUndefined(data) && !isEmpty(data)) {
     if (!isNil(data.userImage)) {
       const undefinedUserImage = data.userImage.filter(
