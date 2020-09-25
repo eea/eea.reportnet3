@@ -6,12 +6,13 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './ValidationViewer.module.css';
+import styles from './ValidationViewer.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -38,6 +39,7 @@ const ValidationViewer = React.memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
+    const [grouped, setGrouped] = useState(true);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -314,19 +316,22 @@ const ValidationViewer = React.memo(
     };
 
     const onRowSelect = async event => {
-      switch (event.data.entityType) {
-        case 'FIELD':
-        case 'RECORD':
-          const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-          onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
-          break;
+      if (!grouped) {
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
+            onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
+            break;
 
-        case 'TABLE':
-          onSelectValidation(event.data.tableSchemaId, -1, -1);
-          break;
+          case 'TABLE':
+            onSelectValidation(event.data.tableSchemaId, -1, -1);
+            break;
 
-        default:
-          break;
+          default:
+            break;
+        }
+      } else {
       }
     };
 
@@ -446,6 +451,18 @@ const ValidationViewer = React.memo(
             </div>
 
             <div className="p-toolbar-group-right">
+              <div className={styles.switchDivInput}>
+                <div className={styles.switchDiv}>
+                  <span className={styles.switchTextInput}>{resources.messages['ungrouped']}</span>
+                  <InputSwitch
+                    checked={grouped}
+                    onChange={e => setGrouped(e.value)}
+                    tooltip={resources.messages['toggleGroup']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                  <span className={styles.switchTextInput}>{resources.messages['grouped']}</span>
+                </div>
+              </div>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                   isLoading ? 'p-button-animated-spin' : ''
