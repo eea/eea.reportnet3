@@ -351,6 +351,7 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
+        console.log({ tableData });
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
 
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {

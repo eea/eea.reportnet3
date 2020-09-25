@@ -396,7 +396,8 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
               entityType: fieldValidation.validation.typeEntity,
               id: fieldValidation.id,
               levelError: fieldValidation.validation.levelError,
-              message: fieldValidation.validation.message
+              message: fieldValidation.validation.message,
+              ruleId: fieldValidation.validation.idRule
             });
           });
         }
