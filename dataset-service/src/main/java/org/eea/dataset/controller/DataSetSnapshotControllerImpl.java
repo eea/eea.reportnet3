@@ -405,8 +405,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       releases = datasetSnapshotService.getReleases(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error retreiving releases. Error message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.DATASET_NOTFOUND, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND,
+          e);
     }
 
     return releases;
@@ -423,7 +423,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/historicReleasesRepresentative",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
   public List<ReleaseVO> historicReleasesByRepresentative(
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("representativeId") Long representativeId) {

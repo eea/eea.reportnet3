@@ -1,3 +1,5 @@
+import snakeCase from 'lodash/snakeCase';
+
 export const ErrorUtils = {
   getLevelErrorPriorityByLevelError: levelError => {
     let levelErrorIndex = 0;
@@ -40,5 +42,9 @@ export const ErrorUtils = {
       .flat()
       .sort((a, b) => a.index - b.index)
       .map(orderedError => orderedError.id);
+  },
+
+  parseErrorType: errorType => {
+    return `${snakeCase(errorType).toUpperCase()}_ERROR`;
   }
 };

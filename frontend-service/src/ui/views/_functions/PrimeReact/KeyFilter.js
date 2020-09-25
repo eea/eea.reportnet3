@@ -6,17 +6,19 @@ export default class KeyFilter {
     alpha: /[a-z_]/i,
     alphanum: /[a-z0-9_]/i,
     any: /[\s\S]*/,
+    coordinates: /[\d\.\s,.-]/,
+    ///^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/,
     date: /[\d\-]/i,
     email: /[a-z0-9_\.\-@]/i,
     hex: /[0-9a-f]/i,
     int: /[\d\-]/,
     money: /[\d\.\s,]/,
+    noComma: /[^,]+/,
     num: /[\d\-\.]/,
     phone: /^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$/,
     pint: /[\d]/,
     pnum: /[\d\.]/,
-    url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/,
-    noComma: /[^,]+/
+    url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
   };
   /* eslint-enable */
 
