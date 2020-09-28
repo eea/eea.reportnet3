@@ -252,9 +252,7 @@ export const Map = ({
         <Dropdown
           ariaLabel={'themes'}
           className={styles.themeSwitcherSplitButton}
-          onChange={e => {
-            onThemeChange(e.target.value);
-          }}
+          onChange={e => onThemeChange(e.target.value)}
           optionLabel="label"
           options={themes}
           placeholder="Select a theme"

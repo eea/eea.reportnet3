@@ -878,6 +878,8 @@
     "sqlSentence": "SQL sentence",
     "datasetComparison": "Dataset comparison",
     "mapSelectPointMessage": "Double click on the map to select a new point",
-    "doNotRemember": "Do not remember again"
+    "doNotRemember": "Do not remember again",
+    "currentPoint": "Current point",
+    "newPoint": "New point"
   }
 }
