@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } 
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
@@ -27,7 +28,6 @@ import { Article15Utils } from './_functions/Utils/Article15Utils';
 
 export const Article15 = ({ dataflowId, datasetId, state }) => {
   const { datasetSchema, tableSchemaNames } = state;
-  console.log('datasetSchema', datasetSchema);
 
   const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
 
@@ -89,26 +89,33 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
     const visibleContent = article15State.data.filter(table => table.webformTitle === visibleTitle)[0];
 
-    return <WebformContent webform={visibleContent} datasetId={datasetId} />;
+    return <WebformContent webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
   };
 
   const renderWebFormHeaders = () => {
-    const headers = article15State.data.filter(header => tableSchemaNames.includes(header.webformTitle));
+    const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.webformTitle));
+    const headers = filteredTabs.map(tab => tab.header);
 
-    return headers.map((webform, i) => (
-      <Button
-        className={`${styles.headerButton} ${
-          article15State.isVisible[webform.webformTitle] ? 'p-button-primary' : 'p-button-secondary'
-        }`}
-        icon={webform.hasErrors ? 'warning' : null}
-        iconClasses={!article15State.isVisible[webform.webformTitle] ? 'warning' : ''}
-        iconPos={'right'}
-        key={i}
-        label={webform.webformTitle}
-        onClick={() => onChangeWebformTab(webform.webformTitle)}
-        style={{ padding: webform.hasErrors ? '0.2rem' : '0.5rem' }}
-      />
-    ));
+    return article15State.data.map((webform, i) => {
+      const isCreated = headers.includes(webform.webformTitle);
+
+      return (
+        <Button
+          className={`${styles.headerButton} ${
+            article15State.isVisible[webform.webformTitle] ? 'p-button-primary' : 'p-button-secondary'
+          }`}
+          icon={!isCreated ? 'info' : webform.hasErrors ? 'warning' : null}
+          iconClasses={!article15State.isVisible[webform.webformTitle] ? (webform.hasErrors ? 'warning' : 'info') : ''}
+          // icon={webform.hasErrors ? 'warning' : null}
+          // iconClasses={!article15State.isVisible[webform.webformTitle] ? 'warning' : ''}
+          iconPos={'right'}
+          key={i}
+          label={webform.webformTitle}
+          onClick={() => onChangeWebformTab(webform.webformTitle)}
+          style={{ padding: webform.hasErrors || !isCreated ? '0.2rem' : '0.5rem' }}
+        />
+      );
+    });
   };
 
   if (isEmpty(article15State.data)) return <Spinner style={{ top: 0 }} />;

@@ -36,8 +36,169 @@
           { "fieldName": "ApproachesMethodologiesTools", "fieldType": "TEXT" },
           { "fieldName": "AssessmentsObservationDocument", "fieldType": "FILE" },
           { "fieldName": "GeneralAspectsAssessment", "fieldType": "TEXT" },
-          { "fieldName": "TemperatureRelatedAcute", "fieldType": "MULTISELECT" },
-          { "fieldName": "TemperatureAcuteOther", "fieldType": "TEXT" }
+          {
+            "fieldName": "Status",
+            "fieldType": "MULTISELECT",
+            "options": [
+              {
+                "label": "Temperature-related - acute - Heat wave",
+                "value": "Temperature-related - acute - Heat wave"
+              },
+              {
+                "label": "Temperature-related - acute Cold wave/frost",
+                "value": "Temperature-related - acute Cold wave/frost"
+              },
+              { "label": "Temperature-related - acute Wildfire", "value": "Temperature-related - acute Wildfire" },
+              { "label": "Temperature-related - acute - Other", "value": "Temperature-related - acute - Other" }
+            ]
+          },
+          { "fieldName": "TemperatureAcuteOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "WindRelatedAcute",
+            "fieldType": "MULTISELECT",
+            "options": [
+              { "label": "Wind-related - acute - Cyclone", "value": "Wind-related - acute - Cyclone" },
+              { "label": "Wind-related - acute - Storm", "value": "Wind-related - acute - Storm" },
+              { "label": "Wind-related - acute - Tornado", "value": "Wind-related - acute - Tornado" },
+              { "label": "Wind-related - acute - Other", "value": "Wind-related - acute - Other" }
+            ]
+          },
+          { "fieldName": "WindAcuteOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "WaterRelatedAcute",
+            "fieldType": "MULTISELECT",
+            "options": [
+              { "label": "Water-related - acute - Drought", "value": "Water-related - acute - Drought" },
+              {
+                "label": "Water-related - acute - Heavy precipitation",
+                "value": "Water-related - acute - Heavy precipitation"
+              },
+              { "label": "Water-related - acute - Flood", "value": "Water-related - acute - Flood" },
+              {
+                "label": "Water-related - acute - Snow and ice load",
+                "value": "Water-related - acute - Snow and ice load"
+              },
+              {
+                "label": "Water-related - acute - Glacial lake outburst",
+                "value": "Water-related - acute - Glacial lake outburst"
+              },
+              { "label": "Water-related - acute - Other", "value": "Water-related - acute - Other" }
+            ]
+          },
+          { "fieldName": "WaterAcuteOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "SolidMassRelatedAcute",
+            "fieldType": "MULTISELECT",
+            "options": [
+              { "label": "Solid-related - acute - Avalanche", "value": "Solid-related - acute - Avalanche" },
+              { "label": "Solid-related - acute - Landslide", "value": "Solid-related - acute - Landslide" },
+              { "label": "Solid-related - acute - Subsidence", "value": "Solid-related - acute - Subsidence" },
+              { "label": "Solid-related - acute - Other", "value": "Solid-related - acute - Other" }
+            ]
+          },
+          { "fieldName": "SolidAcuteOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "SolidMassRelatedAcute",
+            "fieldType": "MULTISELECT",
+            "options": [
+              { "label": "Solid-related - acute - Avalanche", "value": "Solid-related - acute - Avalanche" },
+              { "label": "Solid-related - acute - Landslide", "value": "Solid-related - acute - Landslide" },
+              { "label": "Solid-related - acute - Subsidence", "value": "Solid-related - acute - Subsidence" },
+              { "label": "Solid-related - acute - Other", "value": "Solid-related - acute - Other" }
+            ]
+          },
+          { "fieldName": "SolidAcuteOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "TemperatureRelatedChronic",
+            "fieldType": "MULTISELECT",
+            "options": [
+              {
+                "label": "Temperature-related - chronic - Changing temperature",
+                "value": "Temperature-related - chronic - Changing temperature"
+              },
+              {
+                "label": "Temperature-related - chronic - Heat stress",
+                "value": "Temperature-related - chronic - Heat stress"
+              },
+              {
+                "label": "Temperature-related - chronic - Temperature variability",
+                "value": "Temperature-related - chronic - Temperature variability"
+              },
+              {
+                "label": "Temperature-related - chronic - Permafrost thawing",
+                "value": "Temperature-related - chronic - Permafrost thawing"
+              },
+              { "label": "Temperature-related - chronic - other", "value": "Temperature-related - chronic - other" }
+            ]
+          },
+          { "fieldName": "TemperatureChronicOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "WindRelatedChronic",
+            "fieldType": "MULTISELECT",
+            "options": [
+              {
+                "label": "Wind-related - chronic - Changing wind patterns",
+                "value": "Wind-related - chronic - Changing wind patterns"
+              },
+              { "label": "Wind-related - chronic - other", "value": "Wind-related - chronic - other" }
+            ]
+          },
+          { "fieldName": "WindChronicOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "WaterRelatedChronic",
+            "fieldType": "MULTISELECT",
+            "options": [
+              {
+                "label": "Water-related - chronic - Changing precipitation patterns and types",
+                "value": "Water-related - chronic - Changing precipitation patterns and types"
+              },
+              {
+                "label": "Water-related - chronic - Precipitation and/or hydrological variability",
+                "value": "Water-related - chronic - Precipitation and/or hydrological variability"
+              },
+              {
+                "label": "Water-related - chronic - Ocean acidification",
+                "value": "Water-related - chronic - Ocean acidification"
+              },
+              {
+                "label": "Water-related - chronic - Saline intrusion",
+                "value": "Water-related - chronic - Saline intrusion"
+              },
+              {
+                "label": "Water-related - chronic - Sea level rise",
+                "value": "Water-related - chronic - Sea level rise"
+              },
+              {
+                "label": "Water-related - chronic - Change in sea ice cover",
+                "value": "Water-related - chronic - Change in sea ice cover"
+              },
+              {
+                "label": "Water-related - chronic - Water scarcity",
+                "value": "Water-related - chronic - Water scarcity"
+              },
+              { "label": "Water-related - chronic - other", "value": "Water-related - chronic - other" }
+            ]
+          },
+          { "fieldName": "WaterChronicOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "SolidMassRelatedChronic",
+            "fieldType": "MULTISELECT",
+            "options": [
+              {
+                "label": "Solid-related - chronic - Coastal erosion",
+                "value": "Solid-related - chronic - Coastal erosion"
+              },
+              {
+                "label": "Solid-related - chronic - Soil degradation",
+                "value": "Solid-related - chronic - Soil degradation"
+              },
+              { "label": "Solid-related - chronic - Soil erosion", "value": "Solid-related - chronic - Soil erosion" },
+              { "label": "Solid-related - chronic - Solifluction", "value": "Solid-related - chronic - Solifluction" },
+              { "label": "Solid-related - chronic - other", "value": "Solid-related - chronic - other" }
+            ]
+          },
+          { "fieldName": "SolidChronicOther", "fieldType": "TEXT" },
+          { "fieldName": "DescribeExistingEnvironmental", "fieldType": "TEXT" }
         ]
       }
     ]
@@ -53,7 +214,14 @@
         "multiple": true,
         "webformFields": [
           { "fieldName": "Name", "fieldType": "TEXT" },
-          { "fieldName": "Status", "fieldType": "SELECT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "Being developed", "value": "Being developed" },
+              { "label": "Established", "value": "Established" }
+            ]
+          },
           { "fieldName": "WebLink", "fieldType": "LINK" }
         ]
       }
@@ -70,8 +238,107 @@
         "multiple": true,
         "webformFields": [
           { "fieldName": "Description", "fieldType": "TEXT" },
-          { "fieldName": "Status", "fieldType": "SELECT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "Being developed", "value": "Being developed" },
+              { "label": "Established", "value": "Established" }
+            ]
+          },
           { "fieldName": "WebLink", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 5,
+    "webformIndex": 4,
+    "webformTitle": "AffectedSectors",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "AffectedSectors",
+        "multiple": true,
+        "webformFields": [
+          {
+            "fieldName": "SectorTitle",
+            "fieldType": "SELECT",
+            "options": [
+              {
+                "label": "ICT (information and communications technology)",
+                "value": "ICT (information and communications technology)"
+              },
+              { "label": "agriculture and food", "value": "agriculture and food" },
+              { "label": "biodiversity", "value": "biodiversity" },
+              { "label": "building", "value": "building" },
+              { "label": "business and industry", "value": "business and industry" },
+              {
+                "label": "civil protection and emergency management",
+                "value": "civil protection and emergency management"
+              },
+              { "label": "coastal areas", "value": "coastal areas" },
+              { "label": "energy", "value": "energy" },
+              { "label": "finance and insurance", "value": "finance and insurance" },
+              { "label": "forestry", "value": "forestry" },
+              { "label": "health", "value": "health" },
+              { "label": "land use planning", "value": "land use planning" },
+              { "label": "marine and fisheries", "value": "marine and fisheries" },
+              { "label": "other", "value": "other" },
+              { "label": "rural development", "value": "rural development" },
+              { "label": "tourism", "value": "tourism" },
+              { "label": "transport", "value": "transport" },
+              { "label": "urban", "value": "urban" },
+              { "label": "water management", "value": "water management" }
+            ]
+          },
+          { "fieldName": "SectorDescribeIfOther", "fieldType": "TEXT" },
+          {
+            "fieldName": "ImpactsKeyHazards",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "high", "value": "high" },
+              { "label": "medium", "value": "medium" },
+              { "label": "low", "value": "low" },
+              { "label": "not applicable", "value": "not applicable" }
+            ]
+          },
+          { "fieldName": "DescribeImpactsKeyHazards", "fieldType": "TEXT" },
+          {
+            "fieldName": "KeyHazardsLikelihood",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "high", "value": "high" },
+              { "label": "medium", "value": "medium" },
+              { "label": "low", "value": "low" },
+              { "label": "not applicable", "value": "not applicable" }
+            ]
+          },
+          { "fieldName": "DescribeLikelihood", "fieldType": "TEXT" },
+          {
+            "fieldName": "Vulnerability",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "high", "value": "high" },
+              { "label": "medium", "value": "medium" },
+              { "label": "low", "value": "low" },
+              { "label": "not applicable", "value": "not applicable" }
+            ]
+          },
+          { "fieldName": "DescribeVulnerability", "fieldType": "TEXT" },
+          {
+            "fieldName": "RiskFutureImpacts",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "high", "value": "high" },
+              { "label": "medium", "value": "medium" },
+              { "label": "low", "value": "low" },
+              { "label": "not applicable", "value": "not applicable" }
+            ]
+          },
+          { "fieldName": "DescribeRisk", "fieldType": "TEXT" },
+          { "fieldName": "ValueRelative", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "ValueAbsolute", "fieldType": "NUMBER_DECIMAL" }
         ]
       }
     ]
@@ -93,7 +360,6 @@
           { "fieldName": "DescribeCollection", "fieldType": "TEXT" },
           { "fieldName": "DescribeClimateChangeImpacts and adaptation", "fieldType": "TEXT" },
           { "fieldName": "SummarizeLegalRequirements", "fieldType": "TEXT" },
-          { "fieldName": "ArrangementsCCIV_assessments", "fieldType": "TEXT" },
           { "fieldName": "SummarizeNetworks", "fieldType": "TEXT" }
         ]
       }
@@ -114,14 +380,554 @@
             "fieldName": "Status",
             "fieldType": "SELECT",
             "options": [
-              "being developed",
-              "completed and submitted for adoption",
-              "actual NAS - adopted",
-              "previous NAS - superseded"
+              { "label": "being developed", "value": "being developed" },
+              { "label": "completed and submitted for adoption", "value": "completed and submitted for adoption" },
+              { "label": "actual NAS - adopted", "value": "actual NAS - adopted" },
+              { "label": "previous NAS - superseded", "value": "previous NAS - superseded" }
             ]
           },
           { "fieldName": "Year", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "Link", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 8,
+    "webformIndex": 7,
+    "webformTitle": "NAP",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "NAP",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Title", "fieldType": "TEXT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "being developed", "value": "being developed" },
+              { "label": "completed and submitted for adoption", "value": "completed and submitted for adoption" },
+              { "label": "actual NAP - adopted", "value": "actual NAP - adopted" },
+              { "label": "previous NAP - superseded", "value": "previous NAP - superseded" }
+            ]
+          },
+          { "fieldName": "Year", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "Link", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 9,
+    "webformIndex": 8,
+    "webformTitle": "SAP",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "SAP",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Title", "fieldType": "TEXT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "being developed", "value": "being developed" },
+              { "label": "completed and submitted for adoption", "value": "completed and submitted for adoption" },
+              { "label": "actual SAP - adopted", "value": "actual SAP - adopted" },
+              { "label": "previous SAP - superseded", "value": "previous SAP - superseded" }
+            ]
+          },
+          {
+            "fieldName": "Sector",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "agriculture and food", "value": "agriculture and food" },
+              {
+                "label": "biodiversity (including ecosystembased approaches)",
+                "value": "biodiversity (including ecosystembased approaches)"
+              },
+              { "label": "building", "value": "building" },
+
+              { "label": "coastal areas", "value": "coastal areas" },
+              {
+                "label": "civil protection and emergency management",
+                "value": "civil protection and emergency management"
+              },
+              { "label": "energy", "value": "energy" },
+              { "label": "finance and insurance", "value": "finance and insurance" },
+              { "label": "forestry", "value": "forestry" },
+              { "label": "health", "value": "health" },
+              { "label": "marine and fisheries", "value": "marine and fisheries" },
+              { "label": "transport", "value": "transport" },
+              { "label": "urban", "value": "urban" },
+              { "label": "water management", "value": "water management" },
+              {
+                "label": "ICT (information and communications technology)",
+                "value": "ICT (information and communications technology)"
+              },
+              { "label": "land use planning", "value": "land use planning" },
+              { "label": "business and industry", "value": "business and industry" },
+              { "label": "tourism", "value": "tourism" },
+              { "label": "rural development", "value": "rural development" },
+              { "label": "other", "value": "other" }
+            ]
+          },
+          { "fieldName": "SectorOther", "fieldType": "TEXT" },
+          { "fieldName": "Year", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "Link", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 10,
+    "webformIndex": 9,
+    "webformTitle": "CC_IVA",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "CC_IVA",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Title", "fieldType": "TEXT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "not yet planned", "value": "not yet planned" },
+              { "label": "being developed", "value": "being developed" },
+              { "label": "ongoing in research programmes", "value": "ongoing in research programmes" },
+              { "label": "completed", "value": "completed" }
+            ]
+          },
+          { "fieldName": "Year", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "Link", "fieldType": "LINK" },
+          {
+            "fieldName": "IsPartNAS",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "yes", "value": "yes" },
+              { "label": "no", "value": "no" }
+            ]
+          },
+          {
+            "fieldName": "CCIVA_assessmentFocuses",
+            "fieldType": "MULTISELECT",
+            "options": [
+              { "label": "impact", "value": "impact" },
+              { "label": "vulnerability", "value": "vulnerability" },
+              { "label": "adaptation", "value": "adaptation" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 11,
+    "webformIndex": 10,
+    "webformTitle": "QA_QC_C3",
+    "multipleRecords": false,
+    "webformRecords": [
+      {
+        "title": "QA_QC_C3",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "AdaptationPriorities", "fieldType": "TEXT" },
+          { "fieldName": "Challenges", "fieldType": "TEXT" },
+          { "fieldName": "SummaryNationalStrategies", "fieldType": "TEXT" },
+          { "fieldName": "SummaryForeseenActions", "fieldType": "TEXT" },
+          { "fieldName": "AditionalDocument", "fieldType": "FILE" },
+          { "fieldName": "OverviewContent", "fieldType": "TEXT" },
+          { "fieldName": "OverviewEffortsClimate", "fieldType": "TEXT" },
+          { "fieldName": "OverviewEffortsDisaster", "fieldType": "TEXT" },
+          { "fieldName": "OverviewMeasures", "fieldType": "TEXT" },
+          { "fieldName": "OverviewAvailable", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 12,
+    "webformIndex": 11,
+    "webformTitle": "ActionsMeasures",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "ActionsMeasures",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Title", "fieldType": "TEXT" },
+          {
+            "fieldName": "KeyTypeMeasure",
+            "fieldType": "SELECT",
+            "options": [
+              "A: Governance and Institutional",
+              "B: Economic and Finance",
+              "C: Physical and technological",
+              "D: Nature based solutions and ecosystem-based approaches",
+              "E: Knowledge and behavioural change"
+            ]
+          },
+          {
+            "fieldName": "subKTM",
+            "fieldType": "SELECT",
+            "options": [
+              "A1: Policy",
+              "A2: Management and Planning",
+              "A3: Coordination and Cooperation",
+              "B1: Financing and incentive instrument",
+              "B2: Insurance and transfer instrument",
+              "C1: Physical",
+              "C2: Technological",
+              "D1: green",
+              "D2: blue",
+              "E1: Information and awareness raising",
+              "E2: Capacity building and empowering",
+              "E3: Practice and Behaviour"
+            ]
+          },
+          {
+            "fieldName": "Atribute",
+            "fieldType": "SELECT",
+            "options": [
+              "Creation of new policies laws or strategies",
+              "Revision of policies laws and strategies",
+              "Creation of new regulation",
+              "Revision of regulation",
+              "Mainstreaming (institutional organisational administrative) into existing programs and plans (e.g. agricultural programs and plans water plans and programs NAP)",
+              "Mainstreaming into existing management processes (e.g. coastal planning natural resource management)",
+              "Creation of technical rules and standards",
+              "Revision of technical rules and standards",
+              "Creation of coordination and cooperation formats",
+              "Revision of coordination and cooperation formats",
+              "Creation of new networks",
+              "Progressing of existing networks",
+              "Creation of incentive mechanisms (e.g. sectoral)",
+              "Revision of incentive mechanisms (e.g. sectoral)",
+              "Creation of new funding scheme (e.g. sectoral researc, innovation crisis preparedness – ensure linkages to EU Taxonomy on sustainable finance)",
+              "Revision of existing funding scheme (e.g. sectoral research innovation crisis preparedness – ensure linkages to EU Taxonomy on sustainable finance)",
+              "New insurance scheme/products",
+              "Revision of existing insurance scheme/products",
+              "New Contingency fund for disasters/extreme events",
+              "Revision of contingency fund for disasters/extreme events",
+              "New physical infrastructure (strictly technical in nature – e.g. technological systems for flood protection sea walls slope stabilization water supply/irrigation systems)",
+              "Improved physical infrastructure (strictly technical in nature – e.g. technological systems for flood protection sea walls slope stabilization water supply/irrigation systems)",
+              "Technological early warning systems",
+              "Technologies for hazard mapping and monitoring",
+              "Technologies to improve e.g. water use or access new crop or animal varieties climate-friendly cooling new products etc.",
+              "Creation of new green infrastructure",
+              "Improvement of green infrastructure",
+              "Changed land-use management",
+              "Creation of new blue infrastructure",
+              "Improvement of blue infrastructure",
+              "Changed water management practices",
+              "New research and innovation programmes or adaptation",
+              "Communication formats such as website brochures flyer etc",
+              "Dissemination of information",
+              "Decision support tools and databases",
+              "Identification and sharing of best practices",
+              "Training and workshops",
+              "Consultation",
+              "Uptake of innovation",
+              "Revisions or expansion of practices and on the ground behaviour"
+            ]
+          },
+          { "fieldName": "ShortDescriptionMeasureAction", "fieldType": "TEXT" },
+          {
+            "fieldName": "ClimateThreat",
+            "fieldType": "MULTISELECT",
+            "options": [
+              {
+                "label": "Temperature-related - acute - Heat wave",
+                "value": "Temperature-related - acute - Heat wave"
+              },
+              {
+                "label": "Temperature-related - acute - Cold wave/frost",
+                "value": "Temperature-related - acute - Cold wave/frost"
+              },
+              { "label": "Temperature-related - acute - Wildfire", "value": "Temperature-related - acute - Wildfire" },
+              { "label": "Temperature-related - acute - Other", "value": "Temperature-related - acute - Other" },
+              "Wind-related - acute - Cyclone",
+              "Wind-related - acute - Storm",
+              "Wind-related - acute - Tornado",
+              "Wind-related - acute - Other",
+              "Water-related - acute - Drought",
+              "Water-related - acute - Heavy precipitation",
+              "Water-related - acute - Flood",
+              "Water-related - acute - Snow and ice load",
+              "Water-related - acute - Glacial lake outburst",
+              "Water-related - acute - Other",
+              "Solid mass-related - acute - Avalanche",
+              "Solid mass-related - acute - Landslide",
+              "Solid mass-related - acute - Subsidence",
+              "Solid mass-related - acute - Other",
+              "Temperature-related - chronic - Changing temperature",
+              "Temperature-related - chronic -Heat stress",
+              "Temperature-related - chronic - Temperature variability",
+              "Temperature-related - chronic - Permafrost thawing",
+              "Temperature-related - chronic - other",
+              "Wind-related - chronic - Changing wind patterns",
+              "Wind-related - chronic - other",
+              "Water-related - chronic - Changing precipitation patterns and types",
+              "Water-related - chronic - Precipitation and/or hydrological variability",
+              "Water-related - chronic - Ocean acidification",
+              "Water-related - chronic - Saline intrusion",
+              "Water-related - chronic - Sea level rise",
+              "Water-related - chronic - Change in sea ice cover",
+              "Water-related - chronic - Water scarcity",
+              "Water-related - chronic - other",
+              "Solid mass-related - chronic - Coastal erosion",
+              "Solid mass-related - chronic - Soil degradation",
+              "Solid mass-related - chronic - Soil erosion",
+              "Solid mass-related - chronic - Solifluction",
+              "Solid mass-related - chronic - other"
+            ]
+          },
+          { "fieldName": "SectorsAffected", "fieldType": "TABLELINK" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": ["planned", "studies ongoing", "being implemented", "implemented/completed"]
+          },
+          {
+            "fieldName": "AdministrativeLeveMeasureImplemented",
+            "fieldType": "SELECT",
+            "options": [
+              "National",
+              "Regional (transnational)",
+              "Regional (sub-national)",
+              "River Basin District",
+              "Local",
+              "Multilevel",
+              "Other"
+            ]
+          },
+          { "fieldName": "AdministrativeOther", "fieldType": "TEXT" },
+          { "fieldName": "CostImplementingMeasure", "fieldType": "TEXT" },
+          { "fieldName": "Websites", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 13,
+    "webformIndex": 12,
+    "webformTitle": "QA_QC_C4",
+    "multipleRecords": false,
+    "webformRecords": [
+      {
+        "title": "QA_QC_C4",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "DescribeMonitoringReportingEvaluation", "fieldType": "TEXT" },
+          { "fieldName": "DescribeMREMethodology", "fieldType": "TEXT" },
+          { "fieldName": "DescribeStatePlay", "fieldType": "TEXT" },
+          { "fieldName": "SummaryClimateAdaptation", "fieldType": "TEXT" },
+          { "fieldName": "ProvideShareSpendingSupport", "fieldType": "TEXT" },
+          { "fieldName": "DescribeReducingClimateImpacts", "fieldType": "TEXT" },
+          { "fieldName": "DescribeIncreasingAdaptiveCapacity", "fieldType": "TEXT" },
+          { "fieldName": "DescribeMeetingAdaptationPriorities", "fieldType": "TEXT" },
+          { "fieldName": "DescribeProgressTowardsAddressing", "fieldType": "TEXT" },
+          { "fieldName": "DescribeVulnerability", "fieldType": "TEXT" },
+          { "fieldName": "DescribeNationalAdaptation", "fieldType": "TEXT" },
+          { "fieldName": "DescribeSubnationalAdaptation", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 14,
+    "webformIndex": 13,
+    "webformTitle": "MonitoringIndicatorsMethodologies",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "MonitoringIndicatorsMethodologies",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Description", "fieldType": "TEXT" },
+          {
+            "fieldName": "IndicatorsMethodology",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "Being developed", "value": "Being developed" },
+              { "label": "Ongoing in research programmes", "value": "Ongoing in research programmes" },
+              { "label": "Established", "value": "Established" }
+            ]
+          },
+          { "fieldName": "Link", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 15,
+    "webformIndex": 14,
+    "webformTitle": "QA_QC_C5",
+    "multipleRecords": false,
+    "webformRecords": [
+      {
+        "title": "QA_QC_C5",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "DescribeGeneralAspects", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesClimate", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesInstitutional", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesAdaptation", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesEfforts", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesStakeholder", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesClimateRisk", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesMonitoring", "fieldType": "TEXT" },
+          { "fieldName": "DescribeGoodPracticesStrengthening", "fieldType": "TEXT" },
+          { "fieldName": "GeneralInformationInternationalDimension", "fieldType": "TEXT" },
+          { "fieldName": "DescribeCooperationEUMemberStates", "fieldType": "TEXT" },
+          { "fieldName": "DescribeDetailShareInformation", "fieldType": "TEXT" },
+          { "fieldName": "DescribeDetailCooperationEnhance", "fieldType": "TEXT" },
+          { "fieldName": "DescribeSynergiesAdaptation", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 16,
+    "webformIndex": 15,
+    "webformTitle": "ResearchProgrammes",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "ResearchProgrammes",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Name", "fieldType": "TEXT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": ["currently being undertaken", "completed"]
+          },
+          { "fieldName": "StartYear", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "EndYear", "fieldType": "NUMBER_INTEGER" },
           { "fieldName": "WebLink", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 17,
+    "webformIndex": 16,
+    "webformTitle": "QA_QC_C6",
+    "multipleRecords": false,
+    "webformRecords": [
+      {
+        "title": "QA_QC_C6",
+        "multiple": false,
+        "webformFields": [
+          { "fieldName": "AdditionalInformation", "fieldType": "TEXT" },
+          { "fieldName": "AdditionalDocument", "fieldType": "FILE" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 18,
+    "webformIndex": 17,
+    "webformTitle": "CCIV_PortalsPlatforms",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "CCIV_PortalsPlatforms",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Name", "fieldType": "TEXT" },
+          {
+            "fieldName": "Status",
+            "fieldType": "SELECT",
+            "options": [
+              { "label": "Being developed", "value": "Being developed" },
+              { "label": "Established", "value": "Established" }
+            ]
+          },
+          { "fieldName": "Website", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 19,
+    "webformIndex": 18,
+    "webformTitle": "Publications",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "Publications",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "TitleEnglish", "fieldType": "TEXT" },
+          { "fieldName": "TitleOriginal", "fieldType": "TEXT" },
+          { "fieldName": "Year", "fieldType": "NUMBER_INTEGER" },
+          { "fieldName": "Publisher", "fieldType": "TEXT" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 20,
+    "webformIndex": 19,
+    "webformTitle": "ContactGeneral",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "ContactGeneral",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Organisation", "fieldType": "TEXT" },
+          { "fieldName": "Department", "fieldType": "TEXT" },
+          { "fieldName": "Role", "fieldType": "TEXT" },
+          { "fieldName": "NameContact", "fieldType": "TEXT" },
+          { "fieldName": "RoleContact", "fieldType": "TEXT" },
+          { "fieldName": "GeneralEmail", "fieldType": "EMAIL" },
+          { "fieldName": "Website", "fieldType": "LINK" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 21,
+    "webformIndex": 20,
+    "webformTitle": "ContactPersonal",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "ContactPersonal",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Organisation", "fieldType": "TEXT" },
+          { "fieldName": "Department", "fieldType": "TEXT" },
+          { "fieldName": "RoleOrganisation", "fieldType": "TEXT" },
+          { "fieldName": "NameContact", "fieldType": "TEXT" },
+          { "fieldName": "RoleContact", "fieldType": "TEXT" },
+          { "fieldName": "PersonalEmail", "fieldType": "EMAIL" },
+          { "fieldName": "PhoneNumber", "fieldType": "PHONE_NUMBER" }
+        ]
+      }
+    ]
+  },
+  {
+    "webformId": 22,
+    "webformIndex": 21,
+    "webformTitle": "Websites",
+    "multipleRecords": true,
+    "webformRecords": [
+      {
+        "title": "Websites",
+        "multiple": true,
+        "webformFields": [
+          { "fieldName": "Title", "fieldType": "TEXT" },
+          { "fieldName": "Type", "fieldType": "TEXT" },
+          { "fieldName": "Url", "fieldType": "LINK" }
         ]
       }
     ]

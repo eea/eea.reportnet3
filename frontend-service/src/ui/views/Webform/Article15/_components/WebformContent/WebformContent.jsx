@@ -8,24 +8,25 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './WebformContent.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { WebformRecord } from './_components/WebformRecord';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
 
-export const WebformContent = ({ datasetId, webform }) => {
+export const WebformContent = ({ datasetId, onTabChange, webform }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [refresh, setRefresh] = useState(false);
   const [webformData, setWebformData] = useState({});
 
   useEffect(() => {
     onLoadTableData();
-  }, [refresh]);
+  }, [refresh, webform, onTabChange]);
 
   const onAddMultipleWebform = async () => {
     if (!isEmpty(webformData.webformRecords)) {
       const newEmptyRecord = Article15Utils.parseNewRecordData(webformData.webformRecords[0].webformFields);
-      console.log('newEmptyRecord', newEmptyRecord);
 
       try {
         await DatasetService.addRecordsById(datasetId, webformData.tableSchemaId, [newEmptyRecord]);
@@ -34,6 +35,7 @@ export const WebformContent = ({ datasetId, webform }) => {
   };
 
   const onLoadTableData = async () => {
+    setIsLoading(true);
     try {
       const tableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', '', undefined, [
         'CORRECT',
@@ -52,11 +54,13 @@ export const WebformContent = ({ datasetId, webform }) => {
           const records = { ...webform.webformRecords[0], ...record };
           records['webformFields'] = record.fields.map((field, i) => {
             const webformField = getFieldIndexById(field, webform.webformRecords[0].webformFields);
+            console.log('webformField.options', webformField.options);
             return {
               fieldId: field.fieldId,
               fieldName: webformField.fieldName,
               fieldSchemaId: field.fieldSchemaId,
-              fieldType: field.type || webformField.fieldType,
+              fieldType: webformField.fieldType,
+              options: webformField.options || [],
               recordId: record.recordId,
               recordSchemaId: field.recordId,
               validations: field.validations || [],
@@ -68,11 +72,13 @@ export const WebformContent = ({ datasetId, webform }) => {
       } else {
         webform.webformRecords.map(record => {
           record['webformFields'] = record.webformFields.map((field, i) => {
+            console.log('field.options', field.options);
             return {
               fieldId: null,
               fieldName: field.fieldName,
               fieldSchemaId: field.fieldId,
               fieldType: field.type,
+              options: field.options || [],
               recordSchemaId: field.recordId,
               validations: field.validations || [],
               value: field.value || ''
@@ -98,13 +104,20 @@ export const WebformContent = ({ datasetId, webform }) => {
       setWebformData(webform);
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const onRefresh = () => setRefresh(!refresh);
 
-  const getFieldIndexById = (field, allFields) =>
-    allFields.filter(completeField => completeField.fieldId === field.fieldSchemaId)[0];
+  const getFieldIndexById = (field, allFields) => {
+    return allFields.filter(completeField => {
+      // TODO: Check this filter method
+      const fieldSchemaId = completeField.fieldSchemaId ? completeField.fieldSchemaId : completeField.fieldId;
+      return fieldSchemaId === field.fieldSchemaId;
+    })[0];
+  };
 
   const renderWebformRecords = multiple => {
     return multiple ? (
@@ -129,7 +142,7 @@ export const WebformContent = ({ datasetId, webform }) => {
     );
   };
 
-  return !isEmpty(webformData) ? (
+  return !isLoading ? (
     <div className={styles.body}>
       <h3 className={styles.title}>
         {webformData.webformTitle}
@@ -143,7 +156,7 @@ export const WebformContent = ({ datasetId, webform }) => {
       {renderWebformRecords(webformData.multipleRecords)}
     </div>
   ) : (
-    'hey'
+    <Spinner style={{ top: 0, margin: '1rem' }} />
   );
 };
 

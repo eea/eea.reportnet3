@@ -55,6 +55,30 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
     }
   };
 
+  const parseMultiselect = record => {
+    record.dataRow.forEach(field => {
+      if (
+        field.fieldData.type === 'MULTISELECT_CODELIST' ||
+        (field.fieldData.type === 'LINK' && Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
+      ) {
+        if (
+          !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
+          field.fieldData[field.fieldData.fieldSchemaId] !== ''
+        ) {
+          if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
+            field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+          } else {
+            field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
+              .split(',')
+              .map(item => item.trim())
+              .join(',');
+          }
+        }
+      }
+    });
+    return record;
+  };
+
   const onEditorSubmitValue = async (field, option, value) => {
     try {
       DatasetService.updateFieldById(
@@ -71,19 +95,100 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
     }
   };
 
+  const formatDate = (date, isInvalidDate) => {
+    if (isInvalidDate) return '';
+
+    let d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  };
+
   const renderTemplate = (field, option, type) => {
+    // // console.log('field.options', field.options);
     switch (type) {
       case 'DATE':
-        return <Calendar />;
+        return (
+          <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
+            monthNavigator={true}
+            onChange={event => {
+              onFillField(option, formatDate(event.target.value, isNil(event.target.value)));
+              if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
+              else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            }}
+            onFocus={event => {}}
+            value={new Date(field.value)}
+            yearNavigator={true}
+            yearRange="2010:2030"
+          />
+        );
 
       case 'LINK':
-        return <a href=""></a>;
+        return (
+          <InputText
+            // keyfilter={getFilter(type)}
+            // maxLength={urlCharacters}
+            onBlur={event => {}}
+            onChange={event => {}}
+            onFocus={event => {
+              event.preventDefault();
+              // onEditorValueFocus(cells, event.target.value);
+            }}
+            onKeyDown={event => {}}
+            value={field.value}
+          />
+        );
 
       case 'MULTISELECT':
-        return <MultiSelect />;
+        return (
+          <MultiSelect
+            appendTo={document.body}
+            maxSelectedLabels={10}
+            onChange={event => {
+              onFillField(option, event.target.value);
+              if (isNil(field.recordId)) onSaveField(option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value);
+            }}
+            // onFocus={e => {
+            //   e.preventDefault();
+            //   if (!isUndefined(codelistItemValue)) {
+            //     onEditorValueFocus(cells, codelistItemValue);
+            //   }
+            // }}
+            options={field.options}
+            // optionLabel="itemType"
+            value={field.value}
+          />
+        );
 
       case 'SELECT':
-        return <Dropdown />;
+        return (
+          <Dropdown
+            appendTo={document.body}
+            // currentValue={RecordUtils.getCellValue(cells, cells.field)}
+            // filter={true}
+            // filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+            // filterBy="itemType,value"
+            onChange={event => {
+              onFillField(option, event.target.value);
+              if (isNil(field.recordId)) onSaveField(option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value);
+            }}
+            // onFilterInputChangeBackend={onFilter}
+            // onMouseDown={e => onEditorValueFocus(cells, event.target.value)}
+            // optionLabel="label"
+            options={field.options}
+            showFilterClear={true}
+            value={field.value}
+          />
+        );
 
       case 'TEXT':
         return (
@@ -113,10 +218,10 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
       </div>
       {webformRecordState.record.multiple && !isEmpty(webformRecordState.record.webformFields) ? (
         <div className={styles.actionButtons}>
-          <Button
+          {/* <Button
             className={`${styles.collapse} p-button-rounded p-button-secondary p-button-animated-blink`}
             icon={'plus'}
-          />
+          /> */}
           <Button
             className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
             icon={'trash'}
