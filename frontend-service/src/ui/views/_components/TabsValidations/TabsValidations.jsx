@@ -176,7 +176,7 @@ const TabsValidations = withRouter(
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
           } else if (entityType.toUpperCase() === 'RECORD') {
             additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-          } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
+          } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'TABLE') {
             table.records.forEach(record =>
               record.fields.forEach(field => {
                 if (!isNil(field)) {
@@ -262,11 +262,9 @@ const TabsValidations = withRouter(
     const editAndDeleteTemplate = row => {
       let rowType = 'field';
 
-      if (row.entityType === 'RECORD' || row.entityType === 'TABLE') {
-        rowType = 'row';
-      } else if (row.entityType === 'DATASET') {
-        rowType = 'dataset';
-      }
+      if (row.entityType === 'RECORD') rowType = 'row';
+
+      if (row.entityType === 'TABLE') rowType = 'dataset';
 
       return (
         <ActionsColumn
@@ -280,7 +278,10 @@ const TabsValidations = withRouter(
 
     const editTemplate = row => {
       let rowType = 'field';
-      if (row.entityType === 'RECORD' || row.entityType === 'TABLE') rowType = 'row';
+
+      if (row.entityType === 'RECORD') rowType = 'row';
+
+      if (row.entityType === 'TABLE') rowType = 'dataset';
       return (
         <ActionsColumn
           onEditClick={() => {

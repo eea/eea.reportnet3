@@ -5,10 +5,12 @@ import isEmpty from 'lodash/isEmpty';
 import styles from './ExpressionSelector.module.scss';
 
 import { Dropdown } from 'primereact/dropdown';
+import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
 import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_components/SQLsentence';
+import { TableRelationsSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const ExpressionSelector = ({
@@ -17,6 +19,9 @@ export const ExpressionSelector = ({
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
+  onAddNewRelation,
+  onDatasetSchemaChange,
+  onDoubleReferencedChange,
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
@@ -32,6 +37,11 @@ export const ExpressionSelector = ({
   onExpressionThenMarkToGroup,
   onExpressionTypeToggle,
   onGetFieldType,
+  onReferencedTableChange,
+  onRelationDelete,
+  onRelationFieldUpdate,
+  onRelationsErrors,
+  onSetSQLsentence,
   tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
@@ -39,10 +49,28 @@ export const ExpressionSelector = ({
 
   const [expressionTypeValue, setExpressionTypeValue] = useState('');
 
-  const options = [
-    { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
-    { label: resources.messages['ifThenLabel'], value: 'ifThenClause' }
-  ];
+  const getOptions = () => {
+    if (validationContext.level === 'field') {
+      return [
+        { label: resources.messages['fieldComparisonLabel'], value: 'fieldTab' },
+        { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
+      ];
+    }
+
+    if (validationContext.level === 'row') {
+      return [
+        { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
+        { label: resources.messages['ifThenLabel'], value: 'ifThenClause' },
+        { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
+      ];
+    }
+
+    return [
+      { label: resources.messages['datasetComparison'], value: 'fieldRelations' },
+      { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
+    ];
+  };
+
   const {
     candidateRule: { expressionType }
   } = creationFormState;
@@ -64,12 +92,49 @@ export const ExpressionSelector = ({
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
             onExpressionsErrors={onExpressionsErrors}
-            tabsChanges={tabsChanges}
             onGetFieldType={onGetFieldType}
+            tabsChanges={tabsChanges}
           />
         </>
       );
     }
+
+    if (!isEmpty(expressionType) && expressionType === 'fieldTab') {
+      return (
+        <ExpressionsTab
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewExpression={onAddNewExpression}
+          onExpressionDelete={onExpressionDelete}
+          onExpressionFieldUpdate={onExpressionFieldUpdate}
+          onExpressionGroup={onExpressionGroup}
+          onExpressionMarkToGroup={onExpressionMarkToGroup}
+          onExpressionsErrors={onExpressionsErrors}
+          tabsChanges={tabsChanges}
+        />
+      );
+    }
+
+    if (!isEmpty(expressionType) && expressionType === 'fieldRelations') {
+      return (
+        <TableRelationsSelector
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewRelation={onAddNewRelation}
+          onDatasetSchemaChange={onDatasetSchemaChange}
+          onDoubleReferencedChange={onDoubleReferencedChange}
+          onExpressionTypeToggle={onExpressionTypeToggle}
+          onGetFieldType={onGetFieldType}
+          onReferencedTableChange={onReferencedTableChange}
+          onRelationDelete={onRelationDelete}
+          onRelationFieldUpdate={onRelationFieldUpdate}
+          onRelationsErrors={onRelationsErrors}
+          showRequiredFields={tabsChanges.expression}
+          tabsChanges={tabsChanges}
+        />
+      );
+    }
+
     if (!isEmpty(expressionType) && expressionType === 'ifThenClause') {
       return (
         <IfThenClause
@@ -91,6 +156,10 @@ export const ExpressionSelector = ({
         />
       );
     }
+
+    if (!isEmpty(expressionType) && expressionType === 'sqlSentence') {
+      return <SQLsentence creationFormState={creationFormState} onSetSQLsentence={onSetSQLsentence} />;
+    }
     return <></>;
   };
   return (
@@ -99,7 +168,7 @@ export const ExpressionSelector = ({
         <Dropdown
           onChange={e => onExpressionTypeToggle(e.value)}
           optionLabel="label"
-          options={options}
+          options={getOptions()}
           placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
           style={{ width: '12em' }}
           value={expressionTypeValue}

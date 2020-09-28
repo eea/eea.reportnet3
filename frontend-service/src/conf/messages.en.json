@@ -871,9 +871,11 @@
     "notAllowedError": "You are not allowed to see the requested page",
     "userSettingsBasemapLayerSubtitle": "Configure the default basemap layer for your map",
     "basemapLayer": "Basemap layer",
-    "srid": "SRID: ",
+    "epsg": "EPSG: ",
     "pasteRecordsCoordinatesMessage": "Point coordinates must have the following structure: ",
     "pasteRecordsCoordinatesStructureMessage": "Latitude, Longitude - EPSG:4326/4258/3035. Example: 45.345, -2.344 - EPSG:4258",
-    "pasteRecordsWarningCoordinatesMessage": "Warning! There are columns with a wrong coordinate format"
+    "pasteRecordsWarningCoordinatesMessage": "Warning! There are columns with a wrong coordinate format",
+    "sqlSentence": "SQL sentence",
+    "datasetComparison": "Dataset comparison"
   }
 }

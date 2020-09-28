@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -9,10 +9,10 @@ import styles from './DatasetValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { TableRelationsSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
+import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
-import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
+import ReactTooltip from 'react-tooltip';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -26,6 +26,7 @@ import {
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
 import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonRelation';
+import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonSQLsentence';
 import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
 import { deleteLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteLink';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
@@ -33,7 +34,7 @@ import { getDatasetSchemaTableFieldsBySchema } from 'ui/views/DatasetDesigner/_c
 import { getEmptyLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyLink';
 import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getReferencedTables } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getReferencedTables';
-import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
+import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
 import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleRelationCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
 import { setValidationRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationRelation';
@@ -90,7 +91,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
           headerClassName={showErrorOnRelationsTab ? styles.error : ''}
           key="datasetValidationRelations"
           leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>
-          <TableRelationsSelector
+          <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
             onAddNewRelation={onAddNewRelation}
@@ -103,6 +104,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
             onRelationDelete={onRelationDelete}
             onRelationFieldUpdate={onRelationFieldUpdate}
             onRelationsErrors={onRelationsErrors}
+            onSetSQLsentence={onSetSQLsentence}
             showRequiredFields={tabsChanges.expression}
             tabsChanges={tabsChanges}
           />
@@ -152,8 +154,10 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [relationsErrors]);
 
   useEffect(() => {
+
     if (validationContext.referenceId) {
-      const table = getSelectedTableByFieldId(validationContext.ruleToEdit.relations.links[0].originField.code, tabs);
+      const table = getSelectedTableByTableSchemaId(validationContext.referenceId, tabs);
+
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
@@ -195,10 +199,13 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [creationFormState.candidateRule]);
 
   useEffect(() => {
+
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
-        payload: parseRuleToEdit(validationContext.ruleToEdit)
+        payload: isNil(validationContext.ruleToEdit.sqlSentence)
+          ? parseRuleToEdit(validationContext.ruleToEdit)
+          : validationContext.ruleToEdit
       });
     }
   }, [validationContext.ruleEdit]);
@@ -230,10 +237,14 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const checkDeactivateRules = () => {
-    return (
-      (!creationFormState.candidateRule.table || creationFormState.candidateRule.relations.links.length > 1) &&
-      !creationFormState.areRulesDisabled
-    );
+    if (!creationFormState.candidateRule.expressionType === 'sqlSentence') {
+      return (
+        (!creationFormState.candidateRule.table || creationFormState.candidateRule.relations.links.length > 1) &&
+        !creationFormState.areRulesDisabled
+      );
+    } else {
+      return false;
+    }
   };
 
   const getRecordIdByTableSchemaId = tableSchemaId => {
@@ -460,6 +471,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       setClickedFields(cClickedFields);
     }
   };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
     if (cClickedFields.includes(field)) {
@@ -522,6 +534,16 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
+  const onSetSQLsentence = (key, value) => {
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key,
+        value
+      }
+    });
+  };
+
   const dialogLayout = children => (
     <Fragment>
       {validationContext.isVisible && (
@@ -541,6 +563,20 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     </Fragment>
   );
 
+  const getIsCreationDisabled = () => {
+    if (creationFormState.candidateRule.expressionType === 'sqlSentence') {
+      return (
+        creationFormState.isValidationCreationDisabled ||
+        isSubmitDisabled ||
+        !checkComparisonSQLsentence(creationFormState?.candidateRule?.sqlSentence)
+      );
+    }
+    return (
+      creationFormState.isValidationCreationDisabled ||
+      isSubmitDisabled ||
+      checkComparisonRelation(creationFormState.candidateRule.relations.links)
+    );
+  };
   return dialogLayout(
     <>
       <form>
@@ -574,14 +610,10 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                     <Button
                       className={`p-button-primary p-button-text-icon-left ${
                         !creationFormState.isValidationCreationDisabled && !isSubmitDisabled
-                          ? 'p-button-animated-blin'
+                          ? 'p-button-animated-blink'
                           : ''
                       }`}
-                      disabled={
-                        creationFormState.isValidationCreationDisabled ||
-                        isSubmitDisabled ||
-                        checkComparisonRelation(creationFormState.candidateRule.relations.links)
-                      }
+                      disabled={getIsCreationDisabled()}
                       icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                       id={`${componentName}__create`}
                       label={resourcesContext.messages['create']}
