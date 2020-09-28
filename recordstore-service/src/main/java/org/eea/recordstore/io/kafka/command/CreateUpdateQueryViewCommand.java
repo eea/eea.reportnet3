@@ -84,10 +84,20 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
             // create materialiced view of all tableSchemas
             queryViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId);
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
           } catch (RecordStoreAccessException e) {
-            LOG_ERROR.error("Error creating Query view: ", e.getMessage(), e);;
+            LOG_ERROR.error("Error creating Query view: ", e.getMessage(), e);
           }
         });
+  }
+
+  @Transactional
+  private void executeViewPermissions(String queryViewName, Long datasetId)
+      throws RecordStoreAccessException {
+    StringBuilder queryPermission = new StringBuilder(
+        "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + "TO validation;");
+    recordStoreService.executeQueryViewCommands(queryPermission.toString());
   }
 
   /**
