@@ -3,7 +3,6 @@ package org.eea.recordstore.io.kafka.command;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -82,22 +81,28 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
             // create materialiced view of all tableSchemas
-            queryViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId);
             // execute view permission
             executeViewPermissions(table.getNameTableSchema(), datasetId);
           } catch (RecordStoreAccessException e) {
-            LOG_ERROR.error("Error creating Query view: ", e.getMessage(), e);
+            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
           }
         });
   }
 
-  @Transactional
+  /**
+   * Execute view permissions.
+   *
+   * @param queryViewName the query view name
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
   private void executeViewPermissions(String queryViewName, Long datasetId)
       throws RecordStoreAccessException {
-    StringBuilder queryPermission = new StringBuilder(
-        "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + "TO validation;");
-    recordStoreService.executeQueryViewCommands(queryPermission.toString());
+    String queryPermission =
+        "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + " TO validation";
+    recordStoreService.executeQueryViewCommands(queryPermission);
   }
 
   /**
@@ -109,8 +114,7 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
    * @param datasetId the dataset id
    * @throws RecordStoreAccessException the record store access exception
    */
-  @Transactional
-  private void queryViewQuery(List<FieldSchemaVO> columns, String queryViewName,
+  private void executeViewQuery(List<FieldSchemaVO> columns, String queryViewName,
       String idTableSchema, Long datasetId) throws RecordStoreAccessException {
 
     List<String> stringColumns = new ArrayList<>();
