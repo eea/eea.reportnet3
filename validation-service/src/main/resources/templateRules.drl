@@ -186,8 +186,9 @@ function boolean isUniqueConstraint(String uniqueIdConstraint,String idRule){
 }
 
  //////////////////////////////////////////VALIDATION DATASET INTEGRITY////////////////////////////////////////////////////////////
-function boolean isIntegrityConstraint(DatasetValue datasetId,String integrityId, String idRule){
-	return UniqueValidationUtils.isIntegrityConstraint(datasetId,integrityId,idRule);
+function boolean checkIntegrityConstraint(DatasetValue datasetId,String integrityId, String idRule){
+	 UniqueValidationUtils.checkIntegrityConstraint(datasetId,integrityId,idRule);
+	 return true;
 }
 
 //////////////////////////////////////////VALIDATION TABLE FILLED////////////////////////////////////////////////////////////
@@ -199,6 +200,6 @@ function boolean isTableEmpty(TableValue tableValue){
 }
 //////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
 function boolean isSQLSentence(Long datasetId, String ruleId){	
-	SQLValitaionUtils.executeValidationSQLRule(datasetId,ruleId);
-	return true;
+	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId);
+	return false;
 }

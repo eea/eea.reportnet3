@@ -156,6 +156,10 @@
     "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
   },
   {
+    "key": "config/dataset/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLnNwYXRpYWwuZGlhbGVjdC5wb3N0Z2lzLlBvc3RnaXNEaWFsZWN0fQ=="
+  },
+  {
     "key": "config/dataflow/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },

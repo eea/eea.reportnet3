@@ -3,8 +3,8 @@ package org.eea.recordstore.io.kafka.command;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -81,12 +81,28 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
             // create materialiced view of all tableSchemas
-            queryViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId);
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
           } catch (RecordStoreAccessException e) {
-            LOG_ERROR.error("Error creating Query view: ", e.getMessage(), e);;
+            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
           }
         });
+  }
+
+  /**
+   * Execute view permissions.
+   *
+   * @param queryViewName the query view name
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void executeViewPermissions(String queryViewName, Long datasetId)
+      throws RecordStoreAccessException {
+    String queryPermission =
+        "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + " TO validation";
+    recordStoreService.executeQueryViewCommands(queryPermission);
   }
 
   /**
@@ -98,8 +114,7 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
    * @param datasetId the dataset id
    * @throws RecordStoreAccessException the record store access exception
    */
-  @Transactional
-  private void queryViewQuery(List<FieldSchemaVO> columns, String queryViewName,
+  private void executeViewQuery(List<FieldSchemaVO> columns, String queryViewName,
       String idTableSchema, Long datasetId) throws RecordStoreAccessException {
 
     List<String> stringColumns = new ArrayList<>();
@@ -117,19 +132,55 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
     int i = 0;
     while (iterator.hasNext()) {
       String schemaId = iterator.next();
+      // id
       stringQuery.append("(select fv.id from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName()).append("_id");
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_id")
+          .append("\" ");
       stringQuery.append(COMMA);
+      // _id_field_schema
       stringQuery
           .append(
               "(select fv.id_field_schema from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName()).append("_id_field_schema");
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+          .append("_id_field_schema").append("\" ");
       stringQuery.append(COMMA);
-      stringQuery.append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName());
-      stringQuery.append(COMMA);
+      // value
+      DataType type = DataType.TEXT;
+      for (FieldSchemaVO column : columns) {
+        if (column.getId().equals(schemaId)) {
+          type = column.getType();
+        }
+      }
+      switch (type) {
+        case DATE:
+          stringQuery
+              .append("(select CAST(fv.value as date) from dataset_" + datasetId
+                  + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          stringQuery.append(COMMA);
+          break;
+        case NUMBER_DECIMAL:
+        case NUMBER_INTEGER:
+          stringQuery
+              .append("(select CAST(fv.value as numeric) from dataset_" + datasetId
+                  + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          stringQuery.append(COMMA);
+          break;
+        default:
+          stringQuery
+              .append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          stringQuery.append(COMMA);
+          break;
+      }
+      // type
       stringQuery.append("(select fv.type from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append(columns.get(i).getName()).append("_type");
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_type")
+          .append("\" ");
       if (iterator.hasNext()) {
         stringQuery.append(COMMA);
       }

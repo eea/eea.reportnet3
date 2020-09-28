@@ -1,0 +1,11 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 2rem 0;
+  h2 {
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: var(--title-color);
+  }
+}

@@ -1,12 +1,13 @@
 import React, { useContext } from 'react';
 
-import { isUndefined } from 'lodash';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import colors from 'conf/colors.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) => {
+export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns, numCopiedRecords }) => {
   const resources = useContext(ResourcesContext);
 
   const checkPastedColumnsErrors = () => {
@@ -17,7 +18,7 @@ export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) =
 
     if (!isUndefined(data)) {
       if (data.length > 0) {
-        if (equalNumberColumns.length > 0) {
+        if (equalNumberColumns.length > 0 || !checkValidCoordinates()) {
           return (
             <div>
               <p style={{ fontWeight: 'bold', color: colors.errors }}>
@@ -28,6 +29,16 @@ export const InfoTableMessages = ({ data, filteredColumns, numCopiedRecords }) =
                   {resources.messages['pasteRecordsWarningMessage']}
                 </p>
               ) : null}
+              {!checkValidCoordinates() && (
+                <>
+                  <p style={{ fontWeight: 'bold', color: colors.errors }}>
+                    {resources.messages['pasteRecordsWarningCoordinatesMessage']}
+                  </p>
+                  <p style={{ fontStyle: 'italic', fontSize: '0.9em', fontWeight: 'bold' }}>
+                    {`${resources.messages['pasteRecordsCoordinatesMessage']}(${resources.messages['pasteRecordsCoordinatesStructureMessage']})`}
+                  </p>
+                </>
+              )}
               <p>{resources.messages['pasteColumnWarningConfirmMessage']}</p>
             </div>
           );

@@ -281,7 +281,7 @@ export default class DomHandler {
 
     var last = +new Date();
     var opacity = 0;
-    var tick = function() {
+    var tick = function () {
       opacity = +element.style.opacity + (new Date().getTime() - last) / duration;
       element.style.opacity = opacity;
       last = +new Date();
@@ -357,10 +357,7 @@ export default class DomHandler {
       } else if (
         window.getSelection().removeAllRanges &&
         window.getSelection().rangeCount > 0 &&
-        window
-          .getSelection()
-          .getRangeAt(0)
-          .getClientRects().length > 0
+        window.getSelection().getRangeAt(0).getClientRects().length > 0
       ) {
         window.getSelection().removeAllRanges();
       }

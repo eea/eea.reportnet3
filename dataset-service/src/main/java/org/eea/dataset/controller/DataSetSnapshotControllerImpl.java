@@ -2,9 +2,12 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
@@ -51,6 +54,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataset service. */
   @Autowired
   private DatasetService datasetService;
+
+  /** The data collection service. */
+  @Autowired
+  private DataCollectionService dataCollectionService;
+
+  /** The reporting dataset repository. */
+  @Autowired
+  private ReportingDatasetRepository reportingDatasetRepository;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -377,7 +388,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
 
   /**
-   * Historic releases.
+   * Obtain the dataset historic releases.
    *
    * @param datasetId the dataset id
    * @return the list
@@ -388,42 +399,55 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
   public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId) {
-    List<ReleaseVO> releases = new ArrayList<>();
+    List<ReleaseVO> releases;
     // get dataset type
     try {
-      if (datasetService.isReportingDataset(datasetId)) {
-        // if dataset is reporting return released snapshots
-        releases = datasetSnapshotService.getSnapshotsReleasedByIdDataset(datasetId);
-      } else {
-        // if is not, check if user is custodian to get all the released snapshots
-        // MOCK
-        releases = new ArrayList<>();
-        ReleaseVO release = new ReleaseVO();
-        release.setId(1L);
-        release.setDateReleased(new Date());
-        release.setDatasetName("Dataset1");
-        release.setCountryCode("ES");
-        release.setDatasetId(1L);
-        release.setDcrelease(true);
-        release.setEurelease(false);
-        releases.add(release);
-        ReleaseVO release2 = new ReleaseVO();
-        release2.setId(1L);
-        release2.setDateReleased(new Date());
-        release2.setDatasetName("Dataset2");
-        release2.setCountryCode("FR");
-        release2.setDatasetId(1L);
-        release2.setDcrelease(true);
-        release2.setEurelease(true);
-        releases.add(release2);
-      }
+      releases = datasetSnapshotService.getReleases(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error retreiving releases. Error message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.DATASET_NOTFOUND, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND,
+          e);
     }
 
     return releases;
   }
 
+  /**
+   * Datasets historic releases by representative for all datasets involved.
+   *
+   * @param dataflowId the dataflow id
+   * @param representativeId the representative id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/historicReleasesRepresentative",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
+  public List<ReleaseVO> historicReleasesByRepresentative(
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("representativeId") Long representativeId) {
+    List<ReleaseVO> releases = new ArrayList<>();
+
+    List<ReportingDataset> datasets = reportingDatasetRepository.findByDataflowId(dataflowId);
+    List<Long> datasetIds =
+        datasets.stream().filter(dataset -> dataset.getDataProviderId().equals(representativeId))
+            .map(ReportingDataset::getId).collect(Collectors.toList());
+    for (Long id : datasetIds) {
+      releases.addAll(datasetSnapshotService.getSnapshotsReleasedByIdDataset(id));
+    }
+    return releases;
+  }
+
+  /**
+   * Update snapshot EU release.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/eurelease/{idDataset}")
+  public void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId) {
+    datasetSnapshotService.updateSnapshotEURelease(datasetId);
+  }
 }

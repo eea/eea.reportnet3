@@ -179,4 +179,23 @@ public interface DatasetSnapshotController {
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId);
 
+  /**
+   * Historic releases by representative.
+   *
+   * @param dataflowId the dataflow id
+   * @param representativeId the representative id
+   * @return the list
+   */
+  @GetMapping(value = "/historicReleasesRepresentative",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReleaseVO> historicReleasesByRepresentative(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("representativeId") Long representativeId);
+
+  /**
+   * Update snapshot EU release.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/eurelease/{idDataset}")
+  void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId);
 }

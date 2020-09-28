@@ -86,6 +86,7 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -1471,15 +1472,6 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Test is reporting dataset.
-   */
-  @Test
-  public void testIsReportingDataset() {
-    datasetService.isReportingDataset(1L);
-    Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
-  }
-
-  /**
    * Test save new field propagation.
    */
   @Test
@@ -2438,5 +2430,35 @@ public class DatasetServiceTest {
     datasetService.spreadDataPrefill(desingDatasetList, 2L, schema.getIdDataSetSchema().toString());
     Mockito.verify(representativeControllerZuul, times(1)).findDataProviderById(Mockito.any());
 
+  }
+
+  @Test
+  public void getDatasetTypeReportingTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.REPORTING, datasetService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeDesignTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(designDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.DESIGN, datasetService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeDCTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.COLLECTION, datasetService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeEUTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    when(dataSetMetabaseRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.EUDATASET, datasetService.getDatasetType(1L));
   }
 }

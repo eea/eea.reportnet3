@@ -204,7 +204,7 @@ const DocumentFileUpload = ({
           </fieldset>
           <fieldset>
             <div className={styles.checkboxIsPublic}>
-              <Field name="isPublic" type="checkbox" checked={values.isPublic} component={IsPublicCheckbox} />
+              <Field checked={values.isPublic} component={IsPublicCheckbox} name="isPublic" type="checkbox" />
             </div>
           </fieldset>
           <fieldset>

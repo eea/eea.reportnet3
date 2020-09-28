@@ -1,15 +1,17 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 // import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import proj4 from 'proj4';
+
+import styles from './DataFormFieldEditor.module.scss';
 
 // import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
-// import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-// import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -20,7 +22,9 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-// import { getUrl } from 'core/infrastructure/CoreUtils';
+import { mapReducer } from './_functions/Reducers/mapReducer';
+
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
@@ -29,25 +33,48 @@ const DataFormFieldEditor = ({
   datasetId,
   field,
   fieldValue = '',
-  hasWritePermissions,
   isVisible,
   onChangeForm,
   reporting,
   type
 }) => {
+  const crs = [
+    { label: 'WGS84', value: 'EPSG:4326' },
+    { label: 'ETRS89', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
+  ];
+
   const resources = useContext(ResourcesContext);
 
   const inputRef = useRef(null);
 
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+
+  const [map, dispatchMap] = useReducer(mapReducer, {
+    currentCRS:
+      fieldValue !== '' && type === 'POINT'
+        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
+        : { label: 'WGS84', value: 'EPSG:4326' },
+    isMapDisabled: false,
+    isMapOpen: false,
+    mapCoordinates: '',
+    newPoint: '',
+    newPointCRS: { label: 'WGS84', value: 'EPSG:4326' }
+  });
+
   const [columnWithLinks, setColumnWithLinks] = useState([]);
-  // const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
-  const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const [mapCoordinates, setMapCoordinates] = useState();
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
       if (type === 'LINK') onLoadColsSchema(fieldValue);
+      if (type === 'POINT') {
+        dispatchMap({
+          type: 'TOGGLE_MAP_DISABLED',
+          payload: !MapUtils.checkValidCoordinates(
+            fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''
+          )
+        });
+      }
     }
   }, []);
 
@@ -74,53 +101,41 @@ const DataFormFieldEditor = ({
   };
 
   const onMapOpen = coordinates => {
-    setIsMapOpen(true);
-    setMapCoordinates(coordinates);
+    dispatchMap({ type: 'OPEN_MAP', payload: { coordinates } });
   };
 
-  const onSelectPoint = coordinates => {
-    setIsMapOpen(false);
-    onChangeForm(field, coordinates.join(', '));
-
-    // onEditorSubmitValue(cells, coordinates.join(', '));
+  const onSavePoint = (coordinates, crs) => {
+    if (coordinates !== '') {
+      const inmMapGeoJson = cloneDeep(fieldValue !== '' ? fieldValue : fieldEmptyPointValue);
+      const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
+      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
+      parsedInmMapGeoJson.properties.rsid = crs.value;
+      onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
+    }
+    dispatchMap({ type: 'SAVE_MAP_COORDINATES', payload: { crs } });
   };
 
-  const formatDate = (date, isInvalidDate) => {
-    if (isInvalidDate) return '';
-    let d = new Date(date),
-      month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
+  const onSelectPoint = (coordinates, selectedCrs) => {
+    const filteredCRS = crs.filter(crsItem => crsItem.value === selectedCrs)[0];
+    dispatchMap({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, filteredCRS } });
   };
 
-  const getFilter = type => {
-    switch (type) {
-      case 'NUMBER_INTEGER':
-        return 'int';
-      case 'NUMBER_DECIMAL':
-      case 'POINT':
-        return 'money';
-      case 'COORDINATE_LONG':
-      case 'COORDINATE_LAT':
-        return 'num';
-      case 'DATE':
-        return 'date';
-      case 'TEXT':
-      case 'RICH_TEXT':
-        return 'any';
-      case 'EMAIL':
-        return 'email';
-      case 'PHONE':
-        return 'phone';
-      // case 'URL':
-      //   return 'url';
-      default:
-        return 'any';
+  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
+    if (geoJson !== '') {
+      if (withCRS) {
+        const projectedCoordinates = projectCoordinates(coordinates, crs.value);
+        geoJson.geometry.coordinates = projectedCoordinates;
+        geoJson.properties.rsid = crs.value;
+        dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(projectedCoordinates) });
+        return JSON.stringify(geoJson);
+      } else {
+        dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coordinates) });
+        geoJson.geometry.coordinates = MapUtils.parseCoordinates(
+          coordinates.replace(', ', ',').split(','),
+          parseToFloat
+        );
+        return JSON.stringify(geoJson);
+      }
     }
   };
 
@@ -142,7 +157,6 @@ const DataFormFieldEditor = ({
       })
       .sort((a, b) => a.value - b.value);
 
-    // const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
     if (!hasMultipleValues) {
       linkItems.unshift({
         itemType: resources.messages['noneCodelist'],
@@ -162,6 +176,10 @@ const DataFormFieldEditor = ({
       value: ''
     });
     return codelistItems;
+  };
+
+  const projectCoordinates = (coordinates, newCRS) => {
+    return proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates);
   };
 
   const renderCodelistDropdown = (field, fieldValue) => {
@@ -192,12 +210,9 @@ const DataFormFieldEditor = ({
         optionLabel="itemType"
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
-        // hasSelectedItemsLabel={false}
       />
     );
   };
-
-  // const getAttachExtensions = [{ fileExtension: '.csv, .txt, .pdf' }].map(file => `.${file.fileExtension}`).join(', ');
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
@@ -215,8 +230,6 @@ const DataFormFieldEditor = ({
       case 'NUMBER_DECIMAL':
         return decimalCharacters;
       case 'POINT':
-      case 'COORDINATE_LONG':
-      case 'COORDINATE_LAT':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -233,11 +246,6 @@ const DataFormFieldEditor = ({
       default:
         return null;
     }
-  };
-
-  const onConfirmDeleteAttachment = () => {
-    onChangeForm(field, []);
-    setIsDeleteAttachmentVisible(false);
   };
 
   const renderFieldEditor = () =>
@@ -257,7 +265,7 @@ const DataFormFieldEditor = ({
       <InputText
         disabled={column.readOnly && reporting}
         id={field}
-        keyfilter={getFilter(type)}
+        keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         // type={type === 'DATE' ? 'date' : 'text'}
@@ -313,28 +321,19 @@ const DataFormFieldEditor = ({
   const renderCalendar = (field, fieldValue) => {
     return (
       <Calendar
-        onChange={e => onChangeForm(field, formatDate(e.target.value, isNil(e.target.value)))}
+        onChange={e => onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)))}
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         disabled={column.readOnly && reporting}
         monthNavigator={true}
         style={{ width: '60px' }}
-        value={new Date(formatDate(fieldValue, isNil(fieldValue)))}
+        value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
         yearRange="2010:2030"
       />
     );
   };
-
-  // const renderCustomFileAttachFooter = (
-  //   <Button
-  //     className="p-button-secondary p-button-animated-blink"
-  //     icon={'cancel'}
-  //     label={resources.messages['close']}
-  //     onClick={() => setIsAttachFileVisible(false)}
-  //   />
-  // );
 
   const renderLinkDropdown = (field, fieldValue) => {
     if (column.pkHasMultipleValues) {
@@ -378,32 +377,101 @@ const DataFormFieldEditor = ({
     }
   };
 
-  const renderMap = () => <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>;
+  const renderMap = () => (
+    <Map geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
+  );
 
   const renderMapType = (field, fieldValue) => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      <InputText
-        disabled={column.readOnly && reporting}
-        keyfilter={getFilter(type)}
-        // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-        onChange={e => onChangeForm(field, e.target.value)}
-        // onFocus={e => {
-        //   e.preventDefault();
-        //   onEditorValueFocus(cells, e.target.value);
-        // }}
-        // onKeyDown={e => onEditorKeyChange(cells, e, record)}
-        style={{ width: '35%' }}
-        type="text"
-        value={fieldValue}
+    <div>
+      <div className={styles.pointEpsgWrapper}>
+        <label className={styles.epsg}>{'Coords:'}</label>
+        <InputText
+          disabled={column.readOnly && reporting}
+          keyfilter={RecordUtils.getFilter(type)}
+          onBlur={e =>
+            onChangeForm(
+              field,
+              changePoint(
+                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+                e.target.value,
+                map.currentCRS.value,
+                false
+              )
+            )
+          }
+          onChange={e =>
+            onChangeForm(
+              field,
+              changePoint(
+                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+                e.target.value,
+                map.currentCRS.value,
+                false,
+                false
+              )
+            )
+          }
+          style={{ width: '50%' }}
+          type="text"
+          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''}
+        />
+      </div>
+
+      <div className={styles.pointEpsgWrapper}>
+        <label className={styles.epsg}>{resources.messages['epsg']}</label>
+        <Dropdown
+          ariaLabel={'crs'}
+          appendTo={document.body}
+          className={styles.epsgSwitcher}
+          disabled={map.isMapDisabled}
+          options={crs}
+          optionLabel="label"
+          onChange={e => {
+            onChangeForm(
+              field,
+              changePoint(
+                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+                JSON.parse(fieldValue).geometry.coordinates,
+                e.target.value
+              )
+            );
+            dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
+            // onChangePointCRS(e.target.value.value);
+          }}
+          placeholder="Select a CRS"
+          style={{ width: '50%', minWidth: '50%' }}
+          value={map.currentCRS}
+        />
+        <Button
+          className={`p-button-secondary-transparent button ${styles.mapButton}`}
+          icon="marker"
+          onClick={() => onMapOpen(fieldValue)}
+          tooltip={resources.messages['selectGeographicalDataOnMap']}
+          tooltipOptions={{ position: 'bottom' }}
+        />
+      </div>
+    </div>
+  );
+
+  const saveMapCoordinatesDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        className="p-button-animated-blink"
+        // disabled={isSaving}
+        label={resources.messages['save']}
+        icon={'check'}
+        onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}
       />
       <Button
-        className={`p-button-secondary-transparent button`}
-        icon="marker"
-        onClick={() => onMapOpen(fieldValue)}
-        // style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
-        style={{ width: '2.357em', marginLeft: '0.5rem' }}
-        tooltip={resources.messages['selectGeographicalDataOnMap']}
-        tooltipOptions={{ position: 'bottom' }}
+        className="p-button-secondary"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => {
+          dispatchMap({
+            type: 'CANCEL_SAVE_MAP_NEW_POINT',
+            payload: { newPointCRS: map.currentCRS.value }
+          });
+        }}
       />
     </div>
   );
@@ -449,15 +517,16 @@ const DataFormFieldEditor = ({
         </ConfirmDialog>
       )} */}
 
-      {isMapOpen && (
+      {map.isMapOpen && (
         <Dialog
           className={'map-data'}
           blockScroll={false}
+          dismissableMask={false}
+          footer={saveMapCoordinatesDialogFooter}
           header={resources.messages['geospatialData']}
           modal={true}
-          onHide={() => setIsMapOpen(false)}
-          // style={{ height: '90vh', width: '80%' }}
-          visible={isMapOpen}>
+          onHide={() => dispatchMap({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
+          visible={map.isMapOpen}>
           <div className="p-grid p-fluid">{renderMap()}</div>
         </Dialog>
       )}
