@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -33,6 +33,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     allDataflows: {},
     chosenDataflow: { id: null, name: '' },
     completed: [],
+    filtered: false,
     filteredData: [],
     isLoading: true,
     pagination: { first: 0, rows: 10, page: 0 },
@@ -46,6 +47,23 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   useEffect(() => {
     getCloneDataflow(cloneSchemasState.chosenDataflow);
   }, [cloneSchemasState.chosenDataflow]);
+
+  const getFilteredState = value => cloneSchemasDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+  const getPaginatorRecordsCount = () => {
+    return (
+      <Fragment>
+        {cloneSchemasState.filtered && cloneSchemasState.accepted.length !== cloneSchemasState.filteredData.length
+          ? `${resources.messages['filtered']} : ${cloneSchemasState.filteredData.length} | `
+          : ''}
+        {resources.messages['totalRecords']} {cloneSchemasState.accepted.length}{' '}
+        {resources.messages['records'].toLowerCase()}
+        {cloneSchemasState.filtered && cloneSchemasState.accepted.length === cloneSchemasState.filteredData.length
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          : ''}
+      </Fragment>
+    );
+  };
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -110,6 +128,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         onChangePagination={onChangePagination}
         onSelectDataflow={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
+        paginatorRightText={getPaginatorRecordsCount()}
       />
     ) : (
       <CardsView
@@ -120,6 +139,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
+        paginatorRightText={getPaginatorRecordsCount()}
         type={'cloneSchemas'}
       />
     );
@@ -145,6 +165,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
           data={cloneSchemasState.accepted}
           dateOptions={['expirationDate']}
           getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
           inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
           selectOptions={['status']}
         />
