@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.Objects;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
@@ -37,5 +38,25 @@ public class GroupValidationVO implements Serializable {
 
   /** The origin name. */
   private String originName;
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(idRule, levelError, message, numberOfRecords, originName, typeEntity);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    GroupValidationVO other = (GroupValidationVO) obj;
+    return Objects.equals(idRule, other.idRule) && levelError == other.levelError
+        && Objects.equals(message, other.message)
+        && Objects.equals(numberOfRecords, other.numberOfRecords)
+        && Objects.equals(originName, other.originName) && typeEntity == other.typeEntity;
+  }
 
 }
