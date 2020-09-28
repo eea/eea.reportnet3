@@ -397,8 +397,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
-  public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId) {
+  @PreAuthorize("(secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))) OR (checkApiKey(#dataflowId,0L) AND secondLevelAuthorize(#datasetId,'EUDATASET_CUSTODIAN'))")
+  public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     List<ReleaseVO> releases;
     // get dataset type
     try {
