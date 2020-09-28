@@ -181,15 +181,6 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       { id: 'releasedDate', index: 1 }
     ];
 
-    console.log(
-      'historicReleases',
-      historicReleases
-        .map(error => historicReleasesWithPriority.filter(e => error === e.id))
-        .flat()
-        .sort((a, b) => a.index - b.index)
-        .map(orderedError => orderedError.id)
-    );
-
     return historicReleases
       .map(error => historicReleasesWithPriority.filter(e => error === e.id))
       .flat()
@@ -239,7 +230,6 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
-          // selectOptions={['countryCode', 'isDataCollectionReleased', 'isEUReleased']}
           selectOptions={['countryCode']}
         />
       )}

@@ -1,8 +1,6 @@
 import { FiltersUtils } from '../Utils/FiltersUtils';
 
 export const filterReducer = (state, { type, payload }) => {
-  // console.log('type', type);
-  // console.log('payload', payload);
   switch (type) {
     case 'ANIMATE_LABEL':
       return {

@@ -83,10 +83,6 @@ export const Filters = ({
     getFilteredValue();
   }, [filterState.filterBy]);
 
-  // useEffect(() => {
-  //   getSearchedValue();
-  // }, [filterState.searched]);
-
   useEffect(() => {
     getFilteredStateValue(filterState.filteredState);
   }, [filterState.filtered, filterState.searched]);
@@ -489,7 +485,6 @@ export const Filters = ({
       {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
-      {/* {selectOptions && difference(selectOptions, checkboxOptions).map((option, i) => renderSelectFilter(option, i))} */}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
       {matchMode && renderCheckbox()}
