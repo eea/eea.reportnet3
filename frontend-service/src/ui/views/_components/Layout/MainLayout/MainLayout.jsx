@@ -61,7 +61,7 @@ const MainLayout = ({ children, isPublic = false }) => {
   const getUserConfiguration = async () => {
     try {
       const userConfiguration = await UserService.getConfiguration();
-
+      userContext.onChangeBasemapLayer(userConfiguration.basemapLayer);
       userContext.onChangeDateFormat(userConfiguration.dateFormat);
       userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);

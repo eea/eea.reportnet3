@@ -1,0 +1,31 @@
+.mapButton {
+  margin-right: 1rem;
+  width: 2.357em;
+}
+
+.pointEpsgWrapper {
+  align-items: center;
+  display: flex;
+  margin-top: 0.5rem;
+  width: 100%;
+  label:first-child {
+    width: 80px;
+    color: var(--main-font-color);
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 5px;
+  }
+  button {
+    width: 35%;
+  }
+}
+
+.pointWrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.epsgSwitcher {
+  margin-right: 1rem;
+}

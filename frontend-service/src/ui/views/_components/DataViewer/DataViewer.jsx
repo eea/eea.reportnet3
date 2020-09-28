@@ -2,6 +2,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -53,6 +54,7 @@ import {
   useRecordErrorPosition,
   useSetColumns
 } from './_functions/Hooks/DataViewerHooks';
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
   ({
@@ -113,6 +115,7 @@ const DataViewer = withRouter(
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
+      crs: 'EPSG:4326',
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
@@ -121,7 +124,9 @@ const DataViewer = withRouter(
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
-      mapCoordinates: '',
+      mapGeoJson: '',
+      newPoint: '',
+      newPointCRS: 'EPSG:4326',
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
@@ -135,6 +140,7 @@ const DataViewer = withRouter(
       totalFilteredRecords: 0,
       totalRecords: 0
     });
+
     const [sort, dispatchSort] = useReducer(sortReducer, {
       sortField: undefined,
       sortOrder: undefined
@@ -164,11 +170,11 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
+          onChangePointCRS={onChangePointCRS}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
-          // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
           reporting={reporting}
@@ -196,6 +202,8 @@ const DataViewer = withRouter(
       );
       return getIconsValidationsErrors(validationsGroup);
     };
+
+    const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
     const onFileDownload = async (fileName, fieldId) => {
       const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
@@ -279,6 +287,15 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
+      if (records.mapGeoJson !== '') {
+        onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
+        const inmMapGeoJson = cloneDeep(records.mapGeoJson);
+        const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
+        onEditorSubmitValue(records.selectedMapCells, JSON.stringify(parsedInmMapGeoJson), records.selectedRecord);
+      }
+    }, [records.mapGeoJson]);
+
+    useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
     }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
 
@@ -334,9 +351,7 @@ const DataViewer = withRouter(
           fields,
           levelErrorValidations
         );
-        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) {
-          onLoadTableData(true);
-        }
+        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
 
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
@@ -555,16 +570,24 @@ const DataViewer = withRouter(
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
-    const onEditorKeyChange = (props, event, record) => {
+    const onEditorKeyChange = (props, event, record, isGeometry = false, geoJson = '') => {
       if (event.key === 'Escape') {
         let updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
-        onEditorSubmitValue(props, event.target.value, record);
+        if (!isGeometry) {
+          onEditorSubmitValue(props, event.target.value, record);
+        } else {
+          onEditorSubmitValue(props, geoJson, record);
+        }
       } else if (event.key === 'Tab') {
         event.preventDefault();
-        onEditorSubmitValue(props, event.target.value, record);
+        if (!isGeometry) {
+          onEditorSubmitValue(props, event.target.value, record);
+        } else {
+          onEditorSubmitValue(props, geoJson, record);
+        }
       }
     };
 
@@ -634,7 +657,11 @@ const DataViewer = withRouter(
     const onPasteAccept = async () => {
       try {
         setIsPasting(true);
-        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, records.pastedRecords);
+        const recordsAdded = await DatasetService.addRecordsById(
+          datasetId,
+          tableId,
+          MapUtils.parseGeometryData(records.pastedRecords)
+        );
         if (!recordsAdded) {
           throw new Error('ADD_RECORDS_BY_ID_ERROR');
         } else {
@@ -731,11 +758,16 @@ const DataViewer = withRouter(
       }
     };
 
-    const onSelectPoint = coordinates => {
-      dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
-      onEditorValueChange(records.selectedMapCells, coordinates);
-      onEditorSubmitValue(records.selectedMapCells, coordinates.join(', '), records.selectedRecord);
+    const onSavePoint = coordinates => {
+      if (coordinates !== '') {
+        dispatchRecords({ type: 'SAVE_MAP_COORDINATES', payload: coordinates });
+      } else {
+        dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+      }
     };
+
+    const onSelectPoint = (coordinates, crs) =>
+      dispatchRecords({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, crs } });
 
     const onSetVisible = (fnUseState, visible) => {
       fnUseState(visible);
@@ -831,6 +863,30 @@ const DataViewer = withRouter(
       </div>
     );
 
+    const saveMapGeoJsonDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button
+          className="p-button-animated-blink"
+          // disabled={isSaving}
+          label={resources.messages['save']}
+          icon={'check'}
+          onClick={() => onSavePoint(records.newPoint)}
+        />
+        <Button
+          className="p-button-secondary"
+          icon="cancel"
+          label={resources.messages['cancel']}
+          onClick={() => {
+            // dispatchRecords({
+            //   type: 'SET_NEW_RECORD',
+            //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            // });
+            dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
+          }}
+        />
+      </div>
+    );
+
     const addIconLevelError = (validation, levelError, message) => {
       let icon = [];
       if (!isEmpty(validation)) {
@@ -855,7 +911,7 @@ const DataViewer = withRouter(
     };
 
     const mapRender = () => (
-      <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true} />
+      <Map geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
     );
 
     const rowClassName = rowData => {
@@ -883,15 +939,6 @@ const DataViewer = withRouter(
         </div>
       );
     };
-
-    const renderCustomFileAttachFooter = (
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => setIsAttachFileVisible(false)}
-      />
-    );
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
@@ -1253,16 +1300,10 @@ const DataViewer = withRouter(
           <Dialog
             className={'map-data'}
             blockScroll={false}
-            // contentStyle={
-            //   isMapOpen
-            //     ? { height: '80%', maxHeight: '80%', width: '100%' }
-            //     : { height: '80%', maxHeight: '80%', overflow: 'auto' }
-            // }
-            // footer={isMapOpen ? null : addDialogVisible ? addRowDialogFooter : editRowDialogFooter}
+            footer={saveMapGeoJsonDialogFooter}
             header={resources.messages['geospatialData']}
             modal={true}
             onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
-            // style={isMapOpen ? { width: '80%' } : { width: '50%', height: '80%' }}
             visible={records.isMapOpen}>
             <div className="p-grid p-fluid">{mapRender()}</div>
           </Dialog>

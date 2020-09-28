@@ -3,10 +3,11 @@ import moment from 'moment';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf/index';
+
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { config } from 'conf/index';
 
 const timeOut = time => {
   setTimeout(() => {
@@ -39,6 +40,7 @@ const login = async code => {
 const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
+  userStorage.removeLocalStorage();
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
@@ -68,6 +70,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
+    basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
     showLogoutConfirmation: true,
     rowsPerPage: 10,
@@ -76,8 +79,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
     amPm24h: true,
     listView: true
   };
-
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
+    userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
@@ -86,6 +89,10 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
     userConfiguration.listView = userDefaultConfiguration.listView;
   } else {
+    userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer)
+      ? userConfigurationDTO.basemapLayer[0]
+      : userDefaultConfiguration.basemapLayer;
+
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;
@@ -96,11 +103,11 @@ const parseConfigurationDTO = userConfigurationDTO => {
       ? (userConfiguration.showLogoutConfirmation = false)
       : (userConfiguration.showLogoutConfirmation = true);
 
-    userConfiguration.rowsPerPage = !isNil(userConfigurationDTO.rowsPerPage[0])
+    userConfiguration.rowsPerPage = !isNil(userConfigurationDTO.rowsPerPage)
       ? parseInt(userConfigurationDTO.rowsPerPage[0])
       : userDefaultConfiguration.rowsPerPage;
 
-    userConfiguration.visualTheme = !isNil(userConfigurationDTO.visualTheme[0])
+    userConfiguration.visualTheme = !isNil(userConfigurationDTO.visualTheme)
       ? userConfigurationDTO.visualTheme[0]
       : userDefaultConfiguration.visualTheme;
 

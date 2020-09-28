@@ -1,7 +1,5 @@
 import React, { useContext } from 'react';
 
-import isNil from 'lodash/isNil';
-
 import styles from './ExpressionsTab.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -12,24 +10,26 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const ExpressionsTab = ({
   componentName,
   creationFormState,
+  onAddNewExpression,
   onExpressionDelete,
   onExpressionFieldUpdate,
-  onExpressionMarkToGroup,
-  tabsChanges,
-  onAddNewExpression,
   onExpressionGroup,
-  onExpressionsErrors
+  onExpressionMarkToGroup,
+  onExpressionsErrors,
+  tabsChanges
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+ 
 
   return (
     <React.Fragment>
-      <div className={styles.section}>
+      <div className={styles.section}>       
         <ul>
           {creationFormState.candidateRule.expressions &&
             creationFormState.candidateRule.expressions.map((expression, i) => (
               <ValidationExpressionSelector
                 expressionValues={expression}
+                fieldType={creationFormState.candidateRule.fieldType}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionDelete}
@@ -38,28 +38,27 @@ export const ExpressionsTab = ({
                 onExpressionsErrors={onExpressionsErrors}
                 position={i}
                 showRequiredFields={tabsChanges.expression}
-                fieldType={creationFormState.candidateRule.fieldType}
               />
             ))}
         </ul>
         <div className={styles.expressionsActionsBtns}>
           <Button
-            id={`${componentName}__addExpresion`}
-            disabled={creationFormState.isRuleAddingDisabled}
             className="p-button-primary p-button-text-icon-left"
-            type="button"
-            label={resourcesContext.messages.addNewRule}
+            disabled={creationFormState.isRuleAddingDisabled}
             icon="plus"
-            onClick={e => onAddNewExpression()}
+            id={`${componentName}__addExpresion`}
+            label={resourcesContext.messages.addNewRule}
+            onClick={() => onAddNewExpression()}
+            type="button"
           />
           {creationFormState.groupExpressionsActive >= 2 && (
             <Button
-              id={`${componentName}__groupExpresions`}
               className="p-button-primary p-button-text"
-              type="button"
-              label="Group"
               icon="plus"
-              onClick={e => onExpressionGroup()}
+              id={`${componentName}__groupExpresions`}
+              label="Group"
+              onClick={() => onExpressionGroup()}
+              type="button"
             />
           )}
         </div>

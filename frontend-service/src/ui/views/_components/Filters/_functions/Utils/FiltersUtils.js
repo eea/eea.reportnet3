@@ -2,10 +2,35 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
-const getFilterInitialState = (data, input = [], select = [], date = [], dropDown = [], filterByList) => {
+const getCheckboxFilterInitialState = checkboxOptions => {
+  const initialCheckboxes = [];
+  !isEmpty(checkboxOptions) &&
+    checkboxOptions.forEach(checkboxOption => {
+      initialCheckboxes.push({ property: checkboxOption, isChecked: false });
+    });
+
+  return initialCheckboxes;
+};
+
+const getCheckboxState = (checkboxes, property) => {
+  checkboxes.forEach(checkboxOption => {
+    if (checkboxOption.property === property) checkboxOption.isChecked = !checkboxOption.isChecked;
+  });
+  return checkboxes;
+};
+
+const getFilterInitialState = (
+  data,
+  input = [],
+  select = [],
+  date = [],
+  dropDown = [],
+  checkbox = [],
+  filterByList
+) => {
   if (filterByList) return filterByList;
 
-  const filterByGroup = input.concat(select, date, dropDown);
+  const filterByGroup = input.concat(select, date, dropDown, checkbox);
   const filterBy = filterByGroup.reduce((obj, key) => Object.assign(obj, { [key]: '' }), {});
   if (select) {
     select.forEach(selectOption => {
@@ -16,19 +41,29 @@ const getFilterInitialState = (data, input = [], select = [], date = [], dropDow
       }
     });
   }
+  if (checkbox) {
+    checkbox.forEach(checkboxOption => {
+      const checkboxItems = uniq(data.map(item => item[checkboxOption]));
+      const validCheckboxItems = checkboxItems.filter(option => !isNil(option));
+      for (let i = 0; i < validCheckboxItems.length; i++) {
+        filterBy[checkboxOption] = [];
+      }
+    });
+  }
   if (date) {
     date.forEach(dateOption => {
       filterBy[dateOption] = [];
     });
   }
+
   return filterBy;
 };
 
 const getFilterKeys = (state, filter, inputOptions = []) =>
   Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
 
-const getLabelInitialState = (input = [], select = [], date = [], dropDown = [], filteredBy) => {
-  const labelByGroup = input.concat(select, date, dropDown);
+const getLabelInitialState = (input = [], select = [], date = [], dropDown = [], checkbox = [], filteredBy) => {
+  const labelByGroup = input.concat(select, date, dropDown, checkbox);
   return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: !isEmpty(filteredBy[key]) }), {});
 };
 
@@ -71,10 +106,13 @@ const getOptionTypes = (data, option, list, order) => {
   }
 };
 
-const getSelectedKeys = (state, select, selectOptions = []) =>
-  Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
+const getSelectedKeys = (state, select, selectOptions = []) => {
+  return Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
+};
 
 export const FiltersUtils = {
+  getCheckboxFilterInitialState,
+  getCheckboxState,
   getFilterInitialState,
   getFilterKeys,
   getLabelInitialState,

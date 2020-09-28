@@ -1,0 +1,1 @@
+export { SQLsentence } from './SQLsentence';
