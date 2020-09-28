@@ -214,6 +214,7 @@ export const Map = ({
   };
 
   const onEachFeature = (feature, layer) => {
+    console.log({ feature, layer });
     layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
     layer.on({
       click: () =>
@@ -263,10 +264,17 @@ export const Map = ({
         <Dropdown
           ariaLabel={'crs'}
           className={styles.crsSwitcherSplitButton}
+          disabled={!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible}
           onChange={e => {
             onCRSChange(e.target.value);
             onSelectPoint(
-              proj4(proj4('EPSG:4326'), proj4(e.target.value.value), JSON.parse(mapGeoJson).geometry.coordinates),
+              proj4(
+                proj4('EPSG:4326'),
+                proj4(e.target.value.value),
+                isNewPositionMarkerVisible
+                  ? MapUtils.parseCoordinates(newPositionMarker.split(', '))
+                  : JSON.parse(mapGeoJson).geometry.coordinates
+              ),
               e.target.value.value
             );
           }}
@@ -304,11 +312,13 @@ export const Map = ({
             <TileLayer url="" />
           </BaseLayer>
         </LayersControl> */}
-        <GeoJSON
-          data={JSON.parse(mapGeoJson)}
-          onEachFeature={onEachFeature}
-          coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
-        />
+        {MapUtils.checkValidJSONCoordinates(geoJson) && (
+          <GeoJSON
+            data={JSON.parse(mapGeoJson)}
+            onEachFeature={onEachFeature}
+            coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
+          />
+        )}
         {isNewPositionMarkerVisible && (
           <Marker
             draggable={true}

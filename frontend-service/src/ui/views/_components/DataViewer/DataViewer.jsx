@@ -273,6 +273,10 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
+      if (records.isMapOpen) datatableRef.current.closeEditingCell();
+    }, [records.isMapOpen]);
+
+    useEffect(() => {
       if (isDatasetDeleted) {
         dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
       }
