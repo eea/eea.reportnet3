@@ -177,7 +177,8 @@ public interface DatasetSnapshotController {
    * @return the list
    */
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId);
+  List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId);
 
   /**
    * Historic releases by representative.
