@@ -19,6 +19,7 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import newMarkerIcon from 'assets/images/newMarker.png';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
@@ -62,6 +63,7 @@ export const Map = ({
   },
   selectedCRS = { label: 'WGS84', value: 'EPSG:4326' }
 }) => {
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   // const { BaseLayer, Overlay } = LayersControl;
@@ -245,34 +247,37 @@ export const Map = ({
 
   return (
     <>
-      <Dropdown
-        ariaLabel={'themes'}
-        className={styles.themeSwitcherSplitButton}
-        onChange={e => {
-          onThemeChange(e.target.value);
-        }}
-        optionLabel="label"
-        options={themes}
-        placeholder="Select a theme"
-        value={currentTheme}
-        style={{ width: '20%' }}
-      />
-      <Dropdown
-        ariaLabel={'crs'}
-        className={styles.crsSwitcherSplitButton}
-        onChange={e => {
-          onCRSChange(e.target.value);
-          onSelectPoint(
-            proj4(proj4('EPSG:4326'), proj4(e.target.value.value), JSON.parse(mapGeoJson).geometry.coordinates),
-            e.target.value.value
-          );
-        }}
-        optionLabel="label"
-        options={crs}
-        placeholder="Select a CRS"
-        value={currentCRS}
-        style={{ width: '20%' }}
-      />
+      <div style={{ display: 'inline-flex', width: '60%' }}>
+        <Dropdown
+          ariaLabel={'themes'}
+          className={styles.themeSwitcherSplitButton}
+          onChange={e => {
+            onThemeChange(e.target.value);
+          }}
+          optionLabel="label"
+          options={themes}
+          placeholder="Select a theme"
+          value={currentTheme}
+          style={{ width: '20%' }}
+        />
+        <Dropdown
+          ariaLabel={'crs'}
+          className={styles.crsSwitcherSplitButton}
+          onChange={e => {
+            onCRSChange(e.target.value);
+            onSelectPoint(
+              proj4(proj4('EPSG:4326'), proj4(e.target.value.value), JSON.parse(mapGeoJson).geometry.coordinates),
+              e.target.value.value
+            );
+          }}
+          optionLabel="label"
+          options={crs}
+          placeholder="Select a CRS"
+          value={currentCRS}
+          style={{ width: '20%' }}
+        />
+      </div>
+      <label className={styles.mapSelectMessage}>{resources.messages['mapSelectPointMessage']}</label>
       <MapComponent
         style={{ height: '60vh' }}
         doubleClickZoom={false}

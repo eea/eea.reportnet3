@@ -894,8 +894,22 @@ const DataViewer = withRouter(
 
     const saveMapGeoJsonDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
+        <div className={styles.pointLegendWrapper}>
+          <div className={styles.pointLegendItem}>
+            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
+            <div className={styles.pointLegendItemLabel}>
+              <label>Current point</label>
+            </div>
+          </div>
+          <div className={styles.pointLegendItem}>
+            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
+            <div className={styles.pointLegendItemLabel}>
+              <label>New point</label>
+            </div>
+          </div>
+        </div>
         <Button
-          className="p-button-animated-blink"
+          className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
           label={resources.messages['save']}
           icon={'check'}
