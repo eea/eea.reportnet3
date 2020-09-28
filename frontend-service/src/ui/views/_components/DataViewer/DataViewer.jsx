@@ -291,7 +291,6 @@ const DataViewer = withRouter(
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
-        parsedInmMapGeoJson.geometry.coordinates = MapUtils.lngLatToLatLng(parsedInmMapGeoJson.geometry.coordinates);
         onEditorSubmitValue(records.selectedMapCells, JSON.stringify(parsedInmMapGeoJson), records.selectedRecord);
       }
     }, [records.mapGeoJson]);

@@ -928,6 +928,44 @@ public class RulesServiceImplTest {
   }
 
   /**
+   * Update rule table test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateRuleTableTest() throws EEAException {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.TABLE);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      rulesServiceImpl.updateRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE_TABLE, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Update rule field record test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateRuleFieldRecordTest() throws EEAException {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.FIELD);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      rulesServiceImpl.updateRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Update rule exception test.
    *
    * @throws EEAException the EEA exception
@@ -1186,6 +1224,43 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Creates the rule table test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createRuleTableTest() throws EEAException {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.TABLE);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      rulesServiceImpl.createNewRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE_TABLE, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the rule field record test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createRuleFieldRecordTest() throws EEAException {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.FIELD);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      rulesServiceImpl.createNewRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD, e.getMessage());
+      throw e;
+    }
+  }
 
   /**
    * Delete rule high level like like test.

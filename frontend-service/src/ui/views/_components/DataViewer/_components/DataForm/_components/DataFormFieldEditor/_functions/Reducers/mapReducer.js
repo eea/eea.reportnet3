@@ -12,7 +12,7 @@ export const mapReducer = (state, { type, payload }) => {
     case 'OPEN_MAP':
       return { ...state, isMapOpen: true, mapCoordinates: payload.coordinates, newPointCRS: state.currentCRS };
     case 'SAVE_MAP_COORDINATES':
-      return { ...state, isMapOpen: false, currentCRS: payload.crs };
+      return { ...state, isMapOpen: false, currentCRS: payload.crs, isMapDisabled: false };
     case 'SET_MAP_NEW_POINT':
       return {
         ...state,

@@ -295,6 +295,17 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
+    if (!ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)
+        && EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
+        && StringUtils.isBlank(ruleVO.getSqlSentence())) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
+    }
+    if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType())
+            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition())) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
+    }
+
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setRuleId(new ObjectId());
     rule.setAutomatic(false);
@@ -569,7 +580,15 @@ public class RulesServiceImpl implements RulesService {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
+        && StringUtils.isBlank(ruleVO.getSqlSentence())) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
+    }
+    if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType())
+            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition())) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
+    }
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);

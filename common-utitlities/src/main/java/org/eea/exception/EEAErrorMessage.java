@@ -183,6 +183,14 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_CREATING_RULE: {@value}. */
   public static final String ERROR_CREATING_RULE = "Error creating rule";
 
+  /** The Constant ERROR_CREATING_RULE_TABLE: {@value}. */
+  public static final String ERROR_CREATING_RULE_TABLE =
+      "Error creating rule, IntegrityV0 or sqlSentence should be filled";
+
+  /** The Constant ERROR_CREATING_RULE_FIELD_RECORD: {@value}. */
+  public static final String ERROR_CREATING_RULE_FIELD_RECORD =
+      "Error creating rule, whenCondition or sqlSentence should be filled";
+
   /** The Constant ERROR_CREATING_RULE_NOT_CORRECT: {@value}. */
   public static final String ERROR_CREATING_RULE_NOT_CORRECT =
       "Error creating rule, the expression rule is not correct";
