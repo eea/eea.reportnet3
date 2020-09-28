@@ -345,6 +345,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String[] aux = datasetName.split("_");
       Long idDataset = Long.valueOf(aux[aux.length - 1]);
       jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
+      LOG.info("DS created with the id {} and idDatasetSchema {}", idDataset, idDatasetSchema);
     }
   }
 

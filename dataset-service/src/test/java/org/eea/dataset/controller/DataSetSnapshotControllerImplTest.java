@@ -374,7 +374,7 @@ public class DataSetSnapshotControllerImplTest {
   @Test
   public void historicReleasesReportingSuccessTest() throws Exception {
     when(datasetSnapshotService.getReleases(Mockito.anyLong())).thenReturn(new ArrayList<>());
-    assertEquals("not equals", dataSetSnapshotControllerImpl.historicReleases(1L),
+    assertEquals("not equals", dataSetSnapshotControllerImpl.historicReleases(1L, null),
         new ArrayList<>());
   }
 
@@ -383,7 +383,7 @@ public class DataSetSnapshotControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetSnapshotService)
         .getReleases(Mockito.anyLong());
     try {
-      dataSetSnapshotControllerImpl.historicReleases(1L);
+      dataSetSnapshotControllerImpl.historicReleases(1L, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;

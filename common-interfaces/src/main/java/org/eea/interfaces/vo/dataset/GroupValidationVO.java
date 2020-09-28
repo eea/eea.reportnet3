@@ -11,21 +11,18 @@ import lombok.ToString;
 
 
 /**
- * The Class ValidationVO.
+ * The Class GroupValidationVO.
  */
 @Getter
 @Setter
 @ToString
-public class ValidationVO implements Serializable {
+public class GroupValidationVO implements Serializable {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -5257537261370694057L;
 
   /** The type. */
   private String message;
-
-  /** The id. */
-  private Long id;
 
   /** The id rule. */
   private String idRule;
@@ -36,12 +33,15 @@ public class ValidationVO implements Serializable {
   /** The type entity. */
   private EntityTypeEnum typeEntity;
 
-  /** The validation date. */
-  private String validationDate;
+  /** The number of records. */
+  private Integer numberOfRecords;
+
+  /** The origin name. */
+  private String originName;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, idRule, levelError, message, typeEntity, validationDate);
+    return Objects.hash(idRule, levelError, message, numberOfRecords, originName, typeEntity);
   }
 
   @Override
@@ -52,10 +52,11 @@ public class ValidationVO implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ValidationVO other = (ValidationVO) obj;
-    return Objects.equals(id, other.id) && Objects.equals(idRule, other.idRule)
-        && levelError == other.levelError && Objects.equals(message, other.message)
-        && typeEntity == other.typeEntity && Objects.equals(validationDate, other.validationDate);
+    GroupValidationVO other = (GroupValidationVO) obj;
+    return Objects.equals(idRule, other.idRule) && levelError == other.levelError
+        && Objects.equals(message, other.message)
+        && Objects.equals(numberOfRecords, other.numberOfRecords)
+        && Objects.equals(originName, other.originName) && typeEntity == other.typeEntity;
   }
 
 }

@@ -9,11 +9,16 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 export const Validations = ({ datasetSchema, datasetSchemas, tabs, datasetId }) => {
   const validationContext = useContext(ValidationContext);
 
-  return validationContext.level === 'field' ? (
-    <FieldValidation tabs={tabs} datasetId={datasetId} />
-  ) : validationContext.level === 'row' ? (
-    <RowValidation tabs={tabs} datasetId={datasetId} />
-  ) : (
+
+  if (validationContext.level === 'field') {
+    return <FieldValidation tabs={tabs} datasetId={datasetId} />;
+  }
+
+  if (validationContext.level === 'row') {
+    return <RowValidation tabs={tabs} datasetId={datasetId} />;
+  }
+
+  return (
     <DatasetValidation
       tabs={tabs}
       datasetId={datasetId}

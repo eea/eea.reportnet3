@@ -29,7 +29,7 @@ public class FailedValidationsDatasetVO implements Serializable {
   private String nameDataSetSchema;
 
   /** The errors. */
-  private List<ErrorsValidationVO> errors;
+  private List<?> errors;
 
   /** The total errors. */
   private Long totalRecords;

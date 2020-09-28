@@ -2576,7 +2576,7 @@ public class DatasetServiceImpl implements DatasetService {
       type = DatasetTypeEnum.DESIGN;
     } else if (dataCollectionRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.COLLECTION;
-    } else if (datasetRepository.existsById(datasetId)) {
+    } else if (dataSetMetabaseRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.EUDATASET;
     }
     return type;
