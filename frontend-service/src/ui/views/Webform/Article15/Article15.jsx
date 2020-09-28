@@ -11,7 +11,7 @@ import { config } from 'conf';
 
 import styles from './Article15.module.scss';
 
-import article15 from '../article15.webform.json';
+import { tables } from '../article15.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -29,11 +29,9 @@ import { Article15Utils } from './_functions/Utils/Article15Utils';
 export const Article15 = ({ dataflowId, datasetId, state }) => {
   const { datasetSchema, tableSchemaNames } = state;
 
-  const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
+  const [article15State, article15Dispatch] = useReducer(article15Reducer, { allTables: [], data: [], isVisible: {} });
 
-  useEffect(() => {
-    initialLoad();
-  }, []);
+  useEffect(() => initialLoad(), []);
 
   const changeUrl = index => {
     return window.history.replaceState(
@@ -44,11 +42,12 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
   };
 
   const initialLoad = () => {
+    const allTables = tables.map(table => table.name);
     const parsedData = onLoadData();
 
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: { isVisible: Article15Utils.getWebformTabs(state.datasetSchemaAllTables), data: parsedData }
+      payload: { isVisible: Article15Utils.getWebformTabs(allTables), data: parsedData, allTables }
     });
   };
 
@@ -60,58 +59,54 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
       isVisible[name] = true;
     });
 
-    changeUrl(Article15Utils.getIndexFromName(state.datasetSchemaAllTables, name));
+    // changeUrl(Article15Utils.getIndexFromName(state.datasetSchemaAllTables, name));
     article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
   const onLoadData = () => {
     if (!isEmpty(datasetSchema)) {
-      const data = Article15Utils.mergeArrays(article15, datasetSchema.tables, 'webformTitle', 'tableSchemaName');
-
-      return data.map((element, i) => {
-        if (element.records) {
-          const fields = element.records[0].fields;
-          const webformFields = element.webformRecords[0].webformFields;
-          element.webformRecords[0].webformFields = Article15Utils.mergeArrays(
-            fields,
-            webformFields,
-            'name',
-            'fieldName'
-          );
-
-          return element;
-        } else return data[i];
-      });
+      return Article15Utils.mergeArrays(tables, datasetSchema.tables, 'name', 'tableSchemaName');
+      // return data.map((element, i) => {
+      //   if (element.records) {
+      //     const fields = element.records[0].fields;
+      //     const webformFields = element.webformRecords[0].webformFields;
+      //     element.webformRecords[0].webformFields = Article15Utils.mergeArrays(
+      //       fields,
+      //       webformFields,
+      //       'name',
+      //       'fieldName'
+      //     );
+      //     return element;
+      //   } else return data[i];
+      // });
     }
   };
 
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
-    const visibleContent = article15State.data.filter(table => table.webformTitle === visibleTitle)[0];
+    const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
 
     return <WebformContent webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
   };
 
   const renderWebFormHeaders = () => {
-    const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.webformTitle));
+    const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header);
 
     return article15State.data.map((webform, i) => {
-      const isCreated = headers.includes(webform.webformTitle);
+      const isCreated = headers.includes(webform.name);
 
       return (
         <Button
           className={`${styles.headerButton} ${
-            article15State.isVisible[webform.webformTitle] ? 'p-button-primary' : 'p-button-secondary'
+            article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
           }`}
           icon={!isCreated ? 'info' : webform.hasErrors ? 'warning' : null}
-          iconClasses={!article15State.isVisible[webform.webformTitle] ? (webform.hasErrors ? 'warning' : 'info') : ''}
-          // icon={webform.hasErrors ? 'warning' : null}
-          // iconClasses={!article15State.isVisible[webform.webformTitle] ? 'warning' : ''}
+          iconClasses={!article15State.isVisible[webform.title] ? (webform.hasErrors ? 'warning' : 'info') : ''}
           iconPos={'right'}
           key={i}
-          label={webform.webformTitle}
-          onClick={() => onChangeWebformTab(webform.webformTitle)}
+          label={webform.title}
+          onClick={() => onChangeWebformTab(webform.name)}
           style={{ padding: webform.hasErrors || !isCreated ? '0.2rem' : '0.5rem' }}
         />
       );

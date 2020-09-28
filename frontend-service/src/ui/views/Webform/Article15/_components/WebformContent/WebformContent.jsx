@@ -16,6 +16,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
 
 export const WebformContent = ({ datasetId, onTabChange, webform }) => {
+  console.log('webform', webform);
   const [isLoading, setIsLoading] = useState(true);
   const [refresh, setRefresh] = useState(false);
   const [webformData, setWebformData] = useState({});
@@ -153,7 +154,7 @@ export const WebformContent = ({ datasetId, onTabChange, webform }) => {
         )}
       </h3>
       {webformData.description ? <h3 className={styles.description}>{webformData.description}</h3> : <Fragment />}
-      {renderWebformRecords(webformData.multipleRecords)}
+      {/* {renderWebformRecords(webformData.multipleRecords)} */}
     </div>
   ) : (
     <Spinner style={{ top: 0, margin: '1rem' }} />

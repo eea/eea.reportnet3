@@ -27,11 +27,11 @@ const getUrlParamValue = param => {
 const getWebformTabs = (allTables = []) => {
   const initialValues = {};
 
-  const tables = allTables.map(table => table.tableSchemaName);
+  // const tables = allTables.map(table => table.tableSchemaName);
 
-  const value = getNameFromIndex(allTables, getUrlParamValue('tab'));
+  const value = allTables[0];
 
-  compact(tables).forEach(table => {
+  compact(allTables).forEach(table => {
     initialValues[table] = false;
     initialValues[value] = true;
   });

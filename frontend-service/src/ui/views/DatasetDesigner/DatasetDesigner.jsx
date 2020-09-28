@@ -124,7 +124,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
-    isWebformDataflow: false,
+    isWebformDataflow: true,
     viewType: { design: DatasetDesignerUtils.getUrlParamValue('design'), table: false, webform: false }
   });
 
@@ -235,12 +235,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
       type: 'GET_METADATA',
-      payload: {
-        metaData,
-        dataflowName: metaData.dataflow.name,
-        schemaName: metaData.dataset.name,
-        isWebformDataflow: metaData.dataflow.name === 'Webform -- DEVELOP'
-      }
+      payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
     });
   };
 
