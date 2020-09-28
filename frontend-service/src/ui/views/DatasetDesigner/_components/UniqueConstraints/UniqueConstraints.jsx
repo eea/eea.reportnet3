@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -41,6 +41,7 @@ export const UniqueConstraints = ({
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
     data: [],
+    filtered: false,
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -62,6 +63,20 @@ export const UniqueConstraints = ({
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
     />
+  );
+
+  const getFilteredState = value => constraintsDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+  const getPaginatorRecordsCount = () => (
+    <Fragment>
+      {constraintsState.filtered && constraintsState.data.length !== constraintsState.filteredData.length
+        ? `${resources.messages['filtered']} : ${constraintsState.filteredData.length} | `
+        : ''}
+      {resources.messages['totalRecords']} {constraintsState.data.length} {resources.messages['records'].toLowerCase()}
+      {constraintsState.filtered && constraintsState.data.length === constraintsState.filteredData.length
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
+        : ''}
+    </Fragment>
   );
 
   const isDataUpdated = value => constraintsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
@@ -134,56 +149,58 @@ export const UniqueConstraints = ({
   const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
   if (constraintsState.isLoading)
-  return (
-  <div className={styles.constraintsWithoutTable}>
-    <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
-  </div>);
+    return (
+      <div className={styles.constraintsWithoutTable}>
+        <div className={styles.spinner}>
+          <Spinner style={{ top: 0, left: 0 }} />
+        </div>
+      </div>
+    );
 
   return isEmpty(constraintsState.data) ? (
     <div className={styles.constraintsWithoutTable}>
-      <div className={styles.noConstraints}>
-        {resources.messages['noConstraints']}
-      </div>
+      <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
     </div>
   ) : (
-      <div className={styles.constraints}>
-        <Filters
-          className={'uniqueConstraints'}
-          data={constraintsState.data}
-          getFilteredData={onLoadFilteredData}
-          matchMode={true}
-          selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
-          selectOptions={['tableSchemaName', 'fieldData']}
-        />
+    <div className={styles.constraints}>
+      <Filters
+        className={'uniqueConstraints'}
+        data={constraintsState.data}
+        getFilteredData={onLoadFilteredData}
+        getFilteredSearched={getFilteredState}
+        matchMode={true}
+        selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
+        selectOptions={['tableSchemaName', 'fieldData']}
+      />
 
-        {!isEmpty(constraintsState.filteredData) ? (
-          <DataTable
-            autoLayout={true}
-            onRowClick={event => getManageUniqueConstraint(event.data)}
-            paginator={true}
-            paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
-            rows={10}
-            rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={constraintsState.filteredData.length}
-            value={constraintsState.filteredData}>
-            {renderColumns(constraintsState.filteredData)}
-          </DataTable>
-        ) : (
-          <div className={styles.emptyFilteredData}>{resources.messages['noConstraintsWithSelectedParameters']}</div>
-        )}
+      {!isEmpty(constraintsState.filteredData) ? (
+        <DataTable
+          autoLayout={true}
+          onRowClick={event => getManageUniqueConstraint(event.data)}
+          paginator={true}
+          paginatorRight={getPaginatorRecordsCount()}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={constraintsState.filteredData.length}
+          value={constraintsState.filteredData}>
+          {renderColumns(constraintsState.filteredData)}
+        </DataTable>
+      ) : (
+        <div className={styles.emptyFilteredData}>{resources.messages['noConstraintsWithSelectedParameters']}</div>
+      )}
 
-        {constraintsState.isDeleteDialogVisible && (
-          <ConfirmDialog
-            classNameConfirm={'p-button-danger'}
-            header={resources.messages['deleteUniqueConstraintHeader']}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
-            onConfirm={() => onDeleteConstraint()}
-            onHide={() => isDeleteDialogVisible(false)}
-            visible={constraintsState.isDeleteDialogVisible}>
-            {resources.messages['deleteUniqueConstraintConfirm']}
-          </ConfirmDialog>
-        )}
-      </div>
+      {constraintsState.isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['deleteUniqueConstraintHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteConstraint()}
+          onHide={() => isDeleteDialogVisible(false)}
+          visible={constraintsState.isDeleteDialogVisible}>
+          {resources.messages['deleteUniqueConstraintConfirm']}
+        </ConfirmDialog>
+      )}
+    </div>
   );
 };

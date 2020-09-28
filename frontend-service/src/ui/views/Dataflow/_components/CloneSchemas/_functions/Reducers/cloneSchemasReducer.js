@@ -6,6 +6,9 @@ export const cloneSchemasReducer = (state, { type, payload }) => {
     case 'FILTERED_DATA':
       return { ...state, filteredData: payload.data };
 
+    case 'IS_FILTERED':
+      return { ...state, filtered: payload.value };
+
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 

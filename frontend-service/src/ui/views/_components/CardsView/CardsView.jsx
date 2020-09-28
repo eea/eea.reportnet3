@@ -19,6 +19,7 @@ export const CardsView = ({
   onChangePagination,
   onSelectCard,
   pagination,
+  paginatorRightText,
   type
 }) => {
   const resources = useContext(ResourcesContext);
@@ -45,8 +46,6 @@ export const CardsView = ({
   const begin = Math.max(0, Math.ceil(currentPage * cardsPerPage));
   const end = begin + cardsPerPage;
   const currentPosts = cards.slice(begin, end);
-
-  const paginatorRightText = `${resources.messages[`total${contentType}`]}: ${data.length}`;
 
   const stylesCardWrap = { justifyContent: currentPosts.length % 5 === 0 ? 'space-between' : 'flex-start' };
 

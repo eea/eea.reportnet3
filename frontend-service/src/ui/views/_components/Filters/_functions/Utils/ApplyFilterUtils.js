@@ -70,14 +70,19 @@ const onApplyFilters = ({
   searchedKeys,
   selectedKeys,
   selectOptions = [],
+  checkedKeys,
+  checkboxOptions = [],
   state,
   value
 }) => [
   ...state.data.filter(data => {
-    if (selectOptions.includes(filter) && !isNil(data[filter])) {
+    if (
+      (selectOptions.includes(filter) && !isNil(data[filter])) ||
+      (checkboxOptions.includes(filter) && !isNil(data[filter]))
+    ) {
       return (
         onApplySelected(data, filter, state, value) &&
-        onCheckFilters(data, dateOptions, filteredKeys, searchedKeys, selectedKeys, state)
+        onCheckFilters(data, dateOptions, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state)
       );
     } else if (dateOptions.includes(filter)) {
       let dates;
@@ -87,10 +92,12 @@ const onApplyFilters = ({
             new Date(data[filter]).getTime() / 1000 <= dates[1] &&
             checkFilters(filteredKeys, data, state) &&
             checkSearched(state, data, searchedKeys) &&
-            checkSelected(state, data, selectedKeys)
+            checkSelected(state, data, selectedKeys) &&
+            checkSelected(state, data, checkedKeys)
         : checkFilters(filteredKeys, data, state) &&
             checkSearched(state, data, searchedKeys) &&
-            checkSelected(state, data, selectedKeys);
+            checkSelected(state, data, selectedKeys) &&
+            checkSelected(state, data, checkedKeys);
     } else {
       return (
         !isNil(data[filter]) &&
@@ -98,6 +105,7 @@ const onApplyFilters = ({
         checkFilters(filteredKeys, data, state) &&
         checkSearched(state, data, searchedKeys) &&
         checkSelected(state, data, selectedKeys) &&
+        checkSelected(state, data, checkedKeys) &&
         checkDates(state.filterBy[dateOptions], data[dateOptions])
       );
     }
@@ -117,7 +125,7 @@ const onApplyGroupFilters = (data, filter, matchMode, value) => {
   return resultData.includes(true);
 };
 
-const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKeys) => [
+const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKeys, checkedKeys) => [
   ...data.filter(data => {
     const searchedParams = !isEmpty(searchBy) ? searchBy : getSearchKeys(data);
     const filteredData = [];
@@ -127,7 +135,10 @@ const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKey
       }
     }
     return (
-      filteredData.includes(true) && checkFilters(inputKeys, data, state) && checkSelected(state, data, selectedKeys)
+      filteredData.includes(true) &&
+      checkFilters(inputKeys, data, state) &&
+      checkSelected(state, data, selectedKeys) &&
+      checkSelected(state, data, checkedKeys)
     );
   })
 ];
@@ -141,17 +152,18 @@ const onApplySelected = (data, filter, state, value) => {
   return true;
 };
 
-const onCheckFilters = (data, dateOptions, filteredKeys, searchedKeys, selectedKeys, state) => {
+const onCheckFilters = (data, dateOptions, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state) => {
   return (
     checkDates(state.filterBy[dateOptions], data[dateOptions]) &&
     checkFilters(filteredKeys, data, state) &&
     checkSearched(state, data, searchedKeys) &&
-    checkSelected(state, data, selectedKeys)
+    checkSelected(state, data, selectedKeys) &&
+    checkSelected(state, data, checkedKeys)
   );
 };
 
-const onClearLabelState = (input = [], select = [], date = [], dropDown = []) => {
-  const labelByGroup = input.concat(select, date, dropDown);
+const onClearLabelState = (input = [], select = [], date = [], dropDown = [], checkbox = []) => {
+  const labelByGroup = input.concat(select, date, dropDown, checkbox);
   return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
 };
 
