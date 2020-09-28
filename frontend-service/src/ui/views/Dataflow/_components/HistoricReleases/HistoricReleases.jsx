@@ -73,7 +73,6 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         payload: { data: response, filteredData: response, filtered: false }
       });
     } catch (error) {
-      console.error('error', error);
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
     } finally {
       isLoading(false);
