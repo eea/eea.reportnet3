@@ -1,11 +1,11 @@
-import { ReleaseConfig } from 'conf/domain/model/Release/index';
+import { HistoricReleaseConfig } from 'conf/domain/model/HistoricRelease';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-export const apiRelease = {
+export const apiHistoricRelease = {
   allHistoricReleases: async datasetId => {
     const response = await HTTPRequester.get({
-      url: getUrl(ReleaseConfig.loadAllHistoricReleases, {
+      url: getUrl(HistoricReleaseConfig.loadAllHistoricReleases, {
         datasetId
       })
     });
@@ -15,7 +15,7 @@ export const apiRelease = {
 
   allRepresentativeHistoricReleases: async (dataflowId, dataProviderId) => {
     const response = await HTTPRequester.get({
-      url: getUrl(ReleaseConfig.loadAllRepresentativeHistoricReleases, {
+      url: getUrl(HistoricReleaseConfig.loadAllRepresentativeHistoricReleases, {
         dataflowId,
         representativeId: dataProviderId
       })

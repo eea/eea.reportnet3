@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
-import difference from 'lodash/difference';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';

@@ -1,0 +1,1 @@
+export { apiHistoricRelease } from './ApiHistoricRelease';

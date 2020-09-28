@@ -19,7 +19,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { ReleaseService } from 'core/services/Release';
+import { HistoricReleaseService } from 'core/services/HistoricRelease';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
@@ -64,9 +64,9 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       let response = null;
       Array.isArray(datasetId)
         ? datasetId.length === 1
-          ? (response = await ReleaseService.allHistoricReleases(datasetId[0]))
-          : (response = await ReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
-        : (response = await ReleaseService.allHistoricReleases(datasetId));
+          ? (response = await HistoricReleaseService.allHistoricReleases(datasetId[0]))
+          : (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
+        : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
       response.sort((a, b) => b.releasedDate - a.releasedDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',

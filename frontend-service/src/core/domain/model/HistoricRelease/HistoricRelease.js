@@ -1,4 +1,4 @@
-export class Release {
+export class HistoricRelease {
   constructor({ countryCode, datasetId, datasetName, id, isDataCollectionReleased, isEUReleased, releasedDate } = {}) {
     this.countryCode = countryCode;
     this.datasetId = datasetId;
