@@ -87,12 +87,21 @@ const LinkSelector = withRouter(
         const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
         if (hasPK && table.tableSchemaId !== tableSchemaId) {
           const pkField = table.records[0].fields.filter(field => field.pk === true)[0];
-          return {
-            name: `${table.tableSchemaName} - ${pkField.name}`,
-            value: `${table.tableSchemaName} - ${pkField.fieldId}`,
-            referencedField: { fieldSchemaId: pkField.fieldId, datasetSchemaId: datasetSchema.datasetSchemaId },
-            disabled: false
-          };
+          if (pkField.type !== 'POINT') {
+            return {
+              name: `${table.tableSchemaName} - ${pkField.name}`,
+              value: `${table.tableSchemaName} - ${pkField.fieldId}`,
+              referencedField: { fieldSchemaId: pkField.fieldId, datasetSchemaId: datasetSchema.datasetSchemaId },
+              disabled: false
+            };
+          } else {
+            return {
+              name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
+              value: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
+              referencedField: null,
+              disabled: true
+            };
+          }
         } else if (table.tableSchemaId === tableSchemaId) {
           return {
             name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,

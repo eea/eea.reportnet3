@@ -3,6 +3,7 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'reac
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
 
 import styles from './Filters.module.scss';
 
@@ -27,6 +28,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
+  checkboxOptions,
   className,
   data = [],
   dateOptions,
@@ -34,6 +36,7 @@ export const Filters = ({
   dropdownOptions,
   filterByList,
   getFilteredData,
+  getFilteredSearched,
   inputOptions,
   matchMode,
   searchAll,
@@ -49,13 +52,18 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
+    checkboxes: [],
     data: data,
     filterBy: {},
+    filtered: false,
     filteredData: data,
+    filteredSearched: false,
     labelAnimations: {},
     matchMode: true,
     orderBy: {},
-    searchBy: ''
+    property: '',
+    searchBy: '',
+    searched: false
   });
 
   useEffect(() => {
@@ -70,7 +78,45 @@ export const Filters = ({
     onReApplyFilters();
   }, [filterState.matchMode]);
 
+  useEffect(() => {
+    if (filterState.filtered) {
+      getFilteredValue();
+    }
+  }, [filterState.filterBy]);
+
+  useEffect(() => {
+    getFilteredStateValue(filterState.filteredState);
+  }, [filterState.filtered, filterState.searched]);
+
+  useEffect(() => {
+    getFilteredSearched(filterState.filteredSearched);
+  }, [filterState.filteredSearched]);
+
+  useEffect(() => {
+    getChangedCheckboxes(filterState.property);
+  }, [JSON.stringify(filterState.checkboxes), filterState.property]);
+
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
+
+  const getCheckboxFilterState = property => {
+    const [checkBox] = filterState.checkboxes.filter(checkbox => checkbox.property === property);
+    return isNil(checkBox) ? false : checkBox.isChecked;
+  };
+
+  const getFilteredStateValue = () => {
+    const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
+    filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
+  };
+
+  const getFilteredValue = () => {
+    const filteredByValues = Object.values(filterState.filterBy);
+    const filteredByValuesState = filteredByValues.map(filterBy =>
+      isNull(filterBy) ? false : filterBy.length === 0 ? false : true
+    );
+    const filteredValue = filteredByValuesState.includes(true) ? true : false;
+
+    filterDispatch({ type: 'FILTERED', payload: { filteredValue } });
+  };
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
@@ -80,6 +126,7 @@ export const Filters = ({
       selectOptions,
       dateOptions,
       dropdownOptions,
+      checkboxOptions,
       filterByList
     );
     const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
@@ -88,13 +135,28 @@ export const Filters = ({
       selectOptions,
       dateOptions,
       dropdownOptions,
+      checkboxOptions,
       filterState.filterBy
     );
-    const initialOrderBy = SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions);
+    const initialOrderBy = SortUtils.getOrderInitialState(
+      inputOptions,
+      selectOptions,
+      dateOptions,
+      dropdownOptions,
+      checkboxOptions
+    );
+    const initialCheckboxes = FiltersUtils.getCheckboxFilterInitialState(checkboxOptions);
 
     filterDispatch({
       type: 'INITIAL_STATE',
-      payload: { initialData, initialFilterBy, initialFilteredData, initialLabelAnimations, initialOrderBy }
+      payload: {
+        initialData,
+        initialFilterBy,
+        initialFilteredData,
+        initialLabelAnimations,
+        initialOrderBy,
+        initialCheckboxes
+      }
     });
   };
 
@@ -102,15 +164,45 @@ export const Filters = ({
     filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
+  const getChangedCheckboxes = property => {
+    filterState.checkboxes.forEach(checkbox => {
+      checkbox.property === property && onFilterData(checkbox.property, [checkbox.isChecked]);
+    });
+  };
+
+  const onChangeCheckboxFilter = property => {
+    filterDispatch({ type: 'ON_CHECKBOX_FILTER', payload: { property } });
+  };
+
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FiltersUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
+        filterBy: FiltersUtils.getFilterInitialState(
+          data,
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          checkboxOptions
+        ),
         filteredData: cloneDeep(data),
-        labelAnimations: ApplyFilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
-        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions),
-        searchBy: ''
+        labelAnimations: ApplyFilterUtils.onClearLabelState(
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          checkboxOptions
+        ),
+        orderBy: SortUtils.getOrderInitialState(
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          checkboxOptions
+        ),
+        searchBy: '',
+        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions)
       }
     });
   };
@@ -119,6 +211,7 @@ export const Filters = ({
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+    const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
       dropdownOptions,
@@ -127,6 +220,8 @@ export const Filters = ({
       searchedKeys,
       selectedKeys,
       selectOptions,
+      checkedKeys,
+      checkboxOptions,
       state: filterState,
       value
     });
@@ -138,7 +233,7 @@ export const Filters = ({
     const sortedData = SortUtils.onSortData([...filterState.data], order, property);
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
     const orderBy = order === 0 ? -1 : order;
-    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
+    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
 
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
   };
@@ -146,16 +241,19 @@ export const Filters = ({
   const onSearchData = value => {
     const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const checkedKeys = FiltersUtils.getSelectedKeys(filterState, '', checkboxOptions);
     const searchedValues = ApplyFilterUtils.onApplySearch(
       filterState.data,
       searchBy,
       value,
       filterState,
       inputKeys,
-      selectedKeys
+      selectedKeys,
+      checkedKeys
     );
+    const searched = isEmpty(value) ? false : true;
 
-    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
+    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value, searched } });
   };
 
   const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
@@ -166,7 +264,9 @@ export const Filters = ({
       const filter = keys[index];
       const value = filterState.filterBy[filter];
 
-      if (!isEmpty(value)) onFilterData(filter, filterState.filterBy[filter]);
+      if (!isEmpty(value)) {
+        onFilterData(filter, filterState.filterBy[filter]);
+      }
     }
   };
 
@@ -232,6 +332,29 @@ export const Filters = ({
       </span>
     </Fragment>
   );
+
+  const renderCheckboxFilter = (property, i) => {
+    return (
+      <span key={i} className={styles.checkboxWrap}>
+        <div>
+          <span className={styles.switchTextInput}>{resources.messages[property]}</span>
+          <span className={styles.checkbox}>
+            <Checkbox
+              id={property}
+              inputId={property}
+              isChecked={getCheckboxFilterState(property)}
+              label={property}
+              onChange={() => onChangeCheckboxFilter(property)}
+              style={{ marginRight: '50px' }}
+            />
+            <label htmlFor={property} className="srOnly">
+              {resources.messages[property]}
+            </label>
+          </span>
+        </div>
+      </span>
+    );
+  };
 
   const renderDropdown = (property, i) => (
     <span key={i} className={`${styles.dataflowInput}`}>
@@ -368,7 +491,7 @@ export const Filters = ({
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
       {matchMode && renderCheckbox()}
-
+      {checkboxOptions && checkboxOptions.map((option, i) => renderCheckboxFilter(option, i))}
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
           <Button
@@ -381,7 +504,7 @@ export const Filters = ({
           <Fragment />
         )}
 
-        {(inputOptions || selectOptions || dateOptions) && (
+        {(inputOptions || selectOptions || dateOptions || checkboxOptions) && (
           <Button
             className={`${
               sendData ? 'p-button-secondary' : 'p-button-secondary'
