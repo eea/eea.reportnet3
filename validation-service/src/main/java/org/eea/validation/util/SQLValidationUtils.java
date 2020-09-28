@@ -136,8 +136,8 @@ public class SQLValidationUtils {
 
       Validation validation = new Validation();
       validation.setIdRule(rule.getRuleId().toString());
-      validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(0)));
-      validation.setMessage(rule.getThenCondition().get(1));
+      validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(1)));
+      validation.setMessage(rule.getThenCondition().get(0));
       validation.setTypeEntity((rule.getType()));
       validation.setValidationDate(new Date().toString());
       TableValue table = tableRepository.findById(tableToEvaluate.getId()).orElse(new TableValue());
