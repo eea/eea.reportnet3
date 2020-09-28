@@ -1233,6 +1233,7 @@ public class RulesServiceImplTest {
   public void createRuleTableTest() throws EEAException {
     RuleVO ruleVO = new RuleVO();
     ruleVO.setType(EntityTypeEnum.TABLE);
+    ruleVO.setRuleName("name");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     try {
@@ -1252,6 +1253,7 @@ public class RulesServiceImplTest {
   public void createRuleFieldRecordTest() throws EEAException {
     RuleVO ruleVO = new RuleVO();
     ruleVO.setType(EntityTypeEnum.FIELD);
+    ruleVO.setRuleName("name");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     try {
