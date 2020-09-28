@@ -13,7 +13,14 @@ import { DataTable } from 'ui/views/_components/DataTable';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagination, pagination }) => {
+export const TableView = ({
+  checkedObligation,
+  data,
+  onSelectObl,
+  onChangePagination,
+  pagination,
+  paginatorRightText
+}) => {
   const resources = useContext(ResourcesContext);
 
   const headerTableTemplate = obligation => {
@@ -49,8 +56,6 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
       />
     </div>
   );
-
-  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
   const renderCheckColumn = (
     <Column

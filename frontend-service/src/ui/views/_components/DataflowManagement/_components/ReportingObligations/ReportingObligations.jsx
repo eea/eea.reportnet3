@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -30,6 +30,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     data: [],
     filterBy: { expirationDate: [], countries: {}, issues: {}, organizations: {} },
     filteredData: [],
+    filteredSearched: false,
     isLoading: false,
     issues: [],
     oblChoosed: {},
@@ -48,6 +49,24 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   useEffect(() => {
     if (getObligation) getObligation(reportingObligationState.oblChoosed);
   }, [reportingObligationState.oblChoosed]);
+
+  const getPaginatorRecordsCount = () => (
+    <Fragment>
+      {reportingObligationState.filteredSearched &&
+      reportingObligationState.searchedData.length !== reportingObligationState.filteredData.length
+        ? `${resources.messages['filtered']} : ${reportingObligationState.searchedData.length} | `
+        : ''}
+      {resources.messages['totalRecords']} {reportingObligationState.data.length}{' '}
+      {resources.messages['records'].toLowerCase()}
+      {reportingObligationState.filteredSearched &&
+      reportingObligationState.searchedData.length === reportingObligationState.filteredData.length
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
+        : ''}
+    </Fragment>
+  );
+
+  const getFilteredSearched = value =>
+    reportingObligationDispatch({ type: 'IS_FILTERED_SEARCHED', payload: { value } });
 
   const isFiltered = ReportingObligationUtils.isFiltered(reportingObligationState.filterBy);
 
@@ -131,6 +150,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         onChangePagination={onChangePagination}
         onSelectObl={onSelectObl}
         pagination={reportingObligationState.pagination}
+        paginatorRightText={getPaginatorRecordsCount()}
       />
     ) : (
       <CardsView
@@ -141,6 +161,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         onChangePagination={onChangePagination}
         onSelectCard={onSelectObl}
         pagination={reportingObligationState.pagination}
+        paginatorRightText={getPaginatorRecordsCount()}
       />
     );
 
@@ -156,7 +177,12 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
             : 'space-between'
       }}>
       <div className={styles.repOblTools}>
-        <Filters data={reportingObligationState.filteredData} getFilteredData={onLoadSearchedData} searchAll />
+        <Filters
+          data={reportingObligationState.filteredData}
+          getFilteredData={onLoadSearchedData}
+          getFilteredSearched={getFilteredSearched}
+          searchAll
+        />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
           <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
@@ -171,6 +197,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           dropDownList={parsedFilterList}
           dropdownOptions={['countries', 'issues', 'organizations']}
           filterByList={reportingObligationState.filterBy}
+          getFilteredSearched={getFilteredSearched}
           sendData={onLoadReportingObligations}
         />
       </div>
