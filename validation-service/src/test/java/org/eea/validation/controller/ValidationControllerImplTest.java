@@ -221,8 +221,13 @@ public class ValidationControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void getGroupFailedValidationsByIdDatasetExceptionTest() throws EEAException {
-    validationController.getGroupFailedValidationsByIdDataset(null, 1, 10, null, null, null, null,
-        "");
+    try {
+      validationController.getGroupFailedValidationsByIdDataset(null, 1, 10, null, null, null, null,
+          "");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getCause());
+    }
   }
 
   /**

@@ -1,6 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -101,8 +102,8 @@ public class ValidationRepositoryPaginatedImplTest {
   @Test
   public void findGroupRecordsByFilterTest() {
     Mockito.when(entityManager.getDelegate()).thenReturn(session);
-    validationRepositoryPaginatedImpl.findGroupRecordsByFilter(1L, levelErrorsFilter,
-        typeEntityEnum, "Characterisation,SeasionalPeriod", pageable, "message", true, true);
+    assertNull(validationRepositoryPaginatedImpl.findGroupRecordsByFilter(1L, levelErrorsFilter,
+        typeEntityEnum, "Characterisation,SeasionalPeriod", pageable, "message", true, true));
   }
 
 
