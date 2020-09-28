@@ -413,7 +413,7 @@ const DataFormFieldEditor = ({
           }
           style={{ width: '50%' }}
           type="text"
-          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''}
+          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates : ''}
         />
       </div>
 
