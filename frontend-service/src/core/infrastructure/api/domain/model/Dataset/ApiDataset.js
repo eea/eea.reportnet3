@@ -276,6 +276,33 @@ export const apiDataset = {
     });
     return response.data;
   },
+  groupedErrorsById: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  ) => {
+    if (asc === -1) {
+      asc = 0;
+    }
+    const response = await HTTPRequester.get({
+      url: getUrl(DatasetConfig.listGroupedValidations, {
+        datasetId: datasetId,
+        pageNum: pageNum,
+        pageSize: pageSize,
+        sortField: sortField,
+        asc: asc,
+        levelErrorsFilter: levelErrorsFilter,
+        typeEntitiesFilter: typeEntitiesFilter,
+        originsFilter: originsFilter
+      })
+    });
+    return response.data;
+  },
   orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
     const response = await HTTPRequester.update({
       url: getUrl(DatasetConfig.orderFieldSchemaDesign, {

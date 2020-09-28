@@ -120,7 +120,7 @@ const ValidationViewer = React.memo(
           fetchData('', sortOrder, 0, numberRows, [], [], []);
         }
       }
-    }, [visible]);
+    }, [visible, grouped]);
 
     const columnStyles = columnId => {
       const style = {};
@@ -147,17 +147,33 @@ const ValidationViewer = React.memo(
     ) => {
       setIsLoading(true);
 
-      const datasetErrors = await DatasetService.errorsById(
-        datasetId,
-        Math.floor(firstRow / numberRows),
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        originsFilter
-      );
+      let datasetErrors = {};
 
+      if (grouped) {
+        console.log('GROUPED');
+        datasetErrors = await DatasetService.groupedErrorsById(
+          datasetId,
+          Math.floor(firstRow / numberRows),
+          numberRows,
+          sortField,
+          sortOrder,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          originsFilter
+        );
+      } else {
+        console.log('NON GROUPED');
+        datasetErrors = await DatasetService.errorsById(
+          datasetId,
+          Math.floor(firstRow / numberRows),
+          numberRows,
+          sortField,
+          sortOrder,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          originsFilter
+        );
+      }
       setTotalRecords(datasetErrors.totalErrors);
       setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
       setFetchedData(datasetErrors.errors);

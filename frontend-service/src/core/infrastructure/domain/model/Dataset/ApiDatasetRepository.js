@@ -265,6 +265,53 @@ const getAllLevelErrorsFromRuleValidations = rulesDTO =>
     ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
   ]);
 
+const groupedErrorsById = async (
+  datasetId,
+  pageNum,
+  pageSize,
+  sortField,
+  asc,
+  levelErrorsFilter,
+  typeEntitiesFilter,
+  originsFilter
+) => {
+  const datasetErrorsDTO = await apiDataset.groupedErrorsById(
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  );
+  const dataset = new Dataset({
+    datasetId: datasetErrorsDTO.idDataset,
+    datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
+    datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
+    totalErrors: datasetErrorsDTO.totalRecords,
+    totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
+  });
+
+  const errors = datasetErrorsDTO.errors.map(
+    datasetErrorDTO =>
+      datasetErrorDTO &&
+      new DatasetError({
+        entityType: datasetErrorDTO.typeEntity,
+        levelError: datasetErrorDTO.levelError,
+        message: datasetErrorDTO.message,
+        objectId: datasetErrorDTO.idObject,
+        tableSchemaId: datasetErrorDTO.idTableSchema,
+        tableSchemaName: datasetErrorDTO.nameTableSchema,
+        validationDate: datasetErrorDTO.validationDate,
+        validationId: datasetErrorDTO.idValidation
+      })
+  );
+
+  dataset.errors = errors;
+  return dataset;
+};
+
 const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
 
@@ -554,6 +601,7 @@ export const ApiDatasetRepository = {
   exportTableDataById,
   getMetaData,
   getReferencedFieldValues,
+  groupedErrorsById,
   orderFieldSchema,
   orderTableSchema,
   schemaById,
