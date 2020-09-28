@@ -1,6 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.Validation;
@@ -41,4 +42,22 @@ public interface ValidationRepositoryPaginated {
    */
   Long countRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
       List<EntityTypeEnum> typeEntitiesFilter, String originsFilter);
+
+
+  /**
+   * Find group records by filter.
+   *
+   * @param datasetId the dataset id
+   * @param levelErrorsFilter the level errors filter
+   * @param typeEntitiesFilter the type entities filter
+   * @param originsFilter the origins filter
+   * @param pageable the pageable
+   * @param headerField the header field
+   * @param asc the asc
+   * @param paged the paged
+   * @return the list
+   */
+  List<GroupValidationVO> findGroupRecordsByFilter(Long datasetId,
+      List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
+      String originsFilter, Pageable pageable, String headerField, Boolean asc, boolean paged);
 }
