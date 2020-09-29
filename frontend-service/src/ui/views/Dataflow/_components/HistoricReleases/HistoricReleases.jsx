@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 
 import isEmpty from 'lodash/isEmpty';
+import uniq from 'lodash/uniq';
 
 import styles from './HistoricReleases.module.scss';
 
@@ -29,6 +30,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
+    countryCodes: [],
     data: [],
     filteredData: [],
     filtered: false,
@@ -38,6 +40,11 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   useEffect(() => {
     onLoadHistoricReleases();
   }, []);
+
+  const getCountryCode = historicReleases => {
+    const countryCodes = uniq(historicReleases.map(historicRelease => historicRelease.countryCode));
+    historicReleasesDispatch({ type: 'GET_COUNTRY_CODES', payload: { countryCodes } });
+  };
 
   const getFiltered = value => historicReleasesDispatch({ type: 'IS_FILTERED', payload: { value } });
 
@@ -72,6 +79,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         type: 'INITIAL_LOAD',
         payload: { data: response, filteredData: response, filtered: false }
       });
+      getCountryCode(response);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
     } finally {
@@ -239,6 +247,15 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
           selectOptions={['datasetName']}
+        />
+      )}
+
+      {historicReleasesState.countryCodes.length > 1 && (
+        <Filters
+          data={historicReleasesState.data}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFiltered}
+          selectOptions={['countryCode']}
         />
       )}
 
