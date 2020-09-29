@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 
 const checkRSID = rsid => {
@@ -14,6 +15,8 @@ const checkValidCoordinates = coordinates => {
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.indexOf(',') === -1) return false;
+  } else {
+    if (isEmpty(coordinates)) return false;
   }
   let isValid = true;
   const splittedCoordinates = Array.isArray(coordinates) ? coordinates : coordinates.split(',');
@@ -97,10 +100,14 @@ const printCoordinates = (data, isGeoJson = true) => {
       }
     }
   } else {
-    const splittedCoordinate = Array.isArray(data) ? data : data.replace(', ', ',').split(',');
-    return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
-      isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
-    }}`;
+    if (!isNil(data)) {
+      const splittedCoordinate = Array.isArray(data) ? data : data.replace(', ', ',').split(',');
+      return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
+        isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
+      }}`;
+    } else {
+      return `{Latitude: , Longitude: }`;
+    }
   }
 };
 
