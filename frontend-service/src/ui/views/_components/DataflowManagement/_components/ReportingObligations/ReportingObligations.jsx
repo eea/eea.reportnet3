@@ -19,6 +19,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
+import { RodUrl } from 'core/infrastructure/RodUrl';
 
 export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const notificationContext = useContext(NotificationContext);
@@ -129,7 +130,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   const onLoadSearchedData = data => reportingObligationDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
-  const onOpenObligation = id => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${id}`);
+  const onOpenObligation = id => window.open(`${RodUrl.obligations}${id}`);
 
   const onSelectObl = rowData => {
     const oblChoosed = { id: rowData.id, title: rowData.title };

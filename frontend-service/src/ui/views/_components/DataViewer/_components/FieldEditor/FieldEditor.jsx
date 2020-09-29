@@ -126,7 +126,7 @@ const FieldEditor = ({
     setLinkItemsOptions(linkItems);
   };
 
-  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
+  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
@@ -136,10 +136,16 @@ const FieldEditor = ({
         return JSON.stringify(geoJson);
       } else {
         setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
-        geoJson.geometry.coordinates = MapUtils.parseCoordinates(
-          coordinates.replace(', ', ',').split(','),
-          parseToFloat
-        );
+        if (checkCoordinates) {
+          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates)
+            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
+            : [];
+        } else {
+          geoJson.geometry.coordinates = MapUtils.parseCoordinates(
+            coordinates.replace(', ', ',').split(','),
+            parseToFloat
+          );
+        }
 
         return JSON.stringify(geoJson);
       }
@@ -273,6 +279,7 @@ const FieldEditor = ({
                     e.target.value,
                     currentCRS.value,
                     false,
+                    false,
                     false
                   )
                 )
@@ -289,7 +296,8 @@ const FieldEditor = ({
                   e.target.value,
                   currentCRS.value,
                   false,
-                  true
+                  true,
+                  false
                 );
                 onEditorKeyChange(
                   cells,
@@ -303,7 +311,8 @@ const FieldEditor = ({
                     e.target.value,
                     currentCRS.value,
                     false,
-                    true
+                    true,
+                    false
                   )
                 );
               }}

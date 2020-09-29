@@ -1,114 +1,222 @@
 .mainTextWrapper {
   display: flex;
   justify-content: space-between;
-  .frontText {
-    width: 75%;
-    padding: 2rem;
-    -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
-    @media (max-width: 320px) {
-      padding: 1rem;
-    }
+  background-color: var(--public-page-header-bg);
+  margin-top: 6px;
+  width: 100vw;
+  :global .rep-container {
+    max-width: 97%;
   }
-  .sideBar {
-    width: 22%;
-    display: flex;
-    flex-direction: column;
-    .contactBox {
-      width: 100%;
-      border-radius: 5px;
-      padding: 1rem;
-      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-      margin-right: 1rem;
-      background-color: #000;
-      color: white;
-      cursor: pointer;
-      margin-bottom: 1rem;
-      a {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: var(--white);
-        height: 100%;
-        .iconWrapper {
-          width: 75px;
-          height: 75px;
-          border: 2px solid #fff;
-          border-radius: 50px;
+  .pageContent {
+    .frontText {
+      color: var(--white);
+      display: grid;
+      grid-template-columns: 45% 45% 10%;
+      grid-template-rows: 100%;
+      .text {
+        grid-column: 1/2;
+        h2 {
+          font-size: 1.2rem;
+          color: var(--white);
+          border-bottom: 1px solid var(--white);
+          padding-bottom: 1.2rem;
+        }
+        .columnsWrapper {
           display: flex;
-          justify-content: center;
-          align-items: center;
-          .emailIcon {
-            width: 25px;
-            height: 25px;
-          }
-        }
-        p {
-          text-align: center;
-          margin: 0px;
-        }
-      }
-      &:hover {
-        box-shadow: var(--card-item-box-shadow-hover);
-        transform: scale(1.02, 1.02);
-        transition: transform 0.2s ease;
-      }
-    }
-    .linkBox {
-      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-      border-radius: 5px;
-      padding: 1rem;
-      background-color: var(--white);
-      color: var(--main-font-color);
-      display: flex;
-      flex-direction: column;
-      flex: 1 auto;
-      h3 {
-        margin-bottom: 0;
-      }
-      ul {
-        font-weight: bold;
-        li {
-          margin-bottom: 0.5rem;
-          a {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            color: var(--main-font-color);
-            text-decoration: none;
-            svg {
-              height: 0.75rem;
+          justify-content: space-between;
+          .column {
+            width: 45%;
+            a {
+              color: var(--white) !important;
+              &:hover {
+                color: var(--white) !important;
+              }
+              &:visited {
+                color: var(--white) !important;
+              }
             }
           }
         }
       }
-    }
-  }
-  @media (max-width: 1279px) {
-    flex-direction: column;
-    justify-content: flex-start;
-    .frontText {
-      width: 100%;
-    }
-    .sideBar {
-      margin-top: 1rem;
-      width: 100%;
-      flex-direction: row;
-      .contactBox {
-        width: 49%;
-        margin-bottom: 0px;
+      .illustration {
+        grid-column: 2/3;
+        img {
+          max-width: 100%;
+        }
       }
-    }
-  }
-  @media (max-width: 600px) {
-    .sideBar {
-      flex-direction: column;
-      .contactBox {
-        width: 100%;
-        margin-bottom: 1rem;
+      .sideBar {
+        grid-column: 3/4;
+        display: flex;
+        flex-direction: column;
+        .contactBox {
+          width: 100%;
+          padding: 1rem;
+          margin-right: 1rem;
+          color: var(--white);
+          opacity: 0.7;
+          cursor: pointer;
+          margin-bottom: 1rem;
+          .iconWrapper {
+            .emailIcon {
+              width: 25px;
+              height: 25px;
+              font-weight: lighter;
+            }
+          }
+          h4 {
+            font-size: 0.8rem;
+            margin-top: 0px;
+            margin: 0 0 0.5rem 0;
+          }
+          p {
+            font-size: 0.8rem;
+            margin: 0px;
+          }
+          a {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: var(--white);
+            height: 100%;
+
+            p {
+              margin: 0px;
+            }
+          }
+        }
+        .linkBox {
+          padding: 1rem;
+          display: flex;
+          flex-direction: column;
+          flex: 1 auto;
+          color: var(--white);
+          opacity: 0.7;
+          font-size: 0.8rem;
+          .iconWrapper {
+            .emailIcon {
+              width: 25px;
+              height: 25px;
+              font-weight: lighter;
+            }
+          }
+          h4 {
+            margin: 0 0 0.5rem 0;
+          }
+          ul {
+            padding: 0 0 0 1rem;
+            margin: 0;
+            li {
+              margin-bottom: 0;
+              a {
+                display: flex;
+                align-items: center;
+                color: var(--white);
+                text-decoration: none;
+              }
+            }
+          }
+        }
+      }
+      @media (max-width: 1505px) {
+        grid-template-columns: 45% 55%;
+        grid-template-rows: 65% 35%;
+        .text {
+          grid-row: 1/2;
+        }
+        .illustration {
+          grid-row: 1/3;
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-end;
+          overflow: hidden;
+          img {
+            height: 100%;
+            object-fit: fill;
+          }
+        }
+        .sideBar {
+          grid-column: 1/2;
+          grid-row: 2/3;
+          flex-direction: row;
+          padding-top: 1rem;
+          .contactBox {
+            width: 50%;
+            margin-bottom: 0px;
+          }
+          .linkBox {
+            width: 50%;
+          }
+        }
+      }
+      @media (max-width: 1314px) {
+        justify-content: space-between;
+        display: flex;
+        .text {
+          width: 80%;
+        }
+        .illustration {
+          display: none;
+          img {
+            display: none;
+          }
+        }
+        .sideBar {
+          flex-direction: column;
+          .contactBox {
+            margin-bottom: 0px;
+          }
+          .linkBox {
+            width: 50%;
+          }
+        }
+      }
+      @media (max-width: 903px) {
+        flex-direction: column;
+        display: flex;
+        .text {
+          width: 100%;
+        }
+        .illustration {
+          display: none;
+          img {
+            display: none;
+          }
+        }
+        .sideBar {
+          flex-direction: row;
+          justify-content: space-between;
+          .contactBox {
+            width: 50%;
+            margin-bottom: 0px;
+          }
+          .linkBox {
+            width: 40%;
+          }
+        }
+      }
+      @media (max-width: 736px) {
+        padding: 1rem;
+        .text {
+          .columnsWrapper {
+            flex-direction: column;
+            .column {
+              width: 100%;
+            }
+          }
+        }
+      }
+      @media (max-width: 736px) {
+        .sideBar {
+          flex-direction: column;
+          justify-content: space-between;
+          .contactBox {
+            width: 100%;
+            margin-bottom: 0px;
+          }
+          .linkBox {
+            width: 100%;
+          }
+        }
       }
     }
   }
@@ -128,6 +236,7 @@
 }
 .otherPortals {
   width: 100%;
+  padding-bottom: 4rem;
   .portalList {
     display: flex;
     justify-content: flex-start;
