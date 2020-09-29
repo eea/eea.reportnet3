@@ -48,46 +48,46 @@ export const PublicFrontpage = () => {
               <div className={styles.illustration}>
                 <img src={Illustration} />
               </div>
-            </div>
-            <div className={styles.sideBar}>
-              <div className={`${styles.contactBox} ${styles.sideBarItem}`}>
-                <div className={styles.iconWrapper}>
-                  <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('envelope')} />
+              <div className={styles.sideBar}>
+                <div className={`${styles.contactBox} ${styles.sideBarItem}`}>
+                  <div className={styles.iconWrapper}>
+                    <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('envelope')} />
+                  </div>
+                  <h4>Need any help?</h4>
+                  <p>Please contact us at</p>
+                  <p>
+                    <a href="mailto:helpdesk@eionet.europa.eu">helpdesk@eionet.europa.eu</a>
+                  </p>
                 </div>
-                <h4>Need any help?</h4>
-                <p>Please contact us at</p>
-                <p>
-                  <a href="mailto:helpdesk@eionet.europa.eu">helpdesk@eionet.europa.eu</a>
-                </p>
-              </div>
-              <div className={`${styles.linkBox} ${styles.sideBarItem}`}>
-                <div className={styles.iconWrapper}>
-                  <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('lightPdf')} />
+                <div className={`${styles.linkBox} ${styles.sideBarItem}`}>
+                  <div className={styles.iconWrapper}>
+                    <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('lightPdf')} />
+                  </div>
+                  <h4>Support documents:</h4>
+                  <ul>
+                    <li>
+                      <a
+                        href="https://www.eionet.europa.eu/reportnet/docs/howto_login-reportnet3-0-v1-0.pdf"
+                        target="_blank">
+                        Login
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.eionet.europa.eu/reportnet/docs/howto_reporter-reportnet3-0-v1-0.pdf"
+                        target="_blank">
+                        Reporter
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.eionet.europa.eu/reportnet/docs/howto_requester-reportnet3-0-v1-0.pdf"
+                        target="_blank">
+                        Requester
+                      </a>
+                    </li>
+                  </ul>
                 </div>
-                <h4>Support documents:</h4>
-                <ul>
-                  <li>
-                    <a
-                      href="https://www.eionet.europa.eu/reportnet/docs/howto_login-reportnet3-0-v1-0.pdf"
-                      target="_blank">
-                      Login
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.eionet.europa.eu/reportnet/docs/howto_reporter-reportnet3-0-v1-0.pdf"
-                      target="_blank">
-                      Reporter
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.eionet.europa.eu/reportnet/docs/howto_requester-reportnet3-0-v1-0.pdf"
-                      target="_blank">
-                      Requester
-                    </a>
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
