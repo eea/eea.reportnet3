@@ -927,7 +927,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   public void updateSnapshotEURelease(Long datasetId) {
-    // We have to set for the snapshots actives in this moment in the dataset, the field eu_released
+    // We have to set for the active snapshots in this moment in the dataset, the field eu_released
     // to true, and the rest to false
     List<Snapshot> snapshots =
         snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(datasetId);
@@ -935,7 +935,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         .map(Snapshot::getId).collect(Collectors.toList());
     List<Long> inactiveSnapshots = snapshots.stream().filter(snapshot -> !snapshot.getDcReleased())
         .map(Snapshot::getId).collect(Collectors.toList());
-    snapshotRepository.releaseEUSnapshots(activeSnapshots, inactiveSnapshots);
+    if (!inactiveSnapshots.isEmpty()) {
+      snapshotRepository.releaseEUInactiveSnapshots(inactiveSnapshots);
+    }
+    if (!activeSnapshots.isEmpty()) {
+      snapshotRepository.releaseEUActiveSnapshots(activeSnapshots);
+    }
   }
 
   /**
