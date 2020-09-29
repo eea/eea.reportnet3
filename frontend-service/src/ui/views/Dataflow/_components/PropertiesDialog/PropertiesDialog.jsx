@@ -11,6 +11,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
+import { RodUrl } from 'core/infrastructure/RodUrl';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
@@ -67,8 +68,8 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
                   onMouseDown: () =>
                     window.open(
                       data.label === 'obligation'
-                        ? `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowState.obligations.obligationId}`
-                        : `http://rod3.devel1dub.eionet.europa.eu/instruments/${dataflowState.obligations.legalInstruments.id}`
+                        ? `${RodUrl.obligations}${dataflowState.obligations.obligationId}`
+                        : `${RodUrl.instruments}${dataflowState.obligations.legalInstruments.id}`
                     )
                 }
               ]}>
