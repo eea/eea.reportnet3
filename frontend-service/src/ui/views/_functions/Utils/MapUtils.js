@@ -81,6 +81,29 @@ const parseGeometryData = records => {
   return records;
 };
 
+const printCoordinates = (data, isGeoJson = true) => {
+  if (isGeoJson) {
+    if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
+      let parsedJSON = data;
+      if (typeof parsedJSON === 'string') {
+        parsedJSON = JSON.parse(data);
+      }
+      return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
+    } else {
+      if (Array.isArray(data)) {
+        return `{Latitude: ${data[0]}, Longitude: ${data[1]}}`;
+      } else {
+        return `{Latitude: , Longitude: }`;
+      }
+    }
+  } else {
+    const splittedCoordinate = Array.isArray(data) ? data : data.replace(', ', ',').split(',');
+    return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
+      isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
+    }}`;
+  }
+};
+
 export const MapUtils = {
   checkValidCoordinates,
   checkValidJSONCoordinates,
@@ -88,5 +111,6 @@ export const MapUtils = {
   latLngToLngLat,
   lngLatToLatLng,
   parseCoordinates,
-  parseGeometryData
+  parseGeometryData,
+  printCoordinates
 };
