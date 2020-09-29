@@ -12,6 +12,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { RodUrl } from 'core/infrastructure/RodUrl';
 
 export const TableView = ({
   checkedObligation,
@@ -52,7 +53,7 @@ export const TableView = ({
         aria-hidden={false}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalLink')}
-        onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${row.id}`)}
+        onMouseDown={() => window.open(`${RodUrl.obligations}${row.id}`)}
       />
     </div>
   );
