@@ -166,7 +166,11 @@ export const Filters = ({
 
   const getChangedCheckboxes = property => {
     filterState.checkboxes.forEach(checkbox => {
-      checkbox.property === property && onFilterData(checkbox.property, [checkbox.isChecked]);
+      if (checkbox.property === property) {
+        checkbox.isChecked
+          ? onFilterData(checkbox.property, [checkbox.isChecked])
+          : onFilterData(checkbox.property, [checkbox.isChecked, !checkbox.isChecked]);
+      }
     });
   };
 
