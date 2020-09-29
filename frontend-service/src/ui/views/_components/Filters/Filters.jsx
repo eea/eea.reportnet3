@@ -166,7 +166,11 @@ export const Filters = ({
 
   const getChangedCheckboxes = property => {
     filterState.checkboxes.forEach(checkbox => {
-      checkbox.property === property && onFilterData(checkbox.property, [checkbox.isChecked]);
+      if (checkbox.property === property) {
+        checkbox.isChecked
+          ? onFilterData(checkbox.property, [checkbox.isChecked])
+          : onFilterData(checkbox.property, [checkbox.isChecked, !checkbox.isChecked]);
+      }
     });
   };
 
@@ -208,6 +212,7 @@ export const Filters = ({
   };
 
   const onFilterData = (filter, value) => {
+    console.log('filter, value', filter, value);
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
