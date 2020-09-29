@@ -319,7 +319,7 @@ export const Map = ({
         )}
         {isNewPositionMarkerVisible && (
           <Marker
-            draggable={true}
+            draggable={false}
             icon={NewMarkerIcon}
             position={projectPointCoordinates(newPositionMarker)}
             onClick={e => {
@@ -327,8 +327,7 @@ export const Map = ({
                 setPopUpVisible(true);
               }
               mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
-            }}
-            onDrag={e => setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`)}>
+            }}>
             <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
           </Marker>
         )}
