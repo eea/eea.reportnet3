@@ -973,7 +973,7 @@ public class RulesServiceImpl implements RulesService {
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
-      if (EntityTypeEnum.TABLE.equals(rule.getType())) {
+      if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 
