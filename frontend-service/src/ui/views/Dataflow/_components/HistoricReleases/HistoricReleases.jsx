@@ -250,7 +250,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         />
       )}
 
-      {historicReleasesState.countryCodes.length > 1 && (
+      {historicReleasesState.countryCodes.length > 1 && historicReleasesView === 'EUDataset' && (
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
