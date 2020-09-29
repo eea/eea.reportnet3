@@ -263,7 +263,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       table =
           datasetRepository.queryRSExecution(query, rule.getType(), entityName, datasetId, idTable);
     } catch (SQLException e) {
-      LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
+      LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
     if (null != table.getRecords() && !table.getRecords().isEmpty()) {
       retrieveValidations(table.getRecords(), datasetId);
