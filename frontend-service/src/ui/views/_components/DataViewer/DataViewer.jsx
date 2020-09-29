@@ -899,22 +899,6 @@ const DataViewer = withRouter(
 
     const saveMapGeoJsonDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <div className={styles.pointLegendWrapper}>
-          <div className={styles.pointLegendItem}>
-            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
-            <div className={styles.pointLegendItemLabel}>
-              <label>{resources.messages['currentPoint']}: </label>
-              <label>{MapUtils.printCoordinates(records.mapGeoJson)}</label>
-            </div>
-          </div>
-          <div className={styles.pointLegendItem}>
-            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
-            <div className={styles.pointLegendItemLabel}>
-              <label>{resources.messages['newPoint']}: </label>
-              <label>{MapUtils.printCoordinates(records.newPoint, false)}</label>
-            </div>
-          </div>
-        </div>
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
@@ -1260,7 +1244,7 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="edit-table calendar-table"
+            className="calendar-table"
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
