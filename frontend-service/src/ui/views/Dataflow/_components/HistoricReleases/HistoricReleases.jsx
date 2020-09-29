@@ -233,7 +233,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         />
       )}
 
-      {Array.isArray(datasetId) && (
+      {datasetId.length > 1 && (
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
@@ -244,7 +244,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
 
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
-          className={Array.isArray(datasetId) || historicReleasesView === 'dataCollection' ? '' : styles.noFilters}
+          className={datasetId.length > 1 || historicReleasesView === 'dataCollection' ? '' : styles.noFilters}
           autoLayout={true}
           paginator={true}
           paginatorRight={getPaginatorRecordsCount()}
@@ -254,7 +254,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           value={historicReleasesState.filteredData}>
           {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
           {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(historicReleasesState.filteredData)}
-          {Array.isArray(datasetId)
+          {datasetId.length > 1
             ? renderReportingDatasetsColumns(historicReleasesState.filteredData)
             : historicReleasesView === 'reportingDataset' &&
               renderReportingDatasetColumns(historicReleasesState.filteredData)}
