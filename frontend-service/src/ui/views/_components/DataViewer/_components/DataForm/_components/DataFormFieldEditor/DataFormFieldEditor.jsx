@@ -415,22 +415,6 @@ const DataFormFieldEditor = ({
 
   const saveMapCoordinatesDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <div className={styles.pointLegendWrapper}>
-        <div className={styles.pointLegendItem}>
-          <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
-          <div className={styles.pointLegendItemLabel}>
-            <label>{resources.messages['currentPoint']}: </label>
-            <label>{MapUtils.printCoordinates(map.mapCoordinates)}</label>
-          </div>
-        </div>
-        <div className={styles.pointLegendItem}>
-          <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
-          <div className={styles.pointLegendItemLabel}>
-            <label>{resources.messages['newPoint']}: </label>
-            <label>{MapUtils.printCoordinates(map.newPoint, false)}</label>
-          </div>
-        </div>
-      </div>
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
         // disabled={isSaving}
