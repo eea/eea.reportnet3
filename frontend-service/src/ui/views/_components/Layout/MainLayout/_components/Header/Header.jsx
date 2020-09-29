@@ -8,6 +8,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
+import ReportnetPublicLogo from 'assets/images/reportnet_public_logo.svg';
 
 import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 
@@ -107,8 +108,11 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         e.preventDefault();
         history.push(getUrl(routes.DATAFLOWS));
       }}>
-      <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
-      {isPublic && <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>}
+      {isPublic ? (
+        <img height="50px" src={ReportnetPublicLogo} alt="Reportnet 3.0" className={styles.appLogo} />
+      ) : (
+        <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
+      )}
     </a>
   );
 
@@ -240,7 +244,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   return (
     <Fragment>
-      <div id="header" style={headerElementStyle} className={styles.header}>
+      <div id="header" style={headerElementStyle} className={`${styles.header} ${isPublic ? styles.public : ''}`}>
         <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
         <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
           {loadTitle()}
