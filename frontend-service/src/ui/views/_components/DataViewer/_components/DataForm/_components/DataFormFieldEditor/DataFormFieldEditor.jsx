@@ -39,9 +39,9 @@ const DataFormFieldEditor = ({
   type
 }) => {
   const crs = [
-    { label: 'WGS84', value: 'EPSG:4326' },
-    { label: 'ETRS89', value: 'EPSG:4258' },
-    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
+    { label: 'WGS84 - 4326', value: 'EPSG:4326' },
+    { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
 
   const resources = useContext(ResourcesContext);
@@ -55,12 +55,12 @@ const DataFormFieldEditor = ({
     currentCRS:
       fieldValue !== '' && type === 'POINT'
         ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
-        : { label: 'WGS84', value: 'EPSG:4326' },
+        : { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     isMapDisabled: false,
     isMapOpen: false,
     mapCoordinates: '',
     newPoint: '',
-    newPointCRS: { label: 'WGS84', value: 'EPSG:4326' }
+    newPointCRS: { label: 'WGS84 - 4326', value: 'EPSG:4326' }
   });
 
   useEffect(() => {
