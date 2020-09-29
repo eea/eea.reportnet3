@@ -12,8 +12,16 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { RodUrl } from 'core/infrastructure/RodUrl';
 
-export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagination, pagination }) => {
+export const TableView = ({
+  checkedObligation,
+  data,
+  onSelectObl,
+  onChangePagination,
+  pagination,
+  paginatorRightText
+}) => {
   const resources = useContext(ResourcesContext);
 
   const headerTableTemplate = obligation => {
@@ -45,12 +53,10 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
         aria-hidden={false}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalLink')}
-        onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${row.id}`)}
+        onMouseDown={() => window.open(`${RodUrl.obligations}${row.id}`)}
       />
     </div>
   );
-
-  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
   const renderCheckColumn = (
     <Column

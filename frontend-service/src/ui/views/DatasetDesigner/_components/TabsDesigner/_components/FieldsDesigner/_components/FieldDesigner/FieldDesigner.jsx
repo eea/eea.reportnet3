@@ -234,12 +234,19 @@ export const FieldDesigner = ({
       if (fieldId === '-1') {
         if (type !== '') {
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
-            onFieldAdd({ type: parseGeospatialTypes(type.fieldType) });
+            onFieldAdd({
+              type: parseGeospatialTypes(type.fieldType),
+              pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue
+            });
           }
         }
       } else {
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
-          fieldUpdate({ codelistItems: null, type: parseGeospatialTypes(type.fieldType) });
+          fieldUpdate({
+            codelistItems: null,
+            pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
+            type: parseGeospatialTypes(type.fieldType)
+          });
         } else {
           if (type !== '') {
             fieldTypeRef.current.hide();
@@ -251,6 +258,7 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
       dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
+      if (type.fieldType.toLowerCase() === 'point') dispatchFieldDesigner({ type: 'SET_PK', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -749,7 +757,12 @@ export const FieldDesigner = ({
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
         className={`${styles.checkPK} datasetSchema-pk-help-step`}
-        disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
+        disabled={
+          (!isNil(fieldDesignerState.fieldTypeValue) &&
+            !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
+            fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'POINT') ||
+          (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))
+        }
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
         label="Default"

@@ -233,7 +233,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           })}
         </select>
         <label htmlFor="dataProvider" className="srOnly">
-          {resources.messages['manageRolesDialogInputPlaceholder']}
+          {resources.messages['manageRolesEditorDialogInputPlaceholder']}
         </label>
       </>
     );
@@ -252,11 +252,11 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           inputId={'contributorAccount'}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
-          placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+          placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
           value={contributor.account}
         />
         <label htmlFor="emptyInput" className="srOnly">
-          {resources.messages['manageRolesDialogInputPlaceholder']}
+          {resources.messages['manageRolesEditorDialogInputPlaceholder']}
         </label>
       </div>
     );

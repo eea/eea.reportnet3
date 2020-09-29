@@ -40,9 +40,9 @@ const FieldEditor = ({
   reporting
 }) => {
   const crs = [
-    { label: 'WGS84', value: 'EPSG:4326' },
-    { label: 'ETRS89', value: 'EPSG:4258' },
-    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
+    { label: 'WGS84 - 4326', value: 'EPSG:4326' },
+    { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
@@ -57,7 +57,7 @@ const FieldEditor = ({
         ? crs.filter(
             crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
           )[0]
-        : { label: 'WGS84', value: 'EPSG:4326' }
+        : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
   const [isMapDisabled, setIsMapDisabled] = useState(
@@ -126,7 +126,7 @@ const FieldEditor = ({
     setLinkItemsOptions(linkItems);
   };
 
-  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
+  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
@@ -136,10 +136,16 @@ const FieldEditor = ({
         return JSON.stringify(geoJson);
       } else {
         setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
-        geoJson.geometry.coordinates = MapUtils.parseCoordinates(
-          coordinates.replace(', ', ',').split(','),
-          parseToFloat
-        );
+        if (checkCoordinates) {
+          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates)
+            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
+            : [];
+        } else {
+          geoJson.geometry.coordinates = MapUtils.parseCoordinates(
+            coordinates.replace(', ', ',').split(','),
+            parseToFloat
+          );
+        }
 
         return JSON.stringify(geoJson);
       }
@@ -273,6 +279,7 @@ const FieldEditor = ({
                     e.target.value,
                     currentCRS.value,
                     false,
+                    false,
                     false
                   )
                 )
@@ -289,7 +296,8 @@ const FieldEditor = ({
                   e.target.value,
                   currentCRS.value,
                   false,
-                  true
+                  true,
+                  false
                 );
                 onEditorKeyChange(
                   cells,
@@ -303,7 +311,8 @@ const FieldEditor = ({
                     e.target.value,
                     currentCRS.value,
                     false,
-                    true
+                    true,
+                    false
                   )
                 );
               }}
@@ -311,7 +320,7 @@ const FieldEditor = ({
               type="text"
               value={
                 RecordUtils.getCellValue(cells, cells.field) !== ''
-                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates
                   : ''
               }
             />
