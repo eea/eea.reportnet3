@@ -226,6 +226,7 @@ public class ValidationControllerImplTest {
           "");
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
     }
   }
 
