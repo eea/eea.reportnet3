@@ -50,6 +50,15 @@ public interface DatasetExtendedRepository {
    */
   List<Object> queryUniqueResultExecution(String stringQuery);
 
+  /**
+   * Gets the table id.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the table id
+   */
+  Long getTableId(String idTableSchema, Long datasetId);
+
 
 
 }

@@ -246,14 +246,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     switch (rule.getType()) {
       case FIELD:
         entityName = retriveFieldName(schema, rule.getReferenceId().toString());
-        idTable = retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString());
+        idTable =
+            retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(), datasetId);
         break;
       case TABLE:
         entityName = retriveTableName(schema, rule.getReferenceId().toString());
-        idTable = tableRepository.findByIdTableSchema(rule.getReferenceId().toString()).getId();
+        idTable = datasetRepository.getTableId(rule.getReferenceId().toString(), datasetId);
         break;
       case RECORD:
-        idTable = retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString());
+        idTable =
+            retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString(), datasetId);
         break;
       case DATASET:
         break;
@@ -278,7 +280,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param fieldSchemaId the field schema id
    * @return the long
    */
-  private Long retriveIsTableFromFieldSchema(DataSetSchemaVO schema, String fieldSchemaId) {
+  @Transactional
+  private Long retriveIsTableFromFieldSchema(DataSetSchemaVO schema, String fieldSchemaId,
+      Long datasetId) {
     String tableSchemaId = "";
     for (TableSchemaVO table : schema.getTableSchemas()) {
       for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
@@ -287,7 +291,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         }
       }
     }
-    return tableRepository.findByIdTableSchema(tableSchemaId).getId();
+    return datasetRepository.getTableId(tableSchemaId, datasetId);
   }
 
   /**
@@ -297,14 +301,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param recordSchemaId the record schema id
    * @return the long
    */
-  private Long retriveIsTableFromRecordSchema(DataSetSchemaVO schema, String recordSchemaId) {
+  @Transactional
+  private Long retriveIsTableFromRecordSchema(DataSetSchemaVO schema, String recordSchemaId,
+      Long datasetId) {
     String tableSchemaId = "";
     for (TableSchemaVO table : schema.getTableSchemas()) {
       if (table.getRecordSchema().getIdRecordSchema().equals(recordSchemaId)) {
         tableSchemaId = table.getIdTableSchema();
       }
     }
-    return tableRepository.findByIdTableSchema(tableSchemaId).getId();
+    return datasetRepository.getTableId(tableSchemaId, datasetId);
   }
 
   /**
