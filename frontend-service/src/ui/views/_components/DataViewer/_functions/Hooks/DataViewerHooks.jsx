@@ -154,7 +154,11 @@ export const useSetColumns = (
   const renderPoint = (value = '') => {
     if (MapUtils.checkValidJSONCoordinates(value)) {
       const parsedGeoJson = JSON.parse(value);
-      return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+      if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
+        return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+      } else {
+        return '';
+      }
     }
     return '';
   };
