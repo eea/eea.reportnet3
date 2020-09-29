@@ -50,6 +50,7 @@ const DataFormFieldEditor = ({
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
 
+  const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
@@ -61,8 +62,6 @@ const DataFormFieldEditor = ({
     newPoint: '',
     newPointCRS: { label: 'WGS84', value: 'EPSG:4326' }
   });
-
-  const [columnWithLinks, setColumnWithLinks] = useState([]);
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
@@ -268,7 +267,6 @@ const DataFormFieldEditor = ({
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
-        // type={type === 'DATE' ? 'date' : 'text'}
         placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
         ref={inputRef}
         style={{ width: '35%' }}
@@ -277,45 +275,8 @@ const DataFormFieldEditor = ({
       />
     );
 
-  const renderAttachment = (field, fieldValue = []) => {
+  const renderAttachment = () => {
     return false;
-    // console.log({ field, fieldValue }, fieldValue.split('|'));
-    // const splittedFieldValue = fieldValue.split('|');
-    // return (
-    //   <div style={{ display: 'flex' }}>
-    //     {!isEmpty(fieldValue) && (
-    //       <Button
-    //         className={`${isEmpty(splittedFieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
-    //         icon="export"
-    //         iconPos="right"
-    //         label={splittedFieldValue[0]}
-    //         onClick={() => {
-    //           console.log('Download');
-    //           const a = document.createElement('a');
-    //           a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
-    //           a.download = splittedFieldValue[0];
-    //           a.click();
-    //         }}
-    //         style={{ width: 'fit-content' }}
-    //       />
-    //     )}
-
-    //     <Button
-    //       className={`p-button-animated-blink p-button-secondary-transparent`}
-    //       icon="import"
-    //       onClick={() => {
-    //         setIsAttachFileVisible(true);
-    //       }}
-    //     />
-    //     {!isEmpty(fieldValue) && (
-    //       <Button
-    //         className={`p-button-animated-blink p-button-secondary-transparent`}
-    //         icon="trash"
-    //         onClick={() => setIsDeleteAttachmentVisible(true)}
-    //       />
-    //     )}
-    //   </div>
-    // );
   };
 
   const renderCalendar = (field, fieldValue) => {
@@ -413,7 +374,7 @@ const DataFormFieldEditor = ({
           }
           style={{ width: '50%' }}
           type="text"
-          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''}
+          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates : ''}
         />
       </div>
 
@@ -436,7 +397,6 @@ const DataFormFieldEditor = ({
               )
             );
             dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
-            // onChangePointCRS(e.target.value.value);
           }}
           placeholder="Select a CRS"
           style={{ width: '50%', minWidth: '50%' }}
@@ -455,8 +415,22 @@ const DataFormFieldEditor = ({
 
   const saveMapCoordinatesDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
+      <div className={styles.pointLegendWrapper}>
+        <div className={styles.pointLegendItem}>
+          <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
+          <div className={styles.pointLegendItemLabel}>
+            <label>{resources.messages['currentPoint']}</label>
+          </div>
+        </div>
+        <div className={styles.pointLegendItem}>
+          <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
+          <div className={styles.pointLegendItemLabel}>
+            <label>{resources.messages['newPoint']}</label>
+          </div>
+        </div>
+      </div>
       <Button
-        className="p-button-animated-blink"
+        className={`p-button-animated-blink ${styles.saveButton}`}
         // disabled={isSaving}
         label={resources.messages['save']}
         icon={'check'}
@@ -479,44 +453,6 @@ const DataFormFieldEditor = ({
   return (
     <React.Fragment>
       {renderFieldEditor()}
-      {/* {isAttachFileVisible && (
-        <Dialog
-          // className={styles.Dialog}
-          footer={renderCustomFileAttachFooter}
-          header={`${resources.messages['uploadAttachment']}`}
-          onHide={() => setIsAttachFileVisible(false)}
-          visible={isAttachFileVisible}>
-          <CustomFileUpload
-            accept={getAttachExtensions}
-            // accept=".*"
-            chooseLabel={resources.messages['selectFile']}
-            // className={styles.FileUpload}
-            fileLimit={1}
-            infoTooltip={infoAttachTooltip}
-            mode="advanced"
-            multiple={false}
-            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-            name="file"
-            onUpload={e => onAttach(e)}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
-              datasetId: datasetId
-            })}`}
-          />
-        </Dialog>
-      )} */}
-      {/* {isDeleteAttachmentVisible && (
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={`${resources.messages['deleteAttachmentHeader']}`}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          onConfirm={onConfirmDeleteAttachment}
-          onHide={() => setIsDeleteAttachmentVisible(false)}
-          visible={isDeleteAttachmentVisible}>
-          {resources.messages['deleteAttachmentConfirm']}
-        </ConfirmDialog>
-      )} */}
-
       {map.isMapOpen && (
         <Dialog
           className={'map-data'}

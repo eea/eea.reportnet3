@@ -876,6 +876,10 @@
     "pasteRecordsCoordinatesStructureMessage": "Latitude, Longitude - EPSG:4326/4258/3035. Example: 45.345, -2.344 - EPSG:4258",
     "pasteRecordsWarningCoordinatesMessage": "Warning! There are columns with a wrong coordinate format",
     "sqlSentence": "SQL sentence",
-    "datasetComparison": "Dataset comparison"
+    "datasetComparison": "Dataset comparison",
+    "mapSelectPointMessage": "Double click on the map to select a new point",
+    "doNotRemember": "Do not remember again",
+    "currentPoint": "Current point",
+    "newPoint": "New point"
   }
 }
