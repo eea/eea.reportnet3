@@ -212,7 +212,6 @@ export const Filters = ({
   };
 
   const onFilterData = (filter, value) => {
-    console.log('filter, value', filter, value);
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
