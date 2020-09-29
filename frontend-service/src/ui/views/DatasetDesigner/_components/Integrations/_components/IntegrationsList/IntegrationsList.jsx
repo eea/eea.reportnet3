@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -33,6 +33,7 @@ export const IntegrationsList = ({
 
   const [integrationListState, integrationListDispatch] = useReducer(integrationsListReducer, {
     data: [],
+    filtered: false,
     filteredData: [],
     integrationId: '',
     isDataUpdated: false,
@@ -57,6 +58,21 @@ export const IntegrationsList = ({
         if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
     />
+  );
+
+  const getFilteredSearched = value => integrationListDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+  const getPaginatorRecordsCount = () => (
+    <Fragment>
+      {integrationListState.filtered && integrationListState.data.length !== integrationListState.filteredData.length
+        ? `${resources.messages['filtered']} : ${integrationListState.filteredData.length} | `
+        : ''}
+      {resources.messages['totalRecords']} {integrationListState.data.length}{' '}
+      {resources.messages['records'].toLowerCase()}
+      {integrationListState.filtered && integrationListState.data.length === integrationListState.filteredData.length
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
+        : ''}
+    </Fragment>
   );
 
   const integrationId = value => integrationListDispatch({ type: 'ON_LOAD_INTEGRATION_ID', payload: { value } });
@@ -140,6 +156,7 @@ export const IntegrationsList = ({
       <Filters
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
+        getFilteredSearched={getFilteredSearched}
         inputOptions={['integrationName']}
         selectOptions={['operationName']}
       />
@@ -149,7 +166,7 @@ export const IntegrationsList = ({
           autoLayout={true}
           onRowClick={event => integrationId(event.data.integrationId)}
           paginator={true}
-          paginatorRight={`${resources.messages['totalRecords']} ${integrationListState.filteredData.length}`}
+          paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={integrationListState.filteredData.length}

@@ -1,3 +1,5 @@
+import isNil from 'lodash/isNil';
+
 export const createValidationReducerInitState = {
   candidateRule: {
     active: true,
@@ -320,7 +322,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: { ...payload },
         tableFields: []
       };
-    //Not in use?
+
     case 'UPDATE_EXPRESSIONS':
       return {
         ...state,
@@ -332,16 +334,31 @@ export const createValidationReducer = (state, { type, payload }) => {
 
     case 'POPULATE_CREATE_FORM':
       const rowOptions = {};
-      if (payload.expressionsIf && payload.expressionsIf.length > 0) {
-        rowOptions.expressionType = 'ifThenClause';
-        rowOptions.expressionsIf = payload.expressionsIf;
-        rowOptions.allExpressionsIf = payload.allExpressionsIf;
-        rowOptions.expressionsThen = payload.expressionsThen;
-        rowOptions.allExpressionsThen = payload.allExpressionsThen;
+
+      if (isNil(payload.sqlSentence)) {
+        if (payload.expressionsIf && payload.expressionsIf.length > 0) {
+          rowOptions.expressionType = 'ifThenClause';
+          rowOptions.expressionsIf = payload.expressionsIf;
+          rowOptions.allExpressionsIf = payload.allExpressionsIf;
+          rowOptions.expressionsThen = payload.expressionsThen;
+          rowOptions.allExpressionsThen = payload.allExpressionsThen;
+        }
+
+        if (payload.entityType === 'TABLE') {
+          rowOptions.expressionType = 'fieldRelations';
+        }
+
+        if (payload.entityType === 'RECORD' && payload.expressions.length > 0) {
+          rowOptions.expressionType = 'fieldComparison';
+        }
+
+        if (payload.entityType === 'FIELD' && payload.expressions.length > 0) {
+          rowOptions.expressionType = 'fieldTab';
+        }
+      } else {
+        rowOptions.expressionType = 'sqlSentence';
       }
-      if (payload.entityType === 'RECORD' && payload.expressions.length > 0) {
-        rowOptions.expressionType = 'fieldComparison';
-      }
+
       return {
         ...state,
         candidateRule: {
@@ -359,7 +376,8 @@ export const createValidationReducer = (state, { type, payload }) => {
           shortCode: payload.shortCode,
           ruleType: payload.entityType,
           relations: payload.relations,
-          tableFields: payload.relations.tableFields
+          tableFields: isNil(payload.sqlSentence) && !isNil(payload.relations) ? payload.relations.tableFields : null,
+          sqlSentence: payload.sqlSentence
         }
       };
 
@@ -421,6 +439,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           }
         }
       };
+
     case 'UPDATE_IS_DOUBLE_REFERENCED':
       return {
         ...state,
@@ -432,6 +451,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           }
         }
       };
+
     case 'SET_FORM_FIELD_RELATION':
       return {
         ...state,
@@ -440,9 +460,12 @@ export const createValidationReducer = (state, { type, payload }) => {
           [payload.key]: payload.value,
           relations: {
             ...state.candidateRule.relations,
-            links: state.candidateRule.relations.links.map(link => {
-              return { linkId: link.linkId, originField: '', referencedField: link.referencedField };
-            })
+            links:
+              state.candidateRule.expressionType !== 'sqlSentence'
+                ? state.candidateRule.relations.links.map(link => {
+                    return { linkId: link.linkId, originField: '', referencedField: link.referencedField };
+                  })
+                : null
           }
         }
       };

@@ -803,5 +803,5 @@
   },
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
-  "bannedFields": ["attachment"]
+  "bannedFields": ["attachment", "point"]
 }

@@ -15,6 +15,7 @@ import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -150,6 +151,14 @@ export const useSetColumns = (
     );
   };
 
+  const renderPoint = (value = '') => {
+    if (MapUtils.checkValidJSONCoordinates(value)) {
+      const parsedGeoJson = JSON.parse(value);
+      return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+    }
+    return '';
+  };
+
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
@@ -200,9 +209,11 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field])
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
               ? field.fieldData[column.field].sort().join(', ')
-              : (!isNil(field.fieldData[column.field]) &&
+              : // : Array.isArray(field.fieldData[column.field])
+              // ? field.fieldData[column.field].join(', ')
+              (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
                 (!isNil(field.fieldData[column.field]) &&
@@ -211,6 +222,8 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              : field.fieldData.type === 'POINT'
+              ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -225,8 +238,10 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field])
-              ? field.fieldData[column.field].sort().join(', ')
+            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+              ? // ? field.fieldData[column.field].sort().join(', ')
+                // : Array.isArray(field.fieldData[column.field])
+                field.fieldData[column.field].join(', ')
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
@@ -236,6 +251,8 @@ export const useSetColumns = (
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              : field.fieldData.type === 'POINT'
+              ? renderPoint(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>
@@ -268,7 +285,7 @@ export const useSetColumns = (
       let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
       let invisibleColumn =
         column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
-      const readOnlyColumn = column.readOnly ? styles.readOnlyFields : '';
+      const readOnlyColumn = column.readOnly && isReporting ? styles.readOnlyFields : '';
       return (
         <Column
           body={dataTemplate}

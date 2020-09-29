@@ -19,7 +19,8 @@ export const TableViewSchemas = ({
   handleRedirect,
   onChangePagination,
   onSelectDataflow,
-  pagination
+  pagination,
+  paginatorRightText
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -99,8 +100,6 @@ export const TableViewSchemas = ({
 
     return fieldColumns;
   };
-
-  const paginatorRightText = `${resources.messages['totalDataflows']}: ${data.length}`;
 
   return isEmpty(data) ? (
     <h3 className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</h3>
