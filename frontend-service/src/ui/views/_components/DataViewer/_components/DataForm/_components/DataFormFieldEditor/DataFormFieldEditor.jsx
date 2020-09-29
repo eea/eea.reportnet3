@@ -419,13 +419,15 @@ const DataFormFieldEditor = ({
         <div className={styles.pointLegendItem}>
           <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
           <div className={styles.pointLegendItemLabel}>
-            <label>{resources.messages['currentPoint']}</label>
+            <label>{resources.messages['currentPoint']}: </label>
+            <label>{MapUtils.printCoordinates(map.mapCoordinates)}</label>
           </div>
         </div>
         <div className={styles.pointLegendItem}>
           <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
           <div className={styles.pointLegendItemLabel}>
-            <label>{resources.messages['newPoint']}</label>
+            <label>{resources.messages['newPoint']}: </label>
+            <label>{MapUtils.printCoordinates(map.newPoint, false)}</label>
           </div>
         </div>
       </div>

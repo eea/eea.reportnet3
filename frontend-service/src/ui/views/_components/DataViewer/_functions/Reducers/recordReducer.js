@@ -97,7 +97,7 @@ export const recordReducer = (state, { type, payload }) => {
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(payload.split(','));
       parsedInmMapGeoJson.properties.rsid = state.newPointCRS;
-      return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson) };
+      return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson), newPoint: '' };
     case 'SET_MAP_NEW_POINT':
       return {
         ...state,

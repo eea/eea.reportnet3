@@ -902,13 +902,15 @@ const DataViewer = withRouter(
           <div className={styles.pointLegendItem}>
             <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
             <div className={styles.pointLegendItemLabel}>
-              <label>Current point</label>
+              <label>{resources.messages['currentPoint']}: </label>
+              <label>{MapUtils.printCoordinates(records.mapGeoJson)}</label>
             </div>
           </div>
           <div className={styles.pointLegendItem}>
             <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
             <div className={styles.pointLegendItemLabel}>
-              <label>New point</label>
+              <label>{resources.messages['newPoint']}: </label>
+              <label>{MapUtils.printCoordinates(records.newPoint, false)}</label>
             </div>
           </div>
         </div>
