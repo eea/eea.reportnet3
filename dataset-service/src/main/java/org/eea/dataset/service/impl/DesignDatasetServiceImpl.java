@@ -220,13 +220,14 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // After creating the datasets schemas on the DB, fill them and create the permissions
         for (Map.Entry<Long, DataSetSchemaVO> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
             .entrySet()) {
+          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
+              itemNewDatasetAndSchema.getKey());
           fillAndUpdateDesignDatasetCopied(itemNewDatasetAndSchema.getValue(),
               dictionaryOriginTargetObjectId
                   .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema()),
               dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
               mapDatasetIdFKRelations);
-          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
-              itemNewDatasetAndSchema.getKey());
+
         }
 
 
