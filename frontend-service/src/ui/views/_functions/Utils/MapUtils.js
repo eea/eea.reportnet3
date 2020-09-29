@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 
 const checkRSID = rsid => {
@@ -14,6 +15,8 @@ const checkValidCoordinates = coordinates => {
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.indexOf(',') === -1) return false;
+  } else {
+    if (isEmpty(coordinates)) return false;
   }
   let isValid = true;
   const splittedCoordinates = Array.isArray(coordinates) ? coordinates : coordinates.split(',');
@@ -81,6 +84,33 @@ const parseGeometryData = records => {
   return records;
 };
 
+const printCoordinates = (data, isGeoJson = true) => {
+  if (isGeoJson) {
+    if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
+      let parsedJSON = data;
+      if (typeof parsedJSON === 'string') {
+        parsedJSON = JSON.parse(data);
+      }
+      return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
+    } else {
+      if (Array.isArray(data)) {
+        return `{Latitude: ${data[0]}, Longitude: ${data[1]}}`;
+      } else {
+        return `{Latitude: , Longitude: }`;
+      }
+    }
+  } else {
+    if (!isNil(data)) {
+      const splittedCoordinate = Array.isArray(data) ? data : data.replace(', ', ',').split(',');
+      return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
+        isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
+      }}`;
+    } else {
+      return `{Latitude: , Longitude: }`;
+    }
+  }
+};
+
 export const MapUtils = {
   checkValidCoordinates,
   checkValidJSONCoordinates,
@@ -88,5 +118,6 @@ export const MapUtils = {
   latLngToLngLat,
   lngLatToLatLng,
   parseCoordinates,
-  parseGeometryData
+  parseGeometryData,
+  printCoordinates
 };
