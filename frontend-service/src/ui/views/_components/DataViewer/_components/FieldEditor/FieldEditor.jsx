@@ -40,9 +40,9 @@ const FieldEditor = ({
   reporting
 }) => {
   const crs = [
-    { label: 'WGS84', value: 'EPSG:4326' },
-    { label: 'ETRS89', value: 'EPSG:4258' },
-    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
+    { label: 'WGS84 - 4326', value: 'EPSG:4326' },
+    { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
@@ -57,7 +57,7 @@ const FieldEditor = ({
         ? crs.filter(
             crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
           )[0]
-        : { label: 'WGS84', value: 'EPSG:4326' }
+        : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
   const [isMapDisabled, setIsMapDisabled] = useState(
