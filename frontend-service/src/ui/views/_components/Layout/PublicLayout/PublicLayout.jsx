@@ -18,9 +18,7 @@ export const PublicLayout = ({ children }) => {
     <Fragment>
       <div className={styles.mainContainer}>
         <Header isPublic={true} />
-        <div className={`rep-container`}>
-          <div className={`${styles.pageContent} rep-row`}>{children}</div>
-        </div>
+        {children}
         <Footer />
         <EuFooter />
       </div>
