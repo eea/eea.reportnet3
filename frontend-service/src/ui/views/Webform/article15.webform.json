@@ -2,69 +2,436 @@
   "tables": [
     {
       "name": "QA_QC_C0",
-      "title": "QA_QC_C0 (lo que se muetra)",
+      "title": "QA_QC_C0",
       "multipleRecords": false,
       "elements": [
-        { "type": "FIELD", "name": "EuMemberState", "title": "EuMemberState (lo que se muetra)" },
-        { "type": "FIELD", "name": "UpdateDate", "title": "UpdateDate" },
-        { "type": "FIELD", "name": "ReportingUnderArt19", "title": "ReportingUnderArt19" }
+        { "type": "FIELD", "name": "EuMemberState", "title": "EU Member State / EEA member country" },
+        { "type": "FIELD", "name": "UpdateDate", "title": "The information in this reporting is updated until:" },
+        {
+          "type": "FIELD",
+          "name": "ReportingUnderArt19",
+          "title": "Is the mandatory reporting under Art. 19 and Part 1 of Annex VIII of the Governance Regulation and Annex 1 of the Implementing Act?"
+        }
       ]
     },
     {
       "name": "QA_QC_C1",
-      "title": "QA_QC_C1 (lo que se muetra)",
+      "title": "QA_QC_C1",
       "multipleRecords": false,
       "elements": [
-        { "type": "FIELD", "name": "NationalCircumstances", "title": "NationalCircumstances a" },
-        { "type": "FIELD", "name": "BiogeophysicalCharacteristics", "title": "BiogeophysicalCharacteristics a" },
-        { "type": "FIELD", "name": "DemographicSituation", "title": "DemographicSituation a" },
-        { "type": "FIELD", "name": "EconomicInfrastructuralSituation", "title": "EconomicInfrastructuralSituation a" },
-        { "type": "FIELD", "name": "AssessmentsIntroDocument", "title": "AssessmentsIntroDocument a" },
-        { "type": "FIELD", "name": "GeneralAspectsClimateMonitoring", "title": "GeneralAspectsClimateMonitoring a" },
-        { "type": "FIELD", "name": "MainActivitiesClimateMonitoring", "title": "MainActivitiesClimateMonitoring a" },
-        { "type": "FIELD", "name": "ApproachesMethodologiesTools", "title": "ApproachesMethodologiesTools a" },
-        { "type": "FIELD", "name": "AssessmentsObservationDocument", "title": "AssessmentsObservationDocument a" },
-        { "type": "FIELD", "name": "GeneralAspectsAssessment", "title": "GeneralAspectsAssessment a" },
-        { "type": "FIELD", "name": "Status", "title": "Status a" },
-        { "type": "FIELD", "name": "TemperatureAcuteOther", "title": "TemperatureAcuteOther a" },
-        { "type": "FIELD", "name": "WindRelatedAcute", "title": "WindRelatedAcute a" },
-        { "type": "FIELD", "name": "WindAcuteOther", "title": "WindAcuteOther a" },
-        { "type": "FIELD", "name": "WaterRelatedAcute", "title": "WaterRelatedAcute a" },
-        { "type": "FIELD", "name": "WaterAcuteOther", "title": "WaterAcuteOther a" },
-        { "type": "FIELD", "name": "SolidMassRelatedAcute", "title": "SolidMassRelatedAcute a" },
-        { "type": "FIELD", "name": "SolidAcuteOther", "title": "SolidAcuteOther a" },
-        { "type": "FIELD", "name": "SolidMassRelatedAcute", "title": "SolidMassRelatedAcute a" },
-        { "type": "FIELD", "name": "SolidAcuteOther", "title": "SolidAcuteOther a" },
-        { "type": "FIELD", "name": "TemperatureRelatedChronic", "title": "TemperatureRelatedChronic a" },
-        { "type": "FIELD", "name": "TemperatureChronicOther", "title": "TemperatureChronicOther a" },
-        { "type": "FIELD", "name": "WindRelatedChronic", "title": "WindRelatedChronic a" },
-        { "type": "FIELD", "name": "WindChronicOther", "title": "WindChronicOther a" },
-        { "type": "FIELD", "name": "WaterRelatedChronic", "title": "WaterRelatedChronic a" },
-        { "type": "FIELD", "name": "WaterChronicOther", "title": "WaterChronicOther a" },
-        { "type": "FIELD", "name": "SolidMassRelatedChronic", "title": "SolidMassRelatedChronic a" },
-        { "type": "FIELD", "name": "SolidChronicOther", "title": "SolidChronicOther a" },
-        { "type": "FIELD", "name": "DescribeExistingEnvironmental", "title": "DescribeExistingEnvironmental a" },
+        {
+          "type": "FIELD",
+          "name": "NationalCircumstances",
+          "title": "Please describe the general  National circumstances"
+        },
+        {
+          "type": "FIELD",
+          "name": "BiogeophysicalCharacteristics",
+          "title": "Please describe the biogeophysical characteristics relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "DemographicSituation",
+          "title": "Please describe the demogrpahic situation relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "EconomicInfrastructuralSituation",
+          "title": "Please describe the economic and infrastructural situation relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "AssessmentsIntroDocument",
+          "title": "If necessary, you can upload here an additional document"
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralAspectsClimateMonitoring",
+          "title": "Please describe the general aspects ofthe climate monitoring and modelling framework"
+        },
+        {
+          "type": "FIELD",
+          "name": "MainActivitiesClimateMonitoring",
+          "title": "Please describe the main activities on climate monitoring, modelling, projections and scenarios"
+        },
+        {
+          "type": "FIELD",
+          "name": "ApproachesMethodologiesTools",
+          "title": "Please describe the main approaches, methodologies and tools, and associated uncertainties and challenges"
+        },
+        {
+          "type": "FIELD",
+          "name": "AssessmentsObservationDocument",
+          "title": "If necessary, you can upload here an additional document"
+        },
         {
           "type": "TABLE",
           "name": "Meteorological_Observations",
-          "title": "Meteorological_Observations LO QUE MUESTRAS",
+          "title": "Meteorological Observations",
           "multipleRecords": true,
           "elements": [
-            { "type": "FIELD", "name": "Name", "title": "Name a" },
-            { "type": "FIELD", "name": "Status", "title": "Status a" },
-            { "type": "FIELD", "name": "WebLink", "title": "WebLink a" }
+            { "type": "FIELD", "name": "Name", "title": "Name of the Met Office" },
+            { "type": "FIELD", "name": "Status", "title": "Status of the Met Office" },
+            { "type": "FIELD", "name": "WebLink", "title": "Web link to the Met Office" }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "Meteorological_Observations",
+          "title": "Meteorological Observations",
+          "multipleRecords": true,
+          "elements": [
+            { "type": "FIELD", "name": "Description", "title": "Description of climate projections and services" },
+            { "type": "FIELD", "name": "Status", "title": "Status of the climate projections and services" },
+            { "type": "FIELD", "name": "WebLink", "title": "Web link to the climat eprojections and services" }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralAspectsAssessment",
+          "title": "Please describe the general  aspects of the assessment of climate impacts, vulnerability and risks, including adaptive capacity"
+        },
+        { "type": "FIELD", "name": "TemperatureRelatedAcute", "title": "Temperature-related - acute" },
+        { "type": "FIELD", "name": "TemperatureAcuteOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "WindRelatedAcute", "title": "Water-related - acute" },
+        { "type": "FIELD", "name": "WindAcuteOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "WaterRelatedAcute", "title": "Water-related - acute" },
+        { "type": "FIELD", "name": "WaterAcuteOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "SolidMassRelatedAcute", "title": "Solid mass-related - acute" },
+        { "type": "FIELD", "name": "SolidAcuteOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "TemperatureRelatedChronic", "title": "Temperature-related - chronic" },
+        { "type": "FIELD", "name": "TemperatureChronicOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "WindRelatedChronic", "title": "Wind-related - chronic" },
+        { "type": "FIELD", "name": "WindChronicOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "WaterRelatedChronic", "title": "Water-related - chronic" },
+        { "type": "FIELD", "name": "WaterChronicOther", "title": "If other, please explain" },
+        { "type": "FIELD", "name": "SolidMassRelatedChronic", "title": "Solid mass-related - chronic" },
+        { "type": "FIELD", "name": "SolidChronicOther", "title": "If other, please explain" },
+        {
+          "type": "FIELD",
+          "name": "DescribeExistingEnvironmental",
+          "title": "Please describe the existing environmental, economic and social pressures that are likely to be significantly affected by climate change"
+        },
+        {
+          "type": "TABLE",
+          "name": "AffectedSectors",
+          "title": "Affected Sectors",
+          "multipleRecords": true,
+          "elements": [
+            { "type": "FIELD", "name": "SectorTitle", "title": "Title of the sector" },
+            {
+              "type": "FIELD",
+              "name": "SectorDescribeIfOther",
+              "title": "If sector is 'Other', please explain"
+            },
+            {
+              "type": "FIELD",
+              "name": "ImpactsKeyHazards",
+              "title": "Observed impacts of key hazards, including changes in frequency and magnitude"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeImpactsKeyHazards",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "KeyHazardsLikelihood",
+              "title": "Key hazards, likelihood of their occurrence and exposure to them under future climate, drawing upon the best available climate modelling science"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeLikelihood",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "Vulnerability",
+              "title": "Vulnerability, including adaptive capacity, where adaptive capacity is defined as 'The ability of systems, institutions, humans and other organisms to adjust to potential damage, to take advantage of opportunities, or to respond to consequences'"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeVulnerability",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "RiskFutureImpacts",
+              "title": "Risk of potential future impacts"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeRisk",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "ValueRelative",
+              "title": "Share of spending used to support climate adaptation in this specific sector(relative, expressed in %)"
+            },
+            {
+              "type": "FIELD",
+              "name": "ValueAbsolute",
+              "title": "Share of spending used to support climate adaptation in this specific sector (absolute value, expressed in kEUR)"
+            }
           ]
         }
       ]
     },
     {
       "name": "QA_QC_C2",
-      "title": "QA_QC_C2 (lo que se muetra)",
+      "title": "QA_QC_C2",
       "multipleRecords": false,
       "elements": [
-        { "type": "FIELD", "name": "EuMemberState", "title": "EuMemberState (lo que se muetra)" },
-        { "type": "FIELD", "name": "UpdateDate", "title": "UpdateDate" },
-        { "type": "FIELD", "name": "ReportingUnderArt19", "title": "ReportingUnderArt19" }
+        {
+          "type": "FIELD",
+          "name": "NationalCircumstances",
+          "title": "Please describe the general  National circumstances"
+        },
+        {
+          "type": "FIELD",
+          "name": "BiogeophysicalCharacteristics",
+          "title": "Please describe the biogeophysical characteristics relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "DemographicSituation",
+          "title": "Please describe the demogrpahic situation relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "EconomicInfrastructuralSituation",
+          "title": "Please describe the economic and infrastructural situation relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "AssessmentsIntroDocument",
+          "title": "If necessary, you can upload here an additional document"
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralAspectsClimateMonitoring",
+          "title": "Please describe the general aspects ofthe climate monitoring and modelling framework"
+        },
+        {
+          "type": "FIELD",
+          "name": "MainActivitiesClimateMonitoring",
+          "title": "Please describe the main activities on climate monitoring, modelling, projections and scenarios"
+        },
+        {
+          "type": "FIELD",
+          "name": "ApproachesMethodologiesTools",
+          "title": "Please describe the main approaches, methodologies and tools, and associated uncertainties and challenges"
+        },
+        {
+          "type": "FIELD",
+          "name": "AssessmentsObservationDocument",
+          "title": "If necessary, you can upload here an additional document"
+        },
+        {
+          "type": "TABLE",
+          "name": "Meteorological_Observations",
+          "title": "Meteorological Observations",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Name",
+              "title": "Name of the Met Office"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status of the Met Office"
+            },
+            {
+              "type": "FIELD",
+              "name": "WebLink",
+              "title": "Web link to the Met Office"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "Meteorological_Observations",
+          "title": "Meteorological Observations",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Description",
+              "title": "Description of climate projections and services"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status of the climate projections and services"
+            },
+            {
+              "type": "FIELD",
+              "name": "WebLink",
+              "title": "Web link to the climat eprojections and services"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralAspectsAssessment",
+          "title": "Please describe the general  aspects of the assessment of climate impacts, vulnerability and risks, including adaptive capacity"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureRelatedAcute",
+          "title": "Temperature-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindRelatedAcute",
+          "title": "Water-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterRelatedAcute",
+          "title": "Water-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidMassRelatedAcute",
+          "title": "Solid mass-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureRelatedChronic",
+          "title": "Temperature-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindRelatedChronic",
+          "title": "Wind-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterRelatedChronic",
+          "title": "Water-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidMassRelatedChronic",
+          "title": "Solid mass-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeExistingEnvironmental",
+          "title": "Please describe the existing environmental, economic and social pressures that are likely to be significantly affected by climate change"
+        },
+        {
+          "type": "TABLE",
+          "name": "AffectedSectors",
+          "title": "Affected Sectors",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "SectorTitle",
+              "title": "Title of the sector"
+            },
+            {
+              "type": "FIELD",
+              "name": "SectorDescribeIfOther",
+              "title": "If sector is 'Other', please explain"
+            },
+            {
+              "type": "FIELD",
+              "name": "ImpactsKeyHazards",
+              "title": "Observed impacts of key hazards, including changes in frequency and magnitude"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeImpactsKeyHazards",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "KeyHazardsLikelihood",
+              "title": "Key hazards, likelihood of their occurrence and exposure to them under future climate, drawing upon the best available climate modelling science"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeLikelihood",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "Vulnerability",
+              "title": "Vulnerability, including adaptive capacity, where adaptive capacity is defined as 'The ability of systems, institutions, humans and other organisms to adjust to potential damage, to take advantage of opportunities, or to respond to consequences'"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeVulnerability",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "RiskFutureImpacts",
+              "title": "Risk of potential future impacts"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeRisk",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "ValueRelative",
+              "title": "Share of spending used to support climate adaptation in this specific sector(relative, expressed in %)"
+            },
+            {
+              "type": "FIELD",
+              "name": "ValueAbsolute",
+              "title": "Share of spending used to support climate adaptation in this specific sector (absolute value, expressed in kEUR)"
+            }
+          ]
+        }
       ]
     }
   ]

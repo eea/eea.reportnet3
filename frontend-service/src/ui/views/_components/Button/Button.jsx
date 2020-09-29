@@ -27,7 +27,8 @@ export const Button = ({
   tooltipOptions = null,
   type = 'button',
   value = '',
-  visible = true
+  visible = true,
+  ...rest
 }) => {
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
   if (layout === 'simple') {
@@ -54,6 +55,7 @@ export const Button = ({
       <>
         <PrimeButton
           id={id}
+          {...rest}
           className={`${className} ${helpClassName}`}
           disabled={disabled}
           icon={iconClassName}

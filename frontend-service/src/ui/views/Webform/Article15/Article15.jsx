@@ -1,13 +1,9 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useReducer } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
-
-import { config } from 'conf';
 
 import styles from './Article15.module.scss';
 
@@ -17,29 +13,18 @@ import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformContent } from './_components/WebformContent';
-
-import { DatasetService } from 'core/services/Dataset';
-
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { WebformTable } from './_components/WebformTable';
 
 import { article15Reducer } from './_functions/Reducers/article15Reducer';
 
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 
-export const Article15 = ({ dataflowId, datasetId, state }) => {
+export const Article15 = ({ datasetId, state }) => {
   const { datasetSchema, tableSchemaNames } = state;
 
-  const [article15State, article15Dispatch] = useReducer(article15Reducer, { allTables: [], data: [], isVisible: {} });
+  const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
 
   useEffect(() => initialLoad(), []);
-
-  const changeUrl = index => {
-    return window.history.replaceState(
-      null,
-      null,
-      `?tab=${index}${!isUndefined(state.isPreviewModeOn) ? `&design=${state.isPreviewModeOn}` : ''}`
-    );
-  };
 
   const initialLoad = () => {
     const allTables = tables.map(table => table.name);
@@ -47,7 +32,7 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
 
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: { isVisible: Article15Utils.getWebformTabs(allTables), data: parsedData, allTables }
+      payload: { isVisible: Article15Utils.getWebformTabs(allTables), data: parsedData }
     });
   };
 
@@ -59,26 +44,59 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
       isVisible[name] = true;
     });
 
-    // changeUrl(Article15Utils.getIndexFromName(state.datasetSchemaAllTables, name));
     article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
   const onLoadData = () => {
     if (!isEmpty(datasetSchema)) {
-      return Article15Utils.mergeArrays(tables, datasetSchema.tables, 'name', 'tableSchemaName');
-      // return data.map((element, i) => {
-      //   if (element.records) {
-      //     const fields = element.records[0].fields;
-      //     const webformFields = element.webformRecords[0].webformFields;
-      //     element.webformRecords[0].webformFields = Article15Utils.mergeArrays(
-      //       fields,
-      //       webformFields,
-      //       'name',
-      //       'fieldName'
-      //     );
-      //     return element;
-      //   } else return data[i];
-      // });
+      const data = Article15Utils.mergeArrays(tables, datasetSchema.tables, 'name', 'tableSchemaName');
+
+      data.map(table => {
+        if (table.records) {
+          table.records[0].fields = table.records[0].fields.map(field => {
+            const { fieldId, recordId, type } = field;
+
+            return { fieldSchema: fieldId, fieldType: type, recordSchemaId: recordId, ...field };
+          });
+        }
+      });
+
+      for (let index = 0; index < data.length; index++) {
+        const table = data[index];
+
+        if (table.records) {
+          const { elements, records } = table;
+
+          // table.elements = Article15Utils.mergeArrays(elements, records[0].fields, 'name', 'name');
+
+          const result = [];
+          for (let index = 0; index < elements.length; index++) {
+            result.push({
+              ...elements[index],
+              ...records[0].fields.find(element => element['name'] === elements[index]['name']),
+              type: elements[index].type
+            });
+          }
+
+          table.elements = result;
+
+          // const result = [];
+          // for (let i = 0; i < elements.length; i++) {
+          //   if (elements[i].type === 'FIELD') {
+          //     result.push({
+          //       ...elements[i],
+          //       ...records[0].fields.find(element => element['name'] === elements[i]['name'])
+          //     });
+          //   } else {
+          //     // TABLE PARSE
+          //   }
+          // }
+
+          // table.elements = result;
+        }
+      }
+
+      return data;
     }
   };
 
@@ -86,7 +104,8 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
     const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
 
-    return <WebformContent webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
+    // return <WebformContent webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
+    return <WebformTable webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
   };
 
   const renderWebFormHeaders = () => {
@@ -97,18 +116,28 @@ export const Article15 = ({ dataflowId, datasetId, state }) => {
       const isCreated = headers.includes(webform.name);
 
       return (
-        <Button
-          className={`${styles.headerButton} ${
-            article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
-          }`}
-          icon={!isCreated ? 'info' : webform.hasErrors ? 'warning' : null}
-          iconClasses={!article15State.isVisible[webform.title] ? (webform.hasErrors ? 'warning' : 'info') : ''}
-          iconPos={'right'}
-          key={i}
-          label={webform.title}
-          onClick={() => onChangeWebformTab(webform.name)}
-          style={{ padding: webform.hasErrors || !isCreated ? '0.2rem' : '0.5rem' }}
-        />
+        <Fragment>
+          <Button
+            data-tip
+            data-for={!isCreated ? 'TableNotExists' : ''}
+            className={`${styles.headerButton} ${
+              article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
+            }`}
+            icon={!isCreated ? 'info' : webform.hasErrors ? 'warning' : null}
+            iconClasses={!article15State.isVisible[webform.title] ? (webform.hasErrors ? 'warning' : 'info') : ''}
+            iconPos={'right'}
+            key={i}
+            label={webform.title}
+            onClick={() => onChangeWebformTab(webform.name)}
+            style={{ padding: webform.hasErrors || !isCreated ? '0.2rem' : '0.5rem' }}
+          />
+
+          {!isCreated && (
+            <ReactTooltip effect="solid" id="TableNotExists" place="top">
+              There are no tables created, please create one
+            </ReactTooltip>
+          )}
+        </Fragment>
       );
     });
   };

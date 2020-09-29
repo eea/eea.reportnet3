@@ -26,7 +26,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: Article15Utils.parseNewRecordData(record.webformFields, undefined) }
+      payload: { newRecord: Article15Utils.parseNewRecordData(record.elementsRecords, undefined) }
     });
   }, [record]);
 
@@ -42,7 +42,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
       option
     ] = value;
 
-    webformRecordState.record.webformFields.filter(field => field.fieldSchemaId === option)[0].value = value;
+    webformRecordState.record.elementsRecords.filter(field => field.fieldSchemaId === option)[0].value = value;
 
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { option, value } });
   };
@@ -110,7 +110,6 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
   };
 
   const renderTemplate = (field, option, type) => {
-    // // console.log('field.options', field.options);
     switch (type) {
       case 'DATE':
         return (
@@ -216,7 +215,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
             <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
           ))}
       </div>
-      {webformRecordState.record.multiple && !isEmpty(webformRecordState.record.webformFields) ? (
+      {webformRecordState.record.multiple && !isEmpty(webformRecordState.record.elementsRecords) ? (
         <div className={styles.actionButtons}>
           {/* <Button
             className={`${styles.collapse} p-button-rounded p-button-secondary p-button-animated-blink`}
@@ -231,11 +230,11 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
       ) : (
         <Fragment />
       )}
-      {!isEmpty(webformRecordState.record.webformFields)
-        ? webformRecordState.record.webformFields.map((field, i) => {
+      {!isEmpty(webformRecordState.record.elementsRecords)
+        ? webformRecordState.record.elementsRecords.map((field, i) => {
             return (
               <div key={i} className={styles.content}>
-                <p>{field.fieldName}</p>
+                <p>{field.title}</p>
                 <div>
                   {renderTemplate(field, field.fieldSchemaId, field.fieldType)}
                   {field.validations.map((validation, index) => (
@@ -250,6 +249,6 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
   );
 };
 
-WebformRecord.propTypes = { record: PropTypes.shape({ webformFields: PropTypes.array }) };
+WebformRecord.propTypes = { record: PropTypes.shape({ elementsRecords: PropTypes.array }) };
 
-WebformRecord.defaultProps = { record: { webformFields: [] } };
+WebformRecord.defaultProps = { record: { elementsRecords: [] } };
