@@ -859,7 +859,7 @@ public class DatasetSnapshotServiceTest {
     when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
         .thenReturn(snapshots);
     datasetSnapshotService.updateSnapshotEURelease(1L);
-    Mockito.verify(snapshotRepository, times(1)).releaseEUSnapshots(Mockito.any(), Mockito.any());
+    Mockito.verify(snapshotRepository, times(1)).releaseEUActiveSnapshots(Mockito.any());
   }
 
   /**
