@@ -3,7 +3,6 @@ package org.eea.validation.service.impl;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,6 +13,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -25,11 +26,11 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,48 +43,55 @@ import org.springframework.stereotype.Service;
 @Service("SQLRulesService")
 public class SqlRulesServiceImpl implements SqlRulesService {
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(SqlRulesServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant FIRST_QUERY_PART: {@value}. */
-  private static final String FIRST_QUERY_PART =
-      "ID, ID_RECORD_SCHEMA, ID_TABLE, DATASET_PARTITION_ID, DATA_PROVIDER_CODE";
+  /**
+   * The Constant KEYWORDS: {@value}.
+   */
+  private static final String KEYWORDS = "DELETE,INSERT,DROP";
 
-  /** The Constant COMMA: {@value}. */
-  private static final String COMMA = ", ";
-
-  /** The Constant SELECT: {@value}. */
-  private static final String SELECT = "SELECT";
-
-  /** The Constant FROM: {@value}. */
-  private static final String FROM = "FROM";
-
-  /** The Constant WHERE: {@value}. */
-  private static final String WHERE = "WHERE";
-
-  /** The Constant KEYWORDS: {@value}. */
-  private static final String KEYWORDS = "INNER,JOIN,COALESCE,DELETE,INSERT,DROP";
-
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Autowired
   private RulesRepository rulesRepository;
 
-  /** The kafka sender utils. */
+  /**
+   * The table repository.
+   */
+  @Autowired
+  private TableRepository tableRepository;
+
+
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
-  /** The rule mapper. */
+  /**
+   * The rule mapper.
+   */
   @Autowired
   private RuleMapper ruleMapper;
 
@@ -104,7 +112,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
         .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
 
-    if (validateRule(rule.getSqlSentence(), datasetId).equals(Boolean.TRUE)) {
+    if (validateRule(rule.getSqlSentence(), datasetId, rule).equals(Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
@@ -130,7 +138,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   public void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
       RuleVO ruleVO) {
     Rule rule = ruleMapper.classToEntity(ruleVO);
-    if (validateRule(ruleVO.getSqlSentence(), datasetId).equals(Boolean.FALSE)) {
+    if (validateRule(ruleVO.getSqlSentence(), datasetId, rule).equals(Boolean.FALSE)) {
       rule.setVerified(false);
       rule.setEnabled(false);
       rule.setWhenCondition(
@@ -167,18 +175,21 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param query the query
    * @param datasetId the dataset id
+   * @param rule the rule
+   *
    * @return the boolean
    */
 
-  private Boolean validateRule(String query, Long datasetId) {
+  private Boolean validateRule(String query, Long datasetId, Rule rule) {
     Boolean isSQLCorrect = Boolean.TRUE;
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
         try {
-          String preparedquery = queryTreat(query, datasetId) + " limit 5";
-          retrieveTableData(preparedquery, datasetId);
+
+          String preparedquery = query + " limit 5";
+          retrieveTableData(preparedquery, datasetId, rule);
         } catch (SQLException e) {
           LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
@@ -202,6 +213,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Check query syntax.
    *
    * @param query the query
+   *
    * @return the boolean
    */
   private Boolean checkQuerySyntax(String query) {
@@ -217,205 +229,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Gets the table name.
-   *
-   * @param query the query
-   * @return the table name
-   */
-  private String getTableName(String query) {
-    int from = query.indexOf(FROM);
-    String table = "";
-    List<String> tables = getTablesFromRuleQuery(query.substring(from));
-    for (int index = 0; index < tables.size(); index++) {
-      if (!tables.get(index).trim().equalsIgnoreCase("INNER")
-          && !tables.get(index).trim().equalsIgnoreCase("JOIN")
-          && !tables.get(index).trim().equalsIgnoreCase(" ")
-          && !tables.get(index).trim().equalsIgnoreCase("CROSS")
-          && !tables.get(index).trim().equalsIgnoreCase("LEFT")
-          && !tables.get(index).trim().equalsIgnoreCase("RIGHT")
-          && !tables.get(index).trim().equalsIgnoreCase(FROM)) {
-        table = tables.get(index);
-      }
-    }
-    return table;
-  }
-
-  /**
-   * Query treat.
-   *
-   * @param query the query
-   * @param datasetId the dataset id
-   * @return the string
-   */
-  @Override
-  @Transactional
-  public String queryTreat(String query, Long datasetId) {
-    String queryUpperCase = query.toUpperCase();
-    List<String> userQueryColumnList = getColumsFromRuleQuery(queryUpperCase);
-    String tableName = getTableName(queryUpperCase);
-    List<String> tableColumnList = getColumnsNameFromSchema(datasetId, tableName);
-    List<String> queryColumnList = extractQueryColumns(userQueryColumnList, tableColumnList);
-    String queryLastPart = getLastPartFromQuery(datasetId, queryUpperCase);
-    // the query begins to be rewritten
-    StringBuilder preparedStatement = new StringBuilder(SELECT + " ");
-    if (queryColumnList.isEmpty()) {
-      preparedStatement.append(" * ");
-    } else {
-      /*
-       * if we want the specific fields we need other data such as the id field Schema, the ID and
-       * the Type
-       */
-      preparedStatement.append(FIRST_QUERY_PART);
-      preparedStatement.append(COMMA);
-      Iterator<String> iterator = queryColumnList.iterator();
-      while (iterator.hasNext()) {
-        String column = iterator.next();
-        StringBuilder mustcolumns = new StringBuilder();
-        // name
-        mustcolumns.append(column);
-        mustcolumns.append(COMMA);
-        // name_id
-        mustcolumns.append(column + "_ID");
-        mustcolumns.append(COMMA);
-        // name_id_field_schema
-        mustcolumns.append(column + "_ID_FIELD_SCHEMA");
-        mustcolumns.append(COMMA);
-        // name_type
-        mustcolumns.append(column + "_TYPE");
-        if (iterator.hasNext()) {
-          mustcolumns.append(COMMA);
-        }
-      }
-    }
-    preparedStatement.append(queryLastPart);
-
-    return preparedStatement.toString();
-  }
-
-
-  /**
-   * Gets the last part from query.
-   *
-   * @param datasetId the dataset id
-   * @param query the query
-   * @return the last part from query
-   */
-  private String getLastPartFromQuery(Long datasetId, String query) {
-    int from = query.indexOf(FROM);
-    List<String> tables = getTablesFromRuleQuery(query.substring(from));
-    StringBuilder finalQueryPart = new StringBuilder(FROM);
-    for (int index = 0; index < tables.size(); index++) {
-      if (!tables.get(index).trim().equalsIgnoreCase("INNER")
-          && !tables.get(index).trim().equalsIgnoreCase("JOIN")
-          && !tables.get(index).trim().equalsIgnoreCase(" ")
-          && !tables.get(index).trim().equalsIgnoreCase("CROSS")
-          && !tables.get(index).trim().equalsIgnoreCase("LEFT")
-          && !tables.get(index).trim().equalsIgnoreCase("RIGHT")
-          && !tables.get(index).trim().equalsIgnoreCase(FROM)) {
-        finalQueryPart.append(" dataset_" + datasetId + "." + tables.get(index).trim());
-      }
-      if (query.contains(WHERE)) {
-        if (!tables.get(index).trim().equalsIgnoreCase(WHERE)) {
-          finalQueryPart.append(" ");
-          finalQueryPart.append(query.substring(query.indexOf(WHERE)));
-          break;
-        }
-      }
-    }
-    return finalQueryPart.toString();
-  }
-
-
-  /**
-   * Gets the tables from rule query.
-   *
-   * @param query the query
-   * @return the tables from rule query
-   */
-  private List<String> getTablesFromRuleQuery(String query) {
-    List<String> tableList = new ArrayList<>();
-    String preparedQuery = query.replaceAll(",", ", ");
-    String[] tables = preparedQuery.substring(preparedQuery.indexOf(FROM)).split("(?=\\s)");
-    for (String table : tables) {
-      if (!table.trim().equalsIgnoreCase(FROM)) {
-        tableList.add(table);
-      }
-      if (table.trim().equals(WHERE) && table.trim().equals("LIMIT")
-          && table.trim().equals("OFFSET")) {
-        break;
-      }
-    }
-    return tableList;
-  }
-
-  /**
-   * Extract query columns.
-   *
-   * @param userQueryColumnList the user query column list
-   * @param tableColumnList the table column list
-   * @return the list
-   */
-  private List<String> extractQueryColumns(List<String> userQueryColumnList,
-      List<String> tableColumnList) {
-    List<String> queryColumns = new ArrayList<>();
-    userQueryColumnList.stream().forEach(column -> {
-      if (tableColumnList.contains(column)) {
-        queryColumns.add(column);
-      }
-    });
-    return queryColumns;
-  }
-
-  /**
-   * Gets the colums from rule query.
-   *
-   * @param query the query
-   * @return the colums from rule query
-   */
-  private List<String> getColumsFromRuleQuery(String query) {
-    if (query.contains("*")) {
-      return new ArrayList<>();
-    } else {
-      List<String> columnList = new ArrayList<>();
-      String preparedQuery = query.replaceAll(",", ", ");
-      String[] fields = preparedQuery.split("(?=\\s)");
-      for (String field : fields) {
-        if (!field.trim().equalsIgnoreCase(SELECT) && !field.trim().equalsIgnoreCase(FROM)) {
-          columnList.add(field);
-        }
-        if (field.trim().equalsIgnoreCase(FROM)) {
-          break;
-        }
-      }
-      return columnList;
-    }
-  }
-
-  /**
-   * Gets the columns name from schema.
-   *
-   * @param datasetId the dataset id
-   * @param tableName the table name
-   * @return the columns name from schema
-   */
-  private List<String> getColumnsNameFromSchema(Long datasetId, String tableName) {
-    DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
-    List<String> fieldNameList = new ArrayList<>();
-    schema.getTableSchemas().stream().filter(table -> table.getNameTableSchema().equals(tableName))
-        .forEach(table -> {
-          table.getRecordSchema().getFieldSchema().stream().forEach(field -> {
-            fieldNameList.add(field.getName());
-          });
-        });
-    return fieldNameList;
-  }
-
-
-  /**
    * Gets the rule.
    *
    * @param datasetId the dataset id
    * @param ruleId the rule id
+   *
    * @return the rule
    */
   @Override
@@ -436,24 +254,138 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param query the query
    * @param datasetId the dataset id
+   * @param rule the rule
+   *
    * @return the table value
+   *
    * @throws SQLException the SQL exception
    */
 
   @Override
-  public TableValue retrieveTableData(String query, Long datasetId) throws SQLException {
+  public TableValue retrieveTableData(String query, Long datasetId, Rule rule) throws SQLException {
+    DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+    String entityName = "";
+    Long idTable = null;
+    switch (rule.getType()) {
+      case FIELD:
+        entityName = retriveFieldName(schema, rule.getReferenceId().toString());
+        idTable = retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString());
+        break;
+      case TABLE:
+        entityName = retriveTableName(schema, rule.getReferenceId().toString());
+        idTable = tableRepository.findByIdTableSchema(rule.getReferenceId().toString()).getId();
+        break;
+      case RECORD:
+        idTable = retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString());
+        break;
+      case DATASET:
+        break;
+    }
     TableValue table = new TableValue();
     try {
-      table = datasetRepository.queryRSExecution(query);
+      table =
+          datasetRepository.queryRSExecution(query, rule.getType(), entityName, datasetId, idTable);
     } catch (SQLException e) {
       LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
     }
-    if (null != table.getRecords() && !table.getRecords().isEmpty()) {
+    if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
       retrieveValidations(table.getRecords(), datasetId);
     }
     return table;
   }
 
+  /**
+   * Retrive is table from field schema.
+   *
+   * @param schema the schema
+   * @param fieldSchemaId the field schema id
+   *
+   * @return the long
+   */
+  private Long retriveIsTableFromFieldSchema(DataSetSchemaVO schema, String fieldSchemaId) {
+    String tableSchemaId = "";
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getId().equals(fieldSchemaId)) {
+          tableSchemaId = table.getIdTableSchema();
+        }
+      }
+    }
+    return tableRepository.findByIdTableSchema(tableSchemaId).getId();
+  }
+
+  /**
+   * Retrive is table from record schema.
+   *
+   * @param schema the schema
+   * @param recordSchemaId the record schema id
+   *
+   * @return the long
+   */
+  private Long retriveIsTableFromRecordSchema(DataSetSchemaVO schema, String recordSchemaId) {
+    String tableSchemaId = "";
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      if (table.getRecordSchema().getIdRecordSchema().equals(recordSchemaId)) {
+        tableSchemaId = table.getIdTableSchema();
+      }
+    }
+    return tableRepository.findByIdTableSchema(tableSchemaId).getId();
+  }
+
+  /**
+   * Retrive first result.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   *
+   * @return the list
+   */
+  @Override
+  public List<Object> retriveFirstResult(String query, Long datasetId) {
+
+    List<Object> result = datasetRepository.queryUniqueResultExecution(query);
+
+    return result;
+  }
+
+  /**
+   * Retrive table name.
+   *
+   * @param schema the schema
+   * @param idTableSchema the id table schema
+   *
+   * @return the string
+   */
+  private String retriveTableName(DataSetSchemaVO schema, String idTableSchema) {
+    String tableName = "";
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      if (table.getIdTableSchema().equals(idTableSchema)) {
+        tableName = table.getNameTableSchema();
+      }
+    }
+    return tableName;
+  }
+
+
+  /**
+   * Retrive field name.
+   *
+   * @param schema the schema
+   * @param idFieldSchema the id field schema
+   *
+   * @return the string
+   */
+  private String retriveFieldName(DataSetSchemaVO schema, String idFieldSchema) {
+    String fieldName = "";
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getId().equals(idFieldSchema)) {
+          fieldName = field.getName();
+        }
+      }
+    }
+    return fieldName;
+  }
 
   /**
    * Retrieve validations.
@@ -495,6 +427,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param recordIds the record ids
    * @param datasetId the dataset id
+   *
    * @return the field validations
    */
   private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds,
@@ -539,6 +472,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param recordIds the record ids
    * @param datasetId the dataset id
+   *
    * @return the record validations
    */
   private Map<String, List<RecordValidation>> getRecordValidations(final List<String> recordIds,

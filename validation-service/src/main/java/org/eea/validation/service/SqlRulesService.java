@@ -1,6 +1,7 @@
 package org.eea.validation.service;
 
 import java.sql.SQLException;
+import java.util.List;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -30,15 +31,6 @@ public interface SqlRulesService {
   void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId, RuleVO ruleVO);
 
   /**
-   * Query treat.
-   *
-   * @param query the query
-   * @param datasetId the dataset id
-   * @return the string
-   */
-  String queryTreat(String query, Long datasetId);
-
-  /**
    * Gets the rule.
    *
    * @param datasetId the dataset id
@@ -53,10 +45,21 @@ public interface SqlRulesService {
    *
    * @param query the query
    * @param datasetId the dataset id
+   * @param rule
    * @return the table value
    * @throws SQLException the SQL exception
    */
-  TableValue retrieveTableData(String query, Long datasetId) throws SQLException;
+  TableValue retrieveTableData(String query, Long datasetId, Rule rule) throws SQLException;
+
+
+  /**
+   * Retrive first result.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @return the object
+   */
+  List<Object> retriveFirstResult(String query, Long datasetId);
 
 
 
