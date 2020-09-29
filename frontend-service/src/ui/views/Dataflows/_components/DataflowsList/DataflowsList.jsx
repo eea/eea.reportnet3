@@ -18,12 +18,15 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
 
   const [dataToFilter, setDataToFilter] = useState(content);
   const [filteredData, setFilteredData] = useState(dataToFilter);
+  const [filteredState, setFilteredState] = useState(false);
 
   useEffect(() => {
     setDataToFilter(DataflowsListUtils.parseDataToFilter(content));
   }, [content]);
 
   const onLoadFiltredData = data => setFilteredData(data);
+
+  const getFilteredSearched = value => setFilteredState(value);
 
   return (
     <div className={`${styles.wrap} ${className}`}>
@@ -34,6 +37,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
           data={dataToFilter}
           dateOptions={DataflowConf.filterItems['date']}
           getFilteredData={onLoadFiltredData}
+          getFilteredSearched={getFilteredSearched}
           inputOptions={DataflowConf.filterItems['input']}
           selectOptions={DataflowConf.filterItems['select']}
           sortable={true}

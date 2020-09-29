@@ -295,14 +295,14 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    if (!ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)
-        && EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
-        && StringUtils.isBlank(ruleVO.getSqlSentence())) {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
+        && StringUtils.isBlank(ruleVO.getSqlSentence())
+        && !ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
-        || EntityTypeEnum.FIELD.equals(ruleVO.getType())
-            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition())) {
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
 
@@ -585,8 +585,8 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
-        || EntityTypeEnum.FIELD.equals(ruleVO.getType())
-            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition())) {
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
     Rule rule = ruleMapper.classToEntity(ruleVO);

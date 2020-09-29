@@ -2,9 +2,9 @@
   width: 20% !important;
   min-width: 20% !important;
   margin-left: 3rem;
-  position: absolute;
+  // position: absolute;
   top: 40px;
-  // float: left;
+  left: -300px;
   z-index: 9999;
 }
 
@@ -12,9 +12,9 @@
   width: 20% !important;
   min-width: 20% !important;
   margin-right: 1rem;
-  position: absolute;
+  // position: absolute;
   top: 40px;
-  left: 55px;
+  left: -260px;
   z-index: 9999;
 }
 
@@ -25,6 +25,11 @@
   // width: 20%;
   flex-direction: row;
   justify-content: flex-start;
+}
+
+.mapSelectMessage {
+  float: left;
+  font-weight: bold;
 }
 
 .marker {

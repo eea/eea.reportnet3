@@ -174,6 +174,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     // Map to store the origin datasetsId and the new ones crated equivalent
     Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
 
+    // Auxiliary map with the new dataset schemas created and the origin schema
+    Map<Long, DataSetSchemaVO> mapDatasetsDestinyAndSchemasOrigin = new HashMap<>();
+
     LOG.info(
         "The process to copy schemas from one dataflow to another begins. Dataflow Origin: {}. Dataflow Destination: {}",
         idDataflowOrigin, idDataflowDestination);
@@ -208,15 +211,25 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           // Fill the new schema dataset with the data of the original schema dataset
           LOG.info("Design dataset created in the copy process with id {}", datasetId.get());
           dictionaryOriginTargetDatasetsId.put(design.getId(), datasetId.get());
+          mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schemaVO);
           // Time to wait before continuing the process. If the process goes too fast, it won't find
           // the
           // dataset schema created and the process will fail. By default 3000ms
           Thread.sleep(timeToWaitBeforeContinueCopy);
-          fillAndUpdateDesignDatasetCopied(schemaVO, newIdDatasetSchema,
-              dictionaryOriginTargetObjectId, datasetId.get(), mapDatasetIdFKRelations);
-          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
-              datasetId.get());
         }
+        // After creating the datasets schemas on the DB, fill them and create the permissions
+        for (Map.Entry<Long, DataSetSchemaVO> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
+            .entrySet()) {
+          fillAndUpdateDesignDatasetCopied(itemNewDatasetAndSchema.getValue(),
+              dictionaryOriginTargetObjectId
+                  .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema()),
+              dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
+              mapDatasetIdFKRelations);
+          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
+              itemNewDatasetAndSchema.getKey());
+        }
+
+
 
         // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
         // the correct ones
@@ -281,12 +294,10 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    * @param mapDatasetIdFKRelations the map dataset id FK relations
    * @return the map
    * @throws EEAException the EEA exception
-   * @throws InterruptedException the interrupted exception
    */
   private Map<String, String> fillAndUpdateDesignDatasetCopied(DataSetSchemaVO schemaOrigin,
       String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId,
-      Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations)
-      throws EEAException, InterruptedException {
+      Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations) throws EEAException {
 
     // We've got the new schema created during the copy process. Now using the dictionary we'll
     // replace the objectIds of the schema, because at this moment the new schema has the origin

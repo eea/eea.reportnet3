@@ -311,7 +311,7 @@ const FieldEditor = ({
               type="text"
               value={
                 RecordUtils.getCellValue(cells, cells.field) !== ''
-                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates
                   : ''
               }
             />
