@@ -127,7 +127,13 @@ public class SQLValidationUtils {
       }
     } else {
       try {
-        tableToEvaluate = sqlRulesService.retrieveTableData(query, datasetId, rule);
+        String preparedquery = "";
+        if (query.contains(";")) {
+          preparedquery = query.replace(";", "");
+        } else {
+          preparedquery = query;
+        }
+        tableToEvaluate = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule);
       } catch (SQLException e) {
         LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
       }

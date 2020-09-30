@@ -26,7 +26,6 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -59,11 +58,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
-
-  /** The table repository. */
-  @Autowired
-  private TableRepository tableRepository;
-
 
   /** The kafka sender utils. */
   @Autowired
@@ -134,7 +128,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     }
 
-
   }
 
   /**
@@ -168,8 +161,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       // validate query sintax
       if (checkQuerySyntax(query)) {
         try {
-
-          String preparedquery = query + " limit 5";
+          String preparedquery = "";
+          if (query.contains(";")) {
+            preparedquery = query.replace(";", "") + " limit 5";
+          } else {
+            preparedquery = query + " limit 5";
+          }
           retrieveTableData(preparedquery, datasetId, rule);
         } catch (SQLException e) {
           LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
