@@ -1030,4 +1030,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createUpdateQueryView(Long datasetId) {
+    throw new UnsupportedOperationException("Operation not implemented yet");
+  }
+
+
 }

@@ -137,4 +137,12 @@ public interface RecordStoreService {
    */
   void executeQueryViewCommands(String command) throws RecordStoreAccessException;
 
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   */
+  void createUpdateQueryView(Long datasetId);
+
 }
