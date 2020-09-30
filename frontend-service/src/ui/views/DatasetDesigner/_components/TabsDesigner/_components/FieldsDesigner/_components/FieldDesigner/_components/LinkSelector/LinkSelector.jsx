@@ -56,6 +56,7 @@ const LinkSelector = withRouter(
     useEffect(() => {
       if (isSaved) {
         onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+        setIsVisible(false);
       }
     }, [isSaved]);
 
@@ -67,7 +68,6 @@ const LinkSelector = withRouter(
           label={resources.messages['save']}
           onClick={() => {
             setIsSaved(true);
-            setIsVisible(false);
           }}
         />
         <Button
