@@ -712,6 +712,10 @@
     "value": "dHJ1ZQ=="
   },
   {
+    "key": "config/validation/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLnNwYXRpYWwuZGlhbGVjdC5wb3N0Z2lzLlBvc3RnaXNEaWFsZWN0fQ=="
+  },
+  {
     "key": "config/validation/spring.datasource.hikari.connection-timeout",
     "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
   },
