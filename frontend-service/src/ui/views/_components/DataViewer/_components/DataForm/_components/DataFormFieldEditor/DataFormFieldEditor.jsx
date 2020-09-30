@@ -339,7 +339,7 @@ const DataFormFieldEditor = ({
   };
 
   const renderMap = () => (
-    <Map geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
+    <Map hasLegend={true} geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
   );
 
   const renderMapType = (field, fieldValue) => (
