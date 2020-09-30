@@ -42,32 +42,48 @@ import org.springframework.stereotype.Service;
 @Service("SQLRulesService")
 public class SqlRulesServiceImpl implements SqlRulesService {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(SqlRulesServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant KEYWORDS: {@value}. */
+  /**
+   * The Constant KEYWORDS: {@value}.
+   */
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Autowired
   private RulesRepository rulesRepository;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
-  /** The rule mapper. */
+  /**
+   * The rule mapper.
+   */
   @Autowired
   private RuleMapper ruleMapper;
 
@@ -117,9 +133,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (validateRule(ruleVO.getSqlSentence(), datasetId, rule).equals(Boolean.FALSE)) {
       rule.setVerified(false);
       rule.setEnabled(false);
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
-              .append("',").append(datasetId).append(")").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     } else {
@@ -151,6 +166,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
+   *
    * @return the boolean
    */
 
@@ -191,6 +207,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Check query syntax.
    *
    * @param query the query
+   *
    * @return the boolean
    */
   private Boolean checkQuerySyntax(String query) {
@@ -210,6 +227,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param ruleId the rule id
+   *
    * @return the rule
    */
   @Override
@@ -231,7 +249,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
+   *
    * @return the table value
+   *
    * @throws SQLException the SQL exception
    */
 
@@ -264,7 +284,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     } catch (SQLException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
-    if (null != table.getRecords() && !table.getRecords().isEmpty()) {
+    if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
       retrieveValidations(table.getRecords(), datasetId);
     }
     return table;
@@ -275,6 +295,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param schema the schema
    * @param fieldSchemaId the field schema id
+   *
    * @return the long
    */
   @Transactional
@@ -296,6 +317,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param schema the schema
    * @param recordSchemaId the record schema id
+   *
    * @return the long
    */
   @Transactional
@@ -315,6 +337,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param query the query
    * @param datasetId the dataset id
+   *
    * @return the list
    */
   @Override
@@ -330,6 +353,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param schema the schema
    * @param idTableSchema the id table schema
+   *
    * @return the string
    */
   private String retriveTableName(DataSetSchemaVO schema, String idTableSchema) {
@@ -348,6 +372,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
+   *
    * @return the string
    */
   private String retriveFieldName(DataSetSchemaVO schema, String idFieldSchema) {
@@ -402,6 +427,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param recordIds the record ids
    * @param datasetId the dataset id
+   *
    * @return the field validations
    */
   private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds,
@@ -446,6 +472,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param recordIds the record ids
    * @param datasetId the dataset id
+   *
    * @return the record validations
    */
   private Map<String, List<RecordValidation>> getRecordValidations(final List<String> recordIds,
