@@ -19,7 +19,6 @@ pipeline {
                     steps {
                         sh '''
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
-                            
                         '''
 
                     }
