@@ -904,11 +904,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       result.put(LiteralConstants.ID_DATASET_SCHEMA, entry.getValue());
       kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
 
-      Map<String, Object> event = new HashMap<>();
-      event.put(LiteralConstants.DATASET_ID, entry.getKey().toString());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "CREATE");
-      kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
+      createUpdateQueryView(entry.getKey());
+
 
     }
   }
