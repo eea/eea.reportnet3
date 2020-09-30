@@ -46,7 +46,7 @@ pipeline {
                 }
             }
         }
-        stage('Static Code Analysis') {
+       /* stage('Static Code Analysis') {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
@@ -55,9 +55,9 @@ pipeline {
                     sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
             }
-        }
+        }*/
 
-        stage("Quality Gate"){
+        /*stage("Quality Gate"){
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
