@@ -53,6 +53,8 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private SqlRulesService sqlRulesService;
 
+
+
   /**
    * Creates the empty rules schema.
    *

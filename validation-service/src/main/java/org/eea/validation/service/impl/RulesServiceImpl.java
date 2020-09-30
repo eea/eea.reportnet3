@@ -12,13 +12,13 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
@@ -99,6 +99,9 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreController;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -364,13 +367,7 @@ public class RulesServiceImpl implements RulesService {
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
           .append(",'").append(rule.getRuleId().toString()).append("')").toString());
-
-      Map<String, Object> event = new HashMap<>();
-      event.put("dataset_id", String.valueOf(datasetId));
-      event.put("rule_id", ruleVO.getRuleId());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "CREATE");
-      sentEvent(event);
+      recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
@@ -662,12 +659,7 @@ public class RulesServiceImpl implements RulesService {
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
           .append(",'").append(rule.getRuleId().toString()).append("')").toString());
-      Map<String, Object> event = new HashMap<>();
-      event.put("dataset_id", String.valueOf(datasetId));
-      event.put("rule_id", ruleVO.getRuleId());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "CREATE");
-      sentEvent(event);
+      recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
@@ -1124,16 +1116,6 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public Long updateSequence(String datasetSchemaId) {
     return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
-  }
-
-
-  /**
-   * Sent event.
-   *
-   * @param event the event
-   */
-  private void sentEvent(Map<String, Object> event) {
-    kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
   }
 
   /**

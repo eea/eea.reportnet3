@@ -57,11 +57,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   /** The Constant ERROR_EXECUTING_DOCKER_COMMAND_LOG. */
   private static final String ERROR_EXECUTING_DOCKER_COMMAND_LOG =
       "Error executing docker command to create the dataset. {}";
+
   /**
    * The docker interface service.
    */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
+
+
 
   /**
    * The container name.
@@ -407,4 +410,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     }
     LOG.info("Command on Query View executed: {}", command);
   }
+
+
+  @Override
+  public void createUpdateQueryView(Long datasetId) {
+    LOG.info("Create or Update Query View");
+  }
+
+
 }
