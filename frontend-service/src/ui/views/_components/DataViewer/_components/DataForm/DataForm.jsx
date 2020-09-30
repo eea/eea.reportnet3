@@ -45,9 +45,7 @@ const DataForm = ({
                   <Button
                     className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
                     icon="infoCircle"
-                    onClick={() => {
-                      onShowFieldInfo(column.header, true);
-                    }}
+                    onClick={() => onShowFieldInfo(column.header, true)}
                     tabIndex="-1"
                     tooltip={getTooltipMessage(column)}
                     tooltipOptions={{ position: 'top' }}
@@ -57,7 +55,7 @@ const DataForm = ({
               <div
                 className="p-col-8"
                 style={{
-                  padding: '.5em',
+                  padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
                   width:
                     column.type === 'DATE' ||
                     column.type === 'CODELIST' ||
@@ -120,7 +118,7 @@ const DataForm = ({
                 <div
                   className="p-col-8"
                   style={{
-                    padding: '.5em',
+                    padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
                     width:
                       column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
                         ? '30%'

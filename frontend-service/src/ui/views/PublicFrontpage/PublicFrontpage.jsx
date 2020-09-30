@@ -59,6 +59,7 @@ export const PublicFrontpage = () => {
                     <a href="mailto:helpdesk@eionet.europa.eu">helpdesk@eionet.europa.eu</a>
                   </p>
                 </div>
+                <hr className={styles.separator} />
                 <div className={`${styles.linkBox} ${styles.sideBarItem}`}>
                   <div className={styles.iconWrapper}>
                     <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('lightPdf')} />
