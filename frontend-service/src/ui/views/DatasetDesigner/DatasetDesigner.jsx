@@ -696,7 +696,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
-        label={resources.messages['createDatasetValidationBtn']}
+        label={resources.messages['createTableValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog');
         }}
