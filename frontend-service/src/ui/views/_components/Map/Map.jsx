@@ -215,7 +215,6 @@ export const Map = ({
   };
 
   const onEachFeature = (feature, layer) => {
-    console.log({ feature, layer });
     layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
     layer.on({
       click: () =>
