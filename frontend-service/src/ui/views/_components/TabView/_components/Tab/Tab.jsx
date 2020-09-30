@@ -378,12 +378,8 @@ const Tab = ({
                   }
                 }
               }}
-              onMouseOut={e => {
-                setIconToShow('cancel');
-              }}
-              onMouseOver={e => {
-                setIconToShow('errorCircle');
-              }}>
+              onMouseOut={() => setIconToShow('cancel')}
+              onMouseOver={() => setIconToShow('errorCircle')}>
               {!addTab && !newTab ? (
                 <Icon
                   icon={iconToShow}

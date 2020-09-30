@@ -946,7 +946,7 @@ const DataViewer = withRouter(
     };
 
     const mapRender = () => (
-      <Map geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
+      <Map hasLegend={true} geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
     );
 
     const rowClassName = rowData => {
