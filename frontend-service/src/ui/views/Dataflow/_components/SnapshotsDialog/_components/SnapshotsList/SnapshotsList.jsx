@@ -8,7 +8,13 @@ import { SnapshotItem } from './_components/SnapshotItem';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SnapshotsList = ({ getSnapshotData, isLoading, showReleaseDialog, snapshotsListData }) => {
+export const SnapshotsList = ({
+  getSnapshotData,
+  isLoading,
+  showReleaseDialog,
+  snapshotsListData,
+  snapshotDataToRelease
+}) => {
   const resources = useContext(ResourcesContext);
 
   if (!isEmpty(snapshotsListData)) {
@@ -22,6 +28,7 @@ export const SnapshotsList = ({ getSnapshotData, isLoading, showReleaseDialog, s
                 isLoading={isLoading}
                 itemData={item}
                 showReleaseDialog={showReleaseDialog}
+                snapshotDataToRelease={snapshotDataToRelease}
               />
             </div>
           ))}

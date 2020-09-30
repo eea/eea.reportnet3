@@ -9,7 +9,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog }) => {
+export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog, snapshotDataToRelease }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -37,7 +37,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
             <Button
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : ``}`}
               disabled={isLoading || itemData.isBlocked}
-              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
+              icon={itemData.id === snapshotDataToRelease.id ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
               onClick={() => {
                 showReleaseDialog({ isReleased: false });
                 getSnapshotData(itemData);
