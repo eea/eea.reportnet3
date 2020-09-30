@@ -47,57 +47,70 @@ export const Article15 = ({ datasetId, state }) => {
     article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
-  const onLoadData = () => {
-    if (!isEmpty(datasetSchema)) {
-      const data = Article15Utils.mergeArrays(tables, datasetSchema.tables, 'name', 'tableSchemaName');
+  const onParseWebformData = (allTables, schemaTables) => {
+    const data = Article15Utils.mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
 
-      data.map(table => {
-        if (table.records) {
-          table.records[0].fields = table.records[0].fields.map(field => {
-            const { fieldId, recordId, type } = field;
+    data.map(table => {
+      if (table.records) {
+        table.records[0].fields = table.records[0].fields.map(field => {
+          const { fieldId, recordId, type } = field;
 
-            return { fieldSchema: fieldId, fieldType: type, recordSchemaId: recordId, ...field };
-          });
-        }
-      });
+          return { fieldSchema: fieldId, fieldType: type, recordSchemaId: recordId, ...field };
+        });
+      }
+    });
 
-      for (let index = 0; index < data.length; index++) {
-        const table = data[index];
+    for (let index = 0; index < data.length; index++) {
+      const table = data[index];
 
-        if (table.records) {
-          const { elements, records } = table;
+      if (table.records) {
+        const { elements, records } = table;
 
-          // table.elements = Article15Utils.mergeArrays(elements, records[0].fields, 'name', 'name');
+        // table.elements = Article15Utils.mergeArrays(elements, records[0].fields, 'name', 'name');
 
-          const result = [];
-          for (let index = 0; index < elements.length; index++) {
+        const result = [];
+        for (let index = 0; index < elements.length; index++) {
+          if (elements[index].type === 'FIELD') {
             result.push({
               ...elements[index],
               ...records[0].fields.find(element => element['name'] === elements[index]['name']),
               type: elements[index].type
             });
+          } else if (elements[index].type === 'TABLE') {
+            const filteredTable = datasetSchema.tables.filter(table => table.tableSchemaName === elements[index].name);
+            const parsedTable = onParseWebformData([elements[index]], filteredTable);
+
+            result.push({
+              ...elements[index],
+              ...parsedTable[0],
+              type: elements[index].type
+            });
           }
-
-          table.elements = result;
-
-          // const result = [];
-          // for (let i = 0; i < elements.length; i++) {
-          //   if (elements[i].type === 'FIELD') {
-          //     result.push({
-          //       ...elements[i],
-          //       ...records[0].fields.find(element => element['name'] === elements[i]['name'])
-          //     });
-          //   } else {
-          //     // TABLE PARSE
-          //   }
-          // }
-
-          // table.elements = result;
         }
-      }
 
-      return data;
+        table.elements = result;
+
+        // const result = [];
+        // for (let i = 0; i < elements.length; i++) {
+        //   if (elements[i].type === 'FIELD') {
+        //     result.push({
+        //       ...elements[i],
+        //       ...records[0].fields.find(element => element['name'] === elements[i]['name'])
+        //     });
+        //   } else {
+        //     // TABLE PARSE
+        //   }
+        // }
+
+        // table.elements = result;
+      }
     }
+
+    return data;
+  };
+
+  const onLoadData = () => {
+    if (!isEmpty(datasetSchema)) return onParseWebformData(tables, datasetSchema.tables);
   };
 
   const renderWebFormContent = () => {
@@ -116,7 +129,7 @@ export const Article15 = ({ datasetId, state }) => {
       const isCreated = headers.includes(webform.name);
 
       return (
-        <Fragment>
+        <Fragment key={i}>
           <Button
             data-tip
             data-for={!isCreated ? 'TableNotExists' : ''}
@@ -134,7 +147,7 @@ export const Article15 = ({ datasetId, state }) => {
 
           {!isCreated && (
             <ReactTooltip effect="solid" id="TableNotExists" place="top">
-              There are no tables created, please create one
+              {`The table ${webform.name} is not created in the design, please check it`}
             </ReactTooltip>
           )}
         </Fragment>

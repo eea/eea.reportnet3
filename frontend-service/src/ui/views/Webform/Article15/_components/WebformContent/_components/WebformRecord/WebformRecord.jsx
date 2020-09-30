@@ -1,8 +1,10 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import ReactTooltip from 'react-tooltip';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 
 import styles from './WebformRecord.module.scss';
 
@@ -20,15 +22,15 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
 
-export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
+export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTabChange, record, tableId }) => {
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, { newRecord: {}, record });
 
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: Article15Utils.parseNewRecordData(record.elementsRecords, undefined) }
+      payload: { newRecord: Article15Utils.parseNewRecordData(record.elements, undefined) }
     });
-  }, [record]);
+  }, [record, onTabChange]);
 
   const onDeleteMultipleWebform = async () => {
     try {
@@ -42,7 +44,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
       option
     ] = value;
 
-    webformRecordState.record.elementsRecords.filter(field => field.fieldSchemaId === option)[0].value = value;
+    webformRecordState.record.elements.filter(field => field.fieldSchemaId === option)[0].value = value;
 
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { option, value } });
   };
@@ -116,6 +118,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            id={field.fieldId}
             monthNavigator={true}
             onChange={event => {
               onFillField(option, formatDate(event.target.value, isNil(event.target.value)));
@@ -134,6 +137,9 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
           <InputText
             // keyfilter={getFilter(type)}
             // maxLength={urlCharacters}
+            className={'p-disabled'}
+            disabled={field.isDisabled}
+            id={field.fieldId}
             onBlur={event => {}}
             onChange={event => {}}
             onFocus={event => {
@@ -150,6 +156,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
           <MultiSelect
             appendTo={document.body}
             maxSelectedLabels={10}
+            id={field.fieldId}
             onChange={event => {
               onFillField(option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -171,6 +178,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
         return (
           <Dropdown
             appendTo={document.body}
+            id={field.fieldId}
             // currentValue={RecordUtils.getCellValue(cells, cells.field)}
             // filter={true}
             // filterPlaceholder={resources.messages['linkFilterPlaceholder']}
@@ -192,6 +200,7 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
       case 'TEXT':
         return (
           <InputText
+            id={field.fieldId}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
@@ -202,53 +211,105 @@ export const WebformRecord = ({ datasetId, onRefresh, record, tableId }) => {
           />
         );
 
+      case 'EMPTY':
+        return <span>EMPTY</span>;
+
       default:
         break;
     }
   };
 
-  return (
-    <div className={styles.contentWrap}>
-      <div className={styles.actionButtons}>
-        {!isEmpty(webformRecordState.record.validations) &&
-          webformRecordState.record.validations.map((validation, index) => (
-            <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
-          ))}
-      </div>
-      {webformRecordState.record.multiple && !isEmpty(webformRecordState.record.elementsRecords) ? (
+  const renderFields = elements => {
+    return elements.map((field, i) => {
+      if (field.type === 'FIELD') {
+        return (
+          <div key={i} className={styles.content}>
+            <div>
+              {field.title}
+              {field.isDisabled && (
+                <Fragment>
+                  <Button
+                    className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+                    data-for={'FieldNotExists'}
+                    data-tip
+                    icon="infoCircle"
+                  />
+                  <ReactTooltip effect="solid" id="FieldNotExists" place="top">
+                    {`The field ${field.name} is not created in the design, please check it`}
+                  </ReactTooltip>
+                </Fragment>
+              )}
+            </div>
+            <div>
+              {renderTemplate(field, field.fieldSchemaId, field.fieldType)}
+              {field.validations &&
+                field.validations.map((validation, index) => (
+                  <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+                ))}
+            </div>
+          </div>
+        );
+      } else {
+        // return <div style={{ position: 'absolute', top: '50%', left: '50%', backgroundColor: 'red' }}>heyyy</div>;
+
+        return (
+          <div key={i} className={styles.body}>
+            <h3 className={styles.title}>
+              {field.title ? field.title : field.name}
+              {field.multipleRecords && (
+                <Button
+                  disabled
+                  icon={'plus'}
+                  label={'Add'}
+                  onClick={() => onAddMultipleWebform(field.tableSchemaId)}
+                />
+              )}
+            </h3>
+            {field.elementsRecords.map((record, i) => {
+              return (
+                <WebformRecord
+                  datasetId={datasetId}
+                  key={i}
+                  onAddMultipleWebform={onAddMultipleWebform}
+                  onRefresh={onRefresh}
+                  onTabChange={onTabChange}
+                  record={record}
+                  tableId={tableId}
+                />
+              );
+            })}
+          </div>
+        );
+      }
+    });
+  };
+
+  const renderWebformContent = record => {
+    return (
+      <div className={styles.contentWrap}>
         <div className={styles.actionButtons}>
-          {/* <Button
-            className={`${styles.collapse} p-button-rounded p-button-secondary p-button-animated-blink`}
-            icon={'plus'}
-          /> */}
-          <Button
-            className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-            icon={'trash'}
-            onClick={() => onDeleteMultipleWebform()}
-          />
+          {!isEmpty(record.validations) &&
+            record.validations.map((validation, index) => (
+              <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+            ))}
         </div>
-      ) : (
-        <Fragment />
-      )}
-      {!isEmpty(webformRecordState.record.elementsRecords)
-        ? webformRecordState.record.elementsRecords.map((field, i) => {
-            return (
-              <div key={i} className={styles.content}>
-                <p>{field.title}</p>
-                <div>
-                  {renderTemplate(field, field.fieldSchemaId, field.fieldType)}
-                  {field.validations.map((validation, index) => (
-                    <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
-                  ))}
-                </div>
-              </div>
-            );
-          })
-        : 'There are no fields'}
-    </div>
-  );
+        {record.multiple && !isEmpty(record.elements) && (
+          <div className={styles.actionButtons}>
+            <Button
+              className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
+              icon={'trash'}
+              onClick={() => onDeleteMultipleWebform()}
+            />
+          </div>
+        )}
+        {!isEmpty(record.elements) ? renderFields(record.elements) : 'There are no fields'}
+      </div>
+    );
+  };
+
+  return renderWebformContent(webformRecordState.record);
 };
 
-WebformRecord.propTypes = { record: PropTypes.shape({ elementsRecords: PropTypes.array }) };
+WebformRecord.propTypes = { record: PropTypes.shape({ elements: PropTypes.array }) };
 
-WebformRecord.defaultProps = { record: { elementsRecords: [] } };
+WebformRecord.defaultProps = { record: { elements: [] } };

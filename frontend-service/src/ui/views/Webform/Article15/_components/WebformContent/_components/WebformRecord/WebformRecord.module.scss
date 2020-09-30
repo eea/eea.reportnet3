@@ -30,5 +30,44 @@
   }
 
   .content {
+    .infoButton {
+      background-color: var(--white) !important;
+      border-radius: 50% !important;
+      color: var(--datatable-header-info-button-color) !important;
+      font-size: 12pt !important;
+      height: 0.7em !important;
+      margin-left: 0.4rem !important;
+      width: 0.7em !important;
+
+      > span {
+        left: 46% !important;
+        margin-left: -0.48em !important;
+        margin-top: -0.5em !important;
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+  }
+}
+
+.body {
+  // border: 0.1rem solid var(--gray-25);
+  // padding: 1rem;
+  border-radius: 10px;
+  height: 100%;
+  margin-top: 1rem;
+  width: 100%;
+
+  .title {
+    align-items: center;
+    border-radius: 10px;
+    border: 0.1rem solid var(--gray-25);
+    display: flex;
+    font-weight: 400;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+    padding: 1rem;
   }
 }

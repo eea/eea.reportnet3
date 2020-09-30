@@ -1,5 +1,5 @@
 const parseWebformData = data => {
-  data.here = data.elements.map(element => ({ ...element }));
+  data.elementsRecords = data.elements.map(element => ({ ...element }));
 
   return data;
 };

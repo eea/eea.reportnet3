@@ -125,7 +125,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     validateDialogVisible: false,
     validationListDialogVisible: false,
     isWebformDataflow: true,
-    viewType: { design: DatasetDesignerUtils.getUrlParamValue('design'), table: false, webform: false }
+    viewType: { design: true, table: false, webform: false }
   });
 
   const exportMenuRef = useRef();

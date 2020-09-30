@@ -7,7 +7,7 @@ export const webformTableReducer = (state, { type, payload }) => {
       return { ...state, isLoading: payload.value };
 
     case 'ON_LOAD_DATA':
-      return { ...state, webformData: { ...state.webformData, here: payload.records } };
+      return { ...state, webformData: { ...state.webformData, elementsRecords: payload.records } };
 
     case 'ON_UPDATE_DATA':
       return { ...state, isDataUpdated: payload.value };
