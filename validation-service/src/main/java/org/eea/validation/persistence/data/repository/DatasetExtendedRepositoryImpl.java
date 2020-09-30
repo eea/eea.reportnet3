@@ -10,6 +10,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -54,6 +55,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    * @return the table value
    */
   @Override
+  @Transactional
   public TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
       Long datasetId, Long idTable) throws SQLException {
     Session session = (Session) entityManager.getDelegate();

@@ -26,7 +26,6 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -69,13 +68,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   @Autowired
   private RulesRepository rulesRepository;
-
-  /**
-   * The table repository.
-   */
-  @Autowired
-  private TableRepository tableRepository;
-
 
   /**
    * The kafka sender utils.
@@ -141,9 +133,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (validateRule(ruleVO.getSqlSentence(), datasetId, rule).equals(Boolean.FALSE)) {
       rule.setVerified(false);
       rule.setEnabled(false);
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
-              .append("',").append(datasetId).append(")").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     } else {
@@ -151,7 +142,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       rule.setVerified(true);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     }
-
 
   }
 
@@ -187,8 +177,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       // validate query sintax
       if (checkQuerySyntax(query)) {
         try {
-
-          String preparedquery = query + " limit 5";
+          String preparedquery = "";
+          if (query.contains(";")) {
+            preparedquery = query.replace(";", "") + " limit 5";
+          } else {
+            preparedquery = query + " limit 5";
+          }
           retrieveTableData(preparedquery, datasetId, rule);
         } catch (SQLException e) {
           LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
