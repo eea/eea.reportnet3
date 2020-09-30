@@ -437,8 +437,7 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
               false));
 
-          if (null != fieldSchemaPK && null != fieldSchemaPK.getPkMustBeUsed()
-              && fieldSchemaPK.getPkMustBeUsed()) {
+          if (null != fieldSchemaPK && Boolean.TRUE.equals(fieldSchemaPK.getPkMustBeUsed())) {
 
             Long shortcodeAux =
                 rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
@@ -475,6 +474,34 @@ public class RulesServiceImpl implements RulesService {
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POSITION:
+          ruleList.add(AutomaticRules.createPositionAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POINT:
+          ruleList.add(AutomaticRules.createPointAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case MULTIPOINT:
+          ruleList.add(AutomaticRules.createMultipointAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case LINESTRING:
+          ruleList.add(AutomaticRules.createLinestringAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case MULTILINESTRING:
+          ruleList.add(AutomaticRules.createMultilinestringAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POLYGON:
+          ruleList.add(AutomaticRules.createPolygonAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case GEOMETRYCOLLECTION:
+          ruleList.add(AutomaticRules.createGeometrycollectionAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());

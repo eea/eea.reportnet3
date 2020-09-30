@@ -25,38 +25,29 @@ import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.geolatte.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class PKValidation.
+ * The Class FKValidationUtils.
  */
 @Component
 public class FKValidationUtils {
 
-  /**
-   * The data set controller zuul.
-   */
+  /** The data set controller zuul. */
   private static DataSetControllerZuul dataSetControllerZuul;
 
-  /**
-   * The rules repository.
-   */
+  /** The rules repository. */
   private static RulesRepository rulesRepository;
 
-  /**
-   * The dataset metabase controller zuul.
-   */
+  /** The dataset metabase controller zuul. */
   private static DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   private static SchemasRepository schemasRepository;
 
-  /**
-   * The field repository.
-   */
+  /** The field repository. */
   private static FieldRepository fieldRepository;
 
   /*
@@ -73,7 +64,6 @@ public class FKValidationUtils {
   synchronized void setDatasetController(DataSetControllerZuul dataSetControllerZuul) {
     FKValidationUtils.dataSetControllerZuul = dataSetControllerZuul;
   }
-
 
   /**
    * Sets the rules repository.
@@ -107,24 +97,21 @@ public class FKValidationUtils {
   }
 
   /**
-   * Sets the dataset repository.
+   * Sets the field repository.
    *
-   * @param fieldRepository the new dataset repository
+   * @param fieldRepository the new field repository
    */
   @Autowired
   synchronized void setFieldRepository(FieldRepository fieldRepository) {
     FKValidationUtils.fieldRepository = fieldRepository;
   }
 
-  /**
-   * The Constant PK_VALUE_LIST.
-   */
+  /** The Constant PK_VALUE_LIST: {@value}. */
   private static final String PK_VALUE_LIST =
       "select distinct field_value.VALUE from dataset_%s.field_value field_value where field_value.id_field_schema='%s'";
 
-
   /**
-   * Isfield PK.
+   * Isfield FK.
    *
    * @param datasetValue the dataset value
    * @param idFieldSchema the id field schema
@@ -148,7 +135,6 @@ public class FKValidationUtils {
         && null != idFieldSchemaPk.getReferencedField().getIdPk()) {
       idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk().toString();
     }
-
 
     FieldSchema fkFieldSchema = getPKFieldSchemaFromSchema(datasetSchemaFK, idFieldSchema);
 
@@ -194,7 +180,84 @@ public class FKValidationUtils {
     return true;
   }
 
+  /**
+   * Checks if is position.
+   *
+   * @param fieldValue the field value
+   * @return true, if is position
+   */
+  public static boolean isPosition(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
 
+  /**
+   * Checks if is point.
+   *
+   * @param fieldValue the field value
+   * @return true, if is point
+   */
+  public static boolean isPoint(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
+
+  /**
+   * Checks if is multipoint.
+   *
+   * @param fieldValue the field value
+   * @return true, if is multipoint
+   */
+  public static boolean isMultipoint(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
+
+  /**
+   * Checks if is linestring.
+   *
+   * @param fieldValue the field value
+   * @return true, if is linestring
+   */
+  public static boolean isLinestring(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
+
+  /**
+   * Checks if is multilinestring.
+   *
+   * @param fieldValue the field value
+   * @return true, if is multilinestring
+   */
+  public static boolean isMultilinestring(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
+
+  /**
+   * Checks if is polygon.
+   *
+   * @param fieldValue the field value
+   * @return true, if is polygon
+   */
+  public static boolean isPolygon(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
+
+  /**
+   * Checks if is geometrycollection.
+   *
+   * @param fieldValue the field value
+   * @return true, if is geometrycollection
+   */
+  public static boolean isGeometrycollection(FieldValue fieldValue) {
+    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  }
+
+  /**
+   * Sets the values to validate.
+   *
+   * @param fkFieldSchema the fk field schema
+   * @param pkList the pk list
+   * @param fkFields the fk fields
+   * @return the boolean
+   */
   private static Boolean setValuesToValidate(FieldSchema fkFieldSchema, List<String> pkList,
       List<FieldValue> fkFields) {
     // Values must be
@@ -209,7 +272,6 @@ public class FKValidationUtils {
     }
     return pkSet.isEmpty();
   }
-
 
   /**
    * Creates the field value validation.
@@ -239,7 +301,6 @@ public class FKValidationUtils {
     }
   }
 
-
   /**
    * Check all values multi.
    *
@@ -256,8 +317,6 @@ public class FKValidationUtils {
       }
     }
   }
-
-
 
   /**
    * Creates the validation.
@@ -302,9 +361,8 @@ public class FKValidationUtils {
     return validation;
   }
 
-
   /**
-   * Creates the field validations.
+   * Save field validations.
    *
    * @param fieldValues the field values
    */
@@ -313,12 +371,11 @@ public class FKValidationUtils {
     fieldRepository.saveAll(fieldValues);
   }
 
-
   /**
    * Check PK.
    *
    * @param pkValues the pk values
-   * @param value the FieldValue
+   * @param value the value
    * @param pkHasMultipleValues the pk has multiple values
    * @return the boolean
    */
@@ -341,7 +398,6 @@ public class FKValidationUtils {
 
     }
   }
-
 
   /**
    * Mount query.
@@ -366,14 +422,12 @@ public class FKValidationUtils {
 
   }
 
-
   /**
    * Creates the query.
    *
    * @param datasetSchema the dataset schema
    * @param idFieldSchema the id field schema
    * @param datasetId the dataset id
-   *
    * @return the string
    */
   private static String createQuery(DataSetSchema datasetSchema, String idFieldSchema,
@@ -389,13 +443,11 @@ public class FKValidationUtils {
     return query.toString();
   }
 
-
   /**
-   * Gets the field schema PK from schema.
+   * Gets the field schema from schema.
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
-   *
    * @return the field schema from schema
    */
   private static Map<String, String> getFieldSchemaFromSchema(DataSetSchema schema,
@@ -432,7 +484,6 @@ public class FKValidationUtils {
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
-   *
    * @return the table schema from id field schema
    */
   private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema schema,
@@ -461,7 +512,6 @@ public class FKValidationUtils {
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
-   *
    * @return the PK field from FK field
    */
   private static FieldSchema getPKFieldFromFKField(DataSetSchema schema, String idFieldSchema) {
@@ -483,7 +533,6 @@ public class FKValidationUtils {
     }
     return pkField;
   }
-
 
   /**
    * Gets the PK field schema from schema.
@@ -512,6 +561,4 @@ public class FKValidationUtils {
     }
     return field;
   }
-
-
 }

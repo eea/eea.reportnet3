@@ -15,6 +15,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.geolatte.geom.G2D;
+import org.geolatte.geom.Geometry;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -56,6 +58,24 @@ public class FieldValue {
   @OneToMany(mappedBy = "fieldValue",
       cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
+
+  /**
+   * The geometry.
+   * 
+   * WARNING! This property should not be used. Its function is to retrieve the Geometry type stored
+   * in the DB, but updates must be done within "value" property following the GeoJSON standard.
+   */
+  @Column(name = "GEOMETRY")
+  private Geometry<G2D> geometry;
+
+  /**
+   * The rsid.
+   * 
+   * WARNING! This property should not be used. Its function is to retrieve the Geometry type stored
+   * in the DB, but updates must be done within "value" property following the GeoJSON standard.
+   */
+  @Column(name = "RSID")
+  private Integer rsid;
 
   /** The level error. */
   @Transient
