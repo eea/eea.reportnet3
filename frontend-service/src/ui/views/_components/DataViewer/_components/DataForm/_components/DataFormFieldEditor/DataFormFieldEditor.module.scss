@@ -51,7 +51,7 @@
   background-color: #6fb638;
 }
 
-.pointLegendItemLabel label {
+.pointLegendItemLabel label:first-child {
   font-weight: bold;
   margin-left: 3px;
 }

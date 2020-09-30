@@ -1,15 +1,15 @@
 package org.eea.validation.persistence.data.repository;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.eea.interfaces.vo.dataset.enums.DataType;
+import javax.persistence.Query;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -20,15 +20,32 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class DatasetExtendedRepositoryImpl.
  */
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
+
+
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
+
+
+  @Override
+  public Long getTableId(String idTableSchema, Long datasetId) {
+    String stringQuery = "select id from dataset_" + datasetId
+        + ".table_value where id_table_schema = '" + idTableSchema + "'";
+    Query query = entityManager.createNativeQuery(stringQuery);
+    BigInteger result = (BigInteger) query.getSingleResult();
+    return result.longValue();
+  }
+
+
 
   /**
    * Query RS execution.
@@ -37,93 +54,62 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    * @return the table value
    */
   @Override
-  public TableValue queryRSExecution(String query) throws SQLException {
+  public TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
+      Long datasetId, Long idTable) throws SQLException {
     Session session = (Session) entityManager.getDelegate();
     return session.doReturningWork(new ReturningWork<TableValue>() {
       @Override
       public TableValue execute(Connection conn) throws SQLException {
+        conn.setSchema("dataset_" + datasetId);
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
+          LOG.info("Query: " + query);
           ResultSet rs = stmt.executeQuery();
-          ResultSetMetaData rsmd = rs.getMetaData();
           TableValue tableValue = new TableValue();
           List<RecordValue> records = new ArrayList<>();
-
           while (rs.next()) {
             RecordValue record = new RecordValue();
-            tableValue.setId(Long.parseLong(rs.getString(3)));
-            record.setId(rs.getString(1));
-            record.setIdRecordSchema(rs.getString(2));
-            record.setDatasetPartitionId(Long.parseLong(rs.getString(4)));
-            record.setDataProviderCode(rs.getString(5));
-
-            if (null != rs.getString(6)) {
-              List<FieldValue> fields = new ArrayList<>();
-              for (int fieldcolumninit = 6; fieldcolumninit < rsmd
-                  .getColumnCount(); fieldcolumninit += 4) {
+            tableValue.setId(idTable);
+            List<FieldValue> fields = new ArrayList<>();
+            switch (entityTypeEnum) {
+              case RECORD:
+                record.setId(rs.getString("record_id"));
+                record.setFields(fields);
+                records.add(record);
+                tableValue.setRecords(records);
+                break;
+              case FIELD:
+                record.setId(rs.getString("record_id"));
                 FieldValue field = new FieldValue();
-                field.setId(rs.getString(fieldcolumninit));
-                field.setIdFieldSchema(rs.getString(fieldcolumninit + 1));
-                field.setValue(rs.getString(fieldcolumninit + 2));
-                switch (DataType.valueOf(rs.getString(fieldcolumninit + 3))) {
-                  case ATTACHMENT:
-                    field.setType(DataType.ATTACHMENT.toString());
-                    break;
-                  case BOOLEAN:
-                    field.setType(DataType.BOOLEAN.toString());
-                    break;
-                  case CODELIST:
-                    field.setType(DataType.CODELIST.toString());
-                    break;
-                  case DATE:
-                    field.setType(DataType.DATE.toString());
-                    break;
-                  case EMAIL:
-                    field.setType(DataType.EMAIL.toString());
-                    break;
-                  case LINK:
-                    field.setType(DataType.LINK.toString());
-                    break;
-                  case LINK_DATA:
-                    field.setType(DataType.LINK_DATA.toString());
-                    break;
-                  case LONG_TEXT:
-                    field.setType(DataType.LONG_TEXT.toString());
-                    break;
-                  case MULTISELECT_CODELIST:
-                    field.setType(DataType.MULTISELECT_CODELIST.toString());
-                    break;
-                  case NUMBER_DECIMAL:
-                    field.setType(DataType.NUMBER_DECIMAL.toString());
-                    break;
-                  case NUMBER_INTEGER:
-                    field.setType(DataType.NUMBER_INTEGER.toString());
-                    break;
-                  case PHONE:
-                    field.setType(DataType.PHONE.toString());
-                    break;
-                  case URL:
-                    field.setType(DataType.URL.toString());
-                    break;
-                  case TEXT:
-                    field.setType(DataType.TEXT.toString());
-                    break;
-                  default:
-                    field.setType(DataType.TEXT.toString());
-                    break;
-                }
+                field.setId(rs.getString(entityName + "_id"));
+                field.setValue(rs.getString(entityName));
                 fields.add(field);
-              }
-              record.setFields(fields);
+                record.setFields(fields);
+                records.add(record);
+                tableValue.setRecords(records);
+                break;
             }
 
-            records.add(record);
-            tableValue.setRecords(records);
           }
           return tableValue;
         }
       }
     });
+
   }
+
+
+  /**
+   * Query unique result execution.
+   *
+   * @param stringQuery the string query
+   * @return the list
+   */
+  @Override
+  public List<Object> queryUniqueResultExecution(String stringQuery) {
+    Query query = entityManager.createNativeQuery(stringQuery);
+    return query.getResultList();
+  }
+
 
   /**
    * Query record validation execution.

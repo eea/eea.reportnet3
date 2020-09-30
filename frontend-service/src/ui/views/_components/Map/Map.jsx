@@ -50,6 +50,7 @@ let NewMarkerIcon = L.icon({
 });
 export const Map = ({
   geoJson = '',
+  hasLegend = true,
   onSelectPoint,
   options = {
     zoom: [15],
@@ -61,7 +62,7 @@ export const Map = ({
         : geoJson
       : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
   },
-  selectedCRS = { label: 'WGS84', value: 'EPSG:4326' }
+  selectedCRS = { label: 'WGS84 - 4326', value: 'EPSG:4326' }
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -69,9 +70,9 @@ export const Map = ({
   // const { BaseLayer, Overlay } = LayersControl;
 
   const crs = [
-    { label: 'WGS84', value: 'EPSG:4326' },
-    { label: 'ETRS89', value: 'EPSG:4258' },
-    { label: 'LAEA-ETRS89', value: 'EPSG:3035' }
+    { label: 'WGS84 - 4326', value: 'EPSG:4326' },
+    { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
 
   const themes = [
@@ -248,13 +249,35 @@ export const Map = ({
 
   return (
     <>
+      {/* <label className={styles.mapSelectMessage}>{resources.messages['mapSelectPointMessage']}</label> */}
+      {hasLegend && (
+        <div className={styles.pointLegendWrapper}>
+          <div className={styles.pointLegendItem}>
+            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
+            <div className={styles.pointLegendItemLabel}>
+              <label>{resources.messages['currentPoint']}: </label>
+              <label>{MapUtils.printCoordinates(mapGeoJson)}</label>
+            </div>
+          </div>
+          <div className={styles.pointLegendItem}>
+            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
+            <div className={styles.pointLegendItemLabel}>
+              <label>{resources.messages['newPoint']}: </label>
+              <label>{MapUtils.printCoordinates(newPositionMarker, false)}</label>
+            </div>
+          </div>
+          <div className={styles.pointLegendItem}>
+            <div className={styles.pointLegendItemInfoLabel}>
+              <label>{resources.messages['mapSelectPointMessage']}</label>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'inline-flex', width: '60%' }}>
         <Dropdown
           ariaLabel={'themes'}
           className={styles.themeSwitcherSplitButton}
-          onChange={e => {
-            onThemeChange(e.target.value);
-          }}
+          onChange={e => onThemeChange(e.target.value)}
           optionLabel="label"
           options={themes}
           placeholder="Select a theme"
@@ -285,22 +308,22 @@ export const Map = ({
           style={{ width: '20%' }}
         />
       </div>
-      <label className={styles.mapSelectMessage}>{resources.messages['mapSelectPointMessage']}</label>
-      <MapComponent
-        style={{ height: '60vh' }}
-        doubleClickZoom={false}
-        center={projectGeoJsonCoordinates(options.center)}
-        zoom="4"
-        ref={mapRef}
-        onDblclick={e => {
-          setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
-          onSelectPoint(
-            proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
-            currentCRS.value
-          );
-          mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
-        }}>
-        {/* <LayersControl position="topright">
+      <div>
+        <MapComponent
+          style={{ height: '60vh', marginTop: '6px' }}
+          doubleClickZoom={false}
+          center={projectGeoJsonCoordinates(options.center)}
+          zoom="4"
+          ref={mapRef}
+          onDblclick={e => {
+            setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
+            onSelectPoint(
+              proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
+              currentCRS.value
+            );
+            mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+          }}>
+          {/* <LayersControl position="topright">
           <BaseLayer checked name="EEA Countries">
             <TileLayer
               // attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
@@ -312,29 +335,29 @@ export const Map = ({
             <TileLayer url="" />
           </BaseLayer>
         </LayersControl> */}
-        {MapUtils.checkValidJSONCoordinates(geoJson) && (
-          <GeoJSON
-            data={JSON.parse(mapGeoJson)}
-            onEachFeature={onEachFeature}
-            coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
-          />
-        )}
-        {isNewPositionMarkerVisible && (
-          <Marker
-            draggable={true}
-            icon={NewMarkerIcon}
-            position={projectPointCoordinates(newPositionMarker)}
-            onClick={e => {
-              if (!popUpVisible) {
-                setPopUpVisible(true);
-              }
-              mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
-            }}
-            onDrag={e => setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`)}>
-            <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
-          </Marker>
-        )}
-      </MapComponent>
+          {MapUtils.checkValidJSONCoordinates(geoJson) && (
+            <GeoJSON
+              data={JSON.parse(mapGeoJson)}
+              onEachFeature={onEachFeature}
+              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
+            />
+          )}
+          {isNewPositionMarkerVisible && (
+            <Marker
+              draggable={false}
+              icon={NewMarkerIcon}
+              position={projectPointCoordinates(newPositionMarker)}
+              onClick={e => {
+                if (!popUpVisible) {
+                  setPopUpVisible(true);
+                }
+                mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+              }}>
+              <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
+            </Marker>
+          )}
+        </MapComponent>
+      </div>
     </>
   );
 };

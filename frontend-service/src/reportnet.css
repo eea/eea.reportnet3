@@ -119,6 +119,8 @@
   --statusBox-draft-bg: #eccfff;
   --statusBox-draft-color: #694382;
   --statusBox-designer-bg: #c2c8cf;
+  /* Public page header background */
+  --public-page-header-bg: #033166;
 
   --header-height: 180px;
 

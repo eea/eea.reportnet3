@@ -100,9 +100,14 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
    */
   private void executeViewPermissions(String queryViewName, Long datasetId)
       throws RecordStoreAccessException {
-    String queryPermission =
+    String querySelectPermission =
         "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + " TO validation";
-    recordStoreService.executeQueryViewCommands(queryPermission);
+    recordStoreService.executeQueryViewCommands(querySelectPermission);
+
+    String queryDeletePermission =
+        "GRANT DELETE ON dataset_" + datasetId + "." + queryViewName + " TO recordstore";
+    recordStoreService.executeQueryViewCommands(queryDeletePermission);
+
   }
 
   /**
@@ -123,11 +128,7 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
     }
 
     StringBuilder stringQuery = new StringBuilder("CREATE OR REPLACE VIEW dataset_" + datasetId
-        + "." + "\"" + queryViewName + "\"" + " as (select rv.id, ");
-    stringQuery.append("rv.id_record_schema,");
-    stringQuery.append("rv.id_table,");
-    stringQuery.append("rv.dataset_partition_id,");
-    stringQuery.append("rv.data_provider_code,");
+        + "." + "\"" + queryViewName + "\"" + " as (select rv.id as record_id, ");
     Iterator<String> iterator = stringColumns.iterator();
     int i = 0;
     while (iterator.hasNext()) {
@@ -136,13 +137,6 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
       stringQuery.append("(select fv.id from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
           .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_id")
           .append("\" ");
-      stringQuery.append(COMMA);
-      // _id_field_schema
-      stringQuery
-          .append(
-              "(select fv.id_field_schema from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
-          .append("_id_field_schema").append("\" ");
       stringQuery.append(COMMA);
       // value
       DataType type = DataType.TEXT;
@@ -158,7 +152,6 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
                   + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
-          stringQuery.append(COMMA);
           break;
         case NUMBER_DECIMAL:
         case NUMBER_INTEGER:
@@ -167,20 +160,14 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
                   + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
-          stringQuery.append(COMMA);
           break;
         default:
           stringQuery
               .append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
-          stringQuery.append(COMMA);
           break;
       }
-      // type
-      stringQuery.append("(select fv.type from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
-          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_type")
-          .append("\" ");
       if (iterator.hasNext()) {
         stringQuery.append(COMMA);
       }
