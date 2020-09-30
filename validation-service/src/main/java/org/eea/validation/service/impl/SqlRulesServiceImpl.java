@@ -141,9 +141,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (validateRule(ruleVO.getSqlSentence(), datasetId, rule).equals(Boolean.FALSE)) {
       rule.setVerified(false);
       rule.setEnabled(false);
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
-              .append("',").append(datasetId).append(")").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     } else {
