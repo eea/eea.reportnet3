@@ -50,7 +50,7 @@ let NewMarkerIcon = L.icon({
 });
 export const Map = ({
   geoJson = '',
-  hasLegend = true,
+  hasLegend = false,
   onSelectPoint,
   options = {
     zoom: [15],
@@ -256,7 +256,11 @@ export const Map = ({
             <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
             <div className={styles.pointLegendItemLabel}>
               <label>{resources.messages['currentPoint']}: </label>
-              <label>{MapUtils.printCoordinates(mapGeoJson)}</label>
+              <label>
+                {MapUtils.checkValidJSONCoordinates(geoJson)
+                  ? MapUtils.printCoordinates(mapGeoJson)
+                  : `{Latitude: , Longitude: }`}
+              </label>
             </div>
           </div>
           <div className={styles.pointLegendItem}>
