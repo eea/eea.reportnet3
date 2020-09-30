@@ -100,9 +100,14 @@ public class CreateUpdateQueryViewCommand extends AbstractEEAEventHandlerCommand
    */
   private void executeViewPermissions(String queryViewName, Long datasetId)
       throws RecordStoreAccessException {
-    String queryPermission =
+    String querySelectPermission =
         "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + " TO validation";
-    recordStoreService.executeQueryViewCommands(queryPermission);
+    recordStoreService.executeQueryViewCommands(querySelectPermission);
+
+    String queryDeletePermission =
+        "GRANT DELETE ON dataset_" + datasetId + "." + queryViewName + " TO recordstore";
+    recordStoreService.executeQueryViewCommands(queryDeletePermission);
+
   }
 
   /**

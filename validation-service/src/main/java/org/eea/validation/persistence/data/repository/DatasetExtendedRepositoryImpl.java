@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.data.repository;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,6 +34,18 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
+
+
+  @Override
+  public Long getTableId(String idTableSchema, Long datasetId) {
+    String stringQuery = "select id from dataset_" + datasetId
+        + ".table_value where id_table_schema = '" + idTableSchema + "'";
+    Query query = entityManager.createNativeQuery(stringQuery);
+    BigInteger result = (BigInteger) query.getSingleResult();
+    return result.longValue();
+  }
+
+
 
   /**
    * Query RS execution.
@@ -85,6 +98,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   }
 
 
+  /**
+   * Query unique result execution.
+   *
+   * @param stringQuery the string query
+   * @return the list
+   */
   @Override
   public List<Object> queryUniqueResultExecution(String stringQuery) {
     Query query = entityManager.createNativeQuery(stringQuery);
