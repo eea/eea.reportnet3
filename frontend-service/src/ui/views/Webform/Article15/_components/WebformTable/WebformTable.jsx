@@ -8,6 +8,7 @@ import sortBy from 'lodash/sortBy';
 
 import styles from './WebformTable.module.scss';
 
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { WebformField } from './_components/WebformField';
@@ -124,11 +125,6 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
   };
 
   const onParseWebformRecords = (records, webform, tableData) => {
-    if (isNil(records)) {
-      // AÑADIR EN EL RESULT UNA SUBTABLA VACÍA INDICANDO QUE TIENE QUE CREARSE
-      return [{ elements: [{ fieldType: 'EMPTY' }] }];
-    }
-
     return records.map(record => {
       const { fields } = record;
       const { elements } = webform;
@@ -148,8 +144,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
             isDisabled: isNil(element.fieldSchema),
             name: element.name,
             recordId: record.recordId,
-            type: element.type,
-            validations: element.validations || []
+            type: element.type
           });
         } else {
           if (tableData[element.tableSchemaId]) {
@@ -159,6 +154,8 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
               tableData
             );
             result.push({ ...element, elementsRecords: tableElementsRecords });
+          } else {
+            result.push({ ...element, tableNotCreated: true, elementsRecords: [] });
           }
         }
       }
@@ -200,16 +197,27 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
 
   if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
 
+  const childHasErrors = webformData.elements
+    .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
+    .map(table => table.hasErrors);
+
+  const hasErrors = [webformData.hasErrors].concat(childHasErrors);
+
   return (
     <div className={styles.body}>
       <h3 className={styles.title}>
-        {webformData.title ? webformData.title : webformData.name}
+        <div>
+          {webformData.title ? webformData.title : webformData.name}
+          {hasErrors.includes(true) && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
+        </div>
         {webformData.multipleRecords && (
           <Button label={'Add'} icon={'plus'} onClick={() => onAddMultipleWebform(webformData.tableSchemaId)} />
         )}
       </h3>
       {isNil(webformData.tableSchemaId) && (
-        <span>{`The table ${webformData.name} is not created in the design, please check it`}</span>
+        <span style={{ color: 'red' }}>
+          {`The table ${webformData.name} is not created in the design, please check it`}
+        </span>
       )}
       {!isNil(webformData.elementsRecords) && renderWebformFields(webformData.multipleRecords)}
     </div>

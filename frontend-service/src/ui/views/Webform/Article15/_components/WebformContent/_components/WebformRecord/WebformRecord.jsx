@@ -151,7 +151,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           />
         );
 
-      case 'MULTISELECT':
+      case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
             appendTo={document.body}
@@ -174,7 +174,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           />
         );
 
-      case 'SELECT':
+      case 'CODELIST':
         return (
           <Dropdown
             appendTo={document.body}
@@ -191,13 +191,18 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             // onFilterInputChangeBackend={onFilter}
             // onMouseDown={e => onEditorValueFocus(cells, event.target.value)}
             // optionLabel="label"
-            options={field.options}
+            options={field.codelistItems}
             showFilterClear={true}
             value={field.value}
           />
         );
 
       case 'TEXT':
+      case 'URL':
+      case 'EMAIL':
+      case 'PHONE':
+      case 'NUMBER_INTEGER':
+      case 'NUMBER_DECIMAL':
         return (
           <InputText
             id={field.fieldId}
@@ -212,7 +217,16 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         );
 
       case 'EMPTY':
-        return <span>EMPTY</span>;
+        return (
+          <Fragment>
+            <Button
+              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+              icon="errorCircle"
+            />
+            <span
+              style={{ color: 'red' }}>{`The field ${field.name} is not created in the design, please check it`}</span>
+          </Fragment>
+        );
 
       default:
         break;
@@ -224,24 +238,9 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
       if (field.type === 'FIELD') {
         return (
           <div key={i} className={styles.content}>
-            <div>
-              {field.title}
-              {field.isDisabled && (
-                <Fragment>
-                  <Button
-                    className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-                    data-for={'FieldNotExists'}
-                    data-tip
-                    icon="infoCircle"
-                  />
-                  <ReactTooltip effect="solid" id="FieldNotExists" place="top">
-                    {`The field ${field.name} is not created in the design, please check it`}
-                  </ReactTooltip>
-                </Fragment>
-              )}
-            </div>
-            <div>
-              {renderTemplate(field, field.fieldSchemaId, field.fieldType)}
+            <div>{field.title}</div>
+            <div style={{ display: 'flex' }}>
+              <div style={{ width: '75%' }}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
               {field.validations &&
                 field.validations.map((validation, index) => (
                   <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
@@ -250,12 +249,13 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           </div>
         );
       } else {
-        // return <div style={{ position: 'absolute', top: '50%', left: '50%', backgroundColor: 'red' }}>heyyy</div>;
-
         return (
           <div key={i} className={styles.body}>
             <h3 className={styles.title}>
-              {field.title ? field.title : field.name}
+              <div>
+                {field.title ? field.title : field.name}
+                {field.hasErrors && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
+              </div>
               {field.multipleRecords && (
                 <Button
                   disabled
@@ -265,6 +265,11 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
                 />
               )}
             </h3>
+            {field.tableNotCreated && (
+              <span style={{ color: 'red' }}>
+                {`The table ${field.name} is not created in the design, please check it`}
+              </span>
+            )}
             {field.elementsRecords.map((record, i) => {
               return (
                 <WebformRecord

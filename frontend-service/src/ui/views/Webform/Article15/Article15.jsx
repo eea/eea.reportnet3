@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useReducer } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 
@@ -127,6 +128,11 @@ export const Article15 = ({ datasetId, state }) => {
 
     return article15State.data.map((webform, i) => {
       const isCreated = headers.includes(webform.name);
+      const childHasErrors = webform.elements
+        .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
+        .map(table => table.hasErrors);
+
+      const hasErrors = [webform.hasErrors].concat(childHasErrors);
 
       return (
         <Fragment key={i}>
@@ -136,13 +142,15 @@ export const Article15 = ({ datasetId, state }) => {
             className={`${styles.headerButton} ${
               article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
             }`}
-            icon={!isCreated ? 'info' : webform.hasErrors ? 'warning' : null}
-            iconClasses={!article15State.isVisible[webform.title] ? (webform.hasErrors ? 'warning' : 'info') : ''}
+            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : null}
+            iconClasses={
+              !article15State.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
+            }
             iconPos={'right'}
             key={i}
             label={webform.title}
             onClick={() => onChangeWebformTab(webform.name)}
-            style={{ padding: webform.hasErrors || !isCreated ? '0.2rem' : '0.5rem' }}
+            style={{ padding: hasErrors.includes(true) || !isCreated ? '0.2rem' : '0.5rem' }}
           />
 
           {!isCreated && (
