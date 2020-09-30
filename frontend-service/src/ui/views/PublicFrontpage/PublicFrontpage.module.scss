@@ -3,7 +3,7 @@
   justify-content: space-between;
   background-color: var(--public-page-header-bg);
   margin-top: 6px;
-  width: 100vw;
+  max-width: 100vw;
   :global .rep-container {
     max-width: 97%;
   }
@@ -133,16 +133,17 @@
           grid-column: 1/2;
           grid-row: 2/3;
           flex-direction: row;
-          padding-top: 1rem;
+          padding: 0;
+          margin: 2rem 0;
           .contactBox {
-            width: 50%;
+            width: 55%;
             margin-bottom: 0px;
           }
           .separator {
             display: none;
           }
           .linkBox {
-            width: 50%;
+            width: 45%;
           }
         }
       }
@@ -165,6 +166,7 @@
         .sideBar {
           width: 25%;
           padding: 2rem 0 0 2rem;
+          margin: 0;
           flex-direction: column;
           .contactBox {
             margin-bottom: 0px;
