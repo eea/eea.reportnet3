@@ -187,6 +187,7 @@ public class FKValidationUtils {
    * @return true, if is position
    */
   public static boolean isPosition(FieldValue fieldValue) {
+    // TODO. Modify instanceof to support Position
     return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
   }
 
@@ -207,6 +208,7 @@ public class FKValidationUtils {
    * @return true, if is multipoint
    */
   public static boolean isMultipoint(FieldValue fieldValue) {
+    // TODO. Modify instanceof to support Multipoint
     return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
   }
 
@@ -217,6 +219,7 @@ public class FKValidationUtils {
    * @return true, if is linestring
    */
   public static boolean isLinestring(FieldValue fieldValue) {
+    // TODO. Modify instanceof to support Linestring
     return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
   }
 
@@ -227,6 +230,7 @@ public class FKValidationUtils {
    * @return true, if is multilinestring
    */
   public static boolean isMultilinestring(FieldValue fieldValue) {
+    // TODO. Modify instanceof to support Multilinestring
     return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
   }
 
@@ -237,6 +241,7 @@ public class FKValidationUtils {
    * @return true, if is polygon
    */
   public static boolean isPolygon(FieldValue fieldValue) {
+    // TODO. Modify instanceof to support Polygon
     return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
   }
 
@@ -247,6 +252,7 @@ public class FKValidationUtils {
    * @return true, if is geometrycollection
    */
   public static boolean isGeometrycollection(FieldValue fieldValue) {
+    // TODO. Modify instanceof to support Geometrycollection
     return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
   }
 
