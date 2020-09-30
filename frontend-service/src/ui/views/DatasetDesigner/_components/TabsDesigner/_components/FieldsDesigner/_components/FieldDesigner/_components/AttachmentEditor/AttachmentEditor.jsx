@@ -24,6 +24,9 @@ const AttachmentEditor = ({
   useEffect(() => {
     if (isSaved) {
       onSaveAttachment({ validExtensions, maxSize });
+      setValidExtensionsItems([]);
+      setMaxSize(0);
+      setIsVisible(false);
     }
   }, [isSaved]);
 
@@ -53,15 +56,7 @@ const AttachmentEditor = ({
 
   const attachmentDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['save']}
-        icon="check"
-        onClick={() => {
-          setValidExtensionsItems([]);
-          setIsSaved(true);
-          setIsVisible(false);
-        }}
-      />
+      <Button label={resources.messages['save']} icon="check" onClick={() => setIsSaved(true)} />
       <Button
         className="p-button-secondary"
         icon="cancel"
