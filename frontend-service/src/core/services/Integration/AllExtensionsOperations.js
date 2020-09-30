@@ -1,2 +1,2 @@
-export const AllExtensionsOperations = ({ integrationRepository }) => async datasetSchemaId =>
-  integrationRepository.allExtensionsOperations(datasetSchemaId);
+export const AllExtensionsOperations = ({ integrationRepository }) => async (dataflowId, datasetSchemaId) =>
+  integrationRepository.allExtensionsOperations(dataflowId, datasetSchemaId);
