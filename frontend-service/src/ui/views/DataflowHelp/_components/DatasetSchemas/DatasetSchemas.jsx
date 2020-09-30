@@ -105,7 +105,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const getExtensionsOperations = async datasetsSchemas => {
     try {
       const datasetExtensionsOperations = datasetsSchemas.map(async datasetSchema => {
-        return await IntegrationService.allExtensionsOperations(datasetSchema.datasetSchemaId);
+        return await IntegrationService.allExtensionsOperations(dataflowId, datasetSchema.datasetSchemaId);
       });
 
       Promise.all(datasetExtensionsOperations).then(allExtensionsOperations => {
