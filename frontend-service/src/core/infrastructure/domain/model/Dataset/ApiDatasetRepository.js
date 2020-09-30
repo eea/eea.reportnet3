@@ -285,6 +285,7 @@ const groupedErrorsById = async (
     typeEntitiesFilter,
     originsFilter
   );
+  console.log(datasetErrorsDTO);
   const dataset = new Dataset({
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
@@ -302,7 +303,7 @@ const groupedErrorsById = async (
         message: datasetErrorDTO.message,
         objectId: datasetErrorDTO.idObject,
         tableSchemaId: datasetErrorDTO.idTableSchema,
-        tableSchemaName: datasetErrorDTO.nameTableSchema,
+        tableSchemaName: datasetErrorDTO.originName,
         validationDate: datasetErrorDTO.validationDate,
         validationId: datasetErrorDTO.idValidation
       })

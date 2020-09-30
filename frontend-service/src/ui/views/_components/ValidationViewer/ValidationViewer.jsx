@@ -353,11 +353,11 @@ const ValidationViewer = React.memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {areActiveFilters && totalRecords !== totalFilteredRecords
+        {(areActiveFilters && totalRecords !== totalFilteredRecords) || grouped
           ? `${resources.messages['filtered']} : ${totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {totalRecords} {resources.messages['records'].toLowerCase()}
-        {areActiveFilters && totalRecords === totalFilteredRecords
+        {(areActiveFilters && totalRecords === totalFilteredRecords) || grouped
           ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>

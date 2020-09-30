@@ -22,7 +22,7 @@
   "importFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
   "importTableData": "/dataset/{:datasetId}/loadTableData/{:tableId}",
   "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
-  "listGroupedValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
+  "listGroupedValidations": "/validation/listGroupValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
   "loadStatistics": "/datasetmetabase/{:datasetId}/loadStatistics",
   "orderFieldSchemaDesign": "/dataschema/{:datasetId}/fieldSchema/order",
   "orderTableSchemaDesign": "/dataschema/{:datasetId}/tableSchema/order",
