@@ -3,9 +3,21 @@
   flex-direction: column;
   justify-content: flex-start;
   margin: 2rem 0;
-  h2 {
-    font-size: 1rem;
-    margin: 0 0 1rem 0;
-    color: var(--title-color);
-  }
+}
+.title {
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  color: var(--title-color);
+  margin-bottom: 0.6rem;
+}
+.levelHelp {
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--main-font-color);
+}
+.note {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--main-font-color);
 }
