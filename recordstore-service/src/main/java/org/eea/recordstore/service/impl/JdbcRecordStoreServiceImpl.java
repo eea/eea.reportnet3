@@ -1053,11 +1053,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetId the dataset id
    */
-  /**
-   * Execute.
-   *
-   * @param eeaEventVO the eea event VO
-   */
   @Override
   public void createUpdateQueryView(Long datasetId) {
 
@@ -1088,12 +1083,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void executeViewPermissions(String queryViewName, Long datasetId)
       throws RecordStoreAccessException {
-    String querySelectPermission =
-        "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + " TO validation";
+    String querySelectPermission = "GRANT SELECT ON dataset_" + datasetId + "." + "\""
+        + queryViewName + "\"" + " TO validation";
     executeQueryViewCommands(querySelectPermission);
 
-    String queryDeletePermission =
-        "GRANT DELETE ON dataset_" + datasetId + "." + queryViewName + " TO recordstore";
+    String queryDeletePermission = "GRANT DELETE ON dataset_" + datasetId + "." + "\""
+        + queryViewName + "\"" + " TO recordstore";
     executeQueryViewCommands(queryDeletePermission);
 
   }
