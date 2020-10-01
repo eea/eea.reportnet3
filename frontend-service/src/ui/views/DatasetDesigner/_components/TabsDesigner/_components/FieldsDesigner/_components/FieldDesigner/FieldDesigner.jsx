@@ -173,49 +173,6 @@ export const FieldDesigner = ({
     }
   }, [totalFields]);
 
-  // useEffect(() => {
-  //   //Set pointerEvents to auto or none depending on isDragging.
-  //   //because appendTo in Dropdown component we need to find the p-dropdown-panel class in the document, not in the Dropdown itself
-  //   const dropdownPanel = document.getElementsByClassName('p-dropdown-panel')[0];
-  //   const childs = document.getElementsByClassName('fieldRow');
-  //   if (!isUndefined(childs)) {
-  //     for (let i = 0; i < childs.length; i++) {
-  //       for (let j = 2; j < childs[i].childNodes.length; j++) {
-  //         if (fieldDesignerState.isDragging) {
-  //           childs[i].childNodes[j].style.pointerEvents = 'none';
-  //           dropdownPanel.style.pointerEvents = 'none';
-  //         } else {
-  //           childs[i].childNodes[j].style.pointerEvents = 'auto';
-  //           dropdownPanel.style.pointerEvents = 'auto';
-  //           //Dropdown
-  //           const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
-  //           if (!isUndefined(dropdownChilds)) {
-  //             for (let k = 0; k < dropdownChilds.length; k++) {
-  //               for (let l = 0; l < dropdownChilds[k].childNodes.length; l++) {
-  //                 if (!isUndefined(dropdownChilds[k].childNodes[l])) {
-  //                   dropdownChilds[k].childNodes[l].style.pointerEvents = 'auto';
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //   const requiredAndPKCheckboxes = document.getElementsByClassName('requiredAndPKCheckboxes');
-  //   if (!isUndefined(requiredAndPKCheckboxes)) {
-  //     for (let i = 0; i < requiredAndPKCheckboxes.length; i++) {
-  //       for (let j = 0; j < requiredAndPKCheckboxes[i].childNodes.length; j++) {
-  //         if (fieldDesignerState.isDragging) {
-  //           requiredAndPKCheckboxes[i].childNodes[j].style.pointerEvents = 'none';
-  //         } else {
-  //           requiredAndPKCheckboxes[i].childNodes[j].style.pointerEvents = 'auto';
-  //         }
-  //       }
-  //     }
-  //   }
-  // }, [fieldDesignerState.isDragging]);
-
   const onAttachmentDropdownSelected = fieldType => {
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
