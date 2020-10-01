@@ -1057,7 +1057,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId) {
 
     DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
-
+    // delete all views because some names can be changed
     try {
       deleteAllViewsFromSchema(datasetId);
     } catch (RecordStoreAccessException e1) {
@@ -1069,8 +1069,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         .forEach(table -> {
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
-            // delete all views because some names can be changed
-
             // create materialiced view of all tableSchemas
             executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId);
