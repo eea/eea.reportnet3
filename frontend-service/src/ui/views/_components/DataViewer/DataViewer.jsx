@@ -358,13 +358,11 @@ const DataViewer = withRouter(
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
 
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
-          if (!isUndefined(tableData.records)) {
-            if (tableData.records.length > 0) {
-              dispatchRecords({
-                type: 'SET_NEW_RECORD',
-                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
-              });
-            }
+          if (!isUndefined(tableData.records) && tableData.records.length > 0) {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+            });
           } else {
             dispatchRecords({
               type: 'SET_NEW_RECORD',
