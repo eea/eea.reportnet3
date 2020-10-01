@@ -21,5 +21,16 @@ public interface SnapshotMapper extends IMapper<Snapshot, SnapshotVO> {
    */
   @Override
   @Mapping(source = "reportingDataset.id", target = "datasetId")
+  @Mapping(source = "dcReleased", target = "release")
   SnapshotVO entityToClass(Snapshot entity);
+
+  /**
+   * Class to entity.
+   *
+   * @param model the model
+   * @return the snapshot
+   */
+  @Override
+  @Mapping(source = "release", target = "dcReleased")
+  Snapshot classToEntity(SnapshotVO model);
 }

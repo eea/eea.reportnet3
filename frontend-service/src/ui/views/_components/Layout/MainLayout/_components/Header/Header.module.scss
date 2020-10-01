@@ -11,10 +11,13 @@
   transition: 0.5s;
   box-shadow: var(--header-box-shadow);
   z-index: 3002;
+  &.public {
+    background-color: var(--public-page-header-bg);
+  }
 
   .customHeader {
     display: flex;
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
     justify-content: space-between;
     &.public {
       @media (max-width: 768px) {
@@ -45,9 +48,9 @@
       display: flex;
       align-items: center;
       margin-right: 1rem;
-      a {
-        cursor: pointer;
-        user-select: none;
+      :global .p-button-primary {
+        background-color: var(--white);
+        color: var(--public-page-header-bg);
       }
     }
     .userWrapper {

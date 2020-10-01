@@ -1,5 +1,6 @@
 package org.eea.validation.service;
 
+import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -217,4 +218,14 @@ public interface RulesService {
    * @return the long
    */
   Long updateSequence(String datasetSchemaId);
+
+
+
+  /**
+   * Find sql sentences by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId);
 }

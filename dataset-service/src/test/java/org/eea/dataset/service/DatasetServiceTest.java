@@ -86,6 +86,7 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -116,232 +117,157 @@ import org.springframework.mock.web.MockMultipartFile;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetServiceTest {
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @InjectMocks
   private DatasetServiceImpl datasetService;
 
-  /**
-   * The context.
-   */
+  /** The context. */
   @Mock
   private FileParseContextImpl context;
 
-  /**
-   * The file parser factory.
-   */
+  /** The file parser factory. */
   @Mock
   private FileParserFactory fileParserFactory;
 
-  /**
-   * The data set mapper.
-   */
+  /** The data set mapper. */
   @Mock
   private DataSetMapper dataSetMapper;
 
-  /**
-   * The table value mapper.
-   */
+  /** The table value mapper. */
   @Mock
   private TableValueMapper tableValueMapper;
 
-  /**
-   * The partition data set metabase repository.
-   */
+  /** The partition data set metabase repository. */
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /**
-   * The data set metabase repository.
-   */
+  /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /**
-   * The data collection repository.
-   */
+  /** The data collection repository. */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The reporting dataset repository.
-   */
+  /** The reporting dataset repository. */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The design dataset repository.
-   */
+  /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
 
-  /**
-   * The dataset repository.
-   */
+  /** The dataset repository. */
   @Mock
   private DatasetRepository datasetRepository;
 
-  /**
-   * The table repository.
-   */
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
-  /**
-   * The kafka sender.
-   */
+  /** The kafka sender. */
   @Mock
   private KafkaSender kafkaSender;
 
-  /**
-   * The record repository.
-   */
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
 
-  /**
-   * The record mapper.
-   */
+  /** The record mapper. */
   @Mock
   private RecordMapper recordMapper;
 
-  /**
-   * The record no validation mapper.
-   */
+  /** The record no validation mapper. */
   @Mock
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /**
-   * The pageable.
-   */
+  /** The pageable. */
   @Mock
   private Pageable pageable;
 
-  /**
-   * The field repository.
-   */
+  /** The field repository. */
   @Mock
   private FieldRepository fieldRepository;
 
-  /**
-   * The table no record mapper.
-   */
+  /** The table no record mapper. */
   @Mock
   private TableNoRecordMapper tableNoRecordMapper;
 
-  /**
-   * The field validation repository.
-   */
+  /** The field validation repository. */
   @Mock
   private FieldValidationRepository fieldValidationRepository;
 
-  /**
-   * The record validation repository.
-   */
+  /** The record validation repository. */
   @Mock
   private RecordValidationRepository recordValidationRepository;
 
-  /**
-   * The table validation repository.
-   */
+  /** The table validation repository. */
   @Mock
   private TableValidationRepository tableValidationRepository;
 
-  /**
-   * The table validation mapper.
-   */
+  /** The table validation mapper. */
   @Mock
   private TableValidationMapper tableValidationMapper;
 
-  /**
-   * The field validation mapper.
-   */
+  /** The field validation mapper. */
   @Mock
   private FieldValidationMapper fieldValidationMapper;
 
-  /**
-   * The record validation mapper.
-   */
+  /** The record validation mapper. */
   @Mock
   private RecordValidationMapper recordValidationMapper;
 
-  /**
-   * The validation repository.
-   */
+  /** The validation repository. */
   @Mock
   private ValidationRepository validationRepository;
 
-  /**
-   * The dataset validation repository.
-   */
+  /** The dataset validation repository. */
   @Mock
   private DatasetValidationRepository datasetValidationRepository;
 
-  /**
-   * The file export factory.
-   */
+  /** The file export factory. */
   @Mock
   private IFileExportFactory fileExportFactory;
 
-  /**
-   * The context export.
-   */
+  /** The context export. */
   @Mock
   private IFileExportContext contextExport;
 
-  /**
-   * The file common.
-   */
+  /** The file common. */
   @Mock
   private FileCommonUtils fileCommon;
 
-  /**
-   * The statistics repository.
-   */
+  /** The statistics repository. */
   @Mock
   private StatisticsRepository statisticsRepository;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The field no validation mapper.
-   */
+  /** The field no validation mapper. */
   @Mock
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Mock
   private LockService lockService;
 
   /** The dataflow controller zull. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZull;
-
 
   /** The dataset schema service. */
   @Mock
@@ -359,67 +285,41 @@ public class DatasetServiceTest {
   @Mock
   private AttachmentRepository attachmentRepository;
 
-  /**
-   * The field value.
-   */
+  /** The field value. */
   private FieldValue fieldValue;
 
-  /**
-   * The record value.
-   */
+  /** The record value. */
   private RecordValue recordValue;
 
-  /**
-   * The record values.
-   */
+  /** The record values. */
   private ArrayList<RecordValue> recordValues;
 
-  /**
-   * The table value.
-   */
+  /** The table value. */
   private TableValue tableValue;
 
-  /**
-   * The table values.
-   */
+  /** The table values. */
   private ArrayList<TableValue> tableValues;
 
-  /**
-   * The dataset value.
-   */
+  /** The dataset value. */
   private DatasetValue datasetValue;
 
-  /**
-   * The data set VO.
-   */
+  /** The data set VO. */
   private DataSetVO dataSetVO;
 
-  /**
-   * The table V os.
-   */
+  /** The table V os. */
   private ArrayList<TableVO> tableVOs;
 
-  /**
-   * The table VO.
-   */
+  /** The table VO. */
   private TableVO tableVO;
 
-  /**
-   * The field list.
-   */
+  /** The field list. */
   private List<FieldValue> fieldList;
 
-  /**
-   * The sorted list.
-   */
+  /** The sorted list. */
   private List<FieldValue> sortedList;
 
-  /**
-   * The field.
-   */
+  /** The field. */
   private FieldValue field;
-
-
 
   /**
    * Inits the mocks.
@@ -1572,15 +1472,6 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Test is reporting dataset.
-   */
-  @Test
-  public void testIsReportingDataset() {
-    datasetService.isReportingDataset(1L);
-    Mockito.verify(reportingDatasetRepository, times(1)).existsById(Mockito.any());
-  }
-
-  /**
    * Test save new field propagation.
    */
   @Test
@@ -1656,44 +1547,6 @@ public class DatasetServiceTest {
   public void deleteRecordValuesByProvider() {
     datasetService.deleteRecordValuesByProvider(1L, "ES");
     Mockito.verify(recordRepository, times(1)).deleteByDataProviderCode(Mockito.any());
-  }
-
-  /**
-   * Gets the field values referenced test cord lat.
-   *
-   * @return the field values referenced test cord lat
-   */
-  @Test
-  public void getFieldValuesReferencedTestCordLat() {
-    field.setType(DataType.COORDINATE_LAT);
-
-    Mockito.when(
-        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
-        .thenReturn(1L);
-    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(fieldList);
-
-    datasetService.getFieldValuesReferenced(1L, "", "");
-    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
-  }
-
-  /**
-   * Gets the field values referenced test cord long.
-   *
-   * @return the field values referenced test cord long
-   */
-  @Test
-  public void getFieldValuesReferencedTestCordLong() {
-    field.setType(DataType.COORDINATE_LONG);
-
-    Mockito.when(
-        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
-        .thenReturn(1L);
-    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(fieldList);
-
-    datasetService.getFieldValuesReferenced(1L, "", "");
-    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
   }
 
   /**
@@ -2577,5 +2430,35 @@ public class DatasetServiceTest {
     datasetService.spreadDataPrefill(desingDatasetList, 2L, schema.getIdDataSetSchema().toString());
     Mockito.verify(representativeControllerZuul, times(1)).findDataProviderById(Mockito.any());
 
+  }
+
+  @Test
+  public void getDatasetTypeReportingTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.REPORTING, datasetService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeDesignTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(designDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.DESIGN, datasetService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeDCTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.COLLECTION, datasetService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeEUTest() {
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    when(dataSetMetabaseRepository.existsById(Mockito.any())).thenReturn(true);
+    assertEquals(DatasetTypeEnum.EUDATASET, datasetService.getDatasetType(1L));
   }
 }

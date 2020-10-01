@@ -40,6 +40,8 @@ const LinkSelector = withRouter(
       params: { dataflowId }
     } = match;
 
+    const [isSaved, setIsSaved] = useState(false);
+
     useEffect(() => {
       const getDatasetSchemas = async () => {
         setIsLoading(true);
@@ -51,6 +53,13 @@ const LinkSelector = withRouter(
       getDatasetSchemas();
     }, []);
 
+    useEffect(() => {
+      if (isSaved) {
+        onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+        setIsVisible(false);
+      }
+    }, [isSaved]);
+
     const linkSelectorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
@@ -58,8 +67,7 @@ const LinkSelector = withRouter(
           icon="check"
           label={resources.messages['save']}
           onClick={() => {
-            onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
-            setIsVisible(false);
+            setIsSaved(true);
           }}
         />
         <Button
@@ -79,12 +87,21 @@ const LinkSelector = withRouter(
         const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
         if (hasPK && table.tableSchemaId !== tableSchemaId) {
           const pkField = table.records[0].fields.filter(field => field.pk === true)[0];
-          return {
-            name: `${table.tableSchemaName} - ${pkField.name}`,
-            value: `${table.tableSchemaName} - ${pkField.fieldId}`,
-            referencedField: { fieldSchemaId: pkField.fieldId, datasetSchemaId: datasetSchema.datasetSchemaId },
-            disabled: false
-          };
+          if (pkField.type !== 'POINT') {
+            return {
+              name: `${table.tableSchemaName} - ${pkField.name}`,
+              value: `${table.tableSchemaName} - ${pkField.fieldId}`,
+              referencedField: { fieldSchemaId: pkField.fieldId, datasetSchemaId: datasetSchema.datasetSchemaId },
+              disabled: false
+            };
+          } else {
+            return {
+              name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
+              value: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
+              referencedField: null,
+              disabled: true
+            };
+          }
         } else if (table.tableSchemaId === tableSchemaId) {
           return {
             name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,

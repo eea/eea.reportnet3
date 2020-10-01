@@ -1,5 +1,5 @@
 import React, { Fragment, useContext } from 'react';
-import isNull from 'lodash/isNull';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataForm.module.css';
@@ -45,9 +45,7 @@ const DataForm = ({
                   <Button
                     className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
                     icon="infoCircle"
-                    onClick={() => {
-                      onShowFieldInfo(column.header, true);
-                    }}
+                    onClick={() => onShowFieldInfo(column.header, true)}
                     tabIndex="-1"
                     tooltip={getTooltipMessage(column)}
                     tooltipOptions={{ position: 'top' }}
@@ -57,7 +55,7 @@ const DataForm = ({
               <div
                 className="p-col-8"
                 style={{
-                  padding: '.5em',
+                  padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
                   width:
                     column.type === 'DATE' ||
                     column.type === 'CODELIST' ||
@@ -72,8 +70,10 @@ const DataForm = ({
                   datasetId={datasetId}
                   field={column.field}
                   fieldValue={
-                    isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                      ? ''
+                    isNil(field.fieldData[column.field])
+                      ? column.type === 'POINT'
+                        ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+                        : ''
                       : field.fieldData[column.field]
                   }
                   hasWritePermissions={hasWritePermissions}
@@ -118,7 +118,7 @@ const DataForm = ({
                 <div
                   className="p-col-8"
                   style={{
-                    padding: '.5em',
+                    padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
                     width:
                       column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
                         ? '30%'
@@ -129,11 +129,7 @@ const DataForm = ({
                     column={column}
                     datasetId={datasetId}
                     field={column.field}
-                    fieldValue={
-                      isNull(field.fieldData[column.field]) || isUndefined(field.fieldData[column.field])
-                        ? ''
-                        : field.fieldData[column.field]
-                    }
+                    fieldValue={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                     hasWritePermissions={hasWritePermissions}
                     isVisible={addDialogVisible}
                     onChangeForm={onChangeForm}

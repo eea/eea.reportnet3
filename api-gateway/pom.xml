@@ -12,6 +12,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eea.apigateway</groupId>
   <artifactId>api-gateway</artifactId>
+
   <version>${api-gateway.version}</version>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:api-gateway:${sonar.jenkins.branch}</sonar.moduleKey>

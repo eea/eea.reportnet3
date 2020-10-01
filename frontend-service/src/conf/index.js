@@ -31,5 +31,6 @@ config.permissions = permissions;
 config.publicFrontpage = publicFrontpage;
 config.storage = storage;
 config.validations = validations;
+config.storage = storage;
 
 export { config };

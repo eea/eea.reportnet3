@@ -1,7 +1,21 @@
+.crsSwitcherSplitButton {
+  width: 25% !important;
+  min-width: 20% !important;
+  margin-left: 3rem;
+  // position: absolute;
+  top: 45px;
+  left: 10px;
+  z-index: 9999;
+}
+
 .themeSwitcherSplitButton {
   width: 20% !important;
   min-width: 20% !important;
   margin-right: 1rem;
+  // position: absolute;
+  top: 45px;
+  left: 60px;
+  z-index: 9999;
 }
 
 .mapButtonsBar {
@@ -11,6 +25,11 @@
   // width: 20%;
   flex-direction: row;
   justify-content: flex-start;
+}
+
+.mapSelectMessage {
+  float: left;
+  font-style: italic;
 }
 
 .marker {
@@ -42,6 +61,40 @@
   animation-name: bounce;
   animation-fill-mode: both;
   animation-duration: 1s;
+}
+
+.pointLegendWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.pointLegendItem {
+  display: flex;
+  flex-direction: row;
+  margin-top: 3px;
+}
+
+.pointLegendItemInfoLabel label:first-child {
+  font-style: italic;
+}
+
+.pointLegendItemColour {
+  width: 20px;
+  height: 20px;
+  border: 1px solid;
+}
+
+.pointLegendItemColourCurrent {
+  background-color: #628ccc;
+}
+
+.pointLegendItemColourNew {
+  background-color: #6fb638;
+}
+
+.pointLegendItemLabel label:first-child {
+  font-weight: bold;
+  margin-left: 3px;
 }
 
 .pulse {

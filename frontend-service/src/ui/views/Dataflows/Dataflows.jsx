@@ -34,7 +34,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const {
     params: { errorType: dataflowsErrorType }
   } = match;
-
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);

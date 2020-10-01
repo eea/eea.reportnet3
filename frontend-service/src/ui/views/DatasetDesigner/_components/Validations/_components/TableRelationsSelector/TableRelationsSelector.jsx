@@ -67,6 +67,7 @@ export const TableRelationsSelector = ({
     }
     return <></>;
   };
+
   return (
     <>
       <p className={styles.title}>{resources.messages['tableRelationsTitle']}</p>
@@ -75,23 +76,23 @@ export const TableRelationsSelector = ({
           <div className={styles.field}>
             <label htmlFor="dataset">{resources.messages['targetDatasetSchema']}</label>
             <Dropdown
-              id={`${componentName}__dataset`}
               disabled={relations.links.length > 1}
               filterPlaceholder={resources.messages['referenceSchemaPlaceholder']}
-              placeholder={resources.messages['referenceSchemaPlaceholder']}
+              id={`${componentName}__dataset`}
+              onChange={e => onDatasetSchemaChange(e.target.value)}
               optionLabel="label"
               options={creationFormState.datasetSchemas}
-              onChange={e => onDatasetSchemaChange(e.target.value)}
+              placeholder={resources.messages['referenceSchemaPlaceholder']}
               value={creationFormState.candidateRule.relations.referencedDatasetSchema}
             />
           </div>
           <div className={styles.field}>
             <label htmlFor="table">{resources.messages['targetTable']}</label>
             <Dropdown
-              id={`${componentName}__table`}
               disabled={relations.links.length > 1}
               filterPlaceholder={resources.messages['referenceTablePlaceholder']}
-              placeholder={resources.messages['referenceTablePlaceholder']}
+              id={`${componentName}__table`}
+              onChange={e => onReferencedTableChange(e.target.value)}
               optionLabel="label"
               options={
                 creationFormState.candidateRule.relations.referencedDatasetSchema.code ===
@@ -99,15 +100,15 @@ export const TableRelationsSelector = ({
                   ? creationFormState.schemaTables
                   : relations.referencedTables
               }
-              onChange={e => onReferencedTableChange(e.target.value)}
+              placeholder={resources.messages['referenceTablePlaceholder']}
               value={relations.referencedTable}
             />
           </div>
           <div className={styles.checkbox}>
             <span>{resources.messages['datasetReferenceMustBeUsed']}</span>
             <Checkbox
-              isChecked={creationFormState.candidateRule.relations.isDoubleReferenced}
               inputId={'isDoubleReferenced_check'}
+              isChecked={creationFormState.candidateRule.relations.isDoubleReferenced}
               label="Default"
               onChange={e => onDoubleReferencedChange(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}

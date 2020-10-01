@@ -32,8 +32,8 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   @Transactional
   @Modifying
   @Query(nativeQuery = true,
-      value = "UPDATE snapshot SET release=false WHERE reporting_dataset_id=:idDataset ; "
-          + "UPDATE snapshot SET release=true WHERE id=:idSnapshot")
+      value = "UPDATE snapshot SET dc_released=false WHERE reporting_dataset_id=:idDataset ; "
+          + "UPDATE snapshot SET dc_released=true WHERE id=:idSnapshot")
   void releaseSnaphot(@Param("idDataset") Long idDataset, @Param("idSnapshot") Long idSnapshot);
 
 
@@ -46,16 +46,46 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    * @return the list
    */
   @Query(
-      value = "select s from Snapshot s where s.release=:released AND s.reportingDataset.id IN :datasetIds")
+      value = "select s from Snapshot s where s.dcReleased=:released AND s.reportingDataset.id IN :datasetIds")
   List<Snapshot> findByReportingDatasetAndRelease(@Param("datasetIds") List<Long> datasetIds,
       @Param("released") Boolean released);
 
   /**
    * Find by reporting dataset id.
    *
-   * @param id the id
+   * @param reportingId the reporting id
    * @return the list
    */
   @Query(value = "select max(s) from Snapshot s where s.reportingDataset.id= :reportingId")
   Snapshot findFirstByReportingDatasetId(@Param("reportingId") Long reportingId);
+
+  /**
+   * Release EU inactive snapshots.
+   *
+   * @param inactiveSnapshots the inactive snapshots
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "UPDATE snapshot SET eu_released=false WHERE id in :inactiveSnapshots")
+  void releaseEUInactiveSnapshots(@Param("inactiveSnapshots") List<Long> inactiveSnapshots);
+
+  /**
+   * Release EU active snapshots.
+   *
+   * @param activeSnapshots the active snapshots
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "UPDATE snapshot SET eu_released=true WHERE id in :activeSnapshots ; ")
+  void releaseEUActiveSnapshots(@Param("activeSnapshots") List<Long> activeSnapshots);
+
+  /**
+   * Find by data collection id order by creation date desc.
+   *
+   * @param idDataset the id dataset
+   * @return the list
+   */
+  List<Snapshot> findByDataCollectionIdOrderByCreationDateDesc(@Param("idDataset") Long idDataset);
 }

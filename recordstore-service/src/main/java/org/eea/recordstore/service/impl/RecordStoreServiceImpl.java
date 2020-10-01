@@ -57,11 +57,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   /** The Constant ERROR_EXECUTING_DOCKER_COMMAND_LOG. */
   private static final String ERROR_EXECUTING_DOCKER_COMMAND_LOG =
       "Error executing docker command to create the dataset. {}";
+
   /**
    * The docker interface service.
    */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
+
+
 
   /**
    * The container name.
@@ -386,4 +389,33 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
+
+
+  /**
+   * Execute query view commands.
+   *
+   * @param command the command
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void executeQueryViewCommands(final String command) throws RecordStoreAccessException {
+    final Container container = dockerInterfaceService.getContainer(containerName);
+    try {
+      dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
+          "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
+    } catch (final InterruptedException e) {
+      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+      throw new RecordStoreAccessException(
+          String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
+    }
+    LOG.info("Command on Query View executed: {}", command);
+  }
+
+
+  @Override
+  public void createUpdateQueryView(Long datasetId) {
+    LOG.info("Create or Update Query View");
+  }
+
+
 }

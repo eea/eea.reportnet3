@@ -70,7 +70,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                 additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             } else if (entityType.toUpperCase() === 'RECORD') {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-            } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
+            } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'TABLE') {
               table.records.forEach(record =>
                 record.fields.forEach(field => {
                   if (!isNil(field)) {
@@ -105,7 +105,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const getExtensionsOperations = async datasetsSchemas => {
     try {
       const datasetExtensionsOperations = datasetsSchemas.map(async datasetSchema => {
-        return await IntegrationService.allExtensionsOperations(datasetSchema.datasetSchemaId);
+        return await IntegrationService.allExtensionsOperations(dataflowId, datasetSchema.datasetSchemaId);
       });
 
       Promise.all(datasetExtensionsOperations).then(allExtensionsOperations => {

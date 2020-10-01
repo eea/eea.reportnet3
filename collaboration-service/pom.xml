@@ -13,6 +13,7 @@
 
   <groupId>org.eea.collaboration</groupId>
   <artifactId>collaboration-service</artifactId>
+
   <version>${collaboration.version}</version>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:collaboration-service:${sonar.jenkins.branch}</sonar.moduleKey>

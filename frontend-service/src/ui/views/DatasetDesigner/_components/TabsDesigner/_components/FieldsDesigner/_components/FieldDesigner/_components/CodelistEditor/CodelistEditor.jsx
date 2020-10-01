@@ -7,11 +7,13 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Dialog } from 'ui/views/_components/Dialog';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { useEffect } from 'react';
 
 const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist, type }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
+  const [isSaved, setIsSaved] = useState(false);
 
   const onPasteChips = event => {
     if (event) {
@@ -23,15 +25,21 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
     }
   };
 
+  useEffect(() => {
+    if (isSaved) {
+      onSaveCodelist(codelistItems);
+      setCodelistItems([]);
+      setIsVisible(false);
+    }
+  }, [isSaved]);
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
         label={resources.messages['save']}
         icon="check"
         onClick={() => {
-          onSaveCodelist(codelistItems);
-          setCodelistItems([]);
-          setIsVisible(false);
+          setIsSaved(true);
         }}
       />
       <Button

@@ -3,25 +3,34 @@ import React, { useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import proj4 from 'proj4';
+
+import styles from './FieldEditor.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
-//'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
+import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
+
+proj4.defs([
+  ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
+  ['EPSG:3035', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'],
+  ['EPSG:4326', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs']
+]);
 
 const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
-  hasWritePermissions,
+  onChangePointCRS,
   onEditorKeyChange,
   onEditorSubmitValue,
   onEditorValueChange,
@@ -30,9 +39,36 @@ const FieldEditor = ({
   record,
   reporting
 }) => {
+  const crs = [
+    { label: 'WGS84 - 4326', value: 'EPSG:4326' },
+    { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
+    { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
+  ];
+
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
+
+  const [currentCRS, setCurrentCRS] = useState(
+    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
+      ? RecordUtils.getCellValue(cells, cells.field) !== ''
+        ? crs.filter(
+            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
+          )[0]
+        : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
+      : {}
+  );
+  const [isMapDisabled, setIsMapDisabled] = useState(
+    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
+      ? !MapUtils.checkValidCoordinates(
+          RecordUtils.getCellValue(cells, cells.field) !== ''
+            ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
+            : ''
+        )
+      : true
+  );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
@@ -44,6 +80,9 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
+    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
+      onChangePointCRS(currentCRS.value);
+    }
   }, []);
 
   let fieldType = {};
@@ -87,18 +126,30 @@ const FieldEditor = ({
     setLinkItemsOptions(linkItems);
   };
 
-  const formatDate = (date, isInvalidDate) => {
-    if (isInvalidDate) return '';
+  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
+    if (geoJson !== '') {
+      if (withCRS) {
+        const projectedCoordinates = projectCoordinates(coordinates, crs.value);
+        geoJson.geometry.coordinates = projectedCoordinates;
+        geoJson.properties.rsid = crs.value;
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates));
+        return JSON.stringify(geoJson);
+      } else {
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
+        if (checkCoordinates) {
+          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates)
+            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
+            : [];
+        } else {
+          geoJson.geometry.coordinates = MapUtils.parseCoordinates(
+            coordinates.replace(', ', ',').split(','),
+            parseToFloat
+          );
+        }
 
-    let d = new Date(date),
-      month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
+        return JSON.stringify(geoJson);
+      }
+    }
   };
 
   const getCodelistItemsWithEmptyOption = () => {
@@ -111,30 +162,8 @@ const FieldEditor = ({
     return codelistsItems;
   };
 
-  const getFilter = type => {
-    switch (type) {
-      case 'NUMBER_INTEGER':
-        return 'int';
-      case 'NUMBER_DECIMAL':
-      case 'POINT':
-        return 'money';
-      case 'COORDINATE_LONG':
-      case 'COORDINATE_LAT':
-        return 'num';
-      case 'DATE':
-        return 'date';
-      case 'TEXT':
-      case 'RICH_TEXT':
-        return 'any';
-      case 'EMAIL':
-        return 'email';
-      case 'PHONE':
-        return 'phone';
-      // case 'URL':
-      //   return 'url';
-      default:
-        return 'any';
-    }
+  const projectCoordinates = (coordinates, newCRS) => {
+    return proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
   };
 
   const renderField = type => {
@@ -151,7 +180,7 @@ const FieldEditor = ({
       case 'TEXT':
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -167,7 +196,7 @@ const FieldEditor = ({
       case 'RICH_TEXT':
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -183,7 +212,7 @@ const FieldEditor = ({
       case 'NUMBER_INTEGER':
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -198,7 +227,7 @@ const FieldEditor = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -212,49 +241,141 @@ const FieldEditor = ({
         );
       case 'POINT':
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className={styles.pointWrapper}>
             <InputText
-              keyfilter={getFilter(type)}
-              onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-              onChange={e => onEditorValueChange(cells, e.target.value)}
+              keyfilter={RecordUtils.getFilter(type)}
+              onBlur={e => {
+                onEditorSubmitValue(
+                  cells,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false
+                  ),
+                  record
+                );
+                onEditorValueChange(
+                  cells,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false
+                  )
+                );
+              }}
+              onChange={e =>
+                onEditorValueChange(
+                  cells,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false,
+                    false,
+                    false
+                  )
+                )
+              }
               onFocus={e => {
                 e.preventDefault();
-                onEditorValueFocus(cells, e.target.value);
+                onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field));
               }}
-              onKeyDown={e => onEditorKeyChange(cells, e, record)}
+              onKeyDown={e => {
+                changePoint(
+                  RecordUtils.getCellValue(cells, cells.field) !== ''
+                    ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                    : JSON.parse(fieldEmptyPointValue),
+                  e.target.value,
+                  currentCRS.value,
+                  false,
+                  true,
+                  false
+                );
+                onEditorKeyChange(
+                  cells,
+                  e,
+                  record,
+                  true,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false,
+                    true,
+                    false
+                  )
+                );
+              }}
+              // style={{ marginRight: '2rem' }}
               type="text"
-              value={RecordUtils.getCellValue(cells, cells.field)}
+              value={
+                RecordUtils.getCellValue(cells, cells.field) !== ''
+                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates
+                  : ''
+              }
             />
-            <Button
-              className={`p-button-secondary-transparent button`}
-              icon="marker"
-              onClick={e => {
-                if (!isNil(onMapOpen)) {
-                  onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
-                }
-              }}
-              style={{ width: '2.357em', marginLeft: '0.5rem' }}
-              tooltip={resources.messages['selectGeographicalDataOnMap']}
-              tooltipOptions={{ position: 'bottom' }}
-            />
+            <div className={styles.pointEpsgWrapper}>
+              <label className={styles.epsg}>{resources.messages['epsg']}</label>
+              <Dropdown
+                ariaLabel={'crs'}
+                appendTo={document.body}
+                className={styles.epsgSwitcher}
+                disabled={isMapDisabled}
+                options={crs}
+                optionLabel="label"
+                onChange={e => {
+                  onEditorSubmitValue(
+                    cells,
+                    changePoint(
+                      RecordUtils.getCellValue(cells, cells.field) !== ''
+                        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                        : JSON.parse(fieldEmptyPointValue),
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                      e.target.value,
+                      true
+                    ),
+                    record
+                  );
+                  onEditorValueChange(
+                    cells,
+                    changePoint(
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                      e.target.value
+                    ),
+                    e.target.value
+                  );
+
+                  setCurrentCRS(e.target.value);
+                  onChangePointCRS(e.target.value.value);
+                }}
+                placeholder="Select a CRS"
+                value={currentCRS}
+              />
+              <Button
+                className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                icon="marker"
+                onClick={e => {
+                  if (!isNil(onMapOpen)) {
+                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                  }
+                }}
+                style={{ width: '35%' }}
+                tooltip={resources.messages['selectGeographicalDataOnMap']}
+                tooltipOptions={{ position: 'bottom' }}
+              />
+            </div>
           </div>
-        );
-      // <Map coordinates={RecordUtils.getCellValue(cells, cells.field)}></Map>;
-      case 'COORDINATE_LONG':
-      case 'COORDINATE_LAT':
-        return (
-          <InputText
-            keyfilter={getFilter(type)}
-            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-            onChange={e => onEditorValueChange(cells, e.target.value)}
-            onFocus={e => {
-              e.preventDefault();
-              onEditorValueFocus(cells, e.target.value);
-            }}
-            onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            type="text"
-            value={RecordUtils.getCellValue(cells, cells.field)}
-          />
         );
       case 'DATE':
         return (
@@ -273,10 +394,10 @@ const FieldEditor = ({
           // />
           <Calendar
             onChange={e => {
-              onEditorValueChange(cells, formatDate(e.target.value, isNil(e.target.value)), record);
-              onEditorSubmitValue(cells, formatDate(e.target.value, isNil(e.target.value)), record);
+              onEditorValueChange(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), record);
+              onEditorSubmitValue(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), record);
             }}
-            onFocus={e => onEditorValueFocus(cells, formatDate(e.target.value, isNil(e.target.value)))}
+            onFocus={e => onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)))}
             appendTo={document.body}
             dateFormat="yy-mm-dd"
             // keepInvalid={true}
@@ -289,7 +410,7 @@ const FieldEditor = ({
       case 'EMAIL':
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -304,7 +425,7 @@ const FieldEditor = ({
       case 'URL':
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             maxLength={urlCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
@@ -435,7 +556,7 @@ const FieldEditor = ({
       default:
         return (
           <InputText
-            keyfilter={getFilter(type)}
+            keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {

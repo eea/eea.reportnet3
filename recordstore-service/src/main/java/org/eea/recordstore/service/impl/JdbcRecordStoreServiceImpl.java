@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -26,9 +27,13 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -55,6 +60,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * The Class JdbcRecordStoreServiceImpl.
@@ -123,6 +129,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA =
       "grant all privileges on all sequences in schema %s to %s;";
+
+  /** The Constant QUERY_FILTER_BY_ID_RECORD: {@value}. */
+  private static final String QUERY_FILTER_BY_ID_RECORD =
+      ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '";
+
+  /** The Constant AS: {@value}. */
+  private static final String AS = "') AS ";
+
+  /** The Constant AS: {@value}. */
+  private static final String COMMA = ", ";
 
   /**
    * The user postgre db.
@@ -200,6 +216,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private LockService lockService;
 
 
+
   /**
    * The kafka sender utils.
    */
@@ -229,6 +246,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The dataset schema controller. */
+  @Autowired
+  private DatasetSchemaControllerZuul datasetSchemaController;
 
 
   /**
@@ -345,6 +366,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String[] aux = datasetName.split("_");
       Long idDataset = Long.valueOf(aux[aux.length - 1]);
       jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
+      LOG.info("DS created with the id {} and idDatasetSchema {}", idDataset, idDatasetSchema);
     }
   }
 
@@ -784,6 +806,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+        dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         Map<String, Object> valueEU = new HashMap<>();
         valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
         valueEU.put(LiteralConstants.DATASET_ID, idReportingDataset);
@@ -879,8 +902,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       result.put("connectionDataVO", createConnectionDataVO(datasetName));
       result.put(LiteralConstants.DATASET_ID, datasetName);
       result.put(LiteralConstants.ID_DATASET_SCHEMA, entry.getValue());
-
       kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
+
+      createUpdateQueryView(entry.getKey());
+
+
     }
   }
 
@@ -1007,6 +1033,135 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         cp.cancelCopy();
       }
     }
+  }
+
+  /**
+   * Execute query view commands.
+   *
+   * @param command the command
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void executeQueryViewCommands(String command) throws RecordStoreAccessException {
+    jdbcTemplate.execute(command);
+    LOG.info("Command on Query View executed: {}", command);
+  }
+
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createUpdateQueryView(Long datasetId) {
+
+    DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+
+    datasetSchema.getTableSchemas().stream()
+        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+        .forEach(table -> {
+          List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
+          try {
+            // create materialiced view of all tableSchemas
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+                datasetId);
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
+          }
+        });
+  }
+
+  /**
+   * Execute view permissions.
+   *
+   * @param queryViewName the query view name
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void executeViewPermissions(String queryViewName, Long datasetId)
+      throws RecordStoreAccessException {
+    String querySelectPermission = "GRANT SELECT ON dataset_" + datasetId + "." + "\""
+        + queryViewName + "\"" + " TO " + datasetUsers;
+    executeQueryViewCommands(querySelectPermission.toLowerCase());
+
+    String queryDeletePermission = "GRANT DELETE ON dataset_" + datasetId + "." + "\""
+        + queryViewName + "\"" + " TO " + userPostgreDb;
+    executeQueryViewCommands(queryDeletePermission.toLowerCase());
+
+  }
+
+  /**
+   * Query view query.
+   *
+   * @param columns the columns
+   * @param queryViewName the query view name
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void executeViewQuery(List<FieldSchemaVO> columns, String queryViewName,
+      String idTableSchema, Long datasetId) throws RecordStoreAccessException {
+
+    List<String> stringColumns = new ArrayList<>();
+    for (FieldSchemaVO column : columns) {
+      stringColumns.add(column.getId());
+    }
+
+    StringBuilder stringQuery = new StringBuilder("CREATE OR REPLACE VIEW dataset_" + datasetId
+        + "." + "\"" + queryViewName + "\"" + " as (select rv.id as record_id, ");
+    Iterator<String> iterator = stringColumns.iterator();
+    int i = 0;
+    while (iterator.hasNext()) {
+      String schemaId = iterator.next();
+      // id
+      stringQuery.append("(select fv.id from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
+          .append(schemaId).append(AS).append("\"").append(columns.get(i).getName()).append("_id")
+          .append("\" ");
+      stringQuery.append(COMMA);
+      // value
+      DataType type = DataType.TEXT;
+      for (FieldSchemaVO column : columns) {
+        if (column.getId().equals(schemaId)) {
+          type = column.getType();
+        }
+      }
+      switch (type) {
+        case DATE:
+          stringQuery
+              .append("(select CAST(fv.value as date) from dataset_" + datasetId
+                  + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          break;
+        case NUMBER_DECIMAL:
+        case NUMBER_INTEGER:
+          stringQuery
+              .append("(select CAST(fv.value as numeric) from dataset_" + datasetId
+                  + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          break;
+        default:
+          stringQuery
+              .append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          break;
+      }
+      if (iterator.hasNext()) {
+        stringQuery.append(COMMA);
+      }
+      i++;
+    }
+    stringQuery.append(" from dataset_" + datasetId + ".record_value rv");
+    stringQuery.append(" inner join dataset_" + datasetId
+        + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
+        + "')");
+
+    executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
 
 }

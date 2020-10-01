@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './AttachmentEditor.module.scss';
 
@@ -18,8 +18,17 @@ const AttachmentEditor = ({
   const resources = useContext(ResourcesContext);
   const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions || []);
   const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize || 0);
-
   const [isVisible, setIsVisible] = useState(isAttachmentEditorVisible);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (isSaved) {
+      onSaveAttachment({ validExtensions, maxSize });
+      setValidExtensionsItems([]);
+      setMaxSize(0);
+      setIsVisible(false);
+    }
+  }, [isSaved]);
 
   const onMaxSizeChange = size => {
     size = size.toString();
@@ -47,15 +56,7 @@ const AttachmentEditor = ({
 
   const attachmentDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['save']}
-        icon="check"
-        onClick={() => {
-          onSaveAttachment({ validExtensions, maxSize });
-          setValidExtensionsItems([]);
-          setIsVisible(false);
-        }}
-      />
+      <Button label={resources.messages['save']} icon="check" onClick={() => setIsSaved(true)} />
       <Button
         className="p-button-secondary"
         icon="cancel"

@@ -94,6 +94,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
               <Field
                 id={'datasetSchemaName'}
                 innerRef={inputRef}
+                maxLength={250}
                 name="datasetSchemaName"
                 placeholder={resources.messages['createDatasetSchemaName']}
                 type="text"

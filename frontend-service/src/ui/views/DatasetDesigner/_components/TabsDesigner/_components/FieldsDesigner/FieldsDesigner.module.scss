@@ -104,9 +104,11 @@
 
   .constraintsButtons {
     display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-    width: 35%;
+
+    flex-direction: column;
+    button:last-child {
+      margin-top: 5px;
+    }
   }
 }
 .switchTextInput {

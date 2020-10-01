@@ -286,12 +286,16 @@ public enum EventType {
   COPY_DATASET_SCHEMA_NOT_FOUND_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_not_found_event", true),
 
-
   /** The data delete to replace completed event. */
   DATA_DELETE_TO_REPLACE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "data_delete_to_replace_completed_event", true);
+      "data_delete_to_replace_completed_event", true),
 
+  /** The command create query views event. */
+  CREATED_QUERY_VIEWS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "created_query_views_event",
+      true),
 
+  /** The create update rule event. */
+  CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true);
 
   /** The topic. */
   private String topic;

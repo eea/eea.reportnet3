@@ -17,15 +17,15 @@ export const PrivateRoute = ({ component: Component, path }) => {
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
-      LocalStorageUtils.remove();
+      userStorage.removeLocalStorage();
       return <Route path={path} render={() => <Component />} />;
     } else {
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
-        LocalStorageUtils.set({ redirectUrl: window.location.href });
-      } else if (userContext.isLoggedOut) {
-        return (
-          <Route
-            path={path}
+        userStorage.setLocalStorage({ redirectUrl: window.location.href });
+      }
+      window.location.href = AccessPointWebConfig.euloginUrl;
+    }
+  } else {
             render={props => (
               <Redirect
                 to={{

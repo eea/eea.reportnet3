@@ -250,4 +250,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     // This method will release the lock
     recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
   }
+
+
+  @Override
+  @PutMapping("/private/createUpdateQueryView")
+  public void createUpdateQueryView(@RequestParam("datasetId") Long datasetId) {
+    recordStoreService.createUpdateQueryView(datasetId);
+  }
+
 }
