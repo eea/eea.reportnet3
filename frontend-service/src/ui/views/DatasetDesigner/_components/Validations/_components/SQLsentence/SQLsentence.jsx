@@ -20,13 +20,11 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
   const getHelpByLevel = level => {
     if (level === levelTypes.FIELD) {
       return resources.messages['sqlSentenceHelpField'];
-    }
-
-    if (level === levelTypes.ROW) {
+    } else if (level === levelTypes.ROW) {
       return resources.messages['sqlSentenceHelpRow'];
+    } else {
+      return resources.messages['sqlSentenceHelpTable'];
     }
-
-    return resources.messages['sqlSentenceHelpTable'];
   };
 
   return (
