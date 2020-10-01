@@ -89,8 +89,8 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     try {
       const response = await SnapshotService.allReporter(datasetId);
       setSnapshotsListData(response);
-      const snapshotReleased = response.filter(release => release.isReleased);
-      setSnapshotReleasedId(snapshotReleased[0].id);
+      const snapshotReleased = response.filter(snapshot => snapshot.isReleased);
+      !isEmpty(snapshotReleased) && setSnapshotReleasedId(snapshotReleased[0].id);
     } catch (error) {
       notificationContext.add({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
