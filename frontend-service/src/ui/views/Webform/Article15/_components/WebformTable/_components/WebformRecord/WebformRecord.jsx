@@ -17,7 +17,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
-import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
+import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTabChange, record, tableId }) => {
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, { newRecord: {}, record });
@@ -25,7 +25,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: Article15Utils.parseNewRecordData(record.elements, undefined) }
+      payload: { newRecord: WebformRecordUtils.parseNewRecordData(record.elements, undefined) }
     });
   }, [record, onTabChange]);
 
@@ -236,7 +236,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     return elements.map((field, i) => {
       if (field.type === 'FIELD') {
         return (
-          <div key={i} className={styles.content}>
+          <div key={i} className={styles.field}>
             <div>{field.title}</div>
             <div style={{ display: 'flex' }}>
               <div style={{ width: '75%' }}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
@@ -249,7 +249,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         );
       } else {
         return (
-          <div key={i} className={styles.body}>
+          <div key={i} className={styles.subTable}>
             <h3 className={styles.title}>
               <div>
                 {field.title ? field.title : field.name}
@@ -290,7 +290,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
 
   const renderWebformContent = record => {
     return (
-      <div className={styles.contentWrap}>
+      <div className={styles.content}>
         <div className={styles.actionButtons}>
           {!isEmpty(record.validations) &&
             record.validations.map((validation, index) => (

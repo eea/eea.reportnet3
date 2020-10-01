@@ -1,41 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
-// const getFormInitialValues = fields => {
-//   const initialValues = {};
-
-//   fields.forEach(field => {
-//     initialValues[field.fieldId] = {
-//       fieldId: field.fieldSchemaId,
-//       fieldName: field.fieldName,
-//       fieldSchemaId: field.fieldId,
-//       fieldType: field.fieldType,
-//       newValue: '',
-//       recordId: field.recordSchemaId,
-//       recordSchemaId: field.recordId,
-//       required: field.required,
-//       value: field.value
-//     };
-//   });
-
-//   return initialValues;
-// };
-
-// const getRecordsInitialValues = (records = {}) => {
-//   records.webformFields = records.webformFields.map(field => ({
-//     fieldId: field.fieldSchemaId,
-//     fieldName: field.fieldName,
-//     fieldSchemaId: field.fieldId,
-//     fieldType: field.fieldType,
-//     newValue: '',
-//     recordId: field.recordSchemaId,
-//     recordSchemaId: field.recordId,
-//     required: field.required,
-//     value: field.value
-//   }));
-//   return records;
-// };
-
 const parseNewRecordData = (columnsSchema, data) => {
   if (!isEmpty(columnsSchema)) {
     let fields;

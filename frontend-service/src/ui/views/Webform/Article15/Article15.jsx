@@ -78,11 +78,7 @@ export const Article15 = ({ datasetId, state }) => {
             const filteredTable = datasetSchema.tables.filter(table => table.tableSchemaName === elements[index].name);
             const parsedTable = onParseWebformData([elements[index]], filteredTable);
 
-            result.push({
-              ...elements[index],
-              ...parsedTable[0],
-              type: elements[index].type
-            });
+            result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
           }
         }
 

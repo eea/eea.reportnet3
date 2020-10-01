@@ -192,7 +192,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
   const hasErrors = [webformData.hasErrors].concat(childHasErrors);
 
   return (
-    <div className={styles.body}>
+    <div className={styles.contentWrap}>
       <h3 className={styles.title}>
         <div>
           {webformData.title ? webformData.title : webformData.name}

@@ -1,4 +1,4 @@
-.contentWrap {
+.content {
   background: var(--gray-10);
   padding: 1rem;
   position: relative;
@@ -29,7 +29,7 @@
     }
   }
 
-  .content {
+  .field {
     .infoButton {
       background-color: var(--white) !important;
       border-radius: 50% !important;
@@ -52,7 +52,7 @@
   }
 }
 
-.body {
+.subTable {
   // border: 0.1rem solid var(--gray-25);
   // padding: 1rem;
   border-radius: 10px;
