@@ -158,7 +158,13 @@ export const ExpressionSelector = ({
     }
 
     if (!isEmpty(expressionType) && expressionType === 'sqlSentence') {
-      return <SQLsentence creationFormState={creationFormState} onSetSQLsentence={onSetSQLsentence} />;
+      return (
+        <SQLsentence
+          creationFormState={creationFormState}
+          onSetSQLsentence={onSetSQLsentence}
+          level={validationContext.level}
+        />
+      );
     }
     return <></>;
   };

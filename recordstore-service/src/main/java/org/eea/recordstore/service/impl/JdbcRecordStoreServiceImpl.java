@@ -1057,6 +1057,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId) {
 
     DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+    // delete all views because some names can be changed
+    try {
+      deleteAllViewsFromSchema(datasetId);
+    } catch (RecordStoreAccessException e1) {
+      LOG_ERROR.error("Error deleting Query view: {}", e1.getMessage(), e1);
+    }
 
     datasetSchema.getTableSchemas().stream()
         .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
@@ -1072,6 +1078,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
           }
         });
+  }
+
+  /**
+   * Delete all views from schema.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void deleteAllViewsFromSchema(Long datasetId) throws RecordStoreAccessException {
+    String selectViews = "select table_name as view_name " + " from information_schema.views "
+        + " where table_schema not in ('information_schema', 'pg_catalog') "
+        + " and table_schema = 'dataset_" + datasetId + "'";
+
+    List<String> viewList = jdbcTemplate.queryForList(selectViews, String.class);
+
+    String dropQuery = "drop view if exists dataset_";
+
+    for (String view : viewList) {
+      executeQueryViewCommands(dropQuery + datasetId + "." + "\"" + view + "\"");
+    }
+    LOG.info("These views: {} have been deleted.", viewList);
   }
 
   /**
@@ -1130,17 +1157,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       switch (type) {
         case DATE:
-          stringQuery
-              .append("(select CAST(fv.value as date) from dataset_" + datasetId
-                  + QUERY_FILTER_BY_ID_RECORD)
+          stringQuery.append(
+              "(select case when fv.value = '' then null else CAST(fv.value as date) end from dataset_"
+                  + datasetId + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
           break;
         case NUMBER_DECIMAL:
         case NUMBER_INTEGER:
-          stringQuery
-              .append("(select CAST(fv.value as numeric) from dataset_" + datasetId
-                  + QUERY_FILTER_BY_ID_RECORD)
+          stringQuery.append(
+              "(select case when fv.value = '' then null else CAST(fv.value as numeric) end from dataset_"
+                  + datasetId + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
           break;
