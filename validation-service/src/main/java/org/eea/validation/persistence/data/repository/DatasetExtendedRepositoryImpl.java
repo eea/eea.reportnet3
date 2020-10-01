@@ -63,7 +63,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       @Override
       public TableValue execute(Connection conn) throws SQLException {
         conn.setSchema("dataset_" + datasetId);
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (PreparedStatement stmt = conn.prepareStatement(query.toLowerCase())) {
           LOG.info("Query: " + query);
           ResultSet rs = stmt.executeQuery();
           TableValue tableValue = new TableValue();
@@ -108,7 +108,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    */
   @Override
   public List<Object> queryUniqueResultExecution(String stringQuery) {
-    Query query = entityManager.createNativeQuery(stringQuery);
+    Query query = entityManager.createNativeQuery(stringQuery.toLowerCase());
     return query.getResultList();
   }
 
