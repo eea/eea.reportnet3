@@ -50,7 +50,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
 
   const onSaveField = async (option, value, recordId) => {
     try {
-      await DatasetService.addRecordsById(datasetId, tableId, [webformRecordState.newRecord]);
+      await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
     } catch (error) {
       console.log('error', error);
     }
@@ -167,7 +167,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             //     onEditorValueFocus(cells, codelistItemValue);
             //   }
             // }}
-            options={field.options}
+            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
             // optionLabel="itemType"
             value={field.value}
           />
@@ -190,13 +190,14 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             // onFilterInputChangeBackend={onFilter}
             // onMouseDown={e => onEditorValueFocus(cells, event.target.value)}
             // optionLabel="label"
-            options={field.codelistItems}
+            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
             showFilterClear={true}
             value={field.value}
           />
         );
 
       case 'TEXT':
+      case 'RICH_TEXT':
       case 'URL':
       case 'EMAIL':
       case 'PHONE':
@@ -205,6 +206,8 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         return (
           <InputText
             id={field.fieldId}
+            keyfilter={getInputType[type]}
+            maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
@@ -231,6 +234,19 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         break;
     }
   };
+
+  const getInputType = {
+    DATE: 'date',
+    NUMBER_DECIMAL: 'any',
+    NUMBER_INTEGER: 'init',
+    POINT: 'coordinates',
+    TEXT: 'text',
+    EMAIL: 'email',
+    PHONE: 'phone',
+    RICH_TEXT: 'any'
+  };
+
+  const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
   const renderFields = elements => {
     return elements.map((field, i) => {
