@@ -35,17 +35,17 @@ export const SnapshotItem = ({
         : 'check'
       : 'cloudUpload';
 
-  const getSnapshotIconTexStyle = stylesItem => {
+  const getSnapshotIconTextStyle = valueItemStyle => {
     if (snapshotDataToRelease) {
       return itemData.id === snapshotDataToRelease.id || snapshotReleasedId !== snapshotDataToRelease.id
         ? itemData.id === snapshotDataToRelease.id
-          ? stylesItem.iconItem
+          ? valueItemStyle
             ? 'success'
             : `${styles.is_released_snapshot}`
           : null
         : null;
     } else {
-      return itemData.isReleased ? (stylesItem.iconItem ? 'success' : `${styles.is_released_snapshot}`) : ``;
+      return itemData.isReleased ? (valueItemStyle ? 'success' : `${styles.is_released_snapshot}`) : ``;
     }
   };
 
@@ -53,7 +53,7 @@ export const SnapshotItem = ({
     <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <span className={getSnapshotIconTexStyle({ iconItem: false })}>
+          <span className={getSnapshotIconTextStyle(false)}>
             {moment(itemData.creationDate).format(
               `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                 userContext.userProps.amPm24h ? '' : ' A'
@@ -71,7 +71,7 @@ export const SnapshotItem = ({
           </span>
           <div className={styles.listActions}>
             <Button
-              className={`${styles.btn} rp-btn ${getSnapshotIconTexStyle({ iconItem: true })}`}
+              className={`${styles.btn} rp-btn ${getSnapshotIconTextStyle(true)}`}
               disabled={isLoading || itemData.isBlocked}
               icon={getSnapshotItemIcon()}
               onClick={() => {
