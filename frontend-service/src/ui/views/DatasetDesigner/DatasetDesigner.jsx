@@ -14,6 +14,7 @@ import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/r
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import { routes } from 'ui/routes';
 
+import { Article15 } from 'ui/views/Webform/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -36,8 +37,6 @@ import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
-import { Webform } from 'ui/views/Webform';
-import { Article15 } from 'ui/views/Webform/Article15';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';

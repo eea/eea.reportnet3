@@ -1,10 +1,8 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import ReactTooltip from 'react-tooltip';
+import React, { Fragment, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import sortBy from 'lodash/sortBy';
 
 import styles from './WebformRecord.module.scss';
 
@@ -19,7 +17,6 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
-import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
 
 export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTabChange, record, tableId }) => {
@@ -36,7 +33,9 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, webformRecordState.record.recordId);
       if (isDataDeleted) onRefresh();
-    } catch (error) {}
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   const onFillField = (option, value) => {

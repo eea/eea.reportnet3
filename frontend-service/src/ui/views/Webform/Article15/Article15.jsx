@@ -13,7 +13,6 @@ import { tables } from '../article15.webform.json';
 import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { WebformContent } from './_components/WebformContent';
 import { WebformTable } from './_components/WebformTable';
 
 import { article15Reducer } from './_functions/Reducers/article15Reducer';
@@ -67,8 +66,6 @@ export const Article15 = ({ datasetId, state }) => {
       if (table.records) {
         const { elements, records } = table;
 
-        // table.elements = Article15Utils.mergeArrays(elements, records[0].fields, 'name', 'name');
-
         const result = [];
         for (let index = 0; index < elements.length; index++) {
           if (elements[index].type === 'FIELD') {
@@ -90,20 +87,6 @@ export const Article15 = ({ datasetId, state }) => {
         }
 
         table.elements = result;
-
-        // const result = [];
-        // for (let i = 0; i < elements.length; i++) {
-        //   if (elements[i].type === 'FIELD') {
-        //     result.push({
-        //       ...elements[i],
-        //       ...records[0].fields.find(element => element['name'] === elements[i]['name'])
-        //     });
-        //   } else {
-        //     // TABLE PARSE
-        //   }
-        // }
-
-        // table.elements = result;
       }
     }
 
@@ -118,7 +101,6 @@ export const Article15 = ({ datasetId, state }) => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
     const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
 
-    // return <WebformContent webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
     return <WebformTable webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
   };
 

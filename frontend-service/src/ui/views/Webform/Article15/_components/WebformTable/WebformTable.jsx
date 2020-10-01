@@ -1,47 +1,35 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import sortBy from 'lodash/sortBy';
 
 import styles from './WebformTable.module.scss';
 
-import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { Button } from 'ui/views/_components/Button';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { WebformField } from './_components/WebformField';
-import { WebformRecord } from '../WebformContent/_components/WebformRecord';
+import { WebformRecord } from './_components/WebformRecord';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
-import { WebformTableUtils } from './_functions/Utils/WebformTableUtils';
-import { Article15Utils } from 'ui/views/Webform/Article15/_functions/Utils/Article15Utils';
-
 export const WebformTable = ({ datasetId, onTabChange, webform }) => {
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
     isDataUpdated: false,
     isLoading: true,
-    tableData: {},
     webformData: {}
   });
 
-  const { webformData, isDataUpdated, tableData } = webformTableState;
+  const { webformData, isDataUpdated } = webformTableState;
 
   useEffect(() => {
-    webformTableDispatch({
-      type: 'INITIAL_LOAD',
-      payload: { webformData: { ...webform } }
-    });
+    webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
 
   useEffect(() => {
-    if (webform.tableSchemaId) {
-      onLoadTableData();
-    }
+    if (webform.tableSchemaId) onLoadTableData();
   }, [isDataUpdated, onTabChange, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -63,7 +51,6 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
 
       obj.datasetPartitionId = null;
-      //dataSetPartitionId is needed for checking the rows owned by delegated contributors
       if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
 
       return obj;
@@ -76,7 +63,9 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
 
       try {
         await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
-      } catch (error) {}
+      } catch (error) {
+        console.log('error', error);
+      }
     }
   };
 
@@ -92,7 +81,6 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       ]);
 
       if (!isNil(parentTableData.records)) {
-        //GET ALL TABLE SCHEMA ID
         const tableSchemaIds = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.tableSchemaId))
           .map(table => table.tableSchemaId);
