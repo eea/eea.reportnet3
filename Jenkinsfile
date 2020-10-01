@@ -1,8 +1,10 @@
-
+String cron_working_branch = BRANCH_NAME != "develop" && BRANCH_NAME != "sandbox" ? "@daily" : ""
 
 pipeline {
 
-
+    triggers {
+        cron(cron_working_branch)
+    }
 
     agent {
         label 'java8'
@@ -10,7 +12,7 @@ pipeline {
     stages {
         stage('Preparation') {
             steps {
-                sh 'echo "Starting CI/CD Pipeline"'                
+                sh 'echo "Starting CI/CD Pipeline"'
             }
         }
         stage('Compile') {
@@ -19,6 +21,7 @@ pipeline {
                     steps {
                         sh '''
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
+
                         '''
 
                     }
@@ -31,34 +34,30 @@ pipeline {
                         }
                     }
                 }
+                /*
                 stage('Compile NPM') {
                     steps {
-                        sh 'rm -rf frontend-service/node_modules/'
                         sh '''
-                            npm install frontend-service/
-                        '''                                
+                            npm install --no-cache frontend-service/
+                        '''
                     }
-                    post {
-                        failure {
-                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                        }                        
-                    }
-                }
+
+                }*/
             }
         }
-       /* stage('Static Code Analysis') {
+        stage('Static Code Analysis') {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                  	sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
 
-                    sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
+                    // sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
             }
-        }*/
+        }
 
-        /*stage("Quality Gate"){
-            steps {
+       /*stage("Quality Gate"){
+           steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
                         script {
@@ -114,11 +113,6 @@ pipeline {
                 }
 
             }
-            post {
-                failure {
-                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                }
-            }
         }*/
 
         stage('Install in Nexus') {
@@ -145,9 +139,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                expression {
-                   BRANCH_NAME == "release/3.0.0-OP-Hotfix-121843"
-                }
+                branch 'develop1'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
@@ -186,7 +178,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   BRANCH_NAME == "release/3.0.0-OP-Hotfix-121843"
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
                 }
             }
             parallel {
@@ -245,6 +237,7 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/api-gateway:" + env.API_GATEWAY_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/api-gateway-" + env.API_GATEWAY_VERSION + ".jar --build-arg MS_PORT=8010 -f ./Dockerfile ./api-gateway ")
                             app.push()
+                            sh 'docker rmi k8s-swi001:5000/api-gateway:1.0${TAG_SUFIX}'
                         }
                         script {
                             echo 'Inspire Harvester'
@@ -292,13 +285,13 @@ pipeline {
                         script {
                             echo 'ReportNet 3.0 Frontend'
                             def app
-                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:" +env.$FRONTEND_VERSION + env.$TAG_SUFIX, " ./frontend-service/")
+                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:" +env.FRONTEND_VERSION + env.TAG_SUFIX, " ./frontend-service/")
                             app.push()                    
 
                         }
                     }
                 }
-            
+
             }
         }
         stage('Cleaning docker images'){
@@ -309,23 +302,23 @@ pipeline {
           }
           steps {
             script {
-              sh 'docker rmi k8s-swi001:5000/api-gateway:1.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/dataflow-service:1.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/dataset-service:1.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/recordstore-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/validation-service:1.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/collaboration-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/document-container-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/inspire-harvester:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/communication-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/indexsearch-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/user-management-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/rod-service:3.0${TAG_SUFIX}'
-              sh 'docker rmi k8s-swi001:5000/reportnet-frontend-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/api-gateway:${API_GATEWAY_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/dataflow-service:${DATAFLOW_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/dataset-service:${DATASET_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/recordstore-service:${RECORDSTORE_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/validation-service:${VALIDATION_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/collaboration-service:${COLLABORATION_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/document-container-service:${DOCUMENT_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/inspire-harvester:${INSPIRE_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/communication-service:${COMMUNICATION_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/indexsearch-service:${INDEXSEARCH_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/user-management-service:${UMS_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/rod-service:${ROD_VERSION}${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/reportnet-frontend-service:${FRONTEND_VERSION}${TAG_SUFIX}'
             }
           }
         }
-        
-        
+
+
     }
 }
