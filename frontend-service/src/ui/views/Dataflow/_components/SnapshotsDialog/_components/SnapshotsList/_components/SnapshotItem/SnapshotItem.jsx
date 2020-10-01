@@ -35,27 +35,17 @@ export const SnapshotItem = ({
         : 'check'
       : 'cloudUpload';
 
-  const getSnapshotTextStyle = () => {
+  const getSnapshotIconTexStyle = icon => {
     if (snapshotDataToRelease) {
       return itemData.id === snapshotDataToRelease.id || snapshotReleasedId !== snapshotDataToRelease.id
         ? itemData.id === snapshotDataToRelease.id
-          ? `${styles.is_released_snapshot}`
+          ? icon.icon === true
+            ? 'success'
+            : `${styles.is_released_snapshot}`
           : null
         : null;
     } else {
-      return itemData.isReleased ? `${styles.is_released_snapshot}` : null;
-    }
-  };
-
-  const getSnapshotIconStyle = () => {
-    if (snapshotDataToRelease) {
-      return itemData.id === snapshotDataToRelease.id || snapshotReleasedId !== snapshotDataToRelease.id
-        ? itemData.id === snapshotDataToRelease.id
-          ? 'success'
-          : null
-        : null;
-    } else {
-      return itemData.isReleased ? 'success' : ``;
+      return itemData.isReleased ? (icon.icon === true ? 'success' : `${styles.is_released_snapshot}`) : ``;
     }
   };
 
@@ -63,7 +53,7 @@ export const SnapshotItem = ({
     <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <span className={getSnapshotTextStyle()}>
+          <span className={getSnapshotIconTexStyle({ icon: false })}>
             {moment(itemData.creationDate).format(
               `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                 userContext.userProps.amPm24h ? '' : ' A'
@@ -81,7 +71,7 @@ export const SnapshotItem = ({
           </span>
           <div className={styles.listActions}>
             <Button
-              className={`${styles.btn} rp-btn ${getSnapshotIconStyle()}`}
+              className={`${styles.btn} rp-btn ${getSnapshotIconTexStyle({ icon: true })}`}
               disabled={isLoading || itemData.isBlocked}
               icon={getSnapshotItemIcon()}
               onClick={() => {
