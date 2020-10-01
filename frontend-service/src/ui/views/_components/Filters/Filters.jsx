@@ -79,7 +79,9 @@ export const Filters = ({
   }, [filterState.matchMode]);
 
   useEffect(() => {
-    getFilteredValue();
+    if (filterState.filtered) {
+      getFilteredValue();
+    }
   }, [filterState.filterBy]);
 
   useEffect(() => {
@@ -164,7 +166,11 @@ export const Filters = ({
 
   const getChangedCheckboxes = property => {
     filterState.checkboxes.forEach(checkbox => {
-      checkbox.property === property && onFilterData(checkbox.property, [checkbox.isChecked]);
+      if (checkbox.property === property) {
+        checkbox.isChecked
+          ? onFilterData(checkbox.property, [checkbox.isChecked])
+          : onFilterData(checkbox.property, [checkbox.isChecked, !checkbox.isChecked]);
+      }
     });
   };
 
@@ -209,7 +215,7 @@ export const Filters = ({
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
-    const checkboxKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
+    const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
       dropdownOptions,
@@ -218,7 +224,7 @@ export const Filters = ({
       searchedKeys,
       selectedKeys,
       selectOptions,
-      checkboxKeys,
+      checkedKeys,
       checkboxOptions,
       state: filterState,
       value
@@ -262,7 +268,9 @@ export const Filters = ({
       const filter = keys[index];
       const value = filterState.filterBy[filter];
 
-      if (!isEmpty(value)) onFilterData(filter, filterState.filterBy[filter]);
+      if (!isEmpty(value)) {
+        onFilterData(filter, filterState.filterBy[filter]);
+      }
     }
   };
 

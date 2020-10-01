@@ -8,6 +8,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
+import ReportnetPublicLogo from 'assets/images/reportnet_public_logo.svg';
 
 import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 
@@ -15,6 +16,7 @@ import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -37,6 +39,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const avatarImage = useRef();
 
   const [confirmvisible, setConfirmVisible] = useState(false);
+  const [doNotRemember, setDoNotRemember] = useState(false);
 
   const [globanElementStyle, setGlobanElementStyle] = useState({
     marginTop: 0,
@@ -98,6 +101,23 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     }
   }, [userContext.userProps.userImage]);
 
+  const checkDoNotRemember = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`do_not_remember_checkbox`}
+        inputId={`do_not_remember_checkbox`}
+        isChecked={doNotRemember}
+        onChange={e => setDoNotRemember(e.checked)}
+        role="checkbox"
+      />
+      <label
+        onClick={() => setDoNotRemember(!doNotRemember)}
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['doNotRemember']}
+      </label>
+    </div>
+  );
+
   const loadTitle = () => (
     <a
       href={getUrl(routes.DATAFLOWS)}
@@ -107,8 +127,11 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         e.preventDefault();
         history.push(getUrl(routes.DATAFLOWS));
       }}>
-      <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
-      {isPublic && <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>}
+      {isPublic ? (
+        <img height="50px" src={ReportnetPublicLogo} alt="Reportnet 3.0" className={styles.appLogo} />
+      ) : (
+        <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
+      )}
     </a>
   );
 
@@ -145,6 +168,18 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   );
 
   const userLogout = async () => {
+    if (doNotRemember) {
+      userContext.onToggleLogoutConfirm(false);
+      const inmUserProperties = { ...userContext.userProps };
+      inmUserProperties.showLogoutConfirmation = false;
+      try {
+        await UserService.updateAttributes(inmUserProperties);
+      } catch (error) {
+        notificationContext.add({
+          type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
+        });
+      }
+    }
     userContext.socket.disconnect(() => {});
     try {
       await UserService.logout();
@@ -240,7 +275,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   return (
     <Fragment>
-      <div id="header" style={headerElementStyle} className={styles.header}>
+      <div id="header" style={headerElementStyle} className={`${styles.header} ${isPublic ? styles.public : ''}`}>
         <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
         <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
           {loadTitle()}
@@ -249,14 +284,15 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
           {isPublic && loadLogin()}
           {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
             <ConfirmDialog
+              footerAddon={checkDoNotRemember}
+              header={resources.messages['logout']}
+              labelCancel={resources.messages['no']}
+              labelConfirm={resources.messages['yes']}
+              onHide={() => setConfirmVisible(false)}
               onConfirm={() => {
                 userLogout();
               }}
-              onHide={() => setConfirmVisible(false)}
-              visible={confirmvisible}
-              header={resources.messages['logout']}
-              labelConfirm={resources.messages['yes']}
-              labelCancel={resources.messages['no']}>
+              visible={confirmvisible}>
               {resources.messages['userLogout']}
             </ConfirmDialog>
           )}

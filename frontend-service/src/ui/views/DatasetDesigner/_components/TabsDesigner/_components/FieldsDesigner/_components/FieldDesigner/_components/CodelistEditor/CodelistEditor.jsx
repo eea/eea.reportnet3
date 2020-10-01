@@ -28,6 +28,8 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   useEffect(() => {
     if (isSaved) {
       onSaveCodelist(codelistItems);
+      setCodelistItems([]);
+      setIsVisible(false);
     }
   }, [isSaved]);
 
@@ -37,8 +39,6 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
         label={resources.messages['save']}
         icon="check"
         onClick={() => {
-          setCodelistItems([]);
-          setIsVisible(false);
           setIsSaved(true);
         }}
       />

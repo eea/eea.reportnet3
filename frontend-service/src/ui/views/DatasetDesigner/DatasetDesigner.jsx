@@ -331,7 +331,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const getFileExtensions = async () => {
     try {
-      const response = await IntegrationService.allExtensionsOperations(designerState.datasetSchemaId);
+      const response = await IntegrationService.allExtensionsOperations(dataflowId, designerState.datasetSchemaId);
       const externalOperations = ExtensionUtils.groupOperations('operation', response);
       designerDispatch({
         type: 'LOAD_EXTERNAL_OPERATIONS',
@@ -686,7 +686,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
-        label={resources.messages['createDatasetValidationBtn']}
+        label={resources.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
