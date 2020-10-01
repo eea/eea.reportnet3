@@ -24,3 +24,38 @@
 .epsgSwitcher {
   margin-right: 1rem;
 }
+
+.pointLegendWrapper {
+  display: flex;
+  flex-direction: column;
+  float: left;
+}
+
+.pointLegendItem {
+  display: flex;
+  flex-direction: row;
+  margin-top: 3px;
+}
+
+.pointLegendItemColour {
+  width: 20px;
+  height: 20px;
+  border: 1px solid;
+}
+
+.pointLegendItemColourCurrent {
+  background-color: #628ccc;
+}
+
+.pointLegendItemColourNew {
+  background-color: #6fb638;
+}
+
+.pointLegendItemLabel label:first-child {
+  font-weight: bold;
+  margin-left: 3px;
+}
+
+.saveButton {
+  margin-top: 0.5rem !important;
+}

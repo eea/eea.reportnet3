@@ -165,7 +165,13 @@ const TabsValidations = withRouter(
       </div>
     );
 
-    const expressionsTemplate = rowData => getExpressionString(rowData, datasetSchemaAllTables);
+    const expressionsTemplate = rowData => {   
+
+      if (!isNil(rowData.sqlSentence)) {
+        return rowData.sqlSentence;
+      }
+      return getExpressionString(rowData, datasetSchemaAllTables);
+    };
 
     const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};

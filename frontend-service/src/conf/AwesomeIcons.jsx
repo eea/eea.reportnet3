@@ -98,7 +98,8 @@ import {
   faPlusSquare,
   faQuestionCircle as farQuestionCircle,
   faSave,
-  faSquare as farSquareRegular
+  faSquare as farSquareRegular,
+  faFilePdf as farFilePdf
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -287,6 +288,8 @@ export const AwesomeIcons = icon => {
       return faPalette;
     case 'pdf':
       return faFilePdf;
+    case 'lightPdf':
+      return farFilePdf;
     case 'pencilRuler':
       return faPencilRuler;
     case 'percentage':

@@ -686,9 +686,9 @@
     "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it.",
     "loadingFileExtensionsError": "Error loading supported file extensions",
     "selectField": "Select field",
-    "createDatasetValidationBtn": "Create dataset constraint",
-    "createDatasetConstraint": "Create dataset constraint",
-    "editDatasetConstraint": "Edit dataset constraint",
+    "createTableValidationBtn": "Create table constraint",
+    "createTableConstraint": "Create table constraint",
+    "editTableConstraint": "Edit table constraint",
     "tabMenuTableRelations": "Table relations",
     "fieldRelationsLabel": "Field relations",
     "originField": "Target field",
@@ -876,6 +876,11 @@
     "pasteRecordsCoordinatesStructureMessage": "Latitude, Longitude - EPSG:4326/4258/3035. Example: 45.345, -2.344 - EPSG:4258",
     "pasteRecordsWarningCoordinatesMessage": "Warning! There are columns with a wrong coordinate format",
     "sqlSentence": "SQL sentence",
-    "datasetComparison": "Dataset comparison"
+    "datasetComparison": "Dataset comparison",
+    "mapSelectPointMessage": "Note: Double click on the map to select a new point",
+    "doNotRemember": "Do not remember again",
+    "currentPoint": "Current point",
+    "newPoint": "New point",
+    "manageRolesEditorDialogInputPlaceholder": "Editor account..."
   }
 }

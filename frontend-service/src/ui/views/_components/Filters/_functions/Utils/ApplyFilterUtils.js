@@ -84,7 +84,9 @@ const onApplyFilters = ({
         onApplySelected(data, filter, state, value) &&
         onCheckFilters(data, dateOptions, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state)
       );
-    } else if (dateOptions.includes(filter)) {
+    }
+
+    if (dateOptions.includes(filter)) {
       let dates;
       isEmpty(value) ? (dates = []) : (dates = [getStartOfDay(value[0]), getEndOfDay(value[1])]);
       return !dates.includes(NaN) && !isEmpty(dates)
@@ -98,17 +100,17 @@ const onApplyFilters = ({
             checkSearched(state, data, searchedKeys) &&
             checkSelected(state, data, selectedKeys) &&
             checkSelected(state, data, checkedKeys);
-    } else {
-      return (
-        !isNil(data[filter]) &&
-        data[filter].toLowerCase().includes(value.toLowerCase()) &&
-        checkFilters(filteredKeys, data, state) &&
-        checkSearched(state, data, searchedKeys) &&
-        checkSelected(state, data, selectedKeys) &&
-        checkSelected(state, data, checkedKeys) &&
-        checkDates(state.filterBy[dateOptions], data[dateOptions])
-      );
     }
+
+    return (
+      !isNil(data[filter]) &&
+      data[filter].toLowerCase().includes(value.toLowerCase()) &&
+      checkFilters(filteredKeys, data, state) &&
+      checkSearched(state, data, searchedKeys) &&
+      checkSelected(state, data, selectedKeys) &&
+      checkSelected(state, data, checkedKeys) &&
+      checkDates(state.filterBy[dateOptions], data[dateOptions])
+    );
   })
 ];
 

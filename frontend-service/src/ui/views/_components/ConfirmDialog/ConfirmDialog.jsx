@@ -14,6 +14,7 @@ const ConfirmDialog = forwardRef((props, _) => {
     classNameConfirm,
     dialogStyle,
     divRef,
+    footerAddon = null,
     hasPasteOption = false,
     header,
     iconCancel,
@@ -87,15 +88,18 @@ const ConfirmDialog = forwardRef((props, _) => {
           onClick={onConfirm}
         />
       ) : (
-        <Button
-          className={`${
-            !isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary p-button-animated-blink'
-          } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
-          disabled={disabledConfirm}
-          icon={iconConfirm ? iconConfirm : 'check'}
-          label={labelConfirm}
-          onClick={onConfirm}
-        />
+        <>
+          {footerAddon}
+          <Button
+            className={`${
+              !isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary p-button-animated-blink'
+            } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
+            disabled={disabledConfirm}
+            icon={iconConfirm ? iconConfirm : 'check'}
+            label={labelConfirm}
+            onClick={onConfirm}
+          />
+        </>
       )}
       <Button
         className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary p-button-animated-blink'}`}

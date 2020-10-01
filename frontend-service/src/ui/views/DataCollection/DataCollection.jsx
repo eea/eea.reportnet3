@@ -94,7 +94,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       const dataflowData = await DataflowService.reporting(match.params.dataflowId);
       const dataCollection = dataflowData
-        ? dataflowData.dataCollections.filter(datasets => datasets.dataCollectionId == datasetId)
+        ? dataflowData.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
       const [firstDataCollection] = dataCollection;
       if (!isEmpty(firstDataCollection)) {
