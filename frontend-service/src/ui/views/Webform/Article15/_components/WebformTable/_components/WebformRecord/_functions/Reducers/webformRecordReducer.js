@@ -13,6 +13,9 @@ export const webformRecordReducer = (state, { type, payload }) => {
         // }
       };
 
+    case 'ON_TOGGLE_DIALOG':
+      return { ...state, isFileDialogVisible: payload.value };
+
     default:
       return state;
   }

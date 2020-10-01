@@ -1,13 +1,16 @@
-import React, { Fragment, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { DatasetConfig } from 'conf/domain/model/Dataset';
+
 import styles from './WebformRecord.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
@@ -15,17 +18,37 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTabChange, record, tableId }) => {
-  const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, { newRecord: {}, record });
+  const resources = useContext(ResourcesContext);
+
+  const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
+    isFileDialogVisible: false,
+    newRecord: {},
+    record
+  });
+
+  const { isFileDialogVisible } = webformRecordState;
+
+  const {
+    formatDate,
+    getInputMaxLength,
+    getInputType,
+    getMultiselectValues,
+    parseMultiselect,
+    parseNewRecordData
+  } = WebformRecordUtils;
 
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: WebformRecordUtils.parseNewRecordData(record.elements, undefined) }
+      payload: { newRecord: parseNewRecordData(record.elements, undefined) }
     });
   }, [record, onTabChange]);
 
@@ -33,6 +56,22 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, webformRecordState.record.recordId);
       if (isDataDeleted) onRefresh();
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const onEditorSubmitValue = async (field, option, value) => {
+    try {
+      DatasetService.updateFieldById(
+        datasetId,
+        option,
+        field.fieldId,
+        field.fieldType,
+        field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+          ? value.join(',')
+          : value
+      );
     } catch (error) {
       console.log('error', error);
     }
@@ -56,59 +95,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     }
   };
 
-  const parseMultiselect = record => {
-    record.dataRow.forEach(field => {
-      if (
-        field.fieldData.type === 'MULTISELECT_CODELIST' ||
-        (field.fieldData.type === 'LINK' && Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
-      ) {
-        if (
-          !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
-          field.fieldData[field.fieldData.fieldSchemaId] !== ''
-        ) {
-          if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
-            field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
-          } else {
-            field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
-              .split(',')
-              .map(item => item.trim())
-              .join(',');
-          }
-        }
-      }
-    });
-    return record;
-  };
-
-  const onEditorSubmitValue = async (field, option, value) => {
-    try {
-      DatasetService.updateFieldById(
-        datasetId,
-        option,
-        field.fieldId,
-        field.fieldType,
-        field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
-          ? value.join(',')
-          : value
-      );
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
-
-  const formatDate = (date, isInvalidDate) => {
-    if (isInvalidDate) return '';
-
-    let d = new Date(date),
-      month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-  };
+  const onToggleDialogVisible = value => webformRecordDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
   const renderTemplate = (field, option, type) => {
     switch (type) {
@@ -169,7 +156,10 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             // }}
             options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
             // optionLabel="itemType"
-            value={field.value}
+            value={getMultiselectValues(
+              field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
+              field.value
+            )}
           />
         );
 
@@ -225,28 +215,36 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="errorCircle"
             />
-            <span
-              style={{ color: 'red' }}>{`The field ${field.name} is not created in the design, please check it`}</span>
+            <span style={{ color: 'red' }}>
+              {`The field ${field.name} is not created in the design, please check it`}
+            </span>
           </div>
+        );
+
+      case 'ATTACHMENT':
+        return (
+          <Button
+            className={`p-button-animated-blink p-button-primary-transparent`}
+            // disabled={true}
+            icon="import"
+            label="Upload file"
+            onClick={() => {
+              onToggleDialogVisible(true);
+              // setIsAttachFileVisible(true);
+              // onFileUploadVisible(
+              //   fieldId,
+              //   fieldSchemaId,
+              //   !isNil(colSchema) ? colSchema.validExtensions : [],
+              //   colSchema.maxSize
+              // );
+            }}
+          />
         );
 
       default:
         break;
     }
   };
-
-  const getInputType = {
-    DATE: 'date',
-    NUMBER_DECIMAL: 'any',
-    NUMBER_INTEGER: 'init',
-    POINT: 'coordinates',
-    TEXT: 'text',
-    EMAIL: 'email',
-    PHONE: 'phone',
-    RICH_TEXT: 'any'
-  };
-
-  const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
   const renderFields = elements => {
     return elements.map((field, i) => {
@@ -327,7 +325,35 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     );
   };
 
-  return renderWebformContent(webformRecordState.record);
+  return (
+    <Fragment>
+      {renderWebformContent(webformRecordState.record)}
+
+      {isFileDialogVisible && (
+        <CustomFileUpload
+          dialogClassName={styles.dialog}
+          dialogHeader={resources.messages['uploadAttachment']}
+          dialogOnHide={() => onToggleDialogVisible(false)}
+          dialogVisible={isFileDialogVisible}
+          accept={'*'}
+          chooseLabel={resources.messages['selectFile']}
+          className={styles.fileUpload}
+          fileLimit={1}
+          isDialog={true}
+          mode="advanced"
+          multiple={false}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          name="file"
+          // onUpload={onAttach}
+          operation="PUT"
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+            datasetId
+            // fieldId: records.selectedFieldId
+          })}`}
+        />
+      )}
+    </Fragment>
+  );
 };
 
 WebformRecord.propTypes = { record: PropTypes.shape({ elements: PropTypes.array }) };
