@@ -24,11 +24,16 @@ export const PrivateRoute = ({ component: Component, path }) => {
         LocalStorageUtils.set({ redirectUrl: window.location.href });
       } else if (userContext.isLoggedOut) {
         return (
-          <Redirect
-            to={{
-              pathname: routes.ACCESS_POINT,
-              state: { from: props.location }
-            }}
+          <Route
+            path={path}
+            render={props => (
+              <Redirect
+                to={{
+                  pathname: routes.ACCESS_POINT,
+                  state: { from: props.location }
+                }}
+              />
+            )}
           />
         );
       } else {
