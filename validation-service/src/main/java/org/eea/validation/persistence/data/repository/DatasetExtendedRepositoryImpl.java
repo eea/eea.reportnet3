@@ -83,7 +83,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
                 record.setId(rs.getString("record_id"));
                 FieldValue field = new FieldValue();
                 field.setId(rs.getString(entityName + "_id"));
-                field.setValue(rs.getString(entityName));
                 fields.add(field);
                 record.setFields(fields);
                 records.add(record);
