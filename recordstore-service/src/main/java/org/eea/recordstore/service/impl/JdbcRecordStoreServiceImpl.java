@@ -1084,11 +1084,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void executeViewPermissions(String queryViewName, Long datasetId)
       throws RecordStoreAccessException {
     String querySelectPermission = "GRANT SELECT ON dataset_" + datasetId + "." + "\""
-        + queryViewName + "\"" + " TO validation";
+        + queryViewName + "\"" + " TO " + datasetUsers;
     executeQueryViewCommands(querySelectPermission);
 
     String queryDeletePermission = "GRANT DELETE ON dataset_" + datasetId + "." + "\""
-        + queryViewName + "\"" + " TO recordstore";
+        + queryViewName + "\"" + " TO " + userPostgreDb;
     executeQueryViewCommands(queryDeletePermission);
 
   }
