@@ -22,8 +22,18 @@ export const PrivateRoute = ({ component: Component, path }) => {
     } else {
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
         LocalStorageUtils.set({ redirectUrl: window.location.href });
+      } else if (userContext.isLoggedOut) {
+        return (
+          <Redirect
+            to={{
+              pathname: routes.ACCESS_POINT,
+              state: { from: props.location }
+            }}
+          />
+        );
+      } else {
+        window.location.href = AccessPointWebConfig.euloginUrl;
       }
-      window.location.href = AccessPointWebConfig.euloginUrl;
     }
   } else {
     return (
