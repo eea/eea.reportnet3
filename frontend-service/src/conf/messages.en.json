@@ -882,7 +882,7 @@
     "currentPoint": "Current point",
     "newPoint": "New point",
     "manageRolesEditorDialogInputPlaceholder": "Editor account...",
-    "sqlSentenceHelpNote": "Table name must be in&nbsp<u>quotes</u>&nbspif it begins with a number or it contains blank spaces (e.g.  3tableName -> '3tableName')",
+    "sqlSentenceHelpNote": "Table name must be in&nbsp<u>quotes</u>&nbspif it begins with a number or it contains blank spaces (e.g.  3tableName ->  &quot3tableName&quot)",
     "sqlSentenceHelpField": "SELECT * FROM [tableName]<br/>SELECT record_id, [fieldName]_id FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
     "sqlSentenceHelpRow": "SELECT * FROM [tableName]<br/>SELECT record_id FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
     "sqlSentenceHelpTable": "SELECT * FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
