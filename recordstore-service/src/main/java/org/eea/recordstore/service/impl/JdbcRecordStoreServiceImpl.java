@@ -1053,11 +1053,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetId the dataset id
    */
-  /**
-   * Execute.
-   *
-   * @param eeaEventVO the eea event VO
-   */
   @Override
   public void createUpdateQueryView(Long datasetId) {
 
@@ -1088,13 +1083,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void executeViewPermissions(String queryViewName, Long datasetId)
       throws RecordStoreAccessException {
-    String querySelectPermission =
-        "GRANT SELECT ON dataset_" + datasetId + "." + queryViewName + " TO validation";
-    executeQueryViewCommands(querySelectPermission);
+    String querySelectPermission = "GRANT SELECT ON dataset_" + datasetId + "." + "\""
+        + queryViewName + "\"" + " TO " + datasetUsers;
+    executeQueryViewCommands(querySelectPermission.toLowerCase());
 
-    String queryDeletePermission =
-        "GRANT DELETE ON dataset_" + datasetId + "." + queryViewName + " TO recordstore";
-    executeQueryViewCommands(queryDeletePermission);
+    String queryDeletePermission = "GRANT DELETE ON dataset_" + datasetId + "." + "\""
+        + queryViewName + "\"" + " TO " + userPostgreDb;
+    executeQueryViewCommands(queryDeletePermission.toLowerCase());
 
   }
 
@@ -1166,7 +1161,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
         + "')");
 
-    executeQueryViewCommands(stringQuery.toString());
+    executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
 
 }
