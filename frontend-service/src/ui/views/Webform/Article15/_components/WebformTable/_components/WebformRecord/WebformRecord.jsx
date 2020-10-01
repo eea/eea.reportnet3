@@ -220,14 +220,14 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
 
       case 'EMPTY':
         return (
-          <Fragment>
+          <div className={styles.infoButtonWrapper}>
             <Button
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="errorCircle"
             />
             <span
               style={{ color: 'red' }}>{`The field ${field.name} is not created in the design, please check it`}</span>
-          </Fragment>
+          </div>
         );
 
       default:
@@ -253,7 +253,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
       if (field.type === 'FIELD') {
         return (
           <div key={i} className={styles.field}>
-            <div>{field.title}</div>
+            <label>{field.title}</label>
             <div style={{ display: 'flex' }}>
               <div style={{ width: '75%' }}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
               {field.validations &&

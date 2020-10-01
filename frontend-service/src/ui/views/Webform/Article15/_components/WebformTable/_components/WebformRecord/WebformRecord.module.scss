@@ -1,6 +1,6 @@
 .content {
   background: var(--gray-10);
-  padding: 1rem;
+  padding: 4rem 2rem;
   position: relative;
 
   .actionButtons {
@@ -30,24 +30,44 @@
   }
 
   .field {
-    margin-bottom: 1rem;
-    .infoButton {
-      background-color: var(--white) !important;
-      border-radius: 50% !important;
-      color: var(--datatable-header-info-button-color) !important;
-      font-size: 12pt !important;
-      height: 0.7em !important;
-      margin-left: 0.4rem !important;
-      width: 0.7em !important;
+    margin-bottom: 2rem;
+    :global .p-multiselect {
+      width: 100%;
+      padding: 0.2rem 0;
+    }
+    :global .p-dropdown {
+      width: 100%;
+    }
+    :global .p-inputtext {
+      padding: 1rem 0.5rem;
+    }
+    label {
+      display: inline-block;
+      max-width: 75%;
+      margin-bottom: 0.5rem;
+    }
+    .infoButtonWrapper {
+      border-radius: 5px;
+      border: 0.1rem solid var(--gray-25);
+      padding: 1rem;
+      .infoButton {
+        background-color: var(--white) !important;
+        border-radius: 50% !important;
+        color: var(--datatable-header-info-button-color) !important;
+        font-size: 12pt !important;
+        height: 0.7em !important;
+        margin-left: 0.4rem !important;
+        width: 0.7em !important;
 
-      > span {
-        left: 46% !important;
-        margin-left: -0.48em !important;
-        margin-top: -0.5em !important;
-      }
+        > span {
+          left: 46% !important;
+          margin-left: -0.48em !important;
+          margin-top: -0.5em !important;
+        }
 
-      &:focus {
-        box-shadow: none !important;
+        &:focus {
+          box-shadow: none !important;
+        }
       }
     }
   }
@@ -58,7 +78,7 @@
   // padding: 1rem;
   border-radius: 10px;
   height: 100%;
-  margin: 4rem 0 1rem 0;
+  margin: 6rem 0 2rem 0;
   width: 100%;
 
   .title {
