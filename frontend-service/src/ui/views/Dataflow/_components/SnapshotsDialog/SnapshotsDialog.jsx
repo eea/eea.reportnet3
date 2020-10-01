@@ -30,6 +30,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [snapshotDescription, setSnapshotDescription] = useState();
   const [snapshotsListData, setSnapshotsListData] = useState([]);
+  const [snapshotReleasedId, setSnapshotReleasedId] = useState('');
 
   useCheckNotifications(
     [
@@ -40,6 +41,10 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     setIsLoading,
     false
   );
+
+  if (snapshotReleasedId === snapshotDataToRelease.id) {
+    setSnapshotDataToRelease('');
+  }
 
   useEffect(() => {
     if (isSnapshotDialogVisible) {
@@ -82,7 +87,10 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
 
   const onLoadSnapshotList = async datasetId => {
     try {
-      setSnapshotsListData(await SnapshotService.allReporter(datasetId));
+      const response = await SnapshotService.allReporter(datasetId);
+      setSnapshotsListData(response);
+      const snapshotReleased = response.filter(release => release.isReleased);
+      setSnapshotReleasedId(snapshotReleased[0].id);
     } catch (error) {
       notificationContext.add({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
@@ -175,6 +183,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           showReleaseDialog={onShowReleaseDialog}
           snapshotsListData={snapshotsListData}
           snapshotDataToRelease={snapshotDataToRelease}
+          snapshotReleasedId={snapshotReleasedId}
         />
       </Dialog>
       {isActiveReleaseSnapshotConfirmDialog && (
