@@ -1096,7 +1096,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String dropQuery = "drop view if exists dataset_";
 
     for (String view : viewList) {
-      executeQueryViewCommands(dropQuery + datasetId + "." + view);
+      executeQueryViewCommands(dropQuery + datasetId + "." + "\"" + view + "\"");
     }
     LOG.info("These views: {} have been deleted.", viewList);
   }
