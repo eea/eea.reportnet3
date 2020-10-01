@@ -10,9 +10,9 @@ const all = async (dataflowId, datasetSchemaId) => {
   return parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId, dataflowId)));
 };
 
-const allExtensionsOperations = async datasetSchemaId =>
+const allExtensionsOperations = async (dataflowId, datasetSchemaId) =>
   parseIntegrationsOperationsExtensionsList(
-    await apiIntegration.allExtensionsOperations(parseDatasetSchemaId(datasetSchemaId))
+    await apiIntegration.allExtensionsOperations(parseDatasetSchemaId(datasetSchemaId, dataflowId))
   );
 
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
