@@ -47,6 +47,14 @@
   pointer-events: none;
 }
 
+.dragAndDropActive {
+  pointer-events: none;
+}
+
+.dragAndDropInactive {
+  pointer-events: auto;
+}
+
 .dropdownFieldType {
   margin-left: 0.4rem;
   width: 20%;

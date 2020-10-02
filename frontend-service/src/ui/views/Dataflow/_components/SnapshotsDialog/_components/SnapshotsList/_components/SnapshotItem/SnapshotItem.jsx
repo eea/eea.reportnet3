@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import moment from 'moment';
 
+import { isEmpty } from 'lodash';
+
 import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -9,15 +11,49 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog }) => {
+export const SnapshotItem = ({
+  getSnapshotData,
+  isLoading,
+  itemData,
+  showReleaseDialog,
+  snapshotDataToRelease,
+  snapshotReleasedId
+}) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const getSnapshotItemIcon = () =>
+    snapshotDataToRelease
+      ? itemData.id === snapshotDataToRelease.id
+        ? isLoading
+          ? 'spinnerAnimate'
+          : 'check'
+        : 'cloudUpload'
+      : itemData.isReleased
+      ? isLoading
+        ? 'spinnerAnimate'
+        : 'check'
+      : 'cloudUpload';
+
+  const getSnapshotIconTexStyle = icon => {
+    if (snapshotDataToRelease) {
+      return itemData.id === snapshotDataToRelease.id || snapshotReleasedId !== snapshotDataToRelease.id
+        ? itemData.id === snapshotDataToRelease.id
+          ? icon.icon === true
+            ? 'success'
+            : `${styles.is_released_snapshot}`
+          : null
+        : null;
+    } else {
+      return itemData.isReleased ? (icon.icon === true ? 'success' : `${styles.is_released_snapshot}`) : ``;
+    }
+  };
 
   return (
     <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <span className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
+          <span className={getSnapshotIconTexStyle({ icon: false })}>
             {moment(itemData.creationDate).format(
               `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                 userContext.userProps.amPm24h ? '' : ' A'
@@ -35,9 +71,9 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
           </span>
           <div className={styles.listActions}>
             <Button
-              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : ``}`}
+              className={`${styles.btn} rp-btn ${getSnapshotIconTexStyle({ icon: true })}`}
               disabled={isLoading || itemData.isBlocked}
-              icon={itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload'}
+              icon={getSnapshotItemIcon()}
               onClick={() => {
                 showReleaseDialog({ isReleased: false });
                 getSnapshotData(itemData);
