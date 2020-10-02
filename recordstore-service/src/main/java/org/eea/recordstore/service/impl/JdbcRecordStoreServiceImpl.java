@@ -1157,19 +1157,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       switch (type) {
         case DATE:
-          stringQuery.append(
-              "(select case when fv.value = '' then null else CAST(fv.value as date) end from dataset_"
+          stringQuery
+              .append("(select case when dataset_" + datasetId
+                  + ".is_date( fv.value ) then CAST(fv.value as date) else null end from dataset_"
                   + datasetId + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
           break;
         case NUMBER_DECIMAL:
         case NUMBER_INTEGER:
-          stringQuery.append(
-              "(select case when fv.value = '' then null else CAST(fv.value as numeric) end from dataset_"
-                  + datasetId + QUERY_FILTER_BY_ID_RECORD)
-              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
-              .append("\" ");
+          stringQuery.append("(select case when dataset_" + datasetId
+              + ".is_numeric( fv.value ) then CAST(fv.value as numeric) else null end from dataset_"
+              + datasetId + QUERY_FILTER_BY_ID_RECORD).append(schemaId).append(AS).append("\"")
+              .append(columns.get(i).getName()).append("\" ");
           break;
         default:
           stringQuery
