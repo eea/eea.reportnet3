@@ -41,21 +41,6 @@ export const PrivateRoute = ({ component: Component, path }) => {
       window.location.href = AccessPointWebConfig.euloginUrl;
     }
   } else {
-            render={props => (
-              <Redirect
-                to={{
-                  pathname: routes.ACCESS_POINT,
-                  state: { from: props.location }
-                }}
-              />
-            )}
-          />
-        );
-      } else {
-        window.location.href = AccessPointWebConfig.euloginUrl;
-      }
-    }
-  } else {
     return (
       <Route
         path={path}
