@@ -1,6 +1,6 @@
 .content {
   background: var(--gray-10);
-  padding: 4rem 2rem;
+  padding: 2rem 2rem 2rem 2rem;
   position: relative;
 
   .actionButtons {
@@ -90,7 +90,7 @@
   // padding: 1rem;
   border-radius: 10px;
   height: 100%;
-  margin: 6rem 0 2rem 0;
+  margin: 4rem 0 2rem 0;
   width: 100%;
   border: 1px solid var(--gray-25);
   padding: 1rem;
@@ -108,5 +108,6 @@
   .content {
     border: 1px solid var(--gray-25);
     margin-bottom: 0.5rem;
+    padding-bottom: 0;
   }
 }
