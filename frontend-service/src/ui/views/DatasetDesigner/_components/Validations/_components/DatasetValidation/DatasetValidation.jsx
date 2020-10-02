@@ -252,8 +252,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const parseRuleToEdit = rule => {
+    if (rule.automatic) return rule;
     const inmRuleToEdit = { ...rule };
-
     const filteredReferencedDatasetSchema = datasetSchemas.filter(
       dataset => dataset.datasetSchemaId === rule.relations.referencedDatasetSchema.code
     );
