@@ -60,6 +60,7 @@
         height: 0.7em !important;
         margin-left: 0.4rem !important;
         width: 0.7em !important;
+        margin-right: 0.25rem;
 
         > span {
           left: 46% !important;
@@ -70,6 +71,15 @@
         &:focus {
           box-shadow: none !important;
         }
+      }
+    }
+    :global .webform-validationErrors {
+      width: 2em !important;
+      &:first-of-type {
+        margin-left: 1rem !important;
+      }
+      :global .pi {
+        font-size: 1.8em;
       }
     }
   }
