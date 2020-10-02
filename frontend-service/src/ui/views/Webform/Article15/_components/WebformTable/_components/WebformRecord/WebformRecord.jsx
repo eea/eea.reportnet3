@@ -196,7 +196,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         return (
           <InputText
             id={field.fieldId}
-            keyfilter={getInputType[type]}
+            // keyfilter={getInputType[type]}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
