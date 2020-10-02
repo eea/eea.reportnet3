@@ -931,7 +931,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
                 }`}
-                disabled={!designerState.datasetHasData}
+                // TODO: ENABLE BUTTON
+                // disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
