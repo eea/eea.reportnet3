@@ -925,7 +925,12 @@ const DataViewer = withRouter(
       let icon = [];
       if (!isEmpty(validation)) {
         icon.push(
-          <IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} key={levelError} />
+          <IconTooltip
+            className={styles.iconTooltipLevelError}
+            key={levelError}
+            levelError={levelError}
+            message={message}
+          />
         );
       }
       return icon;
@@ -959,13 +964,11 @@ const DataViewer = withRouter(
     };
 
     const requiredTemplate = rowData => {
+      console.log(rowData.field);
       return (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div className={styles.requiredTemplateWrapper}>
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons('check')}
-              style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
-            />
+            <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
           ) : rowData.field === 'Single select items' ||
             rowData.field === 'Multiple select items' ||
             rowData.field === 'Valid extensions' ? (
@@ -1113,11 +1116,10 @@ const DataViewer = withRouter(
 
         {isColumnInfoVisible && (
           <Dialog
-            className={styles.Dialog}
+            className={styles.fieldInfoDialogWrapper}
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
-            style={{ minWidth: '40vw', maxWidth: '80vw', maxHeight: '80vh' }}
             visible={isColumnInfoVisible}>
             <DataTable
               autoLayout={true}
@@ -1126,21 +1128,25 @@ const DataViewer = withRouter(
                 'header',
                 'description',
                 'type',
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
+                ...(!isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
                   : []),
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                ...(!isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
                   ? ['validExtensions']
                   : []),
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                ...(!isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
                   ? ['maxSize']
                   : []),
                 !isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).readOnly
                   ? 'readOnly'
+                  : '',
+                !isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
+                DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).required
+                  ? 'required'
                   : ''
               ])}>
               {['field', 'value'].map((column, i) => (
@@ -1216,12 +1222,11 @@ const DataViewer = withRouter(
           <div onKeyPress={onKeyPress}>
             <Dialog
               blockScroll={false}
-              className={'edit-table calendar-table'}
+              className={`edit-table calendar-table ${styles.addEditRecordDialog}`}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
               modal={true}
               onHide={() => setAddDialogVisible(false)}
-              style={{ width: '50%' }}
               visible={addDialogVisible}
               zIndex={3003}>
               <div className="p-grid p-fluid">
@@ -1245,12 +1250,11 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="calendar-table"
+            className={`calendar-table ${styles.addEditRecordDialog}`}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
             onHide={() => setEditDialogVisible(false)}
-            style={{ width: '50%' }}
             visible={editDialogVisible}
             zIndex={3003}>
             <div className="p-grid p-fluid">
