@@ -195,34 +195,32 @@ const Dataflow = withRouter(({ history, match }) => {
       return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
     }
 
-    let isRepresentative;
+    let showBtn;
     if (isDesign) {
-      isRepresentative =
-        dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
-          ? true
-          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
-          ? false
-          : true;
+      showBtn = true;
     }
 
     if (isDraft) {
-      isRepresentative =
-        dataflowState.data.datasets.length === 1 && isUndefined(representativeId)
-          ? true
-          : dataflowState.data.datasets.length > 1 && isUndefined(representativeId)
-          ? false
-          : true;
+      if (dataflowState.isCustodian) {
+        showBtn = isUndefined(representativeId);
+      } else {
+        if (!isUndefined(representativeId)) {
+          showBtn = true;
+        } else {
+          showBtn = dataflowState.data.representatives.length === 1;
+        }
+      }
     }
 
     return {
-      apiKeyBtn: isRepresentative,
+      apiKeyBtn: showBtn,
 
       editBtn:
         userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
 
       manageRightsBtn:
         (isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD'])) ||
-        (isDraft && isRepresentative && userRoles.includes(config.permissions['LEAD_REPORTER'])),
+        (isDraft && showBtn && userRoles.includes(config.permissions['LEAD_REPORTER'])),
 
       propertiesBtn: true
     };
