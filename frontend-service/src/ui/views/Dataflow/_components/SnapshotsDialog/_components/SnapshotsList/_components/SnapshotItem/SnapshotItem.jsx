@@ -22,30 +22,39 @@ export const SnapshotItem = ({
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const getSnapshotItemIcon = () =>
-    snapshotDataToRelease
-      ? itemData.id === snapshotDataToRelease.id
-        ? isLoading
-          ? 'spinnerAnimate'
-          : 'check'
-        : 'cloudUpload'
-      : itemData.isReleased
-      ? isLoading
-        ? 'spinnerAnimate'
-        : 'check'
-      : 'cloudUpload';
-
-  const getSnapshotIconTextStyle = valueItemStyle => {
+  const getSnapshotItemIcon = () => {
     if (snapshotDataToRelease) {
-      return itemData.id === snapshotDataToRelease.id || snapshotReleasedId !== snapshotDataToRelease.id
-        ? itemData.id === snapshotDataToRelease.id
-          ? valueItemStyle
-            ? 'success'
-            : `${styles.is_released_snapshot}`
-          : null
-        : null;
+      return itemData.id === snapshotDataToRelease.id ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
     } else {
-      return itemData.isReleased ? (valueItemStyle ? 'success' : `${styles.is_released_snapshot}`) : ``;
+      return itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
+    }
+  };
+
+  const getSnapshotTextStyle = () => {
+    if (snapshotDataToRelease) {
+      if (itemData.id === snapshotDataToRelease.id) {
+        return `${styles.is_released_snapshot}`;
+      } else if (snapshotReleasedId !== snapshotDataToRelease.id) {
+        return itemData.id === snapshotDataToRelease.id && `${styles.is_released_snapshot}`;
+      } else {
+        return ``;
+      }
+    } else {
+      return itemData.isReleased ? `${styles.is_released_snapshot}` : ``;
+    }
+  };
+
+  const getSnapshotIconStyle = () => {
+    if (snapshotDataToRelease) {
+      if (itemData.id === snapshotDataToRelease.id) {
+        return 'success';
+      } else if (snapshotReleasedId !== snapshotDataToRelease.id) {
+        return itemData.id === snapshotDataToRelease.id && 'success';
+      } else {
+        return null;
+      }
+    } else {
+      return itemData.isReleased ? 'success' : null;
     }
   };
 
@@ -53,7 +62,8 @@ export const SnapshotItem = ({
     <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <span className={getSnapshotIconTextStyle(false)}>
+          {/* <span className={getSnapshotIconTextStyle(false)}> */}
+          <span className={getSnapshotTextStyle()}>
             {moment(itemData.creationDate).format(
               `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                 userContext.userProps.amPm24h ? '' : ' A'
@@ -71,7 +81,8 @@ export const SnapshotItem = ({
           </span>
           <div className={styles.listActions}>
             <Button
-              className={`${styles.btn} rp-btn ${getSnapshotIconTextStyle(true)}`}
+              // className={`${styles.btn} rp-btn ${getSnapshotIconTextStyle(true)}`}
+              className={`${styles.btn} rp-btn ${getSnapshotIconStyle()}`}
               disabled={isLoading || itemData.isBlocked}
               icon={getSnapshotItemIcon()}
               onClick={() => {
