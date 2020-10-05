@@ -85,7 +85,6 @@ const Dataflow = withRouter(({ history, match }) => {
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
-    isRepresentativeView: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
     name: '',
@@ -195,34 +194,32 @@ const Dataflow = withRouter(({ history, match }) => {
       return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
     }
 
-    let isRepresentative;
+    let showBtn;
     if (isDesign) {
-      isRepresentative =
-        dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
-          ? true
-          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
-          ? false
-          : true;
+      showBtn = true;
     }
 
     if (isDraft) {
-      isRepresentative =
-        dataflowState.data.datasets.length === 1 && isUndefined(representativeId)
-          ? true
-          : dataflowState.data.datasets.length > 1 && isUndefined(representativeId)
-          ? false
-          : true;
+      if (dataflowState.isCustodian) {
+        showBtn = isUndefined(representativeId);
+      } else {
+        if (!isUndefined(representativeId)) {
+          showBtn = true;
+        } else {
+          showBtn = dataflowState.data.representatives.length === 1;
+        }
+      }
     }
 
     return {
-      apiKeyBtn: isRepresentative,
+      apiKeyBtn: showBtn,
 
       editBtn:
         userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
 
       manageRightsBtn:
         (isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD'])) ||
-        (isDraft && isRepresentative && userRoles.includes(config.permissions['LEAD_REPORTER'])),
+        (isDraft && showBtn && userRoles.includes(config.permissions['LEAD_REPORTER'])),
 
       propertiesBtn: true
     };
@@ -247,13 +244,12 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
-  const initialLoad = (dataflow, isRepresentativeView) =>
+  const initialLoad = dataflow =>
     dataflowDispatch({
       type: 'INITIAL_LOAD',
       payload: {
         data: dataflow,
         description: dataflow.description,
-        isRepresentativeView: isRepresentativeView,
         name: dataflow.name,
         obligations: dataflow.obligation,
         status: dataflow.status
@@ -358,24 +354,11 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
 
-  const checkIsRepresentativeView = (datasets, dataflow) => {
-    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.dataProviderId));
-
-    return dataflow.representatives.length === 1 && uniqRepresentatives === 1;
-  };
-
-  const onInitialLoad = (dataflow, datasets) => {
-    const isRepresentativeView = checkIsRepresentativeView(datasets, dataflow);
-    initialLoad(dataflow, isRepresentativeView);
-  };
-
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
 
-      const { datasets } = dataflow;
-
-      onInitialLoad(dataflow, datasets);
+      initialLoad(dataflow);
 
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
@@ -472,7 +455,7 @@ const Dataflow = withRouter(({ history, match }) => {
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title icon="clone" iconSize="4rem" subtitle={resources.messages['dataflow']} title={dataflowState.name} />
 
-        {!dataflowState.isRepresentativeView && isNil(representativeId) ? (
+        {isNil(representativeId) ? (
           <BigButtonList
             className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
