@@ -72,6 +72,7 @@ const DataViewer = withRouter(
     recordPositionId,
     reporting,
     selectedRecordErrorId,
+    selectedRuleId,
     setIsValidationSelected,
     showWriteButtons,
     tableFixedNumber,
