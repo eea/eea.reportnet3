@@ -90,7 +90,7 @@ public class ReportingDatasetServiceTest {
     datasets.add(dataset);
     Snapshot snap = new Snapshot();
     snap.setId(1L);
-    snap.setRelease(false);
+    snap.setDcReleased(false);
     ReportingDataset reporting = new ReportingDataset();
     reporting.setId(1L);
     snap.setReportingDataset(reporting);

@@ -6,8 +6,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.service.DataCollectionService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -19,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +46,15 @@ public class DataSetSnapshotControllerImplTest {
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
+  @Mock
+  private DatasetService datasetService;
+
+  @Mock
+  private DataCollectionService dataCollectionService;
+
+  @Mock
+  private ReportingDatasetRepository reportingDatasetRepository;
+
   /** The security context. */
   SecurityContext securityContext;
 
@@ -47,6 +63,8 @@ public class DataSetSnapshotControllerImplTest {
 
   /** The snapshot VO. */
   SnapshotVO snapshotVO;
+
+  List<ReportingDataset> datasets;
 
   /**
    * Inits the mocks.
@@ -59,6 +77,15 @@ public class DataSetSnapshotControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
     snapshotVO = new SnapshotVO();
     snapshotVO.setId(1L);
+    datasets = new ArrayList<>();
+    ReportingDataset reportingDataset = new ReportingDataset();
+    reportingDataset.setId(1L);
+    reportingDataset.setDataProviderId(1L);
+    datasets.add(reportingDataset);
+    ReportingDataset reportingDataset2 = new ReportingDataset();
+    reportingDataset2.setId(2L);
+    reportingDataset2.setDataProviderId(1L);
+    datasets.add(reportingDataset2);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -342,5 +369,52 @@ public class DataSetSnapshotControllerImplTest {
   public void testGetSnapshot() throws Exception {
     when(datasetSnapshotService.getById(Mockito.anyLong())).thenReturn(snapshotVO);
     assertEquals("not equals", dataSetSnapshotControllerImpl.getById(1L), snapshotVO);
+  }
+
+  @Test
+  public void historicReleasesReportingSuccessTest() throws Exception {
+    when(datasetSnapshotService.getReleases(Mockito.anyLong())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", dataSetSnapshotControllerImpl.historicReleases(1L, null),
+        new ArrayList<>());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void historicReleasesExceptionTest() throws Exception {
+    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetSnapshotService)
+        .getReleases(Mockito.anyLong());
+    try {
+      dataSetSnapshotControllerImpl.historicReleases(1L, null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+
+  }
+
+  @Test
+  public void getSchemaByIdSuccessTest() throws Exception {
+    when(datasetSnapshotService.getSchemaById(Mockito.anyLong())).thenReturn(snapshotVO);
+    assertEquals("not equals", dataSetSnapshotControllerImpl.getSchemaById(1L), snapshotVO);
+  }
+
+  @Test
+  public void getSchemaByIdExceptionTest() throws Exception {
+    doThrow(new EEAException()).when(datasetSnapshotService).getSchemaById(Mockito.anyLong());
+    assertNull("not equals", dataSetSnapshotControllerImpl.getSchemaById(1L));
+  }
+
+  @Test
+  public void historicReleasesByRespresentativeSuccessTest() throws Exception {
+    when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(datasets);
+    when(datasetSnapshotService.getSnapshotsReleasedByIdDataset(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    assertEquals("not equals",
+        dataSetSnapshotControllerImpl.historicReleasesByRepresentative(1L, 1L), new ArrayList<>());
+  }
+
+  @Test
+  public void updateSnapshotEUReleaseSuccessTest() throws Exception {
+    dataSetSnapshotControllerImpl.updateSnapshotEURelease(Mockito.anyLong());
+    Mockito.verify(datasetSnapshotService, times(1)).updateSnapshotEURelease(Mockito.anyLong());
   }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -72,7 +73,7 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
         Map<String, Object> result = new HashMap<>();
         result.put(LiteralConstants.DATASET_ID, idDataset.toString());
         result.put(LiteralConstants.ID_DATASET_SCHEMA, idDatasetSchema);
-        if (datasetService.isReportingDataset(idDataset)) {
+        if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(idDataset))) {
           sendEvent(result);
         }
       } catch (EEAException e) {

@@ -36,18 +36,25 @@ public class Snapshot extends DataSetMetabase {
   @JoinColumn(name = "REPORTING_DATASET_ID")
   private DataSetMetabase reportingDataset;
 
-  /** The release. */
-  @Column(name = "RELEASE")
-  private Boolean release;
+  /** The data colection released check. */
+  @Column(name = "DC_RELEASED")
+  private Boolean dcReleased;
+
+  /** The eu dataset released check. */
+  @Column(name = "EU_RELEASED")
+  private Boolean euReleased;
 
   /** The date released. */
   @Column(name = "DATE_RELEASED")
   private Date dateReleased;
+
   /** The blocked. */
   @Column(name = "BLOCKED")
   private Boolean blocked;
 
-
+  /** The data collection id. */
+  @Column(name = "DATACOLLECTION_ID")
+  private Long dataCollectionId;
 
   /**
    * Equals.

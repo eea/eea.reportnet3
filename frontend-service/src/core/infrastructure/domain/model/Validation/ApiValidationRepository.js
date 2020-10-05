@@ -161,17 +161,6 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     automatic: validationRule.automatic,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
-    integrityVO:
-      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
-        ? {
-            id: validationRule.relations.id,
-            isDoubleReferenced: validationRule.relations.isDoubleReferenced,
-            originDatasetSchemaId: validationRule.relations.originDatasetSchema,
-            originFields: validationRule.relations.links.map(link => link.originField.code),
-            referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
-            referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
-          }
-        : null,
     referenceId: validationRule.table.code,
     ruleId: validationRule.id,
     ruleName: validationRule.name,
@@ -181,6 +170,21 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     type: 'TABLE',
     whenCondition: null
   };
+
+  if (!validationRule.automatic) {
+    validation.integrityVO =
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
+        ? {
+            id: validationRule.relations.id,
+            isDoubleReferenced: validationRule.relations.isDoubleReferenced,
+            originDatasetSchemaId: validationRule.relations.originDatasetSchema,
+            originFields: validationRule.relations.links.map(link => link.originField.code),
+            referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
+            referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
+          }
+        : null;
+  }
+
   return await apiValidation.update(datasetId, validation);
 };
 

@@ -11,21 +11,25 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
+import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
@@ -37,6 +41,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -177,12 +182,36 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private UniqueConstraintRepository uniqueConstraintRepository;
 
+  /** The release mapper. */
+  @Mock
+  private ReleaseMapper releaseMapper;
+
+  /** The e U dataset repository. */
+  @Mock
+  private EUDatasetRepository eUDatasetRepository;
+
+  /** The snapshots. */
+  private List<Snapshot> snapshots;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
+    Snapshot snapshot = new Snapshot();
+    snapshots = new ArrayList<>();
+    snapshot.setId(1L);
+    snapshot.setDateReleased(new Date());
+    snapshot.setEuReleased(true);
+    snapshot.setDcReleased(true);
+    Snapshot snapshot2 = new Snapshot();
+    snapshot2.setId(2L);
+    snapshot2.setDateReleased(new Date());
+    snapshot2.setEuReleased(true);
+    snapshot2.setDcReleased(false);
+    snapshots.add(snapshot2);
+    snapshots.add(snapshot);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -544,6 +573,11 @@ public class DatasetSnapshotServiceTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test restore schema snapshot exception.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testRestoreSchemaSnapshotException() throws Exception {
     try {
@@ -676,18 +710,36 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
   }
 
+  /**
+   * Gets the by id exception test.
+   *
+   * @return the by id exception test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getByIdExceptionTest() throws EEAException {
     when(snapshotRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     assertNull("Snapshot with id 1 Not found", datasetSnapshotService.getById(1L));
   }
 
+  /**
+   * Gets the by id schema exception test.
+   *
+   * @return the by id schema exception test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getByIdSchemaExceptionTest() throws EEAException {
     when(snapshotSchemaRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     assertNull("Snapshot with id 1 Not found", datasetSnapshotService.getSchemaById(1L));
   }
 
+  /**
+   * Gets the by id test.
+   *
+   * @return the by id test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getByIdTest() throws EEAException {
     SnapshotVO snap = new SnapshotVO();
@@ -697,6 +749,12 @@ public class DatasetSnapshotServiceTest {
     assertEquals(snap, datasetSnapshotService.getById(1L));
   }
 
+  /**
+   * Gets the schema by id test.
+   *
+   * @return the schema by id test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getSchemaByIdTest() throws EEAException {
     SnapshotVO snap = new SnapshotVO();
@@ -705,6 +763,152 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.of(new SnapshotSchema()));
     when(snapshotSchemaMapper.entityToClass(Mockito.any())).thenReturn(snap);
     assertEquals(snap, datasetSnapshotService.getSchemaById(1L));
+  }
+
+  /**
+   * Gets the snapshots released by id dataset test.
+   *
+   * @return the snapshots released by id dataset test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getSnapshotsReleasedByIdDatasetTest() throws Exception {
+    when(snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("failed assertion", new ArrayList<>(),
+        datasetSnapshotService.getSnapshotsReleasedByIdDataset(Mockito.anyLong()));
+  }
+
+  /**
+   * Gets the snapshots released by id data collection test.
+   *
+   * @return the snapshots released by id data collection test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getSnapshotsReleasedByIdDataCollectionTest() throws Exception {
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("failed assertion", new ArrayList<>(),
+        datasetSnapshotService.getSnapshotsReleasedByIdDataCollection(Mockito.anyLong()));
+  }
+
+  /**
+   * Gets the snapshots released by id EU dataset success test.
+   *
+   * @return the snapshots released by id EU dataset success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getSnapshotsReleasedByIdEUDatasetSuccessTest() throws Exception {
+    when(eUDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new EUDataset()));
+    when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new DataCollection()));
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("failed assertion", new ArrayList<>(),
+        datasetSnapshotService.getSnapshotsReleasedByIdEUDataset(Mockito.anyLong()));
+  }
+
+  /**
+   * Gets the snapshots released by id EU dataset exception E unot found test.
+   *
+   * @return the snapshots released by id EU dataset exception E unot found test
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void getSnapshotsReleasedByIdEUDatasetExceptionEUnotFoundTest() throws Exception {
+    when(eUDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    try {
+      datasetSnapshotService.getSnapshotsReleasedByIdEUDataset(1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATASET_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the snapshots released by id EU dataset exception D cnot found test.
+   *
+   * @return the snapshots released by id EU dataset exception D cnot found test
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void getSnapshotsReleasedByIdEUDatasetExceptionDCnotFoundTest() throws Exception {
+    when(eUDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new EUDataset()));
+    when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.empty());
+    try {
+      datasetSnapshotService.getSnapshotsReleasedByIdEUDataset(1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATASET_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Update snapshot EU release test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void updateSnapshotEUReleaseTest() throws Exception {
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    datasetSnapshotService.updateSnapshotEURelease(1L);
+    Mockito.verify(snapshotRepository, times(1)).releaseEUActiveSnapshots(Mockito.any());
+  }
+
+  /**
+   * Gets the releases reporting success test.
+   *
+   * @return the releases reporting success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getReleasesReportingSuccessTest() throws Exception {
+
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.REPORTING);
+    when(snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
+  }
+
+  /**
+   * Gets the releases data collection success test.
+   *
+   * @return the releases data collection success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getReleasesDataCollectionSuccessTest() throws Exception {
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.COLLECTION);
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
+  }
+
+  /**
+   * Gets the releases EU dataset success test.
+   *
+   * @return the releases EU dataset success test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getReleasesEUDatasetSuccessTest() throws Exception {
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.EUDATASET);
+    when(eUDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new EUDataset()));
+    when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new DataCollection()));
+    when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
+        .thenReturn(snapshots);
+    when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
   }
 
 }

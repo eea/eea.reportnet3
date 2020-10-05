@@ -50,6 +50,12 @@ public class IntegrationParams {
   /** The Constant FILE_IS: {@value}. */
   public static final String FILE_IS = "fileIS";
 
+  /** The Constant EXPORT_FILE_NAME: {@value}. */
+  public static final String EXPORT_FILE_NAME = "exportFileName";
+
+  /** The Constant RN3_JOB_ID: {@value}. */
+  public static final String RN3_JOB_ID = "rn3JobId";
+
   /**
    * Instantiates a new integration params.
    */

@@ -301,10 +301,14 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @GetMapping("/private/findExportIntegration")
-  @ApiOperation(value = "Find Integration for data export processes based on their Schema and file extension", hidden = true)
+  @ApiOperation(
+      value = "Find Integration for data export processes based on their Schema and file extension",
+      hidden = true)
   public IntegrationVO findExportIntegration(
-      @ApiParam(value = "Dataschema Id", example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "File extension", example = "csv") @RequestParam("fileExtension") String fileExtension) {
+      @ApiParam(value = "Dataschema Id",
+          example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "File extension",
+          example = "csv") @RequestParam("fileExtension") String fileExtension) {
     return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
   }
 
@@ -318,5 +322,36 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiOperation(value = "Delete an Integration from its Schema", hidden = true)
   public void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId) {
     integrationService.deleteSchemaIntegrations(datasetSchemaId);
+  }
+
+
+
+  /**
+   * Execute external integration.
+   *
+   * @param integrationId the integration id
+   * @param datasetId the dataset id
+   * @param replace the replace
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
+  @ApiOperation(
+      value = "Run an external integration process providing the integration id and the dataset where applies",
+      response = ExecutionResultVO.class)
+  public void executeExternalIntegration(@PathVariable(value = "integrationId") Long integrationId,
+      @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "replace", defaultValue = "false") Boolean replace) {
+
+    try {
+      integrationService.executeExternalIntegration(datasetId, integrationId,
+          IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, replace);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error executing an external integration with id {} on the datasetId {}, with message: {}",
+          integrationId, datasetId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
   }
 }
