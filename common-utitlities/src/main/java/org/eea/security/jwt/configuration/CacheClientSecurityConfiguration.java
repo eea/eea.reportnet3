@@ -50,7 +50,7 @@ public class CacheClientSecurityConfiguration {
    * @return the jedis connection factory
    */
   @Bean
-  @Profile("!production")
+  @Profile("local")
   public JedisConnectionFactory jedisConnectionFactory() {
 
     JedisPoolConfig poolConfig = createPoolConfig();
@@ -67,7 +67,7 @@ public class CacheClientSecurityConfiguration {
    * @return the jedis connection factory
    */
   @Bean
-  @Profile("production")
+  @Profile("!local")
   public JedisConnectionFactory jedisSentinelConnectionFactory() {
 
     JedisPoolConfig poolConfig = createPoolConfig();

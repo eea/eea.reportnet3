@@ -12,7 +12,10 @@ public enum IntegrationOperationTypeEnum {
   EXPORT("EXPORT"),
 
   /** The export eu dataset. */
-  EXPORT_EU_DATASET("EXPORT_EU_DATASET");
+  EXPORT_EU_DATASET("EXPORT_EU_DATASET"),
+
+  /** The import from other system. */
+  IMPORT_FROM_OTHER_SYSTEM("IMPORT_FROM_OTHER_SYSTEM");
 
   /** The value. */
   private final String value;

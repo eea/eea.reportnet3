@@ -57,4 +57,30 @@ public interface ValidationController {
       @RequestParam(value = "typeEntitiesFilter",
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
       @RequestParam(value = "originsFilter", required = false) String originsFilter);
+
+  /**
+   * Gets the group failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   * @param levelErrorsFilter the level errors filter
+   * @param typeEntitiesFilter the type entities filter
+   * @param originsFilter the origins filter
+   * @return the group failed validations by id dataset
+   */
+  @GetMapping(value = "/listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
+      @PathVariable("id") Long datasetId,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true") Boolean asc,
+      @RequestParam(value = "levelErrorsFilter",
+          required = false) List<ErrorTypeEnum> levelErrorsFilter,
+      @RequestParam(value = "typeEntitiesFilter",
+          required = false) List<EntityTypeEnum> typeEntitiesFilter,
+      @RequestParam(value = "originsFilter", required = false) String originsFilter);
 }

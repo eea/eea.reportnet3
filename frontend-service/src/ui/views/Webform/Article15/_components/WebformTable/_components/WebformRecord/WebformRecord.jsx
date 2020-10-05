@@ -196,7 +196,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         return (
           <InputText
             id={field.fieldId}
-            keyfilter={getInputType[type]}
+            // keyfilter={getInputType[type]}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -256,7 +256,12 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
               <div style={{ width: '75%' }}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
               {field.validations &&
                 field.validations.map((validation, index) => (
-                  <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+                  <IconTooltip
+                    className={'webform-validationErrors'}
+                    key={index}
+                    levelError={validation.levelError}
+                    message={validation.message}
+                  />
                 ))}
             </div>
           </div>

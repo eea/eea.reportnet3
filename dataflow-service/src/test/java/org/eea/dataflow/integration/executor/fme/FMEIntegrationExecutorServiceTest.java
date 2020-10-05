@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.IntegrationParams;
+import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -98,15 +99,18 @@ public class FMEIntegrationExecutorServiceTest {
   public void fmeExecutionExportTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.EXPORT);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setId(1L);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     when(fmeCommunicationService.createDirectory(Mockito.any(), Mockito.any()))
         .thenReturn(HttpStatus.OK);
+    when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT, "test", 1L,
         integration);
-    Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
+    Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 
   /**
@@ -118,13 +122,16 @@ public class FMEIntegrationExecutorServiceTest {
   public void fmeExecutionImportTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.IMPORT);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setId(1L);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
+    when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT, "test", 1L,
         integration);
-    Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
+    Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 
   /**
@@ -136,12 +143,15 @@ public class FMEIntegrationExecutorServiceTest {
   public void fmeExecutionExportEUDatasetTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setId(1L);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
+    when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, "test",
         1L, integration);
-    Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
+    Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 }

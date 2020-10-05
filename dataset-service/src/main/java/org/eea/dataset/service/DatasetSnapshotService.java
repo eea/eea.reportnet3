@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 
 /**
@@ -163,4 +164,46 @@ public interface DatasetSnapshotService {
    */
   void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId);
 
+  /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   * @throws EEAException the EEA exception
+   */
+  List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId);
+
+  /**
+   * Gets the snapshots released by id data collection.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the snapshots released by id data collection
+   * @throws EEAException the EEA exception
+   */
+  List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId);
+
+  /**
+   * Gets the snapshots released by id EU dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id EU dataset
+   * @throws EEAException the EEA exception
+   */
+  List<ReleaseVO> getSnapshotsReleasedByIdEUDataset(Long datasetId) throws EEAException;
+
+  /**
+   * Update snapshot EU release.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  void updateSnapshotEURelease(Long datasetId);
+
+  /**
+   * Gets the dataset historic releases per each type.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   */
+  List<ReleaseVO> getReleases(Long datasetId) throws EEAException;
 }

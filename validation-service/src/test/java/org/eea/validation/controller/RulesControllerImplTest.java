@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.service.SqlRulesService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +45,8 @@ public class RulesControllerImplTest {
   @Mock
   private RuleMapper ruleMapper;
 
+  @Mock
+  private SqlRulesService sqlRulesService;
   /** The security context. */
   SecurityContext securityContext;
 
@@ -564,4 +567,29 @@ public class RulesControllerImplTest {
 
   }
 
+  @Test
+  public void deleteNotEmptyRule() throws EEAException {
+    rulesControllerImpl.deleteNotEmptyRule(Mockito.anyString(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).deleteNotEmptyRule(Mockito.anyString(), Mockito.any());
+  }
+
+  @Test
+  public void updateSequence() throws EEAException {
+    rulesControllerImpl.updateSequence(Mockito.anyString());
+    Mockito.verify(rulesService, times(1)).updateSequence(Mockito.any());
+  }
+
+  @Test
+  public void findSqlSentencesByDatasetSchemaId() throws EEAException {
+
+    rulesControllerImpl.findSqlSentencesByDatasetSchemaId(Mockito.anyString());
+    Mockito.verify(rulesService, times(1)).findSqlSentencesByDatasetSchemaId(Mockito.any());
+  }
+
+  @Test
+  public void validateSqlRuleDataCollection() throws EEAException {
+    rulesControllerImpl.validateSqlRuleDataCollection(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(sqlRulesService, times(1)).validateSQLRuleFromDatacollection(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
 }

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.security.jwt.data.TokenDataVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,28 +53,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     try {
       if (StringUtils.hasText(apiKey)) {
         token = userManagementControllerZull.authenticateUserByApiKey(apiKey);
-        String username = token.getPreferredUsername();
-        Set<String> roles = token.getRoles();
-        Set<String> groups = token.getGroups();
-        if (null != groups && !groups.isEmpty()) {
-          groups.stream().map(group -> {
-            if (group.startsWith("/")) {
-              group = group.substring(1);
-            }
-            return group.toUpperCase();
-          }).forEach(roles::add);
-        }
-        UserDetails userDetails = EeaUserDetails.create(username, roles);
-
-        // Adding again the toke type so it can be used in EeaFeignSecurityInterceptor regardless
-        // the token type
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(userDetails, APIKEY_TOKEN + apiKey,
-                userDetails.getAuthorities());
-        Map<String, String> details = new HashMap<>();
-        details.put(AuthenticationDetails.USER_ID, token.getUserId());
-        authentication.setDetails(details);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(token),APIKEY_TOKEN + apiKey);
       }
     } finally {
       filterChain.doFilter(request, response);

@@ -28,10 +28,6 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
   private RouteLocator routeLocator;
 
 
-  @Value("${spring.profiles.active:local}")
-  private String activeProfile;
-
-
   @Override
   public List<SwaggerResource> get() {
     List<SwaggerResource> resources = new ArrayList<>();
