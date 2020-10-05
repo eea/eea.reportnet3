@@ -58,6 +58,9 @@ public class RuleVO {
   /** The integrity VO. */
   private IntegrityVO integrityVO;
 
+  /** The SQLSentence. */
+  private String sqlSentence;
+
   /**
    * Hash code.
    *
@@ -66,7 +69,8 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition, description, shortCode, integrityVO);
+        activationGroup, type, whenCondition, thenCondition, description, shortCode, integrityVO,
+        sqlSentence);
   }
 
   /**
@@ -92,6 +96,7 @@ public class RuleVO {
         && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(description, other.description)
         && Objects.equals(shortCode, other.shortCode)
-        && Objects.equals(integrityVO, other.integrityVO);
+        && Objects.equals(integrityVO, other.integrityVO)
+        && Objects.equals(sqlSentence, other.sqlSentence);
   }
 }

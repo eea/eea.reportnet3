@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -15,6 +16,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -284,15 +286,6 @@ public interface DatasetService {
   void deleteAllTableValues(@DatasetId Long datasetId);
 
   /**
-   * Checks if is reporting dataset.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return true, if is reporting dataset
-   */
-  boolean isReportingDataset(Long datasetId);
-
-  /**
    * Prepare new field propagation.
    *
    * @param datasetId the dataset id
@@ -482,14 +475,6 @@ public interface DatasetService {
   void exportFileThroughIntegration(Long datasetId, String fileExtension) throws EEAException;
 
   /**
-   * Checks if is design dataset.
-   *
-   * @param datasetId the dataset id
-   * @return true, if is design dataset
-   */
-  boolean isDesignDataset(Long datasetId);
-
-  /**
    * Gets the table fixed number of records.
    *
    * @param datasetId the dataset id
@@ -519,4 +504,22 @@ public interface DatasetService {
    */
   String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
 
+
+  /**
+   * Spread data Prefill.
+   *
+   * @param designs the designs
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  void spreadDataPrefill(List<DesignDataset> designs, Long datasetId, String idDatasetSchema);
+
+
+  /**
+   * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
+   *
+   * @param datasetId the dataset id
+   * @return the dataset type
+   */
+  DatasetTypeEnum getDatasetType(Long datasetId);
 }

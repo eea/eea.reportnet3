@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.data.domain.Validation;
@@ -19,11 +20,13 @@ import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
@@ -42,7 +45,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -55,6 +57,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -153,10 +156,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The dataset snapshot controller. */
-  @Autowired
-  private DatasetSnapshotController datasetSnapshotController;
-
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
@@ -172,6 +171,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The unique constraint repository. */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
+
+  /** The EU dataset repository. */
+  @Autowired
+  private EUDatasetRepository eUDatasetRepository;
+
+  /** The release mapper. */
+  @Autowired
+  private ReleaseMapper releaseMapper;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -247,6 +254,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, String description, Boolean released,
       Long partitionIdDestination) {
 
+
     List<Validation> isBlocked = null;
     try {
       setTenant(idDataset);
@@ -256,11 +264,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Snapshot snap = new Snapshot();
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
       snap.setDescription(description);
-      DataSetMetabase reportingDataset = new DataSetMetabase();
-      reportingDataset.setId(idDataset);
-      snap.setReportingDataset(reportingDataset);
+      DataSetMetabase dataset = new DataSetMetabase();
+      dataset.setId(idDataset);
+      if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(idDataset))) {
+        dataset = metabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
+        if (dataset.getDatasetSchema() != null) {
+          DataCollection dataCollection = dataCollectionRepository
+              .findFirstByDatasetSchema(dataset.getDatasetSchema()).orElse(new DataCollection());
+          snap.setDataCollectionId(dataCollection.getId());
+        }
+      }
+      snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      snap.setRelease(released);
+      snap.setDcReleased(released);
+      snap.setEuReleased(false);
       snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
@@ -456,7 +473,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         if (!representatives.isEmpty()) {
           RepresentativeVO representative = representatives.get(0);
           // We only update the representative if the receipt is not outdated
-          if (false == representative.getReceiptOutdated()) {
+          if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
             representative.setReceiptOutdated(true);
             representativeControllerZuul.updateRepresentative(representative);
             LOG.info("Receipt from the representative {} marked as outdated",
@@ -542,7 +559,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description) {
-
     try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
       // 1. Create the snapshot in the metabase
       SnapshotSchema snap = new SnapshotSchema();
@@ -842,6 +858,115 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteria.add(dataflowId);
     lockService.removeLockByCriteria(criteria);
+  }
+
+  /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) {
+    List<Snapshot> snapshots =
+        snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId);
+    return releaseMapper.entityListToClass(snapshots.stream()
+        .filter(snapshot -> snapshot.getDateReleased() != null).collect(Collectors.toList()));
+  }
+
+  /**
+   * Gets the snapshots released by id data collection.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the snapshots released by id data collection
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId) {
+    List<Snapshot> snapshots =
+        snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollectionId);
+    return releaseMapper.entityListToClass(snapshots.stream()
+        .filter(snapshot -> snapshot.getDateReleased() != null).collect(Collectors.toList()));
+  }
+
+  /**
+   * Gets the snapshots released by id EU dataset.
+   *
+   * @param euDatasetId the eu dataset id
+   * @return the snapshots released by id EU dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ReleaseVO> getSnapshotsReleasedByIdEUDataset(Long euDatasetId) throws EEAException {
+    // find datacollectionid
+    EUDataset eudataset = eUDatasetRepository.findById(euDatasetId).orElse(null);
+    if (eudataset == null) {
+      LOG_ERROR.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    DataCollection dataCollection = dataCollectionRepository
+        .findFirstByDatasetSchema(eudataset.getDatasetSchema()).orElse(null);
+    if (dataCollection == null) {
+      LOG_ERROR.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    // find snapshots for the datacollection released in the eudataset
+    List<Snapshot> snapshots =
+        snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollection.getId());
+    return releaseMapper
+        .entityListToClass(snapshots.stream().filter(snapshot -> snapshot.getDateReleased() != null
+            && Boolean.TRUE.equals(snapshot.getEuReleased())).collect(Collectors.toList()));
+  }
+
+  /**
+   * Update snapshot EU release.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateSnapshotEURelease(Long datasetId) {
+    // We have to set for the active snapshots in this moment in the dataset, the field eu_released
+    // to true, and the rest to false
+    List<Snapshot> snapshots =
+        snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(datasetId);
+    List<Long> activeSnapshots = snapshots.stream().filter(Snapshot::getDcReleased)
+        .map(Snapshot::getId).collect(Collectors.toList());
+    List<Long> inactiveSnapshots = snapshots.stream().filter(snapshot -> !snapshot.getDcReleased())
+        .map(Snapshot::getId).collect(Collectors.toList());
+    if (!inactiveSnapshots.isEmpty()) {
+      snapshotRepository.releaseEUInactiveSnapshots(inactiveSnapshots);
+    }
+    if (!activeSnapshots.isEmpty()) {
+      snapshotRepository.releaseEUActiveSnapshots(activeSnapshots);
+    }
+  }
+
+  /**
+   * Gets the historic releases per each dataset type.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ReleaseVO> getReleases(Long datasetId) throws EEAException {
+    List<ReleaseVO> releases = new ArrayList<>();
+    if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))) {
+      // if dataset is reporting return released snapshots
+      releases = getSnapshotsReleasedByIdDataset(datasetId);
+    } else {
+      // if the snapshot is a datacollection
+      if (DatasetTypeEnum.COLLECTION.equals(datasetService.getDatasetType(datasetId))) {
+        releases = getSnapshotsReleasedByIdDataCollection(datasetId);
+      } else
+      // if the snapshot is an eudataset
+      if (DatasetTypeEnum.EUDATASET.equals(datasetService.getDatasetType(datasetId))) {
+        releases = getSnapshotsReleasedByIdEUDataset(datasetId);
+      }
+    }
+    return releases;
   }
 
 }

@@ -12,12 +12,14 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -33,8 +35,10 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.SQLValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +86,22 @@ public class RulesServiceImpl implements RulesService {
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
+
+  /** The sql valitaion utils. */
+  @Autowired
+  private SQLValidationUtils sqlValidationUtils;
+
+  /** The sql rules service. */
+  @Autowired
+  private SqlRulesService sqlRulesService;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreController;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -183,7 +203,7 @@ public class RulesServiceImpl implements RulesService {
     }
     Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
 
-    if (null != rule && EntityTypeEnum.DATASET.equals(rule.getType())
+    if (null != rule && EntityTypeEnum.TABLE.equals(rule.getType())
         && rule.getIntegrityConstraintId() != null) {
       Optional<IntegritySchema> integritySchema =
           integritySchemaRepository.findById(rule.getIntegrityConstraintId());
@@ -278,13 +298,50 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
+        && StringUtils.isBlank(ruleVO.getSqlSentence())
+        && !ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
+    }
+    if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
+    }
+
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setRuleId(new ObjectId());
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (null == ruleVO.getWhenCondition()) {
+      rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
+
+    } else {
+      validateRule(rule);
+      if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+      }
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
+
+  }
+
+  /**
+   * Rules when condition null.That kind of rules is diferent from manual rules, this method is for
+   * any of manual rules about record or field
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void rulesWhenConditionNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
+      Rule rule) throws EEAException {
     // we create the whencondition Integrity for the rule
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
       ObjectId integrityConstraintId = new ObjectId();
       IntegrityVO integrityVO = ruleVO.getIntegrityVO();
       integrityVO.setId(integrityConstraintId.toString());
@@ -294,8 +351,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integrityConstraintId.toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
+          + integrityConstraintId.toString() + "','" + rule.getRuleId().toString() + "')");
       Long datasetReferencedId = dataSetMetabaseControllerZuul
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
@@ -306,14 +363,18 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
+
+    } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
+      recordStoreController.createUpdateQueryView(datasetId);
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
+
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
-
-    // Check if rule is valid
-    kieBaseManager.validateRule(datasetSchemaId, rule);
   }
 
   /**
@@ -359,14 +420,6 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
-        case COORDINATE_LAT:
-          ruleList.add(AutomaticRules.createLatAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
-        case COORDINATE_LONG:
-          ruleList.add(AutomaticRules.createLongAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
@@ -380,8 +433,7 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
               false));
 
-          if (null != fieldSchemaPK && null != fieldSchemaPK.getPkMustBeUsed()
-              && fieldSchemaPK.getPkMustBeUsed()) {
+          if (null != fieldSchemaPK && Boolean.TRUE.equals(fieldSchemaPK.getPkMustBeUsed())) {
 
             Long shortcodeAux =
                 rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
@@ -418,6 +470,34 @@ public class RulesServiceImpl implements RulesService {
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POSITION:
+          ruleList.add(AutomaticRules.createPositionAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POINT:
+          ruleList.add(AutomaticRules.createPointAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case MULTIPOINT:
+          ruleList.add(AutomaticRules.createMultipointAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case LINESTRING:
+          ruleList.add(AutomaticRules.createLinestringAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case MULTILINESTRING:
+          ruleList.add(AutomaticRules.createMultilinestringAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POLYGON:
+          ruleList.add(AutomaticRules.createPolygonAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case GEOMETRYCOLLECTION:
+          ruleList.add(AutomaticRules.createGeometrycollectionAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
@@ -523,13 +603,45 @@ public class RulesServiceImpl implements RulesService {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
+        && StringUtils.isBlank(ruleVO.getSqlSentence())) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
+    }
+    if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
+    }
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+    if (null == ruleVO.getWhenCondition()) {
+      ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule);
+    } else {
+      validateRule(rule);
+      if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
+      }
+      kieBaseManager.validateRule(datasetSchemaId, rule);
+    }
+
+  }
+
+  /**
+   * Rules when condition null.That kind of rules is diferent from manual rules, this method is for
+   * any of manual rules about record or field
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void ruleWhenCondtionUpdateNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
+      Rule rule) throws EEAException {
+    if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
 
       IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
       integritySchemaRepository.deleteById(new ObjectId(ruleVO.getIntegrityVO().getId()));
@@ -538,20 +650,22 @@ public class RulesServiceImpl implements RulesService {
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setWhenCondition("isIntegrityConstraint(this,'" + integritySchema.getId().toString()
-          + "','" + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
+          + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
+    } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
+      recordStoreController.createUpdateQueryView(datasetId);
+      sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
-
-    // Check if rule is valid
-    kieBaseManager.validateRule(datasetSchemaId, rule);
   }
 
   /**
@@ -878,7 +992,7 @@ public class RulesServiceImpl implements RulesService {
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
-      if (EntityTypeEnum.DATASET.equals(rule.getType())) {
+      if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 
@@ -1002,5 +1116,17 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public Long updateSequence(String datasetSchemaId) {
     return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+  }
+
+  /**
+   * Find sql sentences by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  @Override
+  public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
+    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+    return ruleMapper.entityListToClass(rules);
   }
 }

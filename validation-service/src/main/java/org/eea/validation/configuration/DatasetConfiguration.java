@@ -120,13 +120,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   }
 
   /**
-   * Target data sources.
-   *
-   * @return the map
-   */
-
-
-  /**
    * Data sets data source.
    *
    * @param connectionDataVO the connection data VO
@@ -198,4 +191,5 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
   }
+
 }

@@ -131,4 +131,14 @@ public interface RecordStoreController {
   @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
   void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
       @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation);
+
+
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/createUpdateQueryView")
+  void createUpdateQueryView(@RequestParam("datasetId") Long datasetId);
 }

@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -70,7 +71,8 @@ public interface DatasetController {
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema);
+      @PathVariable("idTableSchema") String idTableSchema,
+      @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
    * Load dataset data.
@@ -79,8 +81,8 @@ public interface DatasetController {
    * @param file the file
    */
   @PostMapping("{id}/loadDatasetData")
-  void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file);
+  void loadDatasetData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
    * Delete import data.
@@ -292,4 +294,18 @@ public interface DatasetController {
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
   public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField);
+
+
+
+  /**
+   * Delete data before replacing.
+   *
+   * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
+   */
+  @DeleteMapping("/private/{id}/deleteForReplacing")
+  void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
+      @RequestParam("integrationId") Long integrationId,
+      @RequestParam("operation") IntegrationOperationTypeEnum operation);
 }

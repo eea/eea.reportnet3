@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -23,6 +24,8 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -122,10 +125,16 @@ public class FileTreatmentHelper {
    * @param fileName the file name
    * @param is the input stream
    * @param tableSchemaId the id table schema
+   * @param replace the replace
    */
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
-      String tableSchemaId) {
+      String tableSchemaId, boolean replace) {
+
+    // delete if replace is true
+    if (replace) {
+      datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+    }
 
     // Integration process
     String fileExtension = null;
@@ -168,7 +177,7 @@ public class FileTreatmentHelper {
         integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
             IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationAux.get(0));
       } finally {
-        removeLock(datasetId, tableSchemaId);
+        datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, tableSchemaId);
       }
     } else {
       // REP-3 file process
@@ -182,33 +191,49 @@ public class FileTreatmentHelper {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param inputStream the input stream
-   * @throws EEAException the EEA exception
+   * @param replace the replace
    */
+  @Async
   public void executeExternalIntegrationFileProcess(Long datasetId, String fileName,
-      InputStream inputStream) throws EEAException {
+      InputStream inputStream, boolean replace) {
 
-    String fileExtension = datasetService.getMimetype(fileName);
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    // delete if replace is true
+    if (replace) {
+      datasetService.deleteImportData(datasetId);
+    }
 
-    // Create the IntegrationVO used as criteria.
-    Map<String, String> internalParameters = new HashMap<>();
-    internalParameters.put("datasetSchemaId", datasetSchemaId);
-    IntegrationVO integrationCriteria = new IntegrationVO();
-    integrationCriteria.setInternalParameters(internalParameters);
+    String fileExtension;
+    try {
+      fileExtension = datasetService.getMimetype(fileName);
+      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
 
-    // Find all integrations matching the criteria.
-    List<IntegrationVO> integrations =
-        integrationController.findAllIntegrationsByCriteria(integrationCriteria);
+      // Create the IntegrationVO used as criteria.
+      Map<String, String> internalParameters = new HashMap<>();
+      internalParameters.put("datasetSchemaId", datasetSchemaId);
+      IntegrationVO integrationCriteria = new IntegrationVO();
+      integrationCriteria.setInternalParameters(internalParameters);
 
-    // Find the IntegrationVO with IMPORT operation for the given file extension.
-    IntegrationVO integrationVO = filterImportIntegration(integrations, fileExtension, inputStream);
+      // Find all integrations matching the criteria.
+      List<IntegrationVO> integrations =
+          integrationController.findAllIntegrationsByCriteria(integrationCriteria);
 
-    if (null != integrationVO) {
-      integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-          IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO);
-    } else {
-      throw new EEAException(
-          String.format("Error loading data into dataset %s via external integration", datasetId));
+      // Find the IntegrationVO with IMPORT operation for the given file extension.
+      IntegrationVO integrationVO =
+          filterImportIntegration(integrations, fileExtension, inputStream);
+
+      if (null != integrationVO) {
+        integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+            IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO);
+      } else {
+        releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId, null,
+            fileName, String.format("Error loading data into dataset %s via external integration",
+                datasetId));
+      }
+    } catch (EEAException e) {
+      releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId, null,
+          fileName, "Fail importing file " + fileName);
+    } finally {
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
     }
   }
 
@@ -286,7 +311,14 @@ public class FileTreatmentHelper {
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
       listaGeneral.parallelStream().forEach(value -> {
-        value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
+        value.stream().forEach(r -> {
+          r.setDataProviderCode(provider.getCode());
+          for (FieldValue f : r.getFields()) {
+            if (DataType.ATTACHMENT.equals(f.getType())) {
+              f.setValue("");
+            }
+          }
+        });
         datasetService.saveAllRecords(datasetId, value);
       });
 
@@ -298,7 +330,7 @@ public class FileTreatmentHelper {
       releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
           tableSchemaId, fileName, "Fail importing file " + fileName);
     } finally {
-      removeLock(datasetId, tableSchemaId);
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, tableSchemaId);
     }
   }
 
@@ -312,9 +344,9 @@ public class FileTreatmentHelper {
    */
   private void releaseSuccessEvents(String user, Long datasetId, String tableSchemaId,
       String fileName) {
-    EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
-            : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
+        : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -337,9 +369,14 @@ public class FileTreatmentHelper {
    */
   private void releaseFailEvents(String user, Long datasetId, String tableSchemaId, String fileName,
       String error) {
-    EventType eventType =
-        datasetService.isReportingDataset(datasetId) ? EventType.IMPORT_REPORTING_FAILED_EVENT
-            : EventType.IMPORT_DESIGN_FAILED_EVENT;
+    EventType eventType = null;
+    if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))) {
+      eventType = tableSchemaId == null ? EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT
+          : EventType.IMPORT_REPORTING_FAILED_EVENT;
+    } else {
+      eventType = tableSchemaId == null ? EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT
+          : EventType.IMPORT_DESIGN_FAILED_EVENT;
+    }
     try {
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -349,20 +386,6 @@ public class FileTreatmentHelper {
     } catch (EEAException e) {
       LOG.error("Error realeasing event " + eventType, e);
     }
-  }
-
-  /**
-   * Removes the lock.
-   *
-   * @param datasetId the dataset id
-   * @param tableSchemaId the table schema id
-   */
-  private void removeLock(Long datasetId, String tableSchemaId) {
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.LOAD_TABLE.getValue());
-    criteria.add(datasetId);
-    criteria.add(tableSchemaId);
-    lockService.removeLockByCriteria(criteria);
   }
 
   /**

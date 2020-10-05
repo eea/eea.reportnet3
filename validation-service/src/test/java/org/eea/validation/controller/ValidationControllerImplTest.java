@@ -198,4 +198,52 @@ public class ValidationControllerImplTest {
         null, null, null, null, ""));
   }
 
+  /**
+   * Gets the group failed validations test.
+   *
+   * @return the group failed validations test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getGroupFailedValidationsTest() throws EEAException {
+    when(loadValidationsHelper.getListGroupValidations(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(failedValidationsDatasetVO);
+    assertEquals("result not equals to expected", failedValidationsDatasetVO, validationController
+        .getGroupFailedValidationsByIdDataset(1L, 1, 10, "id", false, null, null, ""));
+  }
+
+  /**
+   * Gets the group failed validations by id dataset exception test.
+   *
+   * @return the group failed validations by id dataset exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void getGroupFailedValidationsByIdDatasetExceptionTest() throws EEAException {
+    try {
+      validationController.getGroupFailedValidationsByIdDataset(null, 1, 10, null, null, null, null,
+          "");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the group failed validations by id dataset EEA exception test.
+   *
+   * @return the group failed validations by id dataset EEA exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getGroupFailedValidationsByIdDatasetEEAExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(loadValidationsHelper).getListGroupValidations(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    assertNull("result is not null", validationController.getGroupFailedValidationsByIdDataset(1L,
+        1, 10, null, null, null, null, ""));
+  }
+
+
 }

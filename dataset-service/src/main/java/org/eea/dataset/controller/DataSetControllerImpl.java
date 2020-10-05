@@ -8,13 +8,13 @@ import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -84,9 +84,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DeleteHelper deleteHelper;
 
-  /** The design dataset service. */
-  @Autowired
-  private DesignDatasetService designDatasetService;
 
   /** The dataset metabase service. */
   @Autowired
@@ -95,6 +92,7 @@ public class DataSetControllerImpl implements DatasetController {
   /** The dataset schema service. */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
+
 
   /**
    * Gets the data tables values.
@@ -171,6 +169,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    * @param idTableSchema the id table schema
+   * @param replace the replace
    */
   @Override
   @HystrixCommand
@@ -179,7 +178,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
   public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file,
-      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema) {
+      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema,
+      @RequestParam(value = "replace", required = false) boolean replace) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -217,6 +217,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
+
     // extract the filename
     String fileName = file.getOriginalFilename();
 
@@ -224,7 +225,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       InputStream is = file.getInputStream();
       // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema, replace);
     } catch (IOException e) {
       LOG_ERROR.error("Error importing a file into a table of the dataset {}. Message: {}",
           datasetId, e.getMessage());
@@ -237,16 +238,20 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param replace the replace
    */
   @Override
   @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
   @PostMapping("{id}/loadDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
-  public void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file) {
+  public void loadDatasetData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace) {
 
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
@@ -256,18 +261,22 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(
           "Error importing a file into a table of the datasetId {}. The file is null or empty",
           datasetId);
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
+
     // extract the filename
     String fileName = file.getOriginalFilename();
 
     // extract the file content
     try {
+      // this method would release the lock
       fileTreatmentHelper.executeExternalIntegrationFileProcess(datasetId, fileName,
-          file.getInputStream());
-    } catch (IOException | EEAException e) {
+          file.getInputStream(), replace);
+    } catch (IOException e) {
       LOG_ERROR.error("Error importing a file into dataset {}. Message: {}", datasetId,
           e.getMessage());
+      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -477,6 +486,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
    * Delete import table.
    *
@@ -658,7 +668,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @GetMapping("/{datasetId}/etlExport")
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN')")
   public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId) {
@@ -826,6 +836,27 @@ public class DataSetControllerImpl implements DatasetController {
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
+
+
+  /**
+   * Delete data before replacing.
+   *
+   * @param datasetId the dataset id
+   * @param integrationId the integration id
+   * @param operation the operation
+   */
+  @Override
+  @DeleteMapping("/private/{id}/deleteForReplacing")
+  public void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
+      @RequestParam("integrationId") Long integrationId,
+      @RequestParam("operation") IntegrationOperationTypeEnum operation) {
+    // When deleting the data finishes, we send a kafka event to make the FME call to import data
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+  }
+
+
   /**
    * Validate attachment.
    *
@@ -865,4 +896,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
+
+
 }

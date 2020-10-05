@@ -3,6 +3,7 @@
  */
 package org.eea.interfaces.controller.validation;
 
+import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -251,9 +252,33 @@ public interface RulesController {
   /**
    * Update sequence.
    *
-   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
    * @return the long
    */
   @GetMapping("/private/updateSequence")
   Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId);
+
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  @GetMapping("/private/findSqlSentencesByDatasetSchemaId")
+  List<RuleVO> findSqlSentencesByDatasetSchemaId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Validate sql rule data collection.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @PostMapping("/private/validateSqlRuleDataCollection")
+  void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO);
+
 }

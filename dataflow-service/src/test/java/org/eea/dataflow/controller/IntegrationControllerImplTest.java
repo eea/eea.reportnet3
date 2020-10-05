@@ -39,6 +39,8 @@ public class IntegrationControllerImplTest {
   @Mock
   private IntegrationService integrationService;
 
+
+
   /**
    * Inits the mocks.
    */
@@ -316,5 +318,26 @@ public class IntegrationControllerImplTest {
     Mockito.doNothing().when(integrationService).deleteSchemaIntegrations(Mockito.anyString());
     integrationControllerImpl.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
     Mockito.verify(integrationService, times(1)).deleteSchemaIntegrations(Mockito.anyString());
+  }
+
+  @Test
+  public void executeExternalIntegrationTest() throws EEAException {
+
+    integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
+    Mockito.verify(integrationService, times(1)).executeExternalIntegration(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void executeExternalIntegrationExceptionTest() throws EEAException {
+
+    Mockito.doThrow(EEAException.class).when(integrationService).executeExternalIntegration(
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any());
+    try {
+      integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
   }
 }

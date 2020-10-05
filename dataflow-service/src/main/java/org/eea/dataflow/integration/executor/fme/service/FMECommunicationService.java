@@ -6,19 +6,27 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
+import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.integration.enums.FMEOperation;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAUnauthorizedException;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
-import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
+import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +38,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -43,41 +55,44 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class FMECommunicationService {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationService.class);
 
-  /**
-   * The fme host.
-   */
+  /** The Constant APPLICATION_JSON: {@value}. */
+  private static final String APPLICATION_JSON = "application/json";
+
+  /** The Constant CONTENT_TYPE: {@value}. */
+  private static final String CONTENT_TYPE = "Content-Type";
+
+  /** The Constant ACCEPT: {@value}. */
+  private static final String ACCEPT = "Accept";
+
+  /** The Constant DATASETID: {@value}. */
+  private static final String DATASETID = "datasetId";
+
+  /** The Constant PROVIDERID: {@value}. */
+  private static final String PROVIDERID = "providerId";
+
+  /** The fme host. */
   @Value("${integration.fme.host}")
   private String fmeHost;
 
-  /**
-   * The fme scheme.
-   */
+  /** The fme scheme. */
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
-  /**
-   * The fme token.
-   */
+  /** The fme token. */
   @Value("${integration.fme.token}")
   private String fmeToken;
 
-  /**
-   * The fme collection mapper.
-   */
+  /** The fme collection mapper. */
   @Autowired
   private FMECollectionMapper fmeCollectionMapper;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -85,21 +100,13 @@ public class FMECommunicationService {
   @Autowired
   private RestTemplate restTemplate;
 
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
 
-  /**
-   * The Constant APPLICATION_JSON: {@value}.
-   */
-  private static final String APPLICATION_JSON = "application/json";
-
-  /**
-   * The Constant CONTENT_TYPE: {@value}.
-   */
-  private static final String CONTENT_TYPE = "Content-Type";
-
-  /**
-   * The Constant ACCEPT: {@value}.
-   */
-  private static final String ACCEPT = "Accept";
+  /** The fme job repository. */
+  @Autowired
+  private FMEJobRepository fmeJobRepository;
 
   /**
    * Submit async job.
@@ -120,9 +127,10 @@ public class FMECommunicationService {
 
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
+    headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     ResponseEntity<SubmitResult> checkResult = null;
-    Integer result = 0;
+    Integer result = null;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
@@ -153,13 +161,14 @@ public class FMECommunicationService {
       String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put(DATASETID, String.valueOf(idDataset));
     String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design?createDirectories=true&overwrite=true";
+
     if (null != idProvider) {
-      uriParams.put("providerId", idProvider);
+      uriParams.put(PROVIDERID, idProvider);
       auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design?createDirectories=true&overwrite=true";
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
@@ -190,10 +199,10 @@ public class FMECommunicationService {
   public HttpStatus createDirectory(Long idDataset, String idProvider) {
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put(DATASETID, String.valueOf(idDataset));
     String auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design";
     if (null != idProvider) {
-      uriParams.put("providerId", idProvider);
+      uriParams.put(PROVIDERID, idProvider);
       auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}";
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
@@ -231,11 +240,11 @@ public class FMECommunicationService {
   public InputStream receiveFile(Long idDataset, Long providerId, String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put(DATASETID, String.valueOf(idDataset));
     String auxURL =
         "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design/ExportFiles/{fileName}?accept=contents&disposition=attachment";
     if (null != providerId) {
-      uriParams.put("providerId", providerId.toString());
+      uriParams.put(PROVIDERID, providerId.toString());
       auxURL =
           "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}/ExportFiles/{fileName}?accept=contents&disposition=attachment";
     }
@@ -259,8 +268,8 @@ public class FMECommunicationService {
     }
 
 
-    InputStream initialStream = new ByteArrayInputStream(checkResult.getBody());
-    return initialStream;
+    return new ByteArrayInputStream(checkResult.getBody());
+
 
   }
 
@@ -322,46 +331,110 @@ public class FMECommunicationService {
   }
 
   /**
-   * Operation finished.
+   * Authenticate and authorize.
    *
-   * @param fmeOperationInfoVO the fme operation info VO
+   * @param apiKey the api key
+   * @param rn3JobId the rn 3 job id
+   * @return the FME job
+   * @throws EEAForbiddenException the EEA forbidden exception
+   * @throws EEAUnauthorizedException the EEA unauthorized exception
    */
-  public void operationFinished(FMEOperationInfoVO fmeOperationInfoVO) {
+  public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId)
+      throws EEAForbiddenException, EEAUnauthorizedException {
 
+    TokenVO tokenVO;
+    if (null != apiKey && !apiKey.isEmpty()
+        && null != (tokenVO = userManagementControllerZull.authenticateUserByApiKey(apiKey))) {
+
+      // Authentication
+      String userName = tokenVO.getPreferredUsername();
+      Set<String> roles = tokenVO.getRoles();
+      Set<String> groups = tokenVO.getGroups();
+      if (null != groups && !groups.isEmpty()) {
+        groups.stream().map(group -> {
+          if (group.startsWith("/")) {
+            group = group.substring(1);
+          }
+          return group.toUpperCase();
+        }).forEach(roles::add);
+      }
+      UserDetails userDetails = EeaUserDetails.create(userName, roles);
+      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+          userDetails, "ApiKey " + apiKey, userDetails.getAuthorities());
+      Map<String, String> details = new HashMap<>();
+      details.put(AuthenticationDetails.USER_ID, tokenVO.getUserId());
+      authentication.setDetails(details);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      // Authorization
+      FMEJob fmeJob = fmeJobRepository.findById(rn3JobId).orElse(null);
+      if (!(null != fmeJob && userName.equals(fmeJob.getUserName()))) {
+        LOG_ERROR.error("User not allowed: userName={}, fmeJobId={}", userName, rn3JobId);
+        throw new EEAForbiddenException(EEAErrorMessage.FORBIDDEN);
+      }
+
+      LOG.info("Successfully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey,
+          fmeJob);
+      return fmeJob;
+    }
+    LOG_ERROR.error("Invalid apiKey: {}", apiKey);
+    throw new EEAUnauthorizedException(EEAErrorMessage.UNAUTHORIZED);
+  }
+
+  /**
+   * Release notifications.
+   *
+   * @param fmeJob the fme job
+   * @param statusNumber the status number
+   */
+  public void releaseNotifications(FMEJob fmeJob, long statusNumber) {
+
+    // Build the major notification
     EventType eventType;
-    Long datasetId = fmeOperationInfoVO.getDatasetId();
-    String user = (String) ThreadPropertiesManager.getVariable("user");
-    NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
-        .dataflowId(fmeOperationInfoVO.getDataflowId()).fileName(fmeOperationInfoVO.getFileName())
-        .providerId(fmeOperationInfoVO.getProviderId()).build();
+    boolean isReporting = null != fmeJob.getProviderId();
+    boolean isStatusCompleted = statusNumber == 0L;
+    NotificationVO notificationVO = NotificationVO.builder().user(fmeJob.getUserName())
+        .datasetId(fmeJob.getDatasetId()).dataflowId(fmeJob.getDataflowId())
+        .fileName(fmeJob.getFileName()).providerId(fmeJob.getProviderId()).build();
 
-    LOG.info("Setting operation {} coming from FME as finished", fmeOperationInfoVO);
-    switch (fmeOperationInfoVO.getFmeOperation()) {
+    // Set the notification EventType
+    switch (fmeJob.getOperation()) {
       case IMPORT:
-        eventType = null != fmeOperationInfoVO.getProviderId()
-            ? EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT
-            : EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+        eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId(),
+            fmeJob.getUserName());
         break;
       case EXPORT:
-        eventType = null != fmeOperationInfoVO.getProviderId()
-            ? EventType.EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT
-            : EventType.EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT;
+        eventType = exportNotification(isReporting, isStatusCompleted);
         break;
       case EXPORT_EU_DATASET:
-        eventType = EventType.EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT;
+        eventType = exportEUDatasetNotification(isStatusCompleted);
+        break;
+      case IMPORT_FROM_OTHER_SYSTEM:
+        eventType = importFromOtherSystemNotification(isReporting, isStatusCompleted,
+            fmeJob.getDatasetId(), fmeJob.getUserName());
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    // Release the notification
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
-      if (FMEOperation.IMPORT.equals(fmeOperationInfoVO.getFmeOperation())) {
-        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-      }
     } catch (EEAException e) {
-      LOG_ERROR.error("Error realeasing event {}", eventType, e);
+      LOG_ERROR.error("Error realeasing event: FMEJob={}", fmeJob, e);
     }
+  }
+
+  /**
+   * Update job status.
+   *
+   * @param fmeJob the fme job
+   * @param statusNumber the status number
+   */
+  @Transactional
+  public void updateJobStatus(FMEJob fmeJob, long statusNumber) {
+    fmeJob.setStatus(statusNumber == 0L ? FMEJobstatus.SUCCESS : FMEJobstatus.FAILURE);
+    fmeJobRepository.save(fmeJob);
   }
 
   /**
@@ -396,6 +469,124 @@ public class FMECommunicationService {
       headersInfo.entrySet().forEach(entry -> headers.set(entry.getKey(), entry.getValue()));
     }
     return headers;
+  }
+
+
+
+  /**
+   * Import notification.
+   *
+   * @param isReporting the is reporting
+   * @param isStatusCompleted the is status completed
+   * @param datasetId the dataset id
+   * @param userName the user name
+   * @return the event type
+   */
+  private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
+      Long datasetId, String userName) {
+    EventType eventType;
+    if (isStatusCompleted) {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+      }
+      launchValidationProcess(datasetId, userName);
+    } else {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
+      }
+    }
+    return eventType;
+  }
+
+  /**
+   * Export notification.
+   *
+   * @param isReporting the is provider
+   * @param isStatusCompleted the is status completed
+   * @return the event type
+   */
+  private EventType exportNotification(boolean isReporting, boolean isStatusCompleted) {
+    EventType eventType;
+    if (isStatusCompleted) {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT;
+      }
+    } else {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_EXPORT_REPORTING_FAILED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_EXPORT_DESIGN_FAILED_EVENT;
+      }
+    }
+    return eventType;
+  }
+
+  /**
+   * Export EU dataset notification.
+   *
+   * @param isStatusCompleted the is status completed
+   * @return the event type
+   */
+  private EventType exportEUDatasetNotification(boolean isStatusCompleted) {
+    EventType eventType;
+    if (isStatusCompleted) {
+      eventType = EventType.EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT;
+    } else {
+      eventType = EventType.EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT;
+    }
+    return eventType;
+  }
+
+
+
+  /**
+   * Import from other system notification.
+   *
+   * @param isReporting the is reporting
+   * @param isStatusCompleted the is status completed
+   * @param datasetId the dataset id
+   * @param userName the user name
+   * @return the event type
+   */
+  private EventType importFromOtherSystemNotification(boolean isReporting,
+      boolean isStatusCompleted, Long datasetId, String userName) {
+    EventType eventType;
+    if (isStatusCompleted) {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
+      }
+      launchValidationProcess(datasetId, userName);
+    } else {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT;
+      }
+    }
+    return eventType;
+  }
+
+
+
+  /**
+   * Launch validation process.
+   *
+   * @param datasetId the dataset id
+   * @param userName the user name
+   */
+  private void launchValidationProcess(Long datasetId, String userName) {
+    Map<String, Object> values = new HashMap<>();
+    values.put(LiteralConstants.DATASET_ID, datasetId);
+    values.put(LiteralConstants.USER, userName);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 
 }

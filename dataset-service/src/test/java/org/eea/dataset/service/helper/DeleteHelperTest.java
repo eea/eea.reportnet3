@@ -4,6 +4,7 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
@@ -66,5 +67,15 @@ public class DeleteHelperTest {
     deleteHelper.executeDeleteDatasetProcess(1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void executeDeleteImportDataAsyncBeforeReplacingTest()
+      throws EEAException, IOException, InterruptedException {
+
+    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(1L, 1L,
+        IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 }

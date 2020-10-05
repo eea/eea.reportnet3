@@ -41,11 +41,6 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   @Value("${mongodb.hibernate.ddl-auto}")
   private String dll;
 
-  /**
-   * The host.
-   */
-  @Value("${mongodb.primary.host}")
-  private String host;
 
   /**
    * The mongo hosts
@@ -53,23 +48,6 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   @Value("${mongodb.hosts}")
   private String mongoHosts;
 
-  /**
-   * The port.
-   */
-  @Value("${mongodb.primary.port}")
-  private Integer port;
-
-  /**
-   * The username.
-   */
-  @Value("${mongodb.primary.username}")
-  private String username;
-
-  /**
-   * The password.
-   */
-  @Value("${mongodb.primary.password}")
-  private String password;
 
   /**
    * The bootstrap address.

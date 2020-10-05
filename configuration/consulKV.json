@@ -156,6 +156,10 @@
     "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
   },
   {
+    "key": "config/dataset/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLnNwYXRpYWwuZGlhbGVjdC5wb3N0Z2lzLlBvc3RnaXNEaWFsZWN0fQ=="
+  },
+  {
     "key": "config/dataflow/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -248,13 +252,17 @@
     "value": "JHtGTUVfRVVfSk9COkV4cG9ydF9FVV9kYXRhc2V0LmZtd30="
   },
   {
+    "key": "config/dataflow/integration.fme.topic",
+    "value": "JHtGTUVfVE9QSUM6UmVwb3J0bmV0M19BbHRpYV9TYW5kYm94X1RvcGljfQ=="
+  },
+  {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
     "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
   },
   {
     "key": "config/dataflow/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-  },  
+  },
   {
     "key": "config/dataflow/stream.download.timeout",
     "value": "JHtTVFJFQU1fVElNRU9VVDozNjAwMDB9"
@@ -697,7 +705,7 @@
   },
   {
     "key": "config/validation/spring.jpa.properties.hibernate.dialect",
-    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLnNwYXRpYWwuZGlhbGVjdC5wb3N0Z2lzLlBvc3RnaXNEaWFsZWN0fQ=="
   },
   {
     "key": "config/validation/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
@@ -1285,7 +1293,7 @@
   },
   {
     "key": "config/dataset/wait.continue.copy.ms",
-    "value": "JHtDT1BZX1NDSEVNQV9XQUlUX01TOjMwMDB9"
+    "value": "JHtDT1BZX1NDSEVNQV9XQUlUX01TOjQwMDB9"
   },
   {
     "key": "config/apiGateway/zuul.routes.contributor.path",
@@ -1314,5 +1322,13 @@
   {
     "key": "config/apiGateway/dataflow.ribbon.ReadTimeout",
     "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjMwMDB9"
+  },
+  {
+    "key": "config/application/spring.profiles.active",
+    "value": "bG9jYWw="
+  },
+  {
+    "key": "config/recordstore/snapshot.task.parallelism",
+    "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
   }
 ]

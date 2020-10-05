@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
@@ -101,7 +102,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/generateToken")
-  @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)", response = TokenVO.class)
+  @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)",
+      response = TokenVO.class)
   public TokenVO generateToken(
       @ApiParam(value = "User Name") @RequestParam("username") String username,
       @ApiParam(value = "User Password") @RequestParam("password") String password) {
@@ -118,7 +120,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/generateTokenByCode")
-  @ApiOperation(value = "Generate an Access Token based on a Keycloak's Code", response = TokenVO.class)
+  @ApiOperation(value = "Generate an Access Token based on a Keycloak's Code",
+      response = TokenVO.class)
   public TokenVO generateToken(@ApiParam(value = "Code") @RequestParam("code") String code) {
     return securityProviderInterfaceService.doLogin(code);
   }
@@ -154,7 +157,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @ApiOperation(value = "Check Resource Permission", response = Boolean.class)
   public Boolean checkResourceAccessPermission(
       @ApiParam(value = "Resource Name") @RequestParam("resource") String resource, @ApiParam(
-      value = "Access Scope Enum Array") @RequestParam("scopes") AccessScopeEnum[] scopes) {
+          value = "Access Scope Enum Array") @RequestParam("scopes") AccessScopeEnum[] scopes) {
     return securityProviderInterfaceService.checkAccessPermission(resource, scopes);
   }
 
@@ -290,7 +293,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the string
    */
   @HystrixCommand
-  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/test-security")
   @ApiOperation(value = "Test Secured Service", response = String.class)
   public String testSecuredService(
@@ -354,7 +357,8 @@ public class UserManagementControllerImpl implements UserManagementController {
       @ApiParam(value = "User Email") @RequestParam("email") String email) {
     UserRepresentationVO user = null;
     UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
-    if (users != null && users.length == 1) {
+    if (users != null && users.length == 1 && StringUtils.isNotBlank(email)
+        && StringUtils.isNotBlank(users[0].getEmail()) && email.equals(users[0].getEmail())) {
       user = userRepresentationMapper.entityToClass(users[0]);
     }
     return user;
@@ -633,7 +637,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @GetMapping("/getApiKey")
-  @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id", response = String.class)
+  @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id",
+      response = String.class)
   public String getApiKey(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Data provider id", example = "0") @RequestParam(value = "dataProvider",
@@ -682,6 +687,13 @@ public class UserManagementControllerImpl implements UserManagementController {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
   }
 
+  @Override
+  @HystrixCommand
+  @PostMapping("/authenticateByEmail")
+  @ApiOperation(value = "Authenticate an User by its email.", response = TokenVO.class)
+  public TokenVO authenticateUserByEmail(@RequestParam("email") String email) {
+    return securityProviderInterfaceService.authenticateEmail(email);
+  }
 
   /**
    * Gets the users by group.
@@ -708,24 +720,6 @@ public class UserManagementControllerImpl implements UserManagementController {
         : null;
   }
 
-  /**
-   * Retrieve api key.
-   *
-   * @param userId the user id
-   * @param dataflowId the dataflow id
-   * @param dataProvider the data provider
-   *
-   * @return the string
-   */
-  private String retrieveApiKey(String userId, Long dataflowId, Long dataProvider) {
-    try {
-      return securityProviderInterfaceService.getApiKey(userId, dataflowId, dataProvider);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
-    }
-  }
 
   /**
    * Gets the resources by user email.
@@ -749,5 +743,24 @@ public class UserManagementControllerImpl implements UserManagementController {
       userId = users[0].getId();
     }
     return securityProviderInterfaceService.getResourcesByUser(userId);
+  }
+
+  /**
+   * Retrieve api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the string
+   */
+  private String retrieveApiKey(String userId, Long dataflowId, Long dataProvider) {
+    try {
+      return securityProviderInterfaceService.getApiKey(userId, dataflowId, dataProvider);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+    }
   }
 }
