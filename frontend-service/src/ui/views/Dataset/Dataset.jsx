@@ -93,6 +93,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
+  const [isGroupedValidationSelected, setIsGroupedValidationSelected] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
@@ -554,13 +555,22 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-    setDataViewerOptions({
-      recordPositionId: posIdRecord,
-      selectedRecordErrorId: selectedRecordErrorId,
-      activeIndex: tableSchemaId
-    });
-    setIsValidationSelected(true);
+  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId, selectedRuleId, grouped = true) => {
+    if (grouped) {
+      setDataViewerOptions({
+        activeIndex: tableSchemaId,
+        selectedRuleId
+      });
+      setIsGroupedValidationSelected(true);
+    } else {
+      setDataViewerOptions({
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId,
+        activeIndex: tableSchemaId
+      });
+      setIsValidationSelected(true);
+    }
+
     onSetVisible(setValidationsVisible, false);
   };
 
@@ -819,6 +829,7 @@ export const Dataset = withRouter(({ match, history }) => {
         activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
         isDatasetDeleted={isDataDeleted}
+        isGroupedValidationSelected={isGroupedValidationSelected}
         isValidationSelected={isValidationSelected}
         levelErrorTypes={levelErrorTypes}
         onLoadTableData={onLoadTableData}
@@ -826,6 +837,7 @@ export const Dataset = withRouter(({ match, history }) => {
         recordPositionId={dataViewerOptions.recordPositionId}
         reporting={true}
         selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+        selectedRuleId={dataViewerOptions.selectedRuleId}
         setIsValidationSelected={setIsValidationSelected}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}

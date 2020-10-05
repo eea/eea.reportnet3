@@ -38,6 +38,7 @@ export const TabsSchema = ({
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
+          console.log({ selectedRuleId }, table.id, activeIndex);
           return (
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.tabsSchema}>
@@ -68,7 +69,7 @@ export const TabsSchema = ({
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
-                  selectedRuleId={table.id === activeIndex ? selectedRuleId : ''}
+                  selectedRuleId={selectedRuleId}
                   setIsValidationSelected={setIsValidationSelected}
                 />
               </div>

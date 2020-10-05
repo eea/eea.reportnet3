@@ -582,7 +582,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
 
   const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId, selectedRuleId, grouped = true) => {
-    console.log(selectedRuleId);
     if (grouped) {
       designerDispatch({
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',

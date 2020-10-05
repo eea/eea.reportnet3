@@ -392,18 +392,18 @@ export const useSetColumns = (
 };
 
 export const useRecordErrorPosition = (
-  filterRuleId,
   recordErrorPositionId,
   dispatchRecords,
   records,
   dispatchSort,
   onFetchData,
-  levelErrorTypesWithCorrects
+  levelErrorTypesWithCorrects,
+  selectedRuleId
 ) => {
   useEffect(() => {
     if (
       (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) &&
-      (isUndefined(filterRuleId) || filterRuleId === '')
+      (isUndefined(selectedRuleId) || selectedRuleId === '')
     ) {
       return;
     }
@@ -427,5 +427,5 @@ export const useRecordErrorPosition = (
       records.recordsPerPage,
       levelErrorTypesWithCorrects
     );
-  }, [recordErrorPositionId]);
+  }, [recordErrorPositionId, selectedRuleId]);
 };

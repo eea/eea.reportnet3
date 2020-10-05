@@ -58,7 +58,6 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
   ({
-    filterRuleId,
     hasCountryCode,
     hasWritePermissions,
     isDatasetDeleted = false,
@@ -83,7 +82,6 @@ const DataViewer = withRouter(
     tableSchemaColumns
   }) => {
     const userContext = useContext(UserContext);
-
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
@@ -343,7 +341,6 @@ const DataViewer = withRouter(
         setFetchedData(dataFiltered);
       };
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
-
       setIsLoading(true);
       try {
         let fields;
@@ -357,7 +354,7 @@ const DataViewer = withRouter(
           nRows,
           fields,
           levelErrorValidations,
-          filterRuleId
+          selectedRuleId
         );
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
@@ -410,13 +407,13 @@ const DataViewer = withRouter(
     };
 
     useRecordErrorPosition(
-      filterRuleId,
       recordErrorPositionId,
       dispatchRecords,
       records,
       dispatchSort,
       onFetchData,
-      levelErrorTypesWithCorrects
+      levelErrorTypesWithCorrects,
+      selectedRuleId
     );
 
     useEffect(() => {

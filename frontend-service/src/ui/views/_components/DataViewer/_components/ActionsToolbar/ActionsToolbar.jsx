@@ -283,6 +283,7 @@ const ActionsToolbar = ({
           icon={'groupBy'}
           label={resources.messages['groupBy']}
         />
+
         {/* <Button
           className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}

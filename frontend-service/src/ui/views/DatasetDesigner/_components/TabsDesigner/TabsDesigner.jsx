@@ -447,15 +447,7 @@ export const TabsDesigner = withRouter(
                             ? selectedRecordErrorId
                             : -1
                         }
-                        selectedRuleId={
-                          !isNaN(activeIndex)
-                            ? tab.index === activeIndex
-                              ? selectedRuleId
-                              : -1
-                            : tab.tableSchemaId === activeIndex
-                            ? selectedRuleId
-                            : -1
-                        }
+                        selectedRuleId={selectedRuleId}
                         setIsValidationSelected={setIsValidationSelected}
                         table={tabs[i]}
                       />

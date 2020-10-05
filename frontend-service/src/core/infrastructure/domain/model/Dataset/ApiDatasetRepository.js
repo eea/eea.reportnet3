@@ -285,7 +285,6 @@ const groupedErrorsById = async (
     typeEntitiesFilter,
     originsFilter
   );
-  console.log(datasetErrorsDTO);
   const dataset = new Dataset({
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
@@ -416,8 +415,16 @@ const schemaById = async datasetId => {
   return dataset;
 };
 
-const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
-  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
+const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+  const tableDataDTO = await apiDataset.tableDataById(
+    datasetId,
+    tableSchemaId,
+    pageNum,
+    pageSize,
+    fields,
+    levelError,
+    ruleId
+  );
   const table = new DatasetTable({});
 
   if (tableDataDTO.totalRecords > 0) {
