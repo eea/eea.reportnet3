@@ -68,43 +68,43 @@ public class RuleOperatorsTest {
   }
 
   @Test
-  public void RecordNullEmptyTest() {
-    assertFalse(RuleOperators.recordNull(""));
-  }
-
-  @Test
-  public void RecordNullNullTest() {
-    assertFalse(RuleOperators.recordNull(null));
-  }
-
-  @Test
   public void RecordNullTest() {
-    assertTrue(RuleOperators.recordNull("NotEmpty"));
+    assertFalse(RuleOperators.recordNull("1"));
   }
 
   @Test
-  public void RecordNullExcpetionTest() {
-    assertTrue(RuleOperators.recordNull(new Integer(1)));
+  public void RecordNullEmptyTest() {
+    assertTrue(RuleOperators.recordNull(""));
   }
 
   @Test
-  public void FieldNullEmptyTest() {
-    assertFalse(RuleOperators.fieldNull(""));
+  public void RecordNotNullTest() {
+    assertTrue(RuleOperators.recordNotNull("1"));
   }
 
   @Test
-  public void FieldNullNullTest() {
-    assertFalse(RuleOperators.fieldNull(null));
+  public void RecordNotNullEmptyTest() {
+    assertFalse(RuleOperators.recordNotNull(""));
   }
 
   @Test
   public void FieldNullTest() {
-    assertTrue(RuleOperators.fieldNull("NotEmpty"));
+    assertFalse(RuleOperators.fieldNull("NotEmpty"));
   }
 
   @Test
-  public void FieldNullExcpetionTest() {
-    assertTrue(RuleOperators.fieldNull(new Integer(1)));
+  public void FieldNullEmptyTest() {
+    assertTrue(RuleOperators.fieldNull(""));
+  }
+
+  @Test
+  public void FieldNotNullTest() {
+    assertTrue(RuleOperators.fieldNotNull("NotEmpty"));
+  }
+
+  @Test
+  public void FieldNotNullEmptyTest() {
+    assertFalse(RuleOperators.fieldNotNull(""));
   }
 
   @Test

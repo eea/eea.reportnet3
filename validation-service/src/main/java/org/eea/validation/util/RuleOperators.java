@@ -146,17 +146,21 @@ public class RuleOperators {
   /**
    * Record null.
    *
-   * @param value the value
+   * @param fieldSchemaId the field schema id
    * @return true, if successful
    */
-  public static boolean recordNull(Object value) {
-    boolean rtn = true;
-    try {
-      rtn = null != value && !((String) value).isEmpty();
-    } catch (Exception e) {
-      LOG_ERROR.error("Error evaluating recordNull. Skipping as true", e);
-    }
-    return rtn;
+  public static boolean recordNull(String fieldSchemaId) {
+    return getValue(fieldSchemaId).isEmpty();
+  }
+
+  /**
+   * Record not null.
+   *
+   * @param fieldSchemaId the field schema id
+   * @return true, if successful
+   */
+  public static boolean recordNotNull(String fieldSchemaId) {
+    return !getValue(fieldSchemaId).isEmpty();
   }
 
   /**
@@ -1830,14 +1834,18 @@ public class RuleOperators {
    * @param value the value
    * @return true, if successful
    */
-  public static boolean fieldNull(Object value) {
-    boolean rtn = true;
-    try {
-      rtn = null != value && !((String) value).isEmpty();
-    } catch (Exception e) {
-      LOG_ERROR.error("Error evaluating fieldNull. Skipping as true", e);
-    }
-    return rtn;
+  public static boolean fieldNull(String value) {
+    return value.isEmpty();
+  }
+
+  /**
+   * Field not null.
+   *
+   * @param value the value
+   * @return true, if successful
+   */
+  public static boolean fieldNotNull(String value) {
+    return !value.isEmpty();
   }
 
   /**
