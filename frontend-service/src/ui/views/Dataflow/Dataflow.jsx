@@ -194,32 +194,32 @@ const Dataflow = withRouter(({ history, match }) => {
       return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
     }
 
-    let showBtn;
+    let buttonsVisibility;
     if (isDesign) {
-      showBtn = true;
+      buttonsVisibility = true;
     }
 
     if (isDraft) {
       if (dataflowState.isCustodian) {
-        showBtn = isUndefined(representativeId);
+        buttonsVisibility = isUndefined(representativeId);
       } else {
         if (!isUndefined(representativeId)) {
-          showBtn = true;
+          buttonsVisibility = true;
         } else {
-          showBtn = dataflowState.data.representatives.length === 1;
+          buttonsVisibility = dataflowState.data.representatives.length === 1;
         }
       }
     }
 
     return {
-      apiKeyBtn: showBtn,
+      apiKeyBtn: buttonsVisibility,
 
       editBtn:
         userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
 
       manageRightsBtn:
         (isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD'])) ||
-        (isDraft && showBtn && userRoles.includes(config.permissions['LEAD_REPORTER'])),
+        (isDraft && buttonsVisibility && userRoles.includes(config.permissions['LEAD_REPORTER'])),
 
       propertiesBtn: true
     };
