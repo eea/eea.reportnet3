@@ -570,7 +570,8 @@ public class DatasetServiceTest {
   @Test
   public void testGetTableValuesByIdEmpty() throws Exception {
     ErrorTypeEnum[] errorfilter = null;
-    TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter);
+    TableVO result =
+        datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter, null);
     Assert.assertNotNull("result null", result);
     Assert.assertEquals("wrong number of records", Long.valueOf(0), result.getTotalRecords());
   }
@@ -587,7 +588,7 @@ public class DatasetServiceTest {
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING,
         ErrorTypeEnum.CORRECT, ErrorTypeEnum.BLOCKER, ErrorTypeEnum.INFO};
-    datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter);
+    datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter, null);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 
@@ -600,7 +601,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById2() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -629,7 +630,7 @@ public class DatasetServiceTest {
     tableVO.setRecords(recordVOs);
 
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -641,7 +642,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById3() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -669,7 +670,7 @@ public class DatasetServiceTest {
     tableVO.setRecords(recordVOs);
 
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -681,7 +682,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById4() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -709,7 +710,7 @@ public class DatasetServiceTest {
     tableVO.setRecords(recordVOs);
 
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -721,7 +722,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById5() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -748,7 +749,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
     tableVO.setRecords(recordVOs);
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -760,7 +761,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById6() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -792,7 +793,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
     tableVO.setRecords(recordVOs);
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -804,7 +805,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById7() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -831,7 +832,7 @@ public class DatasetServiceTest {
     tableVO.setRecords(recordVOs);
 
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -843,7 +844,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById8() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -870,7 +871,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
     tableVO.setRecords(recordVOs);
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**
@@ -882,7 +883,7 @@ public class DatasetServiceTest {
   public void testGetTableValuesById9() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any())).thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -921,7 +922,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
     tableVO.setRecords(recordVOs);
     assertEquals(tableVO, datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
-        listFields, errorfilter));
+        listFields, errorfilter, null));
   }
 
   /**

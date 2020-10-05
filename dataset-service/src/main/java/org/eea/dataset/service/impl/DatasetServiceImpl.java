@@ -396,13 +396,15 @@ public class DatasetServiceImpl implements DatasetService {
    * @param pageable the pageable
    * @param fields the fields
    * @param levelError the level error
+   * @param idRules the id rules
    * @return the table values by id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      Pageable pageable, final String fields, ErrorTypeEnum[] levelError) throws EEAException {
+      Pageable pageable, final String fields, ErrorTypeEnum[] levelError, String[] idRules)
+      throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
@@ -414,7 +416,7 @@ public class DatasetServiceImpl implements DatasetService {
     pageable = calculatePageable(pageable, totalRecords);
 
     result = calculatedErrorsAndRecordsToSee(idTableSchema, pageable, fields, levelError,
-        commonShortFields, mapFields, sortFieldsArray, newFields, result);
+        commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules);
 
     // Table with out values
     if (null == result.getRecords() || result.getRecords().isEmpty()) {
@@ -1878,21 +1880,22 @@ public class DatasetServiceImpl implements DatasetService {
    * @param sortFieldsArray the sort fields array
    * @param newFields the new fields
    * @param result the result
+   * @param idRules the id rules
    * @return the table VO
    */
   private TableVO calculatedErrorsAndRecordsToSee(final String idTableSchema, Pageable pageable,
       final String fields, ErrorTypeEnum[] levelError, List<String> commonShortFields,
       Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
-      TableVO result) {
+      TableVO result, String[] idRules) {
     List<RecordValue> records;
-    if (null == fields && (null == levelError || levelError.length == 5)) {
+    if (null == fields && (null == levelError || levelError.length == 5) && idRules == null) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       result.setTotalFilteredRecords(0L);
       result.setRecords(recordVOs);
     } else {
       result = fieldsMap(idTableSchema, pageable, fields, levelError, commonShortFields, mapFields,
-          sortFieldsArray, newFields);
+          sortFieldsArray, newFields, idRules);
     }
     return result;
   }
@@ -1908,11 +1911,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param mapFields the map fields
    * @param sortFieldsArray the sort fields array
    * @param newFields the new fields
+   * @param idRules the id rules
    * @return the table VO
    */
   private TableVO fieldsMap(final String idTableSchema, Pageable pageable, final String fields,
       ErrorTypeEnum[] levelError, List<String> commonShortFields, Map<String, Integer> mapFields,
-      List<SortField> sortFieldsArray, SortField[] newFields) {
+      List<SortField> sortFieldsArray, SortField[] newFields, String[] idRules) {
     TableVO result;
     if (null != fields) {
 
@@ -1941,7 +1945,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     result = recordRepository.findByTableValueWithOrder(idTableSchema, Arrays.asList(levelError),
-        pageable, newFields);
+        pageable, idRules != null ? Arrays.asList(idRules) : null, newFields);
     return result;
   }
 
