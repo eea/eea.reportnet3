@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** The Class RuleOperators. */
 public class RuleOperators {
@@ -18,6 +20,9 @@ public class RuleOperators {
 
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Instantiates a new rule operators.
@@ -136,6 +141,22 @@ public class RuleOperators {
    */
   public static boolean recordNot(boolean condition) {
     return !condition;
+  }
+
+  /**
+   * Record null.
+   *
+   * @param value the value
+   * @return true, if successful
+   */
+  public static boolean recordNull(Object value) {
+    boolean rtn = true;
+    try {
+      rtn = null != value && !((String) value).isEmpty();
+    } catch (Exception e) {
+      LOG_ERROR.error("Error evaluating recordNull. Skipping as true", e);
+    }
+    return rtn;
   }
 
   /**
@@ -1801,6 +1822,22 @@ public class RuleOperators {
    */
   public static boolean fieldNot(boolean arg) {
     return !arg;
+  }
+
+  /**
+   * Field null.
+   *
+   * @param value the value
+   * @return true, if successful
+   */
+  public static boolean fieldNull(Object value) {
+    boolean rtn = true;
+    try {
+      rtn = null != value && !((String) value).isEmpty();
+    } catch (Exception e) {
+      LOG_ERROR.error("Error evaluating fieldNull. Skipping as true", e);
+    }
+    return rtn;
   }
 
   /**
