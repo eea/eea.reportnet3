@@ -154,7 +154,7 @@ public class RuleOperators {
     try {
       rtn = null != value && !((String) value).isEmpty();
     } catch (Exception e) {
-      LOG_ERROR.error("Cast exception: recordNull cannot cast the value into String", e);
+      LOG_ERROR.error("Error evaluating recordNull. Skipping as true", e);
     }
     return rtn;
   }
@@ -1835,7 +1835,7 @@ public class RuleOperators {
     try {
       rtn = null != value && !((String) value).isEmpty();
     } catch (Exception e) {
-      LOG_ERROR.error("Cast exception: fieldNull cannot cast the value into String", e);
+      LOG_ERROR.error("Error evaluating fieldNull. Skipping as true", e);
     }
     return rtn;
   }
