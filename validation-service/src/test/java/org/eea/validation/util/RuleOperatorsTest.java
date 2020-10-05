@@ -68,6 +68,46 @@ public class RuleOperatorsTest {
   }
 
   @Test
+  public void RecordNullEmptyTest() {
+    assertFalse(RuleOperators.recordNull(""));
+  }
+
+  @Test
+  public void RecordNullNullTest() {
+    assertFalse(RuleOperators.recordNull(null));
+  }
+
+  @Test
+  public void RecordNullTest() {
+    assertTrue(RuleOperators.recordNull("NotEmpty"));
+  }
+
+  @Test
+  public void RecordNullExcpetionTest() {
+    assertTrue(RuleOperators.recordNull(new Integer(1)));
+  }
+
+  @Test
+  public void FieldNullEmptyTest() {
+    assertFalse(RuleOperators.fieldNull(""));
+  }
+
+  @Test
+  public void FieldNullNullTest() {
+    assertFalse(RuleOperators.fieldNull(null));
+  }
+
+  @Test
+  public void FieldNullTest() {
+    assertTrue(RuleOperators.fieldNull("NotEmpty"));
+  }
+
+  @Test
+  public void FieldNullExcpetionTest() {
+    assertTrue(RuleOperators.fieldNull(new Integer(1)));
+  }
+
+  @Test
   public void testRecordOrFirst() {
     assertTrue(RuleOperators.recordOr(Boolean.TRUE, Boolean.FALSE));
   }

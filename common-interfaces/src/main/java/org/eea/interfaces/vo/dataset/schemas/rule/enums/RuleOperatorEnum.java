@@ -28,6 +28,9 @@ public enum RuleOperatorEnum {
   /** The record not. */
   RECORD_NOT(EntityTypeEnum.RECORD, "recordNot", JavaType.BOOLEAN, JavaType.BOOLEAN),
 
+  /** The record null. */
+  RECORD_NULL(EntityTypeEnum.RECORD, "recordNull", JavaType.BOOLEAN, JavaType.OBJECT),
+
   // Number operators
 
   /** The record eq. */
@@ -450,6 +453,9 @@ public enum RuleOperatorEnum {
 
   /** The field not. */
   FIELD_NOT(EntityTypeEnum.FIELD, "fieldNot", JavaType.BOOLEAN, JavaType.BOOLEAN),
+
+  /** The field null. */
+  FIELD_NULL(EntityTypeEnum.FIELD, "fieldNull", JavaType.BOOLEAN, JavaType.OBJECT),
 
   // Number operators
 

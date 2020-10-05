@@ -139,6 +139,20 @@ public class RuleOperators {
   }
 
   /**
+   * Record null.
+   *
+   * @param value the value
+   * @return true, if successful
+   */
+  public static boolean recordNull(Object value) {
+    try {
+      return null != value && !((String) value).isEmpty();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
    * Record number equals.
    *
    * @param fieldSchemaId the field schema id
@@ -1801,6 +1815,20 @@ public class RuleOperators {
    */
   public static boolean fieldNot(boolean arg) {
     return !arg;
+  }
+
+  /**
+   * Field null.
+   *
+   * @param value the value
+   * @return true, if successful
+   */
+  public static boolean fieldNull(Object value) {
+    try {
+      return null != value && !((String) value).isEmpty();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
