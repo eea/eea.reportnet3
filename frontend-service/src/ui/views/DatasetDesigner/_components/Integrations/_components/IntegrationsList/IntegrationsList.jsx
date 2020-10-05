@@ -90,6 +90,7 @@ export const IntegrationsList = ({
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
         onUpdateDesignData();
+        refreshList(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
