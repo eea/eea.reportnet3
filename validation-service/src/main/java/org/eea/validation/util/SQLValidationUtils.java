@@ -119,8 +119,8 @@ public class SQLValidationUtils {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     // Retrieve sql sentence
     String query = rule.getSqlSentence();
-    // Checking SQL sentence and if the rule not works it's going to disable
-
+    // Checking SQL sentence and if the rule does not works it will be disable
+    // TODO
     // Execute query
     TableValue tableToEvaluate = new TableValue();
     if (rule.getType().equals(EntityTypeEnum.TABLE)) {
