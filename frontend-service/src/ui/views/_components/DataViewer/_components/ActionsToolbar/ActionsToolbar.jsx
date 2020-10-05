@@ -68,6 +68,7 @@ const ActionsToolbar = ({
   let dropdownFilterRef = useRef();
 
   useEffect(() => {
+    console.log('ENTRO 2');
     const dropdownFilter = colsSchema.map(colSchema => {
       return { label: colSchema.header, key: colSchema.field };
     });
@@ -76,6 +77,7 @@ const ActionsToolbar = ({
   }, []);
 
   useEffect(() => {
+    console.log('ENTRO', isGroupedValidationSelected);
     if (isGroupedValidationSelected) {
       dispatchFilter({
         type: 'SET_VALIDATION_GROUPED_FILTER',
@@ -282,6 +284,12 @@ const ActionsToolbar = ({
           disabled={!filter.groupedFilter}
           icon={'groupBy'}
           label={resources.messages['groupBy']}
+          onClick={() =>
+            dispatchFilter({
+              type: 'SET_VALIDATION_GROUPED_FILTER',
+              payload: { groupedFilter: false }
+            })
+          }
         />
 
         {/* <Button
