@@ -28,6 +28,7 @@ export const FieldsDesigner = ({
   datasetId,
   datasetSchemas,
   isPreviewModeOn,
+  isGroupedValidationSelected,
   isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
@@ -36,6 +37,7 @@ export const FieldsDesigner = ({
   onLoadTableData,
   recordPositionId,
   selectedRecordErrorId,
+  selectedRuleId,
   setIsValidationSelected,
   table
 }) => {
@@ -325,6 +327,7 @@ export const FieldsDesigner = ({
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
           isExportable={true}
+          isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
@@ -333,6 +336,7 @@ export const FieldsDesigner = ({
           recordPositionId={recordPositionId}
           reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
+          selectedRuleId={selectedRuleId}
           setIsValidationSelected={setIsValidationSelected}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}

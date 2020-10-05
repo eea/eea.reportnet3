@@ -105,6 +105,9 @@ const ValidationViewer = React.memo(
           header={resources.messages['tableSchemaId']}
         />
       );
+      columnsArr.push(
+        <Column key="ruleId" field="ruleId" className={styles.invisibleHeader} header={resources.messages['ruleId']} />
+      );
 
       setColumns(columnsArr);
     }, []);
@@ -150,7 +153,6 @@ const ValidationViewer = React.memo(
       let datasetErrors = {};
 
       if (grouped) {
-        console.log('GROUPED');
         datasetErrors = await DatasetService.groupedErrorsById(
           datasetId,
           Math.floor(firstRow / numberRows),
@@ -162,7 +164,6 @@ const ValidationViewer = React.memo(
           originsFilter
         );
       } else {
-        console.log('NON GROUPED');
         datasetErrors = await DatasetService.errorsById(
           datasetId,
           Math.floor(firstRow / numberRows),
@@ -337,17 +338,18 @@ const ValidationViewer = React.memo(
           case 'FIELD':
           case 'RECORD':
             const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-            onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
+            onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId, '', false);
             break;
 
           case 'TABLE':
-            onSelectValidation(event.data.tableSchemaId, -1, -1);
+            onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
             break;
 
           default:
             break;
         }
       } else {
+        onSelectValidation(event.data.tableSchemaId, -1, -1, event.data.ruleId);
       }
     };
 

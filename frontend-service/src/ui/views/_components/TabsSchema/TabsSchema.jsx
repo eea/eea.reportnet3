@@ -17,6 +17,7 @@ export const TabsSchema = ({
   hasCountryCode,
   isDatasetDeleted,
   isExportable = true,
+  isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypes,
   onLoadTableData,
@@ -24,6 +25,7 @@ export const TabsSchema = ({
   recordPositionId,
   reporting,
   selectedRecordErrorId,
+  selectedRuleId,
   setIsValidationSelected,
   showWriteButtons = true,
   tables,
@@ -45,6 +47,7 @@ export const TabsSchema = ({
                   hasWritePermissions={hasWritePermissions}
                   isDatasetDeleted={isDatasetDeleted}
                   isExportable={isExportable}
+                  isGroupedValidationSelected={isGroupedValidationSelected}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
@@ -65,6 +68,7 @@ export const TabsSchema = ({
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
+                  selectedRuleId={table.id === activeIndex ? selectedRuleId : ''}
                   setIsValidationSelected={setIsValidationSelected}
                 />
               </div>

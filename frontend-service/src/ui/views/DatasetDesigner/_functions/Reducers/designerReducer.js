@@ -45,7 +45,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, isLoadingFile: payload.value };
 
     case 'SET_REPLACE_DATA':
-      return { ...state, replaceData: payload.value }
+      return { ...state, replaceData: payload.value };
 
     case 'IS_PREVIEW_MODE_ON':
       return { ...state, isPreviewModeOn: payload.value };
@@ -85,12 +85,26 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
 
+    case 'SET_DATAVIEWER_GROUPED_OPTIONS':
+      return {
+        ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          activeIndex: payload.activeIndex,
+          isGroupedValidationSelected: true,
+          isValidationSelected: false,
+          selectedRuleId: payload.selectedRuleId
+        },
+        isValidationViewerVisible: false
+      };
+
     case 'SET_DATAVIEWER_OPTIONS':
       return {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
+          isGroupedValidationSelected: false,
           isValidationSelected: payload.isValidationSelected,
           recordPositionId: payload.recordPositionId,
           selectedRecordErrorId: payload.selectedRecordErrorId

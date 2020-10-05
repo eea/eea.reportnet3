@@ -84,7 +84,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetSchemaName: '',
     datasetSchemas: [],
     datasetStatistics: [],
-    dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
+    dataViewerOptions: {
+      activeIndex: 0,
+      isGroupedValidationSelected: false,
+      isValidationSelected: false,
+      recordPositionId: -1,
+      selectedRecordErrorId: -1,
+      selectedRuleId: ''
+    },
     exportButtonsList: [],
     exportDatasetData: null,
     exportDatasetDataName: '',
@@ -574,16 +581,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-    designerDispatch({
-      type: 'SET_DATAVIEWER_OPTIONS',
-      payload: {
-        activeIndex: tableSchemaId,
-        isValidationSelected: true,
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId
-      }
-    });
+  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId, selectedRuleId, grouped = true) => {
+    console.log(selectedRuleId);
+    if (grouped) {
+      designerDispatch({
+        type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
+        payload: {
+          activeIndex: tableSchemaId,
+          isGroupedValidationSelected: true,
+          selectedRuleId
+        }
+      });
+    } else {
+      designerDispatch({
+        type: 'SET_DATAVIEWER_OPTIONS',
+        payload: {
+          activeIndex: tableSchemaId,
+          isValidationSelected: true,
+          recordPositionId: posIdRecord,
+          selectedRecordErrorId
+        }
+      });
+    }
   };
 
   const onTabChange = tableSchemaId => {
@@ -1013,6 +1032,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           editable={true}
           history={history}
           isPreviewModeOn={designerState.isPreviewModeOn}
+          isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
           isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
           manageDialogs={manageDialogs}
           manageUniqueConstraint={manageUniqueConstraint}
@@ -1022,6 +1042,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onUpdateTable={onUpdateTable}
           recordPositionId={designerState.dataViewerOptions.recordPositionId}
           selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
+          selectedRuleId={designerState.dataViewerOptions.selectedRuleId}
           setActiveIndex={index =>
             designerDispatch({
               type: 'SET_DATAVIEWER_OPTIONS',

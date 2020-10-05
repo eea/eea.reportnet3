@@ -32,6 +32,7 @@ export const TabsDesigner = withRouter(
     editable = false,
     history,
     isPreviewModeOn,
+    isGroupedValidationSelected,
     isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
@@ -42,6 +43,7 @@ export const TabsDesigner = withRouter(
     onUpdateTable,
     recordPositionId,
     selectedRecordErrorId,
+    selectedRuleId,
     setActiveIndex,
     setIsValidationSelected
   }) => {
@@ -418,6 +420,7 @@ export const TabsDesigner = withRouter(
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
                         isPreviewModeOn={isPreviewModeOn}
+                        isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}
                         key={tab.index}
                         manageDialogs={manageDialogs}
@@ -442,6 +445,15 @@ export const TabsDesigner = withRouter(
                               : -1
                             : tab.tableSchemaId === activeIndex
                             ? selectedRecordErrorId
+                            : -1
+                        }
+                        selectedRuleId={
+                          !isNaN(activeIndex)
+                            ? tab.index === activeIndex
+                              ? selectedRuleId
+                              : -1
+                            : tab.tableSchemaId === activeIndex
+                            ? selectedRuleId
                             : -1
                         }
                         setIsValidationSelected={setIsValidationSelected}

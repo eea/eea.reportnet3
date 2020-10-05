@@ -41,11 +41,12 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaAllTables: [],
     datasetSchemaId: null,
     datasetSchemaName: '',
-    dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
+    dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1, selectedRuleId: '' },
     isDataDeleted: false,
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
+    isGroupedValidationSelected: false,
     isValidationSelected: false,
     levelErrorTypes: [],
     metaData: {},
@@ -60,6 +61,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetName,
     dataViewerOptions,
     isDataDeleted,
+    isGroupedValidationSelected,
     isValidationSelected,
     levelErrorTypes,
     metaData,
@@ -217,12 +219,14 @@ export const EUDataset = withRouter(({ history, match }) => {
       isDatasetDeleted={isDataDeleted}
       isExportable={false}
       hasCountryCode={true}
+      isGroupedValidationSelected={isGroupedValidationSelected}
       isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
       recordPositionId={dataViewerOptions.recordPositionId}
       selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+      selectedRuleId={dataViewerOptions.selectedRuleId}
       setIsValidationSelected={onSetIsValidationSelected}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}

@@ -339,7 +339,7 @@ export const apiDataset = {
     });
     return response.data;
   },
-  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
+  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.dataViewer, {
         datasetId: datasetId,
@@ -347,7 +347,8 @@ export const apiDataset = {
         pageNum: pageNum,
         pageSize: pageSize,
         fields: fields,
-        levelError: levelError
+        levelError: levelError,
+        idRules: ruleId
       })
     });
 

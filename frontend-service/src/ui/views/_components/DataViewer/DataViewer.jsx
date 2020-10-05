@@ -58,10 +58,12 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
   ({
+    filterRuleId,
     hasCountryCode,
     hasWritePermissions,
     isDatasetDeleted = false,
     isExportable,
+    isGroupedValidationSelected,
     isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
@@ -353,11 +355,10 @@ const DataViewer = withRouter(
           Math.floor(fRow / nRows),
           nRows,
           fields,
-          levelErrorValidations
+          levelErrorValidations,
+          filterRuleId
         );
-        console.log({ tableData });
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
-
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
             if (tableData.records.length > 0) {
@@ -408,6 +409,7 @@ const DataViewer = withRouter(
     };
 
     useRecordErrorPosition(
+      filterRuleId,
       recordErrorPositionId,
       dispatchRecords,
       records,
@@ -1032,6 +1034,7 @@ const DataViewer = withRouter(
           isFilterValidationsActive={isFilterValidationsActive}
           isLoading={isLoading}
           isTableDeleted={isTableDeleted}
+          isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}

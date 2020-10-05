@@ -33,6 +33,7 @@ const ActionsToolbar = ({
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
+  isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypesWithCorrects,
   onSetVisible,
@@ -53,6 +54,7 @@ const ActionsToolbar = ({
   const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
+    groupedFilter: false,
     validationDropdown: [],
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
@@ -72,6 +74,15 @@ const ActionsToolbar = ({
 
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
+
+  useEffect(() => {
+    if (isGroupedValidationSelected) {
+      dispatchFilter({
+        type: 'SET_VALIDATION_GROUPED_FILTER',
+        payload: { groupedFilter: isGroupedValidationSelected }
+      });
+    }
+  }, [isGroupedValidationSelected]);
 
   useEffect(() => {
     if (isValidationSelected) {
@@ -265,6 +276,12 @@ const ActionsToolbar = ({
             getExportButtonPosition(e);
           }}
           showLevelErrorIcons={true}
+        />
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent`}
+          disabled={!filter.groupedFilter}
+          icon={'groupBy'}
+          label={resources.messages['groupBy']}
         />
         {/* <Button
           className={`p-button-rounded p-button-secondary-transparent`}

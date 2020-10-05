@@ -275,6 +275,7 @@ const createEmptyObject = (columnsSchema, data) => {
   if (!isUndefined(data) && data.length > 0) {
     obj.datasetPartitionId = data.datasetPartitionId;
   }
+
   return obj;
 };
 

@@ -38,6 +38,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataViewerOptions, setDataViewerOptions] = useState({
     recordPositionId: -1,
     selectedRecordErrorId: -1,
+    selectedRuleId: '',
     activeIndex: null
   });
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -203,6 +204,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
       recordPositionId={dataViewerOptions.recordPositionId}
       selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+      selectedRuleId={dataViewerOptions.selectedRuleId}
       showWriteButtons={false}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}

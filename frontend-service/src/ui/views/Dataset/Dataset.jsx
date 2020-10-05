@@ -68,6 +68,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [dataViewerOptions, setDataViewerOptions] = useState({
     recordPositionId: -1,
     selectedRecordErrorId: -1,
+    selectedRuleId: '',
     activeIndex: null
   });
   const [datasetHasData, setDatasetHasData] = useState(false);

@@ -392,6 +392,7 @@ export const useSetColumns = (
 };
 
 export const useRecordErrorPosition = (
+  filterRuleId,
   recordErrorPositionId,
   dispatchRecords,
   records,
@@ -400,13 +401,19 @@ export const useRecordErrorPosition = (
   levelErrorTypesWithCorrects
 ) => {
   useEffect(() => {
-    if (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) {
+    if (
+      (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) &&
+      (isUndefined(filterRuleId) || filterRuleId === '')
+    ) {
       return;
     }
 
     dispatchRecords({
       type: 'SET_FIRST_PAGE_RECORD',
-      payload: Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
+      payload:
+        recordErrorPositionId !== -1
+          ? Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
+          : 0
     });
 
     dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
@@ -414,7 +421,9 @@ export const useRecordErrorPosition = (
     onFetchData(
       undefined,
       undefined,
-      Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage,
+      recordErrorPositionId !== -1
+        ? Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
+        : 0,
       records.recordsPerPage,
       levelErrorTypesWithCorrects
     );
