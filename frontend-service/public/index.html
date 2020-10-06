@@ -56,36 +56,9 @@
         </p>
       </div>
     </div>
-    <script type="text/javascript">
-      // Internet Explorer 6-11
-      var isIE = /*@cc_on!@*/ false || !!document.documentMode;
 
-      // Edge 20+ no chromium
-      var isEdge = !isIE && !!window.StyleMedia;
-      if (isIE || isEdge) {
-        var notice = document.getElementById('browserNotice');
-        notice.style.display = 'block';
-      }
-    </script>
+    <script src="index.js"></script>
     <script src="%PUBLIC_URL%/env.js"></script>
   </body>
-  <script>
-    window.addEventListener(
-      'dragover',
-      function (e) {
-        // e.dataTransfer.effectAllowed = 'none';
-        e.preventDefault();
-        e = e || event;
-      },
-      false
-    );
-    window.addEventListener(
-      'drop',
-      function (e) {
-        e = e || event;
-        e.preventDefault();
-      },
-      false
-    );
-  </script>
+  <script src="index.js"></script>
 </html>
