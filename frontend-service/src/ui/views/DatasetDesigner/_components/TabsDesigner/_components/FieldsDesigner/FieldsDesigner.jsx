@@ -28,12 +28,14 @@ export const FieldsDesigner = ({
   datasetId,
   datasetSchemas,
   isPreviewModeOn,
+  isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
   onChangeTableProperties,
+  onHideSelectGroupedValidation,
   onLoadTableData,
   recordPositionId,
   selectedRecordErrorId,
@@ -327,10 +329,12 @@ export const FieldsDesigner = ({
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
           isExportable={true}
+          isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
           recordPositionId={recordPositionId}

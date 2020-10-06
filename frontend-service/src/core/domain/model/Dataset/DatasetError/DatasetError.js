@@ -3,6 +3,7 @@ export class DatasetError {
     entityType,
     levelError,
     message,
+    numberOfRecords,
     objectId,
     position,
     recordId,
@@ -15,6 +16,7 @@ export class DatasetError {
     this.entityType = entityType;
     this.levelError = levelError;
     this.message = message;
+    this.numberOfRecords = numberOfRecords;
     this.objectId = objectId;
     this.position = position;
     this.recordId = recordId;

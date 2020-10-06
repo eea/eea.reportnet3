@@ -20,6 +20,7 @@ export const TabsSchema = ({
   isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypes,
+  onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
   recordPositionId,
@@ -38,7 +39,6 @@ export const TabsSchema = ({
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
-          console.log({ selectedRuleId }, table.id, activeIndex);
           return (
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.tabsSchema}>
@@ -52,6 +52,7 @@ export const TabsSchema = ({
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
+                  onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   reporting={reporting}
                   showWriteButtons={showWriteButtons}

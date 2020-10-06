@@ -889,6 +889,7 @@
     "sqlSentenceHelpDescription": "The sentences should look like the following examples (brackets are mandatory only if the name contains blank spaces):",
     "toggleGroup": "Toggle group/ungroup errors",
     "grouped": "Grouped",
-    "ungrouped": "Ungrouped"
+    "ungrouped": "Ungrouped",
+    "numberOfRecords": "Number of records"
   }
 }

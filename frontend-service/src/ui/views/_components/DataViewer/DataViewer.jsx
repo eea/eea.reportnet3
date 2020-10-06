@@ -62,11 +62,13 @@ const DataViewer = withRouter(
     hasWritePermissions,
     isDatasetDeleted = false,
     isExportable,
+    isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
     },
+    onHideSelectGroupedValidation,
     onLoadTableData,
     recordPositionId,
     reporting,
@@ -322,7 +324,7 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
+    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules) => {
       const removeSelectAllFromList = levelErrorValidations => {
         levelErrorValidations = levelErrorValidations
           .map(error => error.toUpperCase())
@@ -354,7 +356,7 @@ const DataViewer = withRouter(
           nRows,
           fields,
           levelErrorValidations,
-          selectedRuleId
+          groupedRules
         );
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
@@ -412,21 +414,37 @@ const DataViewer = withRouter(
       records,
       dispatchSort,
       onFetchData,
-      levelErrorTypesWithCorrects,
-      selectedRuleId
+      levelErrorTypesWithCorrects
     );
 
     useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (!isValidationShown && levelErrorValidations.length > 0) {
-          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+          console.log('EOOO 1');
+          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
         } else {
           if (isValidationShown) {
-            onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+            console.log('EOOO 2');
+            onFetchData(
+              sort.sortField,
+              sort.sortOrder,
+              0,
+              records.recordsPerPage,
+              levelErrorValidations,
+              selectedRuleId
+            );
           }
         }
       }
     }, [levelErrorValidations]);
+
+    useEffect(() => {
+      console.log('EOOO 4', { isGroupedValidationSelected, isGroupedValidationDeleted, selectedRuleId });
+      if (selectedRuleId !== '' || isGroupedValidationDeleted) {
+        console.log('EOOO 3', { selectedRuleId });
+        onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+      }
+    }, [selectedRuleId]);
 
     useEffect(() => {
       if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
@@ -458,8 +476,15 @@ const DataViewer = withRouter(
       return record;
     };
 
-    const hideValidationFilter = () => {
-      setIsValidationShown(false);
+    const hideValidationFilter = () => setIsValidationShown(false);
+
+    const showGroupedValidationFilter = groupedBy => {
+      setIsFilterValidationsActive(groupedBy);
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+
+      if (recordErrorPositionId !== -1) {
+        setRecordErrorPositionId(-1);
+      }
     };
 
     const showValidationFilter = filteredKeys => {
@@ -497,7 +522,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
-      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations);
+      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -707,7 +732,8 @@ const DataViewer = withRouter(
         sort.sortOrder,
         records.firstPageRecord,
         records.recordsPerPage,
-        levelErrorValidations
+        levelErrorValidations,
+        selectedRuleId
       );
     };
 
@@ -799,7 +825,7 @@ const DataViewer = withRouter(
     const onSort = event => {
       dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
     };
 
     const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
@@ -964,7 +990,6 @@ const DataViewer = withRouter(
     };
 
     const requiredTemplate = rowData => {
-      console.log(rowData.field);
       return (
         <div className={styles.requiredTemplateWrapper}>
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
@@ -1038,6 +1063,7 @@ const DataViewer = withRouter(
           isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}
           onUpdateData={onUpdateData}
@@ -1047,6 +1073,7 @@ const DataViewer = withRouter(
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}
           setRecordErrorPositionId={setRecordErrorPositionId}
+          showGroupedValidationFilter={showGroupedValidationFilter}
           showValidationFilter={showValidationFilter}
           showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}

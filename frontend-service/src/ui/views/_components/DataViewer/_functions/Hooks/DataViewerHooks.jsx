@@ -397,14 +397,10 @@ export const useRecordErrorPosition = (
   records,
   dispatchSort,
   onFetchData,
-  levelErrorTypesWithCorrects,
-  selectedRuleId
+  levelErrorTypesWithCorrects
 ) => {
   useEffect(() => {
-    if (
-      (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) &&
-      (isUndefined(selectedRuleId) || selectedRuleId === '')
-    ) {
+    if (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) {
       return;
     }
 
@@ -427,5 +423,5 @@ export const useRecordErrorPosition = (
       records.recordsPerPage,
       levelErrorTypesWithCorrects
     );
-  }, [recordErrorPositionId, selectedRuleId]);
+  }, [recordErrorPositionId]);
 };

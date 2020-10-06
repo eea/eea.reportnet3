@@ -36,6 +36,7 @@ const ActionsToolbar = ({
   isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypesWithCorrects,
+  onHideSelectGroupedValidation,
   onSetVisible,
   onUpdateData,
   originalColumns,
@@ -43,6 +44,7 @@ const ActionsToolbar = ({
   setColumns,
   setDeleteDialogVisible,
   setImportTableDialogVisible,
+  showGroupedValidationFilter,
   showValidationFilter,
   showWriteButtons,
   tableHasErrors,
@@ -54,7 +56,7 @@ const ActionsToolbar = ({
   const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
-    groupedFilter: false,
+    groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
@@ -63,12 +65,11 @@ const ActionsToolbar = ({
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  let exportMenuRef = useRef();
-  let filterMenuRef = useRef();
-  let dropdownFilterRef = useRef();
+  const exportMenuRef = useRef();
+  const filterMenuRef = useRef();
+  const dropdownFilterRef = useRef();
 
   useEffect(() => {
-    console.log('ENTRO 2');
     const dropdownFilter = colsSchema.map(colSchema => {
       return { label: colSchema.header, key: colSchema.field };
     });
@@ -77,7 +78,6 @@ const ActionsToolbar = ({
   }, []);
 
   useEffect(() => {
-    console.log('ENTRO', isGroupedValidationSelected);
     if (isGroupedValidationSelected) {
       dispatchFilter({
         type: 'SET_VALIDATION_GROUPED_FILTER',
@@ -284,12 +284,14 @@ const ActionsToolbar = ({
           disabled={!filter.groupedFilter}
           icon={'groupBy'}
           label={resources.messages['groupBy']}
-          onClick={() =>
+          onClick={() => {
+            onHideSelectGroupedValidation();
+            showGroupedValidationFilter(false);
             dispatchFilter({
               type: 'SET_VALIDATION_GROUPED_FILTER',
               payload: { groupedFilter: false }
-            })
-          }
+            });
+          }}
         />
 
         {/* <Button

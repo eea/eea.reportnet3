@@ -300,6 +300,7 @@ const groupedErrorsById = async (
         entityType: datasetErrorDTO.typeEntity,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
+        numberOfRecords: datasetErrorDTO.numberOfRecords,
         objectId: datasetErrorDTO.idObject,
         ruleId: datasetErrorDTO.idRule,
         tableSchemaId: datasetErrorDTO.idTableSchema,

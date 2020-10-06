@@ -15,7 +15,7 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
-        tableSchemaNames: payload.tableSchemaNames
+        schemaTables: payload.schemaTables
       };
 
     case 'GET_METADATA':
@@ -91,7 +91,8 @@ export const designerReducer = (state, { type, payload }) => {
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
-          isGroupedValidationSelected: true,
+          isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected,
           isValidationSelected: false,
           selectedRuleId: payload.selectedRuleId
         },

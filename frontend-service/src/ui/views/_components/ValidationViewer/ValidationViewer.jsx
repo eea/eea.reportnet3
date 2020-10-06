@@ -27,11 +27,10 @@ const ValidationViewer = React.memo(
     hasWritePermissions,
     levelErrorTypes,
     onSelectValidation,
-    tableSchemaNames,
+    schemaTables,
     visible
   }) => {
     const resources = useContext(ResourcesContext);
-
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
     const [allOriginsFilter, setAllOriginsFilter] = useState([]);
     const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
@@ -108,9 +107,14 @@ const ValidationViewer = React.memo(
       columnsArr.push(
         <Column key="ruleId" field="ruleId" className={styles.invisibleHeader} header={resources.messages['ruleId']} />
       );
+      if (grouped) {
+        columnsArr.push(
+          <Column key="numberOfRecords" field="numberOfRecords" header={resources.messages['numberOfRecords']} />
+        );
+      }
 
       setColumns(columnsArr);
-    }, []);
+    }, [grouped]);
 
     useEffect(() => {
       if (visible) {
@@ -124,6 +128,14 @@ const ValidationViewer = React.memo(
         }
       }
     }, [visible, grouped]);
+
+    const addTableSchemaId = tableErrors => {
+      tableErrors.forEach(tableError => {
+        const filteredTable = schemaTables.filter(schemaTable => schemaTable.name === tableError.tableSchemaName);
+        if (!isEmpty(filteredTable)) tableError.tableSchemaId = filteredTable[0].id;
+      });
+      return tableErrors;
+    };
 
     const columnStyles = columnId => {
       const style = {};
@@ -163,6 +175,7 @@ const ValidationViewer = React.memo(
           typeEntitiesFilter,
           originsFilter
         );
+        addTableSchemaId(datasetErrors.errors);
       } else {
         datasetErrors = await DatasetService.errorsById(
           datasetId,
@@ -177,6 +190,7 @@ const ValidationViewer = React.memo(
       }
       setTotalRecords(datasetErrors.totalErrors);
       setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
+
       setFetchedData(datasetErrors.errors);
       setIsLoading(false);
     };
@@ -218,8 +232,8 @@ const ValidationViewer = React.memo(
         key: `${datasetName.toString()}`
       });
 
-      tableSchemaNames.forEach(name => {
-        allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}` });
+      schemaTables.forEach(table => {
+        allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
       });
 
       setAllOriginsFilter(allOriginsFilterList);

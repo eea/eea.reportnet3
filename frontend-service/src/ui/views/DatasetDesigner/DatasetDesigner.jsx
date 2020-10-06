@@ -86,6 +86,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetStatistics: [],
     dataViewerOptions: {
       activeIndex: 0,
+      isGroupedValidationDeleted: false,
       isGroupedValidationSelected: false,
       isValidationSelected: false,
       recordPositionId: -1,
@@ -124,7 +125,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     metaData: {},
     refresh: false,
     replaceData: false,
-    tableSchemaNames: [],
+    schemaTables: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false
@@ -543,8 +544,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
-        const tableSchemaNamesList = [];
-        dataset.tables.forEach(table => tableSchemaNamesList.push(table.tableSchemaName));
+        const tableSchemaList = [];
+        dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 
         const datasetStatisticsDTO = await getStatisticsById(
           datasetId,
@@ -561,7 +562,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList
+            schemaTables: tableSchemaList
           }
         });
       };
@@ -581,12 +582,27 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
 
+  const onHideSelectGroupedValidation = () => {
+    designerDispatch({
+      type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
+      payload: {
+        ...designerState.dataViewerOptions,
+        isGroupedValidationDeleted: true,
+        isGroupedValidationSelected: false,
+        selectedRuleId: ''
+      }
+    });
+  };
+
   const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId, selectedRuleId, grouped = true) => {
+    console.log('onSelectValidation');
     if (grouped) {
       designerDispatch({
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
         payload: {
+          ...designerState.dataViewerOptions,
           activeIndex: tableSchemaId,
+          isGroupedValidationDeleted: false,
           isGroupedValidationSelected: true,
           selectedRuleId
         }
@@ -595,6 +611,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       designerDispatch({
         type: 'SET_DATAVIEWER_OPTIONS',
         payload: {
+          ...designerState.dataViewerOptions,
           activeIndex: tableSchemaId,
           isValidationSelected: true,
           recordPositionId: posIdRecord,
@@ -1031,11 +1048,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           editable={true}
           history={history}
           isPreviewModeOn={designerState.isPreviewModeOn}
+          isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
           isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
           manageDialogs={manageDialogs}
           manageUniqueConstraint={manageUniqueConstraint}
           onChangeReference={onChangeReference}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           onTabChange={onTabChange}
           onUpdateTable={onUpdateTable}
@@ -1098,7 +1117,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <Dashboard
               refresh={designerState.dashDialogVisible}
               levelErrorTypes={designerState.levelErrorTypes}
-              tableSchemaNames={designerState.tableSchemaNames}
+              tableSchemaNames={designerState.schemaTables.map(table => table.name)}
             />
           </Dialog>
         )}
@@ -1116,7 +1135,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               hasWritePermissions={designerState.hasWritePermissions}
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
               onSelectValidation={onSelectValidation}
-              tableSchemaNames={designerState.tableSchemaNames}
+              schemaTables={designerState.schemaTables}
               visible={designerState.isValidationViewerVisible}
             />
           </Dialog>
