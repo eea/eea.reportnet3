@@ -4,6 +4,7 @@ import org.bson.Document;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
 import org.eea.exception.EEAException;
 import com.mongodb.client.result.UpdateResult;
 
@@ -141,4 +142,13 @@ public interface ExtendedSchemaRepository {
    * @param schema the schema
    */
   void updateSchemaDocument(DataSetSchema schema);
+
+
+  /**
+   * Update dataset schema web form.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param webForm the web form
+   */
+  void updateDatasetSchemaWebForm(String datasetSchemaId, WebForm webForm);
 }
