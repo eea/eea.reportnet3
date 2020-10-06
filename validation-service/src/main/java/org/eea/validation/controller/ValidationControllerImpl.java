@@ -176,7 +176,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     try {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
-          levelErrorsFilter, typeEntitiesFilter, originsFilter, originsFilter, asc);
+          levelErrorsFilter, typeEntitiesFilter, originsFilter, fields, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
