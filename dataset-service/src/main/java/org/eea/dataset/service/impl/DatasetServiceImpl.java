@@ -1022,6 +1022,7 @@ public class DatasetServiceImpl implements DatasetService {
       FieldValue field = new FieldValue();
       field.setIdFieldSchema(idFieldSchema);
       field.setType(typeField);
+      field.setValue("");
       RecordValue recordAux = new RecordValue();
       TableValue tableAux = new TableValue();
       DatasetValue datasetAux = new DatasetValue();

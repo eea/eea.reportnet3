@@ -88,11 +88,26 @@ const ComparisonExpression = ({
     isDisabled
   ]);
 
+  const isFieldInTable = tableFields => {
+    const result = tableFields.filter(tField => tField.value === expressionValues.field1);
+    return !isEmpty(result);
+  };
+
   useEffect(() => {
     if (rawTableFields) {
       const parsedTableFields = rawTableFields.map(field => {
         return { label: field.label, value: field.code, type: field.type };
       });
+
+      if (!isFieldInTable(parsedTableFields) && !isNil(expressionValues.field1) && expressionValues.field1 !== '') {
+        ['union', 'field1', 'operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
+          onExpressionFieldUpdate(expressionId, {
+            key: field,
+            value: null
+          });
+        });
+      }
+
       setTableFields(parsedTableFields);
       setSecondFieldOptions(parsedTableFields);
     }
@@ -106,15 +121,6 @@ const ComparisonExpression = ({
       });
     }
   }, [tableFields]);
-
-  // useEffect(() => {
-  //   ['operatorType', 'operatorValue', 'field2'].forEach(field => {
-  //     onExpressionFieldUpdate(expressionId, {
-  //       key: field,
-  //       value: ''
-  //     });
-  //   });
-  // }, [expressionValues.field1]);
 
   useEffect(() => {
     if (expressionValues.operatorType) {

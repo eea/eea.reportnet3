@@ -50,6 +50,11 @@
   display: flex !important;
   justify-content: center;
 }
+
+.saveButton {
+  margin-top: 0.5rem !important;
+}
+
 .readOnlyFields div {
   opacity: 0.5;
 }

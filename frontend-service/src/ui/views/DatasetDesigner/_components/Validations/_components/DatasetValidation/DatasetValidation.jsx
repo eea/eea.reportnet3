@@ -154,7 +154,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [relationsErrors]);
 
   useEffect(() => {
-
     if (validationContext.referenceId) {
       const table = getSelectedTableByTableSchemaId(validationContext.referenceId, tabs);
 
@@ -199,7 +198,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   }, [creationFormState.candidateRule]);
 
   useEffect(() => {
-
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
@@ -254,8 +252,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const parseRuleToEdit = rule => {
+    if (rule.automatic) return rule;
     const inmRuleToEdit = { ...rule };
-
     const filteredReferencedDatasetSchema = datasetSchemas.filter(
       dataset => dataset.datasetSchemaId === rule.relations.referencedDatasetSchema.code
     );
@@ -551,8 +549,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
           className={styles.dialog}
           header={
             validationContext.ruleEdit
-              ? resourcesContext.messages.editDatasetConstraint
-              : resourcesContext.messages.createDatasetConstraint
+              ? resourcesContext.messages.editTableConstraint
+              : resourcesContext.messages.createTableConstraint
           }
           visible={validationContext.isVisible}
           style={{ width: '975px' }}

@@ -117,6 +117,7 @@ export const FieldDesigner = ({
 
   const fieldTypeRef = useRef();
   const inputRef = useRef();
+
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -142,7 +143,7 @@ export const FieldDesigner = ({
   }, []);
 
   useEffect(() => {
-    const dropDowns = document.querySelectorAll('.p-dropdown-panel');
+    const dropDowns = document.querySelectorAll('.p-dropdown-panel.p-input-overlay-visible');
     dropDowns.forEach(dropDown => {
       const dropDownDisplay = dropDown.style.display;
       if (dropDownDisplay) {
@@ -172,49 +173,6 @@ export const FieldDesigner = ({
     }
   }, [totalFields]);
 
-  useEffect(() => {
-    //Set pointerEvents to auto or none depending on isDragging.
-    //because appendTo in Dropdown component we need to find the p-dropdown-panel class in the document, not in the Dropdown itself
-    const dropdownPanel = document.getElementsByClassName('p-dropdown-panel')[0];
-    const childs = document.getElementsByClassName('fieldRow');
-    if (!isUndefined(childs)) {
-      for (let i = 0; i < childs.length; i++) {
-        for (let j = 2; j < childs[i].childNodes.length; j++) {
-          if (fieldDesignerState.isDragging) {
-            childs[i].childNodes[j].style.pointerEvents = 'none';
-            dropdownPanel.style.pointerEvents = 'none';
-          } else {
-            childs[i].childNodes[j].style.pointerEvents = 'auto';
-            dropdownPanel.style.pointerEvents = 'auto';
-            //Dropdown
-            const dropdownChilds = document.getElementsByClassName('p-dropdown-items');
-            if (!isUndefined(dropdownChilds)) {
-              for (let k = 0; k < dropdownChilds.length; k++) {
-                for (let l = 0; l < dropdownChilds[k].childNodes.length; l++) {
-                  if (!isUndefined(dropdownChilds[k].childNodes[l])) {
-                    dropdownChilds[k].childNodes[l].style.pointerEvents = 'auto';
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    const requiredAndPKCheckboxes = document.getElementsByClassName('requiredAndPKCheckboxes');
-    if (!isUndefined(requiredAndPKCheckboxes)) {
-      for (let i = 0; i < requiredAndPKCheckboxes.length; i++) {
-        for (let j = 0; j < requiredAndPKCheckboxes[i].childNodes.length; j++) {
-          if (fieldDesignerState.isDragging) {
-            requiredAndPKCheckboxes[i].childNodes[j].style.pointerEvents = 'none';
-          } else {
-            requiredAndPKCheckboxes[i].childNodes[j].style.pointerEvents = 'auto';
-          }
-        }
-      }
-    }
-  }, [fieldDesignerState.isDragging]);
-
   const onAttachmentDropdownSelected = fieldType => {
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
@@ -234,12 +192,19 @@ export const FieldDesigner = ({
       if (fieldId === '-1') {
         if (type !== '') {
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
-            onFieldAdd({ type: parseGeospatialTypes(type.fieldType) });
+            onFieldAdd({
+              type: parseGeospatialTypes(type.fieldType),
+              pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue
+            });
           }
         }
       } else {
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
-          fieldUpdate({ codelistItems: null, type: parseGeospatialTypes(type.fieldType) });
+          fieldUpdate({
+            codelistItems: null,
+            pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
+            type: parseGeospatialTypes(type.fieldType)
+          });
         } else {
           if (type !== '') {
             fieldTypeRef.current.hide();
@@ -251,6 +216,7 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
       dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
+      if (type.fieldType.toLowerCase() === 'point') dispatchFieldDesigner({ type: 'SET_PK', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -748,8 +714,15 @@ export const FieldDesigner = ({
       )}
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
-        className={`${styles.checkPK} datasetSchema-pk-help-step`}
-        disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
+        className={`${styles.checkPK} datasetSchema-pk-help-step ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
+        disabled={
+          (!isNil(fieldDesignerState.fieldTypeValue) &&
+            !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
+            fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'POINT') ||
+          (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))
+        }
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
         label="Default"
@@ -765,7 +738,9 @@ export const FieldDesigner = ({
       </label>
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
-        className={`${styles.checkRequired} datasetSchema-required-help-step`}
+        className={`${styles.checkRequired} datasetSchema-required-help-step ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         disabled={Boolean(fieldDesignerState.fieldPKValue)}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
@@ -780,7 +755,9 @@ export const FieldDesigner = ({
       </label>
       <Checkbox
         checked={fieldDesignerState.fieldReadOnlyValue}
-        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step`}
+        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
@@ -798,7 +775,9 @@ export const FieldDesigner = ({
     (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
       fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        className={`${styles.codelistButton} p-button-secondary-transparent ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         label={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join(', ')}`
@@ -819,7 +798,9 @@ export const FieldDesigner = ({
       />
     ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Link' ? (
       <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        className={`${styles.codelistButton} p-button-secondary-transparent ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         label={
           !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
             ? `${fieldDesignerState.fieldLinkValue.name}`
@@ -837,7 +818,9 @@ export const FieldDesigner = ({
     ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
       fieldDesignerState.fieldTypeValue.fieldType === 'Attachment' ? (
       <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        className={`${styles.codelistButton} p-button-secondary-transparent ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         label={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
@@ -862,14 +845,18 @@ export const FieldDesigner = ({
         tooltipOptions={{ position: 'top' }}
       />
     ) : isCodelistOrLink ? (
-      <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
+      <span
+        className={fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}
+        style={{ width: '4rem', marginRight: '0.4rem' }}></span>
     ) : null;
 
   const renderDeleteButton = () =>
     !addField ? (
       <a
         draggable={true}
-        className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''}`}
+        className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''} ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         href="#"
         onClick={e => {
           e.preventDefault();
@@ -888,7 +875,9 @@ export const FieldDesigner = ({
     <React.Fragment>
       <InputText
         autoFocus={false}
-        className={styles.inputField}
+        className={`${styles.inputField} ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         id={fieldName}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
@@ -913,7 +902,9 @@ export const FieldDesigner = ({
         autoFocus={false}
         collapsedHeight={33}
         expandableOnClick={true}
-        className={styles.inputFieldDescription}
+        className={`${styles.inputFieldDescription} ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         id={`${fieldName}_description`}
         key={fieldId}
         onBlur={e => {
@@ -936,7 +927,9 @@ export const FieldDesigner = ({
       <Dropdown
         appendTo={document.body}
         ariaLabel={'fieldType'}
-        className={styles.dropdownFieldType}
+        className={`${styles.dropdownFieldType} ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        }`}
         inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
         name={resources.messages['newFieldTypePlaceHolder']}
@@ -948,9 +941,9 @@ export const FieldDesigner = ({
         }}
         optionLabel="value"
         options={fieldTypes}
+        placeholder={resources.messages['newFieldTypePlaceHolder']}
         ref={fieldTypeRef}
         required={true}
-        placeholder={resources.messages['newFieldTypePlaceHolder']}
         scrollHeight="450px"
         style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto', display: 'block' }}
         value={
@@ -989,7 +982,9 @@ export const FieldDesigner = ({
         {renderCodelistFileAndLinkButtons()}
         {!addField ? (
           <Button
-            className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            className={`p-button-secondary-transparent button ${styles.qcButton} ${
+              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+            }`}
             disabled={
               !isUndefined(fieldDesignerState.fieldTypeValue) &&
               config.validations.bannedFields.includes(fieldDesignerState.fieldTypeValue.value.toLowerCase())

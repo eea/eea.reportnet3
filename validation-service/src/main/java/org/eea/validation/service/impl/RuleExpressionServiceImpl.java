@@ -383,7 +383,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    * @return true, if is data type compatible number
    */
   private boolean isDataTypeCompatibleNumber(String superInputType) {
-    return superInputType.equals(JavaType.NUMBER);
+    return superInputType.equals(JavaType.OBJECT) || superInputType.equals(JavaType.NUMBER);
   }
 
   /**
@@ -396,6 +396,10 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    */
   private boolean isDataTypeCompatibleString(Map<String, DataType> dataTypeMap,
       String superInputType, String string) {
+
+    if (superInputType.equals(JavaType.OBJECT)) {
+      return true;
+    }
 
     if (string.equals(VALUE) || ObjectId.isValid(string)) {
       return superInputType.equals(dataTypeMap.get(string).getJavaType());

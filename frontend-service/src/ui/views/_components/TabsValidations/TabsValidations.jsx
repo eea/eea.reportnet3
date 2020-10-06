@@ -44,6 +44,7 @@ const TabsValidations = withRouter(
     const validationContext = useContext(ValidationContext);
 
     const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+      filtered: false,
       filteredData: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
@@ -65,6 +66,23 @@ const TabsValidations = withRouter(
 
       if (response) onUpdateData();
     }, [notificationContext]);
+
+    const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+    const getPaginatorRecordsCount = () => (
+      <Fragment>
+        {tabsValidationsState.filtered &&
+        tabsValidationsState.validationList.validations.length !== tabsValidationsState.filteredData.length
+          ? `${resources.messages['filtered']} : ${tabsValidationsState.filteredData.length} | `
+          : ''}
+        {resources.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
+        {resources.messages['records'].toLowerCase()}
+        {tabsValidationsState.filtered &&
+        tabsValidationsState.validationList.validations.length === tabsValidationsState.filteredData.length
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          : ''}
+      </Fragment>
+    );
 
     const isDeleteDialogVisible = value =>
       tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
@@ -147,7 +165,13 @@ const TabsValidations = withRouter(
       </div>
     );
 
-    const expressionsTemplate = rowData => getExpressionString(rowData, datasetSchemaAllTables);
+    const expressionsTemplate = rowData => {   
+
+      if (!isNil(rowData.sqlSentence)) {
+        return rowData.sqlSentence;
+      }
+      return getExpressionString(rowData, datasetSchemaAllTables);
+    };
 
     const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};
@@ -374,8 +398,6 @@ const TabsValidations = withRouter(
         );
       }
 
-      const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.filteredData.length}`;
-
       return (
         <div className={styles.validations}>
           <div className={styles.searchInput}>
@@ -383,6 +405,7 @@ const TabsValidations = withRouter(
               className="filter-lines"
               data={tabsValidationsState.validationList.validations}
               getFilteredData={onLoadFilteredData}
+              getFilteredSearched={getFilteredState}
               searchAll
               searchBy={['name', 'description', 'message']}
               selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
@@ -396,7 +419,7 @@ const TabsValidations = withRouter(
               loading={false}
               onRowClick={event => validationId(event.data.id)}
               paginator={true}
-              paginatorRight={paginatorRightText}
+              paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={tabsValidationsState.validationList.validations.length}

@@ -12,13 +12,13 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
@@ -99,6 +99,9 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreController;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -301,8 +304,8 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
-        || EntityTypeEnum.FIELD.equals(ruleVO.getType())
-            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition())) {
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
 
@@ -362,16 +365,9 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence('").append(rule.getRuleId().toString())
-              .append("',").append(datasetId).append(")").toString());
-
-      Map<String, Object> event = new HashMap<>();
-      event.put("dataset_id", String.valueOf(datasetId));
-      event.put("rule_id", ruleVO.getRuleId());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "CREATE");
-      sentEvent(event);
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
+          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
+      recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
@@ -437,8 +433,7 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
               false));
 
-          if (null != fieldSchemaPK && null != fieldSchemaPK.getPkMustBeUsed()
-              && fieldSchemaPK.getPkMustBeUsed()) {
+          if (null != fieldSchemaPK && Boolean.TRUE.equals(fieldSchemaPK.getPkMustBeUsed())) {
 
             Long shortcodeAux =
                 rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
@@ -475,6 +470,34 @@ public class RulesServiceImpl implements RulesService {
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POSITION:
+          ruleList.add(AutomaticRules.createPositionAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POINT:
+          ruleList.add(AutomaticRules.createPointAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case MULTIPOINT:
+          ruleList.add(AutomaticRules.createMultipointAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case LINESTRING:
+          ruleList.add(AutomaticRules.createLinestringAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case MULTILINESTRING:
+          ruleList.add(AutomaticRules.createMultilinestringAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case POLYGON:
+          ruleList.add(AutomaticRules.createPolygonAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case GEOMETRYCOLLECTION:
+          ruleList.add(AutomaticRules.createGeometrycollectionAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
@@ -585,8 +608,8 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
-        || EntityTypeEnum.FIELD.equals(ruleVO.getType())
-            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition())) {
+        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
     Rule rule = ruleMapper.classToEntity(ruleVO);
@@ -636,12 +659,7 @@ public class RulesServiceImpl implements RulesService {
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
           .append(",'").append(rule.getRuleId().toString()).append("')").toString());
-      Map<String, Object> event = new HashMap<>();
-      event.put("dataset_id", String.valueOf(datasetId));
-      event.put("rule_id", ruleVO.getRuleId());
-      event.put("rule_type", "SQL");
-      event.put("event_type", "CREATE");
-      sentEvent(event);
+      recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
@@ -974,7 +992,7 @@ public class RulesServiceImpl implements RulesService {
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
-      if (EntityTypeEnum.TABLE.equals(rule.getType())) {
+      if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 
@@ -1098,16 +1116,6 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public Long updateSequence(String datasetSchemaId) {
     return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
-  }
-
-
-  /**
-   * Sent event.
-   *
-   * @param event the event
-   */
-  private void sentEvent(Map<String, Object> event) {
-    kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_RULE_EVENT, event);
   }
 
   /**

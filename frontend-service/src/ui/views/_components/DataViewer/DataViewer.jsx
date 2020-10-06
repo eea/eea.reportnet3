@@ -273,6 +273,10 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
+      if (records.isMapOpen) datatableRef.current.closeEditingCell();
+    }, [records.isMapOpen]);
+
+    useEffect(() => {
       if (isDatasetDeleted) {
         dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
       }
@@ -310,7 +314,7 @@ const DataViewer = withRouter(
 
     const getFileExtensions = async () => {
       try {
-        const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
+        const response = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
         setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
       } catch (error) {
         notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -895,7 +899,7 @@ const DataViewer = withRouter(
     const saveMapGeoJsonDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          className="p-button-animated-blink"
+          className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
           label={resources.messages['save']}
           icon={'check'}
@@ -942,7 +946,7 @@ const DataViewer = withRouter(
     };
 
     const mapRender = () => (
-      <Map geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
+      <Map hasLegend={true} geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
     );
 
     const rowClassName = rowData => {
@@ -1239,7 +1243,7 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="edit-table calendar-table"
+            className="calendar-table"
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
