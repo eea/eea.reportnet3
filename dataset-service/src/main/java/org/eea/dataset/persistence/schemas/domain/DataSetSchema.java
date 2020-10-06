@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -18,6 +19,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
@@ -41,6 +48,10 @@ public class DataSetSchema {
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
+  /** The web form. */
+  @Field(value = "webForm")
+  private WebForm webForm;
+
   /**
    * Hash code.
    *
@@ -48,7 +59,7 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description);
+    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webForm);
   }
 
   /**
@@ -69,7 +80,8 @@ public class DataSetSchema {
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
-        && Objects.equals(description, other.description);
+        && Objects.equals(description, other.description) && Objects.equals(webForm, other.webForm);
+
   }
 
 
