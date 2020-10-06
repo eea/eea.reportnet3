@@ -182,7 +182,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     if (!StringUtils.isBlank(originsFilter)) {
       List<String> originsFilterList = Arrays.asList(originsFilter.split(","));
       for (int i = 0; i < originsFilterList.size(); i++) {
-        stringBuilder.append(group ? "and v.origin_name !='"
+        stringBuilder.append(group ? "and v.origin_name <>'" + originsFilterList.get(i) + "' "
             : " and v.originName  !='" + originsFilterList.get(i) + "' ");
       }
     }
