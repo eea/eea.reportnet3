@@ -582,13 +582,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/datasetSchema")
-  public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
-      @RequestBody(required = false) DataSetSchemaVO datasetSchemaVO) {
+  public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (Boolean.FALSE.equals(dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
-          datasetSchemaVO.getDescription()))) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
+      if (null != datasetSchemaVO.getDescription())
+        dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
+            datasetSchemaVO.getDescription());
+      if (null != datasetSchemaVO.getWebform()) {
+        dataschemaService.updateWebForm(datasetSchemaId, datasetSchemaVO.getWebform());
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
@@ -835,4 +837,5 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
+
 }

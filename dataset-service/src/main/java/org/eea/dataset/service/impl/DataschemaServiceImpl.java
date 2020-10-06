@@ -15,6 +15,7 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.SimpleDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
+import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -26,6 +27,7 @@ import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
+import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -49,6 +51,7 @@ import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.WebFormVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -150,6 +153,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private SimpleDataSchemaMapper simpleDataSchemaMapper;
 
+  /** The web form mapper. */
+  @Autowired
+  private WebFormMapper webFormMapper;
+
   /**
    * Creates the empty data set schema.
    *
@@ -170,6 +177,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setTableSchemas(new ArrayList<>());
+    dataSetSchema.setWebForm(new WebForm());
     schemasRepository.save(dataSetSchema);
 
     // create the rules schema
@@ -861,9 +869,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the boolean
    */
   @Override
-  public Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description) {
-    return schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description)
-        .getModifiedCount() == 1;
+  public void updateDatasetSchemaDescription(String datasetSchemaId, String description) {
+    schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description);
   }
 
   /**
@@ -1840,5 +1847,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         createNotEmptyRule(tableSchemaId, datasetId);
       }
     }
+  }
+
+
+  /**
+   * Update web form.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param webformVO the webform VO
+   */
+  @Override
+  public void updateWebForm(String datasetSchemaId, WebFormVO webformVO) {
+    schemasRepository.updateDatasetSchemaWebForm(datasetSchemaId,
+        webFormMapper.classToEntity(webformVO));
   }
 }

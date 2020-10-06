@@ -927,9 +927,9 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateDatasetSchemaDescriptionTest1() {
-    Mockito.when(schemasRepository.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
+    dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description");
+    Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -937,9 +937,9 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateDatasetSchemaDescriptionTest2() {
-    Mockito.when(schemasRepository.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
+    dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description");
+    Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
   }
 
   /**
