@@ -183,7 +183,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
     );
   };
 
-  if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  if (webformTableState.isLoading) return <Spinner className={styles.spinner} />;
 
   const childHasErrors = webformData.elements
     .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
@@ -203,7 +203,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
         )}
       </h3>
       {isNil(webformData.tableSchemaId) && (
-        <span style={{ color: 'red' }}>
+        <span className={styles.nonExistTable}>
           {`The table ${webformData.name} is not created in the design, please check it`}
         </span>
       )}
