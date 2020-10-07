@@ -28,6 +28,14 @@ const printExpression = (expression, tabs) => {
     return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
       expression.field2
     } )`;
+  } else if (
+    !isNil(expression.operatorValue) &&
+    !isEmpty(expression.operatorValue) &&
+    (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL')
+  ) {
+    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
+      expression.field2
+    } )`;
   }
   return '';
 };
