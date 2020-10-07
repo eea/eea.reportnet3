@@ -21,9 +21,11 @@ const printExpression = (expression, field) => {
 
 const printNode = (expression, index, expressions, field) => {
   let expressionString = '';
+
   expressionString = `${printSelector(expression, 0, [], field)} ${
     !isNil(expressions[index + 1].union) ? expressions[index + 1].union : ''
   }`;
+
   if (expressions.length - 1 > index + 1) {
     expressionString = `${expressionString} ${printSelector(expressions[index + 1], index + 1, expressions, field)}`;
   } else {
@@ -46,6 +48,7 @@ const printSelector = (expression, index, expressions, field) => {
 
 export const getFieldExpressionString = (expressions, field) => {
   let expressionString = '';
+
   if (!isNil(field) && expressions.length > 0) {
     expressionString = printSelector(expressions[0], 0, expressions, field.label);
   }

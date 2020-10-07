@@ -165,8 +165,7 @@ const TabsValidations = withRouter(
       </div>
     );
 
-    const expressionsTemplate = rowData => {   
-
+    const expressionsTemplate = rowData => {
       if (!isNil(rowData.sqlSentence)) {
         return rowData.sqlSentence;
       }
