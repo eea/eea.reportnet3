@@ -244,18 +244,6 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
-  const initialLoad = dataflow =>
-    dataflowDispatch({
-      type: 'INITIAL_LOAD',
-      payload: {
-        data: dataflow,
-        description: dataflow.description,
-        name: dataflow.name,
-        obligations: dataflow.obligation,
-        status: dataflow.status
-      }
-    });
-
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDispatch({
       type: 'MANAGE_DIALOGS',
@@ -358,7 +346,16 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
 
-      initialLoad(dataflow);
+      dataflowDispatch({
+        type: 'INITIAL_LOAD',
+        payload: {
+          data: dataflow,
+          description: dataflow.description,
+          name: dataflow.name,
+          obligations: dataflow.obligation,
+          status: dataflow.status
+        }
+      })
 
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
