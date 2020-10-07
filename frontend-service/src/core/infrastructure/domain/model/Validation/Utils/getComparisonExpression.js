@@ -55,6 +55,13 @@ export const getComparisonExpression = expression => {
       };
     }
 
+    if (operatorValue === 'IS NULL' || operatorValue === 'IS NOT NULL') {
+      return {
+        operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
+        params: [field1]
+      };
+    }
+
     return {
       operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
       params: [field1, transField2]
