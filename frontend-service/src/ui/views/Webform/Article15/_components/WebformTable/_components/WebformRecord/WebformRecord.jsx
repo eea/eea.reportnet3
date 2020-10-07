@@ -31,10 +31,11 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isFileDialogVisible: false,
     newRecord: {},
-    record
+    record,
+    selectedField: {}
   });
 
-  const { isFileDialogVisible } = webformRecordState;
+  const { isFileDialogVisible, selectedField } = webformRecordState;
 
   const {
     formatDate,
@@ -61,30 +62,36 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     }
   };
 
+  const onEditorKeyChange = (event, field, option) => {
+    if (event.key === 'Escape') {
+    } else if (event.key === 'Enter') {
+      onEditorSubmitValue(field, option, event.target.value);
+    } else if (event.key === 'Tab') {
+      onEditorSubmitValue(field, option, event.target.value);
+    }
+  };
+
   const onEditorSubmitValue = async (field, option, value) => {
+    const parsedValue =
+      field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+        ? value.join(',')
+        : value;
+
     try {
-      DatasetService.updateFieldById(
-        datasetId,
-        option,
-        field.fieldId,
-        field.fieldType,
-        field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
-          ? value.join(',')
-          : value
-      );
+      DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
     } catch (error) {
       console.log('error', error);
     }
   };
 
-  const onFillField = (option, value) => {
+  const onFillField = (field, option, value) => {
     webformRecordState.newRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === option)[0].fieldData[
       option
     ] = value;
 
     webformRecordState.record.elements.filter(field => field.fieldSchemaId === option)[0].value = value;
 
-    webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { option, value } });
+    webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
   };
 
   const onSaveField = async (option, value, recordId) => {
@@ -94,6 +101,8 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
       console.log('error', error);
     }
   };
+
+  const onSelectField = field => webformRecordDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
 
   const onToggleDialogVisible = value => webformRecordDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
@@ -107,7 +116,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             id={field.fieldId}
             monthNavigator={true}
             onChange={event => {
-              onFillField(option, formatDate(event.target.value, isNil(event.target.value)));
+              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
@@ -144,7 +153,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             maxSelectedLabels={10}
             id={field.fieldId}
             onChange={event => {
-              onFillField(option, event.target.value);
+              onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
@@ -173,7 +182,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             // filterPlaceholder={resources.messages['linkFilterPlaceholder']}
             // filterBy="itemType,value"
             onChange={event => {
-              onFillField(option, event.target.value);
+              onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
@@ -202,7 +211,8 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
-            onChange={event => onFillField(option, event.target.value)}
+            onChange={event => onFillField(field, option, event.target.value)}
+            onKeyDown={event => onEditorKeyChange(event, field, option)}
             type="text"
             value={field.value}
           />
@@ -215,7 +225,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="errorCircle"
             />
-            <span style={{ color: 'red' }}>
+            <span className={styles.nonExistField}>
               {`The field ${field.name} is not created in the design, please check it`}
             </span>
           </div>
@@ -226,10 +236,11 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           <Button
             className={`p-button-animated-blink p-button-primary-transparent`}
             // disabled={true}
-            icon="import"
-            label="Upload file"
+            icon={'import'}
+            label={resources.messages['uploadAttachment']}
             onClick={() => {
               onToggleDialogVisible(true);
+              onSelectField(field);
               // setIsAttachFileVisible(true);
               // onFileUploadVisible(
               //   fieldId,
@@ -252,8 +263,8 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         return (
           <div key={i} className={styles.field}>
             <label>{field.title}</label>
-            <div style={{ display: 'flex' }}>
-              <div style={{ width: '75%' }}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
+            <div className={styles.content}>
+              <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
               {field.validations &&
                 field.validations.map((validation, index) => (
                   <IconTooltip
@@ -284,7 +295,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
               )}
             </h3>
             {field.tableNotCreated && (
-              <span style={{ color: 'red' }}>
+              <span className={styles.nonExistTable}>
                 {`The table ${field.name} is not created in the design, please check it`}
               </span>
             )}
@@ -352,8 +363,8 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           // onUpload={onAttach}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
-            datasetId
-            // fieldId: records.selectedFieldId
+            datasetId,
+            fieldId: selectedField.fieldId
           })}`}
         />
       )}

@@ -128,7 +128,6 @@ export const Article15 = ({ datasetId, state }) => {
             key={i}
             label={webform.title}
             onClick={() => onChangeWebformTab(webform.name)}
-            style={{ padding: hasErrors.includes(true) || !isCreated ? '0.2rem' : '0.5rem' }}
           />
 
           {!isCreated && (
@@ -141,7 +140,7 @@ export const Article15 = ({ datasetId, state }) => {
     });
   };
 
-  if (isEmpty(article15State.data)) return <Spinner style={{ top: 0 }} />;
+  if (isEmpty(article15State.data)) return <Spinner className={styles.spinner} />;
 
   return (
     <div className={styles.webform}>

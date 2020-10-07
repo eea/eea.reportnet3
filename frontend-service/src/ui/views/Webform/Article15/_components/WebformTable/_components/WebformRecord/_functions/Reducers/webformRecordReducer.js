@@ -5,7 +5,8 @@ export const webformRecordReducer = (state, { type, payload }) => {
 
     case 'ON_FILL_FIELD':
       return {
-        ...state
+        ...state,
+        selectedField: payload.field
 
         // fields: {
         //   ...state.fields,
@@ -15,6 +16,9 @@ export const webformRecordReducer = (state, { type, payload }) => {
 
     case 'ON_TOGGLE_DIALOG':
       return { ...state, isFileDialogVisible: payload.value };
+
+    case 'ON_SELECT_FIELD':
+      return { ...state, selectedField: payload.field };
 
     default:
       return state;
