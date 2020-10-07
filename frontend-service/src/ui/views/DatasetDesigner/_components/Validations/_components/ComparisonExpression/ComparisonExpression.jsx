@@ -207,9 +207,14 @@ const ComparisonExpression = ({
       conditions =
         clickedFields.includes(field) &&
         (isNil(expressionValues[field]) || isEmpty(expressionValues[field].toString()));
+
+      if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
+        conditions = false;
+      }
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
+
     return conditions ? 'error' : '';
   };
 
@@ -238,7 +243,6 @@ const ComparisonExpression = ({
       key,
       value
     });
- 
   };
 
   const onAddToClickedFields = field => {
