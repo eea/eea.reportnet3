@@ -312,7 +312,7 @@ const schemaById = async datasetId => {
     datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
     datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
     levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : [],
-    webform: datasetSchemaDTO.webform.name
+    webform: datasetSchemaDTO.webform ? datasetSchemaDTO.webform.name : null
   });
 
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
@@ -425,7 +425,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   });
 
   table.records = records;
-  
+
   return table;
 };
 

@@ -901,7 +901,9 @@ const DataViewer = withRouter(
 
     const getIconsValidationsErrors = validations => {
       let icons = [];
-      if (isNull(validations)) return icons;
+      if (isNull(validations)) {
+        return icons;
+      }
 
       const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
       const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
@@ -976,7 +978,9 @@ const DataViewer = withRouter(
     }`;
 
     const onImportTableError = async ({ xhr, files }) => {
-      if (xhr.status === 423) notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
+      if (xhr.status === 423) {
+        notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
+      }
     };
 
     return (

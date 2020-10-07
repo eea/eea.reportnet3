@@ -64,7 +64,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       try {
         await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
       } catch (error) {
-        console.log('error', error);
+        console.error('error', error);
       }
     }
   };
@@ -106,7 +106,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
     } catch (error) {
-      console.log('ERROR', error);
+      console.error('ERROR', error);
     } finally {
       isLoading(false);
     }
@@ -183,7 +183,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
     );
   };
 
-  if (webformTableState.isLoading) return <Spinner className={styles.spinner} />;
+  if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
 
   const childHasErrors = webformData.elements
     .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))

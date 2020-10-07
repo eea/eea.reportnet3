@@ -126,7 +126,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
-    isWebformDataflow: true,
+    isWebformDataflow: false,
     viewType: { design: true, table: false, webform: false },
     webform: null
   });
@@ -606,7 +606,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpdateDescription = async description => {
     try {
-      const descriptionObject = { description: description }
+      const descriptionObject = { description: description };
       await DatasetService.updateDatasetSchemaDesign(datasetId, descriptionObject);
     } catch (error) {
       console.error('Error during datasetSchema Description update: ', error);
@@ -615,7 +615,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpdateWebform = async webform => {
     try {
-      const webformObject = { webform: { name: webform } }
+      const webformObject = { webform: { name: webform } };
       await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
       onCloseConfigureWebformModal();
     } catch (error) {
@@ -769,7 +769,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     ));
 
   const renderSwitchView = () => {
-    const swtichView = (
+    const switchView = (
       <Fragment>
         <span className={styles.switchTextInput}>{resources.messages['design']}</span>
         <InputSwitch
@@ -786,7 +786,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {designerState.isWebformDataflow ? renderRadioButtons() : swtichView}
+          {!isNil(designerState.webform) && !isNil(designerState.webform.value) ? renderRadioButtons() : switchView}
         </div>
       </div>
     );
@@ -825,10 +825,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => onUpdateWebform(designerState.webform.value)}
       />
       <Button
-          className="p-button-secondary"
-          icon={'cancel'}
-          label={resources.messages['cancel']}
-          onClick={() => onCloseConfigureWebformModal()}
+        className="p-button-secondary"
+        icon={'cancel'}
+        label={resources.messages['cancel']}
+        onClick={() => onCloseConfigureWebformModal()}
       />
     </Fragment>
   );
@@ -909,7 +909,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               key="datasetDescription"
               onBlur={e => onBlurDescription(e.target.value)}
               onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
-              onFocus={e => designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })}
+              onFocus={e =>
+                designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })
+              }
               onKeyDown={e => onKeyChange(e)}
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
               value={designerState.datasetDescription || ''}
@@ -919,9 +921,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
-                onClick={() => {
-                  manageDialogs('isConfigureWebformDialogVisible', true);
-                }}
+                onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
               />
             </div>
           </div>
@@ -1050,7 +1050,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </Toolbar>
         </div>
         {renderSwitchView()}
-        {designerState.isWebformDataflow && designerState.viewType['webform'] ? (
+        {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
           // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
           <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
         ) : (
@@ -1134,7 +1134,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
           </Dialog>
         )}
-        
+
         {designerState.isConfigureWebformDialogVisible && (
           <Dialog
             footer={renderConfigureWebformFooter}
@@ -1142,19 +1142,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             onHide={() => onCloseConfigureWebformModal()}
             style={{ width: '70%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
-              <div className={styles.titleWrapper}>
-                <span>{resources.messages['configureWebformMessage']}</span>
-              </div>
-              <Dropdown
-                appendTo={document.body}
-                ariaLabel={'configureWebform'}
-                inputId="configureWebformDropDown"
-                onChange={e => designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value })}
-                optionLabel="label"
-                options={WebformsConfig}
-                placeholder={resources.messages['configureWebformPlaceholder']}
-                value={designerState.webform}
-              />
+            <div className={styles.titleWrapper}>
+              <span>{resources.messages['configureWebformMessage']}</span>
+            </div>
+            <Dropdown
+              appendTo={document.body}
+              ariaLabel={'configureWebform'}
+              inputId="configureWebformDropDown"
+              onChange={e => designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value })}
+              optionLabel="label"
+              options={WebformsConfig}
+              placeholder={resources.messages['configureWebformPlaceholder']}
+              value={designerState.webform}
+            />
           </Dialog>
         )}
 

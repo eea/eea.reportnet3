@@ -8,7 +8,7 @@ import pickBy from 'lodash/pickBy';
 
 import styles from './Article15.module.scss';
 
-import { tables } from '../article15.webform.json';
+import { tables } from './article15.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';

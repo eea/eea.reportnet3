@@ -10,6 +10,7 @@ import styles from './WebformRecord.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
@@ -29,13 +30,15 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   const resources = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
+    isDeleteRowVisible: false,
+    isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     newRecord: {},
     record,
     selectedField: {}
   });
 
-  const { isFileDialogVisible, selectedField } = webformRecordState;
+  const { isDialogVisible, isFileDialogVisible, selectedField } = webformRecordState;
 
   const {
     formatDate,
@@ -53,12 +56,12 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     });
   }, [record, onTabChange]);
 
-  const onDeleteMultipleWebform = async () => {
+  const onDeleteMultipleWebform = async recordId => {
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, webformRecordState.record.recordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, recordId);
       if (isDataDeleted) onRefresh();
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
   };
 
@@ -80,7 +83,7 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     try {
       DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
   };
 
@@ -98,13 +101,17 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     try {
       await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
   };
 
   const onSelectField = field => webformRecordDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
 
   const onToggleDialogVisible = value => webformRecordDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
+
+  const handleDialogs = (dialog, value) => {
+    webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  };
 
   const renderTemplate = (field, option, type) => {
     switch (type) {
@@ -332,7 +339,8 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               icon={'trash'}
-              onClick={() => onDeleteMultipleWebform()}
+              // onClick={() => onDeleteMultipleWebform(record.recordId)}
+              onClick={() => handleDialogs('deleteRow', true)}
             />
           </div>
         )}
@@ -367,6 +375,19 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
             fieldId: selectedField.fieldId
           })}`}
         />
+      )}
+
+      {isDialogVisible.deleteRow && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['deleteRow']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          // onConfirm={onConfirmDeleteRow}
+          onHide={() => handleDialogs('deleteRow', false)}
+          visible={isDialogVisible.deleteRow}>
+          {resources.messages['confirmDeleteRow']}
+        </ConfirmDialog>
       )}
     </Fragment>
   );

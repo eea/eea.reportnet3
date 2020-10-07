@@ -3,6 +3,9 @@ export const webformRecordReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'HANDLE_DIALOGS':
+      return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };
+
     case 'ON_FILL_FIELD':
       return {
         ...state,
