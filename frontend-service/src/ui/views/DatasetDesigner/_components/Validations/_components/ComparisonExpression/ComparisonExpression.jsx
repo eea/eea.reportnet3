@@ -284,8 +284,31 @@ const ComparisonExpression = ({
     }
   };
 
+  const getFieldType = () => {
+    if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
+      return;
+    }
+    return (
+      <span
+        onBlur={() => onAddToClickedFields('valueTypeSelector')}
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}>
+        <Dropdown
+          disabled={disabledFields.valueTypeSelector}
+          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
+          optionLabel="label"
+          options={valueTypeSelectorOptions}
+          optionValue="value"
+          placeholder={resourcesContext.messages.comparisonValueFieldSelector}
+          value={expressionValues.valueTypeSelector}
+        />
+      </span>
+    );
+  };
+
   const getValueField = () => {
-    if (expressionValues.valueTypeSelector === 'value') {
+    if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
+      return;
+    } else if (expressionValues.valueTypeSelector === 'value') {
       return buildValueInput();
     } else {
       return (
@@ -511,19 +534,7 @@ const ComparisonExpression = ({
           value={expressionValues.operatorValue}
         />
       </span>
-      <span
-        onBlur={() => onAddToClickedFields('valueTypeSelector')}
-        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}>
-        <Dropdown
-          disabled={disabledFields.valueTypeSelector}
-          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
-          optionLabel="label"
-          options={valueTypeSelectorOptions}
-          optionValue="value"
-          placeholder={resourcesContext.messages.comparisonValueFieldSelector}
-          value={expressionValues.valueTypeSelector}
-        />
-      </span>
+      {getFieldType()}
       <span
         onBlur={() => onAddToClickedFields('field2')}
         className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}>
