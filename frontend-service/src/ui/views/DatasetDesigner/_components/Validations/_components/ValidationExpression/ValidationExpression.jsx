@@ -188,6 +188,11 @@ const ValidationExpression = ({
 
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
+
+    if (operatorValue === 'IS NULL' || operatorValue === 'IS NOT NULL') {
+      return;
+    }
+
     if (operatorType === 'date') {
       return (
         <Calendar
