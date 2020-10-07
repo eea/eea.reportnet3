@@ -126,7 +126,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
-    isWebformDataflow: false,
     viewType: { design: true, table: false, webform: false },
     webform: null
   });
@@ -971,8 +970,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
                 }`}
-                // TODO: ENABLE BUTTON
-                // disabled={!designerState.datasetHasData}
+                disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
