@@ -20,11 +20,13 @@ const printExpression = (expression, tabs) => {
         expression.field2
       } )`;
     }
+
     if (expression.valueTypeSelector !== 'value') {
       return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
         getSelectedFieldById(expression.field2, tabs).label
       } )`;
     }
+
     return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
       expression.field2
     } )`;
