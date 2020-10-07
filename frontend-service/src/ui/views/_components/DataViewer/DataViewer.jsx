@@ -68,13 +68,13 @@ const DataViewer = withRouter(
     match: {
       params: { datasetId, dataflowId }
     },
+    onChangeIsValidationSelected,
     onHideSelectGroupedValidation,
     onLoadTableData,
     recordPositionId,
     reporting,
     selectedRecordErrorId,
     selectedRuleId,
-    setIsValidationSelected,
     showWriteButtons,
     tableFixedNumber,
     tableHasErrors,
@@ -264,7 +264,7 @@ const DataViewer = withRouter(
       if (isValidationSelected) {
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        setIsValidationSelected(false);
+        onChangeIsValidationSelected(false);
       }
     }, [isValidationSelected]);
 
@@ -439,12 +439,19 @@ const DataViewer = withRouter(
     }, [levelErrorValidations]);
 
     useEffect(() => {
-      console.log('EOOO 4', { isGroupedValidationSelected, isGroupedValidationDeleted, selectedRuleId });
-      if (selectedRuleId !== '' || isGroupedValidationDeleted) {
-        console.log('EOOO 3', { selectedRuleId });
-        onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+      console.log('EOOO 4', {
+        isGroupedValidationSelected,
+        isGroupedValidationDeleted,
+        selectedRuleId,
+        recordErrorPositionId
+      });
+      if (recordErrorPositionId === -1) {
+        if (selectedRuleId !== '' || isGroupedValidationDeleted) {
+          console.log('EOOO 3', { selectedRuleId });
+          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+        }
       }
-    }, [selectedRuleId]);
+    }, [selectedRuleId, recordErrorPositionId]);
 
     useEffect(() => {
       if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
@@ -984,7 +991,7 @@ const DataViewer = withRouter(
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
       return {
-        'p-highlight': id === selectedRecordErrorId,
+        'p-highlight': id === selectedRecordErrorId && !isGroupedValidationSelected,
         'p-highlight-contextmenu': ''
       };
     };

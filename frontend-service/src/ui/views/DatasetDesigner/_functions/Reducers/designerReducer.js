@@ -94,6 +94,7 @@ export const designerReducer = (state, { type, payload }) => {
           isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
           isGroupedValidationSelected: payload.isGroupedValidationSelected,
           isValidationSelected: false,
+          recordPositionId: -1,
           selectedRuleId: payload.selectedRuleId
         },
         isValidationViewerVisible: false
@@ -105,10 +106,12 @@ export const designerReducer = (state, { type, payload }) => {
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
+          isGroupedValidationDeleted: false,
           isGroupedValidationSelected: false,
           isValidationSelected: payload.isValidationSelected,
           recordPositionId: payload.recordPositionId,
-          selectedRecordErrorId: payload.selectedRecordErrorId
+          selectedRecordErrorId: payload.selectedRecordErrorId,
+          selectedRuleId: payload.selectedRuleId
         },
         isValidationViewerVisible: false
       };
@@ -121,7 +124,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          isValidationSelected: payload
+          isValidationSelected: payload,
+          isGroupedValidationSelected: payload
         }
       };
 

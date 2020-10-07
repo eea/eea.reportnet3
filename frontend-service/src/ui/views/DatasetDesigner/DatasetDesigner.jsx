@@ -604,6 +604,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           activeIndex: tableSchemaId,
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: true,
+          recordPositionId: -1,
           selectedRuleId
         }
       });
@@ -615,16 +616,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           activeIndex: tableSchemaId,
           isValidationSelected: true,
           recordPositionId: posIdRecord,
-          selectedRecordErrorId
+          selectedRecordErrorId,
+          selectedRuleId: ''
         }
       });
     }
   };
 
   const onTabChange = tableSchemaId => {
+    console.log('CLICK');
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
-      payload: { ...designerState.dataViewerOptions, activeIndex: tableSchemaId.index }
+      payload: { ...designerState.dataViewerOptions, activeIndex: tableSchemaId.index, selectedRuleId: '' }
     });
   };
 

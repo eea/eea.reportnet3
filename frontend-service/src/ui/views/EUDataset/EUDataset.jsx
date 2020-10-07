@@ -41,7 +41,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaAllTables: [],
     datasetSchemaId: null,
     datasetSchemaName: '',
-    dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1, selectedRuleId: '' },
+    dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
     isDataDeleted: false,
     isDataUpdated: false,
     isLoading: true,
@@ -226,7 +226,6 @@ export const EUDataset = withRouter(({ history, match }) => {
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
       recordPositionId={dataViewerOptions.recordPositionId}
       selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-      selectedRuleId={dataViewerOptions.selectedRuleId}
       setIsValidationSelected={onSetIsValidationSelected}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}

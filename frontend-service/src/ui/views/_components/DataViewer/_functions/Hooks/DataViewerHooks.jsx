@@ -414,6 +414,7 @@ export const useRecordErrorPosition = (
 
     dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
 
+    console.log('EOOO 5');
     onFetchData(
       undefined,
       undefined,
