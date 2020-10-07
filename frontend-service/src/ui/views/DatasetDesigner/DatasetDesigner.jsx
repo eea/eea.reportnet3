@@ -13,6 +13,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import { routes } from 'ui/routes';
+import WebformsConfig from 'conf/webforms.config.json';
 
 import { Article15 } from 'ui/views/Webform/Article15';
 import { Button } from 'ui/views/_components/Button';
@@ -21,6 +22,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
@@ -95,6 +97,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
+    isConfigureWebformDialogVisible: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
@@ -124,7 +127,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     validateDialogVisible: false,
     validationListDialogVisible: false,
     isWebformDataflow: true,
-    viewType: { design: true, table: false, webform: false }
+    viewType: { design: true, table: false, webform: false },
+    webform: null
   });
 
   const exportMenuRef = useRef();
@@ -439,6 +443,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refreshUniqueList(true);
   };
 
+  const onCloseConfigureWebformModal = () => {
+    manageDialogs('isConfigureWebformDialogVisible', false);
+  };
+
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
     try {
@@ -552,7 +560,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList
+            tableSchemaNames: tableSchemaNamesList,
+            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
           }
         });
       };
@@ -597,9 +606,20 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpdateDescription = async description => {
     try {
-      await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
+      const descriptionObject = { description: description }
+      await DatasetService.updateDatasetSchemaDesign(datasetId, descriptionObject);
     } catch (error) {
       console.error('Error during datasetSchema Description update: ', error);
+    }
+  };
+
+  const onUpdateWebform = async webform => {
+    try {
+      const webformObject = { webform: { name: webform } }
+      await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
+      onCloseConfigureWebformModal();
+    } catch (error) {
+      console.error('Error during datasetSchema Webform update: ', error);
     }
   };
 
@@ -624,7 +644,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
         content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
@@ -692,15 +712,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => onHideValidationsDialog()}
       />
     </Fragment>
-  );
-
-  const renderCustomFileUploadFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isImportDatasetDialogVisible', false)}
-    />
   );
 
   const renderDashboardFooter = (
@@ -805,6 +816,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </Fragment>
   );
 
+  const renderConfigureWebformFooter = (
+    <Fragment>
+      <Button
+        className={`p-button-animated-blink ${styles.saveButton}`}
+        label={resources.messages['save']}
+        icon={'check'}
+        onClick={() => onUpdateWebform(designerState.webform.value)}
+      />
+      <Button
+          className="p-button-secondary"
+          icon={'cancel'}
+          label={resources.messages['cancel']}
+          onClick={() => onCloseConfigureWebformModal()}
+      />
+    </Fragment>
+  );
+
   const renderUniqueConstraintsFooter = (
     <Fragment>
       <div className="p-toolbar-group-left">
@@ -872,19 +900,31 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
         <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
         <div className={styles.ButtonsBar}>
-          <InputTextarea
-            className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
-            collapsedHeight={55}
-            expandableOnClick={true}
-            id="datasetDescription"
-            key="datasetDescription"
-            onBlur={e => onBlurDescription(e.target.value)}
-            onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
-            onFocus={e => designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })}
-            onKeyDown={e => onKeyChange(e)}
-            placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-            value={designerState.datasetDescription || ''}
-          />
+          <div className={styles.datasetDescriptionRow}>
+            <InputTextarea
+              className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
+              collapsedHeight={55}
+              expandableOnClick={true}
+              id="datasetDescription"
+              key="datasetDescription"
+              onBlur={e => onBlurDescription(e.target.value)}
+              onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
+              onFocus={e => designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })}
+              onKeyDown={e => onKeyChange(e)}
+              placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
+              value={designerState.datasetDescription || ''}
+            />
+            <div className={styles.datasetConfigurationButtons}>
+              <Button
+                className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+                icon={'table'}
+                label={resources.messages['configureWebform']}
+                onClick={() => {
+                  manageDialogs('isConfigureWebformDialogVisible', true);
+                }}
+              />
+            </div>
+          </div>
           <Toolbar>
             <div className="p-toolbar-group-left">
               {(!isEmpty(designerState.externalOperationsList.import) ||
@@ -1079,6 +1119,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             {resources.messages['validateDatasetConfirm']}
           </ConfirmDialog>
         )}
+
         {designerState.dashDialogVisible && (
           <Dialog
             footer={renderDashboardFooter}
@@ -1093,6 +1134,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
           </Dialog>
         )}
+        
+        {designerState.isConfigureWebformDialogVisible && (
+          <Dialog
+            footer={renderConfigureWebformFooter}
+            header={resources.messages['configureWebform']}
+            onHide={() => onCloseConfigureWebformModal()}
+            style={{ width: '70%' }}
+            visible={designerState.isConfigureWebformDialogVisible}>
+              <div className={styles.titleWrapper}>
+                <span>{resources.messages['configureWebformMessage']}</span>
+              </div>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel={'configureWebform'}
+                inputId="configureWebformDropDown"
+                onChange={e => designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value })}
+                optionLabel="label"
+                options={WebformsConfig}
+                placeholder={resources.messages['configureWebformPlaceholder']}
+                value={designerState.webform}
+              />
+          </Dialog>
+        )}
+
         {designerState.isValidationViewerVisible && (
           <Dialog
             className={styles.paginatorValidationViewer}
@@ -1115,17 +1180,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
             dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
             dialogOnHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
             dialogVisible={designerState.isImportDatasetDialogVisible}
-            isDialog={true}
-            accept={getImportExtensions}
-            chooseLabel={resources.messages['selectFile']}
-            className={styles.FileUpload}
             fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            isDialog={true}
             mode="advanced"
             multiple={false}
             name="file"

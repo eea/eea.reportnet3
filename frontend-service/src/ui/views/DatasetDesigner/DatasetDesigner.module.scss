@@ -43,12 +43,33 @@
   padding-bottom: 80px;
 }
 
+.titleWrapper {
+  margin-bottom: 1rem;
+}
+
 .switchDivInput {
   display: flex;
   align-items: center;
   justify-items: flex-end;
   flex-direction: row;
 }
+
+.datasetDescriptionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 2vw 1vw;
+  
+  .datasetConfigurationButtons {
+    display: flex;
+
+    flex-direction: column;
+    button:last-child {
+      margin-top: 5px;
+    }
+  }
+}
+
 .switchDiv {
   display: flex;
   align-items: center;

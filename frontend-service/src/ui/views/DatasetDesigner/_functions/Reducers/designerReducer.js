@@ -15,7 +15,8 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
-        tableSchemaNames: payload.tableSchemaNames
+        tableSchemaNames: payload.tableSchemaNames,
+        webform: payload.webform
       };
 
     case 'GET_METADATA':
@@ -118,6 +119,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'ON_CHANGE_VIEW':
       return { ...state, viewType: payload.viewType };
+
+    case 'UPDATE_WEBFORM':
+      return { ...state, webform: payload };
 
     default:
       return state;
