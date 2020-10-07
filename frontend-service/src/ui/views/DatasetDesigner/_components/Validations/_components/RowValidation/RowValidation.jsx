@@ -305,7 +305,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
-      
+
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
         setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
@@ -332,7 +332,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
-     
+
       if (candidateRule.expressionType == 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
         setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);

@@ -7,7 +7,7 @@ const checkLastExpressionWithUnion = expression => {
   let cField2 = field2;
 
   if (valueTypeSelector === 'value' && field2) cField2 = field2.toString();
-  
+
   if (operatorValue === 'IS NULL' || operatorValue === 'IS NOT NULL') {
     return isEmpty(expression.field1) || isEmpty(expression.operatorType) || isEmpty(expression.operatorValue);
   }

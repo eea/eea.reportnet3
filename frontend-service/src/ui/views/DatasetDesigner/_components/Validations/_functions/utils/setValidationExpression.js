@@ -24,7 +24,7 @@ export const setValidationExpression = (expressionId, field, expressions) => {
       targetExpression.expressionValue = '';
       break;
 
-    default:      
+    default:
       targetExpression[field.key] = field.value;
       break;
   }

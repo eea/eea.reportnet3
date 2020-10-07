@@ -6,8 +6,6 @@ import { config } from 'conf';
 import { getCreationComparisonDTO } from './getCreationComparisonDTO';
 
 const getOperatorEquivalence = (valueTypeSelector, operatorType, operatorValue = null) => {
-
-
   const {
     validations: { comparisonOperatorEquivalences, comparisonValuesOperatorEquivalences }
   } = config;
