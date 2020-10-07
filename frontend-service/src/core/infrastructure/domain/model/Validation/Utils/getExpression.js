@@ -25,16 +25,18 @@ export const getExpression = expression => {
     validations: { nonNumericOperators }
   } = config;
 
+  const operatorEquivalence = getOperatorEquivalence(operatorType, operatorValue);
+
   if (expression.expressions.length > 1) {
     return getCreationDTO(expression.expressions);
   } else {
     if (operatorValue === 'IS NULL' || operatorValue === 'IS NOT NULL') {
-      return { operator: getOperatorEquivalence(operatorType, operatorValue), params: ['VALUE'] };
+      return { operator: operatorEquivalence, params: ['VALUE'] };
     }
 
     if (operatorType === 'LEN') {
       return {
-        operator: getOperatorEquivalence(operatorType, operatorValue),
+        operator: operatorEquivalence,
         params: [
           {
             operator: getOperatorEquivalence(operatorType),
@@ -47,20 +49,20 @@ export const getExpression = expression => {
 
     if (operatorType === 'date') {
       return {
-        operator: getOperatorEquivalence(operatorType, operatorValue),
+        operator: operatorEquivalence,
         params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
       };
     }
 
-    if (getOperatorEquivalence(operatorType, operatorValue) === 'FIELD_NUM_MATCH') {
+    if (operatorEquivalence === 'FIELD_NUM_MATCH') {
       return {
-        operator: getOperatorEquivalence(operatorType, operatorValue),
+        operator: operatorEquivalence,
         params: ['VALUE', expressionValue]
       };
     }
 
     return {
-      operator: getOperatorEquivalence(operatorType, operatorValue),
+      operator: operatorEquivalence,
       params: ['VALUE', !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue]
     };
   }
