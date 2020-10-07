@@ -521,7 +521,7 @@ export const FieldsDesigner = ({
   return (
     <Fragment>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
-      <div className={styles.switchDivInput}>
+      <div className={styles.tableDescriptionRow}>
         <InputTextarea
           className={styles.tableDescriptionInput}
           collapsedHeight={55}
