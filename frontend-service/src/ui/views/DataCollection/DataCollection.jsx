@@ -200,6 +200,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}
+      isFilterable={false}
       levelErrorTypes={levelErrorTypes}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
       recordPositionId={dataViewerOptions.recordPositionId}

@@ -30,6 +30,7 @@ const ActionsToolbar = ({
   hasWritePermissions,
   hideValidationFilter,
   isExportable,
+  isFilterable = true,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
@@ -255,44 +256,48 @@ const ActionsToolbar = ({
           }}
         />
 
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
-            tableHasErrors ? 'p-button-animated-blink' : null
-          }`}
-          disabled={!tableHasErrors}
-          icon={'filter'}
-          iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
-          label={resources.messages['validationFilter']}
-          onClick={event => filterMenuRef.current.show(event)}
-        />
-        <DropdownFilter
-          className={!isLoading ? 'p-button-animated-blink' : null}
-          disabled={isLoading}
-          filters={filter.validationDropdown}
-          popup={true}
-          ref={filterMenuRef}
-          hide={hideValidationFilter}
-          id="filterValidationDropdown"
-          showFilters={showValidationFilter}
-          onShow={e => {
-            getExportButtonPosition(e);
-          }}
-          showLevelErrorIcons={true}
-        />
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent`}
-          disabled={!filter.groupedFilter}
-          icon={'groupBy'}
-          label={resources.messages['groupBy']}
-          onClick={() => {
-            onHideSelectGroupedValidation();
-            showGroupedValidationFilter(false);
-            dispatchFilter({
-              type: 'SET_VALIDATION_GROUPED_FILTER',
-              payload: { groupedFilter: false }
-            });
-          }}
-        />
+        {isFilterable && (
+          <>
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
+                tableHasErrors ? 'p-button-animated-blink' : null
+              }`}
+              disabled={!tableHasErrors}
+              icon={'filter'}
+              iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
+              label={resources.messages['validationFilter']}
+              onClick={event => filterMenuRef.current.show(event)}
+            />
+            <DropdownFilter
+              className={!isLoading ? 'p-button-animated-blink' : null}
+              disabled={isLoading}
+              filters={filter.validationDropdown}
+              popup={true}
+              ref={filterMenuRef}
+              hide={hideValidationFilter}
+              id="filterValidationDropdown"
+              showFilters={showValidationFilter}
+              onShow={e => {
+                getExportButtonPosition(e);
+              }}
+              showLevelErrorIcons={true}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent`}
+              disabled={!filter.groupedFilter}
+              icon={'groupBy'}
+              label={resources.messages['groupBy']}
+              onClick={() => {
+                onHideSelectGroupedValidation();
+                showGroupedValidationFilter(false);
+                dispatchFilter({
+                  type: 'SET_VALIDATION_GROUPED_FILTER',
+                  payload: { groupedFilter: false }
+                });
+              }}
+            />
+          </>
+        )}
 
         {/* <Button
           className={`p-button-rounded p-button-secondary-transparent`}

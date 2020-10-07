@@ -62,6 +62,7 @@ const DataViewer = withRouter(
     hasWritePermissions,
     isDatasetDeleted = false,
     isExportable,
+    isFilterable,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isValidationSelected,
@@ -1064,6 +1065,7 @@ const DataViewer = withRouter(
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
           isExportable={isExportable}
+          isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
           isLoading={isLoading}
           isTableDeleted={isTableDeleted}

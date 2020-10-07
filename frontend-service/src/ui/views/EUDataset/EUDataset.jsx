@@ -218,6 +218,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       showWriteButtons={false}
       isDatasetDeleted={isDataDeleted}
       isExportable={false}
+      isFilterable={false}
       hasCountryCode={true}
       isGroupedValidationSelected={isGroupedValidationSelected}
       isValidationSelected={isValidationSelected}

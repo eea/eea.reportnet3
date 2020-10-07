@@ -17,6 +17,7 @@ export const TabsSchema = ({
   hasCountryCode,
   isDatasetDeleted,
   isExportable = true,
+  isFilterable,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -49,6 +50,7 @@ export const TabsSchema = ({
                   hasWritePermissions={hasWritePermissions}
                   isDatasetDeleted={isDatasetDeleted}
                   isExportable={isExportable}
+                  isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
                   isGroupedValidationSelected={isGroupedValidationSelected}
                   isValidationSelected={isValidationSelected}
