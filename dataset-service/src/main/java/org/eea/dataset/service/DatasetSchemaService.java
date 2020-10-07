@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.WebFormVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
@@ -191,9 +192,8 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param description the description
    *
-   * @return the boolean
    */
-  Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
+  void updateDatasetSchemaDescription(String datasetSchemaId, String description);
 
   /**
    * Gets the table schema name.
@@ -463,4 +463,12 @@ public interface DatasetSchemaService {
   Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
       FieldSchemaVO fieldSchemaVO);
 
+
+  /**
+   * Update web form.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param webformVO the webform VO
+   */
+  void updateWebForm(String datasetSchemaId, WebFormVO webformVO);
 }

@@ -44,6 +44,7 @@ public interface DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
+   * @param idRules the id rules
    * @return the data tables values
    */
   @GetMapping("TableValueDataset/{id}")
@@ -52,7 +53,8 @@ public interface DatasetController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError);
+      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
+      @RequestParam(value = "idRules", required = false) String[] idRules);
 
   /**
    * Update dataset.
