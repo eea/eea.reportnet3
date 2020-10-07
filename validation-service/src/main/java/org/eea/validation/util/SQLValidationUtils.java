@@ -119,7 +119,7 @@ public class SQLValidationUtils {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     // Retrieve sql sentence
     String query = rule.getSqlSentence();
-    // Checking SQL sentence and if the rule does not works it will be disable
+    // Checking SQL sentence and if the rule does not work it will be disabled
     // TODO
     // Execute query
     TableValue tableToEvaluate = new TableValue();
