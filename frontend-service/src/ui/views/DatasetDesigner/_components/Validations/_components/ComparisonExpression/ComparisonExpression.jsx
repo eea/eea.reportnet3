@@ -288,7 +288,7 @@ const ComparisonExpression = ({
     }
   };
 
-  const getFieldType = () => {
+  const getTypeField = () => {
     if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
       return;
     }
@@ -538,7 +538,7 @@ const ComparisonExpression = ({
           value={expressionValues.operatorValue}
         />
       </span>
-      {getFieldType()}
+      {getTypeField()}
       <span
         onBlur={() => onAddToClickedFields('field2')}
         className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}>
