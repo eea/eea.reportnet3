@@ -14,10 +14,12 @@ const checkLastExpressionWithUnion = expression => {
 export const checkExpressions = expressions => {
   if (!isNil(expressions) && expressions.length > 0) {
     const lastExpression = last(expressions);
+
     if (lastExpression.expressions && lastExpression.expressions.length > 0) {
       const lastSubExpression = last(lastExpression.expressions);
       return checkLastExpressionWithUnion(lastSubExpression);
     }
+
     if (expressions.length > 1) {
       return checkLastExpressionWithUnion(lastExpression);
     }

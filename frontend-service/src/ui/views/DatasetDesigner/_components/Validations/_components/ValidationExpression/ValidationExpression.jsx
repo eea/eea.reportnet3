@@ -174,6 +174,7 @@ const ValidationExpression = ({
       const yearInt = parseInt(fieldValue);
       if (yearInt < 1000 || yearInt > 9999) onUpdateExpressionField('expressionValue', 0);
     }
+
     if (
       expressionValues.operatorType === 'number' &&
       field === 'operatorValue' &&
@@ -184,6 +185,7 @@ const ValidationExpression = ({
       if (!number) onUpdateExpressionField('expressionValue', '');
     }
   };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
     if (operatorType === 'date') {
@@ -217,6 +219,7 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
         const ccButtonValue = `${expressionValues.expressionValue}{%R3_COUNTRY_CODE%}`;
@@ -352,7 +355,6 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
           optionLabel="label"
@@ -365,7 +367,6 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
           optionLabel="label"

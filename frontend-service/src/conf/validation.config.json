@@ -476,6 +476,7 @@
       ]
     }
   ],
+
   "rowOperatorsTypesFromDTO": [
     {
       "operatorType": "number",

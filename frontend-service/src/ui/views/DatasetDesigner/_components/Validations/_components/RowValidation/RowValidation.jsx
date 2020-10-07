@@ -191,6 +191,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     let formula = '';
+
     const {
       candidateRule: { table, expressions, expressionType, expressionsIf, expressionsThen }
     } = creationFormState;

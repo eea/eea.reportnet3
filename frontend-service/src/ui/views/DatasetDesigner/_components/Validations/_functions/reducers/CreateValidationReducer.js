@@ -373,11 +373,11 @@ export const createValidationReducer = (state, { type, payload }) => {
           expressions: payload.expressions,
           id: payload.id,
           name: payload.name,
-          shortCode: payload.shortCode,
-          ruleType: payload.entityType,
           relations: payload.relations,
-          tableFields: isNil(payload.sqlSentence) && !isNil(payload.relations) ? payload.relations.tableFields : null,
-          sqlSentence: payload.sqlSentence
+          ruleType: payload.entityType,
+          shortCode: payload.shortCode,
+          sqlSentence: payload.sqlSentence,
+          tableFields: isNil(payload.sqlSentence) && !isNil(payload.relations) ? payload.relations.tableFields : null
         }
       };
 

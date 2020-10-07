@@ -238,6 +238,7 @@ const ComparisonExpression = ({
       key,
       value
     });
+ 
   };
 
   const onAddToClickedFields = field => {
@@ -304,6 +305,7 @@ const ComparisonExpression = ({
 
   const buildValueInput = () => {
     const { operatorType, operatorValue, field2 } = expressionValues;
+
     if (operatorType === 'date') {
       return (
         <Calendar

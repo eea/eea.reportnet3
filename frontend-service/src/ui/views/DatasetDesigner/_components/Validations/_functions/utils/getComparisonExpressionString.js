@@ -4,7 +4,6 @@ import isNil from 'lodash/isNil';
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const printExpression = (expression, tabs) => {
-
   if (
     !isNil(expression.operatorValue) &&
     !isEmpty(expression.operatorValue) &&
@@ -35,9 +34,11 @@ const printExpression = (expression, tabs) => {
 
 const printNode = (expression, index, expressions, tabs) => {
   let expressionString = '';
+
   expressionString = `${printSelector(expression, 0, [], tabs)} ${
     !isNil(expressions[index + 1].union) ? expressions[index + 1].union : ''
   }`;
+
   if (expressions.length - 1 > index + 1) {
     expressionString = `${expressionString} ${printSelector(expressions[index + 1], index + 1, expressions, tabs)}`;
   } else {
