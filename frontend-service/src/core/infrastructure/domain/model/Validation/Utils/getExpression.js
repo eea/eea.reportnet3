@@ -28,6 +28,10 @@ export const getExpression = expression => {
   if (expression.expressions.length > 1) {
     return getCreationDTO(expression.expressions);
   } else {
+    if (operatorValue === 'IS NULL' || operatorValue === 'IS NOT NULL') {
+      return { operator: getOperatorEquivalence(operatorType, operatorValue), params: ['VALUE'] };
+    }
+
     if (operatorType === 'LEN') {
       return {
         operator: getOperatorEquivalence(operatorType, operatorValue),
