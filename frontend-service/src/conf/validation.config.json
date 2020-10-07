@@ -12,6 +12,7 @@
     "TEXT": ["LEN", "string"],
     "URL": ["LEN", "string"]
   },
+
   "fieldByOperatorType": {
     "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
     "LEN": ["NUMBER_INTEGER"],
@@ -34,7 +35,9 @@
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
         { "label": "!=", "value": "!=" },
-        { "label": "MATCH", "value": "MATCH" }
+        { "label": "MATCH", "value": "MATCH" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     },
     "LEN": {
@@ -53,7 +56,9 @@
       "values": [
         { "label": "=", "value": "=" },
         { "label": "=(Ignore case)", "value": "=(Ignore case)" },
-        { "label": "MATCH", "value": "MATCH" }
+        { "label": "MATCH", "value": "MATCH" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     },
     "date": {
@@ -64,7 +69,9 @@
         { "label": ">=", "value": ">=" },
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
+        { "label": "!=", "value": "!=" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     },
     "year": {
@@ -75,7 +82,9 @@
         { "label": ">=", "value": ">=" },
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
+        { "label": "!=", "value": "!=" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     },
     "month": {
@@ -86,7 +95,9 @@
         { "label": ">=", "value": ">=" },
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
+        { "label": "!=", "value": "!=" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     },
     "day": {
@@ -97,15 +108,21 @@
         { "label": ">=", "value": ">=" },
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
+        { "label": "!=", "value": "!=" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     }
   },
+
   "nonNumericOperators": ["string", "date"],
+
   "operatorEquivalences": {
     "logicalOperators": {
       "AND": "FIELD_AND",
-      "OR": "FIELD_OR"
+      "OR": "FIELD_OR",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "number": {
       ">": "FIELD_GT",
@@ -114,7 +131,9 @@
       "<=": "FIELD_LTEQ",
       "=": "FIELD_EQ",
       "!=": "FIELD_DIST",
-      "MATCH": "FIELD_NUM_MATCH"
+      "MATCH": "FIELD_NUM_MATCH",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "LEN": {
       "type": "FIELD_LEN",
@@ -123,12 +142,16 @@
       ">=": "FIELD_GTEQ",
       "<=": "FIELD_LTEQ",
       "=": "FIELD_EQ",
-      "!=": "FIELD_DIST"
+      "!=": "FIELD_DIST",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "string": {
       "=": "FIELD_SEQ",
       "=(Ignore case)": "FIELD_SEQIC",
-      "MATCH": "FIELD_MATCH"
+      "MATCH": "FIELD_MATCH",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "date": {
       ">": "FIELD_GT_DATE",
@@ -136,7 +159,9 @@
       ">=": "FIELD_GTEQ_DATE",
       "<=": "FIELD_LTEQ_DATE",
       "=": "FIELD_EQ_DATE",
-      "!=": "FIELD_DIST_DATE"
+      "!=": "FIELD_DIST_DATE",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "day": {
       ">": "FIELD_GT_DAY",
@@ -144,7 +169,9 @@
       ">=": "FIELD_GTEQ_DAY",
       "<=": "FIELD_LTEQ_DAY",
       "=": "FIELD_EQ_DAY",
-      "!=": "FIELD_DIST_DAY"
+      "!=": "FIELD_DIST_DAY",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "month": {
       ">": "FIELD_GT_MONTH",
@@ -152,7 +179,9 @@
       ">=": "FIELD_GTEQ_MONTH",
       "<=": "FIELD_LTEQ_MONTH",
       "=": "FIELD_EQ_MONTH",
-      "!=": "FIELD_DIST_MONTH"
+      "!=": "FIELD_DIST_MONTH",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     },
     "year": {
       ">": "FIELD_GT_YEAR",
@@ -160,13 +189,18 @@
       ">=": "FIELD_GTEQ_YEAR",
       "<=": "FIELD_LTEQ_YEAR",
       "=": "FIELD_EQ_YEAR",
-      "!=": "FIELD_DIST_YEAR"
+      "!=": "FIELD_DIST_YEAR",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
     }
   },
+
   "comparisonOperatorEquivalences": {
     "logicalOperators": {
       "AND": "RECORD_AND",
-      "OR": "RECORD_OR"
+      "OR": "RECORD_OR",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "number": {
       ">": "RECORD_GT_RECORD",
@@ -175,7 +209,9 @@
       "<=": "RECORD_LTEQ_RECORD",
       "=": "RECORD_EQ_RECORD",
       "!=": "RECORD_DIST_RECORD",
-      "MATCH": "RECORD_NUM_MATCH"
+      "MATCH": "RECORD_NUM_MATCH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "LEN": {
       "type": "RECORD_LEN",
@@ -184,12 +220,16 @@
       ">=": "RECORD_LEN_GTEQ_RECORD",
       "<=": "RECORD_LEN_LTEQ_RECORD",
       "=": "RECORD_LEN_EQ_RECORD",
-      "!=": "RECORD_LEN_DIST_RECORD"
+      "!=": "RECORD_LEN_DIST_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "string": {
       "=": "RECORD_SEQ_RECORD",
       "=(Ignore case)": "RECORD_SEQIC_RECORD",
-      "MATCH": "RECORD_MATCH_RECORD"
+      "MATCH": "RECORD_MATCH_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "date": {
       ">": "RECORD_GT_DATE_RECORD",
@@ -197,7 +237,9 @@
       ">=": "RECORD_GTEQ_DATE_RECORD",
       "<=": "RECORD_LTEQ_DATE_RECORD",
       "=": "RECORD_EQ_DATE_RECORD",
-      "!=": "RECORD_DIST_DATE_RECORD"
+      "!=": "RECORD_DIST_DATE_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "day": {
       ">": "RECORD_GT_DAY_RECORD",
@@ -205,7 +247,9 @@
       ">=": "RECORD_GTEQ_DAY_RECORD",
       "<=": "RECORD_LTEQ_DAY_RECORD",
       "=": "RECORD_EQ_DAY_RECORD",
-      "!=": "RECORD_DIST_DAY_RECORD"
+      "!=": "RECORD_DIST_DAY_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "month": {
       ">": "RECORD_GT_MONTH_RECORD",
@@ -213,7 +257,9 @@
       ">=": "RECORD_GTEQ_MONTH_RECORD",
       "<=": "RECORD_LTEQ_MONTH_RECORD",
       "=": "RECORD_EQ_MONTH_RECORD",
-      "!=": "RECORD_DIST_MONTH_RECORD"
+      "!=": "RECORD_DIST_MONTH_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "year": {
       ">": "RECORD_GT_YEAR_RECORD",
@@ -221,7 +267,9 @@
       ">=": "RECORD_GTEQ_YEAR_RECORD",
       "<=": "RECORD_LTEQ_YEAR_RECORD",
       "=": "RECORD_EQ_YEAR_RECORD",
-      "!=": "RECORD_DIST_YEAR_RECORD"
+      "!=": "RECORD_DIST_YEAR_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "dayNumber": {
       ">": "RECORD_GT_DAY_RECORD_NUMBER",
@@ -229,7 +277,9 @@
       ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER",
       "<=": "RECORD_LTEQ_DAY_RECORD_NUMBER",
       "=": "RECORD_EQ_DAY_RECORD_NUMBER",
-      "!=": "RECORD_DIST_DAY_RECORD_NUMBER"
+      "!=": "RECORD_DIST_DAY_RECORD_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "monthNumber": {
       ">": "RECORD_GT_MONTH_RECORD_NUMBER",
@@ -237,7 +287,9 @@
       ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER",
       "<=": "RECORD_LTEQ_MONTH_RECORD_NUMBER",
       "=": "RECORD_EQ_MONTH_RECORD_NUMBER",
-      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER"
+      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "yearNumber": {
       ">": "RECORD_GT_YEAR_RECORD_NUMBER",
@@ -245,13 +297,18 @@
       ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER",
       "<=": "RECORD_LTEQ_YEAR_RECORD_NUMBER",
       "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
-      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
+      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     }
   },
+
   "comparisonValuesOperatorEquivalences": {
     "logicalOperators": {
       "AND": "RECORD_AND",
-      "OR": "RECORD_OR"
+      "OR": "RECORD_OR",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "number": {
       ">": "RECORD_GT",
@@ -260,7 +317,9 @@
       "<=": "RECORD_LTEQ",
       "=": "RECORD_EQ",
       "!=": "RECORD_DIST",
-      "MATCH": "RECORD_NUM_MATCH"
+      "MATCH": "RECORD_NUM_MATCH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "LEN": {
       "type": "RECORD_LEN",
@@ -269,12 +328,16 @@
       ">=": "RECORD_LEN_GTEQ",
       "<=": "RECORD_LEN_LTEQ",
       "=": "RECORD_LEN_EQ",
-      "!=": "RECORD_LEN_DIST"
+      "!=": "RECORD_LEN_DIST",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "string": {
       "=": "RECORD_SEQ",
       "=(Ignore case)": "RECORD_SEQIC",
-      "MATCH": "RECORD_MATCH"
+      "MATCH": "RECORD_MATCH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "date": {
       ">": "RECORD_GT_DATE",
@@ -282,7 +345,9 @@
       ">=": "RECORD_GTEQ_DATE",
       "<=": "RECORD_LTEQ_DATE",
       "=": "RECORD_EQ_DATE",
-      "!=": "RECORD_DIST_DATE"
+      "!=": "RECORD_DIST_DATE",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "day": {
       ">": "RECORD_GT_DAY",
@@ -290,7 +355,9 @@
       ">=": "RECORD_GTEQ_DAY",
       "<=": "RECORD_LTEQ_DAY",
       "=": "RECORD_EQ_DAY",
-      "!=": "RECORD_DIST_DAY"
+      "!=": "RECORD_DIST_DAY",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "month": {
       ">": "RECORD_GT_MONTH",
@@ -298,7 +365,9 @@
       ">=": "RECORD_GTEQ_MONTH",
       "<=": "RECORD_LTEQ_MONTH",
       "=": "RECORD_EQ_MONTH",
-      "!=": "RECORD_DIST_MONTH"
+      "!=": "RECORD_DIST_MONTH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "year": {
       ">": "RECORD_GT_YEAR",
@@ -306,7 +375,9 @@
       ">=": "RECORD_GTEQ_YEAR",
       "<=": "RECORD_LTEQ_YEAR",
       "=": "RECORD_EQ_YEAR",
-      "!=": "RECORD_DIST_YEAR"
+      "!=": "RECORD_DIST_YEAR",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "dayNumber": {
       ">": "RECORD_GT_DAY_NUMBER",
@@ -314,7 +385,9 @@
       ">=": "RECORD_GTEQ_DAY_NUMBER",
       "<=": "RECORD_LTEQ_DAY_NUMBER",
       "=": "RECORD_EQ_DAY_NUMBER",
-      "!=": "RECORD_DIST_DAY_NUMBER"
+      "!=": "RECORD_DIST_DAY_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "monthNumber": {
       ">": "RECORD_GT_MONTH_NUMBER",
@@ -322,7 +395,9 @@
       ">=": "RECORD_GTEQ_MONTH_NUMBER",
       "<=": "RECORD_LTEQ_MONTH_NUMBER",
       "=": "RECORD_EQ_MONTH_NUMBER",
-      "!=": "RECORD_DIST_MONTH_NUMBER"
+      "!=": "RECORD_DIST_MONTH_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "yearNumber": {
       ">": "RECORD_GT_YEAR_NUMBER",
@@ -330,13 +405,18 @@
       ">=": "RECORD_GTEQ_YEAR_NUMBER",
       "<=": "RECORD_LTEQ_YEAR_NUMBER",
       "=": "RECORD_EQ_YEAR_NUMBER",
-      "!=": "RECORD_DIST_YEAR_NUMBER"
+      "!=": "RECORD_DIST_YEAR_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     }
   },
+
   "ifThenOperatorEquivalences": {
     "logicalOperators": {
       "AND": "RECORD_AND",
-      "OR": "RECORD_OR"
+      "OR": "RECORD_OR",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
 
     "number": {
@@ -346,7 +426,9 @@
       "<=": "RECORD_LTEQ",
       "=": "RECORD_EQ",
       "!=": "RECORD_DIST",
-      "MATCH": "RECORD_NUM_MATCH"
+      "MATCH": "RECORD_NUM_MATCH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "LEN": {
       "type": "RECORD_LEN",
@@ -355,12 +437,16 @@
       ">=": "RECORD_GTEQ",
       "<=": "RECORD_LTEQ",
       "=": "RECORD_EQ",
-      "!=": "RECORD_DIST"
+      "!=": "RECORD_DIST",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "string": {
       "=": "RECORD_SEQ",
       "=(Ignore case)": "RECORD_SEQIC",
-      "MATCH": "RECORD_MATCH"
+      "MATCH": "RECORD_MATCH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "date": {
       ">": "RECORD_GT_DATE",
@@ -368,7 +454,9 @@
       ">=": "RECORD_GTEQ_DATE",
       "<=": "RECORD_LTEQ_DATE",
       "=": "RECORD_EQ_DATE",
-      "!=": "RECORD_DIST_DATE"
+      "!=": "RECORD_DIST_DATE",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "day": {
       ">": "RECORD_GT_DAY",
@@ -376,7 +464,9 @@
       ">=": "RECORD_GTEQ_DAY",
       "<=": "RECORD_LTEQ_DAY",
       "=": "RECORD_EQ_DAY",
-      "!=": "RECORD_DIST_DAY"
+      "!=": "RECORD_DIST_DAY",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "month": {
       ">": "RECORD_GT_MONTH",
@@ -384,7 +474,9 @@
       ">=": "RECORD_GTEQ_MONTH",
       "<=": "RECORD_LTEQ_MONTH",
       "=": "RECORD_EQ_MONTH",
-      "!=": "RECORD_DIST_MONTH"
+      "!=": "RECORD_DIST_MONTH",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "dayNumber": {
       ">": "RECORD_GT_DAY_RECORD_NUMBER",
@@ -392,7 +484,9 @@
       ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER",
       "<=": "RECORD_LTEQ_DAY_RECORD_NUMBER",
       "=": "RECORD_EQ_DAY_RECORD_NUMBER",
-      "!=": "RECORD_DIST_DAY_RECORD_NUMBER"
+      "!=": "RECORD_DIST_DAY_RECORD_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "monthNumber": {
       ">": "RECORD_GT_MONTH_RECORD_NUMBER",
@@ -400,7 +494,9 @@
       ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER",
       "<=": "RECORD_LTEQ_MONTH_RECORD_NUMBER",
       "=": "RECORD_EQ_MONTH_RECORD_NUMBER",
-      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER"
+      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     },
     "yearNumber": {
       ">": "RECORD_GT_YEAR_RECORD_NUMBER",
@@ -408,9 +504,12 @@
       ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER",
       "<=": "RECORD_LTEQ_YEAR_RECORD_NUMBER",
       "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
-      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
+      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
     }
   },
+
   "fieldOperatorsTypesFromDTO": [
     {
       "operatorType": "number",
@@ -630,6 +729,7 @@
       ]
     }
   ],
+
   "reverseEquivalences": {
     "FIELD_GT": ">",
     "FIELD_LT": "<",
@@ -668,6 +768,10 @@
     "FIELD_DIST_YEAR": "!=",
     "FIELD_AND": "AND",
     "FIELD_OR": "OR",
+    "FIELD_NULL": "IS NULL",
+    "FIELD_NOT_NULL": "IS NOT NULL",
+    "RECORD_NULL": "IS NULL",
+    "RECORD_NOT_NULL": "IS NOT NULL",
     "RECORD_AND": "AND",
     "RECORD_OR": "OR",
     "RECORD_GT_RECORD": ">",
@@ -787,21 +891,25 @@
     "RECORD_EQ": "=",
     "RECORD_DIST": "!="
   },
+
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
     { "label": "WARNING", "value": "WARNING" },
     { "label": "ERROR", "value": "ERROR" },
     { "label": "BLOCKER", "value": "BLOCKER" }
   ],
+
   "logicalOperators": [
     { "label": "AND", "value": "AND" },
     { "label": "OR", "value": "OR" }
   ],
+
   "requiredFields": {
     "field": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"],
     "row": ["table", "shortCode", "name", "errorLevel", "errorMessage"],
     "dataset": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
   },
+
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
   "bannedFields": ["attachment", "point"]
