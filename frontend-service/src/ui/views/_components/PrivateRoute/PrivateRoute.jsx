@@ -23,25 +23,43 @@ export const PrivateRoute = ({ component: Component, path }) => {
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
         LocalStorageUtils.set({ redirectUrl: window.location.href });
       }
+
+      if (userContext.isLoggedOut) {
+        return (
+            <Route
+                path={path}
+                render={props => (
+                    <Redirect
+                        to={{
+                          pathname: routes.ACCESS_POINT,
+                          state: { from: props.location }
+                        }}
+                    />
+                )}
+            />
+        );
+      }
+
       window.location.href = AccessPointWebConfig.euloginUrl;
+      return;
     }
   } else {
     return (
-      <Route
-        path={path}
-        render={props =>
-          userStorage.hasToken() || !isUndefined(userContext.id) ? (
-            <Component />
-          ) : (
-            <Redirect
-              to={{
-                pathname: routes.ACCESS_POINT,
-                state: { from: props.location }
-              }}
-            />
-          )
-        }
-      />
+        <Route
+            path={path}
+            render={props =>
+                userStorage.hasToken() || !isUndefined(userContext.id) ? (
+                    <Component />
+                ) : (
+                    <Redirect
+                        to={{
+                          pathname: routes.ACCESS_POINT,
+                          state: { from: props.location }
+                        }}
+                    />
+                )
+            }
+        />
     );
   }
 };

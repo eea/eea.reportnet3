@@ -20,7 +20,7 @@ const EULogin = ({ location, history }) => {
       const params = new URLSearchParams(location.hash);
       const code = params.get('code');
 
-      if (code) {
+      if (code && !userContext.isLoggedOut) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);
         const rnLocalStorage = LocalStorageUtils.get();
