@@ -3,6 +3,11 @@ import isNil from 'lodash/isNil';
 import last from 'lodash/last';
 
 const checkLastExpressionWithUnion = expression => {
+  
+  if (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL') {
+    return isEmpty(expression.union) || isEmpty(expression.operatorType) || isEmpty(expression.operatorValue);
+  }
+
   return (
     isEmpty(expression.union) ||
     isEmpty(expression.operatorType) ||
@@ -23,6 +28,11 @@ export const checkExpressions = expressions => {
     if (expressions.length > 1) {
       return checkLastExpressionWithUnion(lastExpression);
     }
+
+    if (expressions[0].operatorValue === 'IS NULL' || expressions[0].operatorValue === 'IS NOT NULL') {
+      return isEmpty(expressions[0].operatorType) || isEmpty(expressions[0].operatorValue);
+    }
+
     return (
       isEmpty(lastExpression.operatorType) ||
       isEmpty(lastExpression.operatorValue) ||
