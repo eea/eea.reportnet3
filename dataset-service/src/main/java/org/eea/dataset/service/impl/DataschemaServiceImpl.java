@@ -177,9 +177,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setTableSchemas(new ArrayList<>());
-    dataSetSchema.setWebform(new Webform());
     schemasRepository.save(dataSetSchema);
-
+    schemasRepository.updateDatasetSchemaWebForm(idDataSetSchema.toString(), new Webform());
     // create the rules schema
     rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
         new ObjectId().toString());
