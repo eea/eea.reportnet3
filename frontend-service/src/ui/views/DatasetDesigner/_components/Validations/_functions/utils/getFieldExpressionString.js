@@ -13,6 +13,10 @@ const printExpression = (expression, field) => {
       return `( ${field} ${expression.operatorValue} ${moment(expression.expressionValue).format('YYYY-MM-DD')} )`;
     }
 
+    if (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL') {
+      return `( ${field} ${expression.operatorValue} )`;
+    }
+
     return `( ${field} ${expression.operatorValue} ${expression.expressionValue} )`;
   }
 
