@@ -27,7 +27,7 @@ public class DataSetSchemaVO {
   private List<TableSchemaVO> tableSchemas;
 
   /** The webform. */
-  private WebFormVO webform;
+  private WebformVO webform;
 
 
   /**
