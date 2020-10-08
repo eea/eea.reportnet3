@@ -383,7 +383,7 @@ const TabsValidations = withRouter(
         return (
           <div className={styles.validationsWithoutTable}>
             <div className={styles.loadingSpinner}>
-              <Spinner style={{ top: 0, left: 0 }} />
+              <Spinner className={styles.spinnerPosition} />
             </div>
           </div>
         );

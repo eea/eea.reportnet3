@@ -219,7 +219,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     return (
       <div className={styles.historicReleasesWithoutTable}>
         <div className={styles.spinner}>
-          <Spinner style={{ top: 0, left: 0 }} />
+          <Spinner className={styles.spinnerPosition} />
         </div>
       </div>
     );
