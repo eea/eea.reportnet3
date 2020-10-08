@@ -30,6 +30,6 @@ export const getExpressionString = (validation, tabs) => {
       }
 
     default:
-      break;
+      return '';     
   }
 };
