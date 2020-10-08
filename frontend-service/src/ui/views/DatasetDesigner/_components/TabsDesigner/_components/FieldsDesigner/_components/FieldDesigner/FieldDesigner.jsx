@@ -199,13 +199,7 @@ export const FieldDesigner = ({
           }
         }
       } else {
-        if (type !== '' && type !== fieldDesignerState.fieldValue) {
-          console.log(
-            fieldDesignerState.fieldValue,
-            type.fieldType,
-            fieldDesignerState,
-            fieldDesignerState.fieldTypeValue.fieldType
-          );
+        if (type !== '' && type !== fieldDesignerState.fieldValue) {          
           fieldUpdate({
             codelistItems: null,
             pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
@@ -649,8 +643,6 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      console.log(fieldDesignerState.fieldTypeValue.fieldType, type);
-
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
         description,
