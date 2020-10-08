@@ -19,8 +19,6 @@ const themeReducer = (state, { type, payload }) => {
         currentTheme: payload.newTheme
       };
     case 'SET_HEADER_COLLAPSE':
-      console.log('state', state);
-      console.log('payload', payload);
       return {
         ...state,
         headerCollapse: payload
@@ -64,7 +62,6 @@ export const ThemeProvider = ({ children }) => {
           userContext.onToggleVisualTheme(newTheme);
         },
         setHeaderCollapse: headerCollapse => {
-          console.log('headerCollapse', headerCollapse);
           dispatch({
             type: 'SET_HEADER_COLLAPSE',
             payload: headerCollapse
