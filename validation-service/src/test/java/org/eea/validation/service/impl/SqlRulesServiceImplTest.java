@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -170,12 +171,18 @@ public class SqlRulesServiceImplTest {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setReferenceId(new ObjectId());
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
+
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+
   }
 
 
   @Test
   public void testValidateSQLRuleNotPassed() throws Exception {
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
 
@@ -252,7 +259,8 @@ public class SqlRulesServiceImplTest {
   public void testGetRule() throws Exception {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
-    rule.setRuleId(new ObjectId());
+    ObjectId idRule = new ObjectId();
+    rule.setRuleId(idRule);
     rules.add(rule);
     ruleSchema.setRules(rules);
 
@@ -260,7 +268,9 @@ public class SqlRulesServiceImplTest {
         .thenReturn(new ObjectId().toString());
     when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(ruleSchema);
 
-    sqlRulesServiceImpl.getRule(1L, new ObjectId().toString());
+
+    assertEquals(rule, (sqlRulesServiceImpl.getRule(1L, idRule.toString())));
+
   }
 
   @Test
