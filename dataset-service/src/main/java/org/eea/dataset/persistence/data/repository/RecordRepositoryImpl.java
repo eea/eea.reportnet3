@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
+  /** The Constant MAX_FILTERS. */
   private static final int MAX_FILTERS = 5;
 
   /** The record no validation mapper. */
