@@ -85,18 +85,20 @@ const getOptionTypes = (data, option, list, order) => {
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {
-        if (option === 'isCorrect' && item === true) {
+        if (option === 'isCorrect' && item) {
           template.push({ type: 'VALID', value: item });
-        } else if (option === 'isCorrect' && item === false) {
+        } else if (option === 'isCorrect' && !item) {
           template.push({ type: 'INVALID', value: item });
-        } else if (option === 'enabled' && item === true) {
+        } else if (option === 'enabled' && item) {
           template.push({ type: 'ENABLED', value: item });
-        } else if (option === 'enabled' && item === false) {
+        } else if (option === 'enabled' && !item) {
           template.push({ type: 'DISABLED', value: item });
-        } else if (option === 'automatic' && item === true) {
+        } else if (option === 'automatic' && item) {
           template.push({ type: 'AUTOMATIC', value: item });
-        } else if (option === 'automatic' && item === false) {
+        } else if (option === 'automatic' && !item) {
           template.push({ type: 'MANUAL', value: item });
+        } else if (option === 'userRole') {
+          template.push({ type: item.toString().replace('_', ' ').toUpperCase(), value: item.toString().toUpperCase() });
         } else {
           template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
         }
