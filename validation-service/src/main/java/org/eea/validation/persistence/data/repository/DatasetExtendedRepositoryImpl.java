@@ -63,11 +63,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       @Override
       public TableValue execute(Connection conn) throws SQLException {
         conn.setSchema("dataset_" + datasetId);
-        try (PreparedStatement stmt = conn.prepareStatement(query.toLowerCase())) {
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
           LOG.info("Query: " + query);
           ResultSet rs = stmt.executeQuery();
           TableValue tableValue = new TableValue();
           List<RecordValue> records = new ArrayList<>();
+
           while (rs.next()) {
             RecordValue record = new RecordValue();
             tableValue.setId(idTable);
@@ -91,6 +92,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             }
 
           }
+
           return tableValue;
         }
       }
