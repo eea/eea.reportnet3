@@ -9,17 +9,20 @@ import uniq from 'lodash/uniq';
 import styles from './DatasetDesigner.module.scss';
 
 import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
+import WebformsConfig from 'conf/webforms.config.json';
 
+import { Article15 } from 'ui/views/Webform/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
@@ -27,6 +30,7 @@ import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'primereact/menu';
+import { RadioButton } from 'ui/views/_components/RadioButton';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -53,8 +57,8 @@ import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
@@ -93,6 +97,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
+    isConfigureWebformDialogVisible: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
@@ -120,7 +125,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     tableSchemaNames: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
-    validationListDialogVisible: false
+    validationListDialogVisible: false,
+    viewType: { design: true, table: false, webform: false },
+    webform: null
   });
 
   const exportMenuRef = useRef();
@@ -147,7 +154,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      setIsLoading(true);
+      // setIsLoading(true);
       const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
@@ -160,7 +167,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       ) {
         history.push(getUrl(routes.DATAFLOWS));
       }
-      setIsLoading(true);
+      // setIsLoading(true);
     }
   }, [userContext.contextRoles, designerState.metaData]);
 
@@ -203,9 +210,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.validationListDialogVisible]);
 
   useEffect(() => {
-    if (window.location.search !== '') {
-      changeUrl();
-    }
+    if (window.location.search !== '') changeUrl();
   }, [designerState.isPreviewModeOn]);
 
   useEffect(() => {
@@ -236,9 +241,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const changeMode = previewMode => {
-    designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
-  };
+  const changeMode = previewMode => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
 
   const changeUrl = () => {
     window.history.replaceState(
@@ -286,9 +289,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: {
-        exportList: internalExtensionList.concat(externalExtensions)
-      }
+      payload: { exportList: internalExtensionList.concat(externalExtensions) }
     });
   };
 
@@ -298,9 +299,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const importFromFile = !isEmpty(externalOperationsList.import)
       ? [
           {
-            label: resources.messages['importFromFile'],
+            command: () => manageDialogs('isImportDatasetDialogVisible', true),
             icon: config.icons['import'],
-            command: () => manageDialogs('isImportDatasetDialogVisible', true)
+            label: resources.messages['importFromFile']
           }
         ]
       : [];
@@ -321,12 +322,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           }
         ]
       : [];
-    designerDispatch({
-      type: 'GET_IMPORT_LIST',
-      payload: {
-        importList: importFromFile.concat(importOtherSystems)
-      }
-    });
+
+    designerDispatch({ type: 'GET_IMPORT_LIST', payload: { importList: importFromFile.concat(importOtherSystems) } });
   };
 
   const getFileExtensions = async () => {
@@ -430,9 +427,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: inmDatasetSchemas } });
   };
 
+  const onChangeView = value => {
+    const viewType = { ...designerState.viewType };
+    Object.keys(viewType).forEach(view => {
+      viewType[view] = false;
+      viewType[value] = true;
+    });
+
+    designerDispatch({ type: 'ON_CHANGE_VIEW', payload: { viewType } });
+  };
+
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
+  };
+
+  const onCloseConfigureWebformModal = () => {
+    manageDialogs('isConfigureWebformDialogVisible', false);
   };
 
   const onConfirmValidate = async () => {
@@ -461,8 +472,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
-
   const onExportError = async exportNotification => {
     const {
       dataflow: { name: dataflowName },
@@ -471,18 +480,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     notificationContext.add({
       type: exportNotification,
-      content: {
-        dataflowName: dataflowName,
-        datasetName: datasetName
-      }
+      content: { dataflowName: dataflowName, datasetName: datasetName }
     });
   };
 
   const onExportDataExternalExtension = async fileExtension => {
     setIsLoadingFile(true);
-    notificationContext.add({
-      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
-    });
+    notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
+
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
@@ -554,7 +559,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList
+            tableSchemaNames: tableSchemaNamesList,
+            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
           }
         });
       };
@@ -599,10 +605,20 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpdateDescription = async description => {
     try {
-      await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
+      const descriptionObject = { description: description };
+      await DatasetService.updateDatasetSchemaDesign(datasetId, descriptionObject);
     } catch (error) {
       console.error('Error during datasetSchema Description update: ', error);
-    } finally {
+    }
+  };
+
+  const onUpdateWebform = async webform => {
+    try {
+      const webformObject = { webform: { name: webform } };
+      await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
+      onCloseConfigureWebformModal();
+    } catch (error) {
+      console.error('Error during datasetSchema Webform update: ', error);
     }
   };
 
@@ -627,22 +643,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
-        content: {
-          dataflowName: designerState.dataflowName,
-          datasetName: designerState.datasetSchemaName
-        }
+        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
       });
     }
   };
 
   const cleanImportOtherSystemsDialog = () => {
-    designerDispatch({
-      type: 'SET_REPLACE_DATA',
-      payload: { value: false }
-    });
+    designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: false } });
     manageDialogs('isImportOtherSystemsDialogVisible', false);
   };
 
@@ -665,10 +675,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
-        content: {
-          dataflowName: designerState.dataflowName,
-          datasetName: designerState.datasetSchemaName
-        }
+        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
       });
     }
   };
@@ -679,27 +686,21 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createFieldValidationBtn']}
-        onClick={() => {
-          validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
-        }}
+        onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
-        onClick={() => {
-          validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
-        }}
+        onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createTableValidationBtn']}
-        onClick={() => {
-          validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog');
-        }}
+        onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
 
@@ -710,15 +711,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => onHideValidationsDialog()}
       />
     </Fragment>
-  );
-
-  const renderCustomFileUploadFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isImportDatasetDialogVisible', false)}
-    />
   );
 
   const renderDashboardFooter = (
@@ -734,11 +726,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        label={resources.messages['import']}
         icon={'check'}
-        onClick={() => {
-          onImportOtherSystems();
-        }}
+        label={resources.messages['import']}
+        onClick={() => onImportOtherSystems()}
       />
       <Button
         className="p-button-secondary"
@@ -758,9 +748,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
-  const renderSwitchView = () => (
-    <div className={styles.switchDivInput}>
-      <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+  const renderRadioButtons = () =>
+    Object.keys(designerState.viewType).map((view, index) => (
+      <div className={styles.radioButton} key={index}>
+        <RadioButton
+          className={styles.button}
+          checked={designerState.viewType[view]}
+          inputId={view}
+          onChange={event => {
+            onChangeView(event.target.value);
+            if (view !== 'webform') changeMode(event.target.value === 'table');
+          }}
+          value={view}
+        />
+        <label className={styles.label} htmlFor={view}>
+          {view}
+        </label>
+      </div>
+    ));
+
+  const renderSwitchView = () => {
+    const switchView = (
+      <Fragment>
         <span className={styles.switchTextInput}>{resources.messages['design']}</span>
         <InputSwitch
           checked={designerState.isPreviewModeOn}
@@ -770,9 +779,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onChange={event => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: event.value } })}
         />
         <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
+      </Fragment>
+    );
+
+    return (
+      <div className={styles.switchDivInput}>
+        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+          {!isNil(designerState.webform) && !isNil(designerState.webform.value) ? renderRadioButtons() : switchView}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderUniqueConstraintsDialog = () => (
     <Fragment>
@@ -795,6 +812,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           />
         </Dialog>
       )}
+    </Fragment>
+  );
+
+  const renderConfigureWebformFooter = (
+    <Fragment>
+      <Button
+        className={`p-button-animated-blink ${styles.saveButton}`}
+        label={resources.messages['save']}
+        icon={'check'}
+        onClick={() => onUpdateWebform(designerState.webform.value)}
+      />
+      <Button
+        className="p-button-secondary"
+        icon={'cancel'}
+        label={resources.messages['cancel']}
+        onClick={() => onCloseConfigureWebformModal()}
+      />
     </Fragment>
   );
 
@@ -865,19 +899,31 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
         <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
         <div className={styles.ButtonsBar}>
-          <InputTextarea
-            className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
-            collapsedHeight={55}
-            expandableOnClick={true}
-            id="datasetDescription"
-            key="datasetDescription"
-            onBlur={e => onBlurDescription(e.target.value)}
-            onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
-            onFocus={e => designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })}
-            onKeyDown={e => onKeyChange(e)}
-            placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-            value={designerState.datasetDescription || ''}
-          />
+          <div className={styles.datasetDescriptionRow}>
+            <InputTextarea
+              className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
+              collapsedHeight={55}
+              expandableOnClick={true}
+              id="datasetDescription"
+              key="datasetDescription"
+              onBlur={e => onBlurDescription(e.target.value)}
+              onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
+              onFocus={e =>
+                designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })
+              }
+              onKeyDown={e => onKeyChange(e)}
+              placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
+              value={designerState.datasetDescription || ''}
+            />
+            <div className={styles.datasetConfigurationButtons}>
+              <Button
+                className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+                icon={'table'}
+                label={resources.messages['configureWebform']}
+                onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
+              />
+            </div>
+          </div>
           <Toolbar>
             <div className="p-toolbar-group-left">
               {(!isEmpty(designerState.externalOperationsList.import) ||
@@ -895,13 +941,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                   />
                   {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
                     <Menu
+                      id="importDataSetMenu"
                       model={designerState.importButtonsList}
+                      onShow={e => getPosition(e)}
                       popup={true}
                       ref={importMenuRef}
-                      id="importDataSetMenu"
-                      onShow={e => {
-                        getPosition(e);
-                      }}
                     />
                   )}
                 </Fragment>
@@ -942,10 +986,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 }`}
                 disabled={!designerState.datasetStatistics.datasetErrors}
                 icon={'warning'}
+                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: true })}
                 ownButtonClasses={null}
-                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
               />
 
               <Button
@@ -1004,34 +1048,39 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </Toolbar>
         </div>
         {renderSwitchView()}
-        <TabsDesigner
-          activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
-          changeMode={changeMode}
-          datasetSchemaDTO={designerState.datasetSchema}
-          datasetSchemas={designerState.datasetSchemas}
-          datasetStatistics={designerState.datasetStatistics}
-          editable={true}
-          history={history}
-          isPreviewModeOn={designerState.isPreviewModeOn}
-          isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
-          manageDialogs={manageDialogs}
-          manageUniqueConstraint={manageUniqueConstraint}
-          onChangeReference={onChangeReference}
-          onLoadTableData={onLoadTableData}
-          onTabChange={onTabChange}
-          onUpdateTable={onUpdateTable}
-          recordPositionId={designerState.dataViewerOptions.recordPositionId}
-          selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
-          setActiveIndex={index =>
-            designerDispatch({
-              type: 'SET_DATAVIEWER_OPTIONS',
-              payload: { ...designerState.dataViewerOptions, activeIndex: index }
-            })
-          }
-          setIsValidationSelected={isVisible =>
-            designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
-          }
-        />
+        {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
+          // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+          <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+        ) : (
+          <TabsDesigner
+            activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
+            changeMode={changeMode}
+            datasetSchemaDTO={designerState.datasetSchema}
+            datasetSchemas={designerState.datasetSchemas}
+            datasetStatistics={designerState.datasetStatistics}
+            editable={true}
+            history={history}
+            isPreviewModeOn={designerState.isPreviewModeOn}
+            isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
+            manageDialogs={manageDialogs}
+            manageUniqueConstraint={manageUniqueConstraint}
+            onChangeReference={onChangeReference}
+            onLoadTableData={onLoadTableData}
+            onTabChange={onTabChange}
+            onUpdateTable={onUpdateTable}
+            recordPositionId={designerState.dataViewerOptions.recordPositionId}
+            selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
+            setActiveIndex={index =>
+              designerDispatch({
+                type: 'SET_DATAVIEWER_OPTIONS',
+                payload: { ...designerState.dataViewerOptions, activeIndex: index }
+              })
+            }
+            setIsValidationSelected={isVisible =>
+              designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
+            }
+          />
+        )}
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}
           isSnapshotDialogVisible={isSnapshotDialogVisible}
@@ -1068,6 +1117,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             {resources.messages['validateDatasetConfirm']}
           </ConfirmDialog>
         )}
+
         {designerState.dashDialogVisible && (
           <Dialog
             footer={renderDashboardFooter}
@@ -1076,12 +1126,36 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             style={{ width: '70vw' }}
             visible={designerState.dashDialogVisible}>
             <Dashboard
-              refresh={designerState.dashDialogVisible}
               levelErrorTypes={designerState.levelErrorTypes}
+              refresh={designerState.dashDialogVisible}
               tableSchemaNames={designerState.tableSchemaNames}
             />
           </Dialog>
         )}
+
+        {designerState.isConfigureWebformDialogVisible && (
+          <Dialog
+            footer={renderConfigureWebformFooter}
+            header={resources.messages['configureWebform']}
+            onHide={() => onCloseConfigureWebformModal()}
+            style={{ width: '70%' }}
+            visible={designerState.isConfigureWebformDialogVisible}>
+            <div className={styles.titleWrapper}>
+              <span>{resources.messages['configureWebformMessage']}</span>
+            </div>
+            <Dropdown
+              appendTo={document.body}
+              ariaLabel={'configureWebform'}
+              inputId="configureWebformDropDown"
+              onChange={e => designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value })}
+              optionLabel="label"
+              options={WebformsConfig}
+              placeholder={resources.messages['configureWebformPlaceholder']}
+              value={designerState.webform}
+            />
+          </Dialog>
+        )}
+
         {designerState.isValidationViewerVisible && (
           <Dialog
             className={styles.paginatorValidationViewer}
@@ -1104,17 +1178,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
             dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
             dialogOnHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
             dialogVisible={designerState.isImportDatasetDialogVisible}
-            isDialog={true}
-            accept={getImportExtensions}
-            chooseLabel={resources.messages['selectFile']}
-            className={styles.FileUpload}
             fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            isDialog={true}
             mode="advanced"
             multiple={false}
             name="file"
@@ -1140,20 +1214,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 inputId="replaceCheckbox"
                 isChecked={designerState.replaceData}
                 onChange={() =>
-                  designerDispatch({
-                    type: 'SET_REPLACE_DATA',
-                    payload: { value: !designerState.replaceData }
-                  })
+                  designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                 }
                 role="checkbox"
               />
               <label htmlFor="replaceCheckbox">
                 <a
                   onClick={() =>
-                    designerDispatch({
-                      type: 'SET_REPLACE_DATA',
-                      payload: { value: !designerState.replaceData }
-                    })
+                    designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                   }>
                   {resources.messages['replaceData']}
                 </a>
