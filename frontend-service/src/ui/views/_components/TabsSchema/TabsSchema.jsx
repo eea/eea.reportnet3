@@ -30,6 +30,8 @@ export const TabsSchema = ({
   reporting,
   selectedRecordErrorId,
   selectedRuleId,
+  selectedRuleLevelError,
+  selectedRuleMessage,
   showWriteButtons = true,
   tables,
   tableSchemaColumns
@@ -76,6 +78,8 @@ export const TabsSchema = ({
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
                   selectedRuleId={selectedRuleId}
+                  selectedRuleLevelError={selectedRuleLevelError}
+                  selectedRuleMessage={selectedRuleMessage}
                 />
               </div>
             </TabPanel>

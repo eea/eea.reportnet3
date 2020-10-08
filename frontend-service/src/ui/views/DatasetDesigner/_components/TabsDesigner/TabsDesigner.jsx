@@ -38,6 +38,7 @@ export const TabsDesigner = withRouter(
     manageDialogs,
     manageUniqueConstraint,
     match,
+    onChangeIsValidationSelected,
     onChangeReference,
     onHideSelectGroupedValidation,
     onLoadTableData,
@@ -46,8 +47,9 @@ export const TabsDesigner = withRouter(
     recordPositionId,
     selectedRecordErrorId,
     selectedRuleId,
-    setActiveIndex,
-    setIsValidationSelected
+    selectedRuleLevelError,
+    selectedRuleMessage,
+    setActiveIndex
   }) => {
     const {
       params: { dataflowId, datasetId }
@@ -193,7 +195,7 @@ export const TabsDesigner = withRouter(
     const onTabClicked = event => {
       if (event.header !== '') {
         setActiveIndex(event.index);
-        setIsValidationSelected(false);
+        onChangeIsValidationSelected(false);
       }
     };
 
@@ -452,7 +454,9 @@ export const TabsDesigner = withRouter(
                             : -1
                         }
                         selectedRuleId={selectedRuleId}
-                        setIsValidationSelected={setIsValidationSelected}
+                        selectedRuleLevelError={selectedRuleLevelError}
+                        selectedRuleMessage={selectedRuleMessage}
+                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         table={tabs[i]}
                       />
                     ) : (

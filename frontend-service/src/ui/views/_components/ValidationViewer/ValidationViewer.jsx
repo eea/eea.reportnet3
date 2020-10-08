@@ -363,7 +363,15 @@ const ValidationViewer = React.memo(
             break;
         }
       } else {
-        onSelectValidation(event.data.tableSchemaId, -1, -1, event.data.ruleId);
+        onSelectValidation(
+          event.data.tableSchemaId,
+          -1,
+          -1,
+          event.data.ruleId,
+          true,
+          event.data.message,
+          event.data.levelError
+        );
       }
     };
 

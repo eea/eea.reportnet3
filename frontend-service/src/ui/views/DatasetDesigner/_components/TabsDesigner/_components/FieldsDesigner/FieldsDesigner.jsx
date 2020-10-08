@@ -34,13 +34,15 @@ export const FieldsDesigner = ({
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
+  onChangeIsValidationSelected,
   onChangeTableProperties,
   onHideSelectGroupedValidation,
   onLoadTableData,
   recordPositionId,
   selectedRecordErrorId,
   selectedRuleId,
-  setIsValidationSelected,
+  selectedRuleLevelError,
+  selectedRuleMessage,
   table
 }) => {
   const validationContext = useContext(ValidationContext);
@@ -341,7 +343,9 @@ export const FieldsDesigner = ({
           reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
           selectedRuleId={selectedRuleId}
-          setIsValidationSelected={setIsValidationSelected}
+          selectedRuleLevelError={selectedRuleLevelError}
+          selectedRuleMessage={selectedRuleMessage}
+          onChangeIsValidationSelected={onChangeIsValidationSelected}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
           tableName={table.tableSchemaName}

@@ -76,6 +76,8 @@ const DataViewer = withRouter(
     reporting,
     selectedRecordErrorId,
     selectedRuleId,
+    selectedRuleLevelError,
+    selectedRuleMessage,
     showWriteButtons,
     tableFixedNumber,
     tableHasErrors,
@@ -421,11 +423,9 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (!isValidationShown && levelErrorValidations.length > 0) {
-          console.log('EOOO 1');
           onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
         } else {
           if (isValidationShown) {
-            console.log('EOOO 2');
             onFetchData(
               sort.sortField,
               sort.sortOrder,
@@ -440,15 +440,8 @@ const DataViewer = withRouter(
     }, [levelErrorValidations]);
 
     useEffect(() => {
-      console.log('EOOO 4', {
-        isGroupedValidationSelected,
-        isGroupedValidationDeleted,
-        selectedRuleId,
-        recordErrorPositionId
-      });
       if (recordErrorPositionId === -1) {
         if (selectedRuleId !== '' || isGroupedValidationDeleted) {
-          console.log('EOOO 3', { selectedRuleId });
           onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
         }
       }
@@ -1078,6 +1071,8 @@ const DataViewer = withRouter(
           onUpdateData={onUpdateData}
           originalColumns={originalColumns}
           records={records}
+          selectedRuleLevelError={selectedRuleLevelError}
+          selectedRuleMessage={selectedRuleMessage}
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}

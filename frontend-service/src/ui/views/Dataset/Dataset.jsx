@@ -72,7 +72,9 @@ export const Dataset = withRouter(({ match, history }) => {
     isValidationSelected: false,
     recordPositionId: -1,
     selectedRecordErrorId: -1,
-    selectedRuleId: ''
+    selectedRuleId: '',
+    selectedRuleLevelError: '',
+    selectedRuleMessage: ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -570,11 +572,22 @@ export const Dataset = withRouter(({ match, history }) => {
       isGroupedValidationSelected: false,
       isValidationSelected: false,
       recordPositionId: -1,
-      selectedRuleId: ''
+      selectedRuleMessage: '',
+      selectedRuleLevelError: '',
+      selectedRuleId: '',
+      selectedRuleMessage: ''
     });
   };
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId, selectedRuleId, grouped = true) => {
+  const onSelectValidation = (
+    tableSchemaId,
+    posIdRecord,
+    selectedRecordErrorId,
+    selectedRuleId,
+    grouped = true,
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
     if (grouped) {
       setDataViewerOptions({
         ...dataViewerOptions,
@@ -582,7 +595,9 @@ export const Dataset = withRouter(({ match, history }) => {
         isGroupedValidationDeleted: false,
         isGroupedValidationSelected: true,
         recordPositionId: -1,
-        selectedRuleId
+        selectedRuleId,
+        selectedRuleLevelError,
+        selectedRuleMessage
       });
     } else {
       setDataViewerOptions({
@@ -592,7 +607,9 @@ export const Dataset = withRouter(({ match, history }) => {
         recordPositionId: posIdRecord,
         selectedRecordErrorId,
         selectedRecordErrorId,
-        selectedRuleId: ''
+        selectedRuleId: '',
+        selectedRuleLevelError: '',
+        selectedRuleMessage: ''
       });
     }
 
@@ -609,7 +626,9 @@ export const Dataset = withRouter(({ match, history }) => {
       activeIndex: tableSchemaId.index,
       isGroupedValidationDeleted: true,
       isGroupedValidationSelected: false,
-      selectedRuleId: ''
+      selectedRuleId: '',
+      selectedRuleLevelError: '',
+      selectedRuleMessage: ''
     });
   };
 
@@ -872,6 +891,8 @@ export const Dataset = withRouter(({ match, history }) => {
         reporting={true}
         selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
         selectedRuleId={dataViewerOptions.selectedRuleId}
+        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />

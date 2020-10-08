@@ -91,7 +91,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       isValidationSelected: false,
       recordPositionId: -1,
       selectedRecordErrorId: -1,
-      selectedRuleId: ''
+      selectedRuleId: '',
+      selectedRuleLevelError: '',
+      selectedRuleMessage: ''
     },
     exportButtonsList: [],
     exportDatasetData: null,
@@ -409,6 +411,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       onUpdateDescription(description);
     }
   };
+  const onChangeIsValidationSelected = selected => {
+    designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: selected });
+  };
 
   const onChangeReference = (tabs, datasetSchemaId) => {
     const inmDatasetSchemas = [...designerState.datasetSchemas];
@@ -589,13 +594,22 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         ...designerState.dataViewerOptions,
         isGroupedValidationDeleted: true,
         isGroupedValidationSelected: false,
-        selectedRuleId: ''
+        selectedRuleId: '',
+        selectedRuleLevelError: '',
+        selectedRuleMessage: ''
       }
     });
   };
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId, selectedRuleId, grouped = true) => {
-    console.log('onSelectValidation');
+  const onSelectValidation = (
+    tableSchemaId,
+    posIdRecord,
+    selectedRecordErrorId,
+    selectedRuleId,
+    grouped = true,
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
     if (grouped) {
       designerDispatch({
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
@@ -605,7 +619,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: true,
           recordPositionId: -1,
-          selectedRuleId
+          selectedRuleId,
+          selectedRuleLevelError,
+          selectedRuleMessage
         }
       });
     } else {
@@ -617,17 +633,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           isValidationSelected: true,
           recordPositionId: posIdRecord,
           selectedRecordErrorId,
-          selectedRuleId: ''
+          selectedRuleId: '',
+          selectedRuleLevelError: '',
+          selectedRuleMessage: ''
         }
       });
     }
   };
 
   const onTabChange = tableSchemaId => {
-    console.log('CLICK');
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
-      payload: { ...designerState.dataViewerOptions, activeIndex: tableSchemaId.index, selectedRuleId: '' }
+      payload: {
+        ...designerState.dataViewerOptions,
+        activeIndex: tableSchemaId.index,
+        selectedRuleId: '',
+        selectedRuleMessage: ''
+      }
     });
   };
 
@@ -1064,15 +1086,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           recordPositionId={designerState.dataViewerOptions.recordPositionId}
           selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
           selectedRuleId={designerState.dataViewerOptions.selectedRuleId}
+          selectedRuleLevelError={designerState.dataViewerOptions.selectedRuleLevelError}
+          selectedRuleMessage={designerState.dataViewerOptions.selectedRuleMessage}
           setActiveIndex={index =>
             designerDispatch({
               type: 'SET_DATAVIEWER_OPTIONS',
               payload: { ...designerState.dataViewerOptions, activeIndex: index }
             })
           }
-          setIsValidationSelected={isVisible =>
-            designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
-          }
+          onChangeIsValidationSelected={onChangeIsValidationSelected}
         />
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}

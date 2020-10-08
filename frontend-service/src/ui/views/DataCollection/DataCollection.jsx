@@ -35,12 +35,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const [dataflowName, setDataflowName] = useState('');
   const [dataCollectionName, setDataCollectionName] = useState();
-  const [dataViewerOptions, setDataViewerOptions] = useState({
-    recordPositionId: -1,
-    selectedRecordErrorId: -1,
-    selectedRuleId: '',
-    activeIndex: null
-  });
+  const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tableSchema, setTableSchema] = useState();
@@ -203,9 +198,6 @@ export const DataCollection = withRouter(({ match, history }) => {
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-      recordPositionId={dataViewerOptions.recordPositionId}
-      selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-      selectedRuleId={dataViewerOptions.selectedRuleId}
       showWriteButtons={false}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}

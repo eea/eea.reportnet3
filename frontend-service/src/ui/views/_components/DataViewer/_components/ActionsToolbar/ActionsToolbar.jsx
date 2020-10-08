@@ -9,6 +9,7 @@ import { config } from 'conf';
 import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { ChipButton } from 'ui/views/_components/ChipButton';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { Menu } from 'primereact/menu';
@@ -42,6 +43,8 @@ const ActionsToolbar = ({
   onUpdateData,
   originalColumns,
   records,
+  selectedRuleLevelError,
+  selectedRuleMessage,
   setColumns,
   setDeleteDialogVisible,
   setImportTableDialogVisible,
@@ -282,7 +285,24 @@ const ActionsToolbar = ({
               }}
               showLevelErrorIcons={true}
             />
-            <Button
+            {filter.groupedFilter && (
+              <ChipButton
+                hasLevelErrorIcon={true}
+                levelError={selectedRuleLevelError}
+                onClick={() => {
+                  onHideSelectGroupedValidation();
+                  showGroupedValidationFilter(false);
+                  dispatchFilter({
+                    type: 'SET_VALIDATION_GROUPED_FILTER',
+                    payload: { groupedFilter: false }
+                  });
+                }}
+                tooltip={selectedRuleMessage}
+                tooltipOptions={{ position: 'top' }}
+                value={selectedRuleMessage}
+              />
+            )}
+            {/* <Button
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={!filter.groupedFilter}
               icon={'groupBy'}
@@ -295,7 +315,7 @@ const ActionsToolbar = ({
                   payload: { groupedFilter: false }
                 });
               }}
-            />
+            /> */}
           </>
         )}
 
