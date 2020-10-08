@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+
+import { config } from 'conf';
 
 import styles from './CookiesDialog.module.scss';
+
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const CookiesDialog = () => {
+  const themeContext = useContext(ThemeContext);
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -17,13 +22,24 @@ export const CookiesDialog = () => {
   }, []);
 
   useEffect(() => {
+    const header = document.querySelector('#header');
     if (isVisible) {
-      const header = window.document.querySelector('.header');
+      header.style.height = `${config.theme.baseHeaderHeight + 152}px`;
+      themeContext.setHeaderCollapse(false);
+    } else {
+      header.style.height = `${config.theme.baseHeaderHeight}px`;
+      themeContext.setHeaderCollapse(true);
     }
   }, [isVisible]);
 
-  const onAcceptCookies = () => {};
-  const onRefuseCookies = () => {};
+  const onAcceptCookies = () => {
+    userStorage.setPropertyToLocalStorage({ cookieConsent: true });
+    setIsVisible(false);
+  };
+  const onRefuseCookies = () => {
+    userStorage.setPropertyToLocalStorage({ cookieConsent: false });
+    setIsVisible(false);
+  };
 
   return (
     isVisible && (
