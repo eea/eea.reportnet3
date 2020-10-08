@@ -120,7 +120,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
-          <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole}
+          <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole?.replace('_', ' ')}
         </p>
       </div>
 

@@ -12,6 +12,7 @@ import {
   faArrowUp,
   faAt,
   faBars,
+  faBookOpen,
   faBroom,
   faCaretDown,
   faCaretRight,
@@ -55,6 +56,7 @@ import {
   faLayerGroup,
   faLink,
   faList,
+  faLock,
   faMapMarkedAlt,
   faMapPin,
   faPalette,
@@ -80,9 +82,7 @@ import {
   faUserCog,
   faUsersCog,
   faUserShield,
-  faVectorSquare,
-  faBookOpen,
-  faLock
+  faVectorSquare
 } from '@fortawesome/free-solid-svg-icons';
 
 import {

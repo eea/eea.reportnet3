@@ -1,0 +1,940 @@
+{
+  "tables": [
+    {
+      "name": "QA_QC_C0",
+      "title": "QA_QC_C0",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "EuMemberState",
+          "title": "EU Member State / EEA member country"
+        },
+        {
+          "type": "FIELD",
+          "name": "UpdateDate",
+          "title": "The information in this reporting is updated until:"
+        },
+        {
+          "type": "FIELD",
+          "name": "ReportingUnderArt19",
+          "title": "Is the mandatory reporting under Art. 19 and Part 1 of Annex VIII of the Governance Regulation and Annex 1 of the Implementing Act?"
+        }
+      ]
+    },
+    {
+      "name": "QA_QC_C1",
+      "title": "QA_QC_C1",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "NationalCircumstances",
+          "title": "Please describe the general  National circumstances"
+        },
+        {
+          "type": "FIELD",
+          "name": "BiogeophysicalCharacteristics",
+          "title": "Please describe the biogeophysical characteristics relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "DemographicSituation",
+          "title": "Please describe the demographic situation relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "EconomicInfrastructuralSituation",
+          "title": "Please describe the economic and infrastructural situation relevant to adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "AssessmentsIntroDocument",
+          "title": "If necessary, you can upload here an additional document"
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralAspectsClimateMonitoring",
+          "title": "Please describe the general aspects of the climate monitoring and modelling framework"
+        },
+        {
+          "type": "FIELD",
+          "name": "MainActivitiesClimateMonitoring",
+          "title": "Please describe the main activities on climate monitoring, modelling, projections and scenarios"
+        },
+        {
+          "type": "FIELD",
+          "name": "ApproachesMethodologiesTools",
+          "title": "Please describe the main approaches, methodologies and tools, and associated uncertainties and challenges"
+        },
+        {
+          "type": "FIELD",
+          "name": "AssessmentsObservationDocument",
+          "title": "If necessary, you can upload here an additional document"
+        },
+        {
+          "type": "TABLE",
+          "name": "Meteorological_Observations",
+          "title": "Meteorological Observations",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Name",
+              "title": "Name of the Met Office"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status of the Met Office"
+            },
+            {
+              "type": "FIELD",
+              "name": "WebLink",
+              "title": "Web link to the Met Office"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralAspectsAssessment",
+          "title": "Please describe the general  aspects of the assessment of climate impacts, vulnerability and risks, including adaptive capacity"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureRelatedAcute",
+          "title": "Temperature-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindRelatedAcute",
+          "title": "Water-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterRelatedAcute",
+          "title": "Water-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidMassRelatedAcute",
+          "title": "Solid mass-related - acute"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidAcuteOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureRelatedChronic",
+          "title": "Temperature-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "TemperatureChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindRelatedChronic",
+          "title": "Wind-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "WindChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterRelatedChronic",
+          "title": "Water-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "WaterChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidMassRelatedChronic",
+          "title": "Solid mass-related - chronic"
+        },
+        {
+          "type": "FIELD",
+          "name": "SolidChronicOther",
+          "title": "If other, please explain"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeExistingEnvironmental",
+          "title": "Please describe the existing environmental, economic and social pressures that are likely to be significantly affected by climate change"
+        },
+        {
+          "type": "TABLE",
+          "name": "AffectedSectors",
+          "title": "Affected Sectors",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "SectorTitle",
+              "title": "Title of the sector"
+            },
+            {
+              "type": "FIELD",
+              "name": "SectorDescribeIfOther",
+              "title": "If sector is 'Other', please explain"
+            },
+            {
+              "type": "FIELD",
+              "name": "ImpactsKeyHazards",
+              "title": "Observed impacts of key hazards, including changes in frequency and magnitude"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeImpactsKeyHazards",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "KeyHazardsLikelihood",
+              "title": "Key hazards, likelihood of their occurrence and exposure to them under future climate, drawing upon the best available climate modelling science"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeLikelihood",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "Vulnerability",
+              "title": "Vulnerability, including adaptive capacity, where adaptive capacity is defined as 'The ability of systems, institutions, humans and other organisms to adjust to potential damage, to take advantage of opportunities, or to respond to consequences'"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeVulnerability",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "RiskFutureImpacts",
+              "title": "Risk of potential future impacts"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeRisk",
+              "title": "Please describe your assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "ValueRelative",
+              "title": "Share of spending used to support climate adaptation in this specific sector(relative, expressed in %)"
+            },
+            {
+              "type": "FIELD",
+              "name": "ValueAbsolute",
+              "title": "Share of spending used to support climate adaptation in this specific sector (absolute value, expressed in kEUR)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QA_QC_C2",
+      "title": "QA_QC_C2",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "LegalPolicyFrameworks",
+          "title": "Please introduce legal and policy frameworks and regulations"
+        },
+        {
+          "type": "TABLE",
+          "name": "NAS",
+          "title": "NAS",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Title of the NAS (preferably translated into English)"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Please select the NAS status"
+            },
+            {
+              "type": "FIELD",
+              "name": "Year",
+              "title": "Year the NAS was adopted"
+            },
+            {
+              "type": "FIELD",
+              "name": "Link",
+              "title": "Link to the NAS"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "NAP",
+          "title": "NAP",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Title of the NAP (preferably translated into English)"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Please select the NAP status"
+            },
+            {
+              "type": "FIELD",
+              "name": "Year",
+              "title": "Year the NAP was adopted"
+            },
+            {
+              "type": "FIELD",
+              "name": "Link",
+              "title": "Link to the NAP"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "SAP",
+          "title": "SAP",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Title of the SAP (preferably translated into English)"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Please select the SAP status"
+            },
+            {
+              "type": "FIELD",
+              "name": "Sector",
+              "title": "SAP sector"
+            },
+            {
+              "type": "FIELD",
+              "name": "SectorOther",
+              "title": "SAP sector (other)"
+            },
+            {
+              "type": "FIELD",
+              "name": "Year",
+              "title": "Year the SAP was adopted"
+            },
+            {
+              "type": "FIELD",
+              "name": "Link",
+              "title": "Link to the SAP"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "ArrangementsCCIV_assessments",
+          "title": "Please describe frameworks and institutional arrangements for the CCIVA assessments"
+        },
+        {
+          "type": "TABLE",
+          "name": "CC_IVA",
+          "title": "CC_IVA",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Title of the CCIVA assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Please select the CCIVA status"
+            },
+            {
+              "type": "FIELD",
+              "name": "Year",
+              "title": "Year the CCIVA assessment was completed"
+            },
+            {
+              "type": "FIELD",
+              "name": "Link",
+              "title": "Link to the CCIVA assessment"
+            },
+            {
+              "type": "FIELD",
+              "name": "IsPartNAS",
+              "title": "Is he CCIVA assessment part of the NAS"
+            },
+            {
+              "type": "FIELD",
+              "name": "CCIVA_assessmentFocuses",
+              "title": "Does the CCIVA assessment focuses on impact, vulnerability and/or adaptation?"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeInstitutionalArrangements",
+          "title": "Please describe the institutional arrangements and governance at the national level for the planning, implementing, monitoring, evaluating and revising adaptation policy"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeClimateChangeResilience",
+          "title": "Please describe how climate change impacts and resilience are integrated into environmental assessment procedures"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeCollection",
+          "title": "Please describe the collection, ownership and re-use of relevant data"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeClimateChangeImpacts",
+          "title": "Please describe how climate change impacts and adaptation planning into disaster risk management frameworks are integrated, and vice versa. How are climate change impacts and adaptation planning integrated into disaster risk management frameworks and vice versa"
+        },
+        {
+          "type": "FIELD",
+          "name": "SummarizeLegalRequirements",
+          "title": "Please summarize the legal requirements and strategic documents for institutional arrangements and governance at the sub-national level"
+        },
+        {
+          "type": "FIELD",
+          "name": "SummarizeNetworks",
+          "title": "Please summarize the networks or other collaborations on adaptation across national, local and regional authorities"
+        }
+      ]
+    },
+    {
+      "name": "QA_QC_C3",
+      "title": "QA_QC_C3",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "AdaptationPriorities",
+          "title": "Please describe the adaptation priorities"
+        },
+        {
+          "type": "FIELD",
+          "name": "Challenges",
+          "title": "Please describe challenges, gaps and barriers to adaptation, including those institutional, governance-related and other barriers that restrict the adaptive capacity as identified in the vulnerability assessment"
+        },
+        {
+          "type": "FIELD",
+          "name": "SummaryNationalStrategies",
+          "title": "Please provide a summary of national strategies, policies, plans and efforts, with a focus on goals and objectives"
+        },
+        {
+          "type": "FIELD",
+          "name": "SummaryForeseenActions",
+          "title": "Please provide a summary of foreseen actions, budget and timeline"
+        },
+        {
+          "type": "TABLE",
+          "name": "ActionsMeasures",
+          "title": "Actions Measures",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Title of the measure or action (preferably translated into English)"
+            },
+            {
+              "type": "FIELD",
+              "name": "KeyTypeMeasure",
+              "title": "Key Type Measure (KTM)"
+            },
+            {
+              "type": "FIELD",
+              "name": "subKTM",
+              "title": "sub-KTM"
+            },
+            {
+              "type": "FIELD",
+              "name": "Atribute",
+              "title": "Atribute"
+            },
+            {
+              "type": "FIELD",
+              "name": "ShortDescriptionMeasureAction",
+              "title": "Short description of the measure or action"
+            },
+            {
+              "type": "FIELD",
+              "name": "ClimateThreat",
+              "title": "Climate threat"
+            },
+            {
+              "type": "FIELD",
+              "name": "SectorsAffected",
+              "title": "Sectors affected"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status"
+            },
+            {
+              "type": "FIELD",
+              "name": "AdministrativeLevelMeasureImplemented",
+              "title": "Administrative level the measure is implemented"
+            },
+            {
+              "type": "FIELD",
+              "name": "AdministrativeOther",
+              "title": "If 'other', please explain"
+            },
+            {
+              "type": "FIELD",
+              "name": "CostImplementingMeasure",
+              "title": "The cost of implementing the measure"
+            },
+            {
+              "type": "FIELD",
+              "name": "Websites",
+              "title": "Examples (websites)"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "AdditionalDocument",
+          "title": "If necessary, you can upload here an additional document on the actions and (programmes of measures)"
+        },
+        {
+          "type": "FIELD",
+          "name": "OverviewContent",
+          "title": "Please give an overview of the content of sub-national strategies, policies, plans and efforts"
+        },
+        {
+          "type": "FIELD",
+          "name": "OverviewEffortsClimate",
+          "title": "Please give an overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs"
+        },
+        {
+          "type": "FIELD",
+          "name": "OverviewEffortsDisaster",
+          "title": "Please give an overview of efforts to integrate disaster risk management strategies and action plans"
+        },
+        {
+          "type": "FIELD",
+          "name": "OverviewMeasures",
+          "title": "Please provide an overview of measures in adaptation policy at all governance levels to engage with stakeholders particularly vulnerable to climate change impacts"
+        },
+        {
+          "type": "FIELD",
+          "name": "OverviewAvailable",
+          "title": "Please provide an overview of available information on private sector plans, priorities, actions and programmes, public/private partnerships, and other relevant private adaptation initiatives and/or projects"
+        }
+      ]
+    },
+    {
+      "name": "QA_QC_C4",
+      "title": "QA_QC_C4",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "DescribeMonitoringReportingEvaluation",
+          "title": "Please describe the monitoring, reporting and evaluation (MRE) methodology related to reducing climate impacts, vulnerabilities, risks, and increasing adaptive capacity"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeMREMethodology",
+          "title": "Please describe the MRE methodology related to the implementation of adaptation actions"
+        },
+        {
+          "type": "TABLE",
+          "name": "MonitoringIndicatorsMethodologies",
+          "title": "Monitoring Indicators and Methodologies",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Description",
+              "title": "Name or short description for the MRE indicators or methodologies"
+            },
+            {
+              "type": "FIELD",
+              "name": "IndicatorsMethodology",
+              "title": "Status of the MRE indicators and/or methodology"
+            },
+            {
+              "type": "FIELD",
+              "name": "Link",
+              "title": "Provide a link to the MRE indicators and/or methodologies"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeStatePlay",
+          "title": "Please describe the state of play of the implementation of measures, including an overview of the subnational level and the disbursement of funding to increase climate resilience"
+        },
+        {
+          "type": "FIELD",
+          "name": "SummaryClimateAdaptation",
+          "title": "Please provide a summary of the spending earmarked for climate adaptation including in disaster risk management"
+        },
+        {
+          "type": "FIELD",
+          "name": "ProvideShareSpendingSupport",
+          "title": "Please provide, to the extent possible, the share of spending used to support climate adaptation in each sector"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeReducingClimateImpacts",
+          "title": "Please describe the evaluation progress towards reducing climate impacts, vulnerabilities and risks"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeIncreasingAdaptiveCapacity",
+          "title": "Please describe the evaluation progress towards increasing adaptive capacity"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeMeetingAdaptationPriorities",
+          "title": "Please describe the evaluation progress towards meeting adaptation priorities"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeProgressTowardsAddressing",
+          "title": "Please describe the evaluation progress towards addressing barriers to adaptation"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeVulnerability",
+          "title": "Please describe the steps taken to review and update vulnerability and risk assessments"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeNationalAdaptation",
+          "title": "Please describe the steps taken to review and update national adaptation policies, strategies, plans and measures"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeSubnationalAdaptation",
+          "title": "Please describe the steps taken to review and update subnational adaptation policies, strategies, plans and measures"
+        }
+      ]
+    },
+    {
+      "name": "QA_QC_C5",
+      "title": "QA_QC_C5",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "DescribeGeneralAspects",
+          "title": "Please describe general aspects of good practices and lessons learnt, including at sub-national level1"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesClimate",
+          "title": "Please describe good practices and lessons learned related to climate modelling activities and methodologies - assessment of climate impacts, vulnerability and risks to climate change"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesInstitutional",
+          "title": "Please describe good practices and lessons learned related to institutional arrangements and governance at the national and sub-national level - policy and regulatory changes -  coordination mechanisms"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesAdaptation",
+          "title": "Please describe good practices and lessons learned related to adaptation priorities - adaptation barriers - adaptation goals, objectives, undertakings, efforts, strategies, policies and plans"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesEfforts",
+          "title": "Please describe good practices and lessons learned related to efforts to integrate climate change adaptation into development and sectoral policies, plans and programs - disaster risk reduction and management"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesStakeholder",
+          "title": "Please describe good practices and lessons learned related to stakeholder engagement - integration of gender perspectives into climate adaptation - integration of indigenous, traditional and local knowledge into climate adaptation"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesClimateRisk",
+          "title": "Please describe good practices and lessons learned related to climate risk communication"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesMonitoring",
+          "title": "Please describe good practices and lessons learned related to monitoring, reporting and evaluation"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeGoodPracticesStrengthening",
+          "title": "Please describe good practices and lessons learned related to strengthening scientific research and knowledge - innovative adaptation solutions and innovative financing mechanisms"
+        },
+        {
+          "type": "TABLE",
+          "name": "ResearchProgrammes",
+          "title": "Research Programmes",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Name",
+              "title": "Name of the research programme"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status of the research programme"
+            },
+            {
+              "type": "FIELD",
+              "name": "StartYear",
+              "title": "Start year of the research programme"
+            },
+            {
+              "type": "FIELD",
+              "name": "EndYear",
+              "title": "End year of the research programme (if continuous, please use 9999)"
+            },
+            {
+              "type": "FIELD",
+              "name": "WebLink",
+              "title": "Research programme web link"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "GeneralInformationInternationalDimension",
+          "title": "Please provide general information on the international dimension of adaptation actions"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeCooperationEUMemberStates",
+          "title": "Please describe the general aspects of cooperation with EU Member States, international cooperation, and with regional and international organisations, excluding information on development cooperation required by Part 2 of Annex VIII of Regulation (EU) 2018/1999"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeDetailShareInformation",
+          "title": "Please describe in some detail the cooperation to share information and to strengthen science, institutions and adaptation knowledge"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeDetailCooperationEnhance",
+          "title": "Please describe in some detail the cooperation to enhance adaptation action at the sub-national, national, macroregional and international level, including the area, scale and types of cooperation"
+        },
+        {
+          "type": "FIELD",
+          "name": "DescribeSynergiesAdaptation",
+          "title": "Please describe the synergies of adaptation actions with other international frameworks and/or conventions, in particular the Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction"
+        }
+      ]
+    },
+    {
+      "name": "QA_QC_C6",
+      "title": "QA_QC_C6",
+      "multipleRecords": false,
+      "elements": [
+        {
+          "type": "TABLE",
+          "name": "ContactGeneral",
+          "title": "Contact General",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Organisation",
+              "title": "Organisation"
+            },
+            {
+              "type": "FIELD",
+              "name": "Department",
+              "title": "Department within the organisation"
+            },
+            {
+              "type": "FIELD",
+              "name": "Role",
+              "title": "Role of the organisation on adaptation"
+            },
+            {
+              "type": "FIELD",
+              "name": "NameContact",
+              "title": "Name of a contact person"
+            },
+            {
+              "type": "FIELD",
+              "name": "RoleContact",
+              "title": "Role of the contact person"
+            },
+            {
+              "type": "FIELD",
+              "name": "GeneralEmail",
+              "title": "General email address (or address to use for questions on adaptation)"
+            },
+            {
+              "type": "FIELD",
+              "name": "Website",
+              "title": "Website of the organisation (or subsection on adaptation)"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "ContactPersonal",
+          "title": "Contact Personal",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Organisation",
+              "title": "Organisation"
+            },
+            {
+              "type": "FIELD",
+              "name": "Department",
+              "title": "Department within the organisation"
+            },
+            {
+              "type": "FIELD",
+              "name": "RoleOrganisation",
+              "title": "Role of the organisation on adaptation"
+            },
+            {
+              "type": "FIELD",
+              "name": "NameContact",
+              "title": "Name of a contact person"
+            },
+            {
+              "type": "FIELD",
+              "name": "RoleContact",
+              "title": "Role of the contact person"
+            },
+            {
+              "type": "FIELD",
+              "name": "PersonalEmail",
+              "title": "Personal email address of the contact person"
+            },
+            {
+              "type": "FIELD",
+              "name": "PhoneNumber",
+              "title": "Phone number of the contact person"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "Websites",
+          "title": "Websites",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Title of website or social media source"
+            },
+            {
+              "type": "FIELD",
+              "name": "Type",
+              "title": "Type of website or social media source"
+            },
+            {
+              "type": "FIELD",
+              "name": "Url",
+              "title": "Url of the website or multimedia source"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "CCIV_PortalsPlatforms",
+          "title": "CCIV PortalsPlatforms",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Name",
+              "title": "Name of the CCIV portal or platform"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status of the CCIV portal or platform"
+            },
+            {
+              "type": "FIELD",
+              "name": "Website",
+              "title": "Website of the CCIV portal or platform"
+            }
+          ]
+        },
+        {
+          "type": "TABLE",
+          "name": "Publications",
+          "title": "Publications",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "TitleEnglish",
+              "title": "Title of the report (in English)"
+            },
+            {
+              "type": "FIELD",
+              "name": "TitleOriginal",
+              "title": "Title of the report (original language)"
+            },
+            {
+              "type": "FIELD",
+              "name": "Year",
+              "title": "Year of publication"
+            },
+            {
+              "type": "FIELD",
+              "name": "Publisher",
+              "title": "Publisher"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "AdditionalInformation",
+          "title": "Please provide any additional information"
+        },
+        {
+          "type": "FIELD",
+          "name": "AdditionalDocument",
+          "title": "If necessary, you can upload here an additional document"
+        }
+      ]
+    }
+  ]
+}
