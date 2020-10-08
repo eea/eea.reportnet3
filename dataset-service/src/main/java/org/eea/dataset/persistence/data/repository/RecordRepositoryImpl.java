@@ -24,6 +24,9 @@ import org.springframework.data.domain.Pageable;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
+  /** The Constant MAX_FILTERS. */
+  private static final int MAX_FILTERS = 5;
+
   /** The record no validation mapper. */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
@@ -165,7 +168,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<ErrorTypeEnum> errorList = new ArrayList<>();
 
     // Compose the query filtering by level ERROR
-    if (!levelErrorList.isEmpty() && levelErrorList.size() != 5) {
+    if (!levelErrorList.isEmpty() && levelErrorList.size() != MAX_FILTERS) {
       if (!levelErrorList.isEmpty() && levelErrorList.size() == 1) {
 
         if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
