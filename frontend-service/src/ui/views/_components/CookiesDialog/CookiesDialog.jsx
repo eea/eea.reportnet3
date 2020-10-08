@@ -22,6 +22,9 @@ export const CookiesDialog = () => {
     }
   }, [isVisible]);
 
+  const onAcceptCookies = () => {};
+  const onRefuseCookies = () => {};
+
   return (
     isVisible && (
       <div className={styles.Wrapper}>
@@ -31,8 +34,8 @@ export const CookiesDialog = () => {
           <a href="https://ec.europa.eu/info/cookies_en">how you can change your settings</a>.
         </p>
         <div>
-          <button>I accept cookies</button>
-          <button>I refuse cookies</button>
+          <button onClick={e => onAcceptCookies()}>I accept cookies</button>
+          <button onClick={e => onRefuseCookies()}>I refuse cookies</button>
         </div>
       </div>
     )
