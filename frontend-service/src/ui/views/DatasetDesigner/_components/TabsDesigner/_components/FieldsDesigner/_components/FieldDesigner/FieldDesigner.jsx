@@ -199,11 +199,12 @@ export const FieldDesigner = ({
           }
         }
       } else {
-        if (type !== '' && type !== fieldDesignerState.fieldValue) {
+        if (type !== '' && type !== fieldDesignerState.fieldValue) {          
           fieldUpdate({
             codelistItems: null,
             pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
-            type: parseGeospatialTypes(type.fieldType)
+            type: parseGeospatialTypes(type.fieldType),
+            isLinkChange: fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'LINK'
           });
         } else {
           if (type !== '') {
@@ -653,13 +654,17 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField: !isNil(referencedField)
-          ? parseReferenceField(referencedField)
-          : fieldDesignerState.fieldLinkValue,
+        referencedField:
+          type.toUpperCase() === 'LINK'
+            ? !isNil(referencedField)
+              ? parseReferenceField(referencedField)
+              : fieldDesignerState.fieldLinkValue
+            : null,
         required,
         type,
         validExtensions
       });
+
       if (!fieldUpdated) {
         console.error('Error during field Update');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
@@ -676,7 +681,12 @@ export const FieldDesigner = ({
           name,
           readOnly,
           recordId,
-          referencedField,
+          referencedField:
+            type.toUpperCase() === 'LINK'
+              ? !isNil(referencedField)
+                ? parseReferenceField(referencedField)
+                : fieldDesignerState.fieldLinkValue
+              : null,
           required,
           type,
           validExtensions
