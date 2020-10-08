@@ -717,6 +717,8 @@ const DataViewer = withRouter(
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
       );
+      //Check invalid coordinates and replace them
+      record = MapUtils.changeIncorrectCoordinates(record);
       if (isNewRecord) {
         try {
           setIsSaving(true);
