@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -167,7 +167,7 @@ const Dataflows = withRouter(({ match, history }) => {
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
-          <>
+          <Fragment>
             {/* <DataflowsList
               className="dataflowList-pending-help-step"
               content={dataflowsState.pending}
@@ -184,9 +184,9 @@ const Dataflows = withRouter(({ match, history }) => {
               // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
             />
-          </>
+          </Fragment>
         ) : (
-          <>
+          <Fragment>
             <DataflowsList
               content={dataflowsState.completed}
               dataFetch={dataFetch}
@@ -195,7 +195,7 @@ const Dataflows = withRouter(({ match, history }) => {
               title={resources.messages.completedDataflowTitle}
               type="completed"
             />
-          </>
+          </Fragment>
         )}
       </div>
 

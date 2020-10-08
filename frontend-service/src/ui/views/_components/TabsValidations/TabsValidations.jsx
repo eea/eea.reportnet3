@@ -165,8 +165,7 @@ const TabsValidations = withRouter(
       </div>
     );
 
-    const expressionsTemplate = rowData => {   
-
+    const expressionsTemplate = rowData => {
       if (!isNil(rowData.sqlSentence)) {
         return rowData.sqlSentence;
       }
@@ -384,7 +383,7 @@ const TabsValidations = withRouter(
         return (
           <div className={styles.validationsWithoutTable}>
             <div className={styles.loadingSpinner}>
-              <Spinner style={{ top: 0, left: 0 }} />
+              <Spinner className={styles.spinnerPosition} />
             </div>
           </div>
         );
