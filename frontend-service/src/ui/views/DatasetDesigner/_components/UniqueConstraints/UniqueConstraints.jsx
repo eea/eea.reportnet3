@@ -155,7 +155,7 @@ export const UniqueConstraints = ({
     return (
       <div className={styles.constraintsWithoutTable}>
         <div className={styles.spinner}>
-          <Spinner style={{ top: 0, left: 0 }} />
+          <Spinner className={styles.spinnerPosition} />
         </div>
       </div>
     );

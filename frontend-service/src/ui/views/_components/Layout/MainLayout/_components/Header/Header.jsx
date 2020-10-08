@@ -112,7 +112,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       <label
         onClick={() => setDoNotRemember(!doNotRemember)}
         style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-        {resources.messages['doNotRemember']}
+        {resources.messages['doNotAskAgain']}
       </label>
     </div>
   );

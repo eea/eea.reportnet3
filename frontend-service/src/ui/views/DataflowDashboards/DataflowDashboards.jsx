@@ -67,22 +67,16 @@ export const DataflowDashboards = withRouter(
         if (error.response.status === 401 || error.response.status === 403) {
           history.push(getUrl(routes.DATAFLOWS));
         }
-      } finally {
       }
     };
 
     const chartReducer = (state, { type, payload }) => {
       switch (type) {
         case 'TOGGLE_SCHEMA_CHART':
-          return {
-            ...state,
-            [payload]: !state[payload]
-          };
+          return { ...state, [payload]: !state[payload] };
 
         default:
-          return {
-            ...state
-          };
+          return { ...state };
       }
     };
 
@@ -120,6 +114,7 @@ export const DataflowDashboards = withRouter(
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
+
     return layout(
       <Fragment>
         <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
