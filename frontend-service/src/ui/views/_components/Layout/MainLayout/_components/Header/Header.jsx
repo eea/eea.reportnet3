@@ -54,8 +54,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     window.onscroll = () => {
       const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
-
-      if (innerWidth > 768) {
+      if (innerWidth > 768 && themeContext.headerCollapse) {
         if (currentScrollPos === 0) {
           setGlobanElementStyle({
             marginTop: '0',
@@ -93,7 +92,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         }
       }
     };
-  }, []);
+  }, [themeContext.headerCollapse]);
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
