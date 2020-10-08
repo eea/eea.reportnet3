@@ -59,13 +59,6 @@ const MainLayout = ({ children, isPublic = false }) => {
   }, [leftSideBarContext.isLeftSideBarOpened]);
 
   useEffect(() => {
-    window.addEventListener('load', preventDownloadFile);
-    return () => {
-      window.removeEventListener('load', preventDownloadFile);
-    };
-  });
-
-  const preventDownloadFile = () => {
     window.addEventListener(
       'dragover',
       function (e) {
@@ -83,7 +76,7 @@ const MainLayout = ({ children, isPublic = false }) => {
       },
       false
     );
-  };
+  });
 
   const getUserConfiguration = async () => {
     try {
