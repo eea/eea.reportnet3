@@ -11,7 +11,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.WebFormVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
@@ -465,10 +465,10 @@ public interface DatasetSchemaService {
 
 
   /**
-   * Update web form.
+   * Update webform.
    *
    * @param datasetSchemaId the dataset schema id
    * @param webformVO the webform VO
    */
-  void updateWebForm(String datasetSchemaId, WebFormVO webformVO);
+  void updateWebform(String datasetSchemaId, WebformVO webformVO);
 }

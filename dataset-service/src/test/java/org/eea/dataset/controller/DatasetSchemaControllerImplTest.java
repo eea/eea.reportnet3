@@ -36,6 +36,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -844,6 +845,17 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateDatasetSchemaDescriptionTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
+    Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void updateDatasetSchemaWebformTest1() throws EEAException {
+    WebformVO webform = new WebformVO();
+    webform.setName("name");
+    datasetSchemaVO.setWebform(webform);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
     Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),

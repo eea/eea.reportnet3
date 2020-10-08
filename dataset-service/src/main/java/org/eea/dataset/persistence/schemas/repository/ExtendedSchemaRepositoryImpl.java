@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.exception.EEAException;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -397,10 +397,10 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @param webForm the web form
    */
   @Override
-  public void updateDatasetSchemaWebForm(String datasetSchemaId, WebForm webForm) {
+  public void updateDatasetSchemaWebForm(String datasetSchemaId, Webform webform) {
     mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
         new Document("_id", new ObjectId(datasetSchemaId)),
-        new Document("$set", new Document("webForm.webFormName", webForm.getWebFormName())));
+        new Document("$set", new Document("webform.name", webform.getName())));
 
   }
 }

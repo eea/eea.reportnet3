@@ -13,7 +13,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class WebForm implements Serializable {
+public class Webform implements Serializable {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 7063146120694063716L;
@@ -21,8 +21,8 @@ public class WebForm implements Serializable {
   /**
    * The id webFormName.
    */
-  @Field(value = "webFormName")
-  private String webFormName;
+  @Field(value = "name")
+  private String name;
 
   /**
    * Hash code.
@@ -32,7 +32,7 @@ public class WebForm implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(webFormName);
+    return Objects.hash(name);
 
   }
 
@@ -50,7 +50,7 @@ public class WebForm implements Serializable {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    WebForm other = (WebForm) obj;
-    return Objects.equals(webFormName, other.webFormName);
+    Webform other = (Webform) obj;
+    return Objects.equals(name, other.name);
   }
 }

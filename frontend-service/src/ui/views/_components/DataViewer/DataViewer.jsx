@@ -358,13 +358,11 @@ const DataViewer = withRouter(
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
 
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
-          if (!isUndefined(tableData.records)) {
-            if (tableData.records.length > 0) {
-              dispatchRecords({
-                type: 'SET_NEW_RECORD',
-                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
-              });
-            }
+          if (!isUndefined(tableData.records) && tableData.records.length > 0) {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+            });
           } else {
             dispatchRecords({
               type: 'SET_NEW_RECORD',
@@ -620,13 +618,7 @@ const DataViewer = withRouter(
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
             notificationContext.add({
               type: 'UPDATE_FIELD_BY_ID_ERROR',
-              content: {
-                dataflowId,
-                datasetId,
-                dataflowName,
-                datasetName,
-                tableName
-              }
+              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
             });
           }
         }
@@ -738,13 +730,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         } finally {
           if (!addAnotherOne) {
@@ -764,13 +750,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'UPDATE_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         } finally {
           onCancelRowEdit();
@@ -842,19 +822,14 @@ const DataViewer = withRouter(
           disabled={isSaving}
           label={resources.messages['save']}
           icon={!isSaving ? 'check' : 'spinnerAnimate'}
-          onClick={() => {
-            onSaveRecord(records.newRecord);
-          }}
+          onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
           className="p-button-secondary"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            dispatchRecords({
-              type: 'SET_NEW_RECORD',
-              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            });
+            dispatchRecords({ type: 'SET_NEW_RECORD', payload: RecordUtils.createEmptyObject(colsSchema, undefined) });
             setAddDialogVisible(false);
           }}
         />
@@ -863,13 +838,7 @@ const DataViewer = withRouter(
 
     const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          icon="check"
-          label={resources.messages['ok']}
-          onClick={() => {
-            setIsColumnInfoVisible(false);
-          }}
-        />
+        <Button icon="check" label={resources.messages['ok']} onClick={() => setIsColumnInfoVisible(false)} />
       </div>
     );
 
@@ -951,10 +920,7 @@ const DataViewer = withRouter(
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
-      return {
-        'p-highlight': id === selectedRecordErrorId,
-        'p-highlight-contextmenu': ''
-      };
+      return { 'p-highlight': id === selectedRecordErrorId, 'p-highlight-contextmenu': '' };
     };
 
     const requiredTemplate = rowData => {

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -49,8 +49,8 @@ public class DataSetSchema {
   private List<TableSchema> tableSchemas;
 
   /** The web form. */
-  @Field(value = "webForm")
-  private WebForm webForm;
+  @Field(value = "webform")
+  private Webform webform;
 
   /**
    * Hash code.
@@ -59,7 +59,7 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webForm);
+    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webform);
   }
 
   /**
@@ -80,7 +80,7 @@ public class DataSetSchema {
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
-        && Objects.equals(description, other.description) && Objects.equals(webForm, other.webForm);
+        && Objects.equals(description, other.description) && Objects.equals(webform, other.webform);
 
   }
 

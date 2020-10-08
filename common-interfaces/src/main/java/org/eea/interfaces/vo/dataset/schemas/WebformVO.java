@@ -12,12 +12,12 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class WebFormVO implements Serializable {
+public class WebformVO implements Serializable {
 
   /**
    * The webFormName.
    */
-  private String webFormName;
+  private String name;
 
   /**
    * Hash code.
@@ -27,7 +27,7 @@ public class WebFormVO implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(webFormName);
+    return Objects.hash(name);
 
   }
 
@@ -45,7 +45,7 @@ public class WebFormVO implements Serializable {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    WebFormVO other = (WebFormVO) obj;
-    return Objects.equals(webFormName, other.webFormName);
+    WebformVO other = (WebformVO) obj;
+    return Objects.equals(name, other.name);
   }
 }

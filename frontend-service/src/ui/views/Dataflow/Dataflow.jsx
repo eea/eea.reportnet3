@@ -46,7 +46,6 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -355,7 +354,7 @@ const Dataflow = withRouter(({ history, match }) => {
           obligations: dataflow.obligation,
           status: dataflow.status
         }
-      })
+      });
 
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {

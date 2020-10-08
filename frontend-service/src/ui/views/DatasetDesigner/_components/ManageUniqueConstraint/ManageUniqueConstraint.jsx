@@ -36,8 +36,6 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
 
-  const uniqueListDialog = isTableCreationMode ? '' : 'isUniqueConstraintsListDialogVisible';
-
   useEffect(() => {
     if (isManageUniqueConstraintDialogVisible) {
       const fields = fieldData.map(field => ({ name: field.name, value: field.fieldId }));
@@ -46,7 +44,9 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       setSelectedTable({ name: tableSchemaName, value: tableSchemaId });
     }
 
-    if (isTableCreationMode) onLoadUniquesList();
+    if (isTableCreationMode) {
+      onLoadUniquesList();
+    }
   }, [isManageUniqueConstraintDialogVisible, manageUniqueConstraintData]);
 
   useEffect(() => {

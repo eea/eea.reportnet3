@@ -142,7 +142,7 @@ export const IntegrationsList = ({
     return (
       <div className={styles.integrationsWithoutTable}>
         <div className={styles.spinner}>
-          <Spinner style={{ top: 0, left: 0 }} />
+          <Spinner className={styles.spinnerPosition} />
         </div>
       </div>
     );
