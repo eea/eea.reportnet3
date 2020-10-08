@@ -1,5 +1,3 @@
-import { config } from 'conf';
-import { getFieldType } from './getFieldType';
 export const setValidationExpression = (expressionId, field, expressions) => {
   const [targetExpression] = expressions.filter(expression => expressionId === expression.expressionId);
 
@@ -10,9 +8,9 @@ export const setValidationExpression = (expressionId, field, expressions) => {
     case 'field2':
       targetExpression[field.key] = field.value;
       break;
+
     case 'expressionValue':
       const { value } = field;
-
       if (value === null) {
         targetExpression[field.key] = '';
       } else {
