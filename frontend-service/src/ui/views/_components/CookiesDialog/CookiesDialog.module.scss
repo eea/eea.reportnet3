@@ -29,4 +29,18 @@
       }
     }
   }
+  @media (max-width: 973px) {
+    width: 100%;
+    h3 {
+      font-size: 1rem;
+    }
+    > p {
+      font-size: 0.8rem;
+    }
+    > div {
+      button {
+        font-size: 0.8rem;
+      }
+    }
+  }
 }
