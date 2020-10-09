@@ -22,12 +22,9 @@ export const CookiesDialog = () => {
   }, []);
 
   useEffect(() => {
-    const header = document.querySelector('#header');
     if (isVisible) {
-      header.style.height = `${config.theme.baseHeaderHeight + 152}px`;
       themeContext.setHeaderCollapse(false);
     } else {
-      header.style.height = `${config.theme.baseHeaderHeight}px`;
       themeContext.setHeaderCollapse(true);
     }
   }, [isVisible]);
