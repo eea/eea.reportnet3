@@ -896,6 +896,7 @@ export const Dataset = withRouter(({ match, history }) => {
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />
+
       {validationsVisible && (
         <Dialog
           className={styles.paginatorValidationViewer}
@@ -915,6 +916,7 @@ export const Dataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       )}
+
       {validationListDialogVisible && (
         <Dialog
           footer={validationListFooter}
@@ -926,11 +928,11 @@ export const Dataset = withRouter(({ match, history }) => {
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}
-            onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
           />
         </Dialog>
       )}
+
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           dialogClassName={styles.Dialog}
@@ -954,6 +956,7 @@ export const Dataset = withRouter(({ match, history }) => {
           })}`}
         />
       )}
+
       {isImportOtherSystemsDialogVisible && (
         <Dialog
           className={styles.Dialog}
@@ -976,6 +979,7 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
         </Dialog>
       )}
+
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -988,6 +992,7 @@ export const Dataset = withRouter(({ match, history }) => {
           {resources.messages['deleteDatasetConfirm']}
         </ConfirmDialog>
       )}
+
       {validateDialogVisible && (
         <ConfirmDialog
           header={resources.messages['validateDataset']}
@@ -999,6 +1004,7 @@ export const Dataset = withRouter(({ match, history }) => {
           {resources.messages['validateDatasetConfirm']}
         </ConfirmDialog>
       )}
+
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}

@@ -1,5 +1,8 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
+
+import { config } from 'conf';
+
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
@@ -49,13 +52,13 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     marginTop: 0,
     transition: '0.5s'
   });
-  const [headerElementStyle, setHeaderElementStyle] = useState({});
+  const [headerElementStyle, setHeaderElementStyle] = useState({ transition: '0.5s' });
+
   useEffect(() => {
     window.onscroll = () => {
       const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
-
-      if (innerWidth > 768) {
+      if (innerWidth > 768 && themeContext.headerCollapse) {
         if (currentScrollPos === 0) {
           setGlobanElementStyle({
             marginTop: '0',
@@ -66,8 +69,8 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
             transition: '0.5s'
           });
           setHeaderElementStyle({
-            height: '180px',
-            transition: '0.5s'
+            ...headerElementStyle,
+            height: '180px'
           });
           onMainContentStyleChange({
             marginTop: '180px',
@@ -93,7 +96,15 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         }
       }
     };
-  }, []);
+    if (!themeContext.headerCollapse) {
+      setHeaderElementStyle({
+        ...headerElementStyle,
+        height: `${config.theme.baseHeaderHeight + config.theme.cookieConsentHeight}px`
+      });
+    } else {
+      setHeaderElementStyle({ ...headerElementStyle, height: `${config.theme.baseHeaderHeight}px` });
+    }
+  }, [themeContext.headerCollapse]);
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
