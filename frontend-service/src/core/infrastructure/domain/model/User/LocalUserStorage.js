@@ -5,13 +5,31 @@ import { config } from 'conf';
 const { storage: storageConfig } = config;
 
 const getLocalStorage = () => {
-  const rnLocalStorage = JSON.parse(localStorage.getItem(storageConfig.LOCAL_KEY));
-  if (!isNil(rnLocalStorage)) return rnLocalStorage;
+  const cLocalStorage = JSON.parse(localStorage.getItem(storageConfig.LOCAL_KEY));
+  if (!isNil(cLocalStorage)) return cLocalStorage;
   return;
 };
 
 const removeLocalStorage = () => {
   localStorage.clear();
+};
+
+const setPropertyToLocalStorage = prop => {
+  const cLocalStorage = getLocalStorage();
+  const nLocalStorage = {};
+  localStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify({ ...cLocalStorage, ...prop }));
+};
+
+const removeLocalProperty = key => {
+  const cLocalStorage = getLocalStorage();
+  delete cLocalStorage[key];
+  setLocalStorage(cLocalStorage);
+};
+
+const getPropertyFromLocalStorage = key => {
+  const cLocalStorage = getLocalStorage();
+  if (cLocalStorage) return cLocalStorage[key];
+  return;
 };
 
 const setLocalStorage = value => {
@@ -41,10 +59,13 @@ const hasToken = () => {
 
 export const LocalUserStorage = {
   get,
-  set,
-  remove,
-  hasToken,
   getLocalStorage,
+  getPropertyFromLocalStorage,
+  hasToken,
+  remove,
+  removeLocalProperty,
   removeLocalStorage,
-  setLocalStorage
+  set,
+  setLocalStorage,
+  setPropertyToLocalStorage
 };
