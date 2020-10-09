@@ -12,9 +12,9 @@ export const SnapshotsList = ({
   getSnapshotData,
   isLoading,
   showReleaseDialog,
-  snapshotsListData,
   snapshotDataToRelease,
-  snapshotReleasedId
+  snapshotReleasedId,
+  snapshotsListData
 }) => {
   const resources = useContext(ResourcesContext);
 
