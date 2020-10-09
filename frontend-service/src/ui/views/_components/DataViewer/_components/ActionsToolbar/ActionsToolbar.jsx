@@ -288,6 +288,7 @@ const ActionsToolbar = ({
             {filter.groupedFilter && (
               <ChipButton
                 hasLevelErrorIcon={true}
+                labelClassName={styles.groupFilter}
                 levelError={selectedRuleLevelError}
                 onClick={() => {
                   onHideSelectGroupedValidation();

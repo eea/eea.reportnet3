@@ -12,9 +12,9 @@ export const ChipButton = ({
   className,
   disabled = false,
   hasLevelErrorIcon = false,
-  hideOnClick = false,
   id,
   key,
+  labelClassName,
   levelError,
   onClick,
   style,
@@ -52,7 +52,7 @@ export const ChipButton = ({
           message={''}
         />
       )}
-      <span className={styles.chipButtonLabel} ref={inputElement}>
+      <span className={`${styles.labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
         {value}
       </span>
       <div onMouseOut={() => setIconToShow('cancel')} onMouseOver={() => setIconToShow('errorCircle')}>
