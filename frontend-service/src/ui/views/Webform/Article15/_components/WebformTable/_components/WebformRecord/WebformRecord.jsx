@@ -12,6 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
@@ -26,19 +27,40 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
-export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTabChange, record, tableId }) => {
+export const WebformRecord = ({
+  columnsSchema,
+  onAddMultipleWebform,
+  datasetId,
+  onRefresh,
+  onTabChange,
+  record,
+  tableId
+}) => {
   const resources = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
+    isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     newRecord: {},
     record,
-    selectedField: {}
+    selectedField: {},
+    selectedFieldId: '',
+    selectedFieldSchemaId: '',
+    selectedMaxSize: '',
+    selectedValidExtensions: []
   });
 
-  const { isDialogVisible, isFileDialogVisible, selectedField } = webformRecordState;
+  const {
+    isDeleteAttachmentVisible,
+    isDialogVisible,
+    isFileDialogVisible,
+    selectedField,
+    selectedFieldId,
+    selectedFieldSchemaId,
+    selectedValidExtensions
+  } = webformRecordState;
 
   const {
     formatDate,
@@ -56,6 +78,24 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     });
   }, [record, onTabChange]);
 
+  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
+    .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
+    .flat()
+    .join(', ');
+
+  const onAttach = async value => {
+    onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
+    onToggleDialogVisible(false);
+  };
+
+  const onConfirmDeleteAttachment = async () => {
+    const fileDeleted = await DatasetService.deleteFileData(datasetId, selectedFieldId);
+    if (fileDeleted) {
+      onFillField(record, selectedFieldSchemaId, '');
+      onToggleDeleteAttachmentDialogVisible(false);
+    }
+  };
+
   const onDeleteMultipleWebform = async recordId => {
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, recordId);
@@ -63,6 +103,12 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     } catch (error) {
       console.error('error', error);
     }
+  };
+
+  const onFileDownload = async (fileName, fieldId) => {
+    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+
+    DownloadFile(fileContent, fileName);
   };
 
   const onEditorKeyChange = (event, field, option) => {
@@ -87,6 +133,16 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     }
   };
 
+  const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
+    webformRecordDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fieldId, fieldSchemaId } });
+
+  const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
+    webformRecordDispatch({
+      type: 'ON_FILE_UPLOAD_SET_FIELDS',
+      payload: { fieldId, fieldSchemaId, validExtensions, maxSize }
+    });
+  };
+
   const onFillField = (field, option, value) => {
     webformRecordState.newRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === option)[0].fieldData[
       option
@@ -106,6 +162,9 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   };
 
   const onSelectField = field => webformRecordDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
+
+  const onToggleDeleteAttachmentDialogVisible = value =>
+    webformRecordDispatch({ type: 'ON_TOGGLE_DELETE_DIALOG', payload: { value } });
 
   const onToggleDialogVisible = value => webformRecordDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
@@ -239,25 +298,65 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
         );
 
       case 'ATTACHMENT':
+        const colSchema = columnsSchema.filter(colSchema => colSchema.fieldSchemaId === field.fieldSchemaId)[0];
         return (
-          <Button
-            className={`p-button-animated-blink p-button-primary-transparent`}
-            // disabled={true}
-            icon={'import'}
-            label={resources.messages['uploadAttachment']}
-            onClick={() => {
-              onToggleDialogVisible(true);
-              onSelectField(field);
-              // setIsAttachFileVisible(true);
-              // onFileUploadVisible(
-              //   fieldId,
-              //   fieldSchemaId,
-              //   !isNil(colSchema) ? colSchema.validExtensions : [],
-              //   colSchema.maxSize
-              // );
-            }}
-          />
+          <div className={styles.attachmentWrapper}>
+            {!isNil(field.value) && field.value !== '' && (
+              <Button
+                className={`${field.value === '' && 'p-button-animated-blink'} p-button-primary-transparent`}
+                icon="export"
+                iconPos="right"
+                label={field.value}
+                onClick={() => onFileDownload(field.value, field.fieldId)}
+              />
+            )}
+            {
+              <Button
+                className={`p-button-animated-blink p-button-primary-transparent`}
+                icon="import"
+                label={
+                  !isNil(field.value) && field.value !== ''
+                    ? resources.messages['uploadReplaceAttachment']
+                    : resources.messages['uploadAttachment']
+                }
+                onClick={() => {
+                  onToggleDialogVisible(true);
+                  onFileUploadVisible(
+                    field.fieldId,
+                    field.fieldSchemaId,
+                    !isNil(colSchema) ? colSchema.validExtensions : [],
+                    !isNil(colSchema) ? colSchema.maxSize : 20
+                  );
+                }}
+              />
+            }
+
+            <Button
+              className={`p-button-animated-blink p-button-primary-transparent`}
+              icon="trash"
+              onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
+            />
+          </div>
         );
+      // return (
+      //   <Button
+      //     className={`p-button-animated-blink p-button-primary-transparent`}
+      //     // disabled={true}
+      //     icon={'import'}
+      //     label={resources.messages['uploadAttachment']}
+      //     onClick={() => {
+      //       onToggleDialogVisible(true);
+      //       onSelectField(field);
+      //       // setIsAttachFileVisible(true);
+      //       // onFileUploadVisible(
+      //       //   fieldId,
+      //       //   fieldSchemaId,
+      //       //   !isNil(colSchema) ? colSchema.validExtensions : [],
+      //       //   colSchema.maxSize
+      //       // );
+      //     }}
+      //   />
+      //);
 
       default:
         break;
@@ -352,14 +451,13 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   return (
     <Fragment>
       {renderWebformContent(webformRecordState.record)}
-
       {isFileDialogVisible && (
         <CustomFileUpload
           dialogClassName={styles.dialog}
           dialogHeader={resources.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
-          accept={'*'}
+          accept={getAttachExtensions || '*'}
           chooseLabel={resources.messages['selectFile']}
           className={styles.fileUpload}
           fileLimit={1}
@@ -368,11 +466,11 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           multiple={false}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           name="file"
-          // onUpload={onAttach}
+          onUpload={onAttach}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
             datasetId,
-            fieldId: selectedField.fieldId
+            fieldId: selectedFieldId
           })}`}
         />
       )}
@@ -387,6 +485,18 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           onHide={() => handleDialogs('deleteRow', false)}
           visible={isDialogVisible.deleteRow}>
           {resources.messages['confirmDeleteRow']}
+        </ConfirmDialog>
+      )}
+      {isDeleteAttachmentVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={`${resources.messages['deleteAttachmentHeader']}`}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmDeleteAttachment}
+          onHide={() => onToggleDeleteAttachmentDialogVisible(false)}
+          visible={isDeleteAttachmentVisible}>
+          {resources.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
     </Fragment>

@@ -130,9 +130,11 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
             codelistItems: element.codelistItems || [],
             description: element.description || '',
             isDisabled: isNil(element.fieldSchema),
+            maxSize: element.maxSize,
             name: element.name,
             recordId: record.recordId,
-            type: element.type
+            type: element.type,
+            validExtensions: element.validExtensions
           });
         } else {
           if (tableData[element.tableSchemaId]) {
@@ -161,6 +163,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       webformData.elementsRecords.map((record, i) => {
         return (
           <WebformRecord
+            columnsSchema={webformData.elementsRecords[0].elements}
             datasetId={datasetId}
             key={i}
             onRefresh={onUpdateData}
@@ -173,6 +176,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       })
     ) : (
       <WebformRecord
+        columnsSchema={webformData.elementsRecords[0].elements}
         datasetId={datasetId}
         onRefresh={onUpdateData}
         onTabChange={onTabChange}

@@ -889,6 +889,7 @@
     "sqlSentenceHelpDescription": "The sentences should look like the following examples (brackets are mandatory only if the name contains blank spaces):",
     "configureWebform": "Configure webform",
     "configureWebformMessage": "Please, select a webform to configure it",
-    "configureWebformPlaceholder": "Select a webform"
+    "configureWebformPlaceholder": "Select a webform",
+    "uploadReplaceAttachment": "Replace file"
   }
 }

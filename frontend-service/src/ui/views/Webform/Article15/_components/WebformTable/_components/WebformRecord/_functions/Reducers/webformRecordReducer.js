@@ -6,6 +6,23 @@ export const webformRecordReducer = (state, { type, payload }) => {
     case 'HANDLE_DIALOGS':
       return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };
 
+    case 'ON_FILE_DELETE_OPENED':
+      return {
+        ...state,
+        isDeleteAttachmentVisible: true,
+        selectedFieldId: payload.fieldId,
+        selectedFieldSchemaId: payload.fieldSchemaId
+      };
+
+    case 'ON_FILE_UPLOAD_SET_FIELDS':
+      return {
+        ...state,
+        selectedFieldId: payload.fieldId,
+        selectedFieldSchemaId: payload.fieldSchemaId,
+        selectedValidExtensions: payload.validExtensions,
+        selectedMaxSize: payload.maxSize
+      };
+
     case 'ON_FILL_FIELD':
       return {
         ...state,
@@ -16,6 +33,9 @@ export const webformRecordReducer = (state, { type, payload }) => {
         //   [payload.option]: { ...state.fields[payload.option], newValue: payload.value }
         // }
       };
+
+    case 'ON_TOGGLE_DELETE_DIALOG':
+      return { ...state, isDeleteAttachmentVisible: payload.value };
 
     case 'ON_TOGGLE_DIALOG':
       return { ...state, isFileDialogVisible: payload.value };
