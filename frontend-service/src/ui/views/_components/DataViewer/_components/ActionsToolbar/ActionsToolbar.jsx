@@ -285,7 +285,7 @@ const ActionsToolbar = ({
               }}
               showLevelErrorIcons={true}
             />
-            {filter.groupedFilter && (
+            {filter.groupedFilter && selectedRuleMessage !== '' && (
               <ChipButton
                 hasLevelErrorIcon={true}
                 labelClassName={styles.groupFilter}
