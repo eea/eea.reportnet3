@@ -22,11 +22,7 @@ export const CookiesDialog = () => {
   }, []);
 
   useEffect(() => {
-    if (isVisible) {
-      themeContext.setHeaderCollapse(false);
-    } else {
-      themeContext.setHeaderCollapse(true);
-    }
+    themeContext.setHeaderCollapse(!isVisible);
   }, [isVisible]);
 
   const onAcceptCookies = () => {
