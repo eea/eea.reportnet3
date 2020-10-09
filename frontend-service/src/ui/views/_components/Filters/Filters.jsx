@@ -79,13 +79,7 @@ export const Filters = ({
   }, [filterState.matchMode]);
 
   useEffect(() => {
-    if (filterState.filtered) {
-      getFilteredValue();
-    }
-  }, [filterState.filterBy]);
-
-  useEffect(() => {
-    getFilteredStateValue(filterState.filteredState);
+    getFilteredStateValue(filterState.filtered);
   }, [filterState.filtered, filterState.searched]);
 
   useEffect(() => {
@@ -106,16 +100,6 @@ export const Filters = ({
   const getFilteredStateValue = () => {
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
-  };
-
-  const getFilteredValue = () => {
-    const filteredByValues = Object.values(filterState.filterBy);
-    const filteredByValuesState = filteredByValues.map(filterBy =>
-      isNull(filterBy) ? false : filterBy.length === 0 ? false : true
-    );
-    const filteredValue = filteredByValuesState.includes(true) ? true : false;
-
-    filterDispatch({ type: 'FILTERED', payload: { filteredValue } });
   };
 
   const getInitialState = () => {
@@ -206,7 +190,9 @@ export const Filters = ({
           checkboxOptions
         ),
         searchBy: '',
-        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions)
+        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
+        filtered: false,
+        filteredSearched: false
       }
     });
   };
@@ -230,7 +216,16 @@ export const Filters = ({
       value
     });
 
-    filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
+    let filteredStateValue = true;
+
+    if (
+      (!isNil(checkboxOptions) && checkboxOptions.includes(filter) && value.length > 1) ||
+      isEmpty(value) ||
+      !Array.isArray(value)
+    )
+      filteredStateValue = false;
+
+    filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value, filteredStateValue } });
   };
 
   const onOrderData = (order, property) => {
