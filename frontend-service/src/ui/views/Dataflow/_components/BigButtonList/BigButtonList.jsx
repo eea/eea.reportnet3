@@ -389,6 +389,7 @@ export const BigButtonList = ({
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
+
       {isIntegrationManageDialogVisible && (
         <ManageIntegrations
           dataflowId={dataflowId}
@@ -399,6 +400,7 @@ export const BigButtonList = ({
           updatedData={euDatasetExportIntegration}
         />
       )}
+
       {newDatasetDialog && (
         <Dialog
           className={styles.dialog}
@@ -414,6 +416,7 @@ export const BigButtonList = ({
           />
         </Dialog>
       )}
+
       {cloneDialogVisible && (
         <Dialog
           className={styles.dialog}
@@ -425,6 +428,7 @@ export const BigButtonList = ({
           <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
         </Dialog>
       )}
+
       {errorDialogData.isVisible && (
         <Dialog
           footer={errorDialogFooter}
@@ -434,6 +438,7 @@ export const BigButtonList = ({
           <div className="p-grid p-fluid">{errorDialogData.message}</div>
         </Dialog>
       )}
+
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -475,6 +480,7 @@ export const BigButtonList = ({
           <p>{resources.messages['updateDataCollectionMessage']}</p>
         </ConfirmDialog>
       )}
+
       {dataCollectionDialog && (
         <ConfirmDialog
           className={styles.calendarConfirm}
@@ -514,6 +520,7 @@ export const BigButtonList = ({
           />
         </ConfirmDialog>
       )}
+
       {isCopyDataCollectionToEuDatasetDialogVisible && (
         <ConfirmDialog
           header={resources.messages['copyDataCollectionToEuDatasetHeader']}
@@ -525,6 +532,7 @@ export const BigButtonList = ({
           <p>{resources.messages['copyDataCollectionToEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
+
       {isExportEuDatasetDialogVisible && (
         <ConfirmDialog
           header={resources.messages['exportEuDatasetHeader']}
@@ -551,6 +559,7 @@ export const BigButtonList = ({
           {resources.messages['createDataCollectionConfirm']}
         </ConfirmDialog>
       )}
+
       <button
         className="dataflow-big-buttons-confirmation-receipt-help-step"
         ref={receiptBtnRef}

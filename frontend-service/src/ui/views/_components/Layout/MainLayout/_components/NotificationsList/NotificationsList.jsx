@@ -71,6 +71,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       const capitalizedMessageLevel = !isUndefined(notification.type)
         ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
         : notification.type;
+
       return {
         message: message,
         messageLevel: capitalizedMessageLevel,
