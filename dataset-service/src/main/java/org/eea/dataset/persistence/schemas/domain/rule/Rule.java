@@ -73,8 +73,13 @@ public class Rule {
   @Field(value = "shortCode")
   private String shortCode;
 
+  /** The unique constraint id. */
   @Field(value = "uniqueConstraintId")
   private ObjectId uniqueConstraintId;
+
+  /** The SQLSentence. */
+  @Field(value = "sqlSentence")
+  private String sqlSentence;
 
   /**
    * Hash code.

@@ -120,33 +120,6 @@ function boolean isNumberDecimal(String value){
         return false;        
     }
  }
-//////////////////////////////////////////VALIDATION LATITUDE///////////////////////////////////////////////////////////
-function boolean isCordenateLat( String value ){
-	if(!isBlank(value)){
-		return true;
-	}
-   if (value.contains(",")){
-   	value = value.replace(",",".");
-   }
-   if(isNumberDecimal(value)){
-    	return Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90;
-   }
-   return false;
-}  
-
-//////////////////////////////////////////VALIDATION LONGITUDE///////////////////////////////////////////////////////////
-function boolean isCordenateLong( String value ){	
-	if(!isBlank(value)){
-		return true;
-	}
-   if (value.contains(",")){
-   	value = value.replace(",",".");
-   }
-   if(isNumberDecimal(value)){
-    	return Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180;
-   }
-   return false;
- }
  
 //////////////////////////////////////////VALIDATION URL///////////////////////////////////////////////////////////
 function boolean isURL( String value ){	
@@ -172,6 +145,41 @@ function boolean isPhone(String value){
 	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");
  }
  
+//////////////////////////////////////////VALIDATION POSITION///////////////////////////////////////////////////////////
+function boolean isPosition(FieldValue fieldValue){
+	return FKValidationUtils.isPosition(fieldValue);
+}
+
+//////////////////////////////////////////VALIDATION POINT///////////////////////////////////////////////////////////
+function boolean isPoint(FieldValue fieldValue){
+	return FKValidationUtils.isPoint(fieldValue);
+}
+ 
+//////////////////////////////////////////VALIDATION MULTIPOINT///////////////////////////////////////////////////////////
+function boolean isMultipoint(FieldValue fieldValue){
+	return FKValidationUtils.isMultipoint(fieldValue);
+}
+
+//////////////////////////////////////////VALIDATION LINESTRING///////////////////////////////////////////////////////////
+function boolean isLinestring(FieldValue fieldValue){
+	return FKValidationUtils.isLinestring(fieldValue);
+}
+
+//////////////////////////////////////////VALIDATION MULTILINESTRING///////////////////////////////////////////////////////////
+function boolean isMultilinestring(FieldValue fieldValue){
+	return FKValidationUtils.isMultilinestring(fieldValue);
+}
+
+//////////////////////////////////////////VALIDATION POLYGON///////////////////////////////////////////////////////////
+function boolean isPolygon(FieldValue fieldValue){
+	return FKValidationUtils.isPolygon(fieldValue);
+}
+
+//////////////////////////////////////////VALIDATION GEOMETRYCOLLECTION///////////////////////////////////////////////////////////
+function boolean isGeometrycollection(FieldValue fieldValue){
+	return FKValidationUtils.isGeometrycollection(fieldValue);
+}
+ 
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
@@ -186,8 +194,9 @@ function boolean isUniqueConstraint(String uniqueIdConstraint,String idRule){
 }
 
  //////////////////////////////////////////VALIDATION DATASET INTEGRITY////////////////////////////////////////////////////////////
-function boolean isIntegrityConstraint(DatasetValue datasetId,String integrityId, String idRule){
-	return UniqueValidationUtils.isIntegrityConstraint(datasetId,integrityId,idRule);
+function boolean checkIntegrityConstraint(DatasetValue datasetId,String integrityId, String idRule){
+	 UniqueValidationUtils.checkIntegrityConstraint(datasetId,integrityId,idRule);
+	 return true;
 }
 
 //////////////////////////////////////////VALIDATION TABLE FILLED////////////////////////////////////////////////////////////
@@ -196,4 +205,9 @@ function boolean isTableEmpty(TableValue tableValue){
 		return false;
 	}
 	return true;
+}
+//////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
+function boolean isSQLSentence(Long datasetId, String ruleId){	
+	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId);
+	return false;
 }

@@ -125,7 +125,7 @@ const Dashboard = withRouter(
               ticks: {
                 min: 0,
                 max: 100,
-                callback: (value) => `${value}%`
+                callback: value => `${value}%`
               },
               gridLines: { display: false }
             }
@@ -142,8 +142,8 @@ const Dashboard = withRouter(
           return (
             <Fragment>
               <span
-              className={styles.dashboardWarning}
-              dangerouslySetInnerHTML={{__html: resources.messages['dashboardWarning']}}></span>
+                className={styles.dashboardWarning}
+                dangerouslySetInnerHTML={{ __html: resources.messages['dashboardWarning'] }}></span>
               <div className={styles.chartDiv}>
                 <StatusList
                   filterDispatch={statusDispatcher}
@@ -161,19 +161,20 @@ const Dashboard = withRouter(
             </Fragment>
           );
         } else {
-          return ( 
-          <div className={styles.dashboardWithoutData}>
-            <div className={styles.noDashboard}>
-              {resources.messages['noValidationDashboardData']}
+          return (
+            <div className={styles.dashboardWithoutData}>
+              <div className={styles.noDashboard}>{resources.messages['noValidationDashboardData']}</div>
             </div>
-          </div>);
+          );
         }
       };
 
       if (isLoading) {
         return (
           <div className={styles.dashboardWithoutData}>
-            <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+            <div className={styles.spinner}>
+              <Spinner style={{ top: 0, left: 0 }} />
+            </div>
           </div>
         );
       }

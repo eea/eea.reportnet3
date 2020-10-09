@@ -38,6 +38,7 @@ public interface UserManagementController {
    *
    * @param username the username
    * @param password the password
+   *
    * @return the token VO
    */
   @PostMapping("/generateToken")
@@ -48,6 +49,7 @@ public interface UserManagementController {
    * Generate token.
    *
    * @param code the code
+   *
    * @return the token VO
    */
   @PostMapping("/generateTokenByCode")
@@ -57,6 +59,7 @@ public interface UserManagementController {
    * Refresh token.
    *
    * @param refreshToken the refresh token
+   *
    * @return the token VO
    */
   @PostMapping("/refreshToken")
@@ -67,6 +70,7 @@ public interface UserManagementController {
    *
    * @param resource the resource
    * @param scopes the scopes
+   *
    * @return the boolean
    */
   @GetMapping("/checkAccess")
@@ -85,6 +89,7 @@ public interface UserManagementController {
    * Gets the resources by user.
    *
    * @param resourceType the resource type
+   *
    * @return the resources by user
    */
   @GetMapping("/resources_by_type")
@@ -95,6 +100,7 @@ public interface UserManagementController {
    * Gets the resources by user.
    *
    * @param securityRole the security role
+   *
    * @return the resources by user
    */
   @GetMapping("/resources_by_role")
@@ -106,6 +112,7 @@ public interface UserManagementController {
    *
    * @param resourceType the resource type
    * @param securityRole the security role
+   *
    * @return the resources by user
    */
   @GetMapping("/resources_by_type_role")
@@ -151,6 +158,7 @@ public interface UserManagementController {
    * Gets the user by email.
    *
    * @param email the email
+   *
    * @return the user by email
    */
   @GetMapping("/getUserByEmail")
@@ -204,6 +212,7 @@ public interface UserManagementController {
    * Gets the user by user id.
    *
    * @param userId the user id
+   *
    * @return the user by user id
    */
   @GetMapping("/getUserByUserId")
@@ -214,6 +223,7 @@ public interface UserManagementController {
    *
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
+   *
    * @return the string
    */
   @PostMapping("/createApiKey")
@@ -225,6 +235,7 @@ public interface UserManagementController {
    *
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
+   *
    * @return the api key
    */
   @GetMapping("/getApiKey")
@@ -237,6 +248,7 @@ public interface UserManagementController {
    * @param userId the user id
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
+   *
    * @return the api key
    */
   @GetMapping("/{userId}/getApiKey")
@@ -247,15 +259,28 @@ public interface UserManagementController {
    * Authenticate user by api key.
    *
    * @param apiKey the api key
+   *
    * @return the token VO
    */
   @PostMapping("/authenticateByApiKey/{apiKey}")
   TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey);
 
+
+  /**
+   * Authenticate user by email token vo.
+   *
+   * @param email the email
+   *
+   * @return the token vo
+   */
+  @PostMapping("/authenticateByEmail")
+  TokenVO authenticateUserByEmail(@RequestParam("email") String email);
+
   /**
    * Gets the users by group.
    *
    * @param group the group
+   *
    * @return the user by group
    */
   @GetMapping("/getUsersByGroup/{group}")
@@ -293,6 +318,7 @@ public interface UserManagementController {
    * Gets the resources by user email.
    *
    * @param email the email
+   *
    * @return the resources by user email
    */
   @GetMapping("/private/resourcesByMail")

@@ -88,7 +88,10 @@ export const UniqueConstraints = ({
   const onDeleteConstraint = async () => {
     try {
       const response = await UniqueConstraintsService.deleteById(dataflowId, uniqueId);
-      if (response.status >= 200 && response.status <= 299) onUpdateData();
+      if (response.status >= 200 && response.status <= 299) {
+        onUpdateData();
+        refreshList(true);
+      }
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
     } finally {
@@ -152,7 +155,7 @@ export const UniqueConstraints = ({
     return (
       <div className={styles.constraintsWithoutTable}>
         <div className={styles.spinner}>
-          <Spinner style={{ top: 0, left: 0 }} />
+          <Spinner className={styles.spinnerPosition} />
         </div>
       </div>
     );

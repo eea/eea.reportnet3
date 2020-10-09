@@ -4,7 +4,6 @@ import isNil from 'lodash/isNil';
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const printExpression = (expression, tabs) => {
-
   if (
     !isNil(expression.operatorValue) &&
     !isEmpty(expression.operatorValue) &&
@@ -21,23 +20,33 @@ const printExpression = (expression, tabs) => {
         expression.field2
       } )`;
     }
+
     if (expression.valueTypeSelector !== 'value') {
       return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
         getSelectedFieldById(expression.field2, tabs).label
       } )`;
     }
+
     return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
       expression.field2
     } )`;
+  } else if (
+    !isNil(expression.operatorValue) &&
+    !isEmpty(expression.operatorValue) &&
+    (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL')
+  ) {
+    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue}  )`;
   }
   return '';
 };
 
 const printNode = (expression, index, expressions, tabs) => {
   let expressionString = '';
+
   expressionString = `${printSelector(expression, 0, [], tabs)} ${
     !isNil(expressions[index + 1].union) ? expressions[index + 1].union : ''
   }`;
+
   if (expressions.length - 1 > index + 1) {
     expressionString = `${expressionString} ${printSelector(expressions[index + 1], index + 1, expressions, tabs)}`;
   } else {

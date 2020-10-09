@@ -129,6 +129,9 @@ public final class EEAErrorMessage {
   /** The Constant FORBIDDEN: {@value}. */
   public static final String FORBIDDEN = "The user has no permissions";
 
+  /** The Constant UNAUTHORIZED: {@value}. */
+  public static final String UNAUTHORIZED = "Method secured. Authentication needed";
+
   /** The Constant ID_LINK_NOT_FOUND: {@value}. */
   public static final String ID_LINK_NOT_FOUND = "WebLink not found";
 
@@ -179,6 +182,14 @@ public final class EEAErrorMessage {
 
   /** The Constant ERROR_CREATING_RULE: {@value}. */
   public static final String ERROR_CREATING_RULE = "Error creating rule";
+
+  /** The Constant ERROR_CREATING_RULE_TABLE: {@value}. */
+  public static final String ERROR_CREATING_RULE_TABLE =
+      "Error creating rule, IntegrityV0 or sqlSentence should be filled";
+
+  /** The Constant ERROR_CREATING_RULE_FIELD_RECORD: {@value}. */
+  public static final String ERROR_CREATING_RULE_FIELD_RECORD =
+      "Error creating rule, whenCondition or sqlSentence should be filled";
 
   /** The Constant ERROR_CREATING_RULE_NOT_CORRECT: {@value}. */
   public static final String ERROR_CREATING_RULE_NOT_CORRECT =

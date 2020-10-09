@@ -6,27 +6,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Assert;
@@ -78,12 +69,15 @@ public class SpreadDataCommandTest {
   @Mock
   private TableRepository tableRepository;
 
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The attachment repository. */
   @Mock
   private AttachmentRepository attachmentRepository;
 
@@ -130,76 +124,6 @@ public class SpreadDataCommandTest {
     spreadDataCommand.execute(eeaEventVO);
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }
-
-  /**
-   * Execute test no desing.
-   */
-  @Test
-  public void executeTestToPrefill() {
-    eeaEventVO.setData(result);
-    eeaEventVO.setEventType(EventType.SPREAD_DATA_EVENT);
-    DesignDataset desingDataset = new DesignDataset();
-    desingDataset.setId(2L);
-    List<DesignDataset> desingDatasetList = new ArrayList<>();
-    desingDatasetList.add(desingDataset);
-    when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(desingDatasetList);
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema desingTableSchema = new TableSchema();
-    desingTableSchema.setToPrefill(Boolean.TRUE);
-    desingTableSchema.setIdTableSchema(new ObjectId());
-    List<TableSchema> desingTableSchemas = new ArrayList<>();
-    desingTableSchemas.add(desingTableSchema);
-    schema.setTableSchemas(desingTableSchemas);
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    List<RecordValue> recordDesignValues = new ArrayList<>();
-    RecordValue record = new RecordValue();
-    TableValue table = new TableValue();
-    table.setId(1L);
-    record.setTableValue(table);
-    recordDesignValues.add(record);
-    when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
-    List<FieldValue> fieldValues = new ArrayList<>();
-    FieldValue field = new FieldValue();
-    fieldValues.add(field);
-    when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
-        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
-    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
-    datasetVO.setDataProviderId(1L);
-    when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(datasetVO);
-    DataProviderVO dataprovider = new DataProviderVO();
-    dataprovider.setCode("ES");
-    when(representativeControllerZuul.findDataProviderById(Mockito.any())).thenReturn(dataprovider);
-    spreadDataCommand.execute(eeaEventVO);
-    Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
-  }
-
-
-  /**
-   * Execute test not to prefill.
-   */
-  @Test
-  public void executeTestNotToPrefill() {
-    eeaEventVO.setData(result);
-    eeaEventVO.setEventType(EventType.SPREAD_DATA_EVENT);
-    DesignDataset desingDataset = new DesignDataset();
-    desingDataset.setId(2L);
-    List<DesignDataset> desingDatasetList = new ArrayList<>();
-    desingDatasetList.add(desingDataset);
-    when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(desingDatasetList);
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema desingTableSchema = new TableSchema();
-    desingTableSchema.setToPrefill(Boolean.FALSE);
-    desingTableSchema.setIdTableSchema(new ObjectId());
-    List<TableSchema> desingTableSchemas = new ArrayList<>();
-    desingTableSchemas.add(desingTableSchema);
-    schema.setTableSchemas(desingTableSchemas);
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    spreadDataCommand.execute(eeaEventVO);
-    Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
-  }
-
 
   /**
    * Execute test no desing datasets.

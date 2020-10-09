@@ -133,4 +133,56 @@ public class ValidationControllerImpl implements ValidationController {
     return validations;
   }
 
+  /**
+   * Gets the group failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   * @param levelErrorsFilter the level errors filter
+   * @param typeEntitiesFilter the type entities filter
+   * @param originsFilter the origins filter
+   * @return the group failed validations by id dataset
+   */
+  @Override
+  @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
+      @PathVariable("id") Long datasetId,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc,
+      @RequestParam(value = "levelErrorsFilter",
+          required = false) List<ErrorTypeEnum> levelErrorsFilter,
+      @RequestParam(value = "typeEntitiesFilter",
+          required = false) List<EntityTypeEnum> typeEntitiesFilter,
+      @RequestParam(value = "originsFilter", required = false) String originsFilter) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    FailedValidationsDatasetVO validations = null;
+    Pageable pageable = null;
+    if (StringUtils.isNotBlank(fields)) {
+      fields = fields.replace("tableSchemaName", "originName");
+      fields = fields.replace("entityType", "typeEntity");
+      Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
+      PageRequest.of(pageNum, pageSize, order);
+      pageable = PageRequest.of(pageNum, pageSize, order);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize);
+    }
+    try {
+      validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
+          levelErrorsFilter, typeEntitiesFilter, originsFilter, originsFilter, asc);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return validations;
+  }
+
+
 }

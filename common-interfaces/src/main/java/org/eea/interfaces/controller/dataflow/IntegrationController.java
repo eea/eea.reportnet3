@@ -147,4 +147,17 @@ public interface IntegrationController {
    */
   @DeleteMapping("/private/deleteSchemaIntegrations")
   void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId);
+
+
+  /**
+   * Execute external integration.
+   *
+   * @param integrationId the integration id
+   * @param datasetId the dataset id
+   * @param replace the replace
+   */
+  @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
+  void executeExternalIntegration(@PathVariable(value = "integrationId") Long integrationId,
+      @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "replace", defaultValue = "false") Boolean replace);
 }

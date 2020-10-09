@@ -124,4 +124,43 @@ public class LoadValidationsHelper {
     return validation;
 
   }
+
+  /**
+   * Gets the list group validations.
+   *
+   * @param datasetId the dataset id
+   * @param pageable the pageable
+   * @param levelErrorsFilter the level errors filter
+   * @param typeEntitiesFilter the type entities filter
+   * @param originsFilter the origins filter
+   * @param headerField the header field
+   * @param asc the asc
+   * @return the list group validations
+   * @throws EEAException the EEA exception
+   */
+  public FailedValidationsDatasetVO getListGroupValidations(@DatasetId Long datasetId,
+      Pageable pageable, List<ErrorTypeEnum> levelErrorsFilter,
+      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter, String headerField,
+      Boolean asc) throws EEAException {
+
+    DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
+    FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
+    validation.setErrors(new ArrayList<>());
+    validation.setIdDatasetSchema(dataset.getIdDatasetSchema());
+    validation.setIdDataset(datasetId);
+
+    validation.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
+        typeEntitiesFilter, originsFilter, pageable, headerField, asc, true));
+    validation.setTotalRecords(validationRepository.count());
+    validation.setTotalFilteredRecords(
+        Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
+            typeEntitiesFilter, originsFilter, pageable, headerField, asc, false).size()));
+    LOG.info(
+        "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
+        datasetId, validation.getErrors().size(), pageable.getPageNumber(), pageable.getPageSize());
+
+
+    return validation;
+
+  }
 }
