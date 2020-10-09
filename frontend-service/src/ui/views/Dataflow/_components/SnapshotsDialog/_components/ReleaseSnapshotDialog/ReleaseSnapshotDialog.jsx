@@ -24,6 +24,7 @@ export const ReleaseSnapshotDialog = ({
   isReleasedDialogVisible,
   onLoadSnapshotList,
   setIsLoading,
+  setSnapshotIdToRelease,
   snapshotDataToRelease,
   snapshotDescription
 }) => {
@@ -58,6 +59,7 @@ export const ReleaseSnapshotDialog = ({
 
   const onReleaseSnapshot = async snapshotId => {
     setIsLoading(true);
+    setSnapshotIdToRelease(snapshotId);
     try {
       await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotId);
       onLoadSnapshotList(datasetId);

@@ -16,26 +16,26 @@ export const SnapshotItem = ({
   isLoading,
   itemData,
   showReleaseDialog,
-  snapshotDataToRelease,
+  snapshotIdToRelease,
   snapshotReleasedId
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const getSnapshotItemIcon = () => {
-    if (snapshotDataToRelease) {
-      return itemData.id === snapshotDataToRelease.id ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
+    if (snapshotIdToRelease) {
+      return itemData.id === snapshotIdToRelease ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
     } else {
       return itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
     }
   };
 
   const getSnapshotTextStyle = () => {
-    if (snapshotDataToRelease) {
-      if (itemData.id === snapshotDataToRelease.id) {
+    if (snapshotIdToRelease) {
+      if (itemData.id === snapshotIdToRelease) {
         return `${styles.is_released_snapshot}`;
-      } else if (snapshotReleasedId !== snapshotDataToRelease.id) {
-        return itemData.id === snapshotDataToRelease.id && `${styles.is_released_snapshot}`;
+      } else if (snapshotReleasedId !== snapshotIdToRelease) {
+        return itemData.id === snapshotIdToRelease && `${styles.is_released_snapshot}`;
       } else {
         return ``;
       }
@@ -45,11 +45,11 @@ export const SnapshotItem = ({
   };
 
   const getSnapshotIconStyle = () => {
-    if (snapshotDataToRelease) {
-      if (itemData.id === snapshotDataToRelease.id) {
+    if (snapshotIdToRelease) {
+      if (itemData.id === snapshotIdToRelease) {
         return 'success';
-      } else if (snapshotReleasedId !== snapshotDataToRelease.id) {
-        return itemData.id === snapshotDataToRelease.id && 'success';
+      } else if (snapshotReleasedId !== snapshotIdToRelease) {
+        return itemData.id === snapshotIdToRelease && 'success';
       } else {
         return null;
       }
@@ -62,7 +62,6 @@ export const SnapshotItem = ({
     <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          {/* <span className={getSnapshotIconTextStyle(false)}> */}
           <span className={getSnapshotTextStyle()}>
             {moment(itemData.creationDate).format(
               `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
@@ -81,7 +80,6 @@ export const SnapshotItem = ({
           </span>
           <div className={styles.listActions}>
             <Button
-              // className={`${styles.btn} rp-btn ${getSnapshotIconTextStyle(true)}`}
               className={`${styles.btn} rp-btn ${getSnapshotIconStyle()}`}
               disabled={isLoading || itemData.isBlocked}
               icon={getSnapshotItemIcon()}

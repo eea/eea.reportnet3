@@ -13,7 +13,7 @@ export const SnapshotsList = ({
   isLoading,
   showReleaseDialog,
   snapshotsListData,
-  snapshotDataToRelease,
+  snapshotIdToRelease,
   snapshotReleasedId
 }) => {
   const resources = useContext(ResourcesContext);
@@ -29,7 +29,7 @@ export const SnapshotsList = ({
                 isLoading={isLoading}
                 itemData={item}
                 showReleaseDialog={showReleaseDialog}
-                snapshotDataToRelease={snapshotDataToRelease}
+                snapshotIdToRelease={snapshotIdToRelease}
                 snapshotReleasedId={snapshotReleasedId}
               />
             </div>

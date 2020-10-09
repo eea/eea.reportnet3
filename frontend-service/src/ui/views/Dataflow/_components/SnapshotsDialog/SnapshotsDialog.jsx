@@ -28,6 +28,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
+  const [snapshotIdToRelease, setSnapshotIdToRelease] = useState('');
   const [snapshotDescription, setSnapshotDescription] = useState();
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotReleasedId, setSnapshotReleasedId] = useState('');
@@ -44,7 +45,20 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
 
   if (snapshotReleasedId === snapshotDataToRelease.id) {
     setSnapshotDataToRelease('');
+    setSnapshotIdToRelease('');
   }
+
+  const clearSnapshotToRelease = () => {
+    setSnapshotDataToRelease('');
+    setSnapshotIdToRelease('');
+  };
+
+  console.log('snapshotIdToRelease', snapshotIdToRelease);
+
+  useCheckNotifications(
+    ['RELEASE_DATASET_SNAPSHOT_FAILED_EVENT', 'DATA_COLLECTION_LOCKED_ERROR', 'RELEASED_BY_ID_REPORTER_ERROR'],
+    clearSnapshotToRelease
+  );
 
   useEffect(() => {
     if (isSnapshotDialogVisible) {
@@ -182,7 +196,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           isLoading={isLoading}
           showReleaseDialog={onShowReleaseDialog}
           snapshotsListData={snapshotsListData}
-          snapshotDataToRelease={snapshotDataToRelease}
+          snapshotIdToRelease={snapshotIdToRelease}
           snapshotReleasedId={snapshotReleasedId}
         />
       </Dialog>
@@ -196,6 +210,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
           onLoadSnapshotList={onLoadSnapshotList}
           setIsLoading={setIsLoading}
+          setSnapshotIdToRelease={setSnapshotIdToRelease}
           snapshotDataToRelease={snapshotDataToRelease}
           snapshotDescription={snapshotDescription}
         />
