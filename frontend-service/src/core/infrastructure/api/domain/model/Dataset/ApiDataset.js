@@ -357,9 +357,7 @@ export const apiDataset = {
   updateFieldById: async (datasetId, datasetTableRecords) => {
     try {
       const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateTableDataField, {
-          datasetId: datasetId
-        }),
+        url: getUrl(DatasetConfig.updateTableDataField, { datasetId: datasetId }),
         data: datasetTableRecords
       });
 
@@ -399,13 +397,13 @@ export const apiDataset = {
       return false;
     }
   },
-  updateSchemaDescriptionById: async (datasetId, datasetSchemaDescription) => {
+  updateDatasetSchemaById: async (datasetId, datasetSchema) => {
     try {
       const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateDatasetSchemaDescriptionDesign, {
+        url: getUrl(DatasetConfig.updateDatasetSchemaDesign, {
           datasetId
         }),
-        data: { description: datasetSchemaDescription }
+        data: datasetSchema
       });
 
       return response.status >= 200 && response.status <= 299;

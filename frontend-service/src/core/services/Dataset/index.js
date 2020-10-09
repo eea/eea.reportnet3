@@ -26,7 +26,7 @@ import { GetStatistics } from './GetStatistics';
 import { GroupedErrors } from './GroupedErrors';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
-import { UpdateDatasetDescriptionDesign } from './UpdateDatasetDescriptionDesign';
+import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { UpdateRecordFieldDesign } from './UpdateRecordFieldDesign';
@@ -62,7 +62,7 @@ export const DatasetService = {
   orderTableDesign: OrderTableDesign({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),
   tableDataById: GetData({ datasetRepository }),
-  updateDatasetDescriptionDesign: UpdateDatasetDescriptionDesign({ datasetRepository }),
+  updateDatasetSchemaDesign: UpdateDatasetSchemaDesign({ datasetRepository }),
   updateFieldById: UpdateField({ datasetRepository }),
   updateRecordFieldDesign: UpdateRecordFieldDesign({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),

@@ -1,5 +1,3 @@
-import isObject from 'lodash/isObject';
-
 import { config } from 'conf';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';

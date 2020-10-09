@@ -15,7 +15,8 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
-        schemaTables: payload.schemaTables
+        schemaTables: payload.schemaTables,
+        webform: payload.webform
       };
 
     case 'GET_METADATA':
@@ -138,6 +139,12 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
       return { ...state, isValidationViewerVisible: payload };
+
+    case 'ON_CHANGE_VIEW':
+      return { ...state, viewType: payload.viewType };
+
+    case 'UPDATE_WEBFORM':
+      return { ...state, webform: payload };
 
     default:
       return state;

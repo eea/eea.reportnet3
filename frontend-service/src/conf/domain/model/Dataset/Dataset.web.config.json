@@ -28,7 +28,7 @@
   "orderTableSchemaDesign": "/dataschema/{:datasetId}/tableSchema/order",
   "referencedFieldValues": "/dataset/{:datasetId}/getFieldsValuesReferenced?idFieldSchema={:fieldSchemaId}&searchValue={:searchToken}",
   "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
-  "updateDatasetSchemaDescriptionDesign": "/dataschema/{:datasetId}/datasetSchema",
+  "updateDatasetSchemaDesign": "/dataschema/{:datasetId}/datasetSchema",
   "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
   "updateTableDataField": "/dataset/{:datasetId}/updateField",
   "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",

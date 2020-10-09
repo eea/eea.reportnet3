@@ -58,6 +58,26 @@ const MainLayout = ({ children, isPublic = false }) => {
     calculateMainContentWidth();
   }, [leftSideBarContext.isLeftSideBarOpened]);
 
+  useEffect(() => {
+    window.addEventListener(
+      'dragover',
+      function (e) {
+        // e.dataTransfer.effectAllowed = 'none';
+        e.preventDefault();
+        e = e || window.event;
+      },
+      false
+    );
+    window.addEventListener(
+      'drop',
+      function (e) {
+        e = e || window.event;
+        e.preventDefault();
+      },
+      false
+    );
+  });
+
   const getUserConfiguration = async () => {
     try {
       const userConfiguration = await UserService.getConfiguration();
