@@ -1,6 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const checkDates = (betweenDates, data) => {
   if (!isEmpty(betweenDates)) {
@@ -54,14 +54,14 @@ const checkSelected = (state, data, selectedKeys = []) => {
   return true;
 };
 
-const getEndOfDay = date => new Date(moment(date).endOf('day').format()).getTime() / 1000;
+const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime() / 1000;
 
 const getSearchKeys = data => {
   if (!isNil(data))
     return Object.keys(Array.isArray(data) ? data[0] : data).filter(item => item !== 'id' && item !== 'key');
 };
 
-const getStartOfDay = date => new Date(moment(date).startOf('day').format()).getTime() / 1000;
+const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime() / 1000;
 
 const onApplyFilters = ({
   dateOptions = [],

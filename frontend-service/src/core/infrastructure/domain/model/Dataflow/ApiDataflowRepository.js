@@ -3,7 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import { config } from 'conf';
 import DataflowConf from 'conf/dataflow.config.json';
@@ -348,7 +348,7 @@ const parseDataflowDTO = dataflowDTO =>
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
@@ -466,7 +466,7 @@ const parseObligationDTO = obligationDTO => {
       countries: obligationDTO.countries,
       description: obligationDTO.description,
       expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+        ? dayjs.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
         : null,
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),

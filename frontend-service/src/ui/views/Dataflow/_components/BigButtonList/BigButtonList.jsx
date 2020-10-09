@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import remove from 'lodash/remove';
 import uniqBy from 'lodash/uniqBy';
 
@@ -489,7 +489,7 @@ export const BigButtonList = ({
             <p
               dangerouslySetInnerHTML={{
                 __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                  expirationData: moment(dataflowState.obligations.expirationDate).format(
+                  expirationData: dayjs(dataflowState.obligations.expirationDate).format(
                     userContext.userProps.dateFormat
                   )
                 })
@@ -536,13 +536,14 @@ export const BigButtonList = ({
           <p>{resources.messages['exportEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
+
       {isConfirmCollectionDialog && (
         <ConfirmDialog
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() =>
-            onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
+            onCreateDataCollection(new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
           }
           onHide={() => setIsConfirmCollectionDialog(false)}
           visible={isConfirmCollectionDialog}>

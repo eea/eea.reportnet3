@@ -1,6 +1,6 @@
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
 
 import { apiObligation } from 'core/infrastructure/api/domain/model/Obligation';
 
@@ -96,7 +96,7 @@ const parseObligation = obligationDTO =>
     countries: obligationDTO.countries,
     description: obligationDTO.description,
     expirationDate:
-      obligationDTO.nextDeadline > 0 ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD') : null,
+      obligationDTO.nextDeadline > 0 ? dayjs.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD') : null,
     issues: obligationDTO.issues,
     legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
     obligationId: obligationDTO.obligationId,

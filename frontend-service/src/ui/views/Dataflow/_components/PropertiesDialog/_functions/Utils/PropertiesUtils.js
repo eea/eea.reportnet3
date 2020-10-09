@@ -1,5 +1,5 @@
+import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
 
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
@@ -14,7 +14,7 @@ const parseObligationsData = (data, format) => {
           comment: data.obligations.comment,
           reportingFrequency: data.obligations.reportingFrequency,
           nextReportDue: !isNil(data.obligations.expirationDate)
-            ? moment(data.obligations.expirationDate).format(format)
+            ? dayjs(data.obligations.expirationDate).format(format)
             : '-'
         }
       },

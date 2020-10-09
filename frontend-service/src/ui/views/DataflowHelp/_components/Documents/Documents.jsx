@@ -1,9 +1,9 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
 
 import styles from './Documents.module.scss';
 
@@ -61,7 +61,7 @@ const Documents = ({
 
   const createFileName = title => `${title.split(' ').join('_')}`;
 
-  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(userContext.userProps.dateFormat)}</span>;
+  const dateColumnTemplate = rowData => <span>{dayjs(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
     <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>

@@ -1,5 +1,4 @@
-import moment from 'moment';
-
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -32,7 +31,7 @@ const login = async code => {
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - moment().unix();
+  const remain = userDTO.accessTokenExpiration - dayjs().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
@@ -150,7 +149,7 @@ const oldLogin = async (userName, password) => {
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - moment().unix();
+  const remain = userDTO.accessTokenExpiration - dayjs().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
@@ -174,7 +173,7 @@ const refreshToken = async () => {
     user.firstName = userInfoDTO.data.firstName;
     user.lastName = userInfoDTO.data.lastName;
     //calculate difference between now and expiration
-    const remain = userDTO.accessTokenExpiration - moment().unix();
+    const remain = userDTO.accessTokenExpiration - dayjs().unix();
     timeOut((remain - 10) * 1000);
     return user;
   } catch (error) {

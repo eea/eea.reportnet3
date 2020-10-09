@@ -1,8 +1,6 @@
 import React, { useContext } from 'react';
 
-import moment from 'moment';
-
-import { isEmpty } from 'lodash';
+import dayjs from 'dayjs';
 
 import styles from './SnapshotItem.module.scss';
 
@@ -54,7 +52,7 @@ export const SnapshotItem = ({
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
           <span className={getSnapshotIconTextStyle(false)}>
-            {moment(itemData.creationDate).format(
+            {dayjs(itemData.creationDate).format(
               `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                 userContext.userProps.amPm24h ? '' : ' A'
               }`
