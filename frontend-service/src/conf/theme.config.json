@@ -539,5 +539,6 @@
     "eu-link-hover-footer-bottom": "var(--c-corporate-yellow-lighter)"
   },
   "baseHeaderHeight": 180,
+  "cookieConsentHeight": 160,
   "headerCollapse": true
 }
