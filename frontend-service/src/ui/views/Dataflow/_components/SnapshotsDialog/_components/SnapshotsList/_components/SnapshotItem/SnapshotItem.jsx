@@ -35,9 +35,7 @@ export const SnapshotItem = ({
       if (itemData.id === snapshotIdToRelease) {
         return `${styles.is_released_snapshot}`;
       } else if (snapshotReleasedId !== snapshotIdToRelease) {
-        return itemData.id === snapshotIdToRelease && `${styles.is_released_snapshot}`;
-      } else {
-        return ``;
+        return itemData.id === snapshotIdToRelease ? `${styles.is_released_snapshot}` : ``;
       }
     } else {
       return itemData.isReleased ? `${styles.is_released_snapshot}` : ``;
@@ -49,9 +47,7 @@ export const SnapshotItem = ({
       if (itemData.id === snapshotIdToRelease) {
         return 'success';
       } else if (snapshotReleasedId !== snapshotIdToRelease) {
-        return itemData.id === snapshotIdToRelease && 'success';
-      } else {
-        return null;
+        return itemData.id === snapshotIdToRelease ? 'success' : null;
       }
     } else {
       return itemData.isReleased ? 'success' : null;
