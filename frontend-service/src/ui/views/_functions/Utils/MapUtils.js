@@ -21,7 +21,7 @@ const checkValidCoordinates = coordinates => {
   let isValid = true;
   const splittedCoordinates = Array.isArray(coordinates) ? coordinates : coordinates.split(',');
   splittedCoordinates.forEach(coordinate => {
-    if (isNil(coordinate) || coordinate.toString().trim() === '') isValid = false;
+    if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(parseFloat(coordinate))) isValid = false;
   });
   return isValid;
 };
