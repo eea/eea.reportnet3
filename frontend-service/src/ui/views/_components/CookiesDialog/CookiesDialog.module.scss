@@ -1,7 +1,32 @@
 .Wrapper {
   width: 982px;
-  height: 152px;
+  height: 160px;
   background-color: var(--cookies-bg);
   color: var(--white);
   align-self: center;
+  padding: 1rem;
+  h3 {
+    margin: 0 0 0.5rem 0;
+  }
+  > p {
+    a {
+      color: var(--white);
+      text-decoration: underline;
+    }
+  }
+  > div {
+    button {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+      padding: 0.5rem;
+      font-size: 1rem;
+      &:hover {
+        cursor: pointer;
+      }
+      &:first-of-type {
+        margin-right: 0.5rem;
+      }
+    }
+  }
 }
