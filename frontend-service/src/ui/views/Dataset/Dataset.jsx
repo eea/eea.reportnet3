@@ -859,11 +859,11 @@ export const Dataset = withRouter(({ match, history }) => {
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}
-            onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
           />
         </Dialog>
       )}
+
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           dialogClassName={styles.Dialog}

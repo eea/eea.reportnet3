@@ -867,7 +867,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
-            onHideValidationsDialog={onHideValidationsDialog}
           />
         </Dialog>
       );
