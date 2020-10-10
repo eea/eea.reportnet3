@@ -39,7 +39,7 @@ const login = async code => {
 const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
-  userStorage.removeLocalStorage();
+  userStorage.removeLocalProperty('redirectUrl');
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
