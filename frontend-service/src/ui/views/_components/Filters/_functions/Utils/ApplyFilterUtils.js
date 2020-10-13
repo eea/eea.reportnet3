@@ -58,7 +58,9 @@ const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime(
 
 const getSearchKeys = data => {
   if (!isNil(data))
-    return Object.keys(Array.isArray(data) ? data[0] : data).filter(item => item !== 'id' && item !== 'key');
+    return Object.keys(Array.isArray(data) && !isEmpty(data) ? data[0] : data).filter(
+      item => item !== 'id' && item !== 'key'
+    );
 };
 
 const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime() / 1000;
