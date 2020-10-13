@@ -12,7 +12,7 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const CookiesDialog = () => {
   const themeContext = useContext(ThemeContext);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const cookieConsent = userStorage.getPropertyFromLocalStorage('cookieConsent');
