@@ -2,8 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'conf';
-
 import styles from './CookiesDialog.module.scss';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
@@ -45,8 +43,8 @@ export const CookiesDialog = () => {
           <a href="https://ec.europa.eu/info/cookies_en">how you can change your settings</a>.
         </p>
         <div>
-          <button onClick={e => onAcceptCookies()}>I accept cookies</button>
-          <button onClick={e => onRefuseCookies()}>I refuse cookies</button>
+          <button onClick={() => onAcceptCookies()}>I accept cookies</button>
+          <button onClick={() => onRefuseCookies()}>I refuse cookies</button>
         </div>
       </div>
     )
