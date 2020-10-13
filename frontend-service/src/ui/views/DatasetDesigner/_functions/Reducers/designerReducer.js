@@ -9,6 +9,10 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_DATASET_DATA':
       return {
         ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          selectedRecordErrorId: -1
+        },
         datasetDescription: payload.description,
         datasetSchema: payload.datasetSchema,
         datasetSchemaAllTables: payload.tables,
@@ -96,6 +100,7 @@ export const designerReducer = (state, { type, payload }) => {
           isGroupedValidationSelected: payload.isGroupedValidationSelected,
           isValidationSelected: false,
           recordPositionId: -1,
+          selectedRecordErrorId: -1,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage

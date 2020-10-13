@@ -47,18 +47,6 @@ export const euDatasetReducer = (state, { type, payload }) => {
         tableSchemaNames: payload.tableSchemaNames
       };
 
-    case 'ON_SELECT_VALIDATION':
-      return {
-        ...state,
-        dataViewerOptions: {
-          ...state.dataViewerOptions,
-          activeIndex: payload.activeIndex,
-          recordPositionId: payload.recordPositionId,
-          selectedRecordErrorId: payload.selectedRecordErrorId
-        },
-        isValidationSelected: payload.isValidationSelected
-      };
-
     case 'ON_TAB_CHANGE':
       return { ...state, dataViewerOptions: { ...state.dataViewerOptions, activeIndex: payload.activeIndex } };
 

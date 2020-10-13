@@ -43,7 +43,8 @@ const checkValidCoordinates = coordinates => {
     isValid = false;
   } else {
     splittedCoordinates.forEach(coordinate => {
-      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(parseFloat(coordinate))) isValid = false;
+      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim()))
+        isValid = false;
     });
   }
   return isValid;
