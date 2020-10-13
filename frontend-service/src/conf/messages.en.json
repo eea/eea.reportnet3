@@ -890,6 +890,10 @@
     "configureWebform": "Configure webform",
     "configureWebformMessage": "Please, select a webform to configure it",
     "configureWebformPlaceholder": "Select a webform",
+    "toggleGroup": "Toggle group/ungroup errors",
+    "grouped": "Grouped",
+    "ungrouped": "Ungrouped",
+    "numberOfRecords": "Number of records",
     "uploadReplaceAttachment": "Replace file"
   }
 }

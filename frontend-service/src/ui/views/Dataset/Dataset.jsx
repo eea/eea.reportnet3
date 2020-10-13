@@ -66,9 +66,15 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
+    activeIndex: null,
+    isGroupedValidationDeleted: false,
+    isGroupedValidationSelected: false,
+    isValidationSelected: false,
     recordPositionId: -1,
     selectedRecordErrorId: -1,
-    activeIndex: null
+    selectedRuleId: '',
+    selectedRuleLevelError: '',
+    selectedRuleMessage: ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -92,14 +98,13 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
-  const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaId, setTableSchemaId] = useState();
-  const [tableSchemaNames, setTableSchemaNames] = useState([]);
+  const [schemaTables, setSchemaTables] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
@@ -291,6 +296,13 @@ export const Dataset = withRouter(({ match, history }) => {
     const menu = button.nextElementSibling;
     menu.style.top = top;
     menu.style.left = left;
+  };
+
+  const onChangeIsValidationSelected = selected => {
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      isValidationSelected: selected
+    });
   };
 
   const onConfirmDelete = async () => {
@@ -490,10 +502,10 @@ export const Dataset = withRouter(({ match, history }) => {
       );
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
-      const tableSchemaNamesList = [];
+      const tableSchemaList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
-          tableSchemaNamesList.push(tableSchema.tableSchemaName);
+          tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
           return {
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
@@ -505,7 +517,7 @@ export const Dataset = withRouter(({ match, history }) => {
           };
         })
       );
-      setTableSchemaNames(tableSchemaNamesList);
+      setSchemaTables(tableSchemaList);
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
@@ -553,13 +565,54 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+  const onHideSelectGroupedValidation = () => {
     setDataViewerOptions({
-      recordPositionId: posIdRecord,
-      selectedRecordErrorId: selectedRecordErrorId,
-      activeIndex: tableSchemaId
+      ...dataViewerOptions,
+      isGroupedValidationDeleted: true,
+      isGroupedValidationSelected: false,
+      isValidationSelected: false,
+      recordPositionId: -1,
+      selectedRuleMessage: '',
+      selectedRuleLevelError: '',
+      selectedRuleId: '',
+      selectedRuleMessage: ''
     });
-    setIsValidationSelected(true);
+  };
+
+  const onSelectValidation = (
+    tableSchemaId,
+    posIdRecord,
+    selectedRecordErrorId,
+    selectedRuleId,
+    grouped = true,
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
+    if (grouped) {
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        activeIndex: tableSchemaId,
+        isGroupedValidationDeleted: false,
+        isGroupedValidationSelected: true,
+        recordPositionId: -1,
+        selectedRuleId,
+        selectedRuleLevelError,
+        selectedRuleMessage
+      });
+    } else {
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        activeIndex: tableSchemaId,
+        isValidationSelected: true,
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId,
+        selectedRecordErrorId,
+        selectedRuleId: '',
+        selectedRuleLevelError: '',
+        selectedRuleMessage: ''
+      });
+    }
+
     onSetVisible(setValidationsVisible, false);
   };
 
@@ -568,7 +621,15 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = tableSchemaId => {
-    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      activeIndex: tableSchemaId.index,
+      isGroupedValidationDeleted: true,
+      isGroupedValidationSelected: false,
+      selectedRuleId: '',
+      selectedRuleLevelError: '',
+      selectedRuleMessage: ''
+    });
   };
 
   const datasetTitle = () => {
@@ -810,7 +871,7 @@ export const Dataset = withRouter(({ match, history }) => {
           <Dashboard
             levelErrorTypes={levelErrorTypes}
             refresh={dashDialogVisible}
-            tableSchemaNames={tableSchemaNames}
+            tableSchemaNames={schemaTables.map(table => table.name)}
           />
         </Dialog>
       )}
@@ -818,14 +879,20 @@ export const Dataset = withRouter(({ match, history }) => {
         activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
         isDatasetDeleted={isDataDeleted}
-        isValidationSelected={isValidationSelected}
+        isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+        isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+        isValidationSelected={dataViewerOptions.isValidationSelected}
         levelErrorTypes={levelErrorTypes}
+        onChangeIsValidationSelected={onChangeIsValidationSelected}
+        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         recordPositionId={dataViewerOptions.recordPositionId}
         reporting={true}
         selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-        setIsValidationSelected={setIsValidationSelected}
+        selectedRuleId={dataViewerOptions.selectedRuleId}
+        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />
@@ -844,7 +911,7 @@ export const Dataset = withRouter(({ match, history }) => {
             hasWritePermissions={hasWritePermissions}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
-            tableSchemaNames={tableSchemaNames}
+            schemaTables={schemaTables}
             visible={validationsVisible}
           />
         </Dialog>
