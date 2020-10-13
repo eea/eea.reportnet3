@@ -5,7 +5,7 @@ import styles from './EuHeader.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { InputText } from 'primereact/inputtext';
+import { CookiesDialog } from 'ui/views/_components/CookiesDialog';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -55,6 +55,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
           )}
         </div>
       </div>
+      <CookiesDialog />
       <div id="euHeader" style={euHeaderElementStyle} className={styles.euHeader}>
         <div className={styles.europeanUnionLogo}>
           <a

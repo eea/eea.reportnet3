@@ -35,7 +35,6 @@ const TabsValidations = withRouter(
     dataset,
     datasetSchemaAllTables,
     datasetSchemaId,
-    onHideValidationsDialog,
     reporting = false,
     setHasValidations = () => {}
   }) => {

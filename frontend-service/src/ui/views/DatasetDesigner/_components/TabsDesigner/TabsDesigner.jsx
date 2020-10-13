@@ -32,18 +32,24 @@ export const TabsDesigner = withRouter(
     editable = false,
     history,
     isPreviewModeOn,
+    isGroupedValidationDeleted,
+    isGroupedValidationSelected,
     isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
     match,
+    onChangeIsValidationSelected,
     onChangeReference,
+    onHideSelectGroupedValidation,
     onLoadTableData,
     onTabChange,
     onUpdateTable,
     recordPositionId,
     selectedRecordErrorId,
-    setActiveIndex,
-    setIsValidationSelected
+    selectedRuleId,
+    selectedRuleLevelError,
+    selectedRuleMessage,
+    setActiveIndex
   }) => {
     const {
       params: { dataflowId, datasetId }
@@ -193,7 +199,7 @@ export const TabsDesigner = withRouter(
     const onTabClicked = event => {
       if (event.header !== '') {
         setActiveIndex(event.index);
-        setIsValidationSelected(false);
+        onChangeIsValidationSelected(false);
       }
     };
 
@@ -422,6 +428,8 @@ export const TabsDesigner = withRouter(
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
                         isPreviewModeOn={isPreviewModeOn}
+                        isGroupedValidationDeleted={isGroupedValidationDeleted}
+                        isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}
                         key={tab.index}
                         manageDialogs={manageDialogs}
@@ -429,6 +437,7 @@ export const TabsDesigner = withRouter(
                         onChangeFields={onChangeFields}
                         onChangeReference={onChangeReference}
                         onChangeTableProperties={onChangeTableProperties}
+                        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                         onLoadTableData={onLoadTableData}
                         recordPositionId={
                           !isNaN(activeIndex)
@@ -448,7 +457,10 @@ export const TabsDesigner = withRouter(
                             ? selectedRecordErrorId
                             : -1
                         }
-                        setIsValidationSelected={setIsValidationSelected}
+                        selectedRuleId={selectedRuleId}
+                        selectedRuleLevelError={selectedRuleLevelError}
+                        selectedRuleMessage={selectedRuleMessage}
+                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         table={tabs[i]}
                       />
                     ) : (
