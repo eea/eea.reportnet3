@@ -300,6 +300,7 @@ export const Filters = ({
             icon="cancel"
             onClick={() => {
               onFilterData(property, []);
+              document.querySelector(`#${property}`).value = null;
               onAnimateLabel(property, false);
             }}
           />
