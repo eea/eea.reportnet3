@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { config } from 'conf';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './CookiesDialog.module.scss';
 
@@ -10,14 +10,14 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const CookiesDialog = () => {
   const themeContext = useContext(ThemeContext);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const cookieConsent = userStorage.getPropertyFromLocalStorage('cookieConsent');
-    if (cookieConsent) {
-      setIsVisible(cookieConsent);
-    } else {
+    if (isUndefined(cookieConsent)) {
       setIsVisible(true);
+    } else {
+      setIsVisible(false);
     }
   }, []);
 
@@ -43,8 +43,8 @@ export const CookiesDialog = () => {
           <a href="https://ec.europa.eu/info/cookies_en">how you can change your settings</a>.
         </p>
         <div>
-          <button onClick={e => onAcceptCookies()}>I accept cookies</button>
-          <button onClick={e => onRefuseCookies()}>I refuse cookies</button>
+          <button onClick={() => onAcceptCookies()}>I accept cookies</button>
+          <button onClick={() => onRefuseCookies()}>I refuse cookies</button>
         </div>
       </div>
     )
