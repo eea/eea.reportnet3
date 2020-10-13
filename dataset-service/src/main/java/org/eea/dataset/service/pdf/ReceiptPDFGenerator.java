@@ -1,11 +1,12 @@
 package org.eea.dataset.service.pdf;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -35,10 +36,16 @@ public class ReceiptPDFGenerator {
   private static final String BACKGROUND = "pdf/receipt_background.png";
 
   /** The Constant POINTS_PER_INCH. */
-  private static final float POINTS_PER_INCH = 72;
+  private static final float POINTS_PER_INCH = 300;
 
   /** The Constant POINTS_PER_MM. */
   private static final float POINTS_PER_MM = 1 / (10 * 2.54f) * POINTS_PER_INCH;
+
+  /** A rectangle the size of A5 Paper (landscape). */
+  public static final PDRectangle A5_LS = new PDRectangle(210 * POINTS_PER_MM, 148 * POINTS_PER_MM);
+
+  /** A rectangle the size of A5 Paper. */
+  public static final PDRectangle A4 = new PDRectangle(210 * POINTS_PER_MM, 297 * POINTS_PER_MM);
 
   /**
    * Generate PDF.
@@ -49,8 +56,8 @@ public class ReceiptPDFGenerator {
   public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
     if (out != null) {
       try (PDDocument document = new PDDocument()) {
-        // Create and add an A3 landscape page
-        PDPage page = new PDPage(new PDRectangle(210 * POINTS_PER_MM, 148 * POINTS_PER_MM));
+        // Create and add an A4 page
+        PDPage page = new PDPage(A4);
         document.addPage(page);
 
         printContentPDF(receipt, document, page);
@@ -76,9 +83,14 @@ public class ReceiptPDFGenerator {
   private void printContentPDF(ReleaseReceiptVO receipt, PDDocument document, PDPage page)
       throws IOException {
 
+    float x;
+    float y;
+    float spaceBetweenLines;
+    float fontSize;
     String text;
     ZoneId timeZone = ZoneId.of("UTC");
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);
     PDType1Font font = PDType1Font.HELVETICA;
     PDType1Font fontBold = PDType1Font.HELVETICA_BOLD;
@@ -88,31 +100,93 @@ public class ReceiptPDFGenerator {
     PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, file, BACKGROUND);
     contentStream.drawImage(pdImage, 0, 0);
 
-    // Print receipt information
-    printLinePDF(contentStream, "CONFIRMATION RECEIPT", font, 25, 25, 345);
-    printLinePDF(contentStream, "Dataset", fontBold, 12, 25, 295);
-    printLinePDF(contentStream, "Date", fontBold, 12, 458, 295);
-    printLinePDF(contentStream, "Date: " + ZonedDateTime.now(timeZone).format(dateFormatter), font,
-        12, 25, 386);
+    // Print receipt left headers
+    x = 133f;
+    y = 3334f;
+    fontSize = 40f;
+    spaceBetweenLines = 20f;
+    printLinePDF(contentStream, "European Environment Agency", fontBold, fontSize, x, y);
+    y -= spaceBetweenLines + fontSize;
+    printLinePDF(contentStream, "Kongens Nytorv 6", fontBold, fontSize, x, y);
+    y -= spaceBetweenLines + fontSize;
+    printLinePDF(contentStream, "Dk 1050 Copenhagen K", fontBold, fontSize, x, y);
 
-    text = "Representative: " + receipt.getProviderAssignation();
-    printLinePDF(contentStream, text, font, 12, 570 - font.getStringWidth(text) / 1000 * 12, 386);
-    printLinePDF(contentStream, receipt.getDataflowName(), font, 12, 25, 325);
+    // Print receipt right headers
+    text = ZonedDateTime.now(timeZone).format(dateFormatter);
+    x = 2346 - font.getStringWidth(text) / 1000 * fontSize;
+    y = 3334f;
+    fontSize = 40f;
+    printLinePDF(contentStream, text, font, fontSize, x, y);
+    text = "Receipt date: ";
+    x -= fontBold.getStringWidth(text) / 1000 * fontSize;
+    printLinePDF(contentStream, text, fontBold, fontSize, x, y);
+    text = receipt.getProviderAssignation();
+    x = 2346 - font.getStringWidth(text) / 1000 * fontSize;
+    y -= spaceBetweenLines + fontSize;
+    printLinePDF(contentStream, text, font, fontSize, x, y);
+    text = "Representative: ";
+    x -= fontBold.getStringWidth(text) / 1000 * fontSize;
+    printLinePDF(contentStream, text, fontBold, fontSize, x, y);
 
-    // Print schemas information
-    float spaceBetweenLines = 20f;
-    float y = 295f - spaceBetweenLines;
-    contentStream.setNonStrokingColor(Color.DARK_GRAY);
+    // Print concern information
+    fontSize = 90f;
+    x = 133f;
+    y = 2900f;
+    text = "To Whom It May Concern";
+    printLinePDF(contentStream, text, fontBold, fontSize, x, y);
+    y -= spaceBetweenLines * 2 + fontSize;
+    fontSize = 58f;
+    text = "This is a confirmation of receipt for national data submission under";
+    printLinePDF(contentStream, text, font, fontSize, x, y);
+    y -= spaceBetweenLines + fontSize;
+    text = "the reporting obligation";
+    printLinePDF(contentStream, text, font, fontSize, x, y);
+
+    // Print dataflow name
+    fontSize = 90f;
+    y -= spaceBetweenLines * 2 + fontSize + 20f;
+    for (String line : splitInDifferentLines(receipt.getDataflowName(), 2213f, fontBold,
+        fontSize)) {
+      printLinePDF(contentStream, line, fontBold, fontSize, x, y);
+      y -= spaceBetweenLines + fontSize;
+    }
+    fontSize = 58f;
+
+    // Print obligation information
+    y -= 18f;
+    text = "Obligation: ";
+    printLinePDF(contentStream, text, fontBold, fontSize, x, y);
+    x += fontBold.getStringWidth(text) / 1000 * fontSize;
+    for (String line : splitInDifferentLines(receipt.getObligationTitle(), 2213 - x, font,
+        fontSize)) {
+      printLinePDF(contentStream, line, font, fontSize, x, y);
+      y -= spaceBetweenLines + fontSize;
+    }
+    text = "https://rod.eionet.europa.eu/obligations/" + receipt.getObligationId();
+    printLinePDF(contentStream, text, font, fontSize, x, y);
+
+    // Print dataset list
+    y -= spaceBetweenLines * 2 + fontSize;
+    printLinePDF(contentStream, "Datasets", fontBold, fontSize, 133f, y);
+    printLinePDF(contentStream, "Release date", fontBold, fontSize, 1672f, y);
+    spaceBetweenLines = 40f;
     for (ReportingDatasetVO dataset : receipt.getDatasets()) {
-      printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, 12, 25, y);
-      text = dateFormatter
+      y -= spaceBetweenLines + fontSize;
+      printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, fontSize, 133f, y);
+      text = dateTimeFormatter
           .format(ZonedDateTime.ofInstant(dataset.getDateReleased().toInstant(), timeZone));
-      printLinePDF(contentStream, text, font, 12, 570 - font.getStringWidth(text) / 1000 * 12, y);
-      contentStream.addRect(25, y - 5.5f, 545, 0.5f);
+      printLinePDF(contentStream, text, font, fontSize, 1672f, y);
+      contentStream.addRect(133f, y - spaceBetweenLines / 2, 2213, 1f);
       contentStream.fill();
-      y -= spaceBetweenLines;
     }
 
+    // Print user
+    fontSize = 40f;
+    x = 133f;
+    y -= spaceBetweenLines * 4 - fontSize;
+    text = "The above-mentioned files were submitted by user: " + receipt.getUserName() + " ("
+        + receipt.getFullUserName() + ")";
+    printLinePDF(contentStream, text, font, fontSize, x, y);
     contentStream.close();
   }
 
@@ -134,5 +208,75 @@ public class ReceiptPDFGenerator {
     contentStream.setFont(font, fontSize);
     contentStream.showText(text);
     contentStream.endText();
+  }
+
+  private String[] splitInDifferentLines(String text, float maxLineWidth, PDType1Font font,
+      float fontSize) throws IOException {
+
+    List<String> lines = new ArrayList<>();
+    String[] textArray = text.split(" ");
+    int index = 0;
+
+    while (index < textArray.length) {
+
+      StringBuilder line = new StringBuilder();
+      boolean isLineFull = false;
+
+      while (!isLineFull && index < textArray.length) {
+
+        String word = textArray[index];
+        float wordWidth = font.getStringWidth(word) / 1000 * fontSize;
+        float newLineWidth = font.getStringWidth(line + " " + word) / 1000 * fontSize;
+
+        if (wordWidth >= maxLineWidth) {
+          int cutIndex = cutWordToFitInLine(word, line.toString(), maxLineWidth, font, fontSize);
+          textArray[index] = word.substring(cutIndex);
+          line.append(" ").append(word.substring(0, cutIndex));
+          isLineFull = true;
+        } else if (newLineWidth <= maxLineWidth) {
+          line.append(" ").append(word);
+          index++;
+        } else {
+          isLineFull = true;
+        }
+      }
+
+      lines.add(line.toString().trim());
+    }
+
+    return lines.toArray(new String[lines.size()]);
+  }
+
+  private int cutWordToFitInLine(String word, String line, float maxLineWidth, PDType1Font font,
+      float fontSize) throws IOException {
+
+    float wordWidth = font.getStringWidth(word) / 1000 * fontSize;
+    float emptyWidth = font.getStringWidth(line + " ") / 1000 * fontSize;
+    int cutIndex = (int) (word.length() * emptyWidth / wordWidth);
+    float currentWidth =
+        font.getStringWidth(line + " " + word.substring(0, cutIndex)) / 1000 * fontSize;
+
+    boolean betterWidthFound = false;
+    while (!betterWidthFound) {
+      if (currentWidth <= maxLineWidth) {
+        currentWidth =
+            font.getStringWidth(line + " " + word.substring(0, cutIndex + 1)) / 1000 * fontSize;
+        if (currentWidth <= maxLineWidth) {
+          cutIndex++;
+        } else {
+          betterWidthFound = true;
+        }
+      } else {
+        currentWidth =
+            font.getStringWidth(line + " " + word.substring(0, cutIndex - 1)) / 1000 * fontSize;
+        if (currentWidth >= maxLineWidth) {
+          cutIndex--;
+        } else {
+          betterWidthFound = true;
+        }
+      }
+    }
+
+    return cutIndex;
   }
 }

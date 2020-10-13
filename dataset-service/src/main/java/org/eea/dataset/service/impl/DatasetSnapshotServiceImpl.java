@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +47,12 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -60,11 +60,13 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -72,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -180,6 +183,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The release mapper. */
   @Autowired
   private ReleaseMapper releaseMapper;
+
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -799,57 +806,47 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
-    List<ReportingDatasetVO> datasets = new ArrayList<>();
-    ReportingDatasetVO dataset1 = new ReportingDatasetVO();
-    dataset1.setNameDatasetSchema("DatasetSchema name 1");
-    dataset1.setDateReleased(new Date());
-    ReportingDatasetVO dataset2 = new ReportingDatasetVO();
-    dataset2.setNameDatasetSchema("DatasetSchema name 2");
-    dataset2.setDateReleased(new Date());
-    ReportingDatasetVO dataset3 = new ReportingDatasetVO();
-    dataset3.setNameDatasetSchema("DatasetSchema name 3");
-    dataset3.setDateReleased(new Date());
-    datasets.add(dataset1);
-    datasets.add(dataset2);
-    datasets.add(dataset3);
-    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
-    receipt.setDataflowName("Dataflow name");
-    receipt.setDatasets(datasets);
-    receipt.setIdDataflow(123L);
-    receipt.setProviderAssignation("Provider assignation");
-    receipt.setProviderEmail("Provider email");
 
-    // ReleaseReceiptVO receipt = new ReleaseReceiptVO();
-    // DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
-    // receipt.setIdDataflow(dataflowId);
-    // receipt.setDataflowName(dataflow.getName());
-    // receipt.setDatasets(dataflow.getReportingDatasets().stream()
-    // .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
-    // .collect(Collectors.toList()));
-    //
-    // if (!receipt.getDatasets().isEmpty()) {
-    // receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
-    // }
-    //
-    // List<RepresentativeVO> representatives =
-    // representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
-    // .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
-    //
-    // if (!representatives.isEmpty()) {
-    // RepresentativeVO representative = representatives.get(0);
-    //
-    // receipt.setProviderEmail(representative.getProviderAccount());
-    //
-    // // Check if it's needed to update the status of the button (i.e I only want to download the
-    // // receipt twice, but no state is changed)
-    // if (!representative.getReceiptDownloaded() || representative.getReceiptOutdated()) {
-    // // update provider. Button downloaded = true && outdated = false
-    // representative.setReceiptDownloaded(true);
-    // representative.setReceiptOutdated(false);
-    // representativeControllerZuul.updateRepresentative(representative);
-    // LOG.info("Receipt from the representative {} marked as downloaded", representative.getId());
-    // }
-    // }
+    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
+    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
+    receipt.setIdDataflow(dataflowId);
+    receipt.setDataflowName(dataflow.getName());
+    receipt.setObligationId(dataflow.getObligation().getObligationId());
+    receipt.setObligationTitle(dataflow.getObligation().getOblTitle());
+    receipt.setDatasets(dataflow.getReportingDatasets().stream()
+        .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
+        .collect(Collectors.toList()));
+
+    if (!receipt.getDatasets().isEmpty()) {
+      receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
+    }
+
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
+            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
+
+    UserRepresentationVO user = userManagementControllerZull.getUserByUserId(
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID));
+    receipt.setUserName(user.getUsername());
+    receipt.setFullUserName((null != user.getFirstName() ? user.getFirstName() : "") + " "
+        + (null != user.getLastName() ? user.getLastName() : ""));
+
+    if (!representatives.isEmpty()) {
+      RepresentativeVO representative = representatives.get(0);
+
+      receipt.setProviderEmail(representative.getProviderAccount());
+
+      // Check if it's needed to update the status of the button (i.e I only want to download the
+      // receipt twice, but no state is changed)
+      if (!representative.getReceiptDownloaded() || representative.getReceiptOutdated()) {
+        // update provider. Button downloaded = true && outdated = false
+        representative.setReceiptDownloaded(true);
+        representative.setReceiptOutdated(false);
+        representativeControllerZuul.updateRepresentative(representative);
+        LOG.info("Receipt from the representative {} marked as downloaded", representative.getId());
+      }
+    }
 
     receiptPDFGenerator.generatePDF(receipt, out);
   }
