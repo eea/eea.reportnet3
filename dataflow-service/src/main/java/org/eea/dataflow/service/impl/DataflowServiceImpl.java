@@ -1,6 +1,8 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -271,6 +273,10 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
           dataflowVOs.add(dataflowVO);
         });
+    // Order the result
+    Comparator<DataFlowVO> comparator = Comparator.comparing(DataFlowVO::getId)
+        .thenComparing(DataFlowVO::getCreationDate).reversed();
+    Collections.sort(dataflowVOs, comparator);
 
     getOpenedObligations(dataflowVOs);
 
