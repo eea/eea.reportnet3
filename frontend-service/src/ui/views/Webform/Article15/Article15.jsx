@@ -20,7 +20,8 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 
 export const Article15 = ({ datasetId, state }) => {
-  const { datasetSchema, tableSchemaNames } = state;
+  const { datasetSchema } = state;
+  const tableSchemaNames = state.schemaTables.map(table => table.name);
 
   const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
 

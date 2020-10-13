@@ -15,7 +15,7 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
-        tableSchemaNames: payload.tableSchemaNames,
+        schemaTables: payload.schemaTables,
         webform: payload.webform
       };
 
@@ -86,15 +86,37 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
 
+    case 'SET_DATAVIEWER_GROUPED_OPTIONS':
+      return {
+        ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          activeIndex: payload.activeIndex,
+          isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected,
+          isValidationSelected: false,
+          recordPositionId: -1,
+          selectedRuleId: payload.selectedRuleId,
+          selectedRuleLevelError: payload.selectedRuleLevelError,
+          selectedRuleMessage: payload.selectedRuleMessage
+        },
+        isValidationViewerVisible: false
+      };
+
     case 'SET_DATAVIEWER_OPTIONS':
       return {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
+          isGroupedValidationDeleted: false,
+          isGroupedValidationSelected: false,
           isValidationSelected: payload.isValidationSelected,
           recordPositionId: payload.recordPositionId,
-          selectedRecordErrorId: payload.selectedRecordErrorId
+          selectedRecordErrorId: payload.selectedRecordErrorId,
+          selectedRuleId: payload.selectedRuleId,
+          selectedRuleLevelError: payload.selectedRuleLevelError,
+          selectedRuleMessage: payload.selectedRuleMessage
         },
         isValidationViewerVisible: false
       };
@@ -107,7 +129,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          isValidationSelected: payload
+          isValidationSelected: payload,
+          isGroupedValidationSelected: payload
         }
       };
 
