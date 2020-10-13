@@ -1,8 +1,6 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -264,19 +262,15 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
 
-    // Get user's dataflows
-    dataflowRepository
-        .findAllById(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()))
+    // Get user's dataflows sorted by status and creation date
+    dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList()))
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
           dataflowVOs.add(dataflowVO);
         });
-    // Order the result
-    Comparator<DataFlowVO> comparator = Comparator.comparing(DataFlowVO::getId)
-        .thenComparing(DataFlowVO::getCreationDate).reversed();
-    Collections.sort(dataflowVOs, comparator);
 
     getOpenedObligations(dataflowVOs);
 
