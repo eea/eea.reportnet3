@@ -262,10 +262,10 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
 
-    // Get user's dataflows
-    dataflowRepository
-        .findAllById(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()))
+    // Get user's dataflows sorted by status and creation date
+    dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList()))
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
