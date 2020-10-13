@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import isUndefined from 'lodash/isUndefined';
+
 import { config } from 'conf';
 
 import styles from './CookiesDialog.module.scss';
@@ -14,10 +16,10 @@ export const CookiesDialog = () => {
 
   useEffect(() => {
     const cookieConsent = userStorage.getPropertyFromLocalStorage('cookieConsent');
-    if (cookieConsent) {
-      setIsVisible(cookieConsent);
-    } else {
+    if (isUndefined(cookieConsent)) {
       setIsVisible(true);
+    } else {
+      setIsVisible(false);
     }
   }, []);
 
