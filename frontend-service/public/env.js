@@ -19,5 +19,5 @@ window.env = {
   // EULOGIN_URL:
   //   'http://reportnet3-backend.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3beta.altia.es%2Feulogin%2F&state=1489230d-c1b1-4e25-8b85-1f9a5b109171&response_mode=fragment&response_type=code&scope=openid',
   // WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket'
-  DOCUMENTATION_FOLDER: ['test' | 'prod']
+  DOCUMENTATION_FOLDER: 'test'
 };
