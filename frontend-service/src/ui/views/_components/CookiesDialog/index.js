@@ -1,0 +1,1 @@
+export { CookiesDialog } from './CookiesDialog';
