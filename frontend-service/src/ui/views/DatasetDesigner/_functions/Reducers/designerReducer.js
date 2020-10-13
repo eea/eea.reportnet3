@@ -143,8 +143,11 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_CHANGE_VIEW':
       return { ...state, viewType: payload.viewType };
 
+    case 'UPDATE_PREVIOUS_WEBFORM':
+      return { ...state, webform: state.previousWebform };
+
     case 'UPDATE_WEBFORM':
-      return { ...state, webform: payload };
+      return { ...state, previousWebform: state.webform, webform: payload };
 
     default:
       return state;

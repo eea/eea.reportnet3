@@ -117,7 +117,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isLoading: true,
     isLoadingFile: false,
     isManageUniqueConstraintDialogVisible: false,
-    isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
+    isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('view') === 'design',
     isRefreshHighlighted: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
@@ -130,6 +130,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       uniqueId: null
     },
     metaData: {},
+    previousWebform: null,
     refresh: false,
     replaceData: false,
     schemaTables: [],
@@ -221,7 +222,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (window.location.search !== '') changeUrl();
-  }, [designerState.isPreviewModeOn]);
+  }, [designerState.viewType]);
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
@@ -257,9 +258,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${DatasetDesignerUtils.getUrlParamValue('tab')}${
-        !isUndefined(designerState.isPreviewModeOn) ? `&design=${designerState.isPreviewModeOn}` : ''
-      }`
+      `?tab=${DatasetDesignerUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
+        view => designerState.viewType[view] === true
+      )}`}`
     );
   };
 
@@ -455,9 +456,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refreshUniqueList(true);
   };
 
-  const onCloseConfigureWebformModal = () => {
-    manageDialogs('isConfigureWebformDialogVisible', false);
-  };
+  const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
 
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
@@ -887,7 +886,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className="p-button-secondary"
         icon={'cancel'}
         label={resources.messages['cancel']}
-        onClick={() => onCloseConfigureWebformModal()}
+        onClick={() => {
+          designerDispatch({ type: 'UPDATE_PREVIOUS_WEBFORM', payload: {} });
+          onCloseConfigureWebformModal();
+        }}
       />
     </Fragment>
   );
