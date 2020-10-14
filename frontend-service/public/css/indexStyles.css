@@ -24,6 +24,7 @@ body {
   border-radius: 5px;
   background-color: #ffffff;
   color: #000;
+  box-sizing: content-box;
 }
 #browserNotice .noticeBox .corporate {
   text-align: center;
