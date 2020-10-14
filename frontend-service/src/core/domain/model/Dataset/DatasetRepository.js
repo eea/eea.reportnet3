@@ -20,6 +20,7 @@ export const DatasetRepository = {
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
   getMetaData: () => Promise.reject('[DatasetRepository#getMetaData] must be implemented'),
   getReferencedFieldValues: () => Promise.reject('[DatasetRepository#getReferencedFieldValues] must be implemented'),
+  groupedErrorsById: () => Promise.reject('[DatasetRepository#groupedErrorsById] must be implemented'),
   orderFieldSchema: () => Promise.reject('[DatasetRepository#orderFieldSchema] must be implemented'),
   orderTableSchema: () => Promise.reject('[DatasetRepository#orderTableSchema] must be implemented'),
   schemaById: () => Promise.reject('[DatasetRepository#schemaById] must be implemented'),

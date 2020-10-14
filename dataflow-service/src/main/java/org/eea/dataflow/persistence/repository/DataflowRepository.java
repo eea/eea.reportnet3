@@ -65,10 +65,10 @@ public interface DataflowRepository
 
 
   /**
-   * Find dataflow by weblink.
+   * Find dataflow by weblinks id.
    *
    * @param idLink the id link
-   * @return the long
+   * @return the dataflow
    */
   Dataflow findDataflowByWeblinks_Id(Long idLink);
 
@@ -91,5 +91,14 @@ public interface DataflowRepository
   @Modifying
   @Query("DELETE FROM Dataflow d where d.id = :idDataflow")
   void deleteById(@Param("idDataflow") Long idDataflow);
+
+
+  /**
+   * Find by id in order by status desc creation date desc.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(List<Long> ids);
 
 }

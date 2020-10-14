@@ -9,6 +9,7 @@ import { config } from 'conf';
 import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { ChipButton } from 'ui/views/_components/ChipButton';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { Menu } from 'primereact/menu';
@@ -30,18 +31,24 @@ const ActionsToolbar = ({
   hasWritePermissions,
   hideValidationFilter,
   isExportable,
+  isFilterable = true,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
+  isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypesWithCorrects,
+  onHideSelectGroupedValidation,
   onSetVisible,
   onUpdateData,
   originalColumns,
   records,
+  selectedRuleLevelError,
+  selectedRuleMessage,
   setColumns,
   setDeleteDialogVisible,
   setImportTableDialogVisible,
+  showGroupedValidationFilter,
   showValidationFilter,
   showWriteButtons,
   tableHasErrors,
@@ -53,6 +60,7 @@ const ActionsToolbar = ({
   const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
+    groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
@@ -61,9 +69,9 @@ const ActionsToolbar = ({
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  let exportMenuRef = useRef();
-  let filterMenuRef = useRef();
-  let dropdownFilterRef = useRef();
+  const exportMenuRef = useRef();
+  const filterMenuRef = useRef();
+  const dropdownFilterRef = useRef();
 
   useEffect(() => {
     const dropdownFilter = colsSchema.map(colSchema => {
@@ -72,6 +80,15 @@ const ActionsToolbar = ({
 
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
+
+  useEffect(() => {
+    if (isGroupedValidationSelected) {
+      dispatchFilter({
+        type: 'SET_VALIDATION_GROUPED_FILTER',
+        payload: { groupedFilter: isGroupedValidationSelected }
+      });
+    }
+  }, [isGroupedValidationSelected]);
 
   useEffect(() => {
     if (isValidationSelected) {
@@ -242,30 +259,67 @@ const ActionsToolbar = ({
           }}
         />
 
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
-            tableHasErrors ? 'p-button-animated-blink' : null
-          }`}
-          disabled={!tableHasErrors}
-          icon={'filter'}
-          iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
-          label={resources.messages['validationFilter']}
-          onClick={event => filterMenuRef.current.show(event)}
-        />
-        <DropdownFilter
-          className={!isLoading ? 'p-button-animated-blink' : null}
-          disabled={isLoading}
-          filters={filter.validationDropdown}
-          popup={true}
-          ref={filterMenuRef}
-          hide={hideValidationFilter}
-          id="filterValidationDropdown"
-          showFilters={showValidationFilter}
-          onShow={e => {
-            getExportButtonPosition(e);
-          }}
-          showLevelErrorIcons={true}
-        />
+        {isFilterable && (
+          <>
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
+                tableHasErrors ? 'p-button-animated-blink' : null
+              }`}
+              disabled={!tableHasErrors}
+              icon={'filter'}
+              iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
+              label={resources.messages['validationFilter']}
+              onClick={event => filterMenuRef.current.show(event)}
+            />
+            <DropdownFilter
+              className={!isLoading ? 'p-button-animated-blink' : null}
+              disabled={isLoading}
+              filters={filter.validationDropdown}
+              popup={true}
+              ref={filterMenuRef}
+              hide={hideValidationFilter}
+              id="filterValidationDropdown"
+              showFilters={showValidationFilter}
+              onShow={e => {
+                getExportButtonPosition(e);
+              }}
+              showLevelErrorIcons={true}
+            />
+            {filter.groupedFilter && selectedRuleMessage !== '' && (
+              <ChipButton
+                hasLevelErrorIcon={true}
+                labelClassName={styles.groupFilter}
+                levelError={selectedRuleLevelError}
+                onClick={() => {
+                  onHideSelectGroupedValidation();
+                  showGroupedValidationFilter(false);
+                  dispatchFilter({
+                    type: 'SET_VALIDATION_GROUPED_FILTER',
+                    payload: { groupedFilter: false }
+                  });
+                }}
+                tooltip={selectedRuleMessage}
+                tooltipOptions={{ position: 'top' }}
+                value={selectedRuleMessage}
+              />
+            )}
+            {/* <Button
+              className={`p-button-rounded p-button-secondary-transparent`}
+              disabled={!filter.groupedFilter}
+              icon={'groupBy'}
+              label={resources.messages['groupBy']}
+              onClick={() => {
+                onHideSelectGroupedValidation();
+                showGroupedValidationFilter(false);
+                dispatchFilter({
+                  type: 'SET_VALIDATION_GROUPED_FILTER',
+                  payload: { groupedFilter: false }
+                });
+              }}
+            /> */}
+          </>
+        )}
+
         {/* <Button
           className={`p-button-rounded p-button-secondary-transparent`}
           disabled={true}

@@ -23,6 +23,7 @@ import { GetMetaData } from './GetMetaData';
 import { GetReferencedFieldValues } from './GetReferencedFieldValues';
 import { GetSchema } from './GetSchema';
 import { GetStatistics } from './GetStatistics';
+import { GroupedErrors } from './GroupedErrors';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
 import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
@@ -56,6 +57,7 @@ export const DatasetService = {
   exportTableDataById: ExportTableData({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),
+  groupedErrorsById: GroupedErrors({ datasetRepository }),
   orderRecordFieldDesign: OrderRecordFieldDesign({ datasetRepository }),
   orderTableDesign: OrderTableDesign({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),

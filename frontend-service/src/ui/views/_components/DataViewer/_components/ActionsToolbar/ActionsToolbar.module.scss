@@ -34,7 +34,9 @@
   opacity: 1;
   color: var(--c-corporate-blue);
 }
-
+.groupFilter {
+  max-width: 50% !important;
+}
 .menu {
   max-height: 27.5vh;
   overflow-y: auto;
