@@ -88,7 +88,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetSchemaName: '',
     datasetSchemas: [],
     datasetStatistics: [],
-    dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
+    dataViewerOptions: {
+      activeIndex: 0,
+      isGroupedValidationDeleted: false,
+      isGroupedValidationSelected: false,
+      isValidationSelected: false,
+      recordPositionId: -1,
+      selectedRecordErrorId: -1,
+      selectedRuleId: '',
+      selectedRuleLevelError: '',
+      selectedRuleMessage: ''
+    },
     exportButtonsList: [],
     exportDatasetData: null,
     exportDatasetDataName: '',
@@ -122,7 +132,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     metaData: {},
     refresh: false,
     replaceData: false,
-    tableSchemaNames: [],
+    schemaTables: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
@@ -398,6 +408,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       onUpdateDescription(description);
     }
   };
+  const onChangeIsValidationSelected = selected => {
+    designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: selected });
+  };
 
   const onChangeReference = (tabs, datasetSchemaId) => {
     const inmDatasetSchemas = [...designerState.datasetSchemas];
@@ -541,8 +554,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
-        const tableSchemaNamesList = [];
-        dataset.tables.forEach(table => tableSchemaNamesList.push(table.tableSchemaName));
+        const tableSchemaList = [];
+        dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 
         const datasetStatisticsDTO = await getStatisticsById(
           datasetId,
@@ -559,7 +572,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList,
+            schemaTables: tableSchemaList,
             webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
           }
         });
@@ -580,24 +593,70 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+  const onHideSelectGroupedValidation = () => {
     designerDispatch({
-      type: 'SET_DATAVIEWER_OPTIONS',
+      type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
       payload: {
-        activeIndex: tableSchemaId,
-        isValidationSelected: true,
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId
+        ...designerState.dataViewerOptions,
+        isGroupedValidationDeleted: true,
+        isGroupedValidationSelected: false,
+        selectedRuleId: '',
+        selectedRuleLevelError: '',
+        selectedRuleMessage: ''
       }
     });
   };
 
-  const onTabChange = tableSchemaId => {
+  const onSelectValidation = (
+    tableSchemaId,
+    posIdRecord,
+    selectedRecordErrorId,
+    selectedRuleId,
+    grouped = true,
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
+    if (grouped) {
+      designerDispatch({
+        type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
+        payload: {
+          ...designerState.dataViewerOptions,
+          activeIndex: tableSchemaId,
+          isGroupedValidationDeleted: false,
+          isGroupedValidationSelected: true,
+          recordPositionId: -1,
+          selectedRuleId,
+          selectedRuleLevelError,
+          selectedRuleMessage
+        }
+      });
+    } else {
+      designerDispatch({
+        type: 'SET_DATAVIEWER_OPTIONS',
+        payload: {
+          ...designerState.dataViewerOptions,
+          activeIndex: tableSchemaId,
+          isValidationSelected: true,
+          recordPositionId: posIdRecord,
+          selectedRecordErrorId,
+          selectedRuleId: '',
+          selectedRuleLevelError: '',
+          selectedRuleMessage: ''
+        }
+      });
+    }
+  };
+
+  const onTabChange = tableSchemaId =>
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
-      payload: { ...designerState.dataViewerOptions, activeIndex: tableSchemaId.index }
+      payload: {
+        ...designerState.dataViewerOptions,
+        activeIndex: tableSchemaId.index,
+        selectedRuleId: '',
+        selectedRuleMessage: ''
+      }
     });
-  };
 
   const onUpdateData = () => {
     designerDispatch({ type: 'ON_UPDATE_DATA', payload: { isUpdated: !designerState.isDataUpdated } });
@@ -1060,24 +1119,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             editable={true}
             history={history}
             isPreviewModeOn={designerState.isPreviewModeOn}
+            isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
+            isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
             isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
             onChangeReference={onChangeReference}
+            onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateTable={onUpdateTable}
             recordPositionId={designerState.dataViewerOptions.recordPositionId}
             selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
+            selectedRuleId={designerState.dataViewerOptions.selectedRuleId}
+            selectedRuleLevelError={designerState.dataViewerOptions.selectedRuleLevelError}
+            selectedRuleMessage={designerState.dataViewerOptions.selectedRuleMessage}
             setActiveIndex={index =>
               designerDispatch({
                 type: 'SET_DATAVIEWER_OPTIONS',
-                payload: { ...designerState.dataViewerOptions, activeIndex: index }
+                payload: { ...designerState.dataViewerOptions, activeIndex: index, selectedRecordErrorId: -1 }
               })
             }
-            setIsValidationSelected={isVisible =>
-              designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
-            }
+            onChangeIsValidationSelected={onChangeIsValidationSelected}
           />
         )}
         <Snapshots
@@ -1127,7 +1190,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <Dashboard
               levelErrorTypes={designerState.levelErrorTypes}
               refresh={designerState.dashDialogVisible}
-              tableSchemaNames={designerState.tableSchemaNames}
+              tableSchemaNames={designerState.schemaTables.map(table => table.name)}
             />
           </Dialog>
         )}
@@ -1169,7 +1232,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               hasWritePermissions={designerState.hasWritePermissions}
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
               onSelectValidation={onSelectValidation}
-              tableSchemaNames={designerState.tableSchemaNames}
+              schemaTables={designerState.schemaTables}
               visible={designerState.isValidationViewerVisible}
             />
           </Dialog>

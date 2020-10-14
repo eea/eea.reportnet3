@@ -4,5 +4,6 @@ export const GetData = ({ datasetRepository }) => async (
   pageNum,
   pageSize,
   fields = undefined,
-  levelError = null
-) => datasetRepository.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
+  levelError = null,
+  ruleId = ''
+) => datasetRepository.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId);
