@@ -207,9 +207,14 @@ const ComparisonExpression = ({
       conditions =
         clickedFields.includes(field) &&
         (isNil(expressionValues[field]) || isEmpty(expressionValues[field].toString()));
+
+      if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
+        conditions = false;
+      }
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
+
     return conditions ? 'error' : '';
   };
 
@@ -283,8 +288,31 @@ const ComparisonExpression = ({
     }
   };
 
+  const getTypeField = () => {
+    if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
+      return;
+    }
+    return (
+      <span
+        onBlur={() => onAddToClickedFields('valueTypeSelector')}
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}>
+        <Dropdown
+          disabled={disabledFields.valueTypeSelector}
+          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
+          optionLabel="label"
+          options={valueTypeSelectorOptions}
+          optionValue="value"
+          placeholder={resourcesContext.messages.comparisonValueFieldSelector}
+          value={expressionValues.valueTypeSelector}
+        />
+      </span>
+    );
+  };
+
   const getValueField = () => {
-    if (expressionValues.valueTypeSelector === 'value') {
+    if (expressionValues.operatorValue === 'IS NULL' || expressionValues.operatorValue === 'IS NOT NULL') {
+      return;
+    } else if (expressionValues.valueTypeSelector === 'value') {
       return buildValueInput();
     } else {
       return (
@@ -304,6 +332,7 @@ const ComparisonExpression = ({
 
   const buildValueInput = () => {
     const { operatorType, operatorValue, field2 } = expressionValues;
+
     if (operatorType === 'date') {
       return (
         <Calendar
@@ -509,19 +538,7 @@ const ComparisonExpression = ({
           value={expressionValues.operatorValue}
         />
       </span>
-      <span
-        onBlur={() => onAddToClickedFields('valueTypeSelector')}
-        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}>
-        <Dropdown
-          disabled={disabledFields.valueTypeSelector}
-          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
-          optionLabel="label"
-          options={valueTypeSelectorOptions}
-          optionValue="value"
-          placeholder={resourcesContext.messages.comparisonValueFieldSelector}
-          value={expressionValues.valueTypeSelector}
-        />
-      </span>
+      {getTypeField()}
       <span
         onBlur={() => onAddToClickedFields('field2')}
         className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}>

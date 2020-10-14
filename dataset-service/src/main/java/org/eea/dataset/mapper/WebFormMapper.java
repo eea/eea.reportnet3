@@ -1,8 +1,8 @@
 package org.eea.dataset.mapper;
 
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
-import org.eea.interfaces.vo.dataset.schemas.WebFormVO;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 
@@ -11,7 +11,7 @@ import org.mapstruct.Mapper;
  * The Interface WebFormMapper.
  */
 @Mapper(componentModel = "spring")
-public interface WebFormMapper extends IMapper<WebForm, WebFormVO> {
+public interface WebFormMapper extends IMapper<Webform, WebformVO> {
 
   /**
    * Entity to class.
@@ -20,7 +20,7 @@ public interface WebFormMapper extends IMapper<WebForm, WebFormVO> {
    * @return the web form VO
    */
   @Override
-  WebFormVO entityToClass(WebForm entity);
+  WebformVO entityToClass(Webform entity);
 
 
   /**
@@ -30,7 +30,7 @@ public interface WebFormMapper extends IMapper<WebForm, WebFormVO> {
    * @return the web form
    */
   @Override
-  WebForm classToEntity(WebFormVO vo);
+  Webform classToEntity(WebformVO vo);
 
   /**
    * Map.

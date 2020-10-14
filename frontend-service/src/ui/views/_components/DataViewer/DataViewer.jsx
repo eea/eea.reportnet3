@@ -62,15 +62,22 @@ const DataViewer = withRouter(
     hasWritePermissions,
     isDatasetDeleted = false,
     isExportable,
+    isFilterable,
+    isGroupedValidationDeleted,
+    isGroupedValidationSelected,
     isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
     },
+    onChangeIsValidationSelected,
+    onHideSelectGroupedValidation,
     onLoadTableData,
     recordPositionId,
     reporting,
     selectedRecordErrorId,
-    setIsValidationSelected,
+    selectedRuleId,
+    selectedRuleLevelError,
+    selectedRuleMessage,
     showWriteButtons,
     tableFixedNumber,
     tableHasErrors,
@@ -80,7 +87,6 @@ const DataViewer = withRouter(
     tableSchemaColumns
   }) => {
     const userContext = useContext(UserContext);
-
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
@@ -261,7 +267,7 @@ const DataViewer = withRouter(
       if (isValidationSelected) {
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        setIsValidationSelected(false);
+        onChangeIsValidationSelected(false);
       }
     }, [isValidationSelected]);
 
@@ -321,7 +327,7 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
+    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules) => {
       const removeSelectAllFromList = levelErrorValidations => {
         levelErrorValidations = levelErrorValidations
           .map(error => error.toUpperCase())
@@ -340,7 +346,6 @@ const DataViewer = withRouter(
         setFetchedData(dataFiltered);
       };
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
-
       setIsLoading(true);
       try {
         let fields;
@@ -353,18 +358,16 @@ const DataViewer = withRouter(
           Math.floor(fRow / nRows),
           nRows,
           fields,
-          levelErrorValidations
+          levelErrorValidations,
+          groupedRules
         );
         if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
-
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
-          if (!isUndefined(tableData.records)) {
-            if (tableData.records.length > 0) {
-              dispatchRecords({
-                type: 'SET_NEW_RECORD',
-                payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
-              });
-            }
+          if (!isUndefined(tableData.records) && tableData.records.length > 0) {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+            });
           } else {
             dispatchRecords({
               type: 'SET_NEW_RECORD',
@@ -418,14 +421,29 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (!isValidationShown && levelErrorValidations.length > 0) {
-          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
         } else {
           if (isValidationShown) {
-            onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+            onFetchData(
+              sort.sortField,
+              sort.sortOrder,
+              0,
+              records.recordsPerPage,
+              levelErrorValidations,
+              selectedRuleId
+            );
           }
         }
       }
     }, [levelErrorValidations]);
+
+    useEffect(() => {
+      if (recordErrorPositionId === -1) {
+        if (selectedRuleId !== '' || isGroupedValidationDeleted) {
+          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+        }
+      }
+    }, [selectedRuleId, recordErrorPositionId]);
 
     useEffect(() => {
       if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
@@ -457,8 +475,15 @@ const DataViewer = withRouter(
       return record;
     };
 
-    const hideValidationFilter = () => {
-      setIsValidationShown(false);
+    const hideValidationFilter = () => setIsValidationShown(false);
+
+    const showGroupedValidationFilter = groupedBy => {
+      setIsFilterValidationsActive(groupedBy);
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+
+      if (recordErrorPositionId !== -1) {
+        setRecordErrorPositionId(-1);
+      }
     };
 
     const showValidationFilter = filteredKeys => {
@@ -496,7 +521,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
-      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations);
+      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -620,13 +645,7 @@ const DataViewer = withRouter(
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
             notificationContext.add({
               type: 'UPDATE_FIELD_BY_ID_ERROR',
-              content: {
-                dataflowId,
-                datasetId,
-                dataflowName,
-                datasetName,
-                tableName
-              }
+              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
             });
           }
         }
@@ -706,7 +725,8 @@ const DataViewer = withRouter(
         sort.sortOrder,
         records.firstPageRecord,
         records.recordsPerPage,
-        levelErrorValidations
+        levelErrorValidations,
+        selectedRuleId
       );
     };
 
@@ -725,6 +745,8 @@ const DataViewer = withRouter(
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
       );
+      //Check invalid coordinates and replace them
+      record = MapUtils.changeIncorrectCoordinates(record);
       if (isNewRecord) {
         try {
           setIsSaving(true);
@@ -738,13 +760,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'ADD_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         } finally {
           if (!addAnotherOne) {
@@ -764,13 +780,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'UPDATE_RECORDS_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         } finally {
           onCancelRowEdit();
@@ -798,7 +808,7 @@ const DataViewer = withRouter(
     const onSort = event => {
       dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
     };
 
     const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
@@ -842,19 +852,14 @@ const DataViewer = withRouter(
           disabled={isSaving}
           label={resources.messages['save']}
           icon={!isSaving ? 'check' : 'spinnerAnimate'}
-          onClick={() => {
-            onSaveRecord(records.newRecord);
-          }}
+          onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
           className="p-button-secondary"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            dispatchRecords({
-              type: 'SET_NEW_RECORD',
-              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            });
+            dispatchRecords({ type: 'SET_NEW_RECORD', payload: RecordUtils.createEmptyObject(colsSchema, undefined) });
             setAddDialogVisible(false);
           }}
         />
@@ -863,13 +868,7 @@ const DataViewer = withRouter(
 
     const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          icon="check"
-          label={resources.messages['ok']}
-          onClick={() => {
-            setIsColumnInfoVisible(false);
-          }}
-        />
+        <Button icon="check" label={resources.messages['ok']} onClick={() => setIsColumnInfoVisible(false)} />
       </div>
     );
 
@@ -924,7 +923,12 @@ const DataViewer = withRouter(
       let icon = [];
       if (!isEmpty(validation)) {
         icon.push(
-          <IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} key={levelError} />
+          <IconTooltip
+            className={styles.iconTooltipLevelError}
+            key={levelError}
+            levelError={levelError}
+            message={message}
+          />
         );
       }
       return icon;
@@ -952,19 +956,16 @@ const DataViewer = withRouter(
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
       return {
-        'p-highlight': id === selectedRecordErrorId,
+        'p-highlight': id === selectedRecordErrorId && !isGroupedValidationSelected,
         'p-highlight-contextmenu': ''
       };
     };
 
     const requiredTemplate = rowData => {
       return (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div className={styles.requiredTemplateWrapper}>
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons('check')}
-              style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
-            />
+            <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
           ) : rowData.field === 'Single select items' ||
             rowData.field === 'Multiple select items' ||
             rowData.field === 'Valid extensions' ? (
@@ -1028,20 +1029,26 @@ const DataViewer = withRouter(
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
           isExportable={isExportable}
+          isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
           isLoading={isLoading}
           isTableDeleted={isTableDeleted}
+          isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}
           onUpdateData={onUpdateData}
           originalColumns={originalColumns}
           records={records}
+          selectedRuleLevelError={selectedRuleLevelError}
+          selectedRuleMessage={selectedRuleMessage}
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}
           setRecordErrorPositionId={setRecordErrorPositionId}
+          showGroupedValidationFilter={showGroupedValidationFilter}
           showValidationFilter={showValidationFilter}
           showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}
@@ -1111,11 +1118,10 @@ const DataViewer = withRouter(
 
         {isColumnInfoVisible && (
           <Dialog
-            className={styles.Dialog}
+            className={styles.fieldInfoDialogWrapper}
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
-            style={{ minWidth: '40vw', maxWidth: '80vw', maxHeight: '80vh' }}
             visible={isColumnInfoVisible}>
             <DataTable
               autoLayout={true}
@@ -1124,21 +1130,25 @@ const DataViewer = withRouter(
                 'header',
                 'description',
                 'type',
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
+                ...(!isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
                   : []),
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                ...(!isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
                   ? ['validExtensions']
                   : []),
-                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                ...(!isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
                   ? ['maxSize']
                   : []),
                 !isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
                 DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).readOnly
                   ? 'readOnly'
+                  : '',
+                !isNil(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader)) &&
+                DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).required
+                  ? 'required'
                   : ''
               ])}>
               {['field', 'value'].map((column, i) => (
@@ -1214,12 +1224,11 @@ const DataViewer = withRouter(
           <div onKeyPress={onKeyPress}>
             <Dialog
               blockScroll={false}
-              className={'edit-table calendar-table'}
+              className={`edit-table calendar-table ${styles.addEditRecordDialog}`}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
               modal={true}
               onHide={() => setAddDialogVisible(false)}
-              style={{ width: '50%' }}
               visible={addDialogVisible}
               zIndex={3003}>
               <div className="p-grid p-fluid">
@@ -1243,12 +1252,11 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="calendar-table"
+            className={`calendar-table ${styles.addEditRecordDialog}`}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
             onHide={() => setEditDialogVisible(false)}
-            style={{ width: '50%' }}
             visible={editDialogVisible}
             zIndex={3003}>
             <div className="p-grid p-fluid">

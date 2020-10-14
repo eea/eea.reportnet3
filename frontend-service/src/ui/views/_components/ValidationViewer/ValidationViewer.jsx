@@ -6,12 +6,13 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './ValidationViewer.module.css';
+import styles from './ValidationViewer.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -26,11 +27,10 @@ const ValidationViewer = React.memo(
     hasWritePermissions,
     levelErrorTypes,
     onSelectValidation,
-    tableSchemaNames,
+    schemaTables,
     visible
   }) => {
     const resources = useContext(ResourcesContext);
-
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
     const [allOriginsFilter, setAllOriginsFilter] = useState([]);
     const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
@@ -38,6 +38,7 @@ const ValidationViewer = React.memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
+    const [grouped, setGrouped] = useState(true);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -103,9 +104,17 @@ const ValidationViewer = React.memo(
           header={resources.messages['tableSchemaId']}
         />
       );
+      columnsArr.push(
+        <Column key="ruleId" field="ruleId" className={styles.invisibleHeader} header={resources.messages['ruleId']} />
+      );
+      if (grouped) {
+        columnsArr.push(
+          <Column key="numberOfRecords" field="numberOfRecords" header={resources.messages['numberOfRecords']} />
+        );
+      }
 
       setColumns(columnsArr);
-    }, []);
+    }, [grouped]);
 
     useEffect(() => {
       if (visible) {
@@ -118,7 +127,15 @@ const ValidationViewer = React.memo(
           fetchData('', sortOrder, 0, numberRows, [], [], []);
         }
       }
-    }, [visible]);
+    }, [visible, grouped]);
+
+    const addTableSchemaId = tableErrors => {
+      tableErrors.forEach(tableError => {
+        const filteredTable = schemaTables.filter(schemaTable => schemaTable.name === tableError.tableSchemaName);
+        if (!isEmpty(filteredTable)) tableError.tableSchemaId = filteredTable[0].id;
+      });
+      return tableErrors;
+    };
 
     const columnStyles = columnId => {
       const style = {};
@@ -145,19 +162,35 @@ const ValidationViewer = React.memo(
     ) => {
       setIsLoading(true);
 
-      const datasetErrors = await DatasetService.errorsById(
-        datasetId,
-        Math.floor(firstRow / numberRows),
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        originsFilter
-      );
+      let datasetErrors = {};
 
+      if (grouped) {
+        datasetErrors = await DatasetService.groupedErrorsById(
+          datasetId,
+          Math.floor(firstRow / numberRows),
+          numberRows,
+          sortField,
+          sortOrder,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          originsFilter
+        );
+        addTableSchemaId(datasetErrors.errors);
+      } else {
+        datasetErrors = await DatasetService.errorsById(
+          datasetId,
+          Math.floor(firstRow / numberRows),
+          numberRows,
+          sortField,
+          sortOrder,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          originsFilter
+        );
+      }
       setTotalRecords(datasetErrors.totalErrors);
       setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
+
       setFetchedData(datasetErrors.errors);
       setIsLoading(false);
     };
@@ -199,8 +232,8 @@ const ValidationViewer = React.memo(
         key: `${datasetName.toString()}`
       });
 
-      tableSchemaNames.forEach(name => {
-        allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}` });
+      schemaTables.forEach(table => {
+        allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
       });
 
       setAllOriginsFilter(allOriginsFilterList);
@@ -314,29 +347,41 @@ const ValidationViewer = React.memo(
     };
 
     const onRowSelect = async event => {
-      switch (event.data.entityType) {
-        case 'FIELD':
-        case 'RECORD':
-          const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-          onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
-          break;
+      if (!grouped) {
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
+            onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId, '', false);
+            break;
 
-        case 'TABLE':
-          onSelectValidation(event.data.tableSchemaId, -1, -1);
-          break;
+          case 'TABLE':
+            onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
+            break;
 
-        default:
-          break;
+          default:
+            break;
+        }
+      } else {
+        onSelectValidation(
+          event.data.tableSchemaId,
+          -1,
+          -1,
+          event.data.ruleId,
+          true,
+          event.data.message,
+          event.data.levelError
+        );
       }
     };
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {areActiveFilters && totalRecords !== totalFilteredRecords
+        {(areActiveFilters && totalRecords !== totalFilteredRecords) || grouped
           ? `${resources.messages['filtered']} : ${totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {totalRecords} {resources.messages['records'].toLowerCase()}
-        {areActiveFilters && totalRecords === totalFilteredRecords
+        {(areActiveFilters && totalRecords === totalFilteredRecords) || grouped
           ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
@@ -446,6 +491,18 @@ const ValidationViewer = React.memo(
             </div>
 
             <div className="p-toolbar-group-right">
+              <div className={styles.switchDivInput}>
+                <div className={styles.switchDiv}>
+                  <span className={styles.switchTextInput}>{resources.messages['ungrouped']}</span>
+                  <InputSwitch
+                    checked={grouped}
+                    onChange={e => setGrouped(e.value)}
+                    tooltip={resources.messages['toggleGroup']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                  <span className={styles.switchTextInput}>{resources.messages['grouped']}</span>
+                </div>
+              </div>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                   isLoading ? 'p-button-animated-spin' : ''

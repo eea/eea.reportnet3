@@ -276,6 +276,33 @@ export const apiDataset = {
     });
     return response.data;
   },
+  groupedErrorsById: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  ) => {
+    if (asc === -1) {
+      asc = 0;
+    }
+    const response = await HTTPRequester.get({
+      url: getUrl(DatasetConfig.listGroupedValidations, {
+        datasetId: datasetId,
+        pageNum: pageNum,
+        pageSize: pageSize,
+        sortField: sortField,
+        asc: asc,
+        levelErrorsFilter: levelErrorsFilter,
+        typeEntitiesFilter: typeEntitiesFilter,
+        originsFilter: originsFilter
+      })
+    });
+    return response.data;
+  },
   orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
     const response = await HTTPRequester.update({
       url: getUrl(DatasetConfig.orderFieldSchemaDesign, {
@@ -312,7 +339,7 @@ export const apiDataset = {
     });
     return response.data;
   },
-  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
+  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.dataViewer, {
         datasetId: datasetId,
@@ -320,7 +347,8 @@ export const apiDataset = {
         pageNum: pageNum,
         pageSize: pageSize,
         fields: fields,
-        levelError: levelError
+        levelError: levelError,
+        idRules: ruleId
       })
     });
 
@@ -329,9 +357,7 @@ export const apiDataset = {
   updateFieldById: async (datasetId, datasetTableRecords) => {
     try {
       const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateTableDataField, {
-          datasetId: datasetId
-        }),
+        url: getUrl(DatasetConfig.updateTableDataField, { datasetId: datasetId }),
         data: datasetTableRecords
       });
 
@@ -371,13 +397,13 @@ export const apiDataset = {
       return false;
     }
   },
-  updateSchemaDescriptionById: async (datasetId, datasetSchemaDescription) => {
+  updateDatasetSchemaById: async (datasetId, datasetSchema) => {
     try {
       const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateDatasetSchemaDescriptionDesign, {
+        url: getUrl(DatasetConfig.updateDatasetSchemaDesign, {
           datasetId
         }),
-        data: { description: datasetSchemaDescription }
+        data: datasetSchema
       });
 
       return response.status >= 200 && response.status <= 299;

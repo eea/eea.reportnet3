@@ -23,13 +23,19 @@ else
     WEBSOCKET_URL_JSON=$(jq -n --arg websocketUrl $WEBSOCKET_URL '$websocketUrl')
 fi
 
+if [ -z "${DOCUMENT_FOLDER:-}" ]; then
+    DOCUMENT_FOLDER_JSON=undefined
+else
+    DOCUMENT_FOLDER_JSON=$(jq -n --arg documentFolder DOCUMENT_FOLDER '$documentFolder')
+fi
 
 cat <<EOF
 window.env = {
 	  REACT_APP_BACKEND: $BACKEND_JSON,
 	  EULOGIN_URL: $EULOGIN_JSON,
 	  REACT_APP_EULOGIN: $KEYCLOAK_JSON,
-	  WEBSOCKET_URL: $WEBSOCKET_URL_JSON
+	  WEBSOCKET_URL: $WEBSOCKET_URL_JSON,
+	  DOCUMENT_FOLDER: $DOCUMENT_FOLDER_JSON
 };
 
 EOF

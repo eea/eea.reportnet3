@@ -1,31 +1,21 @@
-.invisibleHeader {
-  display: none;
-}
 .actionTemplate {
   display: flex;
-}
-.addAnotherOneWrapper {
-  display: inline-block;
-  vertical-align: middle;
 }
 .addAnotherOne {
   font-weight: bold;
   margin: 0 1.5rem 0 0.5rem;
   cursor: pointer;
 }
-.iconTooltipWrapper {
-  display: flex;
-  flex-direction: row;
+.addAnotherOneWrapper {
+  display: inline-block;
+  vertical-align: middle;
+}
+.addEditRecordDialog {
+  width: 35vw !important;
+}
+.chips {
+  display: flex !important;
   justify-content: center;
-}
-.itemTable {
-  margin: 1rem;
-}
-.itemTable > div > table {
-  width: 99%;
-}
-.validationCol {
-  width: 15px;
 }
 .columnInfoButton {
   border-radius: 50% !important;
@@ -36,25 +26,50 @@
   margin-left: 0.4rem !important;
   background-color: var(--white) !important;
 }
-
 .columnInfoButton > span {
   left: 46% !important;
   margin-top: -0.5em !important;
   margin-left: -0.48em !important;
 }
-
 .fieldColumn {
   width: 95px;
 }
-.chips {
-  display: flex !important;
+.fieldInfoDialogWrapper {
+  max-width: 80vw;
+  max-height: 80vh;
+  width: 35vw !important;
+}
+.iconTooltipLevelError {
+  width: 1.5em;
+}
+.iconTooltipWrapper {
+  display: flex;
+  flex-direction: row;
   justify-content: center;
 }
-
+.invisibleHeader {
+  display: none;
+}
+.itemTable {
+  margin: 1rem;
+}
+.itemTable > div > table {
+  width: 99%;
+}
+.readOnlyFields div {
+  opacity: 0.5;
+}
+.requiredTemplateCheck {
+  float: center;
+  color: var(--treeview-table-icon-color);
+}
+.requiredTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}
 .saveButton {
   margin-top: 0.5rem !important;
 }
-
-.readOnlyFields div {
-  opacity: 0.5;
+.validationCol {
+  width: 15px;
 }

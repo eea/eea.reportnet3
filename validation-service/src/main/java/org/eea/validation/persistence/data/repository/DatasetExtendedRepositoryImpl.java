@@ -63,11 +63,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       @Override
       public TableValue execute(Connection conn) throws SQLException {
         conn.setSchema("dataset_" + datasetId);
-        try (PreparedStatement stmt = conn.prepareStatement(query.toLowerCase())) {
-          LOG.info("Query: " + query);
-          ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();) {
+          LOG.info("Query: {}", query);
           TableValue tableValue = new TableValue();
           List<RecordValue> records = new ArrayList<>();
+
           while (rs.next()) {
             RecordValue record = new RecordValue();
             tableValue.setId(idTable);
@@ -88,9 +89,14 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
                 records.add(record);
                 tableValue.setRecords(records);
                 break;
+              case TABLE:
+                break;
+              case DATASET:
+                break;
             }
 
           }
+
           return tableValue;
         }
       }
@@ -125,8 +131,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     return session.doReturningWork(new ReturningWork<List<RecordValidation>>() {
       @Override
       public List<RecordValidation> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();) {
           List<RecordValidation> recordValidations = new ArrayList<>();
           while (rs.next()) {
             RecordValidation recordValidation = new RecordValidation();
@@ -176,8 +182,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     return session.doReturningWork(new ReturningWork<List<FieldValidation>>() {
       @Override
       public List<FieldValidation> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();) {
 
           List<FieldValidation> fieldValidations = new ArrayList<>();
           while (rs.next()) {

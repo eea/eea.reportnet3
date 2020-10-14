@@ -443,11 +443,11 @@ public class UniqueValidationUtils {
       tableValidations.add(tableValidation);
     }
 
-    List<String> notUtilizedRecords2 = new ArrayList<>();
+
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
       // Create validation on referenced DS/Table, checking if all data on Referencer Column are in
       // Referenced column
-      notUtilizedRecords2 =
+      List<String> notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
 

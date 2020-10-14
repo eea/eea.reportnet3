@@ -27,7 +27,7 @@ import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
-import org.eea.dataset.persistence.schemas.domain.webform.WebForm;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -51,7 +51,7 @@ import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.WebFormVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -177,9 +177,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setTableSchemas(new ArrayList<>());
-    dataSetSchema.setWebForm(new WebForm());
     schemasRepository.save(dataSetSchema);
-
+    schemasRepository.updateDatasetSchemaWebForm(idDataSetSchema.toString(), new Webform());
     // create the rules schema
     rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
         new ObjectId().toString());
@@ -1857,7 +1856,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param webformVO the webform VO
    */
   @Override
-  public void updateWebForm(String datasetSchemaId, WebFormVO webformVO) {
+  public void updateWebform(String datasetSchemaId, WebformVO webformVO) {
     schemasRepository.updateDatasetSchemaWebForm(datasetSchemaId,
         webFormMapper.classToEntity(webformVO));
   }

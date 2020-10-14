@@ -265,6 +265,55 @@ const getAllLevelErrorsFromRuleValidations = rulesDTO =>
     ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
   ]);
 
+const groupedErrorsById = async (
+  datasetId,
+  pageNum,
+  pageSize,
+  sortField,
+  asc,
+  levelErrorsFilter,
+  typeEntitiesFilter,
+  originsFilter
+) => {
+  const datasetErrorsDTO = await apiDataset.groupedErrorsById(
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  );
+  const dataset = new Dataset({
+    datasetId: datasetErrorsDTO.idDataset,
+    datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
+    datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
+    totalErrors: datasetErrorsDTO.totalRecords,
+    totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
+  });
+
+  const errors = datasetErrorsDTO.errors.map(
+    datasetErrorDTO =>
+      datasetErrorDTO &&
+      new DatasetError({
+        entityType: datasetErrorDTO.typeEntity,
+        levelError: datasetErrorDTO.levelError,
+        message: datasetErrorDTO.message,
+        numberOfRecords: datasetErrorDTO.numberOfRecords,
+        objectId: datasetErrorDTO.idObject,
+        ruleId: datasetErrorDTO.idRule,
+        tableSchemaId: datasetErrorDTO.idTableSchema,
+        tableSchemaName: datasetErrorDTO.originName,
+        validationDate: datasetErrorDTO.validationDate,
+        validationId: datasetErrorDTO.idValidation
+      })
+  );
+
+  dataset.errors = errors;
+  return dataset;
+};
+
 const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
 
@@ -311,7 +360,8 @@ const schemaById = async datasetId => {
     datasetSchemaDescription: datasetSchemaDTO.description,
     datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
     datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
-    levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
+    levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : [],
+    webform: datasetSchemaDTO.webform ? datasetSchemaDTO.webform.name : null
   });
 
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
@@ -367,65 +417,72 @@ const schemaById = async datasetId => {
   return dataset;
 };
 
-const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
-  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
+const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+  const tableDataDTO = await apiDataset.tableDataById(
+    datasetId,
+    tableSchemaId,
+    pageNum,
+    pageSize,
+    fields,
+    levelError,
+    ruleId
+  );
   const table = new DatasetTable({});
 
-  if (tableDataDTO.totalRecords > 0) {
-    table.tableSchemaId = tableDataDTO.idTableSchema;
-    table.totalRecords = tableDataDTO.totalRecords;
-    table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
+  table.tableSchemaId = tableDataDTO.idTableSchema;
+  table.totalRecords = tableDataDTO.totalRecords;
+  table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
-    let field;
+  let field;
 
-    const records = tableDataDTO.records.map(dataTableRecordDTO => {
-      const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
-        field = new DatasetTableField({
-          fieldId: DataTableFieldDTO.id,
-          fieldSchemaId: DataTableFieldDTO.idFieldSchema,
-          name: DataTableFieldDTO.name,
-          recordId: dataTableRecordDTO.idRecordSchema,
-          type: DataTableFieldDTO.type,
-          value: parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
-        });
-
-        if (!isNull(DataTableFieldDTO.fieldValidations)) {
-          field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
-            return new Validation({
-              date: fieldValidation.validation.validationDate,
-              entityType: fieldValidation.validation.typeEntity,
-              id: fieldValidation.id,
-              levelError: fieldValidation.validation.levelError,
-              message: fieldValidation.validation.message
-            });
-          });
-        }
-        return field;
-      });
-      const record = new DatasetTableRecord({
-        datasetPartitionId: dataTableRecordDTO.datasetPartitionId,
-        providerCode: dataTableRecordDTO.dataProviderCode,
-        recordId: dataTableRecordDTO.id,
-        recordSchemaId: dataTableRecordDTO.idRecordSchema,
-        fields: fields
+  const records = tableDataDTO.records.map(dataTableRecordDTO => {
+    const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
+      field = new DatasetTableField({
+        fieldId: DataTableFieldDTO.id,
+        fieldSchemaId: DataTableFieldDTO.idFieldSchema,
+        name: DataTableFieldDTO.name,
+        recordId: dataTableRecordDTO.idRecordSchema,
+        type: DataTableFieldDTO.type,
+        value: parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
       });
 
-      if (!isNull(dataTableRecordDTO.recordValidations)) {
-        record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
+      if (!isNull(DataTableFieldDTO.fieldValidations)) {
+        field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
           return new Validation({
-            date: recordValidation.validation.validationDate,
-            entityType: recordValidation.validation.typeEntity,
-            id: recordValidation.id,
-            levelError: recordValidation.validation.levelError,
-            message: recordValidation.validation.message
+            date: fieldValidation.validation.validationDate,
+            entityType: fieldValidation.validation.typeEntity,
+            id: fieldValidation.id,
+            levelError: fieldValidation.validation.levelError,
+            message: fieldValidation.validation.message
           });
         });
       }
-      return record;
+      return field;
+    });
+    const record = new DatasetTableRecord({
+      datasetPartitionId: dataTableRecordDTO.datasetPartitionId,
+      providerCode: dataTableRecordDTO.dataProviderCode,
+      recordId: dataTableRecordDTO.id,
+      recordSchemaId: dataTableRecordDTO.idRecordSchema,
+      fields: fields
     });
 
-    table.records = records;
-  }
+    if (!isNull(dataTableRecordDTO.recordValidations)) {
+      record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
+        return new Validation({
+          date: recordValidation.validation.validationDate,
+          entityType: recordValidation.validation.typeEntity,
+          id: recordValidation.id,
+          levelError: recordValidation.validation.levelError,
+          message: recordValidation.validation.message
+        });
+      });
+    }
+    return record;
+  });
+
+  table.records = records;
+
   return table;
 };
 
@@ -436,8 +493,7 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
   datasetTableField.type = fieldType;
   datasetTableField.value = parseValue(fieldType, fieldValue, true);
 
-  const fieldUpdated = await apiDataset.updateFieldById(datasetId, datasetTableField);
-  return fieldUpdated;
+  return await apiDataset.updateFieldById(datasetId, datasetTableField);
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
@@ -484,8 +540,8 @@ const updateRecordsById = async (datasetId, record) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
 };
 
-const updateDatasetDescriptionDesign = async (datasetId, datasetSchemaDescription) => {
-  return await apiDataset.updateSchemaDescriptionById(datasetId, datasetSchemaDescription);
+const updateDatasetSchemaDesign = async (datasetId, datasetSchema) => {
+  return await apiDataset.updateDatasetSchemaById(datasetId, datasetSchema);
 };
 
 const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
@@ -553,11 +609,12 @@ export const ApiDatasetRepository = {
   exportTableDataById,
   getMetaData,
   getReferencedFieldValues,
+  groupedErrorsById,
   orderFieldSchema,
   orderTableSchema,
   schemaById,
   tableDataById,
-  updateDatasetDescriptionDesign,
+  updateDatasetSchemaDesign,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,

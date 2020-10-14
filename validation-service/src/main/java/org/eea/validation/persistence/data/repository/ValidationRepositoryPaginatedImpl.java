@@ -107,8 +107,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     return session.doReturningWork(new ReturningWork<List<GroupValidationVO>>() {
       public List<GroupValidationVO> execute(Connection conn) throws SQLException {
         List<GroupValidationVO> groupsValidations = new ArrayList<>();
-        try (PreparedStatement stmt = conn.prepareStatement(finalQuery)) {
-          ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(finalQuery);
+            ResultSet rs = stmt.executeQuery();) {
           while (rs.next()) {
             GroupValidationVO validation = new GroupValidationVO();
             validation.setMessage(rs.getString("message"));

@@ -307,7 +307,8 @@ public class DataFlowServiceImplTest {
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito.when(dataflowRepository.findAllById(Mockito.any())).thenReturn(list);
+    Mockito.when(dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(Mockito.any()))
+        .thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(new DataFlowVO());
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
   }

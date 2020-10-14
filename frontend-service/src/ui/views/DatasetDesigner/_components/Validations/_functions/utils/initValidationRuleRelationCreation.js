@@ -7,14 +7,14 @@ export const initValidationRuleRelationCreation = (rawTables, datasetSchemaId, d
       return { label: table.header, code: table.tableSchemaId };
     });
 
-  const datsets = datasetSchemas.map(datasetSchema => {
+  const datasets = datasetSchemas.map(datasetSchema => {
     return { label: datasetSchema.datasetSchemaName, code: datasetSchema.datasetSchemaId };
   });
 
   const newLink = getEmptyLink();
   return {
     tables,
-    datasetSchemas: datsets,
+    datasetSchemas: datasets,
     candidateRule: {
       table: undefined,
       field: undefined,

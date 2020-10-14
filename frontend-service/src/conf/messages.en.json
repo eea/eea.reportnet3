@@ -878,7 +878,7 @@
     "sqlSentence": "SQL sentence",
     "datasetComparison": "Dataset comparison",
     "mapSelectPointMessage": "Note: Double click on the map to select a new point",
-    "doNotRemember": "Do not remember again",
+    "doNotAskAgain": "Do not ask again",
     "currentPoint": "Current point",
     "newPoint": "New point",
     "manageRolesEditorDialogInputPlaceholder": "Editor account...",
@@ -886,6 +886,13 @@
     "sqlSentenceHelpField": "SELECT * FROM [tableName]<br/>SELECT record_id, [fieldName]_id FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
     "sqlSentenceHelpRow": "SELECT * FROM [tableName]<br/>SELECT record_id FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
     "sqlSentenceHelpTable": "SELECT * FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
-    "sqlSentenceHelpDescription": "The sentences should look like the following examples (brackets are mandatory only if the name contains blank spaces):"
+    "sqlSentenceHelpDescription": "The sentences should look like the following examples (brackets are mandatory only if the name contains blank spaces):",
+    "configureWebform": "Configure webform",
+    "configureWebformMessage": "Please, select a webform to configure it",
+    "configureWebformPlaceholder": "Select a webform",
+    "toggleGroup": "Toggle group/ungroup errors",
+    "grouped": "Grouped",
+    "ungrouped": "Ungrouped",
+    "numberOfRecords": "Number of records"
   }
 }

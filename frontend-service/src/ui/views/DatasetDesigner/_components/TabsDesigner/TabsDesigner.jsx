@@ -32,18 +32,24 @@ export const TabsDesigner = withRouter(
     editable = false,
     history,
     isPreviewModeOn,
+    isGroupedValidationDeleted,
+    isGroupedValidationSelected,
     isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
     match,
+    onChangeIsValidationSelected,
     onChangeReference,
+    onHideSelectGroupedValidation,
     onLoadTableData,
     onTabChange,
     onUpdateTable,
     recordPositionId,
     selectedRecordErrorId,
-    setActiveIndex,
-    setIsValidationSelected
+    selectedRuleId,
+    selectedRuleLevelError,
+    selectedRuleMessage,
+    setActiveIndex
   }) => {
     const {
       params: { dataflowId, datasetId }
@@ -150,8 +156,12 @@ export const TabsDesigner = withRouter(
           table.showContextMenu = false;
           table.toPrefill = table.tableSchemaToPrefill;
         });
-        //Add tab Button/Tab
+        //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
+        inmDatasetSchema.tables = inmDatasetSchema.tables.filter(
+          table => table.tableSchemaId !== undefined && table.addTab === false
+        );
         inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
+
         setDatasetSchema(inmDatasetSchema);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
@@ -189,7 +199,7 @@ export const TabsDesigner = withRouter(
     const onTabClicked = event => {
       if (event.header !== '') {
         setActiveIndex(event.index);
-        setIsValidationSelected(false);
+        onChangeIsValidationSelected(false);
       }
     };
 
@@ -418,6 +428,8 @@ export const TabsDesigner = withRouter(
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
                         isPreviewModeOn={isPreviewModeOn}
+                        isGroupedValidationDeleted={isGroupedValidationDeleted}
+                        isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}
                         key={tab.index}
                         manageDialogs={manageDialogs}
@@ -425,6 +437,7 @@ export const TabsDesigner = withRouter(
                         onChangeFields={onChangeFields}
                         onChangeReference={onChangeReference}
                         onChangeTableProperties={onChangeTableProperties}
+                        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                         onLoadTableData={onLoadTableData}
                         recordPositionId={
                           !isNaN(activeIndex)
@@ -444,7 +457,10 @@ export const TabsDesigner = withRouter(
                             ? selectedRecordErrorId
                             : -1
                         }
-                        setIsValidationSelected={setIsValidationSelected}
+                        selectedRuleId={selectedRuleId}
+                        selectedRuleLevelError={selectedRuleLevelError}
+                        selectedRuleMessage={selectedRuleMessage}
+                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         table={tabs[i]}
                       />
                     ) : (
@@ -477,7 +493,6 @@ export const TabsDesigner = withRouter(
         }
       } catch (error) {
         console.error(`There has been an error while ordering tables ${error}`);
-      } finally {
       }
     };
 
@@ -497,10 +512,10 @@ export const TabsDesigner = withRouter(
         {renderErrors(errorMessageTitle, errorMessage)}
         {datasetSchema && tabs && validationContext.isVisible && (
           <Validations
+            datasetId={datasetId}
             datasetSchema={datasetSchema}
             datasetSchemas={datasetSchemas}
             tabs={tabs}
-            datasetId={datasetId}
           />
         )}
       </Fragment>
