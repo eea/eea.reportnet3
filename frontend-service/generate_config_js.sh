@@ -26,7 +26,7 @@ fi
 if [ -z "${DOCUMENT_FOLDER:-}" ]; then
     DOCUMENT_FOLDER_JSON=undefined
 else
-    DOCUMENT_FOLDER_JSON=$(jq -n --arg documentFolder DOCUMENT_FOLDER '$documentFolder')
+    DOCUMENT_FOLDER_JSON=$(jq -n --arg documentFolder $DOCUMENT_FOLDER '$documentFolder')
 fi
 
 cat <<EOF
