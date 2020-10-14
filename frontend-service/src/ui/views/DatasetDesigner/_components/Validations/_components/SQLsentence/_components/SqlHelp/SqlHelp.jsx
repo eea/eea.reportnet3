@@ -1,5 +1,9 @@
 import React, { useEffect, useReducer } from 'react';
 
+import ListBox from 'primereact/listbox';
+
+import styles from './SqlHelp.module.scss';
+
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
     case 'UPDATE_PROPERTY':
@@ -68,5 +72,13 @@ export const SqlHelp = ({ sqlSentence, onSetSqlSentence }) => {
     //parse and insert element in sql sentence;
     onSetSqlSentence(`${sqlSentence} ${element}`);
   };
-  return <div></div>;
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.section}>
+        <h3>
+          Dataset <button>add</button>
+        </h3>
+      </div>
+    </div>
+  );
 };
