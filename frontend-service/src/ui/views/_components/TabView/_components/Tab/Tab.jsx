@@ -21,6 +21,7 @@ const Tab = ({
   checkEditingTabs,
   className,
   closeIcon,
+  designMode = false,
   divScrollTabsRef,
   disabled = false,
   editable = false,
@@ -46,9 +47,9 @@ const Tab = ({
   scrollTo,
   selected,
   tableSchemaId,
-  totalTabs,
-  viewType
+  totalTabs
 }) => {
+  console.log(designMode);
   const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
   const [hasErrors, setHasErrors] = useState(false);
@@ -269,7 +270,7 @@ const Tab = ({
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
-          if (viewType['design'] && !addTab) {
+          if (designMode && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
@@ -282,7 +283,7 @@ const Tab = ({
         ref={tabRef}
         tabIndex={index}>
         <a
-          draggable={viewType['design'] ? (!addTab ? true : false) : false}
+          draggable={designMode ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
@@ -367,7 +368,7 @@ const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
-          {viewType['design'] && !hasPKReferenced ? (
+          {designMode && !hasPKReferenced ? (
             <div
               onClick={e => {
                 e.preventDefault();
@@ -400,7 +401,7 @@ const Tab = ({
           ) : null}
         </a>
       </li>
-      {viewType['design'] ? <ContextMenu model={menu} ref={contextMenuRef} /> : null}
+      {designMode ? <ContextMenu model={menu} ref={contextMenuRef} /> : null}
     </React.Fragment>
   );
 };

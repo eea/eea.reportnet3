@@ -25,12 +25,12 @@ const TabView = withRouter(
     checkEditingTabs,
     children,
     className = null,
+    designMode = false,
     hasQueryString = true,
     history,
     id = null,
     initialTabIndexDrag,
     isErrorDialogVisible,
-    isPreviewModeOn,
     onTabAdd,
     onTabAddCancel,
     onTabBlur,
@@ -48,6 +48,7 @@ const TabView = withRouter(
     totalTabs,
     viewType
   }) => {
+    console.log(designMode);
     const [activeIdx, setActiveIdx] = useState(activeIndex);
     const [idx] = useState(id || UniqueComponentId());
     const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
@@ -95,7 +96,7 @@ const TabView = withRouter(
     }, [activeIndex]);
 
     const onTabHeaderClick = (event, tab, index) => {
-      if (viewType['design']) {
+      if (designMode) {
         if (tab.props.addTab) {
           console.log('new tab');
           onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
@@ -181,7 +182,7 @@ const TabView = withRouter(
     };
 
     const isSelected = index => {
-      if (viewType['design']) {
+      if (designMode) {
         if (activeIdx !== TabsUtils.getIndexByTableSchemaId(QuerystringUtils.getUrlParamValue('tab'), tabs)) {
           return activeIdx === index;
         } else {
@@ -207,6 +208,7 @@ const TabView = withRouter(
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={className}
+          designMode={designMode}
           disabled={tab.props.disabled}
           editable={tab.props.editable}
           divScrollTabsRef={divTabsRef.current}
@@ -217,7 +219,6 @@ const TabView = withRouter(
           index={index}
           initialTabIndexDrag={initialTabIndexDrag}
           isNavigationHidden={isNavigationHidden}
-          isPreviewModeOn={isPreviewModeOn}
           key={id}
           leftIcon={tab.props.leftIcon}
           newTab={tab.props.newTab}
@@ -240,7 +241,6 @@ const TabView = withRouter(
           selected={selected}
           tableSchemaId={tab.props.tableSchemaId}
           totalTabs={totalTabs}
-          viewType={viewType}
         />
       );
     };

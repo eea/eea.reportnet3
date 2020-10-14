@@ -370,7 +370,6 @@ export const TabsDesigner = withRouter(
     };
 
     const renderTabViews = () => {
-      console.log(window.location.search);
       return (
         <TabView
           activeIndex={TabsUtils.getIndexByTableSchemaId(
@@ -382,6 +381,7 @@ export const TabsDesigner = withRouter(
             tabs
           )}
           checkEditingTabs={checkEditingTabs}
+          designMode={true}
           history={history}
           initialTabIndexDrag={initialTabIndexDrag}
           isErrorDialogVisible={isErrorDialogVisible}
