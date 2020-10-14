@@ -12,6 +12,12 @@
     a {
       color: var(--white);
       text-decoration: underline;
+      &:hover {
+        color: var(--white);
+      }
+      &:visited {
+        color: var(--white);
+      }
     }
   }
   > div {
