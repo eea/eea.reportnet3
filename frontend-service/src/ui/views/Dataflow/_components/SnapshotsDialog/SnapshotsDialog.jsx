@@ -31,7 +31,6 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   const [snapshotIdToRelease, setSnapshotIdToRelease] = useState('');
   const [snapshotDescription, setSnapshotDescription] = useState();
   const [snapshotsListData, setSnapshotsListData] = useState([]);
-  const [snapshotReleasedId, setSnapshotReleasedId] = useState('');
 
   useCheckNotifications(
     [
@@ -42,11 +41,6 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     setIsLoading,
     false
   );
-
-  if (snapshotReleasedId === snapshotDataToRelease.id) {
-    setSnapshotDataToRelease('');
-    setSnapshotIdToRelease('');
-  }
 
   const clearSnapshotToRelease = () => {
     setSnapshotDataToRelease('');
@@ -62,9 +56,11 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     if (isSnapshotDialogVisible) {
       onLoadSnapshotList(datasetId);
     }
+
     const refresh = notificationContext.toShow.find(
       notification => notification.key === 'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'
     );
+
     if (refresh) {
       onLoadSnapshotList(datasetId);
     }
@@ -101,8 +97,6 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     try {
       const response = await SnapshotService.allReporter(datasetId);
       setSnapshotsListData(response);
-      const snapshotReleased = response.filter(snapshot => snapshot.isReleased);
-      !isEmpty(snapshotReleased) && setSnapshotReleasedId(snapshotReleased[0].id);
     } catch (error) {
       notificationContext.add({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
@@ -195,7 +189,6 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           showReleaseDialog={onShowReleaseDialog}
           snapshotsListData={snapshotsListData}
           snapshotIdToRelease={snapshotIdToRelease}
-          snapshotReleasedId={snapshotReleasedId}
         />
       </Dialog>
       {isActiveReleaseSnapshotConfirmDialog && (

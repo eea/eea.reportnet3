@@ -11,14 +11,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const SnapshotItem = ({
-  getSnapshotData,
-  isLoading,
-  itemData,
-  showReleaseDialog,
-  snapshotIdToRelease,
-  snapshotReleasedId
-}) => {
+export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog, snapshotIdToRelease }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -31,10 +24,10 @@ export const SnapshotItem = ({
   };
 
   const getSnapshotTextStyle = () => {
-    if (snapshotIdToRelease) {
+    if (snapshotIdToRelease !== '') {
       if (itemData.id === snapshotIdToRelease) {
         return `${styles.is_released_snapshot}`;
-      } else if (snapshotReleasedId !== snapshotIdToRelease) {
+      } else if (itemData.isReleased && itemData.id !== snapshotIdToRelease) {
         return itemData.id === snapshotIdToRelease ? `${styles.is_released_snapshot}` : ``;
       }
     } else {
@@ -43,10 +36,10 @@ export const SnapshotItem = ({
   };
 
   const getSnapshotIconStyle = () => {
-    if (snapshotIdToRelease) {
+    if (snapshotIdToRelease !== '') {
       if (itemData.id === snapshotIdToRelease) {
         return 'success';
-      } else if (snapshotReleasedId !== snapshotIdToRelease) {
+      } else if (itemData.isReleased && itemData.id !== snapshotIdToRelease) {
         return itemData.id === snapshotIdToRelease ? 'success' : null;
       }
     } else {
