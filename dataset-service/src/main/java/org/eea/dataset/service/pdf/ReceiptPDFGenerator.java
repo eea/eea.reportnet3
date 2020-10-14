@@ -210,6 +210,16 @@ public class ReceiptPDFGenerator {
     contentStream.endText();
   }
 
+  /**
+   * Split in different lines.
+   *
+   * @param text the text
+   * @param maxLineWidth the max line width
+   * @param font the font
+   * @param fontSize the font size
+   * @return the string[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private String[] splitInDifferentLines(String text, float maxLineWidth, PDType1Font font,
       float fontSize) throws IOException {
 
@@ -247,11 +257,22 @@ public class ReceiptPDFGenerator {
     return lines.toArray(new String[lines.size()]);
   }
 
+  /**
+   * Cut word to fit in line.
+   *
+   * @param word the word
+   * @param line the line
+   * @param maxLineWidth the max line width
+   * @param font the font
+   * @param fontSize the font size
+   * @return the int
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private int cutWordToFitInLine(String word, String line, float maxLineWidth, PDType1Font font,
       float fontSize) throws IOException {
 
     float wordWidth = font.getStringWidth(word) / 1000 * fontSize;
-    float emptyWidth = font.getStringWidth(line + " ") / 1000 * fontSize;
+    float emptyWidth = maxLineWidth - font.getStringWidth(line + " ") / 1000 * fontSize;
     int cutIndex = (int) (word.length() * emptyWidth / wordWidth);
     float currentWidth =
         font.getStringWidth(line + " " + word.substring(0, cutIndex)) / 1000 * fontSize;

@@ -49,8 +49,11 @@ public class ReceiptPDFGeneratorTest {
     datasets.add(dataset);
     dataset.setDateReleased(new Date());
     ReleaseReceiptVO receipt = new ReleaseReceiptVO();
-    receipt.setDataflowName("");
+    receipt.setDataflowName("word ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
     receipt.setDatasets(datasets);
+    receipt.setProviderAssignation("");
+    receipt.setObligationId(1);
+    receipt.setObligationTitle("");
     ReceiptPDFGenerator spyClass = Mockito.spy(receiptPDFGenerator);
     spyClass.generatePDF(receipt, out);
     Mockito.verify(spyClass, times(1)).generatePDF(Mockito.any(), Mockito.any());
