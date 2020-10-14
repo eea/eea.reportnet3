@@ -90,21 +90,21 @@ export const PublicFrontpage = () => {
                     <ul>
                       <li>
                         <a
-                          href="https://www.eionet.europa.eu/reportnet/docs/howto_login-reportnet3-0-v1-0.pdf"
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3.0`}
                           target="_blank">
                           Login
                         </a>
                       </li>
                       <li>
                         <a
-                          href="https://www.eionet.europa.eu/reportnet/docs/howto_reporter-reportnet3-0-v1-0.pdf"
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3.0`}
                           target="_blank">
                           Reporter
                         </a>
                       </li>
                       <li>
                         <a
-                          href="https://www.eionet.europa.eu/reportnet/docs/howto_requester-reportnet3-0-v1-0.pdf"
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3.0`}
                           target="_blank">
                           Requester
                         </a>
