@@ -7,6 +7,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, importButtonsList: payload.importList };
 
     case 'GET_DATASET_DATA':
+      console.log(payload.tables);
       return {
         ...state,
         dataViewerOptions: {
@@ -18,7 +19,12 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaAllTables: payload.tables,
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          tableSchemaId: payload.tables.length === 0 ? '' : payload.tables[0].tableSchemaId
+        },
         levelErrorTypes: payload.levelErrorTypes,
+        previousWebform: payload.previousWebform,
         schemaTables: payload.schemaTables,
         webform: payload.webform
       };
@@ -52,8 +58,17 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_REPLACE_DATA':
       return { ...state, replaceData: payload.value };
 
-    case 'IS_PREVIEW_MODE_ON':
-      return { ...state, isPreviewModeOn: payload.value };
+    case 'SET_VIEW_MODE':
+      const inmViewType = { ...state.viewType };
+      Object.keys(inmViewType).forEach(view => {
+        if (view === payload.value) {
+          inmViewType[view] = true;
+        } else {
+          inmViewType[view] = false;
+        }
+      });
+      console.log({ inmViewType });
+      return { ...state, viewType: inmViewType };
 
     case 'LOAD_EXTERNAL_OPERATIONS':
       return {
@@ -103,7 +118,8 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRecordErrorId: -1,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
-          selectedRuleMessage: payload.selectedRuleMessage
+          selectedRuleMessage: payload.selectedRuleMessage,
+          tableSchemaId: payload.tableSchemaId
         },
         isValidationViewerVisible: false
       };
@@ -121,7 +137,8 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRecordErrorId: payload.selectedRecordErrorId,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
-          selectedRuleMessage: payload.selectedRuleMessage
+          selectedRuleMessage: payload.selectedRuleMessage,
+          tableSchemaId: payload.tableSchemaId
         },
         isValidationViewerVisible: false
       };

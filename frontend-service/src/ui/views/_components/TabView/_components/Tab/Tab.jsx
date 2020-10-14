@@ -24,7 +24,6 @@ const Tab = ({
   divScrollTabsRef,
   disabled = false,
   editable = false,
-  designMode = false,
   hasPKReferenced = false,
   header,
   headerStyle,
@@ -46,7 +45,9 @@ const Tab = ({
   rightIcon,
   scrollTo,
   selected,
-  totalTabs
+  tableSchemaId,
+  totalTabs,
+  viewType
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
@@ -75,13 +76,13 @@ const Tab = ({
         icon: config.icons['trash'],
         command: () => {
           if (!isUndefined(onTabDeleteClick) && !addTab) {
-            onTabDeleteClick(index);
+            onTabDeleteClick(tableSchemaId);
           }
         },
         disabled: hasPKReferenced
       }
     ]);
-  }, []);
+  }, [tableSchemaId]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -108,7 +109,7 @@ const Tab = ({
       //For firefox
       event.dataTransfer.setData('text/plain', null);
       if (!isUndefined(onTabDragAndDropStart)) {
-        onTabDragAndDropStart(index, selected, header);
+        onTabDragAndDropStart(index, tableSchemaId);
       }
     }
   };
@@ -117,7 +118,7 @@ const Tab = ({
     if (!isUndefined(initialTabIndexDrag)) {
       setIsDragging(false);
       if (!isUndefined(onTabDragAndDropStart)) {
-        onTabDragAndDropStart(index);
+        onTabDragAndDropStart(index, tableSchemaId);
       }
     }
   };
@@ -268,7 +269,7 @@ const Tab = ({
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
-          if (designMode && !addTab) {
+          if (viewType['design'] && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
@@ -281,7 +282,7 @@ const Tab = ({
         ref={tabRef}
         tabIndex={index}>
         <a
-          draggable={designMode ? (!addTab ? true : false) : false}
+          draggable={viewType['design'] ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
@@ -300,7 +301,8 @@ const Tab = ({
               if (!isUndefined(checkEditingTabs)) {
                 if (!checkEditingTabs()) {
                   if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
-                    onTabDeleteClick(index);
+                    console.log({ tableSchemaId });
+                    onTabDeleteClick(tableSchemaId);
                   }
                 }
               }
@@ -365,7 +367,7 @@ const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
-          {designMode && !hasPKReferenced ? (
+          {viewType['design'] && !hasPKReferenced ? (
             <div
               onClick={e => {
                 e.preventDefault();
@@ -373,7 +375,8 @@ const Tab = ({
                 if (!isUndefined(checkEditingTabs)) {
                   if (!checkEditingTabs()) {
                     if (!isUndefined(onTabDeleteClick)) {
-                      onTabDeleteClick(index);
+                      console.log({ tableSchemaId });
+                      onTabDeleteClick(tableSchemaId);
                     }
                   }
                 }
@@ -397,7 +400,7 @@ const Tab = ({
           ) : null}
         </a>
       </li>
-      {designMode ? <ContextMenu model={menu} ref={contextMenuRef} /> : null}
+      {viewType['design'] ? <ContextMenu model={menu} ref={contextMenuRef} /> : null}
     </React.Fragment>
   );
 };

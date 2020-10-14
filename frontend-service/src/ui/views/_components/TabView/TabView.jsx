@@ -17,13 +17,14 @@ import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Tab } from './_components/Tab';
 
+import { QuerystringUtils, TabsUtils } from 'ui/views/_functions/Utils';
+
 const TabView = withRouter(
   ({
     activeIndex = -1,
     checkEditingTabs,
     children,
     className = null,
-    designMode = false,
     hasQueryString = true,
     history,
     id = null,
@@ -42,11 +43,14 @@ const TabView = withRouter(
     onTabNameError,
     renderActiveOnly = true,
     style = null,
-    totalTabs
+    tabs,
+    tableSchemaId,
+    totalTabs,
+    viewType
   }) => {
     const [activeIdx, setActiveIdx] = useState(activeIndex);
     const [idx] = useState(id || UniqueComponentId());
-    const [idxToDelete, setIdxToDelete] = useState(null);
+    const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isNavigationHidden, setIsNavigationHidden] = useState(true);
 
@@ -69,27 +73,31 @@ const TabView = withRouter(
 
     useEffect(() => {
       if (!isNil(onTabClick) && history.location.search !== '') {
-        onTabClick({ index: getUrlParamValue('tab') });
+        onTabClick({ index: QuerystringUtils.getUrlParamValue('tab') });
       } else {
         if (!isNil(onTabChange)) {
-          onTabChange({ index: getUrlParamValue('tab') });
+          console.log('eee');
+          onTabChange({ index: QuerystringUtils.getUrlParamValue('tab') });
         }
       }
     }, []);
 
     useEffect(() => {
+      console.log(activeIdx);
       if (hasQueryString) {
         changeUrl();
       }
     }, [activeIdx]);
 
     useEffect(() => {
+      console.log(activeIndex);
       setActiveIdx(activeIndex);
     }, [activeIndex]);
 
     const onTabHeaderClick = (event, tab, index) => {
-      if (designMode) {
+      if (viewType['design']) {
         if (tab.props.addTab) {
+          console.log('new tab');
           onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
             if (!isUndefined(ulTabsRef.current) && !isNull(ulTabsRef.current)) {
               scrollTo(ulTabsRef.current.clientWidth + 100, 0);
@@ -98,9 +106,10 @@ const TabView = withRouter(
         } else {
           if (!tab.props.disabled) {
             if (!isNil(onTabChange)) {
-              onTabChange({ originalEvent: event, index: index });
+              onTabChange({ originalEvent: event, index, tableSchemaId: tab.props.tableSchemaId });
             } else {
               if (!isNil(onTabClick)) {
+                console.log('CLICK');
                 onTabClick({ originalEvent: event, index: index, header: tab.props.header });
               }
             }
@@ -112,7 +121,7 @@ const TabView = withRouter(
             onTabClick({ originalEvent: event, index: index, header: tab.props.header });
           }
           if (!isNil(onTabChange)) {
-            onTabChange({ originalEvent: event, index: index });
+            onTabChange({ originalEvent: event, index, tableSchemaId: tab.props.tableSchemaId });
           } else {
             if (!isNil(onTabClick)) {
               onTabClick({ originalEvent: event, index: index, header: tab.props.header });
@@ -126,8 +135,9 @@ const TabView = withRouter(
       event.preventDefault();
     };
 
-    const onTabDeleteClicked = deleteIndex => {
-      setIdxToDelete(deleteIndex);
+    const onTabDeleteClicked = deleteTableSchemaId => {
+      console.log(deleteTableSchemaId);
+      setTableSchemaIdToDelete(deleteTableSchemaId);
       setIsDeleteDialogVisible(true);
     };
 
@@ -139,12 +149,16 @@ const TabView = withRouter(
       }
     };
 
-    const changeUrl = () =>
-      window.history.replaceState(
-        null,
-        null,
-        `?tab=${activeIdx}${!isUndefined(isPreviewModeOn) ? `&design=${isPreviewModeOn}` : ''}`
-      );
+    const changeUrl = () => {
+      console.log('tableSchemaId :>> ', tableSchemaId);
+      if (!isNil(tableSchemaId)) {
+        window.history.replaceState(
+          null,
+          null,
+          `?tab=${tableSchemaId}${`&view=${Object.keys(viewType).filter(view => viewType[view])}`}`
+        );
+      }
+    };
 
     const createContent = (tab, index) => {
       const selected = isSelected(index);
@@ -165,23 +179,13 @@ const TabView = withRouter(
         </div>
       );
     };
-    const getUrlParamValue = param => {
-      let value = '';
-      let queryString = window.location.search;
-      const params = queryString.substring(1, queryString.length).split('&');
-      params.forEach(parameter => {
-        if (parameter.includes(param)) {
-          value = parameter.split('=')[1];
-        }
-      });
-      return param === 'tab' ? Number(value) : value === 'true';
-    };
+
     const isSelected = index => {
-      if (designMode) {
-        if (activeIdx !== getUrlParamValue('tab')) {
+      if (viewType['design']) {
+        if (activeIdx !== TabsUtils.getIndexByTableSchemaId(QuerystringUtils.getUrlParamValue('tab'), tabs)) {
           return activeIdx === index;
         } else {
-          return getUrlParamValue('tab') === index;
+          return TabsUtils.getIndexByTableSchemaId(QuerystringUtils.getUrlParamValue('tab'), tabs) === index;
         }
       } else {
         return activeIdx === index;
@@ -205,7 +209,6 @@ const TabView = withRouter(
           className={className}
           disabled={tab.props.disabled}
           editable={tab.props.editable}
-          designMode={designMode}
           divScrollTabsRef={divTabsRef.current}
           hasPKReferenced={tab.props.hasPKReferenced}
           header={tab.props.header}
@@ -235,7 +238,9 @@ const TabView = withRouter(
           rightIcon={tab.props.rightIcon}
           scrollTo={scrollTo}
           selected={selected}
+          tableSchemaId={tab.props.tableSchemaId}
           totalTabs={totalTabs}
+          viewType={viewType}
         />
       );
     };
@@ -309,7 +314,7 @@ const TabView = withRouter(
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => {
-          onTabConfirmDelete(idxToDelete);
+          onTabConfirmDelete(tableSchemaIdToDeleteToDelete);
           setIsDeleteDialogVisible(false);
         }}
         onHide={() => setIsDeleteDialogVisible(false)}

@@ -13,5 +13,6 @@ TabPanel.propTypes = {
   headerClassName: PropTypes.string,
   headerStyle: PropTypes.object,
   leftIcon: PropTypes.string,
-  rightIcon: PropTypes.string
+  rightIcon: PropTypes.string,
+  tableSchemaId: PropTypes.string
 };
