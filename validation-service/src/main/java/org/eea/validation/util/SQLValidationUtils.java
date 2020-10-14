@@ -152,14 +152,16 @@ public class SQLValidationUtils {
       validation.setValidationDate(new Date().toString());
       TableValue table = null;
       table = tableRepository.findById(tableToEvaluate.getId()).orElse(new TableValue());
-      String tableOrigName = "";
+      String tableName = "";
       for (TableSchema tableschema : schema.getTableSchemas()) {
         if (table.getIdTableSchema().equals(tableschema.getIdTableSchema().toString())) {
-          tableOrigName = tableschema.getNameTableSchema();
+          tableName = tableschema.getNameTableSchema();
           break;
         }
       }
-      validation.setOriginName(tableOrigName);
+      validation.setTableName(tableName);
+      validation.setShortCode(rule.getShortCode());
+
 
       EntityTypeEnum ruleType = rule.getType();
       switch (ruleType) {
@@ -167,7 +169,7 @@ public class SQLValidationUtils {
           DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
           DataSetMetabaseVO datasetMetabase =
               datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-          validation.setOriginName(datasetMetabase.getDataSetName());
+          validation.setTableName(datasetMetabase.getDataSetName());
           if (dataset.getDatasetValidations().isEmpty()) {
             DatasetValidation datasetValidation = new DatasetValidation();
             datasetValidation.setDatasetValue(dataset);

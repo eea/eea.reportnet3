@@ -448,7 +448,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(fieldValidation.getValidation().getId());
       error.setLevelError(fieldValidation.getValidation().getLevelError().name());
       error.setMessage(fieldValidation.getValidation().getMessage());
-      error.setNameTableSchema(fieldValidation.getValidation().getOriginName());
+      error.setNameTableSchema(fieldValidation.getValidation().getTableName());
 
       error.setIdTableSchema(
           fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
@@ -484,7 +484,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(recordValidation.getValidation().getId());
       error.setLevelError(recordValidation.getValidation().getLevelError().name());
       error.setMessage(recordValidation.getValidation().getMessage());
-      error.setNameTableSchema(recordValidation.getValidation().getOriginName());
+      error.setNameTableSchema(recordValidation.getValidation().getTableName());
 
       error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
 
@@ -519,7 +519,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(tableValidation.getValidation().getId());
       error.setLevelError(tableValidation.getValidation().getLevelError().name());
       error.setMessage(tableValidation.getValidation().getMessage());
-      error.setNameTableSchema(tableValidation.getValidation().getOriginName());
+      error.setNameTableSchema(tableValidation.getValidation().getTableName());
 
       error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
 
@@ -554,7 +554,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(datasetValidation.getValidation().getId());
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(datasetValidation.getValidation().getOriginName());
+      error.setNameTableSchema(datasetValidation.getValidation().getTableName());
       error.setIdTableSchema(dataset.getIdDatasetSchema());
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());

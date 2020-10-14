@@ -148,7 +148,7 @@ public class FKValidationUtils {
         schemasRepository.findByIdDataSetSchema(new ObjectId(pkSchemaId));
 
     // get Orig name
-    TableSchema origname = getTableSchemaFromIdFieldSchema(datasetSchemaFK, idFieldSchema);
+    TableSchema tableName = getTableSchemaFromIdFieldSchema(datasetSchemaFK, idFieldSchema);
 
     // Retrieve PK List
     List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
@@ -157,7 +157,7 @@ public class FKValidationUtils {
     List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
 
     // GetValidationData
-    Validation pkValidation = createValidation(idRule, fkSchemaId, origname);
+    Validation pkValidation = createValidation(idRule, fkSchemaId, tableName);
     List<FieldValue> errorFields = new ArrayList<>();
 
     if (!pkMustBeUsed) {
@@ -329,11 +329,11 @@ public class FKValidationUtils {
    *
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
-   * @param origname the origname
+   * @param tableName the tableName
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
-      TableSchema origname) {
+      TableSchema tableName) {
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
@@ -362,7 +362,9 @@ public class FKValidationUtils {
       validation.setMessage(rule.getThenCondition().get(0));
       validation.setTypeEntity(EntityTypeEnum.FIELD);
       validation.setValidationDate(new Date().toString());
-      validation.setOriginName(origname.getNameTableSchema());
+      validation.setTableName(tableName.getNameTableSchema());
+      validation.setShortCode(rule.getShortCode());
+      // validation
     }
     return validation;
   }

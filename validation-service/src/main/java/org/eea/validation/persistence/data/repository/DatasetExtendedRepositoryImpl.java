@@ -143,7 +143,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setIdRule(rs.getString(6));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
-            validation.setOriginName(rs.getString(9));
+            // validation.setOriginName(rs.getString(9));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(10)));
             validation.setValidationDate(rs.getString(11));
 
@@ -195,7 +195,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setIdRule(rs.getString(6));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
-            validation.setOriginName(rs.getString(9));
+            // validation.setOriginName(rs.getString(9));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(10)));
             validation.setValidationDate(rs.getString(11));
 
