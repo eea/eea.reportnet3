@@ -647,7 +647,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onTabChange = tableSchemaId => {
+  const onTabChange = tableSchemaId =>
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
@@ -657,7 +657,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         selectedRuleMessage: ''
       }
     });
-  };
 
   const onUpdateData = () => {
     designerDispatch({ type: 'ON_UPDATE_DATA', payload: { isUpdated: !designerState.isDataUpdated } });
@@ -1138,7 +1137,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             setActiveIndex={index =>
               designerDispatch({
                 type: 'SET_DATAVIEWER_OPTIONS',
-                payload: { ...designerState.dataViewerOptions, activeIndex: index }
+                payload: { ...designerState.dataViewerOptions, activeIndex: index, selectedRecordErrorId: -1 }
               })
             }
             onChangeIsValidationSelected={onChangeIsValidationSelected}
