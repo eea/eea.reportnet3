@@ -4,6 +4,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import uuid from 'uuid';
 
 import styles from './Filters.module.scss';
 
@@ -274,43 +275,48 @@ export const Filters = ({
     }
   };
 
-  const renderCalendarFilter = (property, i) => (
-    <span key={i} className={styles.dataflowInput} ref={dateRef}>
-      {renderOrderFilter(property)}
-      <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
-        <Calendar
-          className={styles.calendarFilter}
-          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
-          inputClassName={styles.inputFilter}
-          inputId={property}
-          monthNavigator={true}
-          onChange={event => onFilterData(property, event.value)}
-          onFocus={() => onAnimateLabel(property, true)}
-          readOnlyInput={true}
-          selectionMode="range"
-          showWeek={true}
-          value={filterState.filterBy[property]}
-          yearNavigator={true}
-          yearRange="2015:2030"
-          style={{ zoom: '0.95' }}
-        />
-        {!isEmpty(filterState.filterBy[property]) && (
-          <Button
-            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-            icon="cancel"
-            onClick={() => {
-              onFilterData(property, []);
-              document.querySelector(`#${property}`).value = null;
-              onAnimateLabel(property, false);
-            }}
+  const renderCalendarFilter = (property, i) => {
+    const inputId = uuid.v4();
+    return (
+      <span key={i} className={styles.dataflowInput} ref={dateRef}>
+        {renderOrderFilter(property)}
+        <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
+          <Calendar
+            className={`${styles.calendarFilter} ${property}`}
+            dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
+            inputClassName={styles.inputFilter}
+            inputId={inputId}
+            monthNavigator={true}
+            onChange={event => onFilterData(property, event.value)}
+            onFocus={() => onAnimateLabel(property, true)}
+            readOnlyInput={true}
+            selectionMode="range"
+            showWeek={true}
+            style={{ zoom: '0.95' }}
+            value={filterState.filterBy[property]}
+            yearNavigator={true}
+            yearRange="2015:2030"
           />
-        )}
-        <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={property}>
-          {resources.messages[property]}
-        </label>
+          {!isEmpty(filterState.filterBy[property]) && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => {
+                onFilterData(property, []);
+                onAnimateLabel(property, false);
+                document.getElementById(inputId).value = '';
+              }}
+            />
+          )}
+          <label
+            className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label}
+            htmlFor={property}>
+            {resources.messages[property]}
+          </label>
+        </span>
       </span>
-    </span>
-  );
+    );
+  };
 
   const renderCheckbox = () => (
     <Fragment>
