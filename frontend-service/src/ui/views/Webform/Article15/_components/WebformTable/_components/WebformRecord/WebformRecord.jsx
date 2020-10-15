@@ -371,7 +371,7 @@ export const WebformRecord = ({
         return (
           <div key={i} className={styles.field}>
             <label>{field.title}</label>
-            <div className={styles.content}>
+            <div>
               <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
               {field.validations &&
                 field.validations.map((validation, index) => (

@@ -42,7 +42,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
         fields = columnsSchema.map(column => {
           if (column.type === 'FIELD') {
             return {
-              fieldData: { [column.fieldSchemaId]: null, type: column.fieldType, fieldSchemaId: column.fieldSchemaId }
+              fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
             };
           }
         });
@@ -59,10 +59,15 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
 
   const onAddMultipleWebform = async tableSchemaId => {
     if (!isEmpty(webformData.elementsRecords)) {
-      const newEmptyRecord = parseNewRecord(webformData.elementsRecords[0].elements);
+      const newEmptyRecord = parseNewRecord(
+        webformData.elementsRecords[0].elements.filter(element => element.tableSchemaId === tableSchemaId)[0].elements
+      );
 
       try {
-        await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
+        const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
+        if (response) {
+          onUpdateData();
+        }
       } catch (error) {
         console.error('error', error);
       }

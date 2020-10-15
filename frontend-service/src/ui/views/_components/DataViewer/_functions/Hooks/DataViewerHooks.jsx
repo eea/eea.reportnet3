@@ -239,7 +239,8 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+            justifyContent:
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
