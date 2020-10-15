@@ -379,9 +379,10 @@ public class KieBaseManager {
     // drools doesnt
     // work
     ruleAdd.put(ConditionsDrools.TABLE_NAME.getValue(),
-        !tableSchemaName.isEmpty() ? tableSchemaName : "Dataset Table Name");
+        null != tableSchemaName && !tableSchemaName.isEmpty() ? tableSchemaName
+            : "Dataset Table Name");
     ruleAdd.put(ConditionsDrools.FIELD_NAME.getValue(),
-        !fieldName.isEmpty() ? fieldName : "None Field Name");
+        null != fieldName && !fieldName.isEmpty() ? fieldName : "None Field Name");
     ruleAdd.put(ConditionsDrools.SHORT_CODE.getValue(), shortCode);
 
     return ruleAdd;

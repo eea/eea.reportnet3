@@ -449,12 +449,12 @@ public class ValidationServiceImpl implements ValidationService {
       error.setLevelError(fieldValidation.getValidation().getLevelError().name());
       error.setMessage(fieldValidation.getValidation().getMessage());
       error.setNameTableSchema(fieldValidation.getValidation().getTableName());
-
       error.setIdTableSchema(
           fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
-
       error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(fieldValidation.getValidation().getValidationDate());
+      error.setShortCode(fieldValidation.getValidation().getShortCode());
+      error.setFieldNameSchema(fieldValidation.getValidation().getFieldName());
 
       errors.put(fieldValidation.getValidation().getId(), error);
     }
@@ -485,11 +485,10 @@ public class ValidationServiceImpl implements ValidationService {
       error.setLevelError(recordValidation.getValidation().getLevelError().name());
       error.setMessage(recordValidation.getValidation().getMessage());
       error.setNameTableSchema(recordValidation.getValidation().getTableName());
-
       error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
-
       error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(recordValidation.getValidation().getValidationDate());
+      error.setShortCode(recordValidation.getValidation().getShortCode());
 
       errors.put(recordValidation.getValidation().getId(), error);
     }
@@ -520,11 +519,10 @@ public class ValidationServiceImpl implements ValidationService {
       error.setLevelError(tableValidation.getValidation().getLevelError().name());
       error.setMessage(tableValidation.getValidation().getMessage());
       error.setNameTableSchema(tableValidation.getValidation().getTableName());
-
       error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
-
       error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(tableValidation.getValidation().getValidationDate());
+      error.setShortCode((tableValidation.getValidation().getShortCode()));
 
       errors.put(tableValidation.getValidation().getId(), error);
     }
@@ -558,6 +556,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdTableSchema(dataset.getIdDatasetSchema());
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
+      error.setShortCode(datasetValidation.getValidation().getShortCode());
 
       errors.put(datasetValidation.getValidation().getId(), error);
     }
