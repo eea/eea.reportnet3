@@ -348,7 +348,7 @@ const parseDataflowDTO = dataflowDTO =>
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
@@ -359,7 +359,6 @@ const parseDataflowDTO = dataflowDTO =>
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
-
 const parseDataCollectionListDTO = dataCollectionsDTO => {
   if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
     const dataCollections = [];
@@ -466,7 +465,7 @@ const parseObligationDTO = obligationDTO => {
       countries: obligationDTO.countries,
       description: obligationDTO.description,
       expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? dayjs.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+        ? dayjs(obligationDTO.nextDeadline).format('YYYY-MM-DD')
         : null,
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
