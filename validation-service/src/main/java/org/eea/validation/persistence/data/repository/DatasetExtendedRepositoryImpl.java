@@ -143,18 +143,20 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setIdRule(rs.getString(6));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
-            validation.setOriginName(rs.getString(9));
-            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(10)));
-            validation.setValidationDate(rs.getString(11));
+            validation.setTableName(rs.getString(9));
+            validation.setFieldName(rs.getString(10));
+            validation.setShortCode(rs.getString(11));
+            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
+            validation.setValidationDate(rs.getString(13));
 
             RecordValue record = new RecordValue();
             record.setId(rs.getString(3));
-            record.setDataProviderCode(rs.getString(12));
-            record.setDatasetPartitionId(Long.parseLong(rs.getString(13)));
-            record.setIdRecordSchema(rs.getString(14));
+            record.setDataProviderCode(rs.getString(14));
+            record.setDatasetPartitionId(Long.parseLong(rs.getString(15)));
+            record.setIdRecordSchema(rs.getString(16));
 
             TableValue table = new TableValue();
-            table.setId(Long.parseLong(rs.getString(15)));
+            table.setId(Long.parseLong(rs.getString(17)));
 
             record.setTableValue(table);
 
@@ -195,19 +197,21 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setIdRule(rs.getString(6));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
-            validation.setOriginName(rs.getString(9));
-            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(10)));
-            validation.setValidationDate(rs.getString(11));
+            validation.setTableName(rs.getString(9));
+            validation.setFieldName(rs.getString(10));
+            validation.setShortCode(rs.getString(11));
+            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
+            validation.setValidationDate(rs.getString(13));
 
 
             FieldValue field = new FieldValue();
             field.setId(rs.getString(3));
-            field.setIdFieldSchema(rs.getString(12));
-            field.setType(rs.getString(14));
-            field.setValue(rs.getString(15));
+            field.setIdFieldSchema(rs.getString(14));
+            field.setType(rs.getString(16));
+            field.setValue(rs.getString(17));
 
             RecordValue record = new RecordValue();
-            record.setId(rs.getString(13));
+            record.setId(rs.getString(15));
 
             field.setRecord(record);
 

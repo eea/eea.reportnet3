@@ -92,14 +92,15 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
       String originsFilter, Pageable pageable, String headerField, Boolean asc, boolean paged) {
     Session session = (Session) entityManager.getDelegate();
     String basicQuery = String.format(
-        "select v.message as message, v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity,v.origin_name as originName, count(*) as numberOfRecords from dataset_%s.Validation v  where v.id is not null ",
+        "select v.message as message, v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity,v.table_name as tableName,v.short_code as shortCode, v.field_name as fieldName, count(*) as numberOfRecords from dataset_%s.Validation v  where v.id is not null ",
         datasetId);
     String orderPart = "";
     orderPart = addOrderBy(headerField, asc, orderPart);
     String partLevelError = levelErrorFilter(levelErrorsFilter, true);
     String partTypeEntities = typeEntities(typeEntitiesFilter, true);
     String partOriginsFilter = originFilter(originsFilter, true);
-    String groupBy = "group by v.message,v.level_error, v.id_rule, v.type_entity,v.origin_name ";
+    String groupBy =
+        "group by v.message,v.level_error, v.id_rule, v.type_entity,v.table_name,v.short_code,v.field_name ";
     String page =
         paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
     String finalQuery = basicQuery + partLevelError + partTypeEntities + partOriginsFilter + groupBy
@@ -116,7 +117,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString("levelError")));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString("typeEntity")));
             validation.setNumberOfRecords(rs.getInt("numberOfRecords"));
-            validation.setOriginName(rs.getString("originName"));
+            validation.setNameTableSchema(rs.getString("tableName"));
+            validation.setShortCode(rs.getString("shortCode"));
+            validation.setNameFieldSchema(rs.getString("fieldName"));
             groupsValidations.add(validation);
           }
         }
@@ -182,8 +185,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     if (!StringUtils.isBlank(originsFilter)) {
       List<String> originsFilterList = Arrays.asList(originsFilter.split(","));
       for (int i = 0; i < originsFilterList.size(); i++) {
-        stringBuilder.append(group ? "and v.origin_name <>'" + originsFilterList.get(i) + "' "
-            : " and v.originName  !='" + originsFilterList.get(i) + "' ");
+        stringBuilder.append(group ? "and v.table_name <>'" + originsFilterList.get(i) + "' "
+            : " and v.tableName  !='" + originsFilterList.get(i) + "' ");
       }
     }
     return stringBuilder.toString();

@@ -151,7 +151,11 @@ public class LoadValidationsHelper {
 
     validation.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
         typeEntitiesFilter, originsFilter, pageable, headerField, asc, true));
-    validation.setTotalRecords(validationRepository.count());
+    validation.setTotalErrors(validationRepository.count());
+
+    validation.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
+        new ArrayList(), new ArrayList(), "", pageable, "", asc, false).size()));
+
     validation.setTotalFilteredRecords(
         Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
             typeEntitiesFilter, originsFilter, pageable, headerField, asc, false).size()));
