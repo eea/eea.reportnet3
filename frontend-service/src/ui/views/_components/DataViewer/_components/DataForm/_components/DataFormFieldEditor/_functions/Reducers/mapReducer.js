@@ -9,6 +9,11 @@ export const mapReducer = (state, { type, payload }) => {
         newPoint: '',
         newPointCRS: payload.newPointCRS
       };
+    case 'DISPLAY_COORDINATE_ERROR':
+      return {
+        ...state,
+        showCoordinateError: payload
+      };
     case 'OPEN_MAP':
       return {
         ...state,

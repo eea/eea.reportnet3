@@ -46,7 +46,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { CurrentPage, ExtensionUtils, MetadataUtils, TabsUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TabsUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -75,7 +75,7 @@ export const Dataset = withRouter(({ match, history }) => {
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
-    tableSchemaId: ''
+    tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -104,7 +104,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [replaceData, setReplaceData] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [tableSchemaId, setTableSchemaId] = useState();
   const [schemaTables, setSchemaTables] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -122,6 +121,16 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (!isNil(tableSchema) && tableSchema.length > 0) {
+      console.log(tableSchema);
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        tableSchemaId: tableSchema[0].id
+      });
+    }
+  }, [tableSchema]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -189,6 +198,19 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     getExportExtensions(externalOperationsList.export);
   }, [externalOperationsList]);
+
+  useEffect(() => {
+    if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
+  }, [dataViewerOptions.tableSchemaId]);
+
+  const changeUrl = () => {
+    console.log(dataViewerOptions.tableSchemaId, tableSchema[0].id);
+    window.history.replaceState(
+      null,
+      null,
+      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}`
+    );
+  };
 
   const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
@@ -501,7 +523,6 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
-      setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
       const tableSchemaList = [];
       setTableSchema(
@@ -540,11 +561,6 @@ export const Dataset = withRouter(({ match, history }) => {
           });
         })
       );
-
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        tableSchemaId: datasetSchema.tables.length === 0 ? '' : datasetSchema.tables[0].id
-      });
 
       setDatasetHasErrors(datasetStatistics.datasetErrors);
     } catch (error) {
@@ -627,7 +643,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = table => {
-    console.log(table, TabsUtils.getTableSchemaIdByIndex(table.index, tableSchema), tableSchema);
+    console.log(table);
     setDataViewerOptions({
       ...dataViewerOptions,
       isGroupedValidationDeleted: true,
@@ -635,7 +651,7 @@ export const Dataset = withRouter(({ match, history }) => {
       selectedRuleId: '',
       selectedRuleLevelError: '',
       selectedRuleMessage: '',
-      tableSchemaId: TabsUtils.getTableSchemaIdByIndex(table.index, tableSchema)
+      tableSchemaId: table.tableSchemaId
     });
   };
 

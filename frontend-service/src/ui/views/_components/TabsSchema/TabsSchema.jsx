@@ -1,5 +1,6 @@
 import React from 'react';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsSchema.module.css';
@@ -9,6 +10,9 @@ import { config } from 'conf';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
+
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
   activeIndex = 0,
@@ -37,7 +41,7 @@ export const TabsSchema = ({
   tables,
   tableSchemaColumns
 }) => {
-  console.log('LLEGO', tableSchemaId);
+  console.log('LLEGO', { tableSchemaId });
   let tableHasErrors = true;
   if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
     tableHasErrors = tables[activeIndex].hasErrors;
@@ -99,7 +103,19 @@ export const TabsSchema = ({
 
   return (
     <TabView
-      activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
+      activeIndex={
+        !isNil(tables)
+          ? TabsUtils.getIndexByTableProperty(
+              !isNil(tableSchemaId)
+                ? tableSchemaId
+                : QuerystringUtils.getUrlParamValue('tab') !== ''
+                ? QuerystringUtils.getUrlParamValue('tab')
+                : '',
+              tables,
+              'id'
+            )
+          : 0
+      }
       onTabChange={onTabChange}
       renderActiveOnly={false}
       tableSchemaId={tableSchemaId}>

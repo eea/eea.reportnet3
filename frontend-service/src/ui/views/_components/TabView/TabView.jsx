@@ -48,6 +48,7 @@ const TabView = withRouter(
     totalTabs,
     viewType
   }) => {
+    console.log({ activeIndex });
     const [activeIdx, setActiveIdx] = useState(activeIndex);
     const [idx] = useState(id || UniqueComponentId());
     const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
@@ -73,9 +74,11 @@ const TabView = withRouter(
 
     useEffect(() => {
       if (!isNil(onTabClick) && history.location.search !== '') {
+        console.log('AQUI');
         onTabClick({ index: QuerystringUtils.getUrlParamValue('tab') });
       } else {
         if (!isNil(onTabChange)) {
+          console.log('AQUI 2', tableSchemaId);
           onTabChange({ index: QuerystringUtils.getUrlParamValue('tab') });
         }
       }
@@ -116,7 +119,8 @@ const TabView = withRouter(
             onTabClick({ originalEvent: event, index: index, header: tab.props.header });
           }
           if (!isNil(onTabChange)) {
-            onTabChange({ originalEvent: event, index, tableSchemaId: tab.props.tableSchemaId });
+            console.log('AQUI 4', tab);
+            onTabChange({ originalEvent: event, index, tableSchemaId: tab.key });
           } else {
             if (!isNil(onTabClick)) {
               onTabClick({ originalEvent: event, index: index, header: tab.props.header });
@@ -178,10 +182,15 @@ const TabView = withRouter(
 
     const isSelected = index => {
       if (designMode) {
-        if (activeIdx !== TabsUtils.getIndexByTableSchemaId(QuerystringUtils.getUrlParamValue('tab'), tabs)) {
+        if (
+          activeIdx !==
+          TabsUtils.getIndexByTableProperty(QuerystringUtils.getUrlParamValue('tab'), tabs, 'tableSchemaId')
+        ) {
           return activeIdx === index;
         } else {
-          return TabsUtils.getIndexByTableSchemaId(QuerystringUtils.getUrlParamValue('tab'), tabs) === index;
+          return (
+            TabsUtils.getIndexByTableProperty(QuerystringUtils.getUrlParamValue('tab'), tabs, 'tableSchemaId') === index
+          );
         }
       } else {
         return activeIdx === index;
