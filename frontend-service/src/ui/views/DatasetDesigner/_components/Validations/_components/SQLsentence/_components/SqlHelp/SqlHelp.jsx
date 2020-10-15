@@ -1,8 +1,13 @@
-import React, { useEffect, useReducer } from 'react';
-
-import ListBox from 'primereact/listbox';
+import React, { useContext, useEffect, useReducer } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import styles from './SqlHelp.module.scss';
+
+import { SqlHelpListBox } from './_components/SqlHelpListBox';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { DataflowService } from 'core/services/Dataflow';
 
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
@@ -17,7 +22,7 @@ const sqlHelpReducer = (state, { type, payload }) => {
   }
 };
 
-export const SqlHelp = ({ sqlSentence, onSetSqlSentence }) => {
+export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSentence }) => {
   const initState = {
     datasets: [],
     tabs: [],
@@ -26,15 +31,41 @@ export const SqlHelp = ({ sqlSentence, onSetSqlSentence }) => {
     selectedTab: '',
     selectedField: ''
   };
+  const resourcesContext = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(sqlHelpReducer, initState);
-  useEffect(() => {
+  useEffect(async () => {
     //call service to get datasets in mode
+    const {
+      params: { dataflowId }
+    } = match;
+    const dataflowDetails = parseDatasetSchemas(await DataflowService.getAllSchemas(dataflowId));
+    console.log('dataflowDetails', dataflowDetails);
 
     //parse datasets to model
 
     //update datasets state
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasets', value: [] } });
   }, []);
+
+  const parseDatasetSchemas = rowDatasetSchemas => {
+    const datasetSchemas = {
+      datasetSchemaOptions: [],
+      datasetSchemas: []
+    };
+    for (rowDatasetSchema of rowDatasetSchemas) {
+      const option = { label: rowDatasetSchema.datasetSchemaName, value: rowDatasetSchema.datasetSchemaId };
+      const datasetSchema = parseDatasetSchema(datasetSchema);
+      datasetSchemas.datasetSchemaOptions.push(option);
+      datasetSchemas.datasetSchemas.push(datasetSchema);
+    }
+  };
+
+  const getDataflowDetails = async () => {
+    const {
+      params: { dataflowId }
+    } = match;
+    return await DataflowService.dataflowDetails(dataflowId);
+  };
 
   const onSelectDataset = e => {
     // select dataset
@@ -68,17 +99,15 @@ export const SqlHelp = ({ sqlSentence, onSetSqlSentence }) => {
     onSetSqlSentence(`${sqlSentence} ${element}`);
   };
 
-  const onDobleClickOnElement = element => {
+  const onDoubleClickOnElement = element => {
     //parse and insert element in sql sentence;
     onSetSqlSentence(`${sqlSentence} ${element}`);
   };
   return (
     <div className={styles.wrapper}>
-      <div className={styles.section}>
-        <h3>
-          Dataset <button>add</button>
-        </h3>
-      </div>
+      <SqlHelpListBox title="Dataset" selectedItem={state.selectedDataset} />
+      <SqlHelpListBox title="Tables" selectedItem={state.selectedDataset} />
+      <SqlHelpListBox title="Fields" selectedItem={state.selectedDataset} />
     </div>
   );
-};
+});

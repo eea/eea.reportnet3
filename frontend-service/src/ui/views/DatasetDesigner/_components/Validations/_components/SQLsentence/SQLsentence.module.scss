@@ -3,12 +3,27 @@
   flex-direction: column;
   justify-content: flex-start;
   margin: 2rem 0;
-}
-.title {
-  font-size: 1rem;
-  margin: 0 0 1rem 0;
-  color: var(--title-color);
-  margin-bottom: 0.6rem;
+  .title {
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: var(--title-color);
+    margin-bottom: 0.6rem;
+  }
+  .content {
+    display: flex;
+    justify-content: space-between;
+    .helpSideBar {
+      width: 30%;
+    }
+    .sqlSentence {
+      display: flex;
+      flex-direction: column;
+      width: 66%;
+      textarea {
+        flex: auto;
+      }
+    }
+  }
 }
 .levelHelp {
   font-weight: 500;

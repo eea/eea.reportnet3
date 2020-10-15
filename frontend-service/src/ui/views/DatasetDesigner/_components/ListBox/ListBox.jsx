@@ -246,9 +246,11 @@ const ListBox = ({
     return (
       <div ref={inputElement} id={id} className={classes} style={style}>
         {header}
-        <div className="p-listbox-title-wrapper">
-          <span className="p-listbox-title">{title}</span>
-        </div>
+        {title && (
+          <div className="p-listbox-title-wrapper">
+            <span className="p-listbox-title">{title}</span>
+          </div>
+        )}
         <div className="p-listbox-list-wrapper">
           <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
             {items}
