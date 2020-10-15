@@ -7,7 +7,14 @@
   align-items: center;
   display: flex;
   margin-top: 0.5rem;
-  width: 50%;
+  width: 100%;
+  .pointInput {
+    width: 40% !important;
+  }
+  .pointInputError {
+    border: var(--inputtext-border-error);
+    box-shadow: var(--inputtext-box-shadow-focus-error) !important;
+  }
   button {
     width: 35%;
   }
@@ -23,6 +30,15 @@
 
 .epsgSwitcher {
   margin-right: 1rem;
+  min-width: 40% !important;
+  width: 40% !important;
+}
+
+.pointError {
+  color: var(--errors);
+  font-weight: bold;
+  font-size: 0.7rem;
+  margin-left: 1rem;
 }
 
 .pointLegendWrapper {
