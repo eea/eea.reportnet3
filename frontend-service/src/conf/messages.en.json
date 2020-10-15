@@ -893,6 +893,7 @@
     "toggleGroup": "Toggle group/ungroup errors",
     "grouped": "Grouped",
     "ungrouped": "Ungrouped",
-    "numberOfRecords": "Number of records"
+    "numberOfRecords": "Number of records",
+    "wrongCoordinate": "Wrong or incomplete coordinate. "
   }
 }

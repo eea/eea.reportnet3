@@ -152,7 +152,7 @@ export const useSetColumns = (
   };
 
   const renderPoint = (value = '') => {
-    if (MapUtils.checkValidJSONCoordinates(value)) {
+    if (value !== '' && MapUtils.checkValidJSONCoordinates(value)) {
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
         return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
