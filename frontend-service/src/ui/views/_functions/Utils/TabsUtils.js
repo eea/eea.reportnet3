@@ -6,12 +6,13 @@ const getIndexByHeader = (header, tabsArray) => {
     .indexOf(header);
 };
 
-const getIndexByTableSchemaId = (tableSchemaId, tabsArray) => {
+const getIndexByTableProperty = (value, tabsArray, property) => {
+  console.log(value, tabsArray);
   return tabsArray
     .map(tab => {
-      return tab.tableSchemaId;
+      return tab[property];
     })
-    .indexOf(tableSchemaId);
+    .indexOf(value);
 };
 
 const getMaxIndex = tabsArray => {
@@ -25,7 +26,7 @@ const getTableSchemaIdByIndex = (index, tabsArray) => {
 
 export const TabsUtils = {
   getIndexByHeader,
-  getIndexByTableSchemaId,
+  getIndexByTableProperty,
   getMaxIndex,
   getTableSchemaIdByIndex
 };

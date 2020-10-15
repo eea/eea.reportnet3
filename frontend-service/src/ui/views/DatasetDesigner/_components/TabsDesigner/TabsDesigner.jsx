@@ -103,7 +103,7 @@ export const TabsDesigner = withRouter(
 
     const onChangeFields = (fields, isLinkChange, tabSchemaId) => {
       const inmTabs = [...tabs];
-      const tabIdx = TabsUtils.getIndexByTableSchemaId(tabSchemaId, inmTabs);
+      const tabIdx = TabsUtils.getIndexByTableProperty(tabSchemaId, inmTabs, 'tableSchemaId');
       if (!isNil(inmTabs[tabIdx].records)) {
         inmTabs[tabIdx].records[0].fields = fields;
         setTabs(inmTabs);
@@ -126,7 +126,7 @@ export const TabsDesigner = withRouter(
       fixedNumber
     ) => {
       const inmTabs = [...tabs];
-      const tabIdx = TabsUtils.getIndexByTableSchemaId(tabSchemaId, inmTabs);
+      const tabIdx = TabsUtils.getIndexByTableProperty(tabSchemaId, inmTabs, 'tableSchemaId');
       inmTabs[tabIdx].description = tableSchemaDescription;
       inmTabs[tabIdx].fixedNumber = fixedNumber;
       inmTabs[tabIdx].notEmpty = notEmpty;
@@ -312,7 +312,7 @@ export const TabsDesigner = withRouter(
       const tableDeleted = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
       if (tableDeleted) {
         const inmTabs = [...tabs];
-        const deletedTabIndx = TabsUtils.getIndexByTableSchemaId(deletedTableSchemaId, inmTabs);
+        const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
         inmTabs.splice(deletedTabIndx, 1);
         inmTabs.forEach(tab => {
           if (tab.addTab) {
@@ -370,13 +370,14 @@ export const TabsDesigner = withRouter(
     const renderTabViews = () => {
       return (
         <TabView
-          activeIndex={TabsUtils.getIndexByTableSchemaId(
+          activeIndex={TabsUtils.getIndexByTableProperty(
             !isNil(tableSchemaId)
               ? tableSchemaId
               : QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
               : 0,
-            tabs
+            tabs,
+            'tableSchemaId'
           )}
           checkEditingTabs={checkEditingTabs}
           designMode={true}
@@ -476,8 +477,10 @@ export const TabsDesigner = withRouter(
       const tableUpdated = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
       if (tableUpdated) {
         const inmTabs = [...tabs];
-        inmTabs[TabsUtils.getIndexByTableSchemaId(tableSchemaId, inmTabs)].header = tableSchemaName;
-        inmTabs[TabsUtils.getIndexByTableSchemaId(tableSchemaId, inmTabs)].tableSchemaName = tableSchemaName;
+        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
+        inmTabs[
+          TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+        ].tableSchemaName = tableSchemaName;
         setTabs(inmTabs);
       }
     };
