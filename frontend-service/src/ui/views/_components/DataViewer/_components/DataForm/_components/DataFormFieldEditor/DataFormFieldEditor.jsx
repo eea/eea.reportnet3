@@ -35,6 +35,7 @@ const DataFormFieldEditor = ({
   fieldValue = '',
   isVisible,
   onChangeForm,
+  onCheckCoordinateFieldsError,
   reporting,
   type
 }) => {
@@ -60,7 +61,8 @@ const DataFormFieldEditor = ({
     isMapOpen: false,
     mapCoordinates: '',
     newPoint: '',
-    newPointCRS: { label: 'WGS84 - 4326', value: 'EPSG:4326' }
+    newPointCRS: { label: 'WGS84 - 4326', value: 'EPSG:4326' },
+    showCoordinateError: false
   });
 
   useEffect(() => {
@@ -82,6 +84,10 @@ const DataFormFieldEditor = ({
       inputRef.current.element.focus();
     }
   }, [inputRef.current, isVisible]);
+
+  useEffect(() => {
+    onCheckCoordinateFieldsError(field, map.showCoordinateError);
+  }, [map.showCoordinateError]);
 
   const onFilter = async filter => {
     onLoadColsSchema(filter);
@@ -119,22 +125,22 @@ const DataFormFieldEditor = ({
     dispatchMap({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, filteredCRS } });
   };
 
-  const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true) => {
+  const changePoint = (geoJson, coordinates, crs, withCRS = true) => {
     if (geoJson !== '') {
+      let coords = coordinates;
       if (withCRS) {
-        const projectedCoordinates = projectCoordinates(coordinates, crs.value);
-        geoJson.geometry.coordinates = projectedCoordinates;
+        coords = projectCoordinates(coordinates, crs.value);
+        geoJson.geometry.coordinates = coords;
         geoJson.properties.rsid = crs.value;
-        dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(projectedCoordinates) });
-        return JSON.stringify(geoJson);
       } else {
-        dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coordinates) });
         geoJson.geometry.coordinates = MapUtils.parseCoordinates(
           coordinates.replace(', ', ',').split(','),
-          parseToFloat
+          MapUtils.checkValidCoordinates(coords)
         );
-        return JSON.stringify(geoJson);
       }
+      dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coords) });
+      dispatchMap({ type: 'DISPLAY_COORDINATE_ERROR', payload: !MapUtils.checkValidCoordinates(coords, true) });
+      return JSON.stringify(geoJson);
     }
   };
 
@@ -347,6 +353,7 @@ const DataFormFieldEditor = ({
       <div className={styles.pointEpsgWrapper}>
         <label className={styles.epsg}>{'Coords:'}</label>
         <InputText
+          className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
           disabled={column.readOnly && reporting}
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
@@ -367,15 +374,14 @@ const DataFormFieldEditor = ({
                 JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
                 e.target.value,
                 map.currentCRS.value,
-                false,
                 false
               )
             )
           }
-          style={{ width: '50%' }}
           type="text"
           value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates : ''}
         />
+        {map.showCoordinateError && <span className={styles.pointError}>{resources.messages['wrongCoordinate']}</span>}
       </div>
 
       <div className={styles.pointEpsgWrapper}>
@@ -399,7 +405,6 @@ const DataFormFieldEditor = ({
             dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
           }}
           placeholder="Select a CRS"
-          style={{ width: '50%', minWidth: '50%' }}
           value={map.currentCRS}
         />
         <Button
