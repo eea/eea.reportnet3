@@ -63,6 +63,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.model.FieldValueWithLabel;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -1063,10 +1064,20 @@ public class DatasetServiceImpl implements DatasetService {
   public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
     Long idDatasetDestination =
         datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+    idDatasetDestination = 6984L;
     TenantResolver
         .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
     // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
     // want to show on the screen
+    String labelIdSchema = "5f87177b26a10e1df05aad90";
+    List<FieldValueWithLabel> fieldsAux =
+        fieldRepository.findByIdFieldSchemaAndConditional(idPk, labelIdSchema);
+    List<FieldValue> values = new ArrayList<>();
+    List<FieldValue> labels = new ArrayList<>();
+    for (FieldValueWithLabel fvExtended : fieldsAux) {
+      values.add(fvExtended.getFieldValue());
+      labels.add(fvExtended.getLabel());
+    }
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
         searchValue, PageRequest.of(0, 15));
     // Remove the duplicate values

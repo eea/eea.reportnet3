@@ -4,6 +4,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.service.model.FieldValueWithLabel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -122,5 +123,12 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   @Query(nativeQuery = true,
       value = "update field_value set value = '' where id_field_schema = :fieldSchemaId")
   void clearFieldValue(@Param("fieldSchemaId") String fieldSchemaId);
+
+
+  @Query(
+      value = "SELECT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
+          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id")
+  List<FieldValueWithLabel> findByIdFieldSchemaAndConditional(
+      @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId);
 
 }

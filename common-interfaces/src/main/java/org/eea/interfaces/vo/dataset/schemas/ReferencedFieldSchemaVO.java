@@ -23,6 +23,12 @@ public class ReferencedFieldSchemaVO {
   private String idPk;
 
 
+  private String label;
+
+
+  private String conditional;
+
+
 
   /**
    * Hash code.

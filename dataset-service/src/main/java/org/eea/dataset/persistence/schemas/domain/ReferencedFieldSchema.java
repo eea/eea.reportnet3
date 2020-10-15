@@ -26,6 +26,12 @@ public class ReferencedFieldSchema {
   @Field(value = "idPk")
   private ObjectId idPk;
 
+  @Field(value = "label")
+  private ObjectId label;
+
+  @Field(value = "conditional")
+  private ObjectId conditional;
+
 
 
   /**

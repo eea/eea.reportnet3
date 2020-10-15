@@ -705,6 +705,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
           new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
       referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+      referenced.put("label", new ObjectId(fieldSchemaVO.getReferencedField().getLabel()));
+      referenced.put("conditional",
+          new ObjectId(fieldSchemaVO.getReferencedField().getConditional()));
       fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
       // We need to update the fieldSchema that is referenced, the property isPKreferenced to
       // true
