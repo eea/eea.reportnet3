@@ -22,7 +22,6 @@ export const ReleaseSnapshotDialog = ({
   isCopyAndReleaseBody,
   isReleased,
   isReleasedDialogVisible,
-  onLoadSnapshotList,
   setIsLoading,
   setSnapshotIdToRelease,
   snapshotDataToRelease,
@@ -36,7 +35,6 @@ export const ReleaseSnapshotDialog = ({
     setIsLoading(true);
     try {
       await SnapshotService.createByIdReporter(datasetId, snapshotDescription, isReleased);
-      onLoadSnapshotList(datasetId);
     } catch (error) {
       setIsLoading(false);
       if (error.response.data == DataflowConf.errorTypes['copyWithErrors']) {
@@ -62,7 +60,6 @@ export const ReleaseSnapshotDialog = ({
     setSnapshotIdToRelease(snapshotId);
     try {
       await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotId);
-      onLoadSnapshotList(datasetId);
     } catch (error) {
       setIsLoading(false);
 

@@ -11,7 +11,14 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog, snapshotIdToRelease }) => {
+export const SnapshotItem = ({
+  getSnapshotData,
+  isLoading,
+  itemData,
+  showReleaseDialog,
+  snapshotIdToRelease,
+  snapshotReleasedId
+}) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -24,23 +31,27 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
   };
 
   const getSnapshotTextStyle = () => {
-    if (snapshotIdToRelease !== '') {
+    if (snapshotIdToRelease) {
       if (itemData.id === snapshotIdToRelease) {
         return `${styles.is_released_snapshot}`;
-      } else if (itemData.isReleased && itemData.id !== snapshotIdToRelease) {
-        return itemData.id === snapshotIdToRelease ? `${styles.is_released_snapshot}` : ``;
+      } else if (snapshotReleasedId !== snapshotIdToRelease) {
+        return itemData.id === snapshotIdToRelease && `${styles.is_released_snapshot}`;
+      } else {
+        return ``;
       }
     } else {
       return itemData.isReleased ? `${styles.is_released_snapshot}` : ``;
     }
   };
 
-  const getSnapshotIconStyle = () => {
-    if (snapshotIdToRelease !== '') {
+  const getSnapshotIconColour = () => {
+    if (snapshotIdToRelease) {
       if (itemData.id === snapshotIdToRelease) {
         return 'success';
-      } else if (itemData.isReleased && itemData.id !== snapshotIdToRelease) {
-        return itemData.id === snapshotIdToRelease ? 'success' : null;
+      } else if (snapshotReleasedId !== snapshotIdToRelease) {
+        return itemData.id === snapshotIdToRelease && 'success';
+      } else {
+        return null;
       }
     } else {
       return itemData.isReleased ? 'success' : null;
@@ -69,7 +80,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
           </span>
           <div className={styles.listActions}>
             <Button
-              className={`${styles.btn} rp-btn ${getSnapshotIconStyle()}`}
+              className={`${styles.btn} rp-btn ${getSnapshotIconColour()}`}
               disabled={isLoading || itemData.isBlocked}
               icon={getSnapshotItemIcon()}
               onClick={() => {
