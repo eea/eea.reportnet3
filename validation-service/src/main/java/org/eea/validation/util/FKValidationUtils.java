@@ -157,7 +157,7 @@ public class FKValidationUtils {
     List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
 
     // GetValidationData
-    Validation pkValidation = createValidation(idRule, fkSchemaId, tableName);
+    Validation pkValidation = createValidation(idRule, fkSchemaId, tableName, fkFieldSchema);
     List<FieldValue> errorFields = new ArrayList<>();
 
     if (!pkMustBeUsed) {
@@ -333,7 +333,7 @@ public class FKValidationUtils {
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
-      TableSchema tableName) {
+      TableSchema tableName, FieldSchema fkFieldSchema) {
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
@@ -364,7 +364,7 @@ public class FKValidationUtils {
       validation.setValidationDate(new Date().toString());
       validation.setTableName(tableName.getNameTableSchema());
       validation.setShortCode(rule.getShortCode());
-      // validation
+      validation.setFieldName(fkFieldSchema.getHeaderName());
     }
     return validation;
   }
