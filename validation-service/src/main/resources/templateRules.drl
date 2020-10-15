@@ -211,5 +211,5 @@ function boolean isTableEmpty(TableValue tableValue){
 //////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
 function boolean isSQLSentence(Long datasetId, String ruleId){	
 	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId);
-	return false;
+	return true;
 }

@@ -144,12 +144,7 @@ public class SQLValidationUtils {
       String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
       DataSetSchema schema =
           schemasRepository.findById(new ObjectId(schemaId)).orElse(new DataSetSchema());
-      Validation validation = new Validation();
-      validation.setIdRule(rule.getRuleId().toString());
-      validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(1)));
-      validation.setMessage(rule.getThenCondition().get(0));
-      validation.setTypeEntity((rule.getType()));
-      validation.setValidationDate(new Date().toString());
+
       TableValue table = null;
       table = tableRepository.findById(tableToEvaluate.getId()).orElse(new TableValue());
       String tableName = "";
@@ -159,8 +154,6 @@ public class SQLValidationUtils {
           break;
         }
       }
-      validation.setTableName(tableName);
-      validation.setShortCode(rule.getShortCode());
 
 
       EntityTypeEnum ruleType = rule.getType();
@@ -169,11 +162,12 @@ public class SQLValidationUtils {
           DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
           DataSetMetabaseVO datasetMetabase =
               datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-          validation.setTableName(datasetMetabase.getDataSetName());
+          Validation validationDataset = createValidation(rule, tableName);
+          validationDataset.setTableName(datasetMetabase.getDataSetName());
           if (dataset.getDatasetValidations().isEmpty()) {
             DatasetValidation datasetValidation = new DatasetValidation();
             datasetValidation.setDatasetValue(dataset);
-            datasetValidation.setValidation(validation);
+            datasetValidation.setValidation(validationDataset);
             List<DatasetValidation> datasetValidations = new ArrayList<>();
             datasetValidations.add(datasetValidation);
             dataset.setDatasetValidations(datasetValidations);
@@ -181,7 +175,7 @@ public class SQLValidationUtils {
             List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
             DatasetValidation datasetValidation = new DatasetValidation();
             datasetValidation.setDatasetValue(dataset);
-            datasetValidation.setValidation(validation);
+            datasetValidation.setValidation(createValidation(rule, tableName));
             datasetValidations.add(datasetValidation);
             dataset.setDatasetValidations(datasetValidations);
           }
@@ -191,7 +185,7 @@ public class SQLValidationUtils {
           if (table.getTableValidations().isEmpty()) {
             TableValidation tableValidation = new TableValidation();
             tableValidation.setTableValue(tableToEvaluate);
-            tableValidation.setValidation(validation);
+            tableValidation.setValidation(createValidation(rule, tableName));
             List<TableValidation> tableValidations = new ArrayList<>();
             tableValidations.add(tableValidation);
             tableToEvaluate.setTableValidations(tableValidations);
@@ -199,7 +193,7 @@ public class SQLValidationUtils {
             List<TableValidation> tableValidations = tableToEvaluate.getTableValidations();
             TableValidation tablevalidation = new TableValidation();
             tablevalidation.setTableValue(tableToEvaluate);
-            tablevalidation.setValidation(validation);
+            tablevalidation.setValidation(createValidation(rule, tableName));
             tableValidations.add(tablevalidation);
             tableToEvaluate.setTableValidations(tableValidations);
           }
@@ -217,7 +211,7 @@ public class SQLValidationUtils {
                   || record.getRecordValidations().isEmpty()) {
                 RecordValidation recordValidation = new RecordValidation();
                 recordValidation.setRecordValue(record);
-                recordValidation.setValidation(validation);
+                recordValidation.setValidation(createValidation(rule, tableName));
                 List<RecordValidation> recordValidations = new ArrayList<>();
                 recordValidations.add(recordValidation);
                 record.setRecordValidations(recordValidations);
@@ -225,7 +219,7 @@ public class SQLValidationUtils {
                 List<RecordValidation> recordValidations = record.getRecordValidations();
                 RecordValidation recordValidation = new RecordValidation();
                 recordValidation.setRecordValue(record);
-                recordValidation.setValidation(validation);
+                recordValidation.setValidation(createValidation(rule, tableName));
                 recordValidations.add(recordValidation);
                 record.setRecordValidations(recordValidations);
               }
@@ -248,7 +242,7 @@ public class SQLValidationUtils {
                   if (field.getFieldValidations().isEmpty()) {
                     FieldValidation fieldValidation = new FieldValidation();
                     fieldValidation.setFieldValue(field);
-                    fieldValidation.setValidation(validation);
+                    fieldValidation.setValidation(createValidation(rule, tableName));
                     List<FieldValidation> fieldValidations = new ArrayList<>();
                     fieldValidations.add(fieldValidation);
                     field.setFieldValidations(fieldValidations);
@@ -256,7 +250,7 @@ public class SQLValidationUtils {
                     List<FieldValidation> fieldValidations = field.getFieldValidations();
                     FieldValidation fieldValidation = new FieldValidation();
                     fieldValidation.setFieldValue(field);
-                    fieldValidation.setValidation(validation);
+                    fieldValidation.setValidation(createValidation(rule, tableName));
                     fieldValidations.add(fieldValidation);
                     field.setFieldValidations(fieldValidations);
                   }
@@ -269,6 +263,18 @@ public class SQLValidationUtils {
       }
     }
 
+  }
+
+  private static Validation createValidation(Rule rule, String tableName) {
+    Validation validation = new Validation();
+    validation.setIdRule(rule.getRuleId().toString());
+    validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(1)));
+    validation.setMessage(rule.getThenCondition().get(0));
+    validation.setTypeEntity((rule.getType()));
+    validation.setValidationDate(new Date().toString());
+    validation.setTableName(tableName);
+    validation.setShortCode(rule.getShortCode());
+    return validation;
   }
 
   /**

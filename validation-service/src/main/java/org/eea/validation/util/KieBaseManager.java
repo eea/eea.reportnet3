@@ -382,7 +382,7 @@ public class KieBaseManager {
         null != tableSchemaName && !tableSchemaName.isEmpty() ? tableSchemaName
             : "Dataset Table Name");
     ruleAdd.put(ConditionsDrools.FIELD_NAME.getValue(),
-        null != fieldName && !fieldName.isEmpty() ? fieldName : "None Field Name");
+        null != tableSchemaName && !fieldName.isEmpty() ? fieldName : "None Field Name");
     ruleAdd.put(ConditionsDrools.SHORT_CODE.getValue(), shortCode);
 
     return ruleAdd;
