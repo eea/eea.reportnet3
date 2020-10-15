@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
@@ -18,11 +18,32 @@ const DataForm = ({
   getTooltipMessage,
   hasWritePermissions,
   onChangeForm,
+  onShowCoordinateError,
   records,
   reporting,
   onShowFieldInfo
 }) => {
   const resources = useContext(ResourcesContext);
+
+  const [fieldsWithError, setFieldsWithError] = useState([]);
+
+  useEffect(() => {
+    onShowCoordinateError(fieldsWithError.length);
+  }, [fieldsWithError]);
+
+  const onCheckCoordinateFieldsError = (id, hasError) => {
+    let inmFieldsWithError = [...fieldsWithError];
+    if (hasError) {
+      if (!inmFieldsWithError.includes(id)) {
+        inmFieldsWithError.push(id);
+      }
+    } else {
+      if (inmFieldsWithError.includes(id)) {
+        inmFieldsWithError = inmFieldsWithError.filter(error => error !== id);
+      }
+    }
+    setFieldsWithError(inmFieldsWithError);
+  };
 
   const allAttachments = () => {
     const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
@@ -79,6 +100,7 @@ const DataForm = ({
                   hasWritePermissions={hasWritePermissions}
                   isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
+                  onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
                   reporting={reporting}
                   type={column.type}
                 />
@@ -133,6 +155,7 @@ const DataForm = ({
                     hasWritePermissions={hasWritePermissions}
                     isVisible={addDialogVisible}
                     onChangeForm={onChangeForm}
+                    onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
                     reporting={reporting}
                     type={column.type}
                   />
