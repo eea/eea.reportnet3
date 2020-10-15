@@ -1,5 +1,3 @@
-import { isNil } from 'lodash';
-
 const getIndexByHeader = (header, tabsArray) => {
   return tabsArray
     .map(tab => {
@@ -20,8 +18,14 @@ const getMaxIndex = tabsArray => {
   return Math.max(...tabsArray.map(tab => tab.index));
 };
 
+const getTableSchemaIdByIndex = (index, tabsArray) => {
+  if (index === '') return -1;
+  return tabsArray[index].id;
+};
+
 export const TabsUtils = {
   getIndexByHeader,
   getIndexByTableSchemaId,
-  getMaxIndex
+  getMaxIndex,
+  getTableSchemaIdByIndex
 };

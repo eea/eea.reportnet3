@@ -3,6 +3,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
@@ -45,7 +46,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, TabsUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -66,7 +67,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
-    activeIndex: null,
     isGroupedValidationDeleted: false,
     isGroupedValidationSelected: false,
     isValidationSelected: false,
@@ -74,7 +74,8 @@ export const Dataset = withRouter(({ match, history }) => {
     selectedRecordErrorId: -1,
     selectedRuleId: '',
     selectedRuleLevelError: '',
-    selectedRuleMessage: ''
+    selectedRuleMessage: '',
+    tableSchemaId: ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -540,6 +541,11 @@ export const Dataset = withRouter(({ match, history }) => {
         })
       );
 
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        tableSchemaId: datasetSchema.tables.length === 0 ? '' : datasetSchema.tables[0].id
+      });
+
       setDatasetHasErrors(datasetStatistics.datasetErrors);
     } catch (error) {
       const {
@@ -591,25 +597,25 @@ export const Dataset = withRouter(({ match, history }) => {
     if (grouped) {
       setDataViewerOptions({
         ...dataViewerOptions,
-        activeIndex: tableSchemaId,
         isGroupedValidationDeleted: false,
         isGroupedValidationSelected: true,
         recordPositionId: -1,
         selectedRuleId,
         selectedRuleLevelError,
-        selectedRuleMessage
+        selectedRuleMessage,
+        tableSchemaId
       });
     } else {
       setDataViewerOptions({
         ...dataViewerOptions,
-        activeIndex: tableSchemaId,
         isValidationSelected: true,
         recordPositionId: posIdRecord,
         selectedRecordErrorId,
         selectedRecordErrorId,
         selectedRuleId: '',
         selectedRuleLevelError: '',
-        selectedRuleMessage: ''
+        selectedRuleMessage: '',
+        tableSchemaId
       });
     }
 
@@ -620,15 +626,16 @@ export const Dataset = withRouter(({ match, history }) => {
     fnUseState(visible);
   };
 
-  const onTabChange = tableSchemaId => {
+  const onTabChange = table => {
+    console.log(table, TabsUtils.getTableSchemaIdByIndex(table.index, tableSchema), tableSchema);
     setDataViewerOptions({
       ...dataViewerOptions,
-      activeIndex: tableSchemaId.index,
       isGroupedValidationDeleted: true,
       isGroupedValidationSelected: false,
       selectedRuleId: '',
       selectedRuleLevelError: '',
-      selectedRuleMessage: ''
+      selectedRuleMessage: '',
+      tableSchemaId: TabsUtils.getTableSchemaIdByIndex(table.index, tableSchema)
     });
   };
 
@@ -876,7 +883,6 @@ export const Dataset = withRouter(({ match, history }) => {
         </Dialog>
       )}
       <TabsSchema
-        activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
         isDatasetDeleted={isDataDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -893,6 +899,7 @@ export const Dataset = withRouter(({ match, history }) => {
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
         selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        tableSchemaId={dataViewerOptions.tableSchemaId}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />

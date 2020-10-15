@@ -254,7 +254,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
   const changeUrl = () => {
-    console.log(QuerystringUtils.getUrlParamValue('tab'));
     window.history.replaceState(
       null,
       null,
@@ -647,8 +646,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onTabChange = table => {
-    console.log(table);
+  const onTabChange = table =>
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
@@ -658,7 +656,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         tableSchemaId: table.tableSchemaId
       }
     });
-  };
 
   const onUpdateData = () => {
     designerDispatch({ type: 'ON_UPDATE_DATA', payload: { isUpdated: !designerState.isDataUpdated } });

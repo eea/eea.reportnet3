@@ -27,13 +27,20 @@ export const Article15 = ({ datasetId, state }) => {
 
   useEffect(() => initialLoad(), []);
 
+  const changeUrl = tabSchemaName => {
+    console.log(tabSchemaName, state.schemaTables);
+    const filteredTable = state.schemaTables.filter(schemaTable => schemaTable.name === tabSchemaName);
+    console.log(filteredTable);
+    window.history.replaceState(null, null, `?tab=${filteredTable[0].id}${`&view=webform`}`);
+  };
+
   const initialLoad = () => {
     const allTables = tables.map(table => table.name);
     const parsedData = onLoadData();
-
+    console.log(Article15Utils.getWebformTabs(allTables, state.schemaTables));
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: { isVisible: Article15Utils.getWebformTabs(allTables), data: parsedData }
+      payload: { isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables), data: parsedData }
     });
   };
 
@@ -45,12 +52,13 @@ export const Article15 = ({ datasetId, state }) => {
       isVisible[name] = true;
     });
 
+    changeUrl(name);
+
     article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
   const onParseWebformData = (allTables, schemaTables) => {
     const data = Article15Utils.mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
-
     data.map(table => {
       if (table.records) {
         table.records[0].fields = table.records[0].fields.map(field => {

@@ -140,7 +140,6 @@ export const TabsDesigner = withRouter(
         const inmDatasetSchema = { ...datasetSchemaDTO };
 
         inmDatasetSchema.tables.forEach((table, idx) => {
-          console.log(table.tableSchemaId, window.location.search);
           table.addTab = false;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
@@ -234,7 +233,6 @@ export const TabsDesigner = withRouter(
     const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
     const onTableDragAndDropStart = (draggedTabIdx, draggedTabId) => {
-      console.log({ draggedTabIdx, draggedTabId });
       if (!isUndefined(draggedTabId)) {
         setActiveTableSchemaId(draggedTabId);
       } else {

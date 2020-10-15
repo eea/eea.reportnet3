@@ -251,13 +251,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     return layout(
       <Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView
-          activeIndex={0}
-          hasQueryString={false}
-          onTabClick={e => {
-            console.log(e);
-            setSelectedIndex(e);
-          }}>
+        <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setSelectedIndex(e)}>
           <TabPanel
             headerClassName="dataflowHelp-documents-help-step"
             header={resources.messages['supportingDocuments']}>

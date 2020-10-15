@@ -48,7 +48,6 @@ const TabView = withRouter(
     totalTabs,
     viewType
   }) => {
-    console.log(designMode);
     const [activeIdx, setActiveIdx] = useState(activeIndex);
     const [idx] = useState(id || UniqueComponentId());
     const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
@@ -77,28 +76,24 @@ const TabView = withRouter(
         onTabClick({ index: QuerystringUtils.getUrlParamValue('tab') });
       } else {
         if (!isNil(onTabChange)) {
-          console.log('eee');
           onTabChange({ index: QuerystringUtils.getUrlParamValue('tab') });
         }
       }
     }, []);
 
     useEffect(() => {
-      console.log(activeIdx);
       if (hasQueryString) {
         changeUrl();
       }
     }, [activeIdx]);
 
     useEffect(() => {
-      console.log(activeIndex);
       setActiveIdx(activeIndex);
     }, [activeIndex]);
 
     const onTabHeaderClick = (event, tab, index) => {
       if (designMode) {
         if (tab.props.addTab) {
-          console.log('new tab');
           onTabAdd({ header: '', editable: true, addTab: false, newTab: true }, () => {
             if (!isUndefined(ulTabsRef.current) && !isNull(ulTabsRef.current)) {
               scrollTo(ulTabsRef.current.clientWidth + 100, 0);
@@ -110,7 +105,6 @@ const TabView = withRouter(
               onTabChange({ originalEvent: event, index, tableSchemaId: tab.props.tableSchemaId });
             } else {
               if (!isNil(onTabClick)) {
-                console.log('CLICK');
                 onTabClick({ originalEvent: event, index: index, header: tab.props.header });
               }
             }
@@ -137,7 +131,6 @@ const TabView = withRouter(
     };
 
     const onTabDeleteClicked = deleteTableSchemaId => {
-      console.log(deleteTableSchemaId);
       setTableSchemaIdToDelete(deleteTableSchemaId);
       setIsDeleteDialogVisible(true);
     };
@@ -151,12 +144,14 @@ const TabView = withRouter(
     };
 
     const changeUrl = () => {
-      console.log('tableSchemaId :>> ', tableSchemaId);
+      console.log(tableSchemaId);
       if (!isNil(tableSchemaId)) {
         window.history.replaceState(
           null,
           null,
-          `?tab=${tableSchemaId}${`&view=${Object.keys(viewType).filter(view => viewType[view])}`}`
+          `?tab=${tableSchemaId}${
+            !isNil(viewType) ? `&view=${Object.keys(viewType).filter(view => viewType[view])}` : ''
+          }`
         );
       }
     };

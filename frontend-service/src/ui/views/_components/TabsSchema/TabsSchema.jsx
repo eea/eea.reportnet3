@@ -33,9 +33,11 @@ export const TabsSchema = ({
   selectedRuleLevelError,
   selectedRuleMessage,
   showWriteButtons = true,
+  tableSchemaId,
   tables,
   tableSchemaColumns
 }) => {
+  console.log('LLEGO', tableSchemaId);
   let tableHasErrors = true;
   if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
     tableHasErrors = tables[activeIndex].hasErrors;
@@ -99,7 +101,8 @@ export const TabsSchema = ({
     <TabView
       activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
       onTabChange={onTabChange}
-      renderActiveOnly={false}>
+      renderActiveOnly={false}
+      tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>
   );

@@ -49,7 +49,6 @@ const Tab = ({
   tableSchemaId,
   totalTabs
 }) => {
-  console.log(designMode);
   const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
   const [hasErrors, setHasErrors] = useState(false);
@@ -302,7 +301,6 @@ const Tab = ({
               if (!isUndefined(checkEditingTabs)) {
                 if (!checkEditingTabs()) {
                   if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
-                    console.log({ tableSchemaId });
                     onTabDeleteClick(tableSchemaId);
                   }
                 }
@@ -376,7 +374,6 @@ const Tab = ({
                 if (!isUndefined(checkEditingTabs)) {
                   if (!checkEditingTabs()) {
                     if (!isUndefined(onTabDeleteClick)) {
-                      console.log({ tableSchemaId });
                       onTabDeleteClick(tableSchemaId);
                     }
                   }

@@ -7,7 +7,6 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, importButtonsList: payload.importList };
 
     case 'GET_DATASET_DATA':
-      console.log(payload.tables);
       return {
         ...state,
         dataViewerOptions: {
@@ -67,7 +66,6 @@ export const designerReducer = (state, { type, payload }) => {
           inmViewType[view] = false;
         }
       });
-      console.log({ inmViewType });
       return { ...state, viewType: inmViewType };
 
     case 'LOAD_EXTERNAL_OPERATIONS':
