@@ -436,14 +436,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     StringBuilder query = new StringBuilder("select fval.ID as field_val_id," + "v.ID as val_id,"
         + "fv.ID as field_id," + "fval.ID_FIELD as field_validation_id_field,"
         + "fval.ID_VALIDATION as field_validation_id_validation," + "v.ID_RULE as rule_id,"
-        + "v.LEVEL_ERROR as level_error, " + "v.MESSAGE as message,"
-        + "v.TABLE_NAME as origin_name," + "v.TYPE_ENTITY as type_entity,"
-        + "v.VALIDATION_DATE as validation_date," + "fv.ID_FIELD_SCHEMA as id_field_schema,"
-        + "fv.ID_RECORD as id_record," + "fv.TYPE as field_value_type," + "fv.VALUE as value "
-        + "from dataset_" + datasetId + ".FIELD_VALIDATION fval " + "inner join dataset_"
-        + datasetId + ".VALIDATION v " + "on fval.ID_VALIDATION=v.ID " + "inner join dataset_"
-        + datasetId + ".FIELD_VALUE fv " + "on fval.ID_FIELD=fv.ID " + "where fv.ID_RECORD "
-        + "in (");
+        + "v.LEVEL_ERROR as level_error, " + "v.MESSAGE as message," + "v.TABLE_NAME as table_name,"
+        + "v.field_name as field_name, v.short_code as short_code,"
+        + "v.TYPE_ENTITY as type_entity," + "v.VALIDATION_DATE as validation_date,"
+        + "fv.ID_FIELD_SCHEMA as id_field_schema," + "fv.ID_RECORD as id_record,"
+        + "fv.TYPE as field_value_type," + "fv.VALUE as value " + "from dataset_" + datasetId
+        + ".FIELD_VALIDATION fval " + "inner join dataset_" + datasetId + ".VALIDATION v "
+        + "on fval.ID_VALIDATION=v.ID " + "inner join dataset_" + datasetId + ".FIELD_VALUE fv "
+        + "on fval.ID_FIELD=fv.ID " + "where fv.ID_RECORD " + "in (");
 
     for (int i = 0; i < recordIds.size(); i++) {
       query.append("'" + recordIds.get(i) + "'");
@@ -481,7 +481,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     StringBuilder query = new StringBuilder("select rval.ID as record_val_id," + "v.ID as val_id,"
         + "rv.ID as record_id," + "rval.ID_RECORD as record_validation_id_field,"
         + "rval.ID_VALIDATION as record_validation_id_validation," + "v.ID_RULE as rule_id,"
-        + "v.LEVEL_ERROR as level_error," + "v.MESSAGE as message," + "v.TABLE_NAME as origin_name,"
+        + "v.LEVEL_ERROR as level_error," + "v.MESSAGE as message," + "v.TABLE_NAME as table_name,"
+        + "v.field_name as field_name, v.short_code as short_code,"
         + "v.TYPE_ENTITY as type_entity," + "v.VALIDATION_DATE as validation_date,"
         + "rv.DATA_PROVIDER_CODE as data_provider_code,"
         + "rv.DATASET_PARTITION_ID as dataset_partition, "
