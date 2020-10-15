@@ -176,7 +176,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       })
     ) : (
       <WebformRecord
-        columnsSchema={webformData.elementsRecords[0].elements}
+        columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
         datasetId={datasetId}
         onRefresh={onUpdateData}
         onTabChange={onTabChange}

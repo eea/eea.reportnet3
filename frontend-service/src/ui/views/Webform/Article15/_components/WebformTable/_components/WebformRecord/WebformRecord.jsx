@@ -49,6 +49,7 @@ export const WebformRecord = ({
     selectedFieldId: '',
     selectedFieldSchemaId: '',
     selectedMaxSize: '',
+    selectedRecordId: null,
     selectedValidExtensions: []
   });
 
@@ -59,6 +60,7 @@ export const WebformRecord = ({
     selectedField,
     selectedFieldId,
     selectedFieldSchemaId,
+    selectedRecordId,
     selectedValidExtensions
   } = webformRecordState;
 
@@ -96,9 +98,9 @@ export const WebformRecord = ({
     }
   };
 
-  const onDeleteMultipleWebform = async recordId => {
+  const onDeleteMultipleWebform = async () => {
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, recordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
       if (isDataDeleted) onRefresh();
     } catch (error) {
       console.error('error', error);
@@ -392,12 +394,7 @@ export const WebformRecord = ({
                 {field.hasErrors && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
               </div>
               {field.multipleRecords && (
-                <Button
-                  disabled
-                  icon={'plus'}
-                  label={'Add'}
-                  onClick={() => onAddMultipleWebform(field.tableSchemaId)}
-                />
+                <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(field.tableSchemaId)} />
               )}
             </h3>
             {field.tableNotCreated && (
@@ -433,13 +430,16 @@ export const WebformRecord = ({
               <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
             ))}
         </div>
-        {record.multiple && !isEmpty(record.elements) && (
+        {/* record.multiple && */ !isEmpty(record.elements) && (
           <div className={styles.actionButtons}>
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               icon={'trash'}
               // onClick={() => onDeleteMultipleWebform(record.recordId)}
-              onClick={() => handleDialogs('deleteRow', true)}
+              onClick={() => {
+                handleDialogs('deleteRow', true);
+                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { recordId: record.recordId } });
+              }}
             />
           </div>
         )}
@@ -481,7 +481,7 @@ export const WebformRecord = ({
           header={resources.messages['deleteRow']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          // onConfirm={onConfirmDeleteRow}
+          onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}
           onHide={() => handleDialogs('deleteRow', false)}
           visible={isDialogVisible.deleteRow}>
           {resources.messages['confirmDeleteRow']}
