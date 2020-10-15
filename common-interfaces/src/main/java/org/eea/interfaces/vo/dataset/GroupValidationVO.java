@@ -36,14 +36,14 @@ public class GroupValidationVO implements Serializable {
   /** The number of records. */
   private Integer numberOfRecords;
 
-  /** The origin name. */
-  private String tableNameSchema;
+  /** The name table schema. */
+  private String nameTableSchema;
 
   /** The short code. */
   private String shortCode;
 
   /** The field name schema. */
-  private String fieldNameSchema;
+  private String nameFieldSchema;
 
   /**
    * Hash code.
@@ -52,8 +52,8 @@ public class GroupValidationVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idRule, levelError, message, numberOfRecords, tableNameSchema, typeEntity,
-        shortCode, fieldNameSchema);
+    return Objects.hash(idRule, levelError, message, numberOfRecords, nameTableSchema, typeEntity,
+        shortCode, nameFieldSchema);
   }
 
   /**
@@ -74,9 +74,9 @@ public class GroupValidationVO implements Serializable {
     return Objects.equals(idRule, other.idRule) && levelError == other.levelError
         && Objects.equals(message, other.message)
         && Objects.equals(numberOfRecords, other.numberOfRecords)
-        && Objects.equals(tableNameSchema, other.tableNameSchema)
+        && Objects.equals(nameTableSchema, other.nameTableSchema)
         && (typeEntity == other.typeEntity) && (shortCode == other.shortCode)
-        && (fieldNameSchema == other.fieldNameSchema);
+        && (nameFieldSchema == other.nameFieldSchema);
   }
 
 }

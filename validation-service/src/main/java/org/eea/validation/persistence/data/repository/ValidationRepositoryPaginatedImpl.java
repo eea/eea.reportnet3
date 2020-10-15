@@ -117,9 +117,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString("levelError")));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString("typeEntity")));
             validation.setNumberOfRecords(rs.getInt("numberOfRecords"));
-            validation.setTableNameSchema(rs.getString("tableName"));
+            validation.setNameTableSchema(rs.getString("tableName"));
             validation.setShortCode(rs.getString("shortCode"));
-            validation.setFieldNameSchema(rs.getString("fieldName"));
+            validation.setNameFieldSchema(rs.getString("fieldName"));
             groupsValidations.add(validation);
           }
         }

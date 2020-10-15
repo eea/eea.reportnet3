@@ -50,7 +50,7 @@ public class ErrorsValidationVO implements Serializable {
   private String validationDate;
 
   /** The field name schema. */
-  private String fieldNameSchema;
+  private String nameFieldSchema;
 
   /** The short code. */
   private String shortCode;

@@ -454,7 +454,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(fieldValidation.getValidation().getValidationDate());
       error.setShortCode(fieldValidation.getValidation().getShortCode());
-      error.setFieldNameSchema(fieldValidation.getValidation().getFieldName());
+      error.setNameFieldSchema(fieldValidation.getValidation().getFieldName());
 
       errors.put(fieldValidation.getValidation().getId(), error);
     }
