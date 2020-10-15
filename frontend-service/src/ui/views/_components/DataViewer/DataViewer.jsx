@@ -130,6 +130,7 @@ const DataViewer = withRouter(
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
+      isSaveDisabled: false,
       mapGeoJson: '',
       newPoint: '',
       newPointCRS: 'EPSG:4326',
@@ -225,6 +226,9 @@ const DataViewer = withRouter(
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
       setIsDeleteAttachmentVisible(true);
     };
+
+    const onShowCoordinateError = errorCount =>
+      dispatchRecords({ type: 'DISABLE_SAVE_BUTTON', payload: { disable: errorCount > 0 } });
 
     const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
@@ -848,8 +852,8 @@ const DataViewer = withRouter(
           </div>
         )}
         <Button
-          className="p-button-animated-blink"
-          disabled={isSaving}
+          className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
+          disabled={isSaving || records.isSaveDisabled}
           label={resources.messages['save']}
           icon={!isSaving ? 'check' : 'spinnerAnimate'}
           onClick={() => onSaveRecord(records.newRecord)}
@@ -875,7 +879,8 @@ const DataViewer = withRouter(
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          className="p-button-animated-blink"
+          className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
+          disabled={isSaving || records.isSaveDisabled}
           icon={isSaving === true ? 'spinnerAnimate' : 'check'}
           label={resources.messages['save']}
           onClick={() => {
@@ -995,7 +1000,7 @@ const DataViewer = withRouter(
     );
 
     const onKeyPress = event => {
-      if (event.key === 'Enter' && !isSaving) {
+      if (event.key === 'Enter' && !isSaving && !records.isSaveDisabled) {
         event.preventDefault();
         onSaveRecord(records.newRecord);
       }
@@ -1241,6 +1246,7 @@ const DataViewer = withRouter(
                   hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
                   onShowFieldInfo={onShowFieldInfo}
+                  onShowCoordinateError={onShowCoordinateError}
                   records={records}
                   reporting={reporting}
                 />
@@ -1268,6 +1274,7 @@ const DataViewer = withRouter(
                 getTooltipMessage={getTooltipMessage}
                 hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
+                onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
                 reporting={reporting}
