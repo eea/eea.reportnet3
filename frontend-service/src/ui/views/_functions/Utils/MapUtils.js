@@ -30,7 +30,8 @@ const checkRSID = rsid => {
       return 'EPSG:4326';
   }
 };
-const checkValidCoordinates = coordinates => {
+const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
+  if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.indexOf(',') === -1) return false;
