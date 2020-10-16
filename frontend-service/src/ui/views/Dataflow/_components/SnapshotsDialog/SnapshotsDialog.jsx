@@ -104,6 +104,11 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   };
 
   useCheckNotifications(['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadSnapshotList, datasetId);
+  useCheckNotifications(
+    ['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT', 'VALIDATION_FINISHED_EVENT'],
+    onLoadSnapshotList,
+    datasetId
+  );
 
   const onShowReleaseDialog = ({ isReleased }) => {
     setIsActiveReleaseSnapshotConfirmDialog(true);
