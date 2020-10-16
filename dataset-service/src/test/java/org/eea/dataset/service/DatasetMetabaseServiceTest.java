@@ -607,7 +607,8 @@ public class DatasetMetabaseServiceTest {
    */
   @Test
   public void countDatasetNameByDataflowId() {
-    Mockito.when(dataSetMetabaseRepository.countDatasetNameByDataflowId(1L, "1")).thenReturn(1L);
+    Mockito.when(dataSetMetabaseRepository.countByDataSetNameIgnoreCaseAndDataflowId("1", 1L))
+        .thenReturn(1L);
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
 }
