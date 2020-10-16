@@ -303,6 +303,20 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetSchemaRepeatTest() throws EEAException {
+    Mockito.when(datasetMetabaseService.countDatasetNameByDataflowId(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals(EEAErrorMessage.DATASET_NAME_DUPLICATED, ex.getReason());
+      throw ex;
+    }
+
+  }
+
   /**
    * Creates the empty data set schema exception.
    *

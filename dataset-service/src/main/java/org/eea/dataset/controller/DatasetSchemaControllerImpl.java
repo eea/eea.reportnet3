@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -109,6 +110,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+
+  /** The data set metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
   /**
    * Creates the empty dataset schema.
    *
@@ -122,6 +128,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
+    if (0 != datasetMetabaseService.countDatasetNameByDataflowId(dataflowId, datasetSchemaName)) {
+      LOG.error("Error creating duplicated dataset : {}", datasetSchemaName);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_NAME_DUPLICATED);
+    }
     try {
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
