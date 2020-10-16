@@ -9,6 +9,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
+import { parseDatasetSchemas } from './_functions/utils/parseDatasetSchemas';
+
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
     case 'UPDATE_PROPERTY':
@@ -25,40 +27,24 @@ const sqlHelpReducer = (state, { type, payload }) => {
 export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSentence }) => {
   const initState = {
     datasets: [],
-    tabs: [],
+    tables: [],
     fields: [],
     selectedDataset: '',
-    selectedTab: '',
+    selectedTable: '',
     selectedField: ''
   };
   const resourcesContext = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(sqlHelpReducer, initState);
+
   useEffect(async () => {
-    //call service to get datasets in mode
     const {
       params: { dataflowId }
     } = match;
+
     const dataflowDetails = parseDatasetSchemas(await DataflowService.getAllSchemas(dataflowId));
     console.log('dataflowDetails', dataflowDetails);
-
-    //parse datasets to model
-
-    //update datasets state
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasets', value: [] } });
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasets', value: dataflowDetails } });
   }, []);
-
-  const parseDatasetSchemas = rowDatasetSchemas => {
-    const datasetSchemas = {
-      datasetSchemaOptions: [],
-      datasetSchemas: []
-    };
-    for (rowDatasetSchema of rowDatasetSchemas) {
-      const option = { label: rowDatasetSchema.datasetSchemaName, value: rowDatasetSchema.datasetSchemaId };
-      const datasetSchema = parseDatasetSchema(datasetSchema);
-      datasetSchemas.datasetSchemaOptions.push(option);
-      datasetSchemas.datasetSchemas.push(datasetSchema);
-    }
-  };
 
   const getDataflowDetails = async () => {
     const {
@@ -67,31 +53,43 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     return await DataflowService.dataflowDetails(dataflowId);
   };
 
-  const onSelectDataset = e => {
-    // select dataset
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'dataset', value: e.target.value } });
-    // call service to get datasetSchema
-    const rawTabs = [];
-    //parse dataset to model
-    const tabs = [];
-    //update tabs state
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'tabs', value: tabs } });
+  const onSelectDataset = selectedDataset => {
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedDataset', value: selectedDataset } });
   };
 
-  const onSelectTab = e => {
-    //select the tab
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'tab', value: e.target.value } });
-    //select tab fields from schema
-    const rawFields = [];
-    //parse dataset to model
-    const fields = [];
-    //update fields state
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'fields', value: fields } });
+  useEffect(() => {
+    const tablesOptions = state?.datasets?.datasetSchemas?.find(
+      dataset => dataset.datasetSchemaId === state.selectedDataset?.value
+    )?.tablesOptions;
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'tables', value: tablesOptions } });
+  }, [state.selectedDataset]);
+
+  useEffect(() => {
+    if (!state.tables) {
+      onSelectTable('');
+    }
+  }, [state.tables]);
+
+  const onSelectTable = table => {
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedTable', value: table } });
   };
 
-  const onSelectField = e => {
-    //select the field
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'field', value: e.target.value } });
+  useEffect(() => {
+    const fieldsOptions = state?.datasets?.datasetSchemas
+      ?.find(dataset => dataset.datasetSchemaId === state.selectedDataset?.value)
+      ?.tables.find(table => table.tableSchemaId === state.selectedTable?.value)?.fieldsOptions;
+    console.log('fieldsOptions', fieldsOptions);
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'fields', value: fieldsOptions || [] } });
+  }, [state.selectedTable]);
+
+  useEffect(() => {
+    if (!state.fieldsOptions) {
+      onSelectField('');
+    }
+  }, [state.fieldsOptions]);
+
+  const onSelectField = field => {
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedField', value: field } });
   };
 
   const onAddElement = element => {
@@ -105,9 +103,24 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
   };
   return (
     <div className={styles.wrapper}>
-      <SqlHelpListBox title="Dataset" selectedItem={state.selectedDataset} />
-      <SqlHelpListBox title="Tables" selectedItem={state.selectedDataset} />
-      <SqlHelpListBox title="Fields" selectedItem={state.selectedDataset} />
+      <SqlHelpListBox
+        title="Dataset"
+        selectedItem={state.selectedDataset}
+        options={state.datasets.datasetSchemaOptions}
+        onChange={onSelectDataset}
+      />
+      <SqlHelpListBox
+        title="Tables"
+        selectedItem={state.selectedTable}
+        options={state.tables}
+        onChange={onSelectTable}
+      />
+      <SqlHelpListBox
+        title="Fields"
+        selectedItem={state.selectedField}
+        options={state.fields}
+        onChange={onSelectField}
+      />
     </div>
   );
 });

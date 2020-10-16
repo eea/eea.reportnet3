@@ -7,7 +7,7 @@ import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SqlHelpListBox = ({ title, selectedItem, options }) => {
+export const SqlHelpListBox = ({ onChange, options, selectedItem, title }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className={styles.section}>
@@ -25,8 +25,9 @@ export const SqlHelpListBox = ({ title, selectedItem, options }) => {
         onChange={e => {}}
         optionLabel="label"
         optionValue="value"
-        options={[{ label: 'dataset1', value: 'dataset1' }]}
+        options={options}
         value={selectedItem}
+        onChange={e => onChange(e.value)}
       />
     </div>
   );
