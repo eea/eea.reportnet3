@@ -11,14 +11,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const SnapshotItem = ({
-  getSnapshotData,
-  isLoading,
-  itemData,
-  showReleaseDialog,
-  snapshotIdToRelease,
-  snapshotReleasedId
-}) => {
+export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog, snapshotIdToRelease }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -31,30 +24,34 @@ export const SnapshotItem = ({
   };
 
   const getSnapshotTextStyle = () => {
-    if (snapshotIdToRelease) {
+    if (snapshotIdToRelease !== '') {
       if (itemData.id === snapshotIdToRelease) {
         return `${styles.is_released_snapshot}`;
-      } else if (snapshotReleasedId !== snapshotIdToRelease) {
-        return itemData.id === snapshotIdToRelease && `${styles.is_released_snapshot}`;
-      } else {
-        return ``;
+      } else if (itemData.isReleased && itemData.id !== snapshotIdToRelease) {
+        return itemData.id === snapshotIdToRelease ? `${styles.is_released_snapshot}` : ``;
       }
+    } else if (itemData.isReleased) {
+      return isLoading ? `` : `${styles.is_released_snapshot}`;
     } else {
-      return itemData.isReleased ? `${styles.is_released_snapshot}` : ``;
+      return ``;
     }
   };
 
   const getSnapshotIconColour = () => {
-    if (snapshotIdToRelease) {
+    if (snapshotIdToRelease !== '') {
       if (itemData.id === snapshotIdToRelease) {
         return 'success';
-      } else if (snapshotReleasedId !== snapshotIdToRelease) {
-        return itemData.id === snapshotIdToRelease && 'success';
-      } else {
+      } else if (itemData.isReleased && itemData.id !== snapshotIdToRelease) {
+        return itemData.isReleased && itemData.id === snapshotIdToRelease ? 'success' : null;
+      }
+    } else if (itemData.isReleased) {
+      if (isLoading) {
         return null;
+      } else {
+        return 'success';
       }
     } else {
-      return itemData.isReleased ? 'success' : null;
+      return null;
     }
   };
 
