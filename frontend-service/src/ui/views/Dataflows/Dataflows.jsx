@@ -66,6 +66,8 @@ const Dataflows = withRouter(({ match, history }) => {
     pending: []
   });
 
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
+
   useEffect(() => {
     if (!isNil(dataflowsErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
@@ -75,15 +77,9 @@ const Dataflows = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       dataFetch();
+      onLoadPermissions();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.messages, tabMenuActiveItem, userContext.contextRoles]);
-
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
-
-  useEffect(() => {
-    if (!isNil(userContext.contextRoles)) onLoadPermissions();
-  }, [userContext]);
+  }, [userContext.contextRoles]);
 
   useEffect(() => {
     if (dataflowsState.isCustodian) {
@@ -131,7 +127,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const isLoading = value => dataflowsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onCreateDataflow = () => {
-    dataFetch();
     manageDialogs('isAddDialogVisible', false);
     onRefreshToken();
   };
