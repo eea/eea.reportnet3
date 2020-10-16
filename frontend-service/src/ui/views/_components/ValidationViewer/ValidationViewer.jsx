@@ -49,6 +49,7 @@ const ValidationViewer = React.memo(
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
     const [totalFilteredRecords, setTotalFilteredRecords] = useState();
+    const [totalFilteredGroupedRecords, setTotalFilteredGroupedRecords] = useState();
     const [totalRecords, setTotalRecords] = useState(0);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
 
@@ -59,8 +60,20 @@ const ValidationViewer = React.memo(
     useEffect(() => {
       const headers = [
         {
+          id: 'entityType',
+          header: resources.messages['entity']
+        },
+        {
           id: 'tableSchemaName',
-          header: resources.messages['origin']
+          header: resources.messages['table']
+        },
+        {
+          id: 'fieldSchemaName',
+          header: resources.messages['field']
+        },
+        {
+          id: 'shortCode',
+          header: resources.messages['ruleCode']
         },
         {
           id: 'levelError',
@@ -69,10 +82,6 @@ const ValidationViewer = React.memo(
         {
           id: 'message',
           header: resources.messages['errorMessage']
-        },
-        {
-          id: 'entityType',
-          header: resources.messages['entity']
         }
       ];
 
@@ -176,6 +185,7 @@ const ValidationViewer = React.memo(
           originsFilter
         );
         addTableSchemaId(datasetErrors.errors);
+        setTotalFilteredGroupedRecords(datasetErrors.totalFilteredErrors);
       } else {
         datasetErrors = await DatasetService.errorsById(
           datasetId,
@@ -377,11 +387,12 @@ const ValidationViewer = React.memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {(areActiveFilters && totalRecords !== totalFilteredRecords) || grouped
-          ? `${resources.messages['filtered']} : ${totalFilteredRecords} | `
+        {areActiveFilters && totalRecords !== totalFilteredRecords
+          ? `${resources.messages['filtered']}: ${totalFilteredRecords} | `
           : ''}
-        {resources.messages['totalRecords']} {totalRecords} {resources.messages['records'].toLowerCase()}
-        {(areActiveFilters && totalRecords === totalFilteredRecords) || grouped
+        {resources.messages['totalRecords']} {!grouped ? totalRecords : totalFilteredGroupedRecords}{' '}
+        {resources.messages['records'].toLowerCase()}
+        {areActiveFilters && totalRecords === totalFilteredRecords
           ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
@@ -412,7 +423,7 @@ const ValidationViewer = React.memo(
               <Button
                 className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
-                label={resources.messages['origin']}
+                label={resources.messages['table']}
                 onClick={event => {
                   dropdownOriginsFilterRef.current.show(event);
                 }}

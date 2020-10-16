@@ -799,4 +799,18 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return datasetMetabase != null ? datasetMetabase.getId() : null;
   }
 
+
+  /**
+   * Count dataset name by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
+   * @return the long
+   */
+  @Override
+  public Long countDatasetNameByDataflowId(Long dataflowId, String datasetSchemaName) {
+    return dataSetMetabaseRepository.countByDataSetNameIgnoreCaseAndDataflowId(datasetSchemaName,
+        dataflowId);
+  }
+
 }
