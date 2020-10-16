@@ -80,16 +80,16 @@ export const Filters = ({
   }, [filterState.matchMode]);
 
   useEffect(() => {
-    getFilteredStateValue(filterState.filtered);
+    getFilteredSearchedStateValue();
   }, [filterState.filtered, filterState.searched]);
+
+  useEffect(() => {
+    getFilteredState();
+  }, [filterState.filterBy]);
 
   useEffect(() => {
     getFilteredSearched(filterState.filteredSearched);
   }, [filterState.filteredSearched]);
-
-  useEffect(() => {
-    getFilteredState(filterState.filterBy);
-  }, [filterState.filterBy]);
 
   useEffect(() => {
     getChangedCheckboxes(filterState.property);
@@ -102,7 +102,7 @@ export const Filters = ({
     return isNil(checkBox) ? false : checkBox.isChecked;
   };
 
-  const getFilteredStateValue = () => {
+  const getFilteredSearchedStateValue = () => {
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
   };
