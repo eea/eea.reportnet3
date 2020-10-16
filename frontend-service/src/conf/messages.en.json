@@ -894,8 +894,9 @@
     "grouped": "Grouped",
     "ungrouped": "Ungrouped",
     "numberOfRecords": "Number of records",
-    "totalErrors": "total errors: ",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "uploadReplaceAttachment": "Replace file"
+    "uploadReplaceAttachment": "Replace file",
+    "totalErrors": "total errors: ",
+    "datasetSchemaCreationErrorDuplicated": "{:schemaName} already exists. Please choose a different schema name."
   }
 }
