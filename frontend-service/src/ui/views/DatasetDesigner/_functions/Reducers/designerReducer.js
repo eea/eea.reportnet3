@@ -1,3 +1,5 @@
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'GET_EXPORT_LIST':
@@ -20,7 +22,12 @@ export const designerReducer = (state, { type, payload }) => {
         datasetStatistics: payload.datasetStatistics,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          tableSchemaId: payload.tables.length === 0 ? '' : payload.tables[0].tableSchemaId
+          tableSchemaId:
+            QuerystringUtils.getUrlParamValue('tab') !== ''
+              ? QuerystringUtils.getUrlParamValue('tab')
+              : payload.tables.length === 0
+              ? ''
+              : payload.tables[0].tableSchemaId
         },
         levelErrorTypes: payload.levelErrorTypes,
         previousWebform: payload.previousWebform,

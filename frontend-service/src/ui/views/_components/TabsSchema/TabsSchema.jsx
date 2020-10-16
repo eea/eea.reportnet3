@@ -41,7 +41,6 @@ export const TabsSchema = ({
   tables,
   tableSchemaColumns
 }) => {
-  console.log('LLEGO', { tableSchemaId });
   let tableHasErrors = true;
   if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
     tableHasErrors = tables[activeIndex].hasErrors;

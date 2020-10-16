@@ -46,7 +46,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TabsUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -124,10 +124,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
-      console.log(tableSchema);
       setDataViewerOptions({
         ...dataViewerOptions,
-        tableSchemaId: tableSchema[0].id
+        tableSchemaId:
+          QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : tableSchema[0].id
       });
     }
   }, [tableSchema]);
@@ -204,7 +204,6 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [dataViewerOptions.tableSchemaId]);
 
   const changeUrl = () => {
-    console.log(dataViewerOptions.tableSchemaId, tableSchema[0].id);
     window.history.replaceState(
       null,
       null,
@@ -643,7 +642,6 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = table => {
-    console.log(table);
     setDataViewerOptions({
       ...dataViewerOptions,
       isGroupedValidationDeleted: true,

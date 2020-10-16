@@ -48,7 +48,6 @@ const TabView = withRouter(
     totalTabs,
     viewType
   }) => {
-    console.log({ activeIndex });
     const [activeIdx, setActiveIdx] = useState(activeIndex);
     const [idx] = useState(id || UniqueComponentId());
     const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
@@ -74,11 +73,9 @@ const TabView = withRouter(
 
     useEffect(() => {
       if (!isNil(onTabClick) && history.location.search !== '') {
-        console.log('AQUI');
         onTabClick({ index: QuerystringUtils.getUrlParamValue('tab') });
       } else {
         if (!isNil(onTabChange)) {
-          console.log('AQUI 2', tableSchemaId);
           onTabChange({ index: QuerystringUtils.getUrlParamValue('tab') });
         }
       }
@@ -119,7 +116,6 @@ const TabView = withRouter(
             onTabClick({ originalEvent: event, index: index, header: tab.props.header });
           }
           if (!isNil(onTabChange)) {
-            console.log('AQUI 4', tab);
             onTabChange({ originalEvent: event, index, tableSchemaId: tab.key });
           } else {
             if (!isNil(onTabClick)) {
@@ -148,7 +144,6 @@ const TabView = withRouter(
     };
 
     const changeUrl = () => {
-      console.log(tableSchemaId);
       if (!isNil(tableSchemaId)) {
         window.history.replaceState(
           null,

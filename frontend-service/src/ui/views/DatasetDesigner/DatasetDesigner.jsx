@@ -615,6 +615,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     selectedRuleMessage = '',
     selectedRuleLevelError = ''
   ) => {
+    console.log({ tableSchemaId });
     if (grouped) {
       designerDispatch({
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',

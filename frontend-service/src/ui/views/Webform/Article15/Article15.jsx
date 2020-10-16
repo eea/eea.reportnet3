@@ -28,9 +28,7 @@ export const Article15 = ({ datasetId, state }) => {
   useEffect(() => initialLoad(), []);
 
   const changeUrl = tabSchemaName => {
-    console.log(tabSchemaName, state.schemaTables);
     const filteredTable = state.schemaTables.filter(schemaTable => schemaTable.name === tabSchemaName);
-    console.log(filteredTable);
     window.history.replaceState(null, null, `?tab=${filteredTable[0].id}${`&view=webform`}`);
   };
 

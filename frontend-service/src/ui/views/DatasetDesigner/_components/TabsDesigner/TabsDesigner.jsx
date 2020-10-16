@@ -368,17 +368,18 @@ export const TabsDesigner = withRouter(
     };
 
     const renderTabViews = () => {
+      const idx = TabsUtils.getIndexByTableProperty(
+        !isNil(tableSchemaId)
+          ? tableSchemaId
+          : QuerystringUtils.getUrlParamValue('tab') !== ''
+          ? QuerystringUtils.getUrlParamValue('tab')
+          : 0,
+        tabs,
+        'tableSchemaId'
+      );
       return (
         <TabView
-          activeIndex={TabsUtils.getIndexByTableProperty(
-            !isNil(tableSchemaId)
-              ? tableSchemaId
-              : QuerystringUtils.getUrlParamValue('tab') !== ''
-              ? QuerystringUtils.getUrlParamValue('tab')
-              : 0,
-            tabs,
-            'tableSchemaId'
-          )}
+          activeIndex={idx !== -1 ? idx : 0}
           checkEditingTabs={checkEditingTabs}
           designMode={true}
           history={history}

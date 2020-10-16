@@ -7,7 +7,6 @@ const getIndexByHeader = (header, tabsArray) => {
 };
 
 const getIndexByTableProperty = (value, tabsArray, property) => {
-  console.log(value, tabsArray);
   return tabsArray
     .map(tab => {
       return tab[property];
