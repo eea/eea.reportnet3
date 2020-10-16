@@ -16,6 +16,7 @@ export class Dataset {
     tableStatisticValues,
     totalErrors,
     totalFilteredErrors,
+    totalRecords,
     webform
   } = {}) {
     this.dataProviderId = dataProviderId;
@@ -34,6 +35,7 @@ export class Dataset {
     this.tableStatisticValues = tableStatisticValues;
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
+    this.totalRecords = totalRecords;
     this.webform = webform;
   }
 }
