@@ -88,6 +88,10 @@ export const Filters = ({
   }, [filterState.filteredSearched]);
 
   useEffect(() => {
+    getFilteredState(filterState.filterBy);
+  }, [filterState.filterBy]);
+
+  useEffect(() => {
     getChangedCheckboxes(filterState.property);
   }, [JSON.stringify(filterState.checkboxes), filterState.property]);
 
@@ -101,6 +105,14 @@ export const Filters = ({
   const getFilteredStateValue = () => {
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
+  };
+
+  const getFilteredState = () => {
+    const filteredStateValue = Object.values(filterState.filterBy)
+      .map(value => isEmpty(value))
+      .includes(false);
+
+    filterDispatch({ type: 'FILTERED', payload: { filteredStateValue } });
   };
 
   const getInitialState = () => {
@@ -217,16 +229,7 @@ export const Filters = ({
       value
     });
 
-    let filteredStateValue = true;
-
-    if (
-      (!isNil(checkboxOptions) && checkboxOptions.includes(filter) && value.length > 1) ||
-      isEmpty(value) ||
-      !Array.isArray(value)
-    )
-      filteredStateValue = false;
-
-    filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value, filteredStateValue } });
+    filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
 
   const onOrderData = (order, property) => {

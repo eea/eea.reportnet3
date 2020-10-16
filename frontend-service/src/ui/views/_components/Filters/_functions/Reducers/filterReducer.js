@@ -22,12 +22,17 @@ export const filterReducer = (state, { type, payload }) => {
         property: ''
       };
 
+    case 'FILTERED':
+      return {
+        ...state,
+        filtered: payload.filteredStateValue
+      };
+
     case 'FILTER_DATA':
       return {
         ...state,
         filterBy: { ...state.filterBy, [payload.filter]: payload.value },
-        filteredData: payload.filteredData,
-        filtered: payload.filteredStateValue
+        filteredData: payload.filteredData
       };
 
     case 'FILTERED_SEARCHED_STATE':
