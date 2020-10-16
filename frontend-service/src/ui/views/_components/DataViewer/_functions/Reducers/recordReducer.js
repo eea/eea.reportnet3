@@ -41,6 +41,10 @@ export const recordReducer = (state, { type, payload }) => {
       return { ...state, pastedRecords: inmPastedRecords };
     }
 
+    case 'DISABLE_SAVE_BUTTON': {
+      return { ...state, isSaveDisabled: payload.disable };
+    }
+
     case 'EMPTY_PASTED_RECORDS':
       return { ...state, pastedRecords: [] };
 

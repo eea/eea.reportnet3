@@ -26,7 +26,7 @@ const EULogin = ({ location, history }) => {
         userContext.onLogin(userObject);
         const rnLocalStorage = userStorage.getLocalStorage();
         if (!isNil(rnLocalStorage)) {
-          userStorage.removeLocalStorage();
+          userStorage.removeLocalProperty('redirectUrl');
           window.location.href = rnLocalStorage.redirectUrl;
         } else {
           history.push(getUrl(routes.DATAFLOWS));

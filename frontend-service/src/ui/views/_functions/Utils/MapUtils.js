@@ -30,7 +30,8 @@ const checkRSID = rsid => {
       return 'EPSG:4326';
   }
 };
-const checkValidCoordinates = coordinates => {
+const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
+  if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.indexOf(',') === -1) return false;
@@ -43,7 +44,8 @@ const checkValidCoordinates = coordinates => {
     isValid = false;
   } else {
     splittedCoordinates.forEach(coordinate => {
-      if (isNil(coordinate) || coordinate.toString().trim() === '') isValid = false;
+      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim()))
+        isValid = false;
     });
   }
   return isValid;

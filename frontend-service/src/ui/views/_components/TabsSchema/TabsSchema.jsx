@@ -17,14 +17,21 @@ export const TabsSchema = ({
   hasCountryCode,
   isDatasetDeleted,
   isExportable = true,
+  isFilterable,
+  isGroupedValidationDeleted,
+  isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypes,
+  onChangeIsValidationSelected,
+  onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
   recordPositionId,
   reporting,
   selectedRecordErrorId,
-  setIsValidationSelected,
+  selectedRuleId,
+  selectedRuleLevelError,
+  selectedRuleMessage,
   showWriteButtons = true,
   tables,
   tableSchemaColumns
@@ -45,9 +52,14 @@ export const TabsSchema = ({
                   hasWritePermissions={hasWritePermissions}
                   isDatasetDeleted={isDatasetDeleted}
                   isExportable={isExportable}
+                  isFilterable={isFilterable}
+                  isGroupedValidationDeleted={isGroupedValidationDeleted}
+                  isGroupedValidationSelected={isGroupedValidationSelected}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
+                  onChangeIsValidationSelected={onChangeIsValidationSelected}
+                  onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   reporting={reporting}
                   showWriteButtons={showWriteButtons}
@@ -65,7 +77,9 @@ export const TabsSchema = ({
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
-                  setIsValidationSelected={setIsValidationSelected}
+                  selectedRuleId={selectedRuleId}
+                  selectedRuleLevelError={selectedRuleLevelError}
+                  selectedRuleMessage={selectedRuleMessage}
                 />
               </div>
             </TabPanel>

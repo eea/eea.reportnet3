@@ -2,6 +2,9 @@
   margin: 0.5vw 0 0.5vw 1vw;
   color: var(--main-font-color);
 }
+.fieldDesignerItem {
+  margin-right: 50px !important;
+}
 .fieldDesignerWrapper {
   display: flex;
   flex-direction: row;
@@ -10,11 +13,9 @@
   flex-wrap: wrap-reverse;
   z-index: 3000;
 }
-
 .fieldDesignerWrapper:last-child {
   margin-bottom: 1rem;
 }
-
 .fieldsHeader {
   display: flex;
   flex-direction: row;
@@ -45,12 +46,10 @@
       margin-right: 0.4rem;
     }
   }
-
   .PKWrap {
     > label {
       margin-left: 0.5rem !important;
     }
-
     .PKInfoButton {
       background-color: var(--white) !important;
       border-radius: 50% !important;
@@ -61,29 +60,24 @@
       margin-left: 0.4rem !important;
       margin-right: 0.9rem !important;
       margin-top: -1rem !important;
-
       :global .pi-info-circle {
         padding: 0 !important;
         top: 40%;
       }
-
       > span {
         left: 46% !important;
         margin-left: -0.48em !important;
         margin-top: -0.5em !important;
       }
-
       &:focus {
         box-shadow: none !important;
       }
     }
   }
 }
-
 .positioning {
   top: 0 !important;
 }
-
 .switchContainerInput {
   width: 100vw;
 }
@@ -92,7 +86,6 @@
   align-items: flex-end;
   flex-direction: column;
 }
-
 .switchDiv div:nth-child(-n + 3) {
   margin-bottom: 0.3rem;
 }
@@ -102,10 +95,8 @@
   align-items: center;
   justify-content: space-between;
   margin: 0 0 2vw 1vw;
-
   .constraintsButtons {
     display: flex;
-
     flex-direction: column;
     button:last-child {
       margin-top: 5px;
@@ -125,7 +116,6 @@
   width: 40vw;
   transition: 0.5s !important;
 }
-
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   box-shadow: 0 0 0 0em var(--blue-120) !important;
 }

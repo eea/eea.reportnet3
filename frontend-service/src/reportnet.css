@@ -120,7 +120,8 @@
   --statusBox-draft-color: #694382;
   --statusBox-designer-bg: #c2c8cf;
   /* Public page header background */
-  --public-page-header-bg: #033166;
+  --public-custom-header-bg: #033166;
+  --public-page-header-bg: #fff;
 
   --header-height: 180px;
 
@@ -280,6 +281,8 @@
   --inputtext-border-color-focus: var(--c-corporate-blue);
   --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue);
   --inputtext-placeholder: var(--main-font-color);
+  --inputtext-border-error: 1px solid var(--errors);
+  --inputtext-box-shadow-focus-error: 0 0 0 0.1em var(--errors);
 
   /* Treeview */
   --treeview-expandable-color: var(--c-corporate-blue);
@@ -496,6 +499,9 @@
   --card-item-bg: var(--bg);
   --card-item-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.4);
   --card-item-box-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25);
+
+  /*Cookies notice*/
+  --cookies-bg: #033166;
 }
 body {
   margin: 0px;
