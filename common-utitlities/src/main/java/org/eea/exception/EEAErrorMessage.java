@@ -32,7 +32,7 @@ public final class EEAErrorMessage {
   /** The Constant DATASET_INCORRECT_ID: {@value}. */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
-  /** The Constant DATASET_NAME_DUPLICATED: {@value}. */
+  /** The Constant DATASET_NAME_DUPLICATE: {@value}. */
   public static final String DATASET_NAME_DUPLICATE = "Dataset name duplicate in this dataflow";
 
   /** The Constant IDTABLESCHEMA_INCORRECT: {@value}. */
