@@ -107,6 +107,9 @@
           }
         },
         {
+          "key": "DATASET_SCHEMA_CREATION_ERROR_DUPLICATED"
+        },
+        {
           "key": "DATAFLOW_DELETE_BY_ID_ERROR",
           "navigateTo": {
             "section": "DATAFLOW",
