@@ -144,7 +144,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
             validation.setTableName(rs.getString(9));
-            validation.setTableName(rs.getString(9));
             validation.setFieldName(rs.getString(10));
             validation.setShortCode(rs.getString(11));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
