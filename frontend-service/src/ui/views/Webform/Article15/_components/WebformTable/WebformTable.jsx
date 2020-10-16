@@ -29,7 +29,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
   }, [webform]);
 
   useEffect(() => {
-    if (webform.tableSchemaId) onLoadTableData();
+    if (!isNil(webform) && webform.tableSchemaId) onLoadTableData();
   }, [isDataUpdated, onTabChange, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });

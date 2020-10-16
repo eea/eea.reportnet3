@@ -3,6 +3,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
@@ -45,7 +46,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -66,7 +67,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
-    activeIndex: null,
     isGroupedValidationDeleted: false,
     isGroupedValidationSelected: false,
     isValidationSelected: false,
@@ -74,7 +74,8 @@ export const Dataset = withRouter(({ match, history }) => {
     selectedRecordErrorId: -1,
     selectedRuleId: '',
     selectedRuleLevelError: '',
-    selectedRuleMessage: ''
+    selectedRuleMessage: '',
+    tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -103,7 +104,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [replaceData, setReplaceData] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [tableSchemaId, setTableSchemaId] = useState();
   const [schemaTables, setSchemaTables] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -121,6 +121,16 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (!isNil(tableSchema) && tableSchema.length > 0) {
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        tableSchemaId:
+          QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : tableSchema[0].id
+      });
+    }
+  }, [tableSchema]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -188,6 +198,18 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     getExportExtensions(externalOperationsList.export);
   }, [externalOperationsList]);
+
+  useEffect(() => {
+    if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
+  }, [dataViewerOptions.tableSchemaId]);
+
+  const changeUrl = () => {
+    window.history.replaceState(
+      null,
+      null,
+      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}`
+    );
+  };
 
   const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
@@ -500,7 +522,6 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
-      setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
       const tableSchemaList = [];
       setTableSchema(
@@ -591,25 +612,25 @@ export const Dataset = withRouter(({ match, history }) => {
     if (grouped) {
       setDataViewerOptions({
         ...dataViewerOptions,
-        activeIndex: tableSchemaId,
         isGroupedValidationDeleted: false,
         isGroupedValidationSelected: true,
         recordPositionId: -1,
+        selectedRecordErrorId: -1,
         selectedRuleId,
         selectedRuleLevelError,
-        selectedRuleMessage
+        selectedRuleMessage,
+        tableSchemaId
       });
     } else {
       setDataViewerOptions({
         ...dataViewerOptions,
-        activeIndex: tableSchemaId,
         isValidationSelected: true,
         recordPositionId: posIdRecord,
         selectedRecordErrorId,
-        selectedRecordErrorId,
         selectedRuleId: '',
         selectedRuleLevelError: '',
-        selectedRuleMessage: ''
+        selectedRuleMessage: '',
+        tableSchemaId
       });
     }
 
@@ -620,15 +641,15 @@ export const Dataset = withRouter(({ match, history }) => {
     fnUseState(visible);
   };
 
-  const onTabChange = tableSchemaId => {
+  const onTabChange = table => {
     setDataViewerOptions({
       ...dataViewerOptions,
-      activeIndex: tableSchemaId.index,
       isGroupedValidationDeleted: true,
       isGroupedValidationSelected: false,
       selectedRuleId: '',
       selectedRuleLevelError: '',
-      selectedRuleMessage: ''
+      selectedRuleMessage: '',
+      tableSchemaId: table.tableSchemaId
     });
   };
 
@@ -876,7 +897,6 @@ export const Dataset = withRouter(({ match, history }) => {
         </Dialog>
       )}
       <TabsSchema
-        activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
         isDatasetDeleted={isDataDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -893,6 +913,7 @@ export const Dataset = withRouter(({ match, history }) => {
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
         selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        tableSchemaId={dataViewerOptions.tableSchemaId}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />
