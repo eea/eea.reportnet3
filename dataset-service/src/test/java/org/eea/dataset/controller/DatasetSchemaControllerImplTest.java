@@ -311,7 +311,7 @@ public class DatasetSchemaControllerImplTest {
       dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
     } catch (ResponseStatusException ex) {
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      assertEquals(EEAErrorMessage.DATASET_NAME_DUPLICATED, ex.getReason());
+      assertEquals(EEAErrorMessage.DATASET_NAME_DUPLICATE, ex.getReason());
       throw ex;
     }
 

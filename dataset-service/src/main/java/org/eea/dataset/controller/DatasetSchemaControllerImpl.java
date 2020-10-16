@@ -111,6 +111,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   private IntegrationControllerZuul integrationControllerZuul;
 
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
@@ -130,7 +131,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     if (0 != datasetMetabaseService.countDatasetNameByDataflowId(dataflowId, datasetSchemaName)) {
       LOG.error("Error creating duplicated dataset : {}", datasetSchemaName);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_NAME_DUPLICATED);
+          EEAErrorMessage.DATASET_NAME_DUPLICATE);
     }
     try {
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
