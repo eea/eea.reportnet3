@@ -9,7 +9,7 @@ import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import Tooltip from 'primereact/tooltip';
 
 export const ChipButton = ({
-  className,
+  className = '',
   disabled = false,
   hasLevelErrorIcon = false,
   id,
