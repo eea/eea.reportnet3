@@ -894,6 +894,7 @@
     "grouped": "Grouped",
     "ungrouped": "Ungrouped",
     "numberOfRecords": "Number of records",
-    "wrongCoordinate": "Wrong or incomplete coordinate. "
+    "wrongCoordinate": "Wrong or incomplete coordinate. ",
+    "totalErrors": "total errors: "
   }
 }
