@@ -894,6 +894,7 @@
     "grouped": "Grouped",
     "ungrouped": "Ungrouped",
     "numberOfRecords": "Number of records",
+    "totalErrors": "total errors: ",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "uploadReplaceAttachment": "Replace file"
   }

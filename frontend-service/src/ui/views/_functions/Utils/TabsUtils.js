@@ -7,11 +7,12 @@ const getIndexByHeader = (header, tabsArray) => {
 };
 
 const getIndexByTableProperty = (value, tabsArray, property) => {
-  return tabsArray
+  const indx = tabsArray
     .map(tab => {
       return tab[property];
     })
     .indexOf(value);
+  return indx !== -1 ? indx : 0;
 };
 
 const getMaxIndex = tabsArray => {

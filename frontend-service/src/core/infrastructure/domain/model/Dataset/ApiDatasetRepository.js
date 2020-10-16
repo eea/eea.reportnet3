@@ -116,7 +116,7 @@ const errorsById = async (
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
     datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalErrors: datasetErrorsDTO.totalRecords,
+    totalRecords: datasetErrorsDTO.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
   });
 

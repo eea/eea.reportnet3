@@ -35,10 +35,9 @@ export const Article15 = ({ datasetId, state }) => {
   const initialLoad = () => {
     const allTables = tables.map(table => table.name);
     const parsedData = onLoadData();
-    console.log(Article15Utils.getWebformTabs(allTables, state.schemaTables));
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: { isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables), data: parsedData }
+      payload: { isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables, tables), data: parsedData }
     });
   };
 
