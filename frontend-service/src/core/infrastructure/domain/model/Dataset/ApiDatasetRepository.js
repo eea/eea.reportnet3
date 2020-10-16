@@ -125,7 +125,7 @@ const errorsById = async (
       datasetErrorDTO &&
       new DatasetError({
         entityType: datasetErrorDTO.typeEntity,
-        fieldNameSchema: datasetErrorDTO.fieldNameSchema,
+        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         objectId: datasetErrorDTO.idObject,
@@ -301,7 +301,7 @@ const groupedErrorsById = async (
       datasetErrorDTO &&
       new DatasetError({
         entityType: datasetErrorDTO.typeEntity,
-        fieldNameSchema: datasetErrorDTO.fieldNameSchema,
+        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         numberOfRecords: datasetErrorDTO.numberOfRecords,

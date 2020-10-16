@@ -1,7 +1,7 @@
 export class DatasetError {
   constructor({
     entityType,
-    fieldNameSchema,
+    fieldSchemaName,
     levelError,
     message,
     numberOfRecords,
@@ -16,7 +16,7 @@ export class DatasetError {
     validationId
   } = {}) {
     this.entityType = entityType;
-    this.fieldNameSchema = fieldNameSchema;
+    this.fieldSchemaName = fieldSchemaName;
     this.levelError = levelError;
     this.message = message;
     this.numberOfRecords = numberOfRecords;
