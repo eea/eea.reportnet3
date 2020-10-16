@@ -129,6 +129,7 @@ public class ContributorServiceImpl implements ContributorService {
     ResourceGroupEnum resourceGroupEnumRead = null;
     ResourceGroupEnum resourceGroupEnumDataflowWrite = null;
     ResourceGroupEnum resourceGroupEnumDataflowRead = null;
+    ResourceGroupEnum resourceGroupEnumDataschemaRead = null;
 
     switch (role) {
       case EDITOR:
@@ -141,8 +142,9 @@ public class ContributorServiceImpl implements ContributorService {
       case REPORTER:
         resourceGroupEnumWrite = ResourceGroupEnum.DATASET_REPORTER_WRITE;
         resourceGroupEnumRead = ResourceGroupEnum.DATASET_REPORTER_READ;
-        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
+        resourceGroupEnumDataschemaRead = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
         resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
+        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATAFLOW_REPORTER_WRITE;
         break;
       default:
         break;
@@ -154,6 +156,10 @@ public class ContributorServiceImpl implements ContributorService {
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowWrite));
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowRead));
+      if (REPORTER.equals(role)) {
+        resourcesProviders
+            .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataschemaRead));
+      }
       List<Long> ids = EDITOR.equals(role)
           ? dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
               .map(DesignDatasetVO::getId).collect(Collectors.toList())
@@ -205,7 +211,9 @@ public class ContributorServiceImpl implements ContributorService {
             ? SecurityRoleEnum.REPORTER_WRITE
             : SecurityRoleEnum.REPORTER_READ;
         resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
-        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
+        resourceGroupEnumDataflow = Boolean.TRUE.equals(contributorVO.getWritePermission())
+            ? ResourceGroupEnum.DATAFLOW_REPORTER_WRITE
+            : ResourceGroupEnum.DATAFLOW_REPORTER_READ;
         resourceGroupEnumDataset = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? ResourceGroupEnum.DATASET_REPORTER_WRITE
             : ResourceGroupEnum.DATASET_REPORTER_READ;
