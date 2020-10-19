@@ -365,24 +365,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      String datasetAccessTreeData = "";
-      switch (ruleVO.getType()) {
-        case DATASET:
-          datasetAccessTreeData = "this";
-          break;
-        case TABLE:
-          datasetAccessTreeData = "this.datasetId";
-          break;
-        case RECORD:
-          datasetAccessTreeData = "this.tableValue.datasetId";
-          break;
-        case FIELD:
-          datasetAccessTreeData = "this.record.tableValue.datasetId";
-          break;
-      }
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence(").append(datasetAccessTreeData).append(",'")
-              .append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId, ")
+          .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
@@ -673,25 +657,8 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      String datasetAccessTreeData = "";
-      switch (ruleVO.getType()) {
-        case DATASET:
-          datasetAccessTreeData = "this";
-          break;
-        case TABLE:
-          datasetAccessTreeData = "this.datasetId";
-          break;
-        case RECORD:
-          datasetAccessTreeData = "this.tableValue.datasetId";
-          break;
-        case FIELD:
-          datasetAccessTreeData = "this.record.tableValue.datasetId";
-          break;
-      }
-
-      rule.setWhenCondition(
-          new StringBuilder().append("isSQLSentence(").append(datasetAccessTreeData).append(",'")
-              .append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId, ")
+          .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
