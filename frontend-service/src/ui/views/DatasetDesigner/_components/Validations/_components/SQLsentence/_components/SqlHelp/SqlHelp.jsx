@@ -115,7 +115,7 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     if (!sqlSentence) {
       onSetSqlSentence('sqlSentence', trim(helpItem));
     } else {
-      onSetSqlSentence('sqlSentence', trim(`${sqlSentence} ${helpItem}`));
+      onSetSqlSentence('sqlSentence', trim(`${sqlSentence}${helpItem}`));
     }
   };
 
