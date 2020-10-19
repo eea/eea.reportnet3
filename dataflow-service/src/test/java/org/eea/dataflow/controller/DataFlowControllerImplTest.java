@@ -656,7 +656,7 @@ public class DataFlowControllerImplTest {
   }
 
   @Test
-  public void xood() {
+  public void getProviderCodeByIdTest() {
     Mockito.when(dataflowService.getProviderCodeById(Mockito.anyLong())).thenReturn("ES");
     assertEquals("ES", dataFlowControllerImpl.getProviderCodeById(1L));
   }
