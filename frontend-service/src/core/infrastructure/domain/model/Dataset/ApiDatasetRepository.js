@@ -435,7 +435,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.idTableSchema;
-  table.totalRecords = tableDataDTO.totalRecords;
+  table.totalRecords = ruleId === '' ? tableDataDTO.totalRecords : tableDataDTO.totalFilteredRecords;
   table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
   let field;

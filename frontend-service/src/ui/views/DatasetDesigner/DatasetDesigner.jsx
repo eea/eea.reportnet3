@@ -220,8 +220,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.validationListDialogVisible]);
 
   useEffect(() => {
-    if (window.location.search !== '') changeUrl();
-  }, [designerState.viewType]);
+    if (window.location.search !== '' && !isNil(designerState.dataViewerOptions.tableSchemaId)) {
+      changeUrl();
+    } else {
+      changeUrl(true);
+    }
+  }, [designerState.viewType, designerState.dataViewerOptions.tableSchemaId]);
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
@@ -253,13 +257,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
-  const changeUrl = () => {
+  const changeUrl = (changeOnlyView = false) => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
-        view => designerState.viewType[view] === true
-      )}`}`
+      !changeOnlyView
+        ? `?tab=${
+            QuerystringUtils.getUrlParamValue('tab') !== ''
+              ? QuerystringUtils.getUrlParamValue('tab')
+              : designerState.dataViewerOptions.tableSchemaId
+          }${`&view=${Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true)}`}`
+        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
+            view => designerState.viewType[view] === true
+          )}`}`
     );
   };
 
@@ -615,7 +625,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     selectedRuleMessage = '',
     selectedRuleLevelError = ''
   ) => {
-    console.log({ tableSchemaId });
     if (grouped) {
       designerDispatch({
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
@@ -881,7 +890,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className={`p-button-animated-blink ${styles.saveButton}`}
         label={resources.messages['save']}
         icon={'check'}
-        onClick={() => onUpdateWebform(designerState.webform.value)}
+        onClick={() => {
+          onUpdateWebform(designerState.webform.value);
+          if (isNil(designerState.webform.value)) {
+            changeMode('design');
+          }
+        }}
       />
       <Button
         className="p-button-secondary"

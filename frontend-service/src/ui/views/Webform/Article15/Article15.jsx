@@ -29,7 +29,9 @@ export const Article15 = ({ datasetId, isReporting = false, state }) => {
 
   const changeUrl = tabSchemaName => {
     const filteredTable = state.schemaTables.filter(schemaTable => schemaTable.name === tabSchemaName);
-    window.history.replaceState(null, null, `?tab=${filteredTable[0].id}${`&view=webform`}`);
+    if (!isEmpty(filteredTable)) {
+      window.history.replaceState(null, null, `?tab=${filteredTable[0].id}${`&view=webform`}`);
+    }
   };
 
   const initialLoad = () => {
