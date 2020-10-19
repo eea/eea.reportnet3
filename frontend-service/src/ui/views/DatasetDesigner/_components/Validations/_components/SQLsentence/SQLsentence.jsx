@@ -33,7 +33,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
     <div className={styles.section}>
       <div className={styles.content}>
         <div className={styles.helpSideBar}>
-          <SqlHelp />
+          <SqlHelp onSetSqlSentence={onSetSQLsentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
         </div>
         <div className={styles.sqlSentence}>
           <h3 className={styles.title}>{resources.messages['sqlSentence']}:</h3>

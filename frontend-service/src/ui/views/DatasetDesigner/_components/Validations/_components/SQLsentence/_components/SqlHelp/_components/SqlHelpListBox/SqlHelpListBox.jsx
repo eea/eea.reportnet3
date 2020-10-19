@@ -7,7 +7,7 @@ import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SqlHelpListBox = ({ onChange, options, selectedItem, title }) => {
+export const SqlHelpListBox = ({ level, onAddHelpItem, onChange, options, selectedItem, title }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className={styles.section}>
@@ -18,6 +18,10 @@ export const SqlHelpListBox = ({ onChange, options, selectedItem, title }) => {
           tooltip={resourcesContext.messages.createSnapshotTooltip}
           type="submit"
           icon="plus"
+          onClick={e => {
+            e.preventDefault();
+            onAddHelpItem(level);
+          }}
         />
       </div>
       <ListBox

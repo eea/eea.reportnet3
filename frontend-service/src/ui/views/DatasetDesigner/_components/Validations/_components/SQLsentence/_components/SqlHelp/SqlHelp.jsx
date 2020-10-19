@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { trim } from 'lodash';
+
 import styles from './SqlHelp.module.scss';
 
 import { SqlHelpListBox } from './_components/SqlHelpListBox';
@@ -10,6 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { DataflowService } from 'core/services/Dataflow';
 
 import { parseDatasetSchemas } from './_functions/utils/parseDatasetSchemas';
+import { parseHelpItem } from './_functions/utils/parseHelpItem';
 
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
@@ -42,16 +45,8 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     } = match;
 
     const dataflowDetails = parseDatasetSchemas(await DataflowService.getAllSchemas(dataflowId));
-    console.log('dataflowDetails', dataflowDetails);
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasets', value: dataflowDetails } });
   }, []);
-
-  const getDataflowDetails = async () => {
-    const {
-      params: { dataflowId }
-    } = match;
-    return await DataflowService.dataflowDetails(dataflowId);
-  };
 
   const onSelectDataset = selectedDataset => {
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedDataset', value: selectedDataset } });
@@ -78,7 +73,6 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     const fieldsOptions = state?.datasets?.datasetSchemas
       ?.find(dataset => dataset.datasetSchemaId === state.selectedDataset?.value)
       ?.tables.find(table => table.tableSchemaId === state.selectedTable?.value)?.fieldsOptions;
-    console.log('fieldsOptions', fieldsOptions);
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'fields', value: fieldsOptions || [] } });
   }, [state.selectedTable]);
 
@@ -92,34 +86,40 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedField', value: field } });
   };
 
-  const onAddElement = element => {
-    //parse insert in sql sentence the element;
-    onSetSqlSentence(`${sqlSentence} ${element}`);
+  const onAddHelpItem = itemType => {
+    const helpItem = parseHelpItem(itemType, state);
+    if (!sqlSentence) {
+      onSetSqlSentence('sqlSentence', trim(helpItem));
+    } else {
+      onSetSqlSentence('sqlSentence', trim(`${sqlSentence} ${helpItem}`));
+    }
   };
 
-  const onDoubleClickOnElement = element => {
-    //parse and insert element in sql sentence;
-    onSetSqlSentence(`${sqlSentence} ${element}`);
-  };
   return (
     <div className={styles.wrapper}>
       <SqlHelpListBox
         title="Dataset"
+        level="dataset"
         selectedItem={state.selectedDataset}
         options={state.datasets.datasetSchemaOptions}
         onChange={onSelectDataset}
+        onAddHelpItem={onAddHelpItem}
       />
       <SqlHelpListBox
         title="Tables"
+        level="table"
         selectedItem={state.selectedTable}
         options={state.tables}
         onChange={onSelectTable}
+        onAddHelpItem={onAddHelpItem}
       />
       <SqlHelpListBox
         title="Fields"
+        level="field"
         selectedItem={state.selectedField}
         options={state.fields}
         onChange={onSelectField}
+        onAddHelpItem={onAddHelpItem}
       />
     </div>
   );
