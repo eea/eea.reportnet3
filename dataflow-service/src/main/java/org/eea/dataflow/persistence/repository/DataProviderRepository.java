@@ -5,7 +5,6 @@ import org.eea.dataflow.persistence.domain.DataProvider;
 import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DataProviderRepository.
@@ -27,13 +26,4 @@ public interface DataProviderRepository extends CrudRepository<DataProvider, Lon
    * @return the list
    */
   List<DataProvider> findAllByGroupId(Long groupId);
-
-  /**
-   * Gets the code by id.
-   *
-   * @param id the id
-   * @return the code by id
-   */
-  @Query("SELECT dp.code FROM DataProvider dp WHERE dp.id = :id")
-  String getCodeById(@Param("id") Long id);
 }

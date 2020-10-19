@@ -654,10 +654,4 @@ public class DataFlowControllerImplTest {
       throw e;
     }
   }
-
-  @Test
-  public void getProviderCodeByIdTest() {
-    Mockito.when(dataflowService.getProviderCodeById(Mockito.anyLong())).thenReturn("ES");
-    assertEquals("ES", dataFlowControllerImpl.getProviderCodeById(1L));
-  }
 }

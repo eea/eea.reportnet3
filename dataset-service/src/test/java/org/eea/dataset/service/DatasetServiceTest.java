@@ -2376,6 +2376,7 @@ public class DatasetServiceTest {
   public void insertRecordsFixedRecordsExeptionTest() throws EEAException {
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDatasetSchema("5cf0e9b3b793310e9ceca190");
+    datasetMetabaseVO.setDataProviderId(1L);
     TableSchema tableSchema = new TableSchema();
     tableSchema.setReadOnly(Boolean.FALSE);
     tableSchema.setFixedNumber(Boolean.TRUE);
@@ -2384,6 +2385,8 @@ public class DatasetServiceTest {
     Mockito.when(datasetSchemaService.getTableSchema(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tableSchema);
     Mockito.when(reportingDatasetRepository.existsById(Mockito.anyLong())).thenReturn(Boolean.TRUE);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(new DataProviderVO());
     try {
       datasetService.insertRecords(1L, Arrays.asList(new RecordVO()), "5cf0e9b3b793310e9ceca190");
     } catch (EEAException e) {
@@ -2471,8 +2474,10 @@ public class DatasetServiceTest {
     Mockito.when(reportingDatasetRepository.existsById(Mockito.anyLong()))
         .thenReturn(Boolean.FALSE);
     Mockito.when(designDatasetRepository.existsById(Mockito.anyLong())).thenReturn(Boolean.TRUE);
-    Mockito.when(partitionDataSetMetabaseRepository.getId(Mockito.anyLong(), Mockito.any()))
-        .thenReturn(1L);
+    Mockito
+        .when(partitionDataSetMetabaseRepository
+            .findFirstByIdDataSet_idAndUsername(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.anyString())).thenReturn(1L);
     datasetService.insertRecords(1L, recordVOs, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.anyIterable());
@@ -2541,8 +2546,10 @@ public class DatasetServiceTest {
     Mockito.when(datasetSchemaService.getTableSchema(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tableSchema);
     Mockito.when(reportingDatasetRepository.existsById(Mockito.anyLong())).thenReturn(Boolean.TRUE);
-    Mockito.when(partitionDataSetMetabaseRepository.getId(Mockito.anyLong(), Mockito.any()))
-        .thenReturn(1L);
+    Mockito
+        .when(partitionDataSetMetabaseRepository
+            .findFirstByIdDataSet_idAndUsername(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.anyString())).thenReturn(1L);
     datasetService.insertRecords(1L, recordVOs, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.anyIterable());

@@ -646,17 +646,6 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the provider code by id.
-   *
-   * @param providerId the provider id
-   * @return the provider code by id
-   */
-  @Override
-  public String getProviderCodeById(Long providerId) {
-    return null == providerId ? null : dataProviderRepository.getCodeById(providerId);
-  }
-
-  /**
    * Delete documents.
    *
    * @param idDataflow the id dataflow
@@ -717,5 +706,4 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
   }
-
 }

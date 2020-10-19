@@ -700,6 +700,10 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
+    String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
+        ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
+            .getCode()
+        : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
 
@@ -714,8 +718,8 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
-    recordRepository.saveAll(createRecords(datasetId, datasetMetabaseVO.getDataProviderId(),
-        recordVOs, datasetType, tableSchema));
+    recordRepository
+        .saveAll(createRecords(datasetId, dataProviderCode, recordVOs, datasetType, tableSchema));
   }
 
   /**
@@ -2524,12 +2528,13 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetType the dataset type
    * @return the list
    */
-  private List<RecordValue> createRecords(Long datasetId, Long dataProviderId,
+  private List<RecordValue> createRecords(Long datasetId, String dataProviderCode,
       List<RecordVO> recordVOs, DatasetTypeEnum datasetType, TableSchema tableSchema) {
 
     String tableSchemaId = tableSchema.getIdTableSchema().toString();
-    String dataProviderCode = dataflowControllerZull.getProviderCodeById(dataProviderId);
-    Long datasetPartitionId = partitionDataSetMetabaseRepository.getId(datasetId, USER);
+    Long datasetPartitionId =
+        partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(datasetId, USER)
+            .orElse(new PartitionDataSetMetabase()).getId();
 
     DatasetValue dataset = new DatasetValue();
     dataset.setId(datasetId);

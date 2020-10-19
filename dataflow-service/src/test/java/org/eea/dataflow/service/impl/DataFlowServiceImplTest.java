@@ -1,7 +1,6 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -889,16 +888,5 @@ public class DataFlowServiceImplTest {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
       throw e;
     }
-  }
-
-  @Test
-  public void getProviderCodeByIdNullTest() {
-    assertNull(dataflowServiceImpl.getProviderCodeById(null));
-  }
-
-  @Test
-  public void getProviderCodeByIdTest() {
-    Mockito.when(dataProviderRepository.getCodeById(Mockito.anyLong())).thenReturn("ES");
-    assertEquals("ES", dataflowServiceImpl.getProviderCodeById(1L));
   }
 }

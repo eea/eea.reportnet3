@@ -152,13 +152,4 @@ public interface DataFlowController {
   void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,
       @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
-
-  /**
-   * Gets the provider code by id.
-   *
-   * @param providerId the provider id
-   * @return the provider code by id
-   */
-  @GetMapping("/private/getProviderCodeById")
-  String getProviderCodeById(@RequestParam(value = "providerId", required = false) Long providerId);
 }

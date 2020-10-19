@@ -2,9 +2,7 @@ package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.Optional;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface PartitionDataSetMetabaseRepository.
@@ -30,14 +28,4 @@ public interface PartitionDataSetMetabaseRepository
    * @return the optional
    */
   Optional<PartitionDataSetMetabase> findFirstByIdDataSet_id(Long idDataset);
-
-  /**
-   * Gets the id.
-   *
-   * @param datasetId the dataset id
-   * @param user the user
-   * @return the id
-   */
-  @Query("SELECT p.id FROM PartitionDataSetMetabase p JOIN p.idDataSet d WHERE d.id = :datasetId AND p.username = :user")
-  Long getId(@Param("datasetId") Long datasetId, @Param("user") String user);
 }
