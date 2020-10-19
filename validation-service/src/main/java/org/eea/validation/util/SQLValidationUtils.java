@@ -115,9 +115,9 @@ public class SQLValidationUtils {
    * @param datasetId the dataset id
    * @param ruleId the rule id
    */
-  public static void executeValidationSQLRule(Long datasetId, String ruleId) {
+  public static void executeValidationSQLRule(DatasetValue datasetId, String ruleId) {
     // Retrieve the rule
-    Rule rule = sqlRulesService.getRule(datasetId, ruleId);
+    Rule rule = sqlRulesService.getRule(datasetId.getId(), ruleId);
     // Retrieve sql sentence
     String query = rule.getSqlSentence();
     // Checking SQL sentence and if the rule does not work it will be disabled
@@ -125,7 +125,7 @@ public class SQLValidationUtils {
     // Execute query
     TableValue tableToEvaluate = new TableValue();
     if (rule.getType().equals(EntityTypeEnum.TABLE)) {
-      if (null != sqlRulesService.retriveFirstResult(query, datasetId)) {
+      if (null != sqlRulesService.retriveFirstResult(query, datasetId.getId())) {
         tableToEvaluate = tableRepository.findByIdTableSchema(rule.getReferenceId().toString());
       }
     } else {
@@ -136,13 +136,13 @@ public class SQLValidationUtils {
         } else {
           preparedquery = query;
         }
-        tableToEvaluate = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule);
+        tableToEvaluate = sqlRulesService.retrieveTableData(preparedquery, datasetId.getId(), rule);
       } catch (SQLException e) {
         LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
       }
     }
     if (null != tableToEvaluate.getId()) {
-      String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+      String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId.getId());
       DataSetSchema schema =
           schemasRepository.findById(new ObjectId(schemaId)).orElse(new DataSetSchema());
 
@@ -162,9 +162,10 @@ public class SQLValidationUtils {
       EntityTypeEnum ruleType = rule.getType();
       switch (ruleType) {
         case DATASET:
-          DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+          DatasetValue dataset =
+              datasetRepository.findById(datasetId.getId()).orElse(new DatasetValue());
           DataSetMetabaseVO datasetMetabase =
-              datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+              datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId.getId());
           Validation validationDataset = createValidation(rule, tableName, null);
           validationDataset.setTableName(datasetMetabase.getDataSetName());
           if (dataset.getDatasetValidations().isEmpty()) {
