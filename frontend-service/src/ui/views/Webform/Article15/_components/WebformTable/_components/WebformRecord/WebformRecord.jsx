@@ -30,6 +30,7 @@ import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 export const WebformRecord = ({
   columnsSchema,
   datasetId,
+  isReporting,
   multipleRecords,
   onAddMultipleWebform,
   onRefresh,
@@ -64,7 +65,6 @@ export const WebformRecord = ({
     selectedRecordId,
     selectedValidExtensions
   } = webformRecordState;
-
 
   const {
     formatDate,
@@ -369,56 +369,63 @@ export const WebformRecord = ({
 
   const renderFields = elements => {
     return elements.map((field, i) => {
+      const isFieldVisible = field.fieldType === 'EMPTY' && isReporting;
+      const isSubTableVisible = field.tableNotCreated && isReporting;
+
       if (field.type === 'FIELD') {
         return (
-          <div key={i} className={styles.field}>
-            <label>{field.title}</label>
-            <div>
-              <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
-              {field.validations &&
-                field.validations.map((validation, index) => (
-                  <IconTooltip
-                    className={'webform-validationErrors'}
-                    key={index}
-                    levelError={validation.levelError}
-                    message={validation.message}
-                  />
-                ))}
+          !isFieldVisible && (
+            <div key={i} className={styles.field}>
+              <label>{field.title}</label>
+              <div>
+                <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
+                {field.validations &&
+                  field.validations.map((validation, index) => (
+                    <IconTooltip
+                      className={'webform-validationErrors'}
+                      key={index}
+                      levelError={validation.levelError}
+                      message={validation.message}
+                    />
+                  ))}
+              </div>
             </div>
-          </div>
+          )
         );
       } else {
         return (
-          <div key={i} className={styles.subTable}>
-            <h3 className={styles.title}>
-              <div>
-                {field.title ? field.title : field.name}
-                {field.hasErrors && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
-              </div>
-              {field.multipleRecords && (
-                <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(field.tableSchemaId)} />
+          !isSubTableVisible && (
+            <div key={i} className={styles.subTable}>
+              <h3 className={styles.title}>
+                <div>
+                  {field.title ? field.title : field.name}
+                  {field.hasErrors && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
+                </div>
+                {field.multipleRecords && (
+                  <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(field.tableSchemaId)} />
+                )}
+              </h3>
+              {field.tableNotCreated && (
+                <span className={styles.nonExistTable}>
+                  {`The table ${field.name} is not created in the design, please check it`}
+                </span>
               )}
-            </h3>
-            {field.tableNotCreated && (
-              <span className={styles.nonExistTable}>
-                {`The table ${field.name} is not created in the design, please check it`}
-              </span>
-            )}
-            {field.elementsRecords.map((record, i) => {
-              return (
-                <WebformRecord
-                  datasetId={datasetId}
-                  key={i}
-                  multipleRecords={field.multipleRecords}
-                  onAddMultipleWebform={onAddMultipleWebform}
-                  onRefresh={onRefresh}
-                  onTabChange={onTabChange}
-                  record={record}
-                  tableId={tableId}
-                />
-              );
-            })}
-          </div>
+              {field.elementsRecords.map((record, i) => {
+                return (
+                  <WebformRecord
+                    datasetId={datasetId}
+                    key={i}
+                    multipleRecords={field.multipleRecords}
+                    onAddMultipleWebform={onAddMultipleWebform}
+                    onRefresh={onRefresh}
+                    onTabChange={onTabChange}
+                    record={record}
+                    tableId={tableId}
+                  />
+                );
+              })}
+            </div>
+          )
         );
       }
     });

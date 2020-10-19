@@ -106,7 +106,14 @@ export const Article15 = ({ datasetId, isReporting = false, state }) => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
     const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
 
-    return <WebformTable datasetId={datasetId} onTabChange={article15State.isVisible} webform={visibleContent} />;
+    return (
+      <WebformTable
+        datasetId={datasetId}
+        isReporting={isReporting}
+        onTabChange={article15State.isVisible}
+        webform={visibleContent}
+      />
+    );
   };
 
   const renderWebFormHeaders = () => {

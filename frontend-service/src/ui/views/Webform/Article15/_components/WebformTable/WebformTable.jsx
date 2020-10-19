@@ -15,7 +15,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
-export const WebformTable = ({ datasetId, onTabChange, webform }) => {
+export const WebformTable = ({ datasetId, isReporting, onTabChange, webform }) => {
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
     isDataUpdated: false,
     isLoading: true,
@@ -170,6 +170,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
           <WebformRecord
             columnsSchema={webformData.elementsRecords[0].elements}
             datasetId={datasetId}
+            isReporting={isReporting}
             key={i}
             multipleRecords={webformData.multipleRecords}
             onAddMultipleWebform={onAddMultipleWebform}
@@ -184,6 +185,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       <WebformRecord
         columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
         datasetId={datasetId}
+        isReporting={isReporting}
         multipleRecords={webformData.multipleRecords}
         onAddMultipleWebform={onAddMultipleWebform}
         onRefresh={onUpdateData}
@@ -193,7 +195,6 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       />
     );
   };
-
 
   if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
 
