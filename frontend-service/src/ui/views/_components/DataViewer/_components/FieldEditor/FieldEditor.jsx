@@ -152,6 +152,32 @@ const FieldEditor = ({
     }
   };
 
+  const changeLine = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
+    if (geoJson !== '') {
+      if (withCRS) {
+        const projectedCoordinates = coordinates.map(coords => projectCoordinates(coords, crs.value));
+        geoJson.geometry.coordinates = projectedCoordinates;
+        geoJson.properties.rsid = crs.value;
+        setIsMapDisabled(!MapUtils.checkValidLine(projectedCoordinates));
+        return JSON.stringify(geoJson);
+      } else {
+        setIsMapDisabled(!MapUtils.checkValidLine(coordinates));
+        if (checkCoordinates) {
+          geoJson.geometry.coordinates = MapUtils.checkValidLine(coordinates)
+            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
+            : [];
+        } else {
+          geoJson.geometry.coordinates = MapUtils.parseCoordinates(
+            coordinates.replace(', ', ',').split(','),
+            parseToFloat
+          );
+        }
+
+        return JSON.stringify(geoJson);
+      }
+    }
+  };
+
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
     codelistsItems.sort();
@@ -243,6 +269,145 @@ const FieldEditor = ({
         return (
           <div className={styles.pointWrapper}>
             <InputText
+              keyfilter={RecordUtils.getFilter(type)}
+              onBlur={e => {
+                onEditorSubmitValue(
+                  cells,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false
+                  ),
+                  record
+                );
+                onEditorValueChange(
+                  cells,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false
+                  )
+                );
+              }}
+              onChange={e =>
+                onEditorValueChange(
+                  cells,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false,
+                    false,
+                    false
+                  )
+                )
+              }
+              onFocus={e => {
+                e.preventDefault();
+                onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field));
+              }}
+              onKeyDown={e => {
+                changePoint(
+                  RecordUtils.getCellValue(cells, cells.field) !== ''
+                    ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                    : JSON.parse(fieldEmptyPointValue),
+                  e.target.value,
+                  currentCRS.value,
+                  false,
+                  true,
+                  false
+                );
+                onEditorKeyChange(
+                  cells,
+                  e,
+                  record,
+                  true,
+                  changePoint(
+                    RecordUtils.getCellValue(cells, cells.field) !== ''
+                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                      : JSON.parse(fieldEmptyPointValue),
+                    e.target.value,
+                    currentCRS.value,
+                    false,
+                    true,
+                    false
+                  )
+                );
+              }}
+              // style={{ marginRight: '2rem' }}
+              type="text"
+              value={
+                RecordUtils.getCellValue(cells, cells.field) !== ''
+                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates
+                  : ''
+              }
+            />
+            <div className={styles.pointEpsgWrapper}>
+              <label className={styles.epsg}>{resources.messages['epsg']}</label>
+              <Dropdown
+                ariaLabel={'crs'}
+                appendTo={document.body}
+                className={styles.epsgSwitcher}
+                disabled={isMapDisabled}
+                options={crs}
+                optionLabel="label"
+                onChange={e => {
+                  onEditorSubmitValue(
+                    cells,
+                    changePoint(
+                      RecordUtils.getCellValue(cells, cells.field) !== ''
+                        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                        : JSON.parse(fieldEmptyPointValue),
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                      e.target.value,
+                      true
+                    ),
+                    record
+                  );
+                  onEditorValueChange(
+                    cells,
+                    changePoint(
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                      e.target.value
+                    ),
+                    e.target.value
+                  );
+
+                  setCurrentCRS(e.target.value);
+                  onChangePointCRS(e.target.value.value);
+                }}
+                placeholder="Select a CRS"
+                value={currentCRS}
+              />
+              <Button
+                className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                icon="marker"
+                onClick={e => {
+                  if (!isNil(onMapOpen)) {
+                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                  }
+                }}
+                style={{ width: '35%' }}
+                tooltip={resources.messages['selectGeographicalDataOnMap']}
+                tooltipOptions={{ position: 'bottom' }}
+              />
+            </div>
+          </div>
+        );
+      case 'POLYGON':
+        return (
+          <div className={styles.pointWrapper}>
+            <InputText
+              disabled={true}
               keyfilter={RecordUtils.getFilter(type)}
               onBlur={e => {
                 onEditorSubmitValue(

@@ -69,7 +69,9 @@ export const FieldDesigner = ({
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
+    { fieldType: 'Line', value: 'Line', fieldTypeIcon: 'line' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
@@ -199,7 +201,7 @@ export const FieldDesigner = ({
           }
         }
       } else {
-        if (type !== '' && type !== fieldDesignerState.fieldValue) {          
+        if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
             pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,

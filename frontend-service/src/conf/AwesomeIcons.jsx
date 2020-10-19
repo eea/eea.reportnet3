@@ -82,7 +82,8 @@ import {
   faUserCog,
   faUsersCog,
   faUserShield,
-  faVectorSquare
+  faVectorSquare,
+  faGripLines
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -290,6 +291,8 @@ export const AwesomeIcons = icon => {
       return faFilePdf;
     case 'lightPdf':
       return farFilePdf;
+    case 'line':
+      return faGripLines;
     case 'pencilRuler':
       return faPencilRuler;
     case 'percentage':

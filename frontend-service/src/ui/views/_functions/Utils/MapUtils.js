@@ -51,6 +51,17 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
   return isValid;
 };
 
+const checkValidLine = (coordinates, emptyIsValid = false) => {
+  if (coordinates.length < 2) return false;
+  let isValid = true;
+  coordinates.forEach(coordinate => {
+    if (!checkValidCoordinates(coordinate)) {
+      isValid = false;
+    }
+  });
+  return isValid;
+};
+
 const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
   try {
@@ -140,6 +151,7 @@ export const MapUtils = {
   changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,
+  checkValidLine,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,
