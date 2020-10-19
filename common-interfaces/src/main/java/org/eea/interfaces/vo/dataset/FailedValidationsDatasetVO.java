@@ -31,8 +31,11 @@ public class FailedValidationsDatasetVO implements Serializable {
   /** The errors. */
   private List<?> errors;
 
-  /** The total errors. */
+  /** The total records. */
   private Long totalRecords;
+
+  /** The total errors. */
+  private Long totalErrors;
 
   /** The total filters. */
   private Long totalFilteredRecords;

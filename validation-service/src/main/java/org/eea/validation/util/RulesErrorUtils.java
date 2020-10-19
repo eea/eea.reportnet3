@@ -194,9 +194,10 @@ public class RulesErrorUtils {
     Rule ruleDataset = rulesRepository.findRule(new ObjectId(datasetValue.getIdDatasetSchema()),
         new ObjectId(idRule));
 
-    // we put the origin name for the new validation
+    // we put the origin name and shorcode for the new validation
     ruleValidation
-        .setOriginName(null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName());
+        .setTableName(null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName());
+    ruleValidation.setShortCode(ruleDataset.getShortCode());
 
     if (ruleDataset != null) {
       ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleDataset.getShortCode());
@@ -227,9 +228,10 @@ public class RulesErrorUtils {
     if (ruleTable != null) {
       for (TableSchema table : dataSetSchemaTable.getTableSchemas()) {
         if (table.getIdTableSchema().equals(ruleTable.getReferenceId())) {
-          ruleValidation.setOriginName(table.getNameTableSchema());
+          ruleValidation.setTableName(table.getNameTableSchema());
         }
       }
+      ruleValidation.setShortCode(ruleTable.getShortCode());
       ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleTable.getShortCode());
     }
     return tableValue;
@@ -259,10 +261,10 @@ public class RulesErrorUtils {
     if (ruleRecord != null) {
       for (TableSchema table : dataSetSchemaRecord.getTableSchemas()) {
         if (table.getRecordSchema().getIdRecordSchema().equals(ruleRecord.getReferenceId())) {
-          ruleValidation.setOriginName(table.getNameTableSchema());
+          ruleValidation.setTableName(table.getNameTableSchema());
         }
       }
-
+      ruleValidation.setShortCode(ruleRecord.getShortCode());
       ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleRecord.getShortCode());
     }
     return recordValue;
@@ -293,11 +295,12 @@ public class RulesErrorUtils {
       for (TableSchema table : dataSetSchemaField.getTableSchemas()) {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           if (field.getIdFieldSchema().equals(ruleField.getReferenceId())) {
-            ruleValidation.setOriginName(table.getNameTableSchema());
+            ruleValidation.setTableName(table.getNameTableSchema());
+            ruleValidation.setFieldName(field.getHeaderName());
           }
         }
       }
-
+      ruleValidation.setShortCode(ruleField.getShortCode());
       ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleField.getShortCode());
     }
     return fieldValue;

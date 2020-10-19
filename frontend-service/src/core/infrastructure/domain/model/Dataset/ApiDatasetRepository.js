@@ -116,7 +116,7 @@ const errorsById = async (
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
     datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalErrors: datasetErrorsDTO.totalRecords,
+    totalRecords: datasetErrorsDTO.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
   });
 
@@ -125,9 +125,11 @@ const errorsById = async (
       datasetErrorDTO &&
       new DatasetError({
         entityType: datasetErrorDTO.typeEntity,
+        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         objectId: datasetErrorDTO.idObject,
+        shortCode: datasetErrorDTO.shortCode,
         tableSchemaId: datasetErrorDTO.idTableSchema,
         tableSchemaName: datasetErrorDTO.nameTableSchema,
         validationDate: datasetErrorDTO.validationDate,
@@ -289,7 +291,8 @@ const groupedErrorsById = async (
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
     datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalErrors: datasetErrorsDTO.totalRecords,
+    totalErrors: datasetErrorsDTO.totalErrors,
+    totalRecords: datasetErrorsDTO.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
   });
 
@@ -298,13 +301,15 @@ const groupedErrorsById = async (
       datasetErrorDTO &&
       new DatasetError({
         entityType: datasetErrorDTO.typeEntity,
+        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         numberOfRecords: datasetErrorDTO.numberOfRecords,
         objectId: datasetErrorDTO.idObject,
         ruleId: datasetErrorDTO.idRule,
+        shortCode: datasetErrorDTO.shortCode,
         tableSchemaId: datasetErrorDTO.idTableSchema,
-        tableSchemaName: datasetErrorDTO.originName,
+        tableSchemaName: datasetErrorDTO.nameTableSchema,
         validationDate: datasetErrorDTO.validationDate,
         validationId: datasetErrorDTO.idValidation
       })
@@ -430,7 +435,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.idTableSchema;
-  table.totalRecords = tableDataDTO.totalRecords;
+  table.totalRecords = ruleId === '' ? tableDataDTO.totalRecords : tableDataDTO.totalFilteredRecords;
   table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
   let field;
