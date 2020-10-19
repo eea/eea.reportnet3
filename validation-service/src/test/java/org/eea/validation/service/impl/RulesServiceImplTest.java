@@ -1569,30 +1569,10 @@ public class RulesServiceImplTest {
    */
   @Test
   public void findSqlSentencesByDatasetSchemaIdTest() {
-
-
-    List<Rule> rules = new ArrayList<>();
-    ObjectId id = new ObjectId();
-    Rule rule = new Rule();
-    rule.setRuleId(id);
-    rule.setIntegrityConstraintId(id);
-    rule.setType(EntityTypeEnum.TABLE);
-    rule.setShortCode("shortCode");
-    rule.setDescription("description");
-    rule.setRuleName("ruleName");
-    rule.setWhenCondition("whenCondition 5e44110d6a9e3a270ce13fac");
-    rule.setThenCondition(Arrays.asList("success", "error"));
-    rule.setReferenceId(new ObjectId("5e44110d6a9e3a270ce13fac"));
-    rule.setReferenceFieldSchemaPKId(new ObjectId("5e44110d6a9e3a270ce13fac"));
-    rule.setUniqueConstraintId(new ObjectId("5e44110d6a9e3a270ce13fac"));
-    rules.add(rule);
-    RulesSchema ruleSchema = new RulesSchema();
-    ruleSchema.setRules(rules);
-
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(new ArrayList());
     rulesServiceImpl.findSqlSentencesByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1))
-        .findByIdDatasetSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
+        .findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac"));
   }
 
 

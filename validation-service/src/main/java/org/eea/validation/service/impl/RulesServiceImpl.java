@@ -1154,10 +1154,7 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
-
-    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
-    List<Rule> rules = rulesSchema.getRules().stream()
-        .filter(rule -> StringUtils.isNotBlank(rule.getSqlSentence())).collect(Collectors.toList());
+    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
     return ruleMapper.entityListToClass(rules);
 
   }
