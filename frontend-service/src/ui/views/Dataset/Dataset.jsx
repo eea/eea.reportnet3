@@ -603,6 +603,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDataViewerOptions({
         ...dataViewerOptions,
         activeIndex: tableSchemaId,
+        isGroupedValidationSelected: false,
         isValidationSelected: true,
         recordPositionId: posIdRecord,
         selectedRecordErrorId,

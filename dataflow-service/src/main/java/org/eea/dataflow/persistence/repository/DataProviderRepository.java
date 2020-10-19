@@ -26,5 +26,4 @@ public interface DataProviderRepository extends CrudRepository<DataProvider, Lon
    * @return the list
    */
   List<DataProvider> findAllByGroupId(Long groupId);
-
 }

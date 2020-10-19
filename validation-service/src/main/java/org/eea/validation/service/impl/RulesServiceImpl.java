@@ -1074,10 +1074,19 @@ public class RulesServiceImpl implements RulesService {
       // Special case for SQL Sentences
       if (rule.getWhenCondition().contains("isSQLSentence")) {
         dictionaryOriginTargetDatasetsId.forEach((Long oldDatasetId, Long newDatasetId) -> {
+          // Change the datasetId in "isSQLSentence(xxx,...."
           if (rule.getWhenCondition().contains("(" + oldDatasetId.toString())) {
             String newWhenCondition = rule.getWhenCondition();
             newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
                 "(" + newDatasetId.toString());
+            rule.setWhenCondition(newWhenCondition);
+          }
+          // Change the dataset_X in the sentence itself if necessary, like
+          // select * from table_one t1 inner join dataset_256.table_two....
+          if (rule.getWhenCondition().contains("dataset_")) {
+            String newWhenCondition = rule.getWhenCondition();
+            newWhenCondition = newWhenCondition.replace("dataset_" + oldDatasetId.toString(),
+                "dataset_" + newDatasetId.toString());
             rule.setWhenCondition(newWhenCondition);
           }
         });
@@ -1145,7 +1154,11 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
-    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+    List<Rule> rules = rulesSchema.getRules().stream()
+        .filter(rule -> StringUtils.isNotBlank(rule.getSqlSentence())).collect(Collectors.toList());
     return ruleMapper.entityListToClass(rules);
+
   }
 }

@@ -68,20 +68,29 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           } else {
             throw new Error('Schema creation error');
           }
+          onCreate();
         } catch (error) {
           const metadata = await MetadataUtils.getMetadata({ dataflowId });
           const {
             dataflow: { name: dataflowName }
           } = metadata;
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_CREATION_ERROR',
-            content: {
-              dataflowId,
-              dataflowName
-            }
-          });
+
+          if (error.response.data.message.includes('duplicated')) {
+            notificationContext.add({
+              type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
+              content: { schemaName: values.datasetSchemaName }
+            });
+          } else {
+            notificationContext.add({
+              type: 'DATASET_SCHEMA_CREATION_ERROR',
+              content: {
+                dataflowId,
+                dataflowName
+              }
+            });
+            onCreate();
+          }
         } finally {
-          onCreate();
           setSubmitting(false);
           hideLoading();
         }

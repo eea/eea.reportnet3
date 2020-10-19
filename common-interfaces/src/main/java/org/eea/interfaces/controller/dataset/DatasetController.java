@@ -128,12 +128,12 @@ public interface DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param records the records
    */
-  @PostMapping("/{id}/table/{idTableSchema}/record")
-  void insertRecords(@PathVariable("id") Long datasetId,
-      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records);
+  @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
+  void insertRecords(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records);
 
   /**
    * Update records.
