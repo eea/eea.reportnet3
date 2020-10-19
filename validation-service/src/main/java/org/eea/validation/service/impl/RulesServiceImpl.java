@@ -943,6 +943,7 @@ public class RulesServiceImpl implements RulesService {
     // them as new rules. The data needed is inside the auxiliary CopySchemaVO
     List<String> listDatasetSchemaIdToCopy = rules.getOriginDatasetSchemaIds();
     Map<String, String> dictionaryOriginTargetObjectId = rules.getDictionaryOriginTargetObjectId();
+    Map<Long, Long> dictionaryOriginTargetDatasetsId = rules.getDictionaryOriginTargetDatasetsId();
     for (String originDatasetSchemaId : listDatasetSchemaIdToCopy) {
       String newDatasetSchemaId = dictionaryOriginTargetObjectId.get(originDatasetSchemaId);
       RulesSchema originRules =
@@ -952,8 +953,8 @@ public class RulesServiceImpl implements RulesService {
         // We copy only the rules that are not of type Link, because these one are created
         // automatically in the process when we update the fieldSchema in previous calls of the copy
         // process
-        dictionaryOriginTargetObjectId = copyData(dictionaryOriginTargetObjectId,
-            originDatasetSchemaId, newDatasetSchemaId, rule);
+        copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
+            dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule);
       }
     }
     return dictionaryOriginTargetObjectId;
@@ -971,24 +972,27 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.deleteNotEmptyRule(new ObjectId(tableSchemaId), new ObjectId(datasetSchemaId));
   }
 
+
   /**
    * Copy data.
    *
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param originDatasetSchemaId the origin dataset schema id
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
    * @param newDatasetSchemaId the new dataset schema id
    * @param rule the rule
    * @return the map
    * @throws EEAException the EEA exception
    */
   private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
-      String originDatasetSchemaId, String newDatasetSchemaId, Rule rule) throws EEAException {
+      String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
+      String newDatasetSchemaId, Rule rule) throws EEAException {
     if (StringUtils.isNotBlank(rule.getWhenCondition())
         && !rule.getWhenCondition().contains("isfieldFK")) {
 
       LOG.info("A new rule is going to be created in the copy schema process");
       // Here we change the fields of the rule involved with the help of the dictionary
-      dictionaryOriginTargetObjectId = fillRuleCopied(rule, dictionaryOriginTargetObjectId);
+      fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
@@ -1016,15 +1020,18 @@ public class RulesServiceImpl implements RulesService {
     return dictionaryOriginTargetObjectId;
   }
 
+
   /**
    * Fill rule copied.
    *
    * @param rule the rule
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
    * @return the map
    */
   private Map<String, String> fillRuleCopied(Rule rule,
-      Map<String, String> dictionaryOriginTargetObjectId) {
+      Map<String, String> dictionaryOriginTargetObjectId,
+      Map<Long, Long> dictionaryOriginTargetDatasetsId) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -1059,10 +1066,22 @@ public class RulesServiceImpl implements RulesService {
     if (StringUtils.isNotBlank(rule.getWhenCondition())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
         if (rule.getWhenCondition().contains(oldObjectId)) {
-          String newWhenCondition = rule.getWhenCondition().replace(oldObjectId, newObjectId);
+          String newWhenCondition = rule.getWhenCondition();
+          newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
           rule.setWhenCondition(newWhenCondition);
         }
       });
+      // Special case for SQL Sentences
+      if (rule.getWhenCondition().contains("isSQLSentence")) {
+        dictionaryOriginTargetDatasetsId.forEach((Long oldDatasetId, Long newDatasetId) -> {
+          if (rule.getWhenCondition().contains("(" + oldDatasetId.toString())) {
+            String newWhenCondition = rule.getWhenCondition();
+            newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
+                "(" + newDatasetId.toString());
+            rule.setWhenCondition(newWhenCondition);
+          }
+        });
+      }
     }
     return dictionaryOriginTargetObjectId;
   }
