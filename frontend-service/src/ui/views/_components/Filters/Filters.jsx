@@ -108,9 +108,21 @@ export const Filters = ({
   };
 
   const getFilteredState = () => {
-    const filteredStateValue = Object.values(filterState.filterBy)
-      .map(value => isEmpty(value))
-      .includes(false);
+    let filteredStateValue = false;
+    if (filterState.checkboxes.length > 0) {
+      const filtersValue = [];
+      Object.values(filterState.filterBy).forEach(value => {
+        !isEmpty(value) && filtersValue.push(!isEmpty(value));
+        if (value.includes(true) && value.includes(false)) {
+          filtersValue.pop();
+        }
+        filteredStateValue = filtersValue.includes(true);
+      });
+    } else {
+      filteredStateValue = Object.values(filterState.filterBy)
+        .map(value => isEmpty(value))
+        .includes(false);
+    }
 
     filterDispatch({ type: 'FILTERED', payload: { filteredStateValue } });
   };
