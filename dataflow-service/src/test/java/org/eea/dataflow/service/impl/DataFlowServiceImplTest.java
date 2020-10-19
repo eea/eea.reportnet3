@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -21,6 +22,7 @@ import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -73,12 +75,14 @@ public class DataFlowServiceImplTest {
   @InjectMocks
   private DataflowServiceImpl dataflowServiceImpl;
 
+  @Mock
+  private DataProviderRepository dataProviderRepository;
+
   /**
    * The dataflow repository.
    */
   @Mock
   private DataflowRepository dataflowRepository;
-
 
   /**
    * The user request repository.
@@ -869,7 +873,6 @@ public class DataFlowServiceImplTest {
     }
   }
 
-
   @Test
   public void testUpdateDataflowStatus() throws EEAException {
 
@@ -877,7 +880,6 @@ public class DataFlowServiceImplTest {
     dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN, null);
     Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
   }
-
 
   @Test(expected = EEAException.class)
   public void testUpdateDataflowStatusException() throws EEAException {
@@ -889,5 +891,14 @@ public class DataFlowServiceImplTest {
     }
   }
 
+  @Test
+  public void getProviderCodeByIdNullTest() {
+    assertNull(dataflowServiceImpl.getProviderCodeById(null));
+  }
 
+  @Test
+  public void getProviderCodeByIdTest() {
+    Mockito.when(dataProviderRepository.getCodeById(Mockito.anyLong())).thenReturn("ES");
+    assertEquals("ES", dataflowServiceImpl.getProviderCodeById(1L));
+  }
 }

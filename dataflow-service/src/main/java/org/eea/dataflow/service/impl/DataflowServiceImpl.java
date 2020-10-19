@@ -14,6 +14,7 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
@@ -118,6 +119,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The eu dataset controller zuul. */
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
+
+  /** The data provider repository. */
+  @Autowired
+  private DataProviderRepository dataProviderRepository;
 
   /**
    * Gets the by id.
@@ -638,6 +643,17 @@ public class DataflowServiceImpl implements DataflowService {
     } else {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
+  }
+
+  /**
+   * Gets the provider code by id.
+   *
+   * @param providerId the provider id
+   * @return the provider code by id
+   */
+  @Override
+  public String getProviderCodeById(Long providerId) {
+    return null == providerId ? null : dataProviderRepository.getCodeById(providerId);
   }
 
   /**

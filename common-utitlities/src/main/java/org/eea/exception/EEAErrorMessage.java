@@ -59,6 +59,9 @@ public final class EEAErrorMessage {
   /** The Constant RECORD_NOTFOUND: {@value}. */
   public static final String RECORD_NOTFOUND = "Record not found";
 
+  /** The Constant RECORD_REQUIRED: {@value}. */
+  public static final String RECORD_REQUIRED = "Error inserting records. At least one record is required";
+
   /** The Constant PARTITION_ID_NOTFOUND: {@value}. */
   public static final String PARTITION_ID_NOTFOUND = "Partition not found";
 

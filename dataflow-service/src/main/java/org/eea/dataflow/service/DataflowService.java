@@ -169,6 +169,11 @@ public interface DataflowService {
    */
   void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadline) throws EEAException;
 
-
-
+  /**
+   * Find provider code by id.
+   *
+   * @param providerId the provider id
+   * @return the string
+   */
+  String getProviderCodeById(Long providerId);
 }

@@ -471,6 +471,19 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
   /**
+   * Gets the provider code by id.
+   *
+   * @param providerId the provider id
+   * @return the provider code by id
+   */
+  @Override
+  @GetMapping("/private/getProviderCodeById")
+  public String getProviderCodeById(
+      @RequestParam(value = "providerId", required = false) Long providerId) {
+    return dataflowService.getProviderCodeById(providerId);
+  }
+
+  /**
    * Checks if is user data custodian.
    *
    * @return true, if is user data custodian
