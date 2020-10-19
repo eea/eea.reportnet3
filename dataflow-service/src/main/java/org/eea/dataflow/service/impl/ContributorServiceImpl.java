@@ -188,7 +188,7 @@ public class ContributorServiceImpl implements ContributorService {
    */
   @Override
   public void createContributor(Long dataflowId, ContributorVO contributorVO, String role,
-      Long dataProviderId) throws EEAException {
+      Long dataProviderId, Boolean persistDataflowPermission) throws EEAException {
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
@@ -235,7 +235,7 @@ public class ContributorServiceImpl implements ContributorService {
     } else if (REPORTER.equals(role)) {
       createReporterGroupsResources(dataflowId, contributorVO, dataProviderId, securityRoleEnum,
           resourceGroupEnum, resourceGroupEnumDataflow, resourceGroupEnumDataset,
-          resourceAssignationVOList, resourceInfoVOs);
+          resourceAssignationVOList, resourceInfoVOs, persistDataflowPermission);
 
     }
 
@@ -260,12 +260,16 @@ public class ContributorServiceImpl implements ContributorService {
       Long dataProviderId, SecurityRoleEnum securityRoleEnum, ResourceGroupEnum resourceGroupEnum,
       ResourceGroupEnum resourceGroupEnumDataflow, ResourceGroupEnum resourceGroupEnumDataset,
       final List<ResourceAssignationVO> resourceAssignationVOList,
-      List<ResourceInfoVO> resourceInfoVOs) {
+      List<ResourceInfoVO> resourceInfoVOs, Boolean persistDataflowPermission) {
     ResourceInfoVO resourceDataflow =
         resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
     if (null == resourceDataflow.getName()) {
-      resourceInfoVOs
-          .add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
+      resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+      if (Boolean.TRUE.equals(persistDataflowPermission)) {
+        resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW,
+            SecurityRoleEnum.REPORTER_READ.equals(securityRoleEnum) ? SecurityRoleEnum.REPORTER_READ
+                : SecurityRoleEnum.REPORTER_WRITE));
+      }
     }
     resourceAssignationVOList.add(
         fillResourceAssignation(dataflowId, contributorVO.getAccount(), resourceGroupEnumDataflow));
@@ -340,12 +344,20 @@ public class ContributorServiceImpl implements ContributorService {
 
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
+      Boolean persistDataflowPermission = null;
       // avoid delete if it's a new contributor
       List<ResourceAccessVO> resourceAccessVOs =
           userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
-      if (resourceAccessVOs != null && !resourceAccessVOs.isEmpty()
-          && resourceAccessVOs.stream().anyMatch(resource -> resource.getId().equals(dataflowId)
-              && resource.getResource().equals(ResourceTypeEnum.DATAFLOW))) {
+      if (resourceAccessVOs != null && !resourceAccessVOs.isEmpty()) {
+        ResourceAccessVO resourceAccess =
+            resourceAccessVOs.stream()
+                .filter(resource -> resource.getId().equals(dataflowId)
+                    && ResourceTypeEnum.DATAFLOW.equals(resource.getResource()))
+                .findAny().orElse(null);
+        if (resourceAccess != null) {
+          persistDataflowPermission =
+              checkDataflowPrevPermission(role, contributorVO.getWritePermission(), resourceAccess);
+        }
         try {
           deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
         } catch (EEAException e) {
@@ -355,7 +367,8 @@ public class ContributorServiceImpl implements ContributorService {
         }
       }
       try {
-        createContributor(dataflowId, contributorVO, role, dataProviderId);
+        createContributor(dataflowId, contributorVO, role, dataProviderId,
+            persistDataflowPermission);
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);
@@ -369,6 +382,29 @@ public class ContributorServiceImpl implements ContributorService {
           new StringBuilder("Role ").append(role).append(" doesn't exist").toString());
     }
 
+  }
+
+  /**
+   * Check dataflow prev permission.
+   *
+   * @param dataflowId the dataflow id
+   * @param role the role
+   * @param writePermission the write permission
+   * @param resourceAccessVOs the resource access V os
+   * @return the boolean
+   */
+  private Boolean checkDataflowPrevPermission(String role, Boolean writePermission,
+      ResourceAccessVO resourceAccess) {
+    Boolean result = null;
+    if (REPORTER.equals(role)) {
+      SecurityRoleEnum roleEnumToCreate =
+          Boolean.TRUE.equals(writePermission) ? SecurityRoleEnum.REPORTER_WRITE
+              : SecurityRoleEnum.REPORTER_READ;
+      if (!resourceAccess.getRole().equals(roleEnumToCreate)) {
+        result = true;
+      }
+    }
+    return result;
   }
 
   /**

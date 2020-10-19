@@ -140,7 +140,7 @@ public class ContributorServiceImplTest {
   public void createContributorEditorRead() throws EEAException {
     when(dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasets);
-    contributorServiceImpl.createContributor(1L, contributorVORead, "EDITOR", null);
+    contributorServiceImpl.createContributor(1L, contributorVORead, "EDITOR", null, null);
     Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findDesignDataSetIdByDataflowId(1L);
   }
 
@@ -153,7 +153,7 @@ public class ContributorServiceImplTest {
   public void createContributorEditorWrite() throws EEAException {
     when(dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasets);
-    contributorServiceImpl.createContributor(1L, contributorVOWrite, "EDITOR", null);
+    contributorServiceImpl.createContributor(1L, contributorVOWrite, "EDITOR", null, null);
     Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findDesignDataSetIdByDataflowId(1L);
   }
 
@@ -171,7 +171,7 @@ public class ContributorServiceImplTest {
         ResourceGroupEnum.DATAFLOW_REPORTER_READ)).thenReturn(resourceInfoVO);
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATASCHEMA_REPORTER_READ)).thenReturn(resourceInfoVO);
-    contributorServiceImpl.createContributor(1L, contributorVORead, "REPORTER", 1L);
+    contributorServiceImpl.createContributor(1L, contributorVORead, "REPORTER", 1L, null);
     Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findReportingDataSetIdByDataflowId(1L);
   }
 
@@ -220,7 +220,8 @@ public class ContributorServiceImplTest {
     when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
         .thenReturn(resourceInfoVO);
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, "REPORTER", 1l);
-    Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findReportingDataSetIdByDataflowId(1L);
+    Mockito.verify(dataSetMetabaseControllerZuul, times(2))
+        .findReportingDataSetIdByDataflowId(Mockito.any());
   }
 
   /**
