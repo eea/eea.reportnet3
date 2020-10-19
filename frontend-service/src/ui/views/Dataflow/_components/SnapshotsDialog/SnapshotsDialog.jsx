@@ -27,6 +27,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   const [isLoading, setIsLoading] = useState(false);
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
+  const [isSnapshotListCreatedReleaseLoading, setIsSnapshotListCreatedReleaseLoading] = useState(false);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [snapshotIdToRelease, setSnapshotIdToRelease] = useState('');
   const [snapshotDescription, setSnapshotDescription] = useState();
@@ -42,18 +43,24 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     false
   );
 
+  useCheckNotifications(
+    [
+      'RELEASE_BLOCKED_EVENT',
+      'DATA_COLLECTION_LOCKED_ERROR',
+      'CREATE_BY_ID_REPORTER_ERROR',
+      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT'
+    ],
+    setIsSnapshotListCreatedReleaseLoading,
+    false
+  );
+
   const clearSnapshotToRelease = () => {
     setSnapshotDataToRelease('');
     setSnapshotIdToRelease('');
   };
 
   useCheckNotifications(
-    [
-      'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT',
-      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT',
-      'DATA_COLLECTION_LOCKED_ERROR',
-      'RELEASED_BY_ID_REPORTER_ERROR'
-    ],
+    ['RELEASE_DATASET_SNAPSHOT_FAILED_EVENT', 'DATA_COLLECTION_LOCKED_ERROR', 'RELEASED_BY_ID_REPORTER_ERROR'],
     clearSnapshotToRelease
   );
 
@@ -90,8 +97,9 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
 
   const onLoadSnapshotList = async datasetId => {
     try {
-      const response = await SnapshotService.allReporter(datasetId);
-      setSnapshotsListData(response);
+      setSnapshotsListData(await SnapshotService.allReporter(datasetId));
+      clearSnapshotToRelease();
+      setIsSnapshotListCreatedReleaseLoading(false);
     } catch (error) {
       notificationContext.add({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
@@ -187,6 +195,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           className={styles.releaseList}
           getSnapshotData={setSnapshotDataToRelease}
           isLoading={isLoading}
+          isSnapshotListCreatedReleaseLoading={isSnapshotListCreatedReleaseLoading}
           showReleaseDialog={onShowReleaseDialog}
           snapshotsListData={snapshotsListData}
           snapshotIdToRelease={snapshotIdToRelease}
@@ -203,6 +212,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           onLoadSnapshotList={onLoadSnapshotList}
           setIsLoading={setIsLoading}
           setSnapshotIdToRelease={setSnapshotIdToRelease}
+          setIsSnapshotListCreatedReleaseLoading={setIsSnapshotListCreatedReleaseLoading}
           snapshotDataToRelease={snapshotDataToRelease}
           snapshotDescription={snapshotDescription}
         />

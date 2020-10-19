@@ -11,7 +11,14 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showReleaseDialog, snapshotIdToRelease }) => {
+export const SnapshotItem = ({
+  getSnapshotData,
+  isLoading,
+  isSnapshotListCreatedReleaseLoading,
+  itemData,
+  showReleaseDialog,
+  snapshotIdToRelease
+}) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -19,7 +26,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
     if (snapshotIdToRelease) {
       return itemData.id === snapshotIdToRelease ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
     } else {
-      return itemData.isReleased ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
+      return itemData.isReleased ? (isSnapshotListCreatedReleaseLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
     }
   };
 
@@ -31,7 +38,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
         return itemData.id === snapshotIdToRelease ? `${styles.is_released_snapshot}` : ``;
       }
     } else if (itemData.isReleased) {
-      return isLoading ? `` : `${styles.is_released_snapshot}`;
+      return isSnapshotListCreatedReleaseLoading ? `` : `${styles.is_released_snapshot}`;
     } else {
       return ``;
     }
@@ -45,7 +52,7 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
         return itemData.isReleased && itemData.id === snapshotIdToRelease ? 'success' : null;
       }
     } else if (itemData.isReleased) {
-      if (isLoading) {
+      if (isSnapshotListCreatedReleaseLoading) {
         return null;
       } else {
         return 'success';

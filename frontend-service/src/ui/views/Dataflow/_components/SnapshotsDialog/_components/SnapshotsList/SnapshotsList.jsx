@@ -11,6 +11,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const SnapshotsList = ({
   getSnapshotData,
   isLoading,
+  isSnapshotListCreatedReleaseLoading,
   showReleaseDialog,
   snapshotsListData,
   snapshotIdToRelease
@@ -26,6 +27,7 @@ export const SnapshotsList = ({
               <SnapshotItem
                 getSnapshotData={getSnapshotData}
                 isLoading={isLoading}
+                isSnapshotListCreatedReleaseLoading={isSnapshotListCreatedReleaseLoading}
                 itemData={item}
                 showReleaseDialog={showReleaseDialog}
                 snapshotIdToRelease={snapshotIdToRelease}

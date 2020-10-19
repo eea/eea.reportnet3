@@ -24,6 +24,7 @@ export const ReleaseSnapshotDialog = ({
   isReleasedDialogVisible,
   setIsLoading,
   setSnapshotIdToRelease,
+  setIsSnapshotListCreatedReleaseLoading,
   snapshotDataToRelease,
   snapshotDescription
 }) => {
@@ -33,6 +34,7 @@ export const ReleaseSnapshotDialog = ({
 
   const onBuildSnapshot = async () => {
     setIsLoading(true);
+    setIsSnapshotListCreatedReleaseLoading(true);
     try {
       await SnapshotService.createByIdReporter(datasetId, snapshotDescription, isReleased);
     } catch (error) {
