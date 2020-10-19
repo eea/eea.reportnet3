@@ -98,6 +98,14 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     }
   }, [state.fieldsOptions]);
 
+  useEffect(() => {
+    onSelectTable('');
+    onSelectField('');
+  }, [state.selectedDataset]);
+  useEffect(() => {
+    onSelectField('');
+  }, [state.selectedTable]);
+
   const onSelectField = field => {
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedField', value: field } });
   };
