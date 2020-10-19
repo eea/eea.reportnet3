@@ -77,7 +77,7 @@ public class ContributorServiceImpl implements ContributorService {
       Long referenceId = EDITOR.equals(role) ? dataflowId
           : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
               .filter(
-                  reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(providerId))
+                  reportingDatasetVO -> providerId.equals(reportingDatasetVO.getDataProviderId()))
               .map(ReportingDatasetVO::getId).findFirst().orElse(null);
       String resource = EDITOR.equals(role) ? "Dataflow-" : "Dataset-";
 
@@ -150,30 +150,41 @@ public class ContributorServiceImpl implements ContributorService {
         break;
     }
 
-    if (EDITOR.equals(role) || REPORTER.equals(role)) {
-      List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+    List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+    List<Long> ids = new ArrayList<>();
+    if (REPORTER.equals(role)) {
+      List<ContributorVO> contributors =
+          findContributorsByResourceId(dataflowId, dataProviderId, REPORTER);
+      if (contributors != null) {
+        resourcesProviders.add(fillResourceAssignation(dataflowId, account,
+            contributors.stream().filter(contributor -> account.equals(contributor.getAccount()))
+                .findFirst().map(ContributorVO::getWritePermission).orElse(false)
+                    ? resourceGroupEnumDataflowWrite
+                    : resourceGroupEnumDataflowRead));
+      }
+      resourcesProviders
+          .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataschemaRead));
+
+      ids = dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+          .filter(
+              reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
+          .map(ReportingDatasetVO::getId).collect(Collectors.toList());
+    }
+    if (EDITOR.equals(role)) {
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowWrite));
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowRead));
-      if (REPORTER.equals(role)) {
-        resourcesProviders
-            .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataschemaRead));
-      }
-      List<Long> ids = EDITOR.equals(role)
-          ? dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
-              .map(DesignDatasetVO::getId).collect(Collectors.toList())
-          : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
-              .filter(reportingDatasetVO -> reportingDatasetVO.getDataProviderId()
-                  .equals(dataProviderId))
-              .map(ReportingDatasetVO::getId).collect(Collectors.toList());
-      for (Long id : ids) {
-        // remove resources
-        resourcesProviders.add(fillResourceAssignation(id, account, resourceGroupEnumWrite));
-        resourcesProviders.add(fillResourceAssignation(id, account, resourceGroupEnumRead));
-      }
-      userManagementControllerZull.removeContributorsFromResources(resourcesProviders);
+
+      ids = dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
+          .map(DesignDatasetVO::getId).collect(Collectors.toList());
     }
+    for (Long id : ids) {
+      // remove resources
+      resourcesProviders.add(fillResourceAssignation(id, account, resourceGroupEnumWrite));
+      resourcesProviders.add(fillResourceAssignation(id, account, resourceGroupEnumRead));
+    }
+    userManagementControllerZull.removeContributorsFromResources(resourcesProviders);
   }
 
 
@@ -276,7 +287,7 @@ public class ContributorServiceImpl implements ContributorService {
 
     for (Long reportingDatasetId : dataSetMetabaseControllerZuul
         .findReportingDataSetIdByDataflowId(dataflowId).stream()
-        .filter(reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(dataProviderId))
+        .filter(reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
         .map(ReportingDatasetVO::getId).collect(Collectors.toList())) {
       ResourceInfoVO resourceDataSchema =
           resourceManagementControllerZull.getResourceDetail(reportingDatasetId, resourceGroupEnum);
@@ -357,13 +368,13 @@ public class ContributorServiceImpl implements ContributorService {
         if (resourceAccess != null) {
           persistDataflowPermission =
               checkDataflowPrevPermission(role, contributorVO.getWritePermission(), resourceAccess);
-        }
-        try {
-          deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
-        } catch (EEAException e) {
-          LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
-              contributorVO.getAccount(), dataflowId);
-          throw new EEAException(e);
+          try {
+            deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
+          } catch (EEAException e) {
+            LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
+                contributorVO.getAccount(), dataflowId);
+            throw new EEAException(e);
+          }
         }
       }
       try {
