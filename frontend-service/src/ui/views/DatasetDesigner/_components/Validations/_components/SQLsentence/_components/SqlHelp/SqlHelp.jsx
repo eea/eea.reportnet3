@@ -46,7 +46,9 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
       params: { dataflowId }
     } = match;
     const dataflowDetails = await DataflowService.getAllSchemas(dataflowId);
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'rawDatasets', value: dataflowDetails } });
+    const dataflowData = await DataflowService.reporting(dataflowId);
+    const { designDatasets } = dataflowData;
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'rawDatasets', value: { dataflowDetails, designDatasets } } });
   };
 
   useEffect(() => {
@@ -68,7 +70,7 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
 
   useEffect(() => {
     const tablesOptions = state?.datasets?.datasetSchemas?.find(
-      dataset => dataset.datasetSchemaId === state.selectedDataset?.value
+      dataset => dataset.datasetId === state.selectedDataset?.value
     )?.tablesOptions;
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'tables', value: tablesOptions } });
   }, [state.selectedDataset]);
@@ -85,7 +87,7 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
 
   useEffect(() => {
     const fieldsOptions = state?.datasets?.datasetSchemas
-      ?.find(dataset => dataset.datasetSchemaId === state.selectedDataset?.value)
+      ?.find(dataset => dataset.datasetId === state.selectedDataset?.value)
       ?.tables.find(table => table.tableSchemaId === state.selectedTable?.value)?.fieldsOptions;
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'fields', value: fieldsOptions || [] } });
   }, [state.selectedTable]);
