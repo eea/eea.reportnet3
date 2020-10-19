@@ -218,7 +218,7 @@ const ValidationViewer = React.memo(
           originsFilter
         );
       }
-      
+
       validationDispatch({
         type: 'SET_TOTALS_ERRORS',
         payload: {
@@ -399,17 +399,28 @@ const ValidationViewer = React.memo(
             break;
         }
       } else {
-        onSelectValidation(
-          event.data.tableSchemaId,
-          -1,
-          -1,
-          event.data.ruleId,
-          true,
-          event.data.message,
-          event.data.levelError
-        );
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            onSelectValidation(
+              event.data.tableSchemaId,
+              -1,
+              -1,
+              event.data.ruleId,
+              true,
+              event.data.message,
+              event.data.levelError
+            );
+            break;
+          case 'TABLE':
+            onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
+            break;
+
+          default:
+            break;
+        }
       }
-    };    
+    };
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {areActiveFilters && totalRecords !== totalFilteredRecords
