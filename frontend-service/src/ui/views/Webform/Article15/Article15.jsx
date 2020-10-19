@@ -19,7 +19,7 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 
-export const Article15 = ({ datasetId, state }) => {
+export const Article15 = ({ datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
@@ -35,6 +35,7 @@ export const Article15 = ({ datasetId, state }) => {
   const initialLoad = () => {
     const allTables = tables.map(table => table.name);
     const parsedData = onLoadData();
+
     article15Dispatch({
       type: 'INITIAL_LOAD',
       payload: { isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables, tables), data: parsedData }
@@ -108,7 +109,7 @@ export const Article15 = ({ datasetId, state }) => {
 
   const renderWebFormHeaders = () => {
     const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.name));
-    const headers = filteredTabs.map(tab => tab.header);
+    const headers = filteredTabs.map(tab => tab.header || tab.name);
 
     return article15State.data.map((webform, i) => {
       const isCreated = headers.includes(webform.name);
@@ -134,6 +135,7 @@ export const Article15 = ({ datasetId, state }) => {
             key={i}
             label={webform.title}
             onClick={() => onChangeWebformTab(webform.name)}
+            style={{ display: isReporting && !isCreated ? 'none' : '' }}
           />
 
           {!isCreated && (
