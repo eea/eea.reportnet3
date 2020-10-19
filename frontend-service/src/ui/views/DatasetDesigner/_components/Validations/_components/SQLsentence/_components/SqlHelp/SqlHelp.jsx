@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { trim } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import trim from 'lodash/trim';
 
 import styles from './SqlHelp.module.scss';
 
@@ -29,6 +30,7 @@ const sqlHelpReducer = (state, { type, payload }) => {
 
 export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSentence }) => {
   const initState = {
+    rawDatasets: [],
     datasets: [],
     tables: [],
     fields: [],
@@ -39,14 +41,26 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
   const resourcesContext = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(sqlHelpReducer, initState);
 
-  useEffect(async () => {
+  const fetchData = async () => {
     const {
       params: { dataflowId }
     } = match;
+    const dataflowDetails = await DataflowService.getAllSchemas(dataflowId);
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'rawDatasets', value: dataflowDetails } });
+  };
 
-    const dataflowDetails = parseDatasetSchemas(await DataflowService.getAllSchemas(dataflowId));
-    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasets', value: dataflowDetails } });
+  useEffect(() => {
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!isEmpty(state.rawDatasets)) {
+      dispatch({
+        type: 'UPDATE_PROPERTY',
+        payload: { key: 'datasets', value: parseDatasetSchemas(state.rawDatasets) }
+      });
+    }
+  }, [state.rawDatasets]);
 
   const onSelectDataset = selectedDataset => {
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedDataset', value: selectedDataset } });
