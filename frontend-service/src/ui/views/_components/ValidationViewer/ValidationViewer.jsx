@@ -218,7 +218,7 @@ const ValidationViewer = React.memo(
           originsFilter
         );
       }
-      console.log(datasetErrors.totalRecords, datasetErrors);
+      
       validationDispatch({
         type: 'SET_TOTALS_ERRORS',
         payload: {
@@ -409,8 +409,7 @@ const ValidationViewer = React.memo(
           event.data.levelError
         );
       }
-    };
-    console.log({ totalFilteredRecords, totalErrors, totalRecords });
+    };    
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {areActiveFilters && totalRecords !== totalFilteredRecords
