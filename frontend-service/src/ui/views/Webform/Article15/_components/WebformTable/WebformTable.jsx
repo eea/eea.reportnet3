@@ -171,11 +171,12 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
             columnsSchema={webformData.elementsRecords[0].elements}
             datasetId={datasetId}
             key={i}
+            multipleRecords={webformData.multipleRecords}
+            onAddMultipleWebform={onAddMultipleWebform}
             onRefresh={onUpdateData}
             onTabChange={onTabChange}
             record={record}
             tableId={webformData.tableSchemaId}
-            onAddMultipleWebform={onAddMultipleWebform}
           />
         );
       })
@@ -183,14 +184,16 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       <WebformRecord
         columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
         datasetId={datasetId}
+        multipleRecords={webformData.multipleRecords}
+        onAddMultipleWebform={onAddMultipleWebform}
         onRefresh={onUpdateData}
         onTabChange={onTabChange}
         record={webformData.elementsRecords[0]}
         tableId={webformData.tableSchemaId}
-        onAddMultipleWebform={onAddMultipleWebform}
       />
     );
   };
+
 
   if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
 

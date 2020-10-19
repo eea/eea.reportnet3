@@ -29,8 +29,9 @@ import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
   columnsSchema,
-  onAddMultipleWebform,
   datasetId,
+  multipleRecords,
+  onAddMultipleWebform,
   onRefresh,
   onTabChange,
   record,
@@ -63,6 +64,7 @@ export const WebformRecord = ({
     selectedRecordId,
     selectedValidExtensions
   } = webformRecordState;
+
 
   const {
     formatDate,
@@ -407,6 +409,7 @@ export const WebformRecord = ({
                 <WebformRecord
                   datasetId={datasetId}
                   key={i}
+                  multipleRecords={field.multipleRecords}
                   onAddMultipleWebform={onAddMultipleWebform}
                   onRefresh={onRefresh}
                   onTabChange={onTabChange}
@@ -430,7 +433,7 @@ export const WebformRecord = ({
               <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
             ))}
         </div>
-        {/* record.multiple && */ !isEmpty(record.elements) && (
+        {multipleRecords && !isEmpty(record.elements) && (
           <div className={styles.actionButtons}>
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
