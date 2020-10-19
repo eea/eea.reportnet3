@@ -893,6 +893,9 @@
     "toggleGroup": "Toggle group/ungroup errors",
     "grouped": "Grouped",
     "ungrouped": "Ungrouped",
-    "numberOfRecords": "Number of records"
+    "numberOfRecords": "Number of records",
+    "wrongCoordinate": "Wrong or incomplete coordinate. ",
+    "totalErrors": "total errors: ",
+    "datasetSchemaCreationErrorDuplicated": "{:schemaName} already exists. Please choose a different schema name."
   }
 }
