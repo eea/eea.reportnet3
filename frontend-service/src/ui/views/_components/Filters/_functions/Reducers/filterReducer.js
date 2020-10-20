@@ -17,15 +17,15 @@ export const filterReducer = (state, { type, payload }) => {
         orderBy: payload.orderBy,
         searchBy: payload.searchBy,
         checkboxes: payload.checkboxes,
-        filtered: false,
-        filteredSearched: false,
+        filtered: payload.filtered,
+        filteredSearched: payload.filteredSearched,
         property: ''
       };
 
     case 'FILTERED':
       return {
         ...state,
-        filtered: payload.filteredValue
+        filtered: payload.filteredStateValue
       };
 
     case 'FILTER_DATA':
