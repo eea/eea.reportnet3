@@ -26,6 +26,8 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   const resources = useContext(ResourcesContext);
 
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
+    isAddingMultiple: false,
+    addingOnTableSchemaId: null,
     isDataUpdated: false,
     isLoading: true,
     webformData: {}
@@ -78,6 +80,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   };
 
   const onAddMultipleWebform = async tableSchemaId => {
+    webformTableDispatch({
+      type: 'SET_IS_ADDING_MULTIPLE',
+      payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
+    });
+
     if (!isEmpty(webformData.elementsRecords)) {
       const newEmptyRecord = parseNewRecord(
         webformData.elementsRecords[0].elements.filter(element => element.tableSchemaId === tableSchemaId)[0].elements
@@ -97,6 +104,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         notificationContext.add({
           type: 'ADD_RECORDS_BY_ID_ERROR',
           content: { dataflowId, datasetId, dataflowName, datasetName, tableName: webformData.title }
+        });
+      } finally {
+        webformTableDispatch({
+          type: 'SET_IS_ADDING_MULTIPLE',
+          payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
         });
       }
     }
@@ -204,9 +216,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
       webformData.elementsRecords.map((record, i) => {
         return (
           <WebformRecord
+            addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
             columnsSchema={webformData.elementsRecords[0].elements}
             dataflowId={dataflowId}
             datasetId={datasetId}
+            isAddingMultiple={webformTableState.isAddingMultiple}
             isReporting={isReporting}
             key={i}
             multipleRecords={webformData.multipleRecords}
@@ -221,9 +235,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
       })
     ) : (
       <WebformRecord
+        addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
         columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        isAddingMultiple={webformTableState.isAddingMultiple}
         isReporting={isReporting}
         multipleRecords={webformData.multipleRecords}
         onAddMultipleWebform={onAddMultipleWebform}

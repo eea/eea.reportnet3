@@ -31,9 +31,11 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
+  addingOnTableSchemaId,
   columnsSchema,
   dataflowId,
   datasetId,
+  isAddingMultiple,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
@@ -427,7 +429,14 @@ export const WebformRecord = ({
                   )}
                 </div>
                 {element.multipleRecords && (
-                  <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(element.tableSchemaId)} />
+                  <Button
+                    disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                    icon={
+                      addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
+                    }
+                    label={'Add'}
+                    onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                  />
                 )}
               </h3>
               {element.tableNotCreated && (
@@ -526,6 +535,7 @@ export const WebformRecord = ({
           {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
+
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
