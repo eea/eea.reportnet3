@@ -643,7 +643,6 @@ public class DataFlowControllerImplTest {
         Mockito.any());
   }
 
-
   @Test(expected = ResponseStatusException.class)
   public void testUpdateStatusException() throws EEAException {
     try {
@@ -654,8 +653,5 @@ public class DataFlowControllerImplTest {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
       throw e;
     }
-
   }
-
 }
-

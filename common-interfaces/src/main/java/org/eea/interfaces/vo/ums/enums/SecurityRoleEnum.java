@@ -36,7 +36,6 @@ public enum SecurityRoleEnum {
    * The reporter with edit access.
    */
   REPORTER_WRITE("REPORTER_WRITE"),
-
   /**
    * The reporter read-only access.
    */
