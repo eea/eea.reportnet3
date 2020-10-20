@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 
 import styles from './SQLsentence.module.scss';
 
+import { Button } from 'ui/views/_components/Button';
 import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -36,12 +37,19 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           <SqlHelp onSetSqlSentence={onSetSQLsentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
         </div>
         <div className={styles.sqlSentence}>
-          <h3 className={styles.title}>{resources.messages['sqlSentence']}:</h3>
-          <p>{resources.messages['sqlSentenceHelpDescription']}</p>
+          <h3 className={styles.title}>
+            {resources.messages['sqlSentence']}
+            <Button
+              className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
+              icon="infoCircle"
+              id="infoSQLsentence"
+            />
+          </h3>
+          {/* <p>{resources.messages['sqlSentenceHelpDescription']}</p>
           <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
           <p
             className={styles.note}
-            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p>
+            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p> */}
           <textarea
             id="SQLsentenceTextarea"
             name=""

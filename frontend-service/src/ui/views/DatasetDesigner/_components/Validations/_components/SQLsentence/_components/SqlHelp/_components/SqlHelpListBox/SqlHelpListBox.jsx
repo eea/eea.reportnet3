@@ -15,7 +15,6 @@ export const SqlHelpListBox = ({ level, onAddHelpItem, onChange, options, select
         <h3>{title} </h3>
         <Button
           className={`${styles.addButton} rp-btn secondary`}
-          tooltip={resourcesContext.messages.createSnapshotTooltip}
           type="submit"
           icon="angleDoubleRight"
           onClick={e => {
