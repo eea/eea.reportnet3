@@ -649,7 +649,7 @@ export const Dataset = withRouter(({ match, history }) => {
     fnUseState(visible);
   };
 
-  const onTabChange = table => {
+  const onTabChange = table =>
     setDataViewerOptions({
       ...dataViewerOptions,
       tableSchemaId: table.tableSchemaId
