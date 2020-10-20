@@ -45,6 +45,7 @@ export const TabsDesigner = withRouter(
     onLoadTableData,
     onTabChange,
     onUpdateTable,
+    getUpdatedTabs,
     recordPositionId,
     selectedRecordErrorId,
     selectedRuleId,
@@ -85,6 +86,8 @@ export const TabsDesigner = withRouter(
     }, [scrollFn, tabs, isEditing]);
 
     useEffect(() => {
+      getUpdatedTabs(tabs);
+      console.log({ tabs });
       onUpdateTable(tabs);
     }, [tabs]);
 
@@ -200,7 +203,7 @@ export const TabsDesigner = withRouter(
     };
 
     const onTabClicked = event => {
-      if (event.header !== '') {        
+      if (event.header !== '') {
         setActiveTableSchemaId(event.tableSchemaId);
         onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }

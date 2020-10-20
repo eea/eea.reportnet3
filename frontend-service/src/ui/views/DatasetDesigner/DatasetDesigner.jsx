@@ -554,6 +554,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const onUpdateTabs = data => {
+    const parsedData = [];
+    data.forEach(table => parsedData.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
+    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData } });
+  };
+
   const onLoadSchema = () => {
     onHighlightRefresh(false);
 
@@ -641,7 +647,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       designerDispatch({
         type: 'SET_DATAVIEWER_OPTIONS',
         payload: {
-          ...designerState.dataViewerOptions,          
+          ...designerState.dataViewerOptions,
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: false,
           isValidationSelected: true,
@@ -1144,6 +1150,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateTable={onUpdateTable}
+            getUpdatedTabs={onUpdateTabs}
             recordPositionId={designerState.dataViewerOptions.recordPositionId}
             selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
             selectedRuleId={designerState.dataViewerOptions.selectedRuleId}

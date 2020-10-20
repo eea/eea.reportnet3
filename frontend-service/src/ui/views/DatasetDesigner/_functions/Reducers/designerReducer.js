@@ -176,6 +176,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'UPDATE_WEBFORM':
       return { ...state, previousWebform: state.webform, webform: payload };
 
+    case 'ON_UPDATE_TABS':
+      return { ...state, schemaTables: payload.data };
+
     default:
       return state;
   }

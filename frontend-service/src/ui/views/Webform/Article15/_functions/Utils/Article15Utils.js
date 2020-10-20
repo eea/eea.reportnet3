@@ -7,6 +7,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
 
   let tableIdx = 0;
   if (QuerystringUtils.getUrlParamValue('tab') !== '') {
+    console.log('schemaTables', schemaTables);
     const filteredTable = schemaTables.filter(
       schemaTable => schemaTable.id === QuerystringUtils.getUrlParamValue('tab')
     );
