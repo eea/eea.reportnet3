@@ -78,7 +78,7 @@ public class SQLValidationUtilsTest {
     ReflectionTestUtils.setField(sqlValidationUtils, "sqlRulesService", sqlRulesService);
     ReflectionTestUtils.setField(sqlValidationUtils, "tableRepository", tableRepository);
 
-
+    datasetValue = new DatasetValue();
     datasetValue.setId(1L);
     ruleId = new ObjectId().toString();
 
