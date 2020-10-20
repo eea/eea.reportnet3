@@ -57,7 +57,7 @@ import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
@@ -89,7 +89,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetSchemas: [],
     datasetStatistics: [],
     dataViewerOptions: {
-      activeIndex: 0,
       isGroupedValidationDeleted: false,
       isGroupedValidationSelected: false,
       isValidationSelected: false,
@@ -97,7 +96,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       selectedRecordErrorId: -1,
       selectedRuleId: '',
       selectedRuleLevelError: '',
-      selectedRuleMessage: ''
+      selectedRuleMessage: '',
+      tableSchemaId: ''
     },
     exportButtonsList: [],
     exportDatasetData: null,
@@ -117,7 +117,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isLoading: true,
     isLoadingFile: false,
     isManageUniqueConstraintDialogVisible: false,
-    isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
     isRefreshHighlighted: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
@@ -130,6 +129,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       uniqueId: null
     },
     metaData: {},
+    previousWebform: null,
     refresh: false,
     replaceData: false,
     schemaTables: [],
@@ -220,8 +220,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.validationListDialogVisible]);
 
   useEffect(() => {
-    if (window.location.search !== '') changeUrl();
-  }, [designerState.isPreviewModeOn]);
+    if (window.location.search !== '' && !isNil(designerState.dataViewerOptions.tableSchemaId)) {
+      changeUrl();
+    } else {
+      changeUrl(true);
+    }
+  }, [designerState.viewType, designerState.dataViewerOptions.tableSchemaId]);
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
@@ -251,29 +255,35 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const changeMode = previewMode => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
+  const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
-  const changeUrl = () => {
+  const changeUrl = (changeOnlyView = false) => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${DatasetDesignerUtils.getUrlParamValue('tab')}${
-        !isUndefined(designerState.isPreviewModeOn) ? `&design=${designerState.isPreviewModeOn}` : ''
-      }`
+      !changeOnlyView
+        ? `?tab=${
+            QuerystringUtils.getUrlParamValue('tab') !== ''
+              ? QuerystringUtils.getUrlParamValue('tab')
+              : designerState.dataViewerOptions.tableSchemaId
+          }${`&view=${Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true)}`}`
+        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
+            view => designerState.viewType[view] === true
+          )}`}`
     );
   };
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
-  const filterActiveIndex = index => {
-    if (!isNil(index) && isNaN(index)) {
-      const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
-      if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
-        return filteredTable[0].index;
-      }
-    }
-    return index;
-  };
+  // const filterActiveIndex = index => {
+  //   if (!isNil(index) && isNaN(index)) {
+  //     const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
+  //     if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
+  //       return filteredTable[0].index;
+  //     }
+  //   }
+  //   return index;
+  // };
 
   const getExportList = () => {
     const { externalOperationsList } = designerState;
@@ -455,9 +465,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refreshUniqueList(true);
   };
 
-  const onCloseConfigureWebformModal = () => {
-    manageDialogs('isConfigureWebformDialogVisible', false);
-  };
+  const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
 
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
@@ -570,6 +578,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
             levelErrorTypes: dataset.levelErrorTypes,
+            previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
             schemaTables: tableSchemaList,
@@ -621,13 +630,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
         payload: {
           ...designerState.dataViewerOptions,
-          activeIndex: tableSchemaId,
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: true,
           recordPositionId: -1,
           selectedRuleId,
           selectedRuleLevelError,
-          selectedRuleMessage
+          selectedRuleMessage,
+          tableSchemaId
         }
       });
     } else {
@@ -635,26 +644,26 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         type: 'SET_DATAVIEWER_OPTIONS',
         payload: {
           ...designerState.dataViewerOptions,
-          activeIndex: tableSchemaId,
           isValidationSelected: true,
           recordPositionId: posIdRecord,
           selectedRecordErrorId,
           selectedRuleId: '',
           selectedRuleLevelError: '',
-          selectedRuleMessage: ''
+          selectedRuleMessage: '',
+          tableSchemaId
         }
       });
     }
   };
 
-  const onTabChange = tableSchemaId =>
+  const onTabChange = table =>
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
         ...designerState.dataViewerOptions,
-        activeIndex: tableSchemaId.index,
         selectedRuleId: '',
-        selectedRuleMessage: ''
+        selectedRuleMessage: '',
+        tableSchemaId: table.tableSchemaId
       }
     });
 
@@ -816,12 +825,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           inputId={view}
           onChange={event => {
             onChangeView(event.target.value);
-            if (view !== 'webform') changeMode(event.target.value === 'table');
+            changeMode(view);
           }}
           value={view}
         />
         <label className={styles.label} htmlFor={view}>
-          {view}
+          {resources.messages[`${view}View`]}
         </label>
       </div>
     ));
@@ -831,13 +840,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Fragment>
         <span className={styles.switchTextInput}>{resources.messages['design']}</span>
         <InputSwitch
-          checked={designerState.isPreviewModeOn}
+          checked={designerState.viewType['table']}
           // disabled={true}
           // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-          // onChange={e => setIsPreviewModeOn(e.value)}
-          onChange={event => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: event.value } })}
+          onChange={event =>
+            designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
+          }
         />
-        <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
+        <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
       </Fragment>
     );
 
@@ -880,13 +890,21 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className={`p-button-animated-blink ${styles.saveButton}`}
         label={resources.messages['save']}
         icon={'check'}
-        onClick={() => onUpdateWebform(designerState.webform.value)}
+        onClick={() => {
+          onUpdateWebform(designerState.webform.value);
+          if (isNil(designerState.webform.value)) {
+            changeMode('design');
+          }
+        }}
       />
       <Button
         className="p-button-secondary"
         icon={'cancel'}
         label={resources.messages['cancel']}
-        onClick={() => onCloseConfigureWebformModal()}
+        onClick={() => {
+          designerDispatch({ type: 'UPDATE_PREVIOUS_WEBFORM', payload: {} });
+          onCloseConfigureWebformModal();
+        }}
       />
     </Fragment>
   );
@@ -1026,7 +1044,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
+                  designerState.datasetHasData && designerState.viewType['table'] ? ' p-button-animated-blink' : null
                 }`}
                 disabled={!designerState.datasetHasData}
                 icon={'validate'}
@@ -1038,7 +1056,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetStatistics.datasetErrors && designerState.isPreviewModeOn
+                  designerState.datasetStatistics.datasetErrors && designerState.viewType['table']
                     ? 'p-button-animated-blink'
                     : null
                 }`}
@@ -1111,19 +1129,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
         ) : (
           <TabsDesigner
-            activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
             changeMode={changeMode}
             datasetSchemaDTO={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
             editable={true}
             history={history}
-            isPreviewModeOn={designerState.isPreviewModeOn}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
             isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
+            onChangeIsValidationSelected={onChangeIsValidationSelected}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
@@ -1134,13 +1151,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             selectedRuleId={designerState.dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={designerState.dataViewerOptions.selectedRuleLevelError}
             selectedRuleMessage={designerState.dataViewerOptions.selectedRuleMessage}
-            setActiveIndex={index =>
+            setActiveTableSchemaId={tabSchemaId =>
               designerDispatch({
                 type: 'SET_DATAVIEWER_OPTIONS',
-                payload: { ...designerState.dataViewerOptions, activeIndex: index, selectedRecordErrorId: -1 }
+                payload: { ...designerState.dataViewerOptions, tableSchemaId: tabSchemaId, selectedRecordErrorId: -1 }
               })
             }
-            onChangeIsValidationSelected={onChangeIsValidationSelected}
+            tableSchemaId={designerState.dataViewerOptions.tableSchemaId}
+            viewType={designerState.viewType}
           />
         )}
         <Snapshots
