@@ -388,20 +388,22 @@ export const WebformRecord = ({
     }
   };
 
-  const renderFields = elements => {
-    return elements.map((field, i) => {
-      const isFieldVisible = field.fieldType === 'EMPTY' && isReporting;
-      const isSubTableVisible = field.tableNotCreated && isReporting;
+  const renderElements = elements => {
+    return elements.map((element, i) => {
+      const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
+      const isSubTableVisible = element.tableNotCreated && isReporting;
 
-      if (field.type === 'FIELD') {
+      if (element.type === 'FIELD') {
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              <label>{field.title}</label>
+              <label>{element.title}</label>
               <div>
-                <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
-                {field.validations &&
-                  field.validations.map((validation, index) => (
+                <div className={styles.template}>
+                  {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
+                </div>
+                {element.validations &&
+                  element.validations.map((validation, index) => (
                     <IconTooltip
                       className={'webform-validationErrors'}
                       key={index}
@@ -419,36 +421,36 @@ export const WebformRecord = ({
             <div key={i} className={styles.subTable}>
               <h3 className={styles.title}>
                 <div>
-                  {field.title ? field.title : field.name}
-                  {field.hasErrors && (
+                  {element.title ? element.title : element.name}
+                  {element.hasErrors && (
                     <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
                   )}
                 </div>
-                {field.multipleRecords && (
-                  <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(field.tableSchemaId)} />
+                {element.multipleRecords && (
+                  <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(element.tableSchemaId)} />
                 )}
               </h3>
-              {field.tableNotCreated && (
+              {element.tableNotCreated && (
                 <span
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
-                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: field.name })
+                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: element.name })
                   }}
                 />
               )}
-              {field.elementsRecords.map((record, i) => {
+              {element.elementsRecords.map((record, i) => {
                 return (
                   <WebformRecord
                     dataflowId={dataflowId}
                     datasetId={datasetId}
                     key={i}
-                    multipleRecords={field.multipleRecords}
+                    multipleRecords={element.multipleRecords}
                     onAddMultipleWebform={onAddMultipleWebform}
                     onRefresh={onRefresh}
                     onTabChange={onTabChange}
                     record={record}
                     tableId={tableId}
-                    tableName={field.title}
+                    tableName={element.title}
                   />
                 );
               })}
@@ -459,28 +461,28 @@ export const WebformRecord = ({
     });
   };
 
-  const renderWebformContent = record => {
+  const renderWebformContent = content => {
     return (
       <div className={styles.content}>
         <div className={styles.actionButtons}>
-          {!isEmpty(record.validations) &&
-            record.validations.map((validation, index) => (
+          {!isEmpty(content.validations) &&
+            content.validations.map((validation, index) => (
               <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
             ))}
         </div>
-        {multipleRecords && !isEmpty(record.elements) && (
+        {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               icon={'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);
-                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { recordId: record.recordId } });
+                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { recordId: content.recordId } });
               }}
             />
           </div>
         )}
-        {!isEmpty(record.elements) ? renderFields(record.elements) : resources.messages['emptyWebformTable']}
+        {!isEmpty(content.elements) ? renderElements(content.elements) : resources.messages['emptyWebformTable']}
       </div>
     );
   };
