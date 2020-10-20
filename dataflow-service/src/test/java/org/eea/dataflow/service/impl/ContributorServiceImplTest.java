@@ -220,7 +220,7 @@ public class ContributorServiceImplTest {
     when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
         .thenReturn(resourceInfoVO);
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, "REPORTER", 1l);
-    Mockito.verify(dataSetMetabaseControllerZuul, times(2))
+    Mockito.verify(dataSetMetabaseControllerZuul, times(1))
         .findReportingDataSetIdByDataflowId(Mockito.any());
   }
 
