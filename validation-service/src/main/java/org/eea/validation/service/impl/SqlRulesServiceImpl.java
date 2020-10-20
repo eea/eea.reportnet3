@@ -263,7 +263,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   @Override
   public Rule getRule(Long datasetId, String ruleId) {
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    String datasetSchemaId = datasetMetabaseController.findDatasetSchemaIdById(datasetId);
     RulesSchema rulechema =
         rulesRepository.getActiveAndVerifiedRules(new ObjectId(datasetSchemaId));
     for (Rule rule : rulechema.getRules()) {
@@ -566,7 +566,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
 
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
-      String auxQuery = null;
       switch (datasetType) {
         case DESIGN:
           processedQuery = query;
@@ -584,10 +583,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
           }
           for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
-            auxQuery = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
+            query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
                 "dataset_" + auxDatasetOldAndNew.getValue());
           }
-          processedQuery = auxQuery;
+          processedQuery = query;
           break;
         case EUDATASET:
           List<EUDatasetVO> euDatasetList =
@@ -604,10 +603,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           }
 
           for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
-            auxQuery = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
+            query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
                 "dataset_" + auxDatasetOldAndNew.getValue());
           }
-          processedQuery = auxQuery;
+          processedQuery = query;
 
           break;
         case REPORTING:
@@ -622,7 +621,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           List<Long> dataprovidersIdList = new ArrayList<>();
 
           for (RepresentativeVO provider : dataprovidersVOList) {
-            dataprovidersIdList.add(provider.getDataProviderGroupId());
+            dataprovidersIdList.add(provider.getDataProviderId());
           }
           Map<String, Long> reportingDatasetSchamasMap = new HashMap<>();
           for (ReportingDatasetVO reportingDataset : reportingDatasetList) {
@@ -636,13 +635,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
             datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
           }
+
           for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
-            auxQuery = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
+            query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
                 "dataset_" + auxDatasetOldAndNew.getValue());
           }
-          processedQuery = auxQuery;
-
-
+          processedQuery = query;
           break;
       }
     } else {
