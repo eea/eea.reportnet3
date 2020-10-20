@@ -427,7 +427,11 @@ export const WebformRecord = ({
                   )}
                 </div>
                 {element.multipleRecords && (
-                  <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(element.tableSchemaId)} />
+                  <Button
+                    icon={'plus'}
+                    label={resources.messages['addRecord']}
+                    onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                  />
                 )}
               </h3>
               {element.tableNotCreated && (

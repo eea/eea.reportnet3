@@ -901,7 +901,7 @@
     "tabularData": "Tabular data",
     "tableIsNotCreated": "The table {:tableName} is not created in the design, please check it",
     "fieldIsNotCreated": "The field {:fieldName} is not created in the design, please check it",
-    "emptyWebformTable": "This table has no fields",
+    "emptyWebformTable": "This table has no fields or do not match with the webform model.",
     "tableWithErrorsTooltip": "This table has errors",
     "webform": "Webform",
     "webformView": "Webform",
