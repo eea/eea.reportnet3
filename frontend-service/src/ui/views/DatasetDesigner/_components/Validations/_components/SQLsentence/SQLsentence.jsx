@@ -70,7 +70,6 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           onHide={onHideInfoDiaog}
           visible={isVisibleInfoDialog}
           header={resources.messages['sqlSentenceHelpDialogTitle']}>
-          <p>{resources.messages['sqlSentenceHelpDescription']}</p>
           <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
           <p
             className={styles.note}
