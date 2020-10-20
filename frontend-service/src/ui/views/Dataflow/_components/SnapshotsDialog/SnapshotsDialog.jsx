@@ -27,10 +27,11 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   const [isLoading, setIsLoading] = useState(false);
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
+  const [isSnapshotListCreatedReleaseLoading, setIsSnapshotListCreatedReleaseLoading] = useState(false);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
+  const [snapshotIdToRelease, setSnapshotIdToRelease] = useState('');
   const [snapshotDescription, setSnapshotDescription] = useState();
   const [snapshotsListData, setSnapshotsListData] = useState([]);
-  const [snapshotReleasedId, setSnapshotReleasedId] = useState('');
 
   useCheckNotifications(
     [
@@ -42,21 +43,30 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
     false
   );
 
-  if (snapshotReleasedId === snapshotDataToRelease.id) {
+  useCheckNotifications(
+    [
+      'RELEASE_BLOCKED_EVENT',
+      'DATA_COLLECTION_LOCKED_ERROR',
+      'CREATE_BY_ID_REPORTER_ERROR',
+      'RELEASE_DATASET_SNAPSHOT_FAILED_EVENT'
+    ],
+    setIsSnapshotListCreatedReleaseLoading,
+    false
+  );
+
+  const clearSnapshotToRelease = () => {
     setSnapshotDataToRelease('');
-  }
+    setSnapshotIdToRelease('');
+  };
+
+  useCheckNotifications(
+    ['RELEASE_DATASET_SNAPSHOT_FAILED_EVENT', 'DATA_COLLECTION_LOCKED_ERROR', 'RELEASED_BY_ID_REPORTER_ERROR'],
+    clearSnapshotToRelease
+  );
 
   useEffect(() => {
-    if (isSnapshotDialogVisible) {
-      onLoadSnapshotList(datasetId);
-    }
-    const refresh = notificationContext.toShow.find(
-      notification => notification.key === 'RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'
-    );
-    if (refresh) {
-      onLoadSnapshotList(datasetId);
-    }
-  }, [isSnapshotDialogVisible, notificationContext]);
+    onLoadSnapshotList(datasetId);
+  }, []);
 
   useEffect(() => {
     if (isSnapshotInputActive) {
@@ -88,9 +98,9 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   const onLoadSnapshotList = async datasetId => {
     try {
       const response = await SnapshotService.allReporter(datasetId);
+      setIsSnapshotListCreatedReleaseLoading(false);
+      clearSnapshotToRelease();
       setSnapshotsListData(response);
-      const snapshotReleased = response.filter(snapshot => snapshot.isReleased);
-      !isEmpty(snapshotReleased) && setSnapshotReleasedId(snapshotReleased[0].id);
     } catch (error) {
       notificationContext.add({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
@@ -98,6 +108,12 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
       });
     }
   };
+
+  useCheckNotifications(
+    ['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT', 'VALIDATION_FINISHED_EVENT'],
+    onLoadSnapshotList,
+    datasetId
+  );
 
   const onShowReleaseDialog = ({ isReleased }) => {
     setIsActiveReleaseSnapshotConfirmDialog(true);
@@ -134,8 +150,8 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
                 {!isSnapshotInputActive ? (
                   <>
                     <Button
-                      className={styles.createButton}
-                      icon="plus"
+                      className={isLoading && snapshotIdToRelease === '' ? styles.successButton : null}
+                      icon={isSnapshotListCreatedReleaseLoading ? 'spinnerAnimate' : 'plus'}
                       onClick={() => {
                         setIsSnapshotInputActive(true);
                       }}
@@ -180,10 +196,10 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           className={styles.releaseList}
           getSnapshotData={setSnapshotDataToRelease}
           isLoading={isLoading}
+          isSnapshotListCreatedReleaseLoading={isSnapshotListCreatedReleaseLoading}
           showReleaseDialog={onShowReleaseDialog}
           snapshotsListData={snapshotsListData}
-          snapshotDataToRelease={snapshotDataToRelease}
-          snapshotReleasedId={snapshotReleasedId}
+          snapshotIdToRelease={snapshotIdToRelease}
         />
       </Dialog>
       {isActiveReleaseSnapshotConfirmDialog && (
@@ -196,6 +212,8 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
           isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
           onLoadSnapshotList={onLoadSnapshotList}
           setIsLoading={setIsLoading}
+          setSnapshotIdToRelease={setSnapshotIdToRelease}
+          setIsSnapshotListCreatedReleaseLoading={setIsSnapshotListCreatedReleaseLoading}
           snapshotDataToRelease={snapshotDataToRelease}
           snapshotDescription={snapshotDescription}
         />
