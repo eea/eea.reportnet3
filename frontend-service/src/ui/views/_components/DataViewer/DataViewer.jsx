@@ -277,7 +277,7 @@ const DataViewer = withRouter(
       if (isValidationSelected) {
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        onChangeIsValidationSelected(false);
+        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     }, [isValidationSelected]);
 
