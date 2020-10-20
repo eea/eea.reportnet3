@@ -96,6 +96,29 @@
           ]
         },
         {
+          "type": "TABLE",
+          "name": "Climate_Projections_Services",
+          "title": "Climate projections and services",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Description",
+              "title": "Description of climate projections and services"
+            },
+            {
+              "type": "FIELD",
+              "name": "Status",
+              "title": "Status of the climate projections and services"
+            },
+            {
+              "type": "FIELD",
+              "name": "WebLink",
+              "title": "Web link to the climat eprojections and services"
+            }
+          ]
+        },
+        {
           "type": "FIELD",
           "name": "GeneralAspectsAssessment",
           "title": "Please describe the general  aspects of the assessment of climate impacts, vulnerability and risks, including adaptive capacity"
