@@ -12,6 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
+import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
@@ -42,6 +43,8 @@ const ValidationViewer = React.memo(
     const [fetchedData, setFetchedData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [grouped, setGrouped] = useState(true);
+    const [filtered, setFiltered] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -168,10 +171,16 @@ const ValidationViewer = React.memo(
       return style;
     };
 
+    const getFilteredState = value => setFiltered(value);
+
     const onChangePage = event => {
       setNumberRows(event.rows);
       setFirstRow(event.first);
       fetchData(sortField, sortOrder, event.first, event.rows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+    };
+
+    const onLoadFilteredData = fetchedData => {
+      setFilteredData(fetchedData);
     };
 
     const onLoadErrors = async (
@@ -457,7 +466,7 @@ const ValidationViewer = React.memo(
           buttonsList
         ) : (
           <Toolbar className={styles.validationToolbar}>
-            <div className="p-toolbar-group-left">
+            {/* <div className="p-toolbar-group-left">
               <Button
                 className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
@@ -537,6 +546,16 @@ const ValidationViewer = React.memo(
                   setAreActiveFilters(false);
                 }}
               />
+            </div> */}
+
+            <div className={styles.searchInput}>
+              <Filters
+                className="filter-lines"
+                data={fetchedData}
+                getFilteredData={onLoadFilteredData}
+                getFilteredSearched={getFilteredState}
+                selectOptions={['entityType', 'tableSchemaName', 'field', 'levelError']}
+              />
             </div>
 
             <div className="p-toolbar-group-right">
@@ -584,7 +603,7 @@ const ValidationViewer = React.memo(
             sortField={sortField}
             sortOrder={sortOrder}
             totalRecords={totalFilteredRecords}
-            value={fetchedData}>
+            value={filteredData}>
             {columns}
           </DataTable>
         </>
