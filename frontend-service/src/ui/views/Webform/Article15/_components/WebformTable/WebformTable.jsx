@@ -225,10 +225,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
     );
   };
 
-  if (isUndefined(webform.tableSchemaId)) {
-    return <span className={styles.emptyWebformTables}>{resources.messages['emptyWebformTables']}</span>;
-  }
-
   if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
 
   const childHasErrors = webformData.elements

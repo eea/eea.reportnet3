@@ -25,7 +25,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
       });
     }
   }
-  const value = allTables[tableIdx];
+  const value = allTables[tableIdx === -1 ? 0 : tableIdx];
 
   compact(allTables).forEach(table => {
     initialValues[table] = false;
