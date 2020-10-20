@@ -58,7 +58,6 @@ const ActionsToolbar = ({
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
-
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
