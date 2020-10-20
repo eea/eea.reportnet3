@@ -2,8 +2,6 @@ import React, { useContext } from 'react';
 
 import moment from 'moment';
 
-import { isEmpty } from 'lodash';
-
 import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -26,7 +24,7 @@ export const SnapshotItem = ({
     if (snapshotIdToRelease) {
       return itemData.id === snapshotIdToRelease ? (isLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
     } else {
-      return itemData.isReleased ? (isSnapshotListCreatedReleaseLoading ? 'spinnerAnimate' : 'check') : 'cloudUpload';
+      return itemData.isReleased ? (isSnapshotListCreatedReleaseLoading ? 'cloudUpload' : 'check') : 'cloudUpload';
     }
   };
 

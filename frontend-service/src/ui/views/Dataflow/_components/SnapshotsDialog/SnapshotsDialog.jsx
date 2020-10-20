@@ -97,9 +97,10 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
 
   const onLoadSnapshotList = async datasetId => {
     try {
-      setSnapshotsListData(await SnapshotService.allReporter(datasetId));
-      clearSnapshotToRelease();
+      const response = await SnapshotService.allReporter(datasetId);
       setIsSnapshotListCreatedReleaseLoading(false);
+      clearSnapshotToRelease();
+      setSnapshotsListData(response);
     } catch (error) {
       notificationContext.add({
         type: 'LOAD_SNAPSHOTS_LIST_ERROR',
@@ -149,8 +150,8 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
                 {!isSnapshotInputActive ? (
                   <>
                     <Button
-                      className={styles.createButton}
-                      icon="plus"
+                      className={isLoading && snapshotIdToRelease === '' ? styles.successButton : null}
+                      icon={isSnapshotListCreatedReleaseLoading ? 'spinnerAnimate' : 'plus'}
                       onClick={() => {
                         setIsSnapshotInputActive(true);
                       }}
