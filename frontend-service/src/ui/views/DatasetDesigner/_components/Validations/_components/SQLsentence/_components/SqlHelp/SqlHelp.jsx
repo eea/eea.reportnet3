@@ -36,7 +36,10 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     fields: [],
     selectedDataset: '',
     selectedTable: '',
-    selectedField: ''
+    selectedField: '',
+    datasetSpinner: false,
+    tableSpinner: false,
+    fieldSpinner: false
   };
   const resourcesContext = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(sqlHelpReducer, initState);
@@ -45,6 +48,7 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     const {
       params: { dataflowId }
     } = match;
+    dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasetSpinner', value: true } });
     const dataflowDetails = await DataflowService.getAllSchemas(dataflowId);
     const dataflowData = await DataflowService.reporting(dataflowId);
     const { designDatasets } = dataflowData;
@@ -63,6 +67,12 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
       });
     }
   }, [state.rawDatasets]);
+
+  useEffect(() => {
+    if (state.datasets) {
+      dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasetSpinner', value: true } });
+    }
+  }, [state.datasets]);
 
   const onSelectDataset = selectedDataset => {
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'selectedDataset', value: selectedDataset } });
@@ -128,6 +138,7 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
         options={state.datasets.datasetSchemaOptions}
         onChange={onSelectDataset}
         onAddHelpItem={onAddHelpItem}
+        isSpinnerVisible={state.datasetSpinner}
       />
       <SqlHelpListBox
         title="Tables"

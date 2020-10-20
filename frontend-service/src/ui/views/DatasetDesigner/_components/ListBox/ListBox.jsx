@@ -10,6 +10,7 @@ import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
 import { ListBoxItem } from './_components/ListBoxItem';
 import { ListBoxHeader } from './_components/ListBoxHeader';
+import { Spinner } from 'ui/views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
 
 const ListBox = ({
@@ -28,6 +29,7 @@ const ListBox = ({
   optionLabel = null,
   options = null,
   style = null,
+  spinner = false,
   tabIndex = '0',
   title = '',
   tooltip = null,
@@ -253,7 +255,7 @@ const ListBox = ({
         )}
         <div className="p-listbox-list-wrapper">
           <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
-            {items}
+            {!items && spinner ? <Spinner style={{ top: 0 }} /> : items}
           </ul>
         </div>
       </div>

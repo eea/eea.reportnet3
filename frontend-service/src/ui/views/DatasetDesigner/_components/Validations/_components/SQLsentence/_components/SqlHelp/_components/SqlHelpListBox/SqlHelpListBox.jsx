@@ -7,7 +7,15 @@ import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SqlHelpListBox = ({ level, onAddHelpItem, onChange, options, selectedItem, title }) => {
+export const SqlHelpListBox = ({
+  level,
+  onAddHelpItem,
+  onChange,
+  options,
+  selectedItem,
+  title,
+  isSpinnerVisible = false
+}) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className={styles.section}>
@@ -31,6 +39,7 @@ export const SqlHelpListBox = ({ level, onAddHelpItem, onChange, options, select
         options={options}
         value={selectedItem}
         onChange={e => onChange(e.value)}
+        spinner={isSpinnerVisible}
       />
     </div>
   );
