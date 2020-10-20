@@ -41,6 +41,8 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
     if (!isNil(webform) && webform.tableSchemaId) {
       isLoading(true);
       onLoadTableData();
+    } else if (!isNil(webform) && isNil(webform.tableSchemaId)) {
+      isLoading(false);
     }
   }, [onTabChange, webform]);
 
