@@ -6,7 +6,11 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.controller.dataset.DataCollectionController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -51,6 +55,12 @@ public class SqlRulesServiceImplTest {
 
   @Mock
   private RulesRepository rulesRepository;
+
+  @Mock
+  private DatasetMetabaseController datasetMetabaseController;
+
+  @Mock
+  private DataCollectionController dataCollectionController;
 
   @InjectMocks
   private SqlRulesServiceImpl sqlRulesServiceImpl;
@@ -221,9 +231,17 @@ public class SqlRulesServiceImplTest {
 
     rule.setSqlSentence("SELECT * from dataset_1.table_value;");
     rule.setType(EntityTypeEnum.TABLE);
+    rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId());
 
-
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
+        .thenReturn(DatasetTypeEnum.COLLECTION);
+    Mockito.when(dataCollectionController.findDataCollectionIdByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList());
     when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong())).thenReturn(schema);
     when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
 
@@ -247,6 +265,14 @@ public class SqlRulesServiceImplTest {
     rule.setType(EntityTypeEnum.TABLE);
     rule.setReferenceId(new ObjectId());
     rule.setRuleId(new ObjectId());
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
+        .thenReturn(DatasetTypeEnum.COLLECTION);
+    Mockito.when(dataCollectionController.findDataCollectionIdByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList());
     when(ruleMapper.classToEntity(ruleVO)).thenReturn(rule);
 
     sqlRulesServiceImpl.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
@@ -264,10 +290,9 @@ public class SqlRulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
 
-    when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+    when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
     when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(ruleSchema);
-
 
     assertEquals(rule, (sqlRulesServiceImpl.getRule(1L, idRule.toString())));
 
