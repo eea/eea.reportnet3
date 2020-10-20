@@ -84,7 +84,7 @@ export const WebformRecord = ({
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: parseNewRecordData(record.elements, undefined) }
+      payload: { newRecord: parseNewRecordData(record.elements, undefined), record }
     });
   }, [record, onTabChange]);
 
@@ -109,7 +109,10 @@ export const WebformRecord = ({
   const onDeleteMultipleWebform = async () => {
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
-      if (isDataDeleted) onRefresh();
+      if (isDataDeleted) {
+        onRefresh();
+        handleDialogs('deleteRow', false);
+      }
     } catch (error) {
       console.error('error', error);
 

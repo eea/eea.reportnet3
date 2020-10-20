@@ -38,8 +38,17 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   }, [webform]);
 
   useEffect(() => {
-    if (!isNil(webform) && webform.tableSchemaId) onLoadTableData();
-  }, [isDataUpdated, onTabChange, webform]);
+    if (!isNil(webform) && webform.tableSchemaId) {
+      isLoading(true);
+      onLoadTableData();
+    }
+  }, [onTabChange, webform]);
+
+  useEffect(() => {
+    if (!isNil(webform) && webform.tableSchemaId) {
+      onLoadTableData();
+    }
+  }, [isDataUpdated, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -92,7 +101,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   };
 
   const onLoadTableData = async () => {
-    isLoading(true);
     try {
       const parentTableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', 100, undefined, [
         'CORRECT',
