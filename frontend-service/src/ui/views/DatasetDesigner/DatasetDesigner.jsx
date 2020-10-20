@@ -830,7 +830,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           value={view}
         />
         <label className={styles.label} htmlFor={view}>
-          {view}
+          {resources.messages[`${view}View`]}
         </label>
       </div>
     ));
@@ -847,7 +847,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
           }
         />
-        <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
+        <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
       </Fragment>
     );
 

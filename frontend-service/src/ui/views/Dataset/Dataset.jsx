@@ -747,9 +747,9 @@ export const Dataset = withRouter(({ match, history }) => {
     !isNil(webformData) && (
       <div className={styles.switch}>
         <div className={`${styles.wrap}`}>
-          <span className={styles.text}>{resources.messages['preview']}</span>
+          <span className={styles.text}>{resources.messages['tabularData']}</span>
           <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
-          <span className={styles.text}>webform</span>
+          <span className={styles.text}>{resources.messages['webform']}</span>
         </div>
       </div>
     );
@@ -937,6 +937,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       ) : (
         <Article15
+          dataflowId={dataflowId}
           datasetId={datasetId}
           isReporting
           state={{ datasetSchema: { tables: datasetSchemaAllTables }, schemaTables }}

@@ -19,7 +19,7 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 
-export const Article15 = ({ datasetId, isReporting = false, state }) => {
+export const Article15 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
@@ -108,6 +108,7 @@ export const Article15 = ({ datasetId, isReporting = false, state }) => {
 
     return (
       <WebformTable
+        dataflowId={dataflowId}
         datasetId={datasetId}
         isReporting={isReporting}
         onTabChange={article15State.isVisible}

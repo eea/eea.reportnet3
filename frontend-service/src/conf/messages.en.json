@@ -897,6 +897,16 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "uploadReplaceAttachment": "Replace file",
     "totalErrors": "total errors: ",
-    "datasetSchemaCreationErrorDuplicated": "{:schemaName} already exists. Please choose a different schema name."
+    "datasetSchemaCreationErrorDuplicated": "{:schemaName} already exists. Please choose a different schema name.",
+    "tabularData": "Tabular data",
+    "tableIsNotCreated": "The table {:tableName} is not created in the design, please check it",
+    "fieldIsNotCreated": "The field {:fieldName} is not created in the design, please check it",
+    "emptyWebformTable": "This table has no fields",
+    "tableWithErrorsTooltip": "This table has errors",
+    "webform": "Webform",
+    "webformView": "Webform",
+    "designView": "Design",
+    "tableView": "Tabular data",
+    "emptyWebformTables": "Created tables do not match with the webform model, please check it."
   }
 }

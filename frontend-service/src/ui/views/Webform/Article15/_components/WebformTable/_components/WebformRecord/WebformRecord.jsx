@@ -20,15 +20,19 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
   columnsSchema,
+  dataflowId,
   datasetId,
   isReporting,
   multipleRecords,
@@ -36,8 +40,10 @@ export const WebformRecord = ({
   onRefresh,
   onTabChange,
   record,
-  tableId
+  tableId,
+  tableName
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
@@ -106,6 +112,15 @@ export const WebformRecord = ({
       if (isDataDeleted) onRefresh();
     } catch (error) {
       console.error('error', error);
+
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'DELETE_RECORD_BY_ID_ERROR',
+        content: { dataflowId, dataflowName, datasetId, datasetName, tableName }
+      });
     }
   };
 
@@ -295,9 +310,12 @@ export const WebformRecord = ({
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="errorCircle"
             />
-            <span className={styles.nonExistField}>
-              {`The field ${field.name} is not created in the design, please check it`}
-            </span>
+            <span
+              className={styles.nonExistField}
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resources.messages['fieldIsNotCreated'], { fieldName: field.name })
+              }}
+            />
           </div>
         );
 
@@ -399,20 +417,26 @@ export const WebformRecord = ({
               <h3 className={styles.title}>
                 <div>
                   {field.title ? field.title : field.name}
-                  {field.hasErrors && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
+                  {field.hasErrors && (
+                    <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
+                  )}
                 </div>
                 {field.multipleRecords && (
                   <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(field.tableSchemaId)} />
                 )}
               </h3>
               {field.tableNotCreated && (
-                <span className={styles.nonExistTable}>
-                  {`The table ${field.name} is not created in the design, please check it`}
-                </span>
+                <span
+                  className={styles.nonExistTable}
+                  dangerouslySetInnerHTML={{
+                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: field.name })
+                  }}
+                />
               )}
               {field.elementsRecords.map((record, i) => {
                 return (
                   <WebformRecord
+                    dataflowId={dataflowId}
                     datasetId={datasetId}
                     key={i}
                     multipleRecords={field.multipleRecords}
@@ -421,6 +445,7 @@ export const WebformRecord = ({
                     onTabChange={onTabChange}
                     record={record}
                     tableId={tableId}
+                    tableName={field.title}
                   />
                 );
               })}
@@ -445,7 +470,6 @@ export const WebformRecord = ({
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               icon={'trash'}
-              // onClick={() => onDeleteMultipleWebform(record.recordId)}
               onClick={() => {
                 handleDialogs('deleteRow', true);
                 webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { recordId: record.recordId } });
@@ -453,7 +477,7 @@ export const WebformRecord = ({
             />
           </div>
         )}
-        {!isEmpty(record.elements) ? renderFields(record.elements) : 'There are no fields'}
+        {!isEmpty(record.elements) ? renderFields(record.elements) : resources.messages['emptyWebformTable']}
       </div>
     );
   };
