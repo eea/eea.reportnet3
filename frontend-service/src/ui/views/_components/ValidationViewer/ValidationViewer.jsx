@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
@@ -13,11 +13,14 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { validationReducer } from './_functions/Reducers/validationReducer';
 
 const ValidationViewer = React.memo(
   ({
@@ -48,10 +51,16 @@ const ValidationViewer = React.memo(
     const [originsFilter, setOriginsFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
-    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
-    const [totalFilteredGroupedRecords, setTotalFilteredGroupedRecords] = useState();
-    const [totalRecords, setTotalRecords] = useState(0);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
+
+    const [validationState, validationDispatch] = useReducer(validationReducer, {
+      totalErrors: 0,
+      totalFilteredGroupedRecords: 0,
+      totalFilteredRecords: 0,
+      totalRecords: 0
+    });
+
+    const { totalErrors, totalFilteredGroupedRecords, totalFilteredRecords, totalRecords } = validationState;
 
     let dropdownLevelErrorsFilterRef = useRef();
     let dropdownTypeEntitiesFilterRef = useRef();
@@ -118,7 +127,12 @@ const ValidationViewer = React.memo(
       );
       if (grouped) {
         columnsArr.push(
-          <Column key="numberOfRecords" field="numberOfRecords" header={resources.messages['numberOfRecords']} />
+          <Column
+            key="numberOfRecords"
+            field="numberOfRecords"
+            header={resources.messages['numberOfRecords']}
+            sortable={true}
+          />
         );
       }
 
@@ -185,7 +199,13 @@ const ValidationViewer = React.memo(
           originsFilter
         );
         addTableSchemaId(datasetErrors.errors);
-        setTotalFilteredGroupedRecords(datasetErrors.totalFilteredErrors);
+        validationDispatch({
+          type: 'SET_TOTAL_GROUPED_ERRORS',
+          payload: {
+            totalErrors: datasetErrors.totalErrors,
+            totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
+          }
+        });
       } else {
         datasetErrors = await DatasetService.errorsById(
           datasetId,
@@ -198,8 +218,14 @@ const ValidationViewer = React.memo(
           originsFilter
         );
       }
-      setTotalRecords(datasetErrors.totalErrors);
-      setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
+
+      validationDispatch({
+        type: 'SET_TOTALS_ERRORS',
+        payload: {
+          totalFilteredRecords: datasetErrors.totalFilteredErrors,
+          totalRecords: datasetErrors.totalRecords
+        }
+      });
 
       setFetchedData(datasetErrors.errors);
       setIsLoading(false);
@@ -373,25 +399,37 @@ const ValidationViewer = React.memo(
             break;
         }
       } else {
-        onSelectValidation(
-          event.data.tableSchemaId,
-          -1,
-          -1,
-          event.data.ruleId,
-          true,
-          event.data.message,
-          event.data.levelError
-        );
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            onSelectValidation(
+              event.data.tableSchemaId,
+              -1,
+              -1,
+              event.data.ruleId,
+              true,
+              event.data.message,
+              event.data.levelError
+            );
+            break;
+          case 'TABLE':
+            onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
+            break;
+
+          default:
+            break;
+        }
       }
     };
-
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {areActiveFilters && totalRecords !== totalFilteredRecords
-          ? `${resources.messages['filtered']}: ${totalFilteredRecords} | `
+          ? `${resources.messages['filtered']}: ${!grouped ? totalFilteredRecords : totalFilteredGroupedRecords} | `
           : ''}
-        {resources.messages['totalRecords']} {!grouped ? totalRecords : totalFilteredGroupedRecords}{' '}
-        {resources.messages['records'].toLowerCase()}
+        {resources.messages['totalRecords']} {totalRecords}{' '}
+        {`${resources.messages['records'].toLowerCase()}${
+          grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
+        }`}
         {areActiveFilters && totalRecords === totalFilteredRecords
           ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
@@ -536,7 +574,7 @@ const ValidationViewer = React.memo(
             onRowSelect={onRowSelect}
             onSort={onSort}
             paginator={true}
-            paginatorRight={getPaginatorRecordsCount()}
+            paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
             reorderableColumns={true}
             resizableColumns={true}
             rows={numberRows}

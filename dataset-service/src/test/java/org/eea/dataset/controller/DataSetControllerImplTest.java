@@ -748,98 +748,6 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Testinsert records null entry.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testinsertRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<>());
-  }
-
-  /**
-   * Testinsert records null.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testinsertRecordsNull() throws Exception {
-    dataSetControllerImpl.insertRecords(-2L, "id", null);
-  }
-
-  /**
-   * Testinsert records empty.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testinsertRecordsEmpty() throws Exception {
-    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<>());
-  }
-
-  /**
-   * Testinsert records success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testinsertRecordsSuccess() throws Exception {
-    doNothing().when(updateRecordHelper).executeCreateProcess(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.insertRecords(1L, "id", records);
-    Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Testinsert records not found exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testinsertRecordsNotFoundException() throws Exception {
-    doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataSetControllerImpl.insertRecords(1L, "id", records);
-  }
-
-
-  /**
-   * Testinsert records table read only exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testinsertRecordsTableReadOnlyException() throws Exception {
-    try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-          .thenReturn(true);
-
-      dataSetControllerImpl.insertRecords(1L, "id", records);
-    } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
-      throw e;
-    }
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void testinsertRecordsTableFixedNumberException() throws Exception {
-    try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
-          Mockito.any())).thenReturn(true);
-
-      dataSetControllerImpl.insertRecords(1L, "id", records);
-    } catch (ResponseStatusException e) {
-      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "id"), e.getReason());
-      throw e;
-    }
-  }
-
-  /**
    * Testupdate field success.
    *
    * @throws Exception the exception
@@ -1330,5 +1238,24 @@ public class DataSetControllerImplTest {
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     Mockito.verify(deleteHelper, times(1)).executeDeleteImportDataAsyncBeforeReplacing(
         Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void insertRecordsTest() throws EEAException {
+    dataSetControllerImpl.insertRecords(1L, "", new ArrayList<RecordVO>());
+    Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void inserRecordsExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(updateRecordHelper)
+        .executeCreateProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    try {
+      dataSetControllerImpl.insertRecords(1L, "", new ArrayList<RecordVO>());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 }

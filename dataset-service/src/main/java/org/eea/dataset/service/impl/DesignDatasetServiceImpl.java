@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DesignDatasetMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -20,7 +21,6 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
-import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
@@ -64,9 +64,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   @Autowired
   private DesignDatasetMapper designDatasetMapper;
 
-  /** The file common. */
-  @Autowired
-  private FileCommonUtils fileCommon;
 
   /** The dataschema service. */
   @Autowired
@@ -113,6 +110,10 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   /** The contributor controller zuul. */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
+
+  /** The webform mapper. */
+  @Autowired
+  private WebFormMapper webformMapper;
 
   /** The time to wait before continue copy. */
   @Value("${wait.continue.copy.ms}")
@@ -306,6 +307,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     DataSetSchema schema =
         schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
     schema.setDescription(schemaOrigin.getDescription());
+    schema.setWebform(webformMapper.classToEntity(schemaOrigin.getWebform()));
     // table level
     for (TableSchemaVO tableVO : schemaOrigin.getTableSchemas()) {
       ObjectId newTableId = new ObjectId();
