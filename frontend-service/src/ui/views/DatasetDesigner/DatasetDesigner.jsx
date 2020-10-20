@@ -408,9 +408,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       onUpdateDescription(description);
     }
   };
-  const onChangeIsValidationSelected = selected => {
-    designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: selected });
-  };
+  const onChangeIsValidationSelected = options =>
+    designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: options });
 
   const onChangeReference = (tabs, datasetSchemaId) => {
     const inmDatasetSchemas = [...designerState.datasetSchemas];
@@ -593,7 +592,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
 
-  const onHideSelectGroupedValidation = () => {
+  const onHideSelectGroupedValidation = () =>
     designerDispatch({
       type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
       payload: {
@@ -605,7 +604,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         selectedRuleMessage: ''
       }
     });
-  };
 
   const onSelectValidation = (
     tableSchemaId,
@@ -636,6 +634,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         payload: {
           ...designerState.dataViewerOptions,
           activeIndex: tableSchemaId,
+          isGroupedValidationDeleted: false,
+          isGroupedValidationSelected: false,
           isValidationSelected: true,
           recordPositionId: posIdRecord,
           selectedRecordErrorId,
@@ -652,9 +652,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
         ...designerState.dataViewerOptions,
-        activeIndex: tableSchemaId.index,
-        selectedRuleId: '',
-        selectedRuleMessage: ''
+        activeIndex: tableSchemaId.index
       }
     });
 

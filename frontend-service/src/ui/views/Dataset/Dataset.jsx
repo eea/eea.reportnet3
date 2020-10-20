@@ -298,10 +298,11 @@ export const Dataset = withRouter(({ match, history }) => {
     menu.style.left = left;
   };
 
-  const onChangeIsValidationSelected = selected => {
+  const onChangeIsValidationSelected = options => {
     setDataViewerOptions({
       ...dataViewerOptions,
-      isValidationSelected: selected
+      isGroupedValidationSelected: options.isGroupedValidationSelected,
+      isValidationSelected: options.isValidationSelected
     });
   };
 
@@ -565,7 +566,7 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onHideSelectGroupedValidation = () => {
+  const onHideSelectGroupedValidation = () =>
     setDataViewerOptions({
       ...dataViewerOptions,
       isGroupedValidationDeleted: true,
@@ -577,7 +578,6 @@ export const Dataset = withRouter(({ match, history }) => {
       selectedRuleId: '',
       selectedRuleMessage: ''
     });
-  };
 
   const onSelectValidation = (
     tableSchemaId,
@@ -603,6 +603,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDataViewerOptions({
         ...dataViewerOptions,
         activeIndex: tableSchemaId,
+        isGroupedValidationDeleted: false,
         isGroupedValidationSelected: false,
         isValidationSelected: true,
         recordPositionId: posIdRecord,
@@ -621,17 +622,11 @@ export const Dataset = withRouter(({ match, history }) => {
     fnUseState(visible);
   };
 
-  const onTabChange = tableSchemaId => {
+  const onTabChange = tableSchemaId =>
     setDataViewerOptions({
       ...dataViewerOptions,
-      activeIndex: tableSchemaId.index,
-      isGroupedValidationDeleted: true,
-      isGroupedValidationSelected: false,
-      selectedRuleId: '',
-      selectedRuleLevelError: '',
-      selectedRuleMessage: ''
+      activeIndex: tableSchemaId.index
     });
-  };
 
   const datasetTitle = () => {
     let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;

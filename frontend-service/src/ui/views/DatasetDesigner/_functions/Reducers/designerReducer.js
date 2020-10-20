@@ -114,8 +114,8 @@ export const designerReducer = (state, { type, payload }) => {
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
-          isGroupedValidationDeleted: false,
-          isGroupedValidationSelected: false,
+          isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected,
           isValidationSelected: payload.isValidationSelected,
           recordPositionId: payload.recordPositionId,
           selectedRecordErrorId: payload.selectedRecordErrorId,
@@ -134,8 +134,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          isValidationSelected: payload,
-          isGroupedValidationSelected: payload
+          isValidationSelected: payload.isValidationSelected,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected
         }
       };
 

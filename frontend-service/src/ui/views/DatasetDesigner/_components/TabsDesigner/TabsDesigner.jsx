@@ -54,7 +54,6 @@ export const TabsDesigner = withRouter(
     const {
       params: { dataflowId, datasetId }
     } = match;
-
     const validationContext = useContext(ValidationContext);
 
     // const [activeIndex, setActiveIndex] = useState(activeIdx);
@@ -199,7 +198,7 @@ export const TabsDesigner = withRouter(
     const onTabClicked = event => {
       if (event.header !== '') {
         setActiveIndex(event.index);
-        onChangeIsValidationSelected(false);
+        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     };
 
