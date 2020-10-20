@@ -1,5 +1,6 @@
 import React from 'react';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsSchema.module.css';
@@ -9,6 +10,9 @@ import { config } from 'conf';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
+
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
   activeIndex = 0,
@@ -33,6 +37,7 @@ export const TabsSchema = ({
   selectedRuleLevelError,
   selectedRuleMessage,
   showWriteButtons = true,
+  tableSchemaId,
   tables,
   tableSchemaColumns
 }) => {
@@ -76,7 +81,7 @@ export const TabsSchema = ({
                       : []
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
-                  selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
+                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
@@ -97,9 +102,22 @@ export const TabsSchema = ({
 
   return (
     <TabView
-      activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
+      activeIndex={
+        !isNil(tables)
+          ? TabsUtils.getIndexByTableProperty(
+              !isNil(tableSchemaId)
+                ? tableSchemaId
+                : QuerystringUtils.getUrlParamValue('tab') !== ''
+                ? QuerystringUtils.getUrlParamValue('tab')
+                : '',
+              tables,
+              'id'
+            )
+          : 0
+      }
       onTabChange={onTabChange}
-      renderActiveOnly={false}>
+      renderActiveOnly={false}
+      tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>
   );
