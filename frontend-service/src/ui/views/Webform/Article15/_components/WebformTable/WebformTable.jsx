@@ -272,7 +272,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           )}
         </div>
         {webformData.multipleRecords && (
-          <Button label={'Add'} icon={'plus'} onClick={() => onAddMultipleWebform(webformData.tableSchemaId)} />
+          <Button
+            icon={'plus'}
+            label={resources.messages['addRecord']}
+            onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
+          />
         )}
       </h3>
       {isNil(webformData.tableSchemaId) && (

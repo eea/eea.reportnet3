@@ -439,7 +439,7 @@ export const WebformRecord = ({
                     icon={
                       addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                     }
-                    label={'Add'}
+                    label={resources.messages['addRecord']}
                     onClick={() => onAddMultipleWebform(element.tableSchemaId)}
                   />
                 )}
