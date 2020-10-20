@@ -51,6 +51,7 @@ export const WebformRecord = ({
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
+    isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     newRecord: {},
@@ -86,7 +87,7 @@ export const WebformRecord = ({
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: parseNewRecordData(record.elements, undefined), record }
+      payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
     });
   }, [record, onTabChange]);
 
@@ -109,6 +110,10 @@ export const WebformRecord = ({
   };
 
   const onDeleteMultipleWebform = async () => {
+    webformRecordDispatch({
+      type: 'SET_IS_DELETING',
+      payload: { isDeleting: true }
+    });
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
       if (isDataDeleted) {
@@ -483,10 +488,11 @@ export const WebformRecord = ({
           <div className={styles.actionButtons}>
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-              icon={'trash'}
+              disabled={webformRecordState.isDeleting}
+              icon={webformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);
-                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { recordId: content.recordId } });
+                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { selectedRecordId: content.recordId } });
               }}
             />
           </div>
