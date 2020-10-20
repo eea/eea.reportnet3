@@ -1,11 +1,31 @@
 import compact from 'lodash/compact';
-import isEmpty from 'lodash/isEmpty';
-import isUndefined from 'lodash/isUndefined';
 
-const getWebformTabs = (allTables = []) => {
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+
+const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
   const initialValues = {};
 
-  const value = allTables[0];
+  let tableIdx = 0;
+  if (QuerystringUtils.getUrlParamValue('tab') !== '') {
+    const filteredTable = schemaTables.filter(
+      schemaTable => schemaTable.id === QuerystringUtils.getUrlParamValue('tab')
+    );
+    tableIdx = allTables.indexOf(filteredTable[0].name);
+
+    //Search on subtables for parent id
+    if (tableIdx === -1) {
+      configTables.forEach(table => {
+        table.elements.forEach(element => {
+          if (element.type === 'TABLE') {
+            if (element.name === filteredTable[0].name) {
+              tableIdx = allTables.indexOf(table.name);
+            }
+          }
+        });
+      });
+    }
+  }
+  const value = allTables[tableIdx === -1 ? 0 : tableIdx];
 
   compact(allTables).forEach(table => {
     initialValues[table] = false;

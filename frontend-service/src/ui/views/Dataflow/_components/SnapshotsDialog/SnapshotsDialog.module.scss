@@ -11,6 +11,11 @@
   }
 }
 
+.successButton {
+  background-color: var(--c-green) !important;
+  border-color: var(--c-green) !important;
+}
+
 .createSnapshotButton {
   border-radius: 0 5px 5px 0 !important;
   box-shadow: 0px 0px 0px 1.5px var(--c-corporate-blue);

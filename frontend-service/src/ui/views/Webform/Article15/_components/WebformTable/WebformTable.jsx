@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -13,9 +13,18 @@ import { WebformRecord } from './_components/WebformRecord';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
-export const WebformTable = ({ datasetId, onTabChange, webform }) => {
+import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
+
+export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, webform }) => {
+  const notificationContext = useContext(NotificationContext);
+  const resources = useContext(ResourcesContext);
+
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
     isDataUpdated: false,
     isLoading: true,
@@ -29,7 +38,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
   }, [webform]);
 
   useEffect(() => {
-    if (webform.tableSchemaId) onLoadTableData();
+    if (!isNil(webform) && webform.tableSchemaId) onLoadTableData();
   }, [isDataUpdated, onTabChange, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -42,7 +51,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
         fields = columnsSchema.map(column => {
           if (column.type === 'FIELD') {
             return {
-              fieldData: { [column.fieldSchemaId]: null, type: column.fieldType, fieldSchemaId: column.fieldSchemaId }
+              fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
             };
           }
         });
@@ -59,12 +68,25 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
 
   const onAddMultipleWebform = async tableSchemaId => {
     if (!isEmpty(webformData.elementsRecords)) {
-      const newEmptyRecord = parseNewRecord(webformData.elementsRecords[0].elements);
+      const newEmptyRecord = parseNewRecord(
+        webformData.elementsRecords[0].elements.filter(element => element.tableSchemaId === tableSchemaId)[0].elements
+      );
 
       try {
-        await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
+        const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
+        if (response) {
+          onUpdateData();
+        }
       } catch (error) {
         console.error('error', error);
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'ADD_RECORDS_BY_ID_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName, tableName: webformData.title }
+        });
       }
     }
   };
@@ -72,7 +94,7 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
   const onLoadTableData = async () => {
     isLoading(true);
     try {
-      const parentTableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', '', undefined, [
+      const parentTableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', 100, undefined, [
         'CORRECT',
         'INFO',
         'WARNING',
@@ -107,6 +129,15 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       }
     } catch (error) {
       console.error('ERROR', error);
+
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'TABLE_DATA_BY_ID_ERROR',
+        content: { dataflowId, dataflowName, datasetId, datasetName }
+      });
     } finally {
       isLoading(false);
     }
@@ -130,9 +161,11 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
             codelistItems: element.codelistItems || [],
             description: element.description || '',
             isDisabled: isNil(element.fieldSchema),
+            maxSize: element.maxSize,
             name: element.name,
             recordId: record.recordId,
-            type: element.type
+            type: element.type,
+            validExtensions: element.validExtensions
           });
         } else {
           if (tableData[element.tableSchemaId]) {
@@ -161,24 +194,33 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       webformData.elementsRecords.map((record, i) => {
         return (
           <WebformRecord
+            columnsSchema={webformData.elementsRecords[0].elements}
+            dataflowId={dataflowId}
             datasetId={datasetId}
+            isReporting={isReporting}
             key={i}
+            multipleRecords={webformData.multipleRecords}
+            onAddMultipleWebform={onAddMultipleWebform}
             onRefresh={onUpdateData}
             onTabChange={onTabChange}
             record={record}
             tableId={webformData.tableSchemaId}
-            onAddMultipleWebform={onAddMultipleWebform}
+            tableName={webformData.title}
           />
         );
       })
     ) : (
       <WebformRecord
+        columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
+        dataflowId={dataflowId}
         datasetId={datasetId}
+        isReporting={isReporting}
+        multipleRecords={webformData.multipleRecords}
+        onAddMultipleWebform={onAddMultipleWebform}
         onRefresh={onUpdateData}
         onTabChange={onTabChange}
         record={webformData.elementsRecords[0]}
         tableId={webformData.tableSchemaId}
-        onAddMultipleWebform={onAddMultipleWebform}
       />
     );
   };
@@ -196,16 +238,21 @@ export const WebformTable = ({ datasetId, onTabChange, webform }) => {
       <h3 className={styles.title}>
         <div>
           {webformData.title ? webformData.title : webformData.name}
-          {hasErrors.includes(true) && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
+          {hasErrors.includes(true) && (
+            <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
+          )}
         </div>
         {webformData.multipleRecords && (
           <Button label={'Add'} icon={'plus'} onClick={() => onAddMultipleWebform(webformData.tableSchemaId)} />
         )}
       </h3>
       {isNil(webformData.tableSchemaId) && (
-        <span className={styles.nonExistTable}>
-          {`The table ${webformData.name} is not created in the design, please check it`}
-        </span>
+        <span
+          className={styles.nonExistTable}
+          dangerouslySetInnerHTML={{
+            __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: webformData.name })
+          }}
+        />
       )}
       {!isNil(webformData.elementsRecords) && renderWebformFields(webformData.multipleRecords)}
     </div>
