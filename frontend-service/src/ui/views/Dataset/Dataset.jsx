@@ -629,6 +629,8 @@ export const Dataset = withRouter(({ match, history }) => {
     } else {
       setDataViewerOptions({
         ...dataViewerOptions,
+        activeIndex: tableSchemaId,
+        isGroupedValidationSelected: false,
         isValidationSelected: true,
         recordPositionId: posIdRecord,
         selectedRecordErrorId,
