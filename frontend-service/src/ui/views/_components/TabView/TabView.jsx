@@ -17,6 +17,8 @@ import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Tab } from './_components/Tab';
 
+import { QuerystringUtils, TabsUtils } from 'ui/views/_functions/Utils';
+
 const TabView = withRouter(
   ({
     activeIndex = -1,
@@ -29,7 +31,6 @@ const TabView = withRouter(
     id = null,
     initialTabIndexDrag,
     isErrorDialogVisible,
-    isPreviewModeOn,
     onTabAdd,
     onTabAddCancel,
     onTabBlur,
@@ -42,11 +43,14 @@ const TabView = withRouter(
     onTabNameError,
     renderActiveOnly = true,
     style = null,
-    totalTabs
+    tabs,
+    tableSchemaId,
+    totalTabs,
+    viewType
   }) => {
     const [activeIdx, setActiveIdx] = useState(activeIndex);
     const [idx] = useState(id || UniqueComponentId());
-    const [idxToDelete, setIdxToDelete] = useState(null);
+    const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isNavigationHidden, setIsNavigationHidden] = useState(true);
 
@@ -69,10 +73,10 @@ const TabView = withRouter(
 
     useEffect(() => {
       if (!isNil(onTabClick) && history.location.search !== '') {
-        onTabClick({ index: getUrlParamValue('tab') });
+        onTabClick({ index: QuerystringUtils.getUrlParamValue('tab') });
       } else {
         if (!isNil(onTabChange)) {
-          onTabChange({ index: getUrlParamValue('tab') });
+          onTabChange({ index: QuerystringUtils.getUrlParamValue('tab') });
         }
       }
     }, []);
@@ -98,7 +102,7 @@ const TabView = withRouter(
         } else {
           if (!tab.props.disabled) {
             if (!isNil(onTabChange)) {
-              onTabChange({ originalEvent: event, index: index });
+              onTabChange({ originalEvent: event, index, tableSchemaId: tab.props.tableSchemaId });
             } else {
               if (!isNil(onTabClick)) {
                 onTabClick({ originalEvent: event, index: index, header: tab.props.header });
@@ -112,7 +116,7 @@ const TabView = withRouter(
             onTabClick({ originalEvent: event, index: index, header: tab.props.header });
           }
           if (!isNil(onTabChange)) {
-            onTabChange({ originalEvent: event, index: index });
+            onTabChange({ originalEvent: event, index, tableSchemaId: tab.key });
           } else {
             if (!isNil(onTabClick)) {
               onTabClick({ originalEvent: event, index: index, header: tab.props.header });
@@ -126,8 +130,8 @@ const TabView = withRouter(
       event.preventDefault();
     };
 
-    const onTabDeleteClicked = deleteIndex => {
-      setIdxToDelete(deleteIndex);
+    const onTabDeleteClicked = deleteTableSchemaId => {
+      setTableSchemaIdToDelete(deleteTableSchemaId);
       setIsDeleteDialogVisible(true);
     };
 
@@ -139,12 +143,17 @@ const TabView = withRouter(
       }
     };
 
-    const changeUrl = () =>
-      window.history.replaceState(
-        null,
-        null,
-        `?tab=${activeIdx}${!isUndefined(isPreviewModeOn) ? `&design=${isPreviewModeOn}` : ''}`
-      );
+    const changeUrl = () => {
+      if (!isNil(tableSchemaId)) {
+        window.history.replaceState(
+          null,
+          null,
+          `?tab=${tableSchemaId}${
+            !isNil(viewType) ? `&view=${Object.keys(viewType).filter(view => viewType[view])}` : ''
+          }`
+        );
+      }
+    };
 
     const createContent = (tab, index) => {
       const selected = isSelected(index);
@@ -165,23 +174,18 @@ const TabView = withRouter(
         </div>
       );
     };
-    const getUrlParamValue = param => {
-      let value = '';
-      let queryString = window.location.search;
-      const params = queryString.substring(1, queryString.length).split('&');
-      params.forEach(parameter => {
-        if (parameter.includes(param)) {
-          value = parameter.split('=')[1];
-        }
-      });
-      return param === 'tab' ? Number(value) : value === 'true';
-    };
+
     const isSelected = index => {
       if (designMode) {
-        if (activeIdx !== getUrlParamValue('tab')) {
+        if (
+          activeIdx !==
+          TabsUtils.getIndexByTableProperty(QuerystringUtils.getUrlParamValue('tab'), tabs, 'tableSchemaId')
+        ) {
           return activeIdx === index;
         } else {
-          return getUrlParamValue('tab') === index;
+          return (
+            TabsUtils.getIndexByTableProperty(QuerystringUtils.getUrlParamValue('tab'), tabs, 'tableSchemaId') === index
+          );
         }
       } else {
         return activeIdx === index;
@@ -203,9 +207,9 @@ const TabView = withRouter(
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={className}
+          designMode={designMode}
           disabled={tab.props.disabled}
           editable={tab.props.editable}
-          designMode={designMode}
           divScrollTabsRef={divTabsRef.current}
           hasPKReferenced={tab.props.hasPKReferenced}
           header={tab.props.header}
@@ -214,7 +218,6 @@ const TabView = withRouter(
           index={index}
           initialTabIndexDrag={initialTabIndexDrag}
           isNavigationHidden={isNavigationHidden}
-          isPreviewModeOn={isPreviewModeOn}
           key={id}
           leftIcon={tab.props.leftIcon}
           newTab={tab.props.newTab}
@@ -235,6 +238,7 @@ const TabView = withRouter(
           rightIcon={tab.props.rightIcon}
           scrollTo={scrollTo}
           selected={selected}
+          tableSchemaId={tab.props.tableSchemaId}
           totalTabs={totalTabs}
         />
       );
@@ -309,7 +313,7 @@ const TabView = withRouter(
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => {
-          onTabConfirmDelete(idxToDelete);
+          onTabConfirmDelete(tableSchemaIdToDeleteToDelete);
           setIsDeleteDialogVisible(false);
         }}
         onHide={() => setIsDeleteDialogVisible(false)}
