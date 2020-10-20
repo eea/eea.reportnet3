@@ -105,7 +105,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           type: 'ADD_RECORDS_BY_ID_ERROR',
           content: { dataflowId, datasetId, dataflowName, datasetName, tableName: webformData.title }
         });
-      } finally {
         webformTableDispatch({
           type: 'SET_IS_ADDING_MULTIPLE',
           payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
@@ -162,6 +161,10 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
       });
     } finally {
       isLoading(false);
+      webformTableDispatch({
+        type: 'SET_IS_ADDING_MULTIPLE',
+        payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
+      });
     }
   };
 
