@@ -565,6 +565,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Long dataflowId =
           datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
 
+
+
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
         case DESIGN:
@@ -619,7 +621,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           dataprovidersVOList
               .removeIf(dataprovider -> dataprovider.getDataProviderId() != providerId);
           List<Long> dataprovidersIdList = new ArrayList<>();
-
+          List<Long> datasetIdList = new ArrayList<>();
+          for (ReportingDatasetVO dataset : reportingDatasetList) {
+            datasetIdList.add(dataset.getId());
+          }
           for (RepresentativeVO provider : dataprovidersVOList) {
             dataprovidersIdList.add(provider.getDataProviderId());
           }
@@ -631,11 +636,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             }
           }
           for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
-            String key = auxDatasetMap.getKey();
-            Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
-            datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+            if (datasetIdList.contains(auxDatasetMap.getValue())) {
+              String key = auxDatasetMap.getKey();
+              Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
+              datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+            }
           }
-
           for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
             query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
                 "dataset_" + auxDatasetOldAndNew.getValue());
