@@ -55,7 +55,7 @@ const checkValidLine = (coordinates, emptyIsValid = false) => {
   if (coordinates.length < 2) return false;
   let isValid = true;
   coordinates.forEach(coordinate => {
-    if (!checkValidCoordinates(coordinate)) {
+    if (!checkValidCoordinates(coordinate, emptyIsValid)) {
       isValid = false;
     }
   });

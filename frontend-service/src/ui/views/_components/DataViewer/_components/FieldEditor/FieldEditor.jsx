@@ -167,10 +167,11 @@ const FieldEditor = ({
             ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
             : [];
         } else {
-          geoJson.geometry.coordinates = MapUtils.parseCoordinates(
-            coordinates.replace(', ', ',').split(','),
-            parseToFloat
-          );
+          geoJson.geometry.coordinates = coordinates
+            .replace('[', '')
+            .replace(']', '')
+            .split(',')
+            .map(coord => MapUtils.parseCoordinates(coord.replace(', ', ','), parseToFloat));
         }
 
         return JSON.stringify(geoJson);
@@ -403,7 +404,7 @@ const FieldEditor = ({
             </div>
           </div>
         );
-      case 'POLYGON':
+      case 'LINE':
         return (
           <div className={styles.pointWrapper}>
             <InputText
@@ -412,7 +413,7 @@ const FieldEditor = ({
               onBlur={e => {
                 onEditorSubmitValue(
                   cells,
-                  changePoint(
+                  changeLine(
                     RecordUtils.getCellValue(cells, cells.field) !== ''
                       ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
                       : JSON.parse(fieldEmptyPointValue),
