@@ -351,7 +351,7 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
+      rule.setWhenCondition("checkIntegrityConstraint(this.datasetId.id,'"
           + integrityConstraintId.toString() + "','" + rule.getRuleId().toString() + "')");
       Long datasetReferencedId = dataSetMetabaseControllerZuul
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
@@ -365,7 +365,7 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId, ")
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, ")
           .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
@@ -657,7 +657,7 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId, ")
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, ")
           .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
