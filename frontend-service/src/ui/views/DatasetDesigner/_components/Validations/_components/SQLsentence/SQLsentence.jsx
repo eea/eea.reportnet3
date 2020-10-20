@@ -1,14 +1,17 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './SQLsentence.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
   const resources = useContext(ResourcesContext);
+
+  const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
 
   useEffect(() => {
     return () => onSetSQLsentence('sqlSentence', '');
@@ -30,6 +33,14 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
     }
   };
 
+  const onClickInfoButton = () => {
+    setIsVisibleInfoDialog(true);
+  };
+
+  const onHideInfoDiaog = () => {
+    setIsVisibleInfoDialog(false);
+  };
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -40,16 +51,12 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           <h3 className={styles.title}>
             {resources.messages['sqlSentence']}
             <Button
-              className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
+              className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
               id="infoSQLsentence"
+              onClick={e => onClickInfoButton()}
             />
           </h3>
-          {/* <p>{resources.messages['sqlSentenceHelpDescription']}</p>
-          <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
-          <p
-            className={styles.note}
-            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p> */}
           <textarea
             id="SQLsentenceTextarea"
             name=""
@@ -58,6 +65,15 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           />
         </div>
       </div>
+      {isVisibleInfoDialog && (
+        <Dialog onHide={onHideInfoDiaog} visible={isVisibleInfoDialog} header={''}>
+          <p>{resources.messages['sqlSentenceHelpDescription']}</p>
+          <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
+          <p
+            className={styles.note}
+            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p>
+        </Dialog>
+      )}
     </div>
   );
 };
