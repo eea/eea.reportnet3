@@ -28,7 +28,11 @@
       color: var(--errors);
     }
   }
-
+  .attachmentWrapper {
+    button {
+      margin-right: 0.5rem;
+    }
+  }
   .field {
     margin-bottom: 2rem;
     :global .p-multiselect {

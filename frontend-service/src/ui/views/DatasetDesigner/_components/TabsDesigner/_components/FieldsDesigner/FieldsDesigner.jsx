@@ -27,7 +27,6 @@ export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
   datasetSchemas,
-  isPreviewModeOn,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -43,7 +42,8 @@ export const FieldsDesigner = ({
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
-  table
+  table,
+  viewType
 }) => {
   const validationContext = useContext(ValidationContext);
   const resources = useContext(ResourcesContext);
@@ -329,7 +329,6 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           hasWritePermissions={true}
-          isPreviewModeOn={isPreviewModeOn}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
@@ -351,6 +350,7 @@ export const FieldsDesigner = ({
           tableName={table.tableSchemaName}
           tableReadOnly={false}
           tableSchemaColumns={tableSchemaColumns}
+          viewType={viewType}
         />
       );
     }
@@ -378,8 +378,8 @@ export const FieldsDesigner = ({
     } else {
       return (
         <>
-          {isPreviewModeOn ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!isPreviewModeOn && renderNewField()}
+          {viewType['table'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+          {!viewType['table'] && renderNewField()}
         </>
       );
     }
@@ -631,7 +631,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      {!isPreviewModeOn && (
+      {!viewType['table'] && (
         <div className={styles.fieldsHeader}>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
