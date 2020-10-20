@@ -21,9 +21,11 @@ export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns
         if (equalNumberColumns.length > 0 || !checkValidCoordinates()) {
           return (
             <div>
-              <p style={{ fontWeight: 'bold', color: colors.errors }}>
-                {resources.messages['pasteColumnWarningMessage']}
-              </p>
+              {equalNumberColumns.length > 0 && (
+                <p style={{ fontWeight: 'bold', color: colors.errors }}>
+                  {resources.messages['pasteColumnWarningMessage']}
+                </p>
+              )}
               {numCopiedRecords > 500 ? (
                 <p style={{ fontWeight: 'bold', color: colors.errors }}>
                   {resources.messages['pasteRecordsWarningMessage']}
