@@ -1,11 +1,17 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './SQLsentence.module.scss';
+
+import { Button } from 'ui/views/_components/Button';
+import { Dialog } from 'ui/views/_components/Dialog';
+import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
   const resources = useContext(ResourcesContext);
+
+  const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
 
   useEffect(() => {
     return () => onSetSQLsentence('sqlSentence', '');
@@ -27,20 +33,49 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
     }
   };
 
+  const onClickInfoButton = () => {
+    setIsVisibleInfoDialog(true);
+  };
+
+  const onHideInfoDiaog = () => {
+    setIsVisibleInfoDialog(false);
+  };
+
   return (
     <div className={styles.section}>
-      <h3 className={styles.title}>{resources.messages['sqlSentence']}:</h3>
-      <p>{resources.messages['sqlSentenceHelpDescription']}</p>
-      <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
-      <p className={styles.note} dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p>
-      <textarea
-        cols={30}
-        id="SQLsentenceTextarea"
-        name=""
-        onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
-        rows={10}
-        value={creationFormState.candidateRule['sqlSentence']}
-      />
+      <div className={styles.content}>
+        <div className={styles.helpSideBar}>
+          <SqlHelp onSetSqlSentence={onSetSQLsentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
+        </div>
+        <div className={styles.sqlSentence}>
+          <h3 className={styles.title}>
+            {resources.messages['sqlSentence']}
+            <Button
+              className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
+              icon="infoCircle"
+              id="infoSQLsentence"
+              onClick={e => onClickInfoButton()}
+            />
+          </h3>
+          <textarea
+            id="SQLsentenceTextarea"
+            name=""
+            onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
+            value={creationFormState.candidateRule['sqlSentence']}
+          />
+        </div>
+      </div>
+      {isVisibleInfoDialog && (
+        <Dialog
+          onHide={onHideInfoDiaog}
+          visible={isVisibleInfoDialog}
+          header={resources.messages['sqlSentenceHelpDialogTitle']}>
+          <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
+          <p
+            className={styles.note}
+            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p>
+        </Dialog>
+      )}
     </div>
   );
 };
