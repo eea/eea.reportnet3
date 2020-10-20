@@ -1173,7 +1173,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           break;
         default:
           stringQuery
-              .append("(select fv.value from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
+              .append("(select case when fv.value = '' then null else fv.value end from dataset_"
+                  + datasetId + QUERY_FILTER_BY_ID_RECORD)
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
           break;
