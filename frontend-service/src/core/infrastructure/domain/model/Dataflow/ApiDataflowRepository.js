@@ -37,11 +37,11 @@ const accepted = async () => {
 
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
-  userRoles.filter(item => {
-    return !item.duplicatedRoles && userRoleToDataflow.push(item);
+  userRoles.filter(userRol => {
+    return !userRol.duplicatedRoles && userRoleToDataflow.push(userRol);
   });
 
-  const duplicatedRoles = userRoles.filter(item => item.duplicatedRoles);
+  const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
   const dataflowIdDuplicatedRoles = [];
   for (const userRoleDuplicated of duplicatedRoles) {
     if (dataflowIdDuplicatedRoles[userRoleDuplicated.id]) {
