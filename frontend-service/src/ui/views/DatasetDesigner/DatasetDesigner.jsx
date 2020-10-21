@@ -554,6 +554,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const onUpdateTabs = data => {
+    const parsedData = [];
+    data.forEach(table => parsedData.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
+    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData } });
+  };
+
   const onLoadSchema = () => {
     onHighlightRefresh(false);
 
@@ -641,7 +647,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       designerDispatch({
         type: 'SET_DATAVIEWER_OPTIONS',
         payload: {
-          ...designerState.dataViewerOptions,          
+          ...designerState.dataViewerOptions,
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: false,
           isValidationSelected: true,
@@ -689,6 +695,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onUpdateTable = tables => designerDispatch({ type: 'ON_UPDATE_TABLES', payload: { tables } });
+
+  const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
@@ -1128,7 +1136,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         ) : (
           <TabsDesigner
             changeMode={changeMode}
-            datasetSchemaDTO={designerState.datasetSchema}
+            datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
             editable={true}
@@ -1144,6 +1152,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateTable={onUpdateTable}
+            onUpdateSchema={onUpdateSchema}
+            getUpdatedTabs={onUpdateTabs}
             recordPositionId={designerState.dataViewerOptions.recordPositionId}
             selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
             selectedRuleId={designerState.dataViewerOptions.selectedRuleId}

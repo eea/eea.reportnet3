@@ -497,6 +497,7 @@ export const FieldsDesigner = ({
       );
       if (fieldOrdered) {
         setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+        onChangeFields(inmFields, false, table.tableSchemaId);
       }
     } catch (error) {
       console.error(`There has been an error during the field reorder: ${error}`);
