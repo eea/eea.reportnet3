@@ -37,7 +37,7 @@ export const WebformRecord = ({
   datasetId,
   hasFields,
   isAddingMultiple,
-  isFixedNumber,
+  isFixedNumber = true,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,

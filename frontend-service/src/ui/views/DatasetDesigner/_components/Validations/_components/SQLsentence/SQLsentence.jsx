@@ -67,6 +67,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
       </div>
       {isVisibleInfoDialog && (
         <Dialog
+          style={{ maxWidth: '41vw' }}
           onHide={onHideInfoDiaog}
           visible={isVisibleInfoDialog}
           header={resources.messages['sqlSentenceHelpDialogTitle']}>
