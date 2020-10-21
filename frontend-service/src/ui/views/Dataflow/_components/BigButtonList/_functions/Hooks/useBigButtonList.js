@@ -107,6 +107,19 @@ const useBigButtonList = ({
     }
   ];
 
+  const feedbackBigButton = [
+    {
+      buttonClass: 'dataflowFeedback',
+      buttonIcon: 'comments',
+      caption: resources.messages['dataflowFeedback'],
+      handleRedirect: () => handleRedirect(getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true)),
+      helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
+      layout: 'defaultBigButton',
+      onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),
+      visibility: true
+    }
+  ];
+
   const helpBigButton = [
     {
       buttonClass: 'dataflowHelp',
@@ -513,6 +526,7 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
+    ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
     ...copyDataCollectionToEuDatasetBigButton,

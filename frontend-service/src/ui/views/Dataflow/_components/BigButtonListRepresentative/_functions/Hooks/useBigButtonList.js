@@ -44,6 +44,32 @@ const useBigButtonList = ({
       !roles.includes(config.permissions['REPORTER_READ'])
   });
 
+  const feedbackButton = {
+    layout: 'defaultBigButton',
+    buttonClass: 'dataflowFeedback',
+    buttonIcon: 'comments',
+    caption: resources.messages['dataflowFeedback'],
+    handleRedirect: () =>
+      handleRedirect(
+        getUrl(
+          routes.DATAFLOW_FEEDBACK,
+          {
+            dataflowId: dataflowState.id
+          },
+          true
+        )
+      ),
+    helpClassName: 'dataflow-feedback-help-step',
+    onWheel: getUrl(
+      routes.DATAFLOW_FEEDBACK,
+      {
+        dataflowId: dataflowState.id
+      },
+      true
+    ),
+    visibility: true
+  };
+
   const helpButton = {
     layout: 'defaultBigButton',
     buttonClass: 'dataflowHelp',
@@ -187,7 +213,7 @@ const useBigButtonList = ({
 
   const releaseBigButton = onBuildReleaseButton();
 
-  return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
+  return [helpButton, feedbackButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };
 
 export { useBigButtonList };
