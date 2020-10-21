@@ -546,7 +546,7 @@ const ValidationViewer = React.memo(
               />
             </div> */}
 
-            <div className={styles.searchInput}>
+            <div>
               <Filters
                 className="filter-lines"
                 data={fetchedData}
@@ -582,28 +582,33 @@ const ValidationViewer = React.memo(
           </Toolbar>
         )}
         <>
-          <DataTable
-            autoLayout={true}
-            first={firstRow}
-            lazy={true}
-            loading={isLoading}
-            onPage={onChangePage}
-            onRowSelect={onRowSelect}
-            onSort={onSort}
-            paginator={true}
-            paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
-            reorderableColumns={true}
-            resizableColumns={true}
-            rows={numberRows}
-            rowsPerPageOptions={[5, 10, 15]}
-            selectionMode="single"
-            sortable={true}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            totalRecords={totalFilteredRecords}
-            value={filteredData}>
-            {columns}
-          </DataTable>
+          {!isEmpty(filteredData) ? (
+            <DataTable
+              autoLayout={true}
+              // className={styles.validations}
+              first={firstRow}
+              lazy={true}
+              loading={isLoading}
+              onPage={onChangePage}
+              onRowSelect={onRowSelect}
+              onSort={onSort}
+              paginator={true}
+              paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
+              reorderableColumns={true}
+              resizableColumns={true}
+              rows={numberRows}
+              rowsPerPageOptions={[5, 10, 15]}
+              selectionMode="single"
+              sortable={true}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              totalRecords={totalFilteredRecords}
+              value={filteredData}>
+              {columns}
+            </DataTable>
+          ) : (
+            <div className={styles.emptyFilteredData}>{resources.messages['noValidationsWithSelectedParameters']}</div>
+          )}
         </>
       </div>
     );

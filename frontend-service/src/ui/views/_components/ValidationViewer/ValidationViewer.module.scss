@@ -65,3 +65,11 @@
 .validationWrapper {
   min-height: 200px;
 }
+
+.emptyFilteredData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
