@@ -1189,7 +1189,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
         + "')");
 
-    executeQueryViewCommands(stringQuery.toString().toLowerCase());
+    executeQueryViewCommands(stringQuery.toString());
   }
 
 }
