@@ -27,11 +27,16 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
 
   useEffect(() => {
     if (isSaved) {
-      onSaveCodelist(codelistItems);
-      setCodelistItems([]);
       setIsVisible(false);
     }
   }, [isSaved]);
+
+  useEffect(() => {
+    if (!isVisible && isSaved) {
+      onSaveCodelist(codelistItems);
+      setCodelistItems([]);
+    }
+  }, [isVisible]);
 
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
