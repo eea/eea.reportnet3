@@ -322,13 +322,15 @@ export const Feedback = withRouter(({ match, history }) => {
         <Column field="datetime" header="Datetime" loadingBody={loadingText}></Column>
         <Column field="read" header="Read" loadingBody={loadingText}></Column>
       </DataTable>
-      <Dialog
-        // className={styles.dialog}
-        header={resources.messages['message']}
-        onHide={onCloseDialog}
-        visible={isDialogVisible}>
-        <div className="p-grid p-fluid">{messageToShow}</div>
-      </Dialog>
+      {isDialogVisible && (
+        <Dialog
+          // className={styles.dialog}
+          header={resources.messages['message']}
+          onHide={onCloseDialog}
+          visible={isDialogVisible}>
+          <div className="p-grid p-fluid">{messageToShow}</div>
+        </Dialog>
+      )}
     </Fragment>
   );
 });
