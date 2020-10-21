@@ -3,6 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 import moment from 'moment';
 
 import { config } from 'conf';
@@ -34,6 +35,45 @@ const accepted = async () => {
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
+const getUserRoles = userRoles => {
+  const userRoleToDataflow = [];
+  userRoles.filter(item => {
+    return !item.duplicatedRoles && userRoleToDataflow.push(item);
+  });
+
+  const duplicatedRoles = userRoles.filter(item => item.duplicatedRoles);
+  const dataflowIdDuplicatedRoles = [];
+  for (const userRoleDuplicated of duplicatedRoles) {
+    if (dataflowIdDuplicatedRoles[userRoleDuplicated.id]) {
+      dataflowIdDuplicatedRoles[userRoleDuplicated.id].push(userRoleDuplicated);
+    } else {
+      dataflowIdDuplicatedRoles[userRoleDuplicated.id] = [userRoleDuplicated];
+    }
+  }
+
+  dataflowIdDuplicatedRoles.forEach(dataflowIdRoles => {
+    const rol = dataflowIdRoles.find(dataflowRole => {
+      return dataflowRole.userRole === 'LEAD_REPORTER';
+    });
+
+    if (isEmpty(rol)) {
+      rol = dataflowIdRoles.find(dataflowRole => {
+        return dataflowRole.userRole === 'REPORTER_WRITE';
+      });
+    }
+
+    if (isEmpty(rol)) {
+      rol = dataflowIdRoles.find(dataflowRole => {
+        return dataflowRole.userRole === 'REPORTER_READ';
+      });
+    }
+
+    userRoleToDataflow.push(rol);
+  });
+
+  return userRoleToDataflow;
+};
+
 const all = async userData => {
   const pendingDataflowsDTO = await apiDataflow.all(userData);
   const dataflows = !userData ? pendingDataflowsDTO : [];
@@ -50,14 +90,7 @@ const all = async userData => {
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
       dataflows.push({
         ...pendingDataflowsDTO[i],
-        ...(isDuplicated
-          ? userRoles.filter(item =>
-              item.duplicatedRoles
-                ? item.userRole === config.permissions['DATA_CUSTODIAN'] && delete item.duplicatedRoles
-                : item
-            )
-          : userRoles
-        ).find(item => item.id === pendingDataflowsDTO[i].id)
+        ...(isDuplicated ? getUserRoles(userRoles) : userRoles).find(item => item.id === pendingDataflowsDTO[i].id)
       });
     }
   }
