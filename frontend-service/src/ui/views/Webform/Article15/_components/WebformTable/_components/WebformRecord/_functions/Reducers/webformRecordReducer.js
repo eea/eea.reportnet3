@@ -44,7 +44,10 @@ export const webformRecordReducer = (state, { type, payload }) => {
       return { ...state, selectedField: payload.field };
 
     case 'GET_DELETE_ROW_ID':
-      return { ...state, selectedRecordId: payload.recordId };
+      return { ...state, selectedRecordId: payload.selectedRecordId };
+
+    case 'SET_IS_DELETING':
+      return { ...state, isDeleting: payload.isDeleting };
 
     default:
       return state;
