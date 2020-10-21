@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.scss';
@@ -266,9 +267,10 @@ const ValidationViewer = React.memo(
         label: datasetName.toString(),
         key: `${datasetName.toString()}`
       });
-
       schemaTables.forEach(table => {
-        allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
+        if (!isNil(table.name)) {
+          allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
+        }
       });
 
       setAllOriginsFilter(allOriginsFilterList);

@@ -741,7 +741,7 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) && (
+    !isNil(webformData) && hasWritePermissions && (
       <div className={styles.switch}>
         <div className={`${styles.wrap}`}>
           <span className={styles.text}>{resources.messages['tabularData']}</span>
