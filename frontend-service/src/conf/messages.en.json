@@ -882,11 +882,11 @@
     "currentPoint": "Current point",
     "newPoint": "New point",
     "manageRolesEditorDialogInputPlaceholder": "Editor account...",
-    "sqlSentenceHelpNote": "Table name must be in&nbsp<u>quotes</u>&nbspif it begins with a number or it contains blank spaces (e.g.  3tableName ->  &quot3tableName&quot)",
-    "sqlSentenceHelpField": "SELECT * FROM [tableName]<br/>SELECT record_id, [fieldName]_id FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
-    "sqlSentenceHelpRow": "SELECT * FROM [tableName]<br/>SELECT record_id FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
-    "sqlSentenceHelpTable": "SELECT * FROM [tableName]<br/>SELECT * FROM [table1] [table1Alias] [join] [table2] [table2Alias] ON [table2Alias].[fieldName] = [table1Alias].[fieldName]",
-    "sqlSentenceHelpDescription": "The sentences should look like the following examples (brackets are mandatory only if the name contains blank spaces):",
+    "sqlSentenceHelpNote": "Note: Table name must be in<strong>&nbsp<u>quotes</u>&nbsp</strong>if it <u>begins with a number</u> or it contains <u>special characters or blank spaces</u> (e.g.  3tableName ->  &quot3tableName&quot)",
+    "sqlSentenceHelpField": "SELECT * FROM <strong>\"tableName\"</strong><br/>SELECT <strong>\"record_id\", \"[fieldName]_id\", \"fieldName\"</strong> FROM <strong>\"tableName\"</strong><br/>SELECT * FROM <strong>\"table1\"</strong> JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong>",
+    "sqlSentenceHelpRow": "SELECT * FROM <strong>\"tableName\"</strong><br/>SELECT <strong>\"record_id\"</strong> FROM <strong>\"tableName\"</strong><br/>SELECT * FROM <strong>\"table1\"</strong> JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong>",
+    "sqlSentenceHelpTable": "SELECT * FROM <strong>\"tableName\"</strong><br/>SELECT * FROM <strong>\"table1\"</strong> JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong>",
+    "sqlSentenceHelpDescription": "The sentences should look like the following examples (quotes are mandatory only if the name contains blank spaces):",
     "configureWebform": "Configure webform",
     "configureWebformMessage": "Please, select a webform to configure it",
     "configureWebformPlaceholder": "Select a webform",
@@ -907,6 +907,7 @@
     "webformView": "Webform",
     "designView": "Design",
     "tableView": "Tabular data",
-    "emptyWebformTables": "Created tables do not match with the webform model, please check it."
+    "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
+    "sqlSentenceHelpDialogTitle": "SQL Help"
   }
 }
