@@ -255,7 +255,7 @@ const ListBox = ({
         )}
         <div className="p-listbox-list-wrapper">
           <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
-            {!items && spinner ? <Spinner style={{ top: 0 }} /> : items}
+            {!items && spinner ? <Spinner style={{ top: 0, maxWidth: '15%' }} /> : items}
           </ul>
         </div>
       </div>
