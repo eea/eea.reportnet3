@@ -1,9 +1,13 @@
 import cloneDeep from 'lodash/cloneDeep';
+import chunk from 'lodash/chunk';
+import chain from 'lodash/chain';
+import find from 'lodash/find';
+import includes from 'lodash/includes';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import values from 'lodash/values';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 import moment from 'moment';
 
 import { config } from 'conf';
@@ -42,37 +46,26 @@ const getUserRoles = userRoles => {
   });
 
   const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
-  const dataflowIdDuplicatedRoles = [];
-  for (const userRoleDuplicated of duplicatedRoles) {
-    if (dataflowIdDuplicatedRoles[userRoleDuplicated.id]) {
-      dataflowIdDuplicatedRoles[userRoleDuplicated.id].push(userRoleDuplicated);
+  const dataflowDuplicatedRoles = [];
+  for (const duplicatedRol of duplicatedRoles) {
+    if (dataflowDuplicatedRoles[duplicatedRol.id]) {
+      dataflowDuplicatedRoles[duplicatedRol.id].push(duplicatedRol);
     } else {
-      dataflowIdDuplicatedRoles[userRoleDuplicated.id] = [userRoleDuplicated];
+      dataflowDuplicatedRoles[duplicatedRol.id] = [duplicatedRol];
     }
   }
 
-  dataflowIdDuplicatedRoles.forEach(dataflowIdRoles => {
-    const rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'LEAD_REPORTER');
+  const permissionsArr = values(config.dataflowPermissions);
+  dataflowDuplicatedRoles.forEach(dataflowRoles => {
+    let rol = null;
 
-    if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'REPORTER_WRITE');
-    }
-
-    if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'REPORTER_READ');
-    }
-
-    if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'DATA_CUSTODIAN');
-    }
-
-    if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'EDITOR_WRITE');
-    }
-
-    if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'EDITOR_READ');
-    }
+    permissionsArr.forEach(permission => {
+      dataflowRoles.forEach(dataflowRol => {
+        if (isNil(rol) && dataflowRol.userRole === permission) {
+          rol = dataflowRol;
+        }
+      });
+    });
 
     userRoleToDataflow.push(rol);
   });
