@@ -212,8 +212,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         }
       }
 
-      console.log('totalRecords', totalRecords);
-
       return { ...record, elements: result, totalRecords };
     });
   };
@@ -253,6 +251,7 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         datasetId={datasetId}
         hasFields={isEmpty(webformData.records[0].fields)}
         isAddingMultiple={webformTableState.isAddingMultiple}
+        isFixedNumber={webformData.fixedNumber}
         isReporting={isReporting}
         multipleRecords={webformData.multipleRecords}
         onAddMultipleWebform={onAddMultipleWebform}

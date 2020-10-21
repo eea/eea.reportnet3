@@ -37,6 +37,7 @@ export const WebformRecord = ({
   datasetId,
   hasFields,
   isAddingMultiple,
+  isFixedNumber,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
@@ -84,8 +85,6 @@ export const WebformRecord = ({
     parseMultiselect,
     parseNewRecordData
   } = WebformRecordUtils;
-
-  console.log('columnsSchema', columnsSchema);
 
   useEffect(() => {
     webformRecordDispatch({
@@ -479,7 +478,6 @@ export const WebformRecord = ({
   };
 
   const renderWebformContent = content => {
-    console.log('content', content);
     const errorMessages = renderErrorMessages(content);
 
     return (
@@ -515,6 +513,8 @@ export const WebformRecord = ({
       return resources.messages['webformTableWithLessRecords'];
     } else if (content.totalRecords > 1) {
       return resources.messages['webformTableWithMoreRecords'];
+    } else if (!isFixedNumber) {
+      return resources.messages['webformTableWithoutFixedNumber'];
     } else {
       return '';
     }

@@ -910,6 +910,7 @@
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
-    "webformTableWithLessRecords": "There is no records in the table."
+    "webformTableWithLessRecords": "There is no records in the table.",
+    "webformTableWithoutFixedNumber": "This table should have fixed number of records."
   }
 }
