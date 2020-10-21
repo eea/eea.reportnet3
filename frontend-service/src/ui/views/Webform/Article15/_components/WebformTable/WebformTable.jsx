@@ -144,7 +144,12 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           tableData[tableSchemaId] = tableChildData;
         }
 
-        const records = onParseWebformRecords(parentTableData.records, webform, tableData);
+        const records = onParseWebformRecords(
+          parentTableData.records,
+          webform,
+          tableData,
+          parentTableData.totalRecords
+        );
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
@@ -168,7 +173,7 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
     }
   };
 
-  const onParseWebformRecords = (records, webform, tableData) => {
+  const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
     return records.map(record => {
       const { fields } = record;
       const { elements } = webform;
@@ -197,7 +202,8 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
             const tableElementsRecords = onParseWebformRecords(
               tableData[element.tableSchemaId].records,
               element,
-              tableData
+              tableData,
+              totalRecords
             );
             result.push({ ...element, elementsRecords: tableElementsRecords });
           } else {
@@ -206,7 +212,9 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         }
       }
 
-      return { ...record, elements: result };
+      console.log('totalRecords', totalRecords);
+
+      return { ...record, elements: result, totalRecords };
     });
   };
 
@@ -223,6 +231,7 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
             columnsSchema={webformData.elementsRecords[0].elements}
             dataflowId={dataflowId}
             datasetId={datasetId}
+            hasFields={isEmpty(webformData.records[0].fields)}
             isAddingMultiple={webformTableState.isAddingMultiple}
             isReporting={isReporting}
             key={i}
@@ -242,6 +251,7 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        hasFields={isEmpty(webformData.records[0].fields)}
         isAddingMultiple={webformTableState.isAddingMultiple}
         isReporting={isReporting}
         multipleRecords={webformData.multipleRecords}

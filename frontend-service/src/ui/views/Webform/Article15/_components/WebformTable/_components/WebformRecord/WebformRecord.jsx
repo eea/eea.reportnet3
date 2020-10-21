@@ -35,6 +35,7 @@ export const WebformRecord = ({
   columnsSchema,
   dataflowId,
   datasetId,
+  hasFields,
   isAddingMultiple,
   isReporting,
   multipleRecords,
@@ -83,6 +84,8 @@ export const WebformRecord = ({
     parseMultiselect,
     parseNewRecordData
   } = WebformRecordUtils;
+
+  console.log('columnsSchema', columnsSchema);
 
   useEffect(() => {
     webformRecordDispatch({
@@ -476,6 +479,9 @@ export const WebformRecord = ({
   };
 
   const renderWebformContent = content => {
+    console.log('content', content);
+    const errorMessages = renderErrorMessages(content);
+
     return (
       <div className={styles.content}>
         <div className={styles.actionButtons}>
@@ -497,9 +503,21 @@ export const WebformRecord = ({
             />
           </div>
         )}
-        {!isEmpty(content.elements) ? renderElements(content.elements) : resources.messages['emptyWebformTable']}
+        {isEmpty(errorMessages) ? renderElements(content.elements) : errorMessages}
       </div>
     );
+  };
+
+  const renderErrorMessages = content => {
+    if (hasFields) {
+      return resources.messages['emptyWebformTable'];
+    } else if (content.totalRecords === 0) {
+      return resources.messages['webformTableWithLessRecords'];
+    } else if (content.totalRecords > 1) {
+      return resources.messages['webformTableWithMoreRecords'];
+    } else {
+      return '';
+    }
   };
 
   return (
@@ -560,4 +578,4 @@ export const WebformRecord = ({
 
 WebformRecord.propTypes = { record: PropTypes.shape({ elements: PropTypes.array }) };
 
-WebformRecord.defaultProps = { record: { elements: [] } };
+WebformRecord.defaultProps = { record: { elements: [], totalRecords: 0 } };
