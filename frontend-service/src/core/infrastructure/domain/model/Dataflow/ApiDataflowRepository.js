@@ -52,20 +52,26 @@ const getUserRoles = userRoles => {
   }
 
   dataflowIdDuplicatedRoles.forEach(dataflowIdRoles => {
-    const rol = dataflowIdRoles.find(dataflowRole => {
-      return dataflowRole.userRole === 'LEAD_REPORTER';
-    });
+    const rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'LEAD_REPORTER');
 
     if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => {
-        return dataflowRole.userRole === 'REPORTER_WRITE';
-      });
+      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'REPORTER_WRITE');
     }
 
     if (isEmpty(rol)) {
-      rol = dataflowIdRoles.find(dataflowRole => {
-        return dataflowRole.userRole === 'REPORTER_READ';
-      });
+      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'REPORTER_READ');
+    }
+
+    if (isEmpty(rol)) {
+      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'DATA_CUSTODIAN');
+    }
+
+    if (isEmpty(rol)) {
+      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'EDITOR_WRITE');
+    }
+
+    if (isEmpty(rol)) {
+      rol = dataflowIdRoles.find(dataflowRole => dataflowRole.userRole === 'EDITOR_READ');
     }
 
     userRoleToDataflow.push(rol);
