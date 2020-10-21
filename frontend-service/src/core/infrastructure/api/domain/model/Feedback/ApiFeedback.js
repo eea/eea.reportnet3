@@ -9,5 +9,12 @@ export const apiFeedback = {
     });
 
     return response.data;
+  },
+  allUnread: async () => {
+    const response = await HTTPRequester.get({
+      url: getUrl(FeedbackConfig.loadAllUnread)
+    });
+
+    return response.data;
   }
 };

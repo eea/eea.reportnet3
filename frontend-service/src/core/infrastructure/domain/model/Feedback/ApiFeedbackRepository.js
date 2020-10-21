@@ -6,8 +6,13 @@ import { apiFeedback } from 'core/infrastructure/api/domain/model/Feedback';
 
 const all = async () => {
   return await apiFeedback.all();
-}
+};
+
+const allUnread = async () => {
+  return await apiFeedback.allUnread();
+};
 
 export const ApiFeedbackRepository = {
-  all
+  all,
+  allUnread
 };
