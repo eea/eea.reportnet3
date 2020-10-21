@@ -696,6 +696,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onUpdateTable = tables => designerDispatch({ type: 'ON_UPDATE_TABLES', payload: { tables } });
 
+  const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
+
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
     try {
@@ -1134,7 +1136,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         ) : (
           <TabsDesigner
             changeMode={changeMode}
-            datasetSchemaDTO={designerState.datasetSchema}
+            datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
             editable={true}
@@ -1150,6 +1152,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateTable={onUpdateTable}
+            onUpdateSchema={onUpdateSchema}
             getUpdatedTabs={onUpdateTabs}
             recordPositionId={designerState.dataViewerOptions.recordPositionId}
             selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}

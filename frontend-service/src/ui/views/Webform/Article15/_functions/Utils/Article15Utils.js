@@ -1,4 +1,5 @@
 import compact from 'lodash/compact';
+import isEmpty from 'lodash/isEmpty';
 
 import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 
@@ -7,12 +8,12 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
 
   let tableIdx = 0;
   if (QuerystringUtils.getUrlParamValue('tab') !== '') {
-    console.log('schemaTables', schemaTables);
     const filteredTable = schemaTables.filter(
       schemaTable => schemaTable.id === QuerystringUtils.getUrlParamValue('tab')
     );
-    tableIdx = allTables.indexOf(filteredTable[0].name);
-
+    if (!isEmpty(filteredTable)) {
+      tableIdx = allTables.indexOf(filteredTable[0].name);
+    }
     //Search on subtables for parent id
     if (tableIdx === -1) {
       configTables.forEach(table => {
