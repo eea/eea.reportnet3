@@ -3,6 +3,7 @@
     "add": "pi pi-plus",
     "angleDown": "pi pi-chevron-down",
     "angleRight": "pi pi-chevron-right",
+    "angleDoubleRight": "pi pi-angle-double-right",
     "alphabeticOrderDown": "pi pi-sort-alpha-down",
     "alphabeticOrderUp": "pi pi-sort-alpha-down-alt",
     "archive": "pi pi-file",
