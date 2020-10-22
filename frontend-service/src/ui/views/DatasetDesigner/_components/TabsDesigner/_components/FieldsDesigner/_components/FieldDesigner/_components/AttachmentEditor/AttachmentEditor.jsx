@@ -23,12 +23,17 @@ const AttachmentEditor = ({
 
   useEffect(() => {
     if (isSaved) {
-      onSaveAttachment({ validExtensions, maxSize });
-      setValidExtensionsItems([]);
-      setMaxSize(0);
       setIsVisible(false);
     }
   }, [isSaved]);
+
+  useEffect(() => {
+    if (!isVisible && isSaved) {
+      onSaveAttachment({ validExtensions, maxSize });
+      setValidExtensionsItems([]);
+      setMaxSize(0);
+    }
+  }, [isVisible]);
 
   const onMaxSizeChange = size => {
     size = size.toString();
@@ -96,57 +101,59 @@ const AttachmentEditor = ({
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      contentStyle={{ overflow: 'auto' }}
-      focusOnShow={false}
-      footer={attachmentDialogFooter}
-      header={resources.messages['validExtensionEditor']}
-      modal={true}
-      onHide={() => {
-        onCancelSaveAttachment();
-        setIsVisible(false);
-      }}
-      style={{ width: '40%' }}
-      visible={isVisible}
-      zIndex={3003}>
-      {renderChips()}
-      {
-        <span
-          dangerouslySetInnerHTML={{
-            __html: resources.messages['attachmentEditorSizeMessage']
-          }}></span>
-      }
-      <div className={styles.maxSizeWrapper}>
-        <Button
-          className={`secondary`}
-          icon="minus"
-          onClick={() => onMaxSizeChange((Number(maxSize) - 0.25).toString())}
-          tooltip={resources.messages['minusFileSize']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-        <InputText
-          className={styles.maxSizeInput}
-          id="maxFileSize"
-          keyfilter="pnum"
-          onChange={e => onMaxSizeChange(e.target.value)}
-          value={maxSize}
-        />
-        <Button
-          className={`secondary`}
-          icon="plus"
-          onClick={() => onMaxSizeChange((Number(maxSize) + 0.25).toString())}
-          tooltip={resources.messages['plusFileSize']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-        <label htmlFor="maxFileSize" className="srOnly">
-          {resources.messages['supportedFileAttachmentsMaxSizeTooltip']}
-        </label>
-        <span className={styles.mbSpan}>{`${resources.messages['MB']} (${
-          isNaN(Number(maxSize)) ? 0 : Number(maxSize) * 1024
-        } ${resources.messages['KB']})`}</span>
-      </div>
-    </Dialog>
+    isVisible && (
+      <Dialog
+        blockScroll={false}
+        contentStyle={{ overflow: 'auto' }}
+        focusOnShow={false}
+        footer={attachmentDialogFooter}
+        header={resources.messages['validExtensionEditor']}
+        modal={true}
+        onHide={() => {
+          onCancelSaveAttachment();
+          setIsVisible(false);
+        }}
+        style={{ width: '40%' }}
+        visible={isVisible}
+        zIndex={3003}>
+        {renderChips()}
+        {
+          <span
+            dangerouslySetInnerHTML={{
+              __html: resources.messages['attachmentEditorSizeMessage']
+            }}></span>
+        }
+        <div className={styles.maxSizeWrapper}>
+          <Button
+            className={`secondary`}
+            icon="minus"
+            onClick={() => onMaxSizeChange((Number(maxSize) - 0.25).toString())}
+            tooltip={resources.messages['minusFileSize']}
+            tooltipOptions={{ position: 'bottom' }}
+          />
+          <InputText
+            className={styles.maxSizeInput}
+            id="maxFileSize"
+            keyfilter="pnum"
+            onChange={e => onMaxSizeChange(e.target.value)}
+            value={maxSize}
+          />
+          <Button
+            className={`secondary`}
+            icon="plus"
+            onClick={() => onMaxSizeChange((Number(maxSize) + 0.25).toString())}
+            tooltip={resources.messages['plusFileSize']}
+            tooltipOptions={{ position: 'bottom' }}
+          />
+          <label htmlFor="maxFileSize" className="srOnly">
+            {resources.messages['supportedFileAttachmentsMaxSizeTooltip']}
+          </label>
+          <span className={styles.mbSpan}>{`${resources.messages['MB']} (${
+            isNaN(Number(maxSize)) ? 0 : Number(maxSize) * 1024
+          } ${resources.messages['KB']})`}</span>
+        </div>
+      </Dialog>
+    )
   );
 };
 

@@ -1,0 +1,23 @@
+.section {
+  margin-bottom: 1rem;
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+  .title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    h3 {
+      margin: 0;
+    }
+    .addButton {
+      height: 1rem;
+      width: 1rem;
+      padding: 0.8rem;
+      margin-left: 0.5rem;
+    }
+  }
+  :global .p-listbox {
+    width: 100%;
+  }
+}

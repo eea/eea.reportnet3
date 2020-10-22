@@ -19,7 +19,7 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 
-export const Article15 = ({ datasetId, state }) => {
+export const Article15 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
@@ -27,13 +27,23 @@ export const Article15 = ({ datasetId, state }) => {
 
   useEffect(() => initialLoad(), []);
 
+  const changeUrl = tabSchemaName => {
+    const filteredTable = state.schemaTables.filter(schemaTable => schemaTable.name === tabSchemaName);
+    if (!isEmpty(filteredTable)) {
+      window.history.replaceState(null, null, `?tab=${filteredTable[0].id}${`&view=webform`}`);
+    }
+  };
+
   const initialLoad = () => {
     const allTables = tables.map(table => table.name);
     const parsedData = onLoadData();
 
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: { isVisible: Article15Utils.getWebformTabs(allTables), data: parsedData }
+      payload: {
+        isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables, tables),
+        data: parsedData
+      }
     });
   };
 
@@ -45,12 +55,13 @@ export const Article15 = ({ datasetId, state }) => {
       isVisible[name] = true;
     });
 
+    changeUrl(name);
+
     article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
   const onParseWebformData = (allTables, schemaTables) => {
     const data = Article15Utils.mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
-
     data.map(table => {
       if (table.records) {
         table.records[0].fields = table.records[0].fields.map(field => {
@@ -98,12 +109,20 @@ export const Article15 = ({ datasetId, state }) => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
     const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
 
-    return <WebformTable webform={visibleContent} datasetId={datasetId} onTabChange={article15State.isVisible} />;
+    return (
+      <WebformTable
+        dataflowId={dataflowId}
+        datasetId={datasetId}
+        isReporting={isReporting}
+        onTabChange={article15State.isVisible}
+        webform={visibleContent}
+      />
+    );
   };
 
   const renderWebFormHeaders = () => {
     const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.name));
-    const headers = filteredTabs.map(tab => tab.header);
+    const headers = filteredTabs.map(tab => tab.header || tab.name);
 
     return article15State.data.map((webform, i) => {
       const isCreated = headers.includes(webform.name);
@@ -129,6 +148,7 @@ export const Article15 = ({ datasetId, state }) => {
             key={i}
             label={webform.title}
             onClick={() => onChangeWebformTab(webform.name)}
+            style={{ display: isReporting && !isCreated ? 'none' : '' }}
           />
 
           {!isCreated && (

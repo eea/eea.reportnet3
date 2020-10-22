@@ -256,6 +256,12 @@ const DataViewer = withRouter(
     // }, [levelErrorTypes]);
 
     useEffect(() => {
+      if (isGroupedValidationSelected) {
+        dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+      }
+    }, [isGroupedValidationSelected]);
+
+    useEffect(() => {
       if (!addDialogVisible) setAddAnotherOne(false);
     }, [addDialogVisible]);
 
@@ -271,7 +277,7 @@ const DataViewer = withRouter(
       if (isValidationSelected) {
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        onChangeIsValidationSelected(false);
+        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     }, [isValidationSelected]);
 
