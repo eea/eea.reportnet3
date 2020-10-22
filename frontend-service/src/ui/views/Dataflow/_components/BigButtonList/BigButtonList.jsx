@@ -77,6 +77,7 @@ export const BigButtonList = ({
     false
   );
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
+  const [isFinalFeedbackDialogVisible, setIsFinalFeedbackDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
@@ -207,6 +208,8 @@ export const BigButtonList = ({
     }
   };
 
+  const onShowFinalFeedbackDialog = () => setIsFinalFeedbackDialogVisible(true);
+
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);
     setHistoricReleasesView(typeView);
@@ -325,32 +328,36 @@ export const BigButtonList = ({
 
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
-  const renderDialogFooter = isHistoricReleasesDialogVisible ? (
-    <Fragment>
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => setIsHistoricReleasesDialogVisible(false)}
-      />
-    </Fragment>
-  ) : (
-    <Fragment>
-      <Button
-        className="p-button-primary p-button-animated-blink"
-        disabled={isNil(cloneDataflow.id)}
-        icon={'plus'}
-        label={resources.messages['cloneSelectedDataflow']}
-        onClick={() => cloneDatasetSchemas()}
-      />
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => setCloneDialogVisible(false)}
-      />
-    </Fragment>
-  );
+  const renderDialogFooter =
+    isHistoricReleasesDialogVisible || isFinalFeedbackDialogVisible ? (
+      <Fragment>
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'cancel'}
+          label={resources.messages['close']}
+          onClick={() => {
+            setIsHistoricReleasesDialogVisible(false);
+            setIsFinalFeedbackDialogVisible(false);
+          }}
+        />
+      </Fragment>
+    ) : (
+      <Fragment>
+        <Button
+          className="p-button-primary p-button-animated-blink"
+          disabled={isNil(cloneDataflow.id)}
+          icon={'plus'}
+          label={resources.messages['cloneSelectedDataflow']}
+          onClick={() => cloneDatasetSchemas()}
+        />
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'cancel'}
+          label={resources.messages['close']}
+          onClick={() => setCloneDialogVisible(false)}
+        />
+      </Fragment>
+    );
 
   const bigButtonList = uniqBy(
     useBigButtonList({
@@ -369,6 +376,7 @@ export const BigButtonList = ({
       onShowCopyDataCollectionToEuDatasetModal,
       onShowDataCollectionModal,
       onShowExportEuDatasetModal,
+      onShowFinalFeedbackDialog,
       onShowHistoricReleases,
       onShowManageReportersDialog,
       onShowNewSchemaDialog,
@@ -461,6 +469,23 @@ export const BigButtonList = ({
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />
+        </Dialog>
+      )}
+
+      {isFinalFeedbackDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={resources.messages['finalFeedback']}
+          onHide={() => setIsFinalFeedbackDialogVisible(false)}
+          // style={{ width: '80%' }}
+          visible={isFinalFeedbackDialogVisible}>
+          {/* <HistoricReleases
+            dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
+            datasetId={datasetId}
+            historicReleasesView={historicReleasesView}
+          /> */}
         </Dialog>
       )}
 
