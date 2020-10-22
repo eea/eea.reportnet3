@@ -177,6 +177,7 @@ export const FieldsDesigner = ({
     if (fieldIndex > -1) {
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].fieldType = type;
       inmFields[fieldIndex].maxSize = maxSize;
       inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;

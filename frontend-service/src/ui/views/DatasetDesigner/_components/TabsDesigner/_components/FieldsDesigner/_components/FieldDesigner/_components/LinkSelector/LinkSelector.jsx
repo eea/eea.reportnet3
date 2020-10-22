@@ -55,10 +55,15 @@ const LinkSelector = withRouter(
 
     useEffect(() => {
       if (isSaved) {
-        onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
         setIsVisible(false);
       }
     }, [isSaved]);
+
+    useEffect(() => {
+      if (!isVisible && isSaved) {
+        onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+      }
+    }, [isVisible]);
 
     const linkSelectorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">

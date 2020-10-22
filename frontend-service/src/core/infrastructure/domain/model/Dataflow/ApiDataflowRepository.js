@@ -1,9 +1,14 @@
 import cloneDeep from 'lodash/cloneDeep';
+import chunk from 'lodash/chunk';
+import chain from 'lodash/chain';
+import find from 'lodash/find';
+import includes from 'lodash/includes';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import values from 'lodash/values';
 import isUndefined from 'lodash/isUndefined';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import { config } from 'conf';
 import DataflowConf from 'conf/dataflow.config.json';
@@ -34,6 +39,40 @@ const accepted = async () => {
   return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
+const getUserRoles = userRoles => {
+  const userRoleToDataflow = [];
+  userRoles.filter(userRol => {
+    return !userRol.duplicatedRoles && userRoleToDataflow.push(userRol);
+  });
+
+  const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
+  const dataflowDuplicatedRoles = [];
+  for (const duplicatedRol of duplicatedRoles) {
+    if (dataflowDuplicatedRoles[duplicatedRol.id]) {
+      dataflowDuplicatedRoles[duplicatedRol.id].push(duplicatedRol);
+    } else {
+      dataflowDuplicatedRoles[duplicatedRol.id] = [duplicatedRol];
+    }
+  }
+
+  const permissionsArr = values(config.dataflowPermissions);
+  dataflowDuplicatedRoles.forEach(dataflowRoles => {
+    let rol = null;
+
+    permissionsArr.forEach(permission => {
+      dataflowRoles.forEach(dataflowRol => {
+        if (isNil(rol) && dataflowRol.userRole === permission) {
+          rol = dataflowRol;
+        }
+      });
+    });
+
+    userRoleToDataflow.push(rol);
+  });
+
+  return userRoleToDataflow;
+};
+
 const all = async userData => {
   const pendingDataflowsDTO = await apiDataflow.all(userData);
   const dataflows = !userData ? pendingDataflowsDTO : [];
@@ -50,14 +89,7 @@ const all = async userData => {
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
       dataflows.push({
         ...pendingDataflowsDTO[i],
-        ...(isDuplicated
-          ? userRoles.filter(item =>
-              item.duplicatedRoles
-                ? item.userRole === config.permissions['DATA_CUSTODIAN'] && delete item.duplicatedRoles
-                : item
-            )
-          : userRoles
-        ).find(item => item.id === pendingDataflowsDTO[i].id)
+        ...(isDuplicated ? getUserRoles(userRoles) : userRoles).find(item => item.id === pendingDataflowsDTO[i].id)
       });
     }
   }
@@ -348,7 +380,7 @@ const parseDataflowDTO = dataflowDTO =>
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
@@ -359,7 +391,6 @@ const parseDataflowDTO = dataflowDTO =>
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
-
 const parseDataCollectionListDTO = dataCollectionsDTO => {
   if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
     const dataCollections = [];
@@ -466,7 +497,7 @@ const parseObligationDTO = obligationDTO => {
       countries: obligationDTO.countries,
       description: obligationDTO.description,
       expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+        ? dayjs(obligationDTO.nextDeadline).format('YYYY-MM-DD')
         : null,
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
