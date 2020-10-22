@@ -16,9 +16,10 @@ export const feedbackReducer = (state, { type, payload }) => {
       console.log(payload);
       return { ...state, isDialogVisible: true, messageToShow: payload };
     case 'SET_MESSAGES':
+      console.log(payload);
       return {
         ...state,
-        messages: payload,
+        messages: [...state.messages, ...payload],
         isLoading: false
       };
 

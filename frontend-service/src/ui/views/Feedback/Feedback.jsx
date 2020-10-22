@@ -47,204 +47,6 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
-  const getData = () => {
-    return [
-      {
-        id: 1000,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1001,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1002,
-        message:
-          'This is a message. Please read it bla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blablabla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1003,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: true,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1004,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1005,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1006,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1007,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1008,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1009,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1010,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1011,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: true,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1012,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1013,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1014,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1015,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1016,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1017,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1018,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1019,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: true,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1020,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1021,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1022,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1023,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1024,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1025,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1026,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1027,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: true,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1028,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1029,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      },
-      {
-        id: 1030,
-        message: 'This is a message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-13'
-      },
-      {
-        id: 1031,
-        message: 'This is another message. Please read it bla bla blabla',
-        read: false,
-        datetime: '2015-09-14'
-      }
-    ];
-  };
-
   const loadingText = () => {
     return <span className="loading-text"></span>;
   };
@@ -267,12 +69,15 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onGetUnreadMessages = async () => {
-    // FeedbackService.getUnreadMessages();
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
-    setTimeout(() => {
-      dispatchFeedback({ type: 'SET_MESSAGES', payload: getData() });
-    }, 500);
+    const data = await onLoadMessages(0, 25);
+    dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
+  };
+
+  const onLoadMessages = async (first, rows) => {
+    const data = await FeedbackService.allUnread(first, rows);
+    return data;
   };
 
   const onMessageSelect = event => {
@@ -280,9 +85,10 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_MESSAGE_TO_SHOW', payload: event.data.message });
   };
 
-  const onVirtualScroll = event => {
+  const onVirtualScroll = async event => {
     console.log(event);
-    //CALL SERVICE WITH EVENT.FIRST
+    const data = await onLoadMessages(event.first, event.rows);
+    dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
   };
 
   const layout = children => {
@@ -318,6 +124,7 @@ export const Feedback = withRouter(({ match, history }) => {
         value={messages}
         virtualRowHeight={45}
         virtualScroll>
+        <Column field="id" header="Id" loadingBody={loadingText}></Column>
         <Column field="message" header="Message" loadingBody={loadingText}></Column>
         <Column field="datetime" header="Datetime" loadingBody={loadingText}></Column>
         <Column field="read" header="Read" loadingBody={loadingText}></Column>
