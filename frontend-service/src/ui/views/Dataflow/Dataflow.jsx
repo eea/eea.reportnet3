@@ -28,7 +28,7 @@ import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
-import { SnapshotsDialog } from './_components/SnapshotsDialog';
+/* import { SnapshotsDialog } from './_components/SnapshotsDialog'; */
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 

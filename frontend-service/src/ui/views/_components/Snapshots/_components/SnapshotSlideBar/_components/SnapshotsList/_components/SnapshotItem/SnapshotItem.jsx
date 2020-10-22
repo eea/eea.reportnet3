@@ -82,19 +82,21 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
           <></>
         )}
 
-        <Button
-          tooltip={resources.messages.deleteSnapshotTooltip}
-          tooltipOptions={{ position: 'left' }}
-          icon="trash"
-          disabled={itemData.isReleased}
-          className={`${styles.btn} rp-btn warning`}
-          onClick={() =>
-            snapshotContext.snapshotDispatch({
-              type: 'DELETE_SNAPSHOT',
-              payload: { ...itemData }
-            })
-          }
-        />
+        {!itemData.isReleased /* || itemData.whereReleased --- */&& (
+          <Button
+            tooltip={resources.messages.deleteSnapshotTooltip}
+            tooltipOptions={{ position: 'left' }}
+            icon="trash"
+            disabled={itemData.isReleased}
+            className={`${styles.btn} rp-btn warning`}
+            onClick={() =>
+              snapshotContext.snapshotDispatch({
+                type: 'DELETE_SNAPSHOT',
+                payload: { ...itemData }
+              })
+            }
+          />
+        )}
       </div>
     </li>
   );
