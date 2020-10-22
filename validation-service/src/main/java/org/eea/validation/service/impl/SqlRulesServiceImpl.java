@@ -617,9 +617,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           dataprovidersVOList
               .removeIf(dataprovider -> dataprovider.getDataProviderId() != providerId);
           List<Long> dataprovidersIdList = new ArrayList<>();
-          List<Long> datasetIdList = new ArrayList<>();
+          List<String> datasetIdList = new ArrayList<>();
           for (ReportingDatasetVO dataset : reportingDatasetList) {
-            datasetIdList.add(dataset.getId());
+            datasetIdList.add(dataset.getDatasetSchema());
           }
           for (RepresentativeVO provider : dataprovidersVOList) {
             dataprovidersIdList.add(provider.getDataProviderId());
@@ -632,7 +632,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             }
           }
           for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
-            if (datasetIdList.contains(auxDatasetMap.getValue())) {
+            if (datasetIdList.contains(auxDatasetMap.getKey())) {
               String key = auxDatasetMap.getKey();
               Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
               datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
