@@ -17,8 +17,8 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
-  getDatasetData,
   getDataHistoricReleases,
+  getDatasetData,
   getDeleteSchemaIndex,
   handleExportEuDataset,
   handleRedirect,
@@ -26,6 +26,7 @@ const useBigButtonList = ({
   onCloneDataflow,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
+  onOpenReleaseConfirmDialog,
   onSaveName,
   onShowCopyDataCollectionToEuDatasetModal,
   onShowDataCollectionModal,
@@ -33,9 +34,9 @@ const useBigButtonList = ({
   onShowHistoricReleases,
   onShowManageReportersDialog,
   onShowNewSchemaDialog,
-  onShowSnapshotDialog,
   onShowUpdateDataCollectionModal,
   setErrorDialogData
+  /*  onShowSnapshotDialog, */
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -424,6 +425,31 @@ const useBigButtonList = ({
     });
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
+    return [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: 'released',
+        caption: resources.messages['releaseDataCollection'],
+        handleRedirect: () => onOpenReleaseConfirmDialog(),
+        helpClassName: 'dataflow-big-buttons-release-help-step',
+        layout: 'defaultBigButton',
+        visibility:
+          buttonsVisibility.release &&
+          dataflowState.status !== 'DESIGN' &&
+          !isEmpty(dataflowState.data.datasets) &&
+          isUniqRepresentative
+      }
+    ];
+  };
+
+  /*  const onBuildReleaseButton = () => {
+    const { datasets } = dataflowState.data;
+
+    const allDatasets = datasets.map(dataset => {
+      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+    });
+
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
     const properties = [
       {
@@ -455,7 +481,7 @@ const useBigButtonList = ({
     }
 
     return properties;
-  };
+  }; */
 
   const copyDataCollectionToEuDatasetBigButton = [
     {

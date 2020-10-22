@@ -23,7 +23,8 @@ export const BigButtonListRepresentative = ({
   handleRedirect,
   match,
   onCleanUpReceipt,
-  onShowSnapshotDialog,
+ /*  onShowSnapshotDialog, */
+  onOpenReleaseConfirmDialog,
   setIsReceiptLoading
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -108,8 +109,9 @@ export const BigButtonListRepresentative = ({
               handleRedirect,
               match,
               onLoadReceiptData,
+              onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
-              onShowSnapshotDialog
+             /*  onShowSnapshotDialog, */
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
         </div>

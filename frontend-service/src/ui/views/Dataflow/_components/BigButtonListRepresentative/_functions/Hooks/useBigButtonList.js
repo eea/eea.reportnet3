@@ -18,8 +18,9 @@ const useBigButtonList = ({
   handleRedirect,
   match,
   onLoadReceiptData,
-  onShowHistoricReleases,
-  onShowSnapshotDialog
+  onOpenReleaseConfirmDialog,
+  onShowHistoricReleases
+  /*   onShowSnapshotDialog, */
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -30,9 +31,6 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowState.id}`);
       setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
-      // setButtonsVisibility(
-      //   getButtonsVisibility(['LEAD_REPORTER', 'REPORTER_READ'].map(userRole => config.permissions[userRole]))
-      // );
     }
   }, [userContext]);
 
@@ -146,7 +144,7 @@ const useBigButtonList = ({
     ];
   };
 
-  const onBuildReleaseButton = () => {
+  /*   const onBuildReleaseButton = () => {
     const { datasets } = dataflowState.data;
 
     const filteredDatasets = datasets.filter(
@@ -181,11 +179,22 @@ const useBigButtonList = ({
     }
 
     return properties;
-  };
+  }; */
 
   const receiptBigButton = onBuildReceiptButton();
 
-  const releaseBigButton = onBuildReleaseButton();
+  const releaseBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: 'released',
+      caption: resources.messages['releaseDataCollection'],
+      handleRedirect: () => onOpenReleaseConfirmDialog(),
+      helpClassName: 'dataflow-big-buttons-release-help-step',
+      layout: 'defaultBigButton',
+      visibility:
+        buttonsVisibility.release && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
+    }
+  ];
 
   return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };

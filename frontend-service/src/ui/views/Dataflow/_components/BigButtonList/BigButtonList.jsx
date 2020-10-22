@@ -43,7 +43,8 @@ export const BigButtonList = ({
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
-  onShowSnapshotDialog,
+  onOpenReleaseConfirmDialog,
+ /*  onShowSnapshotDialog, */
   onUpdateData,
   setIsCopyDataCollectionToEuDatasetLoading,
   setIsExportEuDatasetLoading,
@@ -372,7 +373,8 @@ export const BigButtonList = ({
       onShowHistoricReleases,
       onShowManageReportersDialog,
       onShowNewSchemaDialog,
-      onShowSnapshotDialog,
+      /* onShowSnapshotDialog, */
+      onOpenReleaseConfirmDialog,
       onShowUpdateDataCollectionModal,
       setErrorDialogData,
       updatedDatasetSchema

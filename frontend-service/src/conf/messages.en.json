@@ -911,6 +911,8 @@
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
     "webformTableWithLessRecords": "There are no records in the table.",
-    "webformTableWithoutFixedNumber": "This table should have fixed number of records."
+    "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
+    "confirmReleaseHeader": "Confirm Release",
+    "confirmReleaseQuestion": "Are you sure you want to release all datasets?"
   }
 }
