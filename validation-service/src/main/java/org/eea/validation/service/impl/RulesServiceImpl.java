@@ -1089,6 +1089,15 @@ public class RulesServiceImpl implements RulesService {
                 "dataset_" + newDatasetId.toString());
             rule.setWhenCondition(newWhenCondition);
           }
+          // Do the same in the property SqlSentence
+          if (StringUtils.isNotBlank(rule.getSqlSentence())
+              && rule.getSqlSentence().contains("dataset_")) {
+            String newSqlSentence = rule.getSqlSentence();
+            newSqlSentence = newSqlSentence.replace("dataset_" + oldDatasetId.toString(),
+                "dataset_" + newDatasetId.toString());
+            rule.setSqlSentence(newSqlSentence);
+          }
+
         });
       }
     }
