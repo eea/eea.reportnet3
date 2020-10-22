@@ -11,7 +11,7 @@ const getFieldName = state => {
 };
 export const parseHelpItem = (type, state) => {
   if (type === 'field' && state.selectedField !== '') {
-    return `"${getFieldName(state)}"`;
+    return `dataset_${state.selectedDataset.value}."${getTableName(state)}"."${getFieldName(state)}"`;
   }
   if (type === 'table' && state.selectedTable !== '') {
     return `dataset_${state.selectedDataset.value}."${getTableName(state)}"`;
