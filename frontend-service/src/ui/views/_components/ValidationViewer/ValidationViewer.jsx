@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.scss';
@@ -218,7 +219,7 @@ const ValidationViewer = React.memo(
           originsFilter
         );
       }
-      
+
       validationDispatch({
         type: 'SET_TOTALS_ERRORS',
         payload: {
@@ -226,7 +227,6 @@ const ValidationViewer = React.memo(
           totalRecords: datasetErrors.totalRecords
         }
       });
-
       setFetchedData(datasetErrors.errors);
       setIsLoading(false);
     };
@@ -267,9 +267,10 @@ const ValidationViewer = React.memo(
         label: datasetName.toString(),
         key: `${datasetName.toString()}`
       });
-
       schemaTables.forEach(table => {
-        allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
+        if (!isNil(table.name)) {
+          allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
+        }
       });
 
       setAllOriginsFilter(allOriginsFilterList);
@@ -399,17 +400,40 @@ const ValidationViewer = React.memo(
             break;
         }
       } else {
-        onSelectValidation(
-          event.data.tableSchemaId,
-          -1,
-          -1,
-          event.data.ruleId,
-          true,
-          event.data.message,
-          event.data.levelError
-        );
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            onSelectValidation(
+              event.data.tableSchemaId,
+              -1,
+              -1,
+              event.data.ruleId,
+              true,
+              event.data.message,
+              event.data.levelError
+            );
+            break;
+          case 'TABLE':
+            if (event.data.shortCode.substring(0, 2) === 'TU' && event.data.message.startsWith('Uniqueness')) {
+              onSelectValidation(
+                event.data.tableSchemaId,
+                -1,
+                -1,
+                event.data.ruleId,
+                true,
+                event.data.message,
+                event.data.levelError
+              );
+            } else {
+              onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
+            }
+            break;
+
+          default:
+            break;
+        }
       }
-    };    
+    };
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {areActiveFilters && totalRecords !== totalFilteredRecords

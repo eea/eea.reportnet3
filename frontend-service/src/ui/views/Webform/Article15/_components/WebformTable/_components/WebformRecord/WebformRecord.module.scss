@@ -28,7 +28,11 @@
       color: var(--errors);
     }
   }
-
+  .attachmentWrapper {
+    button {
+      margin-right: 0.5rem;
+    }
+  }
   .field {
     margin-bottom: 2rem;
     :global .p-multiselect {
@@ -93,6 +97,16 @@
       :global .pi {
         font-size: 1.8em;
       }
+    }
+  }
+
+  .errorList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .errorItem {
+      padding: 0.5rem;
     }
   }
 }

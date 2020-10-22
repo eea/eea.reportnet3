@@ -52,6 +52,7 @@
   align-items: center;
   justify-items: flex-end;
   flex-direction: row;
+  margin-bottom: 1rem;
 }
 
 .datasetDescriptionRow {
@@ -59,7 +60,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 0 0 2vw 1vw;
-  
+
   .datasetConfigurationButtons {
     display: flex;
 
@@ -90,7 +91,6 @@
 
     .label {
       cursor: pointer;
-      text-transform: capitalize;
     }
   }
 }

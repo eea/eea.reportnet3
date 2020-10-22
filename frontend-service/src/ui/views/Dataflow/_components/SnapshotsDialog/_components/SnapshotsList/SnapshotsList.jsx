@@ -11,10 +11,10 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const SnapshotsList = ({
   getSnapshotData,
   isLoading,
+  isSnapshotListCreatedReleaseLoading,
   showReleaseDialog,
-  snapshotDataToRelease,
-  snapshotReleasedId,
-  snapshotsListData
+  snapshotsListData,
+  snapshotIdToRelease
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -27,10 +27,10 @@ export const SnapshotsList = ({
               <SnapshotItem
                 getSnapshotData={getSnapshotData}
                 isLoading={isLoading}
+                isSnapshotListCreatedReleaseLoading={isSnapshotListCreatedReleaseLoading}
                 itemData={item}
                 showReleaseDialog={showReleaseDialog}
-                snapshotDataToRelease={snapshotDataToRelease}
-                snapshotReleasedId={snapshotReleasedId}
+                snapshotIdToRelease={snapshotIdToRelease}
               />
             </div>
           ))}

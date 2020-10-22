@@ -12,6 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
@@ -19,26 +20,62 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
-export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTabChange, record, tableId }) => {
+export const WebformRecord = ({
+  addingOnTableSchemaId,
+  columnsSchema,
+  dataflowId,
+  datasetId,
+  hasFields,
+  isAddingMultiple,
+  isFixedNumber = true,
+  isReporting,
+  multipleRecords,
+  onAddMultipleWebform,
+  onRefresh,
+  onTabChange,
+  record,
+  tableId,
+  tableName
+}) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
+    isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
+    isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     newRecord: {},
     record,
-    selectedField: {}
+    selectedField: {},
+    selectedFieldId: '',
+    selectedFieldSchemaId: '',
+    selectedMaxSize: '',
+    selectedRecordId: null,
+    selectedValidExtensions: []
   });
 
-  const { isDialogVisible, isFileDialogVisible, selectedField } = webformRecordState;
+  const {
+    isDeleteAttachmentVisible,
+    isDialogVisible,
+    isFileDialogVisible,
+    selectedField,
+    selectedFieldId,
+    selectedFieldSchemaId,
+    selectedRecordId,
+    selectedValidExtensions
+  } = webformRecordState;
 
   const {
     formatDate,
@@ -52,17 +89,57 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: parseNewRecordData(record.elements, undefined) }
+      payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
     });
   }, [record, onTabChange]);
 
-  const onDeleteMultipleWebform = async recordId => {
+  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
+    .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
+    .flat()
+    .join(', ');
+
+  const onAttach = async value => {
+    onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
+    onToggleDialogVisible(false);
+  };
+
+  const onConfirmDeleteAttachment = async () => {
+    const fileDeleted = await DatasetService.deleteFileData(datasetId, selectedFieldId);
+    if (fileDeleted) {
+      onFillField(record, selectedFieldSchemaId, '');
+      onToggleDeleteAttachmentDialogVisible(false);
+    }
+  };
+
+  const onDeleteMultipleWebform = async () => {
+    webformRecordDispatch({
+      type: 'SET_IS_DELETING',
+      payload: { isDeleting: true }
+    });
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, recordId);
-      if (isDataDeleted) onRefresh();
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
+      if (isDataDeleted) {
+        onRefresh();
+        handleDialogs('deleteRow', false);
+      }
     } catch (error) {
       console.error('error', error);
+
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'DELETE_RECORD_BY_ID_ERROR',
+        content: { dataflowId, dataflowName, datasetId, datasetName, tableName }
+      });
     }
+  };
+
+  const onFileDownload = async (fileName, fieldId) => {
+    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+
+    DownloadFile(fileContent, fileName);
   };
 
   const onEditorKeyChange = (event, field, option) => {
@@ -87,6 +164,16 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
     }
   };
 
+  const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
+    webformRecordDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fieldId, fieldSchemaId } });
+
+  const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
+    webformRecordDispatch({
+      type: 'ON_FILE_UPLOAD_SET_FIELDS',
+      payload: { fieldId, fieldSchemaId, validExtensions, maxSize }
+    });
+  };
+
   const onFillField = (field, option, value) => {
     webformRecordState.newRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === option)[0].fieldData[
       option
@@ -106,6 +193,9 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
   };
 
   const onSelectField = field => webformRecordDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
+
+  const onToggleDeleteAttachmentDialogVisible = value =>
+    webformRecordDispatch({ type: 'ON_TOGGLE_DELETE_DIALOG', payload: { value } });
 
   const onToggleDialogVisible = value => webformRecordDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
@@ -232,134 +322,226 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="errorCircle"
             />
-            <span className={styles.nonExistField}>
-              {`The field ${field.name} is not created in the design, please check it`}
-            </span>
+            <span
+              className={styles.nonExistField}
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resources.messages['fieldIsNotCreated'], { fieldName: field.name })
+              }}
+            />
           </div>
         );
 
       case 'ATTACHMENT':
+        const colSchema = columnsSchema.filter(colSchema => colSchema.fieldSchemaId === field.fieldSchemaId)[0];
         return (
-          <Button
-            className={`p-button-animated-blink p-button-primary-transparent`}
-            // disabled={true}
-            icon={'import'}
-            label={resources.messages['uploadAttachment']}
-            onClick={() => {
-              onToggleDialogVisible(true);
-              onSelectField(field);
-              // setIsAttachFileVisible(true);
-              // onFileUploadVisible(
-              //   fieldId,
-              //   fieldSchemaId,
-              //   !isNil(colSchema) ? colSchema.validExtensions : [],
-              //   colSchema.maxSize
-              // );
-            }}
-          />
+          <div className={styles.attachmentWrapper}>
+            {!isNil(field.value) && field.value !== '' && (
+              <Button
+                className={`${field.value === '' && 'p-button-animated-blink'} p-button-primary-transparent`}
+                icon="export"
+                iconPos="right"
+                label={field.value}
+                onClick={() => onFileDownload(field.value, field.fieldId)}
+              />
+            )}
+            {
+              <Button
+                className={`p-button-animated-blink p-button-primary-transparent`}
+                icon="import"
+                label={
+                  !isNil(field.value) && field.value !== ''
+                    ? resources.messages['uploadReplaceAttachment']
+                    : resources.messages['uploadAttachment']
+                }
+                onClick={() => {
+                  onToggleDialogVisible(true);
+                  onFileUploadVisible(
+                    field.fieldId,
+                    field.fieldSchemaId,
+                    !isNil(colSchema) ? colSchema.validExtensions : [],
+                    !isNil(colSchema) ? colSchema.maxSize : 20
+                  );
+                }}
+              />
+            }
+
+            <Button
+              className={`p-button-animated-blink p-button-primary-transparent`}
+              icon="trash"
+              onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
+            />
+          </div>
         );
+      // return (
+      //   <Button
+      //     className={`p-button-animated-blink p-button-primary-transparent`}
+      //     // disabled={true}
+      //     icon={'import'}
+      //     label={resources.messages['uploadAttachment']}
+      //     onClick={() => {
+      //       onToggleDialogVisible(true);
+      //       onSelectField(field);
+      //       // setIsAttachFileVisible(true);
+      //       // onFileUploadVisible(
+      //       //   fieldId,
+      //       //   fieldSchemaId,
+      //       //   !isNil(colSchema) ? colSchema.validExtensions : [],
+      //       //   colSchema.maxSize
+      //       // );
+      //     }}
+      //   />
+      //);
 
       default:
         break;
     }
   };
 
-  const renderFields = elements => {
-    return elements.map((field, i) => {
-      if (field.type === 'FIELD') {
+  const renderElements = elements => {
+    return elements.map((element, i) => {
+      const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
+      const isSubTableVisible = element.tableNotCreated && isReporting;
+
+      if (element.type === 'FIELD') {
         return (
-          <div key={i} className={styles.field}>
-            <label>{field.title}</label>
-            <div className={styles.content}>
-              <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
-              {field.validations &&
-                field.validations.map((validation, index) => (
-                  <IconTooltip
-                    className={'webform-validationErrors'}
-                    key={index}
-                    levelError={validation.levelError}
-                    message={validation.message}
-                  />
-                ))}
+          !isFieldVisible && (
+            <div key={i} className={styles.field}>
+              <label>{element.title}</label>
+              <div>
+                <div className={styles.template}>
+                  {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
+                </div>
+                {element.validations &&
+                  element.validations.map((validation, index) => (
+                    <IconTooltip
+                      className={'webform-validationErrors'}
+                      key={index}
+                      levelError={validation.levelError}
+                      message={validation.message}
+                    />
+                  ))}
+              </div>
             </div>
-          </div>
+          )
         );
       } else {
         return (
-          <div key={i} className={styles.subTable}>
-            <h3 className={styles.title}>
-              <div>
-                {field.title ? field.title : field.name}
-                {field.hasErrors && <IconTooltip levelError={'ERROR'} message={'This table has errors'} />}
-              </div>
-              {field.multipleRecords && (
-                <Button
-                  disabled
-                  icon={'plus'}
-                  label={'Add'}
-                  onClick={() => onAddMultipleWebform(field.tableSchemaId)}
+          !isSubTableVisible && (
+            <div key={i} className={styles.subTable}>
+              <h3 className={styles.title}>
+                <div>
+                  {element.title ? element.title : element.name}
+                  {element.hasErrors && (
+                    <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
+                  )}
+                </div>
+                {element.multipleRecords && (
+                  <Button
+                    disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                    icon={
+                      addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
+                    }
+                    label={resources.messages['addRecord']}
+                    onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                  />
+                )}
+              </h3>
+              {element.tableNotCreated && (
+                <span
+                  className={styles.nonExistTable}
+                  dangerouslySetInnerHTML={{
+                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: element.name })
+                  }}
                 />
               )}
-            </h3>
-            {field.tableNotCreated && (
-              <span className={styles.nonExistTable}>
-                {`The table ${field.name} is not created in the design, please check it`}
-              </span>
-            )}
-            {field.elementsRecords.map((record, i) => {
-              return (
-                <WebformRecord
-                  datasetId={datasetId}
-                  key={i}
-                  onAddMultipleWebform={onAddMultipleWebform}
-                  onRefresh={onRefresh}
-                  onTabChange={onTabChange}
-                  record={record}
-                  tableId={tableId}
-                />
-              );
-            })}
-          </div>
+              {element.elementsRecords.map((record, i) => {
+                return (
+                  <WebformRecord
+                    dataflowId={dataflowId}
+                    datasetId={datasetId}
+                    key={i}
+                    multipleRecords={element.multipleRecords}
+                    onAddMultipleWebform={onAddMultipleWebform}
+                    onRefresh={onRefresh}
+                    onTabChange={onTabChange}
+                    record={record}
+                    tableId={tableId}
+                    tableName={element.title}
+                  />
+                );
+              })}
+            </div>
+          )
         );
       }
     });
   };
 
-  const renderWebformContent = record => {
+  const renderWebformContent = content => {
+    const errorMessages = renderErrorMessages(content);
+
     return (
       <div className={styles.content}>
         <div className={styles.actionButtons}>
-          {!isEmpty(record.validations) &&
-            record.validations.map((validation, index) => (
+          {!isEmpty(content.validations) &&
+            content.validations.map((validation, index) => (
               <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
             ))}
         </div>
-        {record.multiple && !isEmpty(record.elements) && (
+        {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-              icon={'trash'}
-              // onClick={() => onDeleteMultipleWebform(record.recordId)}
-              onClick={() => handleDialogs('deleteRow', true)}
+              disabled={webformRecordState.isDeleting}
+              icon={webformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
+              onClick={() => {
+                handleDialogs('deleteRow', true);
+                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { selectedRecordId: content.recordId } });
+              }}
             />
           </div>
         )}
-        {!isEmpty(record.elements) ? renderFields(record.elements) : 'There are no fields'}
+        {isEmpty(errorMessages) ? (
+          renderElements(content.elements)
+        ) : (
+          <ul className={styles.errorList}>
+            {errorMessages.map(msg => (
+              <li className={styles.errorItem}>{msg}</li>
+            ))}
+          </ul>
+        )}
       </div>
     );
+  };
+
+  const renderErrorMessages = content => {
+    const errorMessages = [];
+    if (hasFields) {
+      errorMessages.push(resources.messages['emptyWebformTable']);
+    }
+    if (content.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+    }
+    if (content.totalRecords > 1) {
+      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
+    }
+    if (!isFixedNumber) {
+      errorMessages.push(resources.messages['webformTableWithoutFixedNumber']);
+    }
+
+    return errorMessages;
   };
 
   return (
     <Fragment>
       {renderWebformContent(webformRecordState.record)}
-
       {isFileDialogVisible && (
         <CustomFileUpload
           dialogClassName={styles.dialog}
           dialogHeader={resources.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
-          accept={'*'}
+          accept={getAttachExtensions || '*'}
           chooseLabel={resources.messages['selectFile']}
           className={styles.fileUpload}
           fileLimit={1}
@@ -368,11 +550,11 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           multiple={false}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           name="file"
-          // onUpload={onAttach}
+          onUpload={onAttach}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
             datasetId,
-            fieldId: selectedField.fieldId
+            fieldId: selectedFieldId
           })}`}
         />
       )}
@@ -383,10 +565,23 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
           header={resources.messages['deleteRow']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          // onConfirm={onConfirmDeleteRow}
+          onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}
           onHide={() => handleDialogs('deleteRow', false)}
           visible={isDialogVisible.deleteRow}>
           {resources.messages['confirmDeleteRow']}
+        </ConfirmDialog>
+      )}
+
+      {isDeleteAttachmentVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={`${resources.messages['deleteAttachmentHeader']}`}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmDeleteAttachment}
+          onHide={() => onToggleDeleteAttachmentDialogVisible(false)}
+          visible={isDeleteAttachmentVisible}>
+          {resources.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
     </Fragment>
@@ -395,4 +590,4 @@ export const WebformRecord = ({ onAddMultipleWebform, datasetId, onRefresh, onTa
 
 WebformRecord.propTypes = { record: PropTypes.shape({ elements: PropTypes.array }) };
 
-WebformRecord.defaultProps = { record: { elements: [] } };
+WebformRecord.defaultProps = { record: { elements: [], totalRecords: 0 } };
