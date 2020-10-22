@@ -31,9 +31,13 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
+  addingOnTableSchemaId,
   columnsSchema,
   dataflowId,
   datasetId,
+  hasFields,
+  isAddingMultiple,
+  isFixedNumber = true,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
@@ -49,6 +53,7 @@ export const WebformRecord = ({
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
+    isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     newRecord: {},
@@ -84,7 +89,7 @@ export const WebformRecord = ({
   useEffect(() => {
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
-      payload: { newRecord: parseNewRecordData(record.elements, undefined) }
+      payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
     });
   }, [record, onTabChange]);
 
@@ -107,9 +112,16 @@ export const WebformRecord = ({
   };
 
   const onDeleteMultipleWebform = async () => {
+    webformRecordDispatch({
+      type: 'SET_IS_DELETING',
+      payload: { isDeleting: true }
+    });
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
-      if (isDataDeleted) onRefresh();
+      if (isDataDeleted) {
+        onRefresh();
+        handleDialogs('deleteRow', false);
+      }
     } catch (error) {
       console.error('error', error);
 
@@ -141,7 +153,7 @@ export const WebformRecord = ({
 
   const onEditorSubmitValue = async (field, option, value) => {
     const parsedValue =
-      field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+      field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
@@ -385,20 +397,22 @@ export const WebformRecord = ({
     }
   };
 
-  const renderFields = elements => {
-    return elements.map((field, i) => {
-      const isFieldVisible = field.fieldType === 'EMPTY' && isReporting;
-      const isSubTableVisible = field.tableNotCreated && isReporting;
+  const renderElements = elements => {
+    return elements.map((element, i) => {
+      const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
+      const isSubTableVisible = element.tableNotCreated && isReporting;
 
-      if (field.type === 'FIELD') {
+      if (element.type === 'FIELD') {
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              <label>{field.title}</label>
+              <label>{element.title}</label>
               <div>
-                <div className={styles.template}>{renderTemplate(field, field.fieldSchemaId, field.fieldType)}</div>
-                {field.validations &&
-                  field.validations.map((validation, index) => (
+                <div className={styles.template}>
+                  {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
+                </div>
+                {element.validations &&
+                  element.validations.map((validation, index) => (
                     <IconTooltip
                       className={'webform-validationErrors'}
                       key={index}
@@ -416,36 +430,43 @@ export const WebformRecord = ({
             <div key={i} className={styles.subTable}>
               <h3 className={styles.title}>
                 <div>
-                  {field.title ? field.title : field.name}
-                  {field.hasErrors && (
+                  {element.title ? element.title : element.name}
+                  {element.hasErrors && (
                     <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
                   )}
                 </div>
-                {field.multipleRecords && (
-                  <Button icon={'plus'} label={'Add'} onClick={() => onAddMultipleWebform(field.tableSchemaId)} />
+                {element.multipleRecords && (
+                  <Button
+                    disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                    icon={
+                      addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
+                    }
+                    label={resources.messages['addRecord']}
+                    onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                  />
                 )}
               </h3>
-              {field.tableNotCreated && (
+              {element.tableNotCreated && (
                 <span
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
-                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: field.name })
+                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: element.name })
                   }}
                 />
               )}
-              {field.elementsRecords.map((record, i) => {
+              {element.elementsRecords.map((record, i) => {
                 return (
                   <WebformRecord
                     dataflowId={dataflowId}
                     datasetId={datasetId}
                     key={i}
-                    multipleRecords={field.multipleRecords}
+                    multipleRecords={element.multipleRecords}
                     onAddMultipleWebform={onAddMultipleWebform}
                     onRefresh={onRefresh}
                     onTabChange={onTabChange}
                     record={record}
                     tableId={tableId}
-                    tableName={field.title}
+                    tableName={element.title}
                   />
                 );
               })}
@@ -456,30 +477,59 @@ export const WebformRecord = ({
     });
   };
 
-  const renderWebformContent = record => {
+  const renderWebformContent = content => {
+    const errorMessages = renderErrorMessages(content);
+
     return (
       <div className={styles.content}>
         <div className={styles.actionButtons}>
-          {!isEmpty(record.validations) &&
-            record.validations.map((validation, index) => (
+          {!isEmpty(content.validations) &&
+            content.validations.map((validation, index) => (
               <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
             ))}
         </div>
-        {multipleRecords && !isEmpty(record.elements) && (
+        {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-              icon={'trash'}
+              disabled={webformRecordState.isDeleting}
+              icon={webformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);
-                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { recordId: record.recordId } });
+                webformRecordDispatch({ type: 'GET_DELETE_ROW_ID', payload: { selectedRecordId: content.recordId } });
               }}
             />
           </div>
         )}
-        {!isEmpty(record.elements) ? renderFields(record.elements) : resources.messages['emptyWebformTable']}
+        {isEmpty(errorMessages) ? (
+          renderElements(content.elements)
+        ) : (
+          <ul className={styles.errorList}>
+            {errorMessages.map(msg => (
+              <li className={styles.errorItem}>{msg}</li>
+            ))}
+          </ul>
+        )}
       </div>
     );
+  };
+
+  const renderErrorMessages = content => {
+    const errorMessages = [];
+    if (hasFields) {
+      errorMessages.push(resources.messages['emptyWebformTable']);
+    }
+    if (content.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+    }
+    if (content.totalRecords > 1) {
+      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
+    }
+    if (!isFixedNumber) {
+      errorMessages.push(resources.messages['webformTableWithoutFixedNumber']);
+    }
+
+    return errorMessages;
   };
 
   return (
@@ -521,6 +571,7 @@ export const WebformRecord = ({
           {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
+
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -539,4 +590,4 @@ export const WebformRecord = ({
 
 WebformRecord.propTypes = { record: PropTypes.shape({ elements: PropTypes.array }) };
 
-WebformRecord.defaultProps = { record: { elements: [] } };
+WebformRecord.defaultProps = { record: { elements: [], totalRecords: 0 } };

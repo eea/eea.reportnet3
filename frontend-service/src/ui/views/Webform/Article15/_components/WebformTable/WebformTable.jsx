@@ -26,6 +26,8 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   const resources = useContext(ResourcesContext);
 
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
+    isAddingMultiple: false,
+    addingOnTableSchemaId: null,
     isDataUpdated: false,
     isLoading: true,
     webformData: {}
@@ -38,8 +40,19 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   }, [webform]);
 
   useEffect(() => {
-    if (!isNil(webform) && webform.tableSchemaId) onLoadTableData();
-  }, [isDataUpdated, onTabChange, webform]);
+    if (!isNil(webform) && webform.tableSchemaId) {
+      isLoading(true);
+      onLoadTableData();
+    } else if (!isNil(webform) && isNil(webform.tableSchemaId)) {
+      isLoading(false);
+    }
+  }, [onTabChange, webform]);
+
+  useEffect(() => {
+    if (!isNil(webform) && webform.tableSchemaId) {
+      onLoadTableData();
+    }
+  }, [isDataUpdated, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -67,6 +80,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   };
 
   const onAddMultipleWebform = async tableSchemaId => {
+    webformTableDispatch({
+      type: 'SET_IS_ADDING_MULTIPLE',
+      payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
+    });
+
     if (!isEmpty(webformData.elementsRecords)) {
       const newEmptyRecord = parseNewRecord(
         webformData.elementsRecords[0].elements.filter(element => element.tableSchemaId === tableSchemaId)[0].elements
@@ -87,12 +105,15 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           type: 'ADD_RECORDS_BY_ID_ERROR',
           content: { dataflowId, datasetId, dataflowName, datasetName, tableName: webformData.title }
         });
+        webformTableDispatch({
+          type: 'SET_IS_ADDING_MULTIPLE',
+          payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
+        });
       }
     }
   };
 
   const onLoadTableData = async () => {
-    isLoading(true);
     try {
       const parentTableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', 100, undefined, [
         'CORRECT',
@@ -123,7 +144,12 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           tableData[tableSchemaId] = tableChildData;
         }
 
-        const records = onParseWebformRecords(parentTableData.records, webform, tableData);
+        const records = onParseWebformRecords(
+          parentTableData.records,
+          webform,
+          tableData,
+          parentTableData.totalRecords
+        );
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
@@ -140,10 +166,14 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
       });
     } finally {
       isLoading(false);
+      webformTableDispatch({
+        type: 'SET_IS_ADDING_MULTIPLE',
+        payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
+      });
     }
   };
 
-  const onParseWebformRecords = (records, webform, tableData) => {
+  const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
     return records.map(record => {
       const { fields } = record;
       const { elements } = webform;
@@ -172,7 +202,8 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
             const tableElementsRecords = onParseWebformRecords(
               tableData[element.tableSchemaId].records,
               element,
-              tableData
+              tableData,
+              totalRecords
             );
             result.push({ ...element, elementsRecords: tableElementsRecords });
           } else {
@@ -181,7 +212,7 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         }
       }
 
-      return { ...record, elements: result };
+      return { ...record, elements: result, totalRecords };
     });
   };
 
@@ -194,9 +225,12 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
       webformData.elementsRecords.map((record, i) => {
         return (
           <WebformRecord
+            addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
             columnsSchema={webformData.elementsRecords[0].elements}
             dataflowId={dataflowId}
             datasetId={datasetId}
+            hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
+            isAddingMultiple={webformTableState.isAddingMultiple}
             isReporting={isReporting}
             key={i}
             multipleRecords={webformData.multipleRecords}
@@ -211,9 +245,13 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
       })
     ) : (
       <WebformRecord
+        addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
         columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
+        isAddingMultiple={webformTableState.isAddingMultiple}
+        isFixedNumber={webformData.fixedNumber}
         isReporting={isReporting}
         multipleRecords={webformData.multipleRecords}
         onAddMultipleWebform={onAddMultipleWebform}
@@ -243,7 +281,11 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           )}
         </div>
         {webformData.multipleRecords && (
-          <Button label={'Add'} icon={'plus'} onClick={() => onAddMultipleWebform(webformData.tableSchemaId)} />
+          <Button
+            icon={'plus'}
+            label={resources.messages['addRecord']}
+            onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
+          />
         )}
       </h3>
       {isNil(webformData.tableSchemaId) && (

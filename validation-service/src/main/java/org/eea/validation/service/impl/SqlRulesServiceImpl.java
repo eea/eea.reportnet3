@@ -161,20 +161,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     Rule rule = ruleMapper.classToEntity(ruleVO);
 
     String query = proccessQuery(datasetId, ruleVO.getSqlSentence(), datasetSchemaId);
-
+    boolean verifAndEnabled = true;
     if (validateRule(query, datasetId, rule).equals(Boolean.FALSE)) {
-      rule.setVerified(false);
-      rule.setEnabled(false);
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
-          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-    } else {
-      rule.setEnabled(true);
-      rule.setVerified(true);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+      verifAndEnabled = false;
     }
-
+    rule.setEnabled(verifAndEnabled);
+    rule.setVerified(verifAndEnabled);
+    rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
+        .append(rule.getRuleId().toString()).append("')").toString());
+    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
   }
 
   /**
