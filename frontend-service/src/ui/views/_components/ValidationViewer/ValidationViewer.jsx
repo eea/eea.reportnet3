@@ -1,22 +1,27 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './ValidationViewer.module.css';
+import styles from './ValidationViewer.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { validationReducer } from './_functions/Reducers/validationReducer';
 
 const ValidationViewer = React.memo(
   ({
@@ -26,11 +31,10 @@ const ValidationViewer = React.memo(
     hasWritePermissions,
     levelErrorTypes,
     onSelectValidation,
-    tableSchemaNames,
+    schemaTables,
     visible
   }) => {
     const resources = useContext(ResourcesContext);
-
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
     const [allOriginsFilter, setAllOriginsFilter] = useState([]);
     const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
@@ -38,6 +42,7 @@ const ValidationViewer = React.memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
+    const [grouped, setGrouped] = useState(true);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -47,9 +52,16 @@ const ValidationViewer = React.memo(
     const [originsFilter, setOriginsFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
-    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
-    const [totalRecords, setTotalRecords] = useState(0);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
+
+    const [validationState, validationDispatch] = useReducer(validationReducer, {
+      totalErrors: 0,
+      totalFilteredGroupedRecords: 0,
+      totalFilteredRecords: 0,
+      totalRecords: 0
+    });
+
+    const { totalErrors, totalFilteredGroupedRecords, totalFilteredRecords, totalRecords } = validationState;
 
     let dropdownLevelErrorsFilterRef = useRef();
     let dropdownTypeEntitiesFilterRef = useRef();
@@ -58,8 +70,20 @@ const ValidationViewer = React.memo(
     useEffect(() => {
       const headers = [
         {
+          id: 'entityType',
+          header: resources.messages['entity']
+        },
+        {
           id: 'tableSchemaName',
-          header: resources.messages['origin']
+          header: resources.messages['table']
+        },
+        {
+          id: 'fieldSchemaName',
+          header: resources.messages['field']
+        },
+        {
+          id: 'shortCode',
+          header: resources.messages['ruleCode']
         },
         {
           id: 'levelError',
@@ -68,10 +92,6 @@ const ValidationViewer = React.memo(
         {
           id: 'message',
           header: resources.messages['errorMessage']
-        },
-        {
-          id: 'entityType',
-          header: resources.messages['entity']
         }
       ];
 
@@ -103,9 +123,22 @@ const ValidationViewer = React.memo(
           header={resources.messages['tableSchemaId']}
         />
       );
+      columnsArr.push(
+        <Column key="ruleId" field="ruleId" className={styles.invisibleHeader} header={resources.messages['ruleId']} />
+      );
+      if (grouped) {
+        columnsArr.push(
+          <Column
+            key="numberOfRecords"
+            field="numberOfRecords"
+            header={resources.messages['numberOfRecords']}
+            sortable={true}
+          />
+        );
+      }
 
       setColumns(columnsArr);
-    }, []);
+    }, [grouped]);
 
     useEffect(() => {
       if (visible) {
@@ -118,7 +151,15 @@ const ValidationViewer = React.memo(
           fetchData('', sortOrder, 0, numberRows, [], [], []);
         }
       }
-    }, [visible]);
+    }, [visible, grouped]);
+
+    const addTableSchemaId = tableErrors => {
+      tableErrors.forEach(tableError => {
+        const filteredTable = schemaTables.filter(schemaTable => schemaTable.name === tableError.tableSchemaName);
+        if (!isEmpty(filteredTable)) tableError.tableSchemaId = filteredTable[0].id;
+      });
+      return tableErrors;
+    };
 
     const columnStyles = columnId => {
       const style = {};
@@ -145,19 +186,47 @@ const ValidationViewer = React.memo(
     ) => {
       setIsLoading(true);
 
-      const datasetErrors = await DatasetService.errorsById(
-        datasetId,
-        Math.floor(firstRow / numberRows),
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        originsFilter
-      );
+      let datasetErrors = {};
 
-      setTotalRecords(datasetErrors.totalErrors);
-      setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
+      if (grouped) {
+        datasetErrors = await DatasetService.groupedErrorsById(
+          datasetId,
+          Math.floor(firstRow / numberRows),
+          numberRows,
+          sortField,
+          sortOrder,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          originsFilter
+        );
+        addTableSchemaId(datasetErrors.errors);
+        validationDispatch({
+          type: 'SET_TOTAL_GROUPED_ERRORS',
+          payload: {
+            totalErrors: datasetErrors.totalErrors,
+            totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
+          }
+        });
+      } else {
+        datasetErrors = await DatasetService.errorsById(
+          datasetId,
+          Math.floor(firstRow / numberRows),
+          numberRows,
+          sortField,
+          sortOrder,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          originsFilter
+        );
+      }
+
+      validationDispatch({
+        type: 'SET_TOTALS_ERRORS',
+        payload: {
+          totalFilteredRecords: datasetErrors.totalFilteredErrors,
+          totalRecords: datasetErrors.totalRecords
+        }
+      });
       setFetchedData(datasetErrors.errors);
       setIsLoading(false);
     };
@@ -198,9 +267,10 @@ const ValidationViewer = React.memo(
         label: datasetName.toString(),
         key: `${datasetName.toString()}`
       });
-
-      tableSchemaNames.forEach(name => {
-        allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}` });
+      schemaTables.forEach(table => {
+        if (!isNil(table.name)) {
+          allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
+        }
       });
 
       setAllOriginsFilter(allOriginsFilterList);
@@ -314,28 +384,65 @@ const ValidationViewer = React.memo(
     };
 
     const onRowSelect = async event => {
-      switch (event.data.entityType) {
-        case 'FIELD':
-        case 'RECORD':
-          const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-          onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId);
-          break;
+      if (!grouped) {
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
+            onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId, '', false);
+            break;
 
-        case 'TABLE':
-          onSelectValidation(event.data.tableSchemaId, -1, -1);
-          break;
+          case 'TABLE':
+            onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
+            break;
 
-        default:
-          break;
+          default:
+            break;
+        }
+      } else {
+        switch (event.data.entityType) {
+          case 'FIELD':
+          case 'RECORD':
+            onSelectValidation(
+              event.data.tableSchemaId,
+              -1,
+              -1,
+              event.data.ruleId,
+              true,
+              event.data.message,
+              event.data.levelError
+            );
+            break;
+          case 'TABLE':
+            if (event.data.shortCode.substring(0, 2) === 'TU' && event.data.message.startsWith('Uniqueness')) {
+              onSelectValidation(
+                event.data.tableSchemaId,
+                -1,
+                -1,
+                event.data.ruleId,
+                true,
+                event.data.message,
+                event.data.levelError
+              );
+            } else {
+              onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
+            }
+            break;
+
+          default:
+            break;
+        }
       }
     };
-
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {areActiveFilters && totalRecords !== totalFilteredRecords
-          ? `${resources.messages['filtered']} : ${totalFilteredRecords} | `
+          ? `${resources.messages['filtered']}: ${!grouped ? totalFilteredRecords : totalFilteredGroupedRecords} | `
           : ''}
-        {resources.messages['totalRecords']} {totalRecords} {resources.messages['records'].toLowerCase()}
+        {resources.messages['totalRecords']} {totalRecords}{' '}
+        {`${resources.messages['records'].toLowerCase()}${
+          grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
+        }`}
         {areActiveFilters && totalRecords === totalFilteredRecords
           ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
@@ -367,7 +474,7 @@ const ValidationViewer = React.memo(
               <Button
                 className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
-                label={resources.messages['origin']}
+                label={resources.messages['table']}
                 onClick={event => {
                   dropdownOriginsFilterRef.current.show(event);
                 }}
@@ -446,6 +553,18 @@ const ValidationViewer = React.memo(
             </div>
 
             <div className="p-toolbar-group-right">
+              <div className={styles.switchDivInput}>
+                <div className={styles.switchDiv}>
+                  <span className={styles.switchTextInput}>{resources.messages['ungrouped']}</span>
+                  <InputSwitch
+                    checked={grouped}
+                    onChange={e => setGrouped(e.value)}
+                    tooltip={resources.messages['toggleGroup']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                  <span className={styles.switchTextInput}>{resources.messages['grouped']}</span>
+                </div>
+              </div>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                   isLoading ? 'p-button-animated-spin' : ''
@@ -468,7 +587,7 @@ const ValidationViewer = React.memo(
             onRowSelect={onRowSelect}
             onSort={onSort}
             paginator={true}
-            paginatorRight={getPaginatorRecordsCount()}
+            paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
             reorderableColumns={true}
             resizableColumns={true}
             rows={numberRows}

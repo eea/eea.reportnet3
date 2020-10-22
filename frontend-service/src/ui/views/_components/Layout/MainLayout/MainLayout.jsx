@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import styles from './MainLayout.module.css';
 
 import { EuFooter } from './_components/EuFooter';
@@ -30,12 +32,26 @@ const MainLayout = ({ children, isPublic = false }) => {
   const [margin, setMargin] = useState('50px');
   const [mainContentStyle, setMainContentStyle] = useState({
     height: `auto`,
-    minHeight: `${window.innerHeight - 180}px`,
-    marginTop: '180px'
+    minHeight: `${window.innerHeight - config.theme.baseHeaderHeight}px`,
+    marginTop: `${config.theme.baseHeaderHeight}px`
   });
   const [pageContentStyle, setPageContentStyle] = useState({
     maxWidth: `${element.clientWidth - 50}px`
   });
+
+  useEffect(() => {
+    if (!themeContext.headerCollapse) {
+      setMainContentStyle({
+        ...mainContentStyle,
+        marginTop: `${config.theme.baseHeaderHeight + config.theme.cookieConsentHeight}px`
+      });
+    } else {
+      setMainContentStyle({
+        ...mainContentStyle,
+        marginTop: `${config.theme.baseHeaderHeight}px`
+      });
+    }
+  }, [themeContext.headerCollapse]);
 
   useEffect(() => {
     window.addEventListener('resize', calculateMainContentWidth);
@@ -57,6 +73,26 @@ const MainLayout = ({ children, isPublic = false }) => {
   useEffect(() => {
     calculateMainContentWidth();
   }, [leftSideBarContext.isLeftSideBarOpened]);
+
+  useEffect(() => {
+    window.addEventListener(
+      'dragover',
+      function (e) {
+        // e.dataTransfer.effectAllowed = 'none';
+        e.preventDefault();
+        e = e || window.event;
+      },
+      false
+    );
+    window.addEventListener(
+      'drop',
+      function (e) {
+        e = e || window.event;
+        e.preventDefault();
+      },
+      false
+    );
+  });
 
   const getUserConfiguration = async () => {
     try {

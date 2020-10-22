@@ -1,6 +1,25 @@
 import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 
+const changeIncorrectCoordinates = record => {
+  const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"rsid": "EPSG:4326"}}`;
+  record.dataRow.forEach(row => {
+    if (row.fieldData.type === 'POINT') {
+      const parsedJSON = JSON.parse(
+        !isNil(Object.values(row.fieldData)[0]) ? Object.values(row.fieldData)[0] : baseJson
+      );
+      const value = !isNil(row.fieldData[Object.keys(row.fieldData)[0]])
+        ? row.fieldData[Object.keys(row.fieldData)[0]]
+        : ',';
+      if (!checkValidJSONCoordinates(value)) parsedJSON.geometry.coordinates = [''];
+      if (!checkRSID(parsedJSON.properties.rsid)) parsedJSON.properties.rsid = '4326';
+
+      row.fieldData[Object.keys(row.fieldData)[0]] = JSON.stringify(parsedJSON);
+    }
+  });
+  return record;
+};
+
 const checkRSID = rsid => {
   switch (rsid.split(':')[1].trim()) {
     case '4326':
@@ -11,7 +30,8 @@ const checkRSID = rsid => {
       return 'EPSG:4326';
   }
 };
-const checkValidCoordinates = coordinates => {
+const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
+  if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.indexOf(',') === -1) return false;
@@ -20,9 +40,14 @@ const checkValidCoordinates = coordinates => {
   }
   let isValid = true;
   const splittedCoordinates = Array.isArray(coordinates) ? coordinates : coordinates.split(',');
-  splittedCoordinates.forEach(coordinate => {
-    if (isNil(coordinate) || coordinate.toString().trim() === '') isValid = false;
-  });
+  if (splittedCoordinates.length < 2) {
+    isValid = false;
+  } else {
+    splittedCoordinates.forEach(coordinate => {
+      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim()))
+        isValid = false;
+    });
+  }
   return isValid;
 };
 
@@ -40,8 +65,9 @@ const checkValidJSONCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
     return checkValidCoordinates(parsedJSON.geometry.coordinates);
+  } else {
+    return false;
   }
-  return false;
 };
 
 const latLngToLngLat = (coordinates = []) =>
@@ -112,6 +138,7 @@ const printCoordinates = (data, isGeoJson = true) => {
 };
 
 export const MapUtils = {
+  changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,
   isValidJSON,

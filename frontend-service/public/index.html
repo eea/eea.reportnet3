@@ -10,6 +10,7 @@
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="stylesheet" type="text/css" href="css/indexStyles.css" />
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -20,45 +21,6 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Reportnet 3</title>
-    <style>
-      body {
-        margin: 0px;
-        padding: 0px;
-      }
-      #browserNotice {
-        position: absolute;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100%;
-        background-color: #006699;
-        margin: 0px;
-        padding: 0px;
-        font-family: Arial, Helvetica, sans-serif;
-      }
-      #browserNotice .noticeBox {
-        position: relative;
-        top: 10%;
-        margin: 0 auto;
-        width: 300px;
-        height: 400px;
-        padding: 32px;
-        border-radius: 5px;
-        background-color: #ffffff;
-        color: #000;
-      }
-      #browserNotice .noticeBox .corporate {
-        text-align: center;
-      }
-      #browserNotice .noticeBox .corporate img {
-        width: 80px;
-        height: 80px;
-      }
-      #browserNotice .noticeBox .corporate h2 {
-        margin: 0px;
-      }
-    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -79,7 +41,7 @@
       Please open this file for more details.
     -->
 
-    <div id="browserNotice">
+    <div id="browserNotice" style="display: none;">
       <div class="noticeBox">
         <div class="corporate">
           <img src="assets/img/logo.jpg" />
@@ -94,36 +56,7 @@
         </p>
       </div>
     </div>
-    <script type="text/javascript">
-      // Internet Explorer 6-11
-      var isIE = /*@cc_on!@*/ false || !!document.documentMode;
-
-      // Edge 20+ no chromium
-      var isEdge = !isIE && !!window.StyleMedia;
-      if (isIE || isEdge) {
-        var notice = document.getElementById('browserNotice');
-        notice.style.display = 'block';
-      }
-    </script>
     <script src="%PUBLIC_URL%/env.js"></script>
+    <script src="%PUBLIC_URL%/js/index.js"></script>
   </body>
-  <script>
-    window.addEventListener(
-      'dragover',
-      function (e) {
-        // e.dataTransfer.effectAllowed = 'none';
-        e.preventDefault();
-        e = e || event;
-      },
-      false
-    );
-    window.addEventListener(
-      'drop',
-      function (e) {
-        e = e || event;
-        e.preventDefault();
-      },
-      false
-    );
-  </script>
 </html>

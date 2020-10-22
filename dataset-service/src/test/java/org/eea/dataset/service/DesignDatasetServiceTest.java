@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DesignDatasetMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -117,6 +118,9 @@ public class DesignDatasetServiceTest {
 
   @Mock
   private ContributorControllerZuul contributorControllerZuul;
+
+  @Mock
+  private WebFormMapper webformMapper;
 
   /**
    * Inits the mocks.

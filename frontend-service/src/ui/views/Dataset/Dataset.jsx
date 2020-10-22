@@ -3,6 +3,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
@@ -13,6 +14,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
+import { Article15 } from 'ui/views/Webform/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -20,6 +22,7 @@ import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -45,7 +48,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -66,9 +69,15 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
+    isGroupedValidationDeleted: false,
+    isGroupedValidationSelected: false,
+    isValidationSelected: false,
     recordPositionId: -1,
     selectedRecordErrorId: -1,
-    activeIndex: null
+    selectedRuleId: '',
+    selectedRuleLevelError: '',
+    selectedRuleMessage: '',
+    tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -92,17 +101,17 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
-  const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
+  const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [tableSchemaId, setTableSchemaId] = useState();
-  const [tableSchemaNames, setTableSchemaNames] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [isTableView, setIsTableView] = useState(true);
+  const [webformData, setWebformData] = useState(null);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -116,6 +125,16 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (!isNil(tableSchema) && tableSchema.length > 0) {
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        tableSchemaId:
+          QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : tableSchema[0].id
+      });
+    }
+  }, [tableSchema]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -183,6 +202,18 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     getExportExtensions(externalOperationsList.export);
   }, [externalOperationsList]);
+
+  useEffect(() => {
+    if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
+  }, [dataViewerOptions.tableSchemaId]);
+
+  const changeUrl = () => {
+    window.history.replaceState(
+      null,
+      null,
+      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}`
+    );
+  };
 
   const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
@@ -291,6 +322,14 @@ export const Dataset = withRouter(({ match, history }) => {
     const menu = button.nextElementSibling;
     menu.style.top = top;
     menu.style.left = left;
+  };
+
+  const onChangeIsValidationSelected = options => {
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      isGroupedValidationSelected: options.isGroupedValidationSelected,
+      isValidationSelected: options.isValidationSelected
+    });
   };
 
   const onConfirmDelete = async () => {
@@ -463,6 +502,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
+      setWebformData(datasetSchema.webform);
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -488,12 +528,11 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
-      setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
-      const tableSchemaNamesList = [];
+      const tableSchemaList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
-          tableSchemaNamesList.push(tableSchema.tableSchemaName);
+          tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
           return {
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
@@ -505,7 +544,7 @@ export const Dataset = withRouter(({ match, history }) => {
           };
         })
       );
-      setTableSchemaNames(tableSchemaNamesList);
+      setSchemaTables(tableSchemaList);
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
@@ -553,13 +592,56 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+  const onHideSelectGroupedValidation = () =>
     setDataViewerOptions({
-      recordPositionId: posIdRecord,
-      selectedRecordErrorId: selectedRecordErrorId,
-      activeIndex: tableSchemaId
+      ...dataViewerOptions,
+      isGroupedValidationDeleted: true,
+      isGroupedValidationSelected: false,
+      isValidationSelected: false,
+      recordPositionId: -1,
+      selectedRuleMessage: '',
+      selectedRuleLevelError: '',
+      selectedRuleId: '',
+      selectedRuleMessage: ''
     });
-    setIsValidationSelected(true);
+
+  const onSelectValidation = (
+    tableSchemaId,
+    posIdRecord,
+    selectedRecordErrorId,
+    selectedRuleId,
+    grouped = true,
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
+    if (grouped) {
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        isGroupedValidationDeleted: false,
+        isGroupedValidationSelected: true,
+        recordPositionId: -1,
+        selectedRecordErrorId: -1,
+        selectedRuleId,
+        selectedRuleLevelError,
+        selectedRuleMessage,
+        tableSchemaId
+      });
+    } else {
+      setDataViewerOptions({
+        ...dataViewerOptions,
+        activeIndex: tableSchemaId,
+        isGroupedValidationDeleted: false,
+        isGroupedValidationSelected: false,
+        isValidationSelected: true,
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId,
+        selectedRuleId: '',
+        selectedRuleLevelError: '',
+        selectedRuleMessage: '',
+        tableSchemaId
+      });
+    }
+
     onSetVisible(setValidationsVisible, false);
   };
 
@@ -567,9 +649,11 @@ export const Dataset = withRouter(({ match, history }) => {
     fnUseState(visible);
   };
 
-  const onTabChange = tableSchemaId => {
-    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
-  };
+  const onTabChange = table =>
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      tableSchemaId: table.tableSchemaId
+    });
 
   const datasetTitle = () => {
     let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
@@ -655,6 +739,17 @@ export const Dataset = withRouter(({ match, history }) => {
       />
     </Fragment>
   );
+
+  const renderSwitchView = () =>
+    !isNil(webformData) && hasWritePermissions && (
+      <div className={styles.switch}>
+        <div className={`${styles.wrap}`}>
+          <span className={styles.text}>{resources.messages['tabularData']}</span>
+          <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
+          <span className={styles.text}>{resources.messages['webform']}</span>
+        </div>
+      </div>
+    );
 
   const renderValidationsFooter = (
     <Button
@@ -800,6 +895,7 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
+      {renderSwitchView()}
       {dashDialogVisible && (
         <Dialog
           footer={renderDashboardFooter}
@@ -810,25 +906,41 @@ export const Dataset = withRouter(({ match, history }) => {
           <Dashboard
             levelErrorTypes={levelErrorTypes}
             refresh={dashDialogVisible}
-            tableSchemaNames={tableSchemaNames}
+            tableSchemaNames={schemaTables.map(table => table.name)}
           />
         </Dialog>
       )}
-      <TabsSchema
-        activeIndex={dataViewerOptions.activeIndex}
-        hasWritePermissions={hasWritePermissions}
-        isDatasetDeleted={isDataDeleted}
-        isValidationSelected={isValidationSelected}
-        levelErrorTypes={levelErrorTypes}
-        onLoadTableData={onLoadTableData}
-        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-        recordPositionId={dataViewerOptions.recordPositionId}
-        reporting={true}
-        selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-        setIsValidationSelected={setIsValidationSelected}
-        tables={tableSchema}
-        tableSchemaColumns={tableSchemaColumns}
-      />
+      {isTableView ? (
+        <TabsSchema
+          hasWritePermissions={hasWritePermissions}
+          isDatasetDeleted={isDataDeleted}
+          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+          isValidationSelected={dataViewerOptions.isValidationSelected}
+          levelErrorTypes={levelErrorTypes}
+          onChangeIsValidationSelected={onChangeIsValidationSelected}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+          onLoadTableData={onLoadTableData}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          recordPositionId={dataViewerOptions.recordPositionId}
+          reporting={true}
+          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+          selectedRuleId={dataViewerOptions.selectedRuleId}
+          selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+          selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          tableSchemaId={dataViewerOptions.tableSchemaId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+        />
+      ) : (
+        <Article15
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          isReporting
+          state={{ datasetSchema: { tables: datasetSchemaAllTables }, schemaTables }}
+        />
+      )}
+
       {validationsVisible && (
         <Dialog
           className={styles.paginatorValidationViewer}
@@ -843,11 +955,12 @@ export const Dataset = withRouter(({ match, history }) => {
             hasWritePermissions={hasWritePermissions}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
-            tableSchemaNames={tableSchemaNames}
+            schemaTables={schemaTables}
             visible={validationsVisible}
           />
         </Dialog>
       )}
+
       {validationListDialogVisible && (
         <Dialog
           footer={validationListFooter}
@@ -859,11 +972,11 @@ export const Dataset = withRouter(({ match, history }) => {
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}
-            onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
           />
         </Dialog>
       )}
+
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           dialogClassName={styles.Dialog}
@@ -887,6 +1000,7 @@ export const Dataset = withRouter(({ match, history }) => {
           })}`}
         />
       )}
+
       {isImportOtherSystemsDialogVisible && (
         <Dialog
           className={styles.Dialog}
@@ -909,6 +1023,7 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
         </Dialog>
       )}
+
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -921,6 +1036,7 @@ export const Dataset = withRouter(({ match, history }) => {
           {resources.messages['deleteDatasetConfirm']}
         </ConfirmDialog>
       )}
+
       {validateDialogVisible && (
         <ConfirmDialog
           header={resources.messages['validateDataset']}
@@ -932,6 +1048,7 @@ export const Dataset = withRouter(({ match, history }) => {
           {resources.messages['validateDatasetConfirm']}
         </ConfirmDialog>
       )}
+
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}

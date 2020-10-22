@@ -46,6 +46,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
+    isGroupedValidationSelected: false,
     isValidationSelected: false,
     levelErrorTypes: [],
     metaData: {},
@@ -60,6 +61,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetName,
     dataViewerOptions,
     isDataDeleted,
+    isGroupedValidationSelected,
     isValidationSelected,
     levelErrorTypes,
     metaData,
@@ -216,7 +218,9 @@ export const EUDataset = withRouter(({ history, match }) => {
       showWriteButtons={false}
       isDatasetDeleted={isDataDeleted}
       isExportable={false}
+      isFilterable={false}
       hasCountryCode={true}
+      isGroupedValidationSelected={isGroupedValidationSelected}
       isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}

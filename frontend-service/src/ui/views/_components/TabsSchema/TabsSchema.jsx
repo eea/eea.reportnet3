@@ -1,5 +1,6 @@
 import React from 'react';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsSchema.module.css';
@@ -10,6 +11,9 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
+
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
@@ -17,15 +21,23 @@ export const TabsSchema = ({
   hasCountryCode,
   isDatasetDeleted,
   isExportable = true,
+  isFilterable,
+  isGroupedValidationDeleted,
+  isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypes,
+  onChangeIsValidationSelected,
+  onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
   recordPositionId,
   reporting,
   selectedRecordErrorId,
-  setIsValidationSelected,
+  selectedRuleId,
+  selectedRuleLevelError,
+  selectedRuleMessage,
   showWriteButtons = true,
+  tableSchemaId,
   tables,
   tableSchemaColumns
 }) => {
@@ -45,9 +57,14 @@ export const TabsSchema = ({
                   hasWritePermissions={hasWritePermissions}
                   isDatasetDeleted={isDatasetDeleted}
                   isExportable={isExportable}
+                  isFilterable={isFilterable}
+                  isGroupedValidationDeleted={isGroupedValidationDeleted}
+                  isGroupedValidationSelected={isGroupedValidationSelected}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
+                  onChangeIsValidationSelected={onChangeIsValidationSelected}
+                  onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   reporting={reporting}
                   showWriteButtons={showWriteButtons}
@@ -64,8 +81,10 @@ export const TabsSchema = ({
                       : []
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
-                  selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
-                  setIsValidationSelected={setIsValidationSelected}
+                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
+                  selectedRuleId={selectedRuleId}
+                  selectedRuleLevelError={selectedRuleLevelError}
+                  selectedRuleMessage={selectedRuleMessage}
                 />
               </div>
             </TabPanel>
@@ -83,9 +102,22 @@ export const TabsSchema = ({
 
   return (
     <TabView
-      activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
+      activeIndex={
+        !isNil(tables)
+          ? TabsUtils.getIndexByTableProperty(
+              !isNil(tableSchemaId)
+                ? tableSchemaId
+                : QuerystringUtils.getUrlParamValue('tab') !== ''
+                ? QuerystringUtils.getUrlParamValue('tab')
+                : '',
+              tables,
+              'id'
+            )
+          : 0
+      }
       onTabChange={onTabChange}
-      renderActiveOnly={false}>
+      renderActiveOnly={false}
+      tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>
   );

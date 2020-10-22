@@ -18,8 +18,8 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
-import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
@@ -27,17 +27,23 @@ export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
   datasetSchemas,
-  isPreviewModeOn,
+  isGroupedValidationDeleted,
+  isGroupedValidationSelected,
   isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
+  onChangeIsValidationSelected,
   onChangeTableProperties,
+  onHideSelectGroupedValidation,
   onLoadTableData,
   recordPositionId,
   selectedRecordErrorId,
-  setIsValidationSelected,
-  table
+  selectedRuleId,
+  selectedRuleLevelError,
+  selectedRuleMessage,
+  table,
+  viewType
 }) => {
   const validationContext = useContext(ValidationContext);
   const resources = useContext(ResourcesContext);
@@ -171,6 +177,7 @@ export const FieldsDesigner = ({
     if (fieldIndex > -1) {
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].fieldType = type;
       inmFields[fieldIndex].maxSize = maxSize;
       inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;
@@ -323,22 +330,28 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           hasWritePermissions={true}
-          isPreviewModeOn={isPreviewModeOn}
           isExportable={true}
+          isGroupedValidationDeleted={isGroupedValidationDeleted}
+          isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
           recordPositionId={recordPositionId}
           reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
-          setIsValidationSelected={setIsValidationSelected}
+          selectedRuleId={selectedRuleId}
+          selectedRuleLevelError={selectedRuleLevelError}
+          selectedRuleMessage={selectedRuleMessage}
+          onChangeIsValidationSelected={onChangeIsValidationSelected}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
           tableName={table.tableSchemaName}
           tableReadOnly={false}
           tableSchemaColumns={tableSchemaColumns}
+          viewType={viewType}
         />
       );
     }
@@ -366,8 +379,8 @@ export const FieldsDesigner = ({
     } else {
       return (
         <>
-          {isPreviewModeOn ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!isPreviewModeOn && renderNewField()}
+          {viewType['table'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+          {!viewType['table'] && renderNewField()}
         </>
       );
     }
@@ -485,6 +498,7 @@ export const FieldsDesigner = ({
       );
       if (fieldOrdered) {
         setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+        onChangeFields(inmFields, false, table.tableSchemaId);
       }
     } catch (error) {
       console.error(`There has been an error during the field reorder: ${error}`);
@@ -521,7 +535,7 @@ export const FieldsDesigner = ({
   return (
     <Fragment>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
-      <div className={styles.switchDivInput}>
+      <div className={styles.tableDescriptionRow}>
         <InputTextarea
           className={styles.tableDescriptionInput}
           collapsedHeight={55}
@@ -535,7 +549,6 @@ export const FieldsDesigner = ({
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.constraintsButtons}>
@@ -565,12 +578,11 @@ export const FieldsDesigner = ({
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
             <Checkbox
               checked={isReadOnlyTable}
-              // className={styles.checkRequired}
+              className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_readOnly`}
               inputId={`${table.tableSchemaId}_check_readOnly`}
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
-              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_readOnly`} className="srOnly">
               {resources.messages['readOnlyTable']}
@@ -581,12 +593,11 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={toPrefill || fixedNumber}
               disabled={isReadOnlyTable || fixedNumber}
-              // className={styles.checkRequired}
+              className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
-              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
@@ -596,12 +607,11 @@ export const FieldsDesigner = ({
             <span className={styles.switchTextInput}>{resources.messages['fixedNumber']}</span>
             <Checkbox
               checked={fixedNumber}
-              // className={styles.checkRequired}
+              className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_fixed_number`}
               inputId={`${table.tableSchemaId}_check_fixed_number`}
               label="Default"
               onChange={e => onChangeFixedNumber(e.checked)}
-              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_fixed_number`} className="srOnly">
               {resources.messages['fixedNumber']}
@@ -611,12 +621,11 @@ export const FieldsDesigner = ({
             <span className={styles.switchTextInput}>{resources.messages['notEmpty']}</span>
             <Checkbox
               checked={notEmpty}
-              // className={styles.checkRequired}
+              className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_not_empty`}
               inputId={`${table.tableSchemaId}_check_not_empty`}
               label="Default"
               onChange={e => onChangeNotEmpty(e.checked)}
-              style={{ marginRight: '50px' }}
             />
             <label htmlFor={`${table.tableSchemaId}_check_not_empty`} className="srOnly">
               {resources.messages['notEmpty']}
@@ -624,7 +633,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      {!isPreviewModeOn && (
+      {!viewType['table'] && (
         <div className={styles.fieldsHeader}>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>

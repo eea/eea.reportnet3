@@ -41,6 +41,7 @@
     }
   }
   .expressionValue {
+    height: 0.5px;
     width: calc(100% - (var(--operatorsWidth) * 2) - var(--unionWidth) - (var(--fieldsGap) * 5));
   }
   > span {

@@ -1,5 +1,6 @@
 import avatarImages from './avatarImages.json';
 import countryCode from './countries.code.json';
+import dataflowPermissions from './dataflowPermissions';
 import exportTypeCode from './exportType.code.json';
 import footer from './footer.config.json';
 import languageCode from './language.code.json';
@@ -8,6 +9,7 @@ import permissions from './permissions';
 import primeIcons from './prime.icons';
 import publicFrontpage from './publicFrontpage.json';
 import storage from './storage.config.json';
+import theme from './theme.config.json';
 import validations from './validation.config.json';
 
 const config = {};
@@ -22,6 +24,7 @@ config.MAX_FILE_SIZE = 100000000;
 
 config.avatars = images;
 config.countries = countries;
+config.dataflowPermissions = dataflowPermissions;
 config.exportTypes = exportTypes;
 config.footer = footer;
 config.icons = icons;
@@ -32,5 +35,6 @@ config.publicFrontpage = publicFrontpage;
 config.storage = storage;
 config.validations = validations;
 config.storage = storage;
+config.theme = theme;
 
 export { config };

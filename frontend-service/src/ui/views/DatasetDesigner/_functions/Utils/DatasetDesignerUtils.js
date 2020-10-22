@@ -8,7 +8,12 @@ const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
       if (!isUndefined(table.records) && !table.addTab) {
         table.records.forEach(record =>
           record.fields.forEach(field => {
-            if (!isNil(field) && !isNil(field.referencedField) && !isNil(field.referencedField.name)) {
+            if (
+              !isNil(field) &&
+              field.type.toUpperCase() === 'LINK' &&
+              !isNil(field.referencedField) &&
+              !isNil(field.referencedField.name)
+            ) {
               if (
                 !isNil(field) &&
                 !isNil(field.referencedField) &&
@@ -17,7 +22,12 @@ const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
                 referencedFields++;
               }
             } else {
-              if (!isNil(field) && !isNil(field.referencedField) && field.referencedField.idPk === fieldPkId) {
+              if (
+                !isNil(field) &&
+                field.type.toUpperCase() === 'LINK' &&
+                !isNil(field.referencedField) &&
+                field.referencedField.idPk === fieldPkId
+              ) {
                 referencedFields++;
               }
             }
@@ -33,20 +43,7 @@ const getIndexById = (datasetSchemaId, datasetSchemasArray) => {
   return datasetSchemasArray.map(datasetSchema => datasetSchema.datasetSchemaId).indexOf(datasetSchemaId);
 };
 
-const getUrlParamValue = param => {
-  let value = '';
-  let queryString = window.location.search;
-  const params = queryString.substring(1, queryString.length).split('&');
-  params.forEach(parameter => {
-    if (parameter.includes(param)) {
-      value = parameter.split('=')[1];
-    }
-  });
-  return param === 'tab' ? Number(value) : value === 'true';
-};
-
 export const DatasetDesignerUtils = {
   getCountPKUseInAllSchemas,
-  getIndexById,
-  getUrlParamValue
+  getIndexById
 };

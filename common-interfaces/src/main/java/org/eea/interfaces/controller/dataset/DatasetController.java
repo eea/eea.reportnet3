@@ -44,6 +44,7 @@ public interface DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
+   * @param idRules the id rules
    * @return the data tables values
    */
   @GetMapping("TableValueDataset/{id}")
@@ -52,7 +53,8 @@ public interface DatasetController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError);
+      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
+      @RequestParam(value = "idRules", required = false) String[] idRules);
 
   /**
    * Update dataset.
@@ -126,12 +128,12 @@ public interface DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param records the records
    */
-  @PostMapping("/{id}/table/{idTableSchema}/record")
-  void insertRecords(@PathVariable("id") Long datasetId,
-      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records);
+  @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
+  void insertRecords(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records);
 
   /**
    * Update records.

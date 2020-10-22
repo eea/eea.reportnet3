@@ -1,3 +1,5 @@
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'GET_EXPORT_LIST':
@@ -9,13 +11,28 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_DATASET_DATA':
       return {
         ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          selectedRecordErrorId: -1
+        },
         datasetDescription: payload.description,
         datasetSchema: payload.datasetSchema,
         datasetSchemaAllTables: payload.tables,
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          tableSchemaId:
+            QuerystringUtils.getUrlParamValue('tab') !== ''
+              ? QuerystringUtils.getUrlParamValue('tab')
+              : payload.tables.length === 0
+              ? ''
+              : payload.tables[0].tableSchemaId
+        },
         levelErrorTypes: payload.levelErrorTypes,
-        tableSchemaNames: payload.tableSchemaNames
+        previousWebform: payload.previousWebform,
+        schemaTables: payload.schemaTables,
+        webform: payload.webform
       };
 
     case 'GET_METADATA':
@@ -45,10 +62,18 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, isLoadingFile: payload.value };
 
     case 'SET_REPLACE_DATA':
-      return { ...state, replaceData: payload.value }
+      return { ...state, replaceData: payload.value };
 
-    case 'IS_PREVIEW_MODE_ON':
-      return { ...state, isPreviewModeOn: payload.value };
+    case 'SET_VIEW_MODE':
+      const inmViewType = { ...state.viewType };
+      Object.keys(inmViewType).forEach(view => {
+        if (view === payload.value) {
+          inmViewType[view] = true;
+        } else {
+          inmViewType[view] = false;
+        }
+      });
+      return { ...state, viewType: inmViewType };
 
     case 'LOAD_EXTERNAL_OPERATIONS':
       return {
@@ -82,8 +107,30 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_UPDATE_TABLES':
       return { ...state, datasetSchemaAllTables: payload.tables, areUpdatingTables: true };
 
+    case 'ON_UPDATE_SCHEMA':
+      return { ...state, datasetSchema: { ...state.datasetSchema, tables: payload.schema } };
+
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
+
+    case 'SET_DATAVIEWER_GROUPED_OPTIONS':
+      return {
+        ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          activeIndex: payload.activeIndex,
+          isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected,
+          isValidationSelected: false,
+          recordPositionId: -1,
+          selectedRecordErrorId: -1,
+          selectedRuleId: payload.selectedRuleId,
+          selectedRuleLevelError: payload.selectedRuleLevelError,
+          selectedRuleMessage: payload.selectedRuleMessage,
+          tableSchemaId: payload.tableSchemaId
+        },
+        isValidationViewerVisible: false
+      };
 
     case 'SET_DATAVIEWER_OPTIONS':
       return {
@@ -91,9 +138,15 @@ export const designerReducer = (state, { type, payload }) => {
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
+          isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected,
           isValidationSelected: payload.isValidationSelected,
           recordPositionId: payload.recordPositionId,
-          selectedRecordErrorId: payload.selectedRecordErrorId
+          selectedRecordErrorId: payload.selectedRecordErrorId,
+          selectedRuleId: payload.selectedRuleId,
+          selectedRuleLevelError: payload.selectedRuleLevelError,
+          selectedRuleMessage: payload.selectedRuleMessage,
+          tableSchemaId: payload.tableSchemaId
         },
         isValidationViewerVisible: false
       };
@@ -106,7 +159,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          isValidationSelected: payload
+          isValidationSelected: payload.isValidationSelected,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected
         }
       };
 
@@ -115,6 +169,18 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
       return { ...state, isValidationViewerVisible: payload };
+
+    case 'ON_CHANGE_VIEW':
+      return { ...state, viewType: payload.viewType };
+
+    case 'UPDATE_PREVIOUS_WEBFORM':
+      return { ...state, webform: state.previousWebform };
+
+    case 'UPDATE_WEBFORM':
+      return { ...state, previousWebform: state.webform, webform: payload };
+
+    case 'ON_UPDATE_TABS':
+      return { ...state, schemaTables: payload.data };
 
     default:
       return state;

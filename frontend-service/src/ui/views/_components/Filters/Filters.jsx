@@ -4,6 +4,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import uuid from 'uuid';
 
 import styles from './Filters.module.scss';
 
@@ -79,14 +80,12 @@ export const Filters = ({
   }, [filterState.matchMode]);
 
   useEffect(() => {
-    if (filterState.filtered) {
-      getFilteredValue();
-    }
-  }, [filterState.filterBy]);
+    getFilteredSearchedStateValue();
+  }, [filterState.filtered, filterState.searched]);
 
   useEffect(() => {
-    getFilteredStateValue(filterState.filteredState);
-  }, [filterState.filtered, filterState.searched]);
+    getFilteredState();
+  }, [filterState.filterBy]);
 
   useEffect(() => {
     getFilteredSearched(filterState.filteredSearched);
@@ -103,19 +102,29 @@ export const Filters = ({
     return isNil(checkBox) ? false : checkBox.isChecked;
   };
 
-  const getFilteredStateValue = () => {
+  const getFilteredSearchedStateValue = () => {
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
   };
 
-  const getFilteredValue = () => {
-    const filteredByValues = Object.values(filterState.filterBy);
-    const filteredByValuesState = filteredByValues.map(filterBy =>
-      isNull(filterBy) ? false : filterBy.length === 0 ? false : true
-    );
-    const filteredValue = filteredByValuesState.includes(true) ? true : false;
+  const getFilteredState = () => {
+    let filteredStateValue = false;
+    if (filterState.checkboxes.length > 0) {
+      const filtersValue = [];
+      Object.values(filterState.filterBy).forEach(value => {
+        !isEmpty(value) && filtersValue.push(!isEmpty(value));
+        if (value.includes(true) && value.includes(false)) {
+          filtersValue.pop();
+        }
+        filteredStateValue = filtersValue.includes(true);
+      });
+    } else {
+      filteredStateValue = Object.values(filterState.filterBy)
+        .map(value => isEmpty(value))
+        .includes(false);
+    }
 
-    filterDispatch({ type: 'FILTERED', payload: { filteredValue } });
+    filterDispatch({ type: 'FILTERED', payload: { filteredStateValue } });
   };
 
   const getInitialState = () => {
@@ -206,7 +215,9 @@ export const Filters = ({
           checkboxOptions
         ),
         searchBy: '',
-        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions)
+        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
+        filtered: false,
+        filteredSearched: false
       }
     });
   };
@@ -274,42 +285,48 @@ export const Filters = ({
     }
   };
 
-  const renderCalendarFilter = (property, i) => (
-    <span key={i} className={styles.dataflowInput} ref={dateRef}>
-      {renderOrderFilter(property)}
-      <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
-        <Calendar
-          className={styles.calendarFilter}
-          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
-          inputClassName={styles.inputFilter}
-          inputId={property}
-          monthNavigator={true}
-          onChange={event => onFilterData(property, event.value)}
-          onFocus={() => onAnimateLabel(property, true)}
-          readOnlyInput={true}
-          selectionMode="range"
-          showWeek={true}
-          value={filterState.filterBy[property]}
-          yearNavigator={true}
-          yearRange="2015:2030"
-          style={{ zoom: '0.95' }}
-        />
-        {!isEmpty(filterState.filterBy[property]) && (
-          <Button
-            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-            icon="cancel"
-            onClick={() => {
-              onFilterData(property, []);
-              onAnimateLabel(property, false);
-            }}
+  const renderCalendarFilter = (property, i) => {
+    const inputId = uuid.v4();
+    return (
+      <span key={i} className={styles.dataflowInput} ref={dateRef}>
+        {renderOrderFilter(property)}
+        <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
+          <Calendar
+            className={styles.calendarFilter}
+            dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
+            inputClassName={styles.inputFilter}
+            inputId={inputId}
+            monthNavigator={true}
+            onChange={event => onFilterData(property, event.value)}
+            onFocus={() => onAnimateLabel(property, true)}
+            readOnlyInput={true}
+            selectionMode="range"
+            showWeek={true}
+            style={{ zoom: '0.95' }}
+            value={filterState.filterBy[property]}
+            yearNavigator={true}
+            yearRange="2015:2030"
           />
-        )}
-        <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={property}>
-          {resources.messages[property]}
-        </label>
+          {!isEmpty(filterState.filterBy[property]) && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => {
+                onFilterData(property, []);
+                onAnimateLabel(property, false);
+                document.getElementById(inputId).value = '';
+              }}
+            />
+          )}
+          <label
+            className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label}
+            htmlFor={property}>
+            {resources.messages[property]}
+          </label>
+        </span>
       </span>
-    </span>
-  );
+    );
+  };
 
   const renderCheckbox = () => (
     <Fragment>

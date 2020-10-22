@@ -90,6 +90,7 @@ export const IntegrationsList = ({
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
         onUpdateDesignData();
+        refreshList(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
@@ -141,7 +142,7 @@ export const IntegrationsList = ({
     return (
       <div className={styles.integrationsWithoutTable}>
         <div className={styles.spinner}>
-          <Spinner style={{ top: 0, left: 0 }} />
+          <Spinner className={styles.spinnerPosition} />
         </div>
       </div>
     );
