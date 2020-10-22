@@ -49,7 +49,8 @@ public interface SqlRulesService {
    * @return the table value
    * @throws SQLException the SQL exception
    */
-  TableValue retrieveTableData(String query, Long datasetId, Rule rule) throws SQLException;
+  TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
+      throws SQLException;
 
 
   /**
