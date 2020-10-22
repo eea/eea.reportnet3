@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import isEmpty from 'lodash/isEmpty';
 import uniq from 'lodash/uniq';
@@ -90,7 +90,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   const releasedDateTemplate = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
-        {moment(rowData.releasedDate).format(
+        {dayjs(rowData.releasedDate).format(
           `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
             userContext.userProps.amPm24h ? '' : ' A'
           }`
