@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
+import dayjs from 'dayjs';
 
 import styles from './Feedback.module.scss';
 
@@ -101,7 +102,15 @@ export const Feedback = withRouter(({ match, history }) => {
     if (sended) {
       dispatchFeedback({
         type: 'ON_SEND_MESSAGE',
-        payload: { value: { datetime: Date.now(), id: messages.length + 1, message, read: true, sender: true } }
+        payload: {
+          value: {
+            datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+            id: messages.length + 1,
+            message,
+            read: true,
+            sender: true
+          }
+        }
       });
     }
   };
