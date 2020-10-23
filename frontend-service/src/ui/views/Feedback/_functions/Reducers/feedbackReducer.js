@@ -1,10 +1,11 @@
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ON_LOAD_MORE_MESSAGES':
-      const inmMessages = [...payload.data, ...state.messages];
+      console.log({payload});
+      const inmAllMessages = [...payload, ...state.messages];
       return {
         ...state,
-        messages: inmMessages
+        messages: inmAllMessages
       };
     case 'ON_SEND_MESSAGE':
       const inmMessages = [...state.messages];
@@ -33,7 +34,7 @@ export const feedbackReducer = (state, { type, payload }) => {
       console.log(payload);
       return {
         ...state,
-        messages: [...state.messages, ...payload],
+        messages: payload,
         isLoading: false
       };
     case 'ON_UPDATE_MESSAGE':

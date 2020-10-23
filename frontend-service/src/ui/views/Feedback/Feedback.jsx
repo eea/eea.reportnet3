@@ -167,34 +167,7 @@ export const Feedback = withRouter(({ match, history }) => {
           iconPos="right"
           onClick={e => onSendMessage(e.target.value)}
         />
-      </div>
-      {/* <DataTable
-        lazy
-        loading={isLoading}
-        onRowSelect={onMessageSelect}
-        onVirtualScroll={onVirtualScroll}
-        rows={10}
-        scrollable
-        scrollHeight="200px"
-        selectionMode="single"
-        totalRecords={messages.length}
-        value={messages}
-        virtualRowHeight={45}
-        virtualScroll>
-        <Column field="id" header="Id" loadingBody={loadingText}></Column>
-        <Column field="message" header="Message" loadingBody={loadingText}></Column>
-        <Column field="datetime" header="Datetime" loadingBody={loadingText}></Column>
-        <Column field="read" header="Read" loadingBody={loadingText}></Column>
-      </DataTable>
-      {isDialogVisible && (
-        <Dialog
-          // className={styles.dialog}
-          header={resources.messages['message']}
-          onHide={onCloseDialog}
-          visible={isDialogVisible}>
-          <div className="p-grid p-fluid">{messageToShow}</div>
-        </Dialog>
-      )} */}
+      </div>     
     </Fragment>
   );
 });

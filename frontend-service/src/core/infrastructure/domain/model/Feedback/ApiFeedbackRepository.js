@@ -241,7 +241,7 @@ const allUnread = async (first, rows) => {
   console.log({ first, rows });
   let messages = [];
   for (let i = first; i < rows; i++) {
-    messages[i] = new Feedback({ ...data[i] });
+    messages.push(new Feedback({ ...data[i] }));
   }
   console.log({ messages });
   return messages;
