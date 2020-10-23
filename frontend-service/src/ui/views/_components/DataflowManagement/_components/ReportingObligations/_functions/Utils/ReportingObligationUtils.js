@@ -1,6 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const filteredInitialValues = (data, checkedId, format) => {
   let obligationList = data;
@@ -36,7 +36,7 @@ const parseObligationData = (data, format) => {
     id: data.obligationId,
     title: data.title,
     legalInstrument: !isNil(data.legalInstruments) && data.legalInstruments.alias,
-    dueDate: !isNil(data.expirationDate) ? moment(data.expirationDate).format(format) : '-'
+    dueDate: !isNil(data.expirationDate) ? dayjs(data.expirationDate).format(format) : '-'
   }));
 };
 
