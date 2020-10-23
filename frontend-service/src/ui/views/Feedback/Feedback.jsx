@@ -1,9 +1,11 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { Column } from 'primereact/column';
-import { DataTable } from 'ui/views/_components/DataTable';
-import { Dialog } from 'ui/views/_components/Dialog';
+import styles from './Feedback.module.scss';
+
+import { Button } from 'ui/views/_components/Button';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
@@ -35,10 +37,10 @@ export const Feedback = withRouter(({ match, history }) => {
     isDialogVisible: false,
     isLoading: false,
     messages: [],
-    messageToShow: ''
+    messageToSend: ''
   });
 
-  const { dataflowName, isDialogVisible, isLoading, messages, messageToShow } = feedbackState;
+  const { dataflowName, isDialogVisible, isLoading, messages, messageToSend } = feedbackState;
 
   useEffect(() => {
     onGetDataflowName();
@@ -75,14 +77,33 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
   };
 
+  const onKeyChange = event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onSendMessage(event.target.value);
+    }
+  };
+
   const onLoadMessages = async (first, rows) => {
     const data = await FeedbackService.allUnread(first, rows);
     return data;
   };
 
-  const onMessageSelect = event => {
-    console.log(event);
-    dispatchFeedback({ type: 'SET_MESSAGE_TO_SHOW', payload: event.data.message });
+  // const onMessageSelect = event => {
+  //   console.log(event);
+  //   dispatchFeedback({ type: 'SET_MESSAGE_TO_SHOW', payload: event.data.message });
+  // };
+
+  const onSendMessage = message => {
+    console.log('message :>> ', message);
+    //Send message to BE
+    let sended = true;
+    if (sended) {
+      dispatchFeedback({
+        type: 'ON_SEND_MESSAGE',
+        payload: { value: { datetime: Date.now(), id: messages.length + 1, message, read: true, sender: true } }
+      });
+    }
   };
 
   const onVirtualScroll = async event => {
@@ -111,7 +132,28 @@ export const Feedback = withRouter(({ match, history }) => {
         icon="info"
         iconSize="3.5rem"
       />
-      <DataTable
+      <div className={styles.feedbackWrapper}>
+        <ListMessages messages={messages} />
+        <InputTextarea
+          className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
+          collapsedHeight={55}
+          expandableOnClick={true}
+          id="feedbackSender"
+          key="feedbackSender"
+          onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
+          onKeyDown={e => onKeyChange(e)}
+          placeholder={resources.messages['writeMessagePlaceholder']}
+          value={messageToSend}
+        />
+        <Button
+          className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
+          label={resources.messages['send']}
+          icon={'comment'}
+          iconPos="right"
+          onClick={e => onSendMessage(e.target.value)}
+        />
+      </div>
+      {/* <DataTable
         lazy
         loading={isLoading}
         onRowSelect={onMessageSelect}
@@ -137,7 +179,7 @@ export const Feedback = withRouter(({ match, history }) => {
           visible={isDialogVisible}>
           <div className="p-grid p-fluid">{messageToShow}</div>
         </Dialog>
-      )}
+      )} */}
     </Fragment>
   );
 });

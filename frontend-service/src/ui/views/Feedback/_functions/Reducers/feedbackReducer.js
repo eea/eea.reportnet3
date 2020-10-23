@@ -1,5 +1,13 @@
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_SEND_MESSAGE':
+      const inmMessages = [...state.messages];
+      inmMessages.push(payload.value);
+      return {
+        ...state,
+        messages: inmMessages,
+        messageToSend: ''
+      };
     case 'SET_DATAFLOW_NAME':
       return {
         ...state,
@@ -22,7 +30,11 @@ export const feedbackReducer = (state, { type, payload }) => {
         messages: [...state.messages, ...payload],
         isLoading: false
       };
-
+    case 'ON_UPDATE_MESSAGE':
+      return {
+        ...state,
+        messageToSend: payload.value
+      };
     default:
       return state;
   }

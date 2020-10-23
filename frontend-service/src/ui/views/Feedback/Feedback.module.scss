@@ -1,0 +1,14 @@
+.feedbackWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .sendMessageTextarea {
+    width: 50vw;
+    margin: 1rem 1rem !important;
+    transition: 0.5s !important;
+  }
+  .sendMessageButton {
+    margin-bottom: 1rem;
+  }
+}
