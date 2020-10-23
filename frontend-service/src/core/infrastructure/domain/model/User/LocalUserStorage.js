@@ -1,4 +1,5 @@
-import { isNil } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
@@ -16,14 +17,19 @@ const removeLocalStorage = () => {
 
 const setPropertyToLocalStorage = prop => {
   const cLocalStorage = getLocalStorage();
-  const nLocalStorage = {};
   localStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify({ ...cLocalStorage, ...prop }));
 };
 
 const removeLocalProperty = key => {
   const cLocalStorage = getLocalStorage();
-  delete cLocalStorage[key];
-  setLocalStorage(cLocalStorage);
+  if (!isNil(cLocalStorage)) {
+    delete cLocalStorage[key];
+    if (!isNil(cLocalStorage) && !isEmpty(cLocalStorage)) {
+      setLocalStorage(cLocalStorage);
+    } else {
+      localStorage.removeItem(storageConfig.LOCAL_KEY);
+    }
+  }
 };
 
 const getPropertyFromLocalStorage = key => {
