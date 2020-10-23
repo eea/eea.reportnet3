@@ -1,5 +1,11 @@
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_LOAD_MORE_MESSAGES':
+      const inmMessages = [...payload.data, ...state.messages];
+      return {
+        ...state,
+        messages: inmMessages
+      };
     case 'ON_SEND_MESSAGE':
       const inmMessages = [...state.messages];
       inmMessages.push(payload.value);

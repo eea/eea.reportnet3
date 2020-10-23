@@ -71,6 +71,11 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
+  const onGetReadMessages = async (first, rows) => {
+    const data = await onLoadMessages(first, rows);
+    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
+  };
+
   const onGetUnreadMessages = async () => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     const data = await onLoadMessages(0, 25);
@@ -142,8 +147,9 @@ export const Feedback = withRouter(({ match, history }) => {
         iconSize="3.5rem"
       />
       <div className={styles.feedbackWrapper}>
-        <ListMessages messages={messages} />
+        <ListMessages messages={messages} onLazyLoad={onGetReadMessages} />
         <InputTextarea
+          // autoFocus={true}
           className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
           collapsedHeight={55}
           expandableOnClick={true}
