@@ -26,6 +26,9 @@ public class DataSetSchemaVO {
   /** The table schemas. */
   private List<TableSchemaVO> tableSchemas;
 
+  /** The webform. */
+  private WebformVO webform;
+
 
   /**
    * Hash code.
@@ -34,7 +37,7 @@ public class DataSetSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSetSchema, description, nameDatasetSchema, tableSchemas);
+    return Objects.hash(idDataSetSchema, description, nameDatasetSchema, tableSchemas, webform);
   }
 
   /**
@@ -55,6 +58,7 @@ public class DataSetSchemaVO {
     return Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(description, other.description)
         && Objects.equals(nameDatasetSchema, other.nameDatasetSchema)
-        && Objects.equals(tableSchemas, other.tableSchemas);
+        && Objects.equals(tableSchemas, other.tableSchemas)
+        && Objects.equals(webform, other.webform);
   }
 }

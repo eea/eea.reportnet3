@@ -5,12 +5,14 @@ import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
@@ -191,9 +193,8 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param description the description
    *
-   * @return the boolean
    */
-  Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
+  void updateDatasetSchemaDescription(String datasetSchemaId, String description);
 
   /**
    * Gets the table schema name.
@@ -432,7 +433,6 @@ public interface DatasetSchemaService {
   void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
       throws EEAException;
 
-
   /**
    * Copy unique constraints catalogue.
    *
@@ -451,7 +451,6 @@ public interface DatasetSchemaService {
    */
   SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException;
 
-
   /**
    * Check clear attachments.
    *
@@ -463,4 +462,20 @@ public interface DatasetSchemaService {
   Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
       FieldSchemaVO fieldSchemaVO);
 
+  /**
+   * Update webform.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param webformVO the webform VO
+   */
+  void updateWebform(String datasetSchemaId, WebformVO webformVO);
+
+  /**
+   * Gets the table schema.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @return the table schema
+   */
+  TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId);
 }

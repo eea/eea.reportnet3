@@ -13,28 +13,28 @@ public class ValidationRuleDroolsTest {
   @Test
   public void testFillValidationDatasetValue() {
     DatasetValue dataset = new DatasetValue();
-    ValidationRuleDrools.fillValidation(dataset, "", "ERROR", "", "");
+    ValidationRuleDrools.fillValidation(dataset, "", "ERROR", "", "", "", "");
     assertNotNull(dataset.getDatasetValidations());
   }
 
   @Test
   public void testFillValidationTableValue() {
     TableValue table = new TableValue();
-    ValidationRuleDrools.fillValidation(table, "", "ERROR", "", "");
+    ValidationRuleDrools.fillValidation(table, "", "ERROR", "", "", "", "");
     assertNotNull(table.getTableValidations());
   }
 
   @Test
   public void testFillValidationFieldValue() {
     FieldValue field = new FieldValue();
-    ValidationRuleDrools.fillValidation(field, "", "ERROR", "", "");
+    ValidationRuleDrools.fillValidation(field, "", "ERROR", "", "", "", "");
     assertNotNull(field.getFieldValidations());
   }
 
   @Test
   public void testFillValidationRecordValueStringStringStringString() {
     RecordValue record = new RecordValue();
-    ValidationRuleDrools.fillValidation(record, "", "ERROR", "", "");
+    ValidationRuleDrools.fillValidation(record, "", "ERROR", "", "", "", "");
     assertNotNull(record.getRecordValidations());
 
   }

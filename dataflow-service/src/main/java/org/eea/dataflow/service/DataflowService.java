@@ -147,7 +147,6 @@ public interface DataflowService {
    */
   DataFlowVO getReportingDatasetsId(String dataschemaId) throws EEAException;
 
-
   /**
    * Gets the metabase by id.
    *
@@ -156,8 +155,6 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   DataFlowVO getMetabaseById(Long id) throws EEAException;
-
-
 
   /**
    * Update data flow status.
@@ -168,7 +165,4 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadline) throws EEAException;
-
-
-
 }

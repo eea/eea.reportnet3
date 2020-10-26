@@ -151,12 +151,12 @@ public class UniqueValidationUtils {
    *
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
-   * @param origname the origname
+   * @param tableName the tableName
    * @param typeEnum the type enum
    * @return the validation
    */
-  private static Validation createValidation(String idRule, String idDatasetSchema, String origname,
-      EntityTypeEnum typeEnum) {
+  private static Validation createValidation(String idRule, String idDatasetSchema,
+      String tableName, EntityTypeEnum typeEnum) {
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
@@ -182,7 +182,8 @@ public class UniqueValidationUtils {
       validation.setMessage(rule.getThenCondition().get(0));
       validation.setTypeEntity(typeEnum);
       validation.setValidationDate(new Date().toString());
-      validation.setOriginName(origname);
+      validation.setTableName(tableName);
+      validation.setShortCode(rule.getShortCode());
     }
     return validation;
   }
@@ -357,12 +358,12 @@ public class UniqueValidationUtils {
 
     DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
 
-    // get Orig name
-    String origname =
+    // get tableName
+    String tableName =
         getTableSchemaFromIdTableSchema(datasetSchema, uniqueConstraint.getTableSchemaId());
 
     // GetValidationData
-    Validation validation = createValidation(idRule, schemaId, origname, EntityTypeEnum.RECORD);
+    Validation validation = createValidation(idRule, schemaId, tableName, EntityTypeEnum.RECORD);
 
     // get duplicated records
     List<RecordValue> duplicatedRecords = recordRepository
@@ -443,11 +444,11 @@ public class UniqueValidationUtils {
       tableValidations.add(tableValidation);
     }
 
-    List<String> notUtilizedRecords2 = new ArrayList<>();
+
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
       // Create validation on referenced DS/Table, checking if all data on Referencer Column are in
       // Referenced column
-      notUtilizedRecords2 =
+      List<String> notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
 

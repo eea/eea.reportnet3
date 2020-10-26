@@ -20,11 +20,12 @@ public interface RecordExtendedQueriesRepository {
    * @param idTableSchema the id table schema
    * @param levelErrorList the level error list
    * @param pageable the pageable
+   * @param idRules the id rules
    * @param sortFields the sort fields
    * @return the list
    */
   TableVO findByTableValueWithOrder(String idTableSchema, List<ErrorTypeEnum> levelErrorList,
-      Pageable pageable, SortField... sortFields);
+      Pageable pageable, List<String> idRules, SortField... sortFields);
 
 
 

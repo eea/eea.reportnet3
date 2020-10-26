@@ -67,13 +67,12 @@ public interface DatasetService {
    * @param pageable the pageable
    * @param fields the fields
    * @param levelError the level error
-   *
+   * @param idRules the id rules
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-      String fields, ErrorTypeEnum[] levelError) throws EEAException;
+      String fields, ErrorTypeEnum[] levelError, String[] idRules) throws EEAException;
 
   /**
    * Gets the position from any object id.
@@ -167,11 +166,10 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
-   * @param idTableSchema the id table schema
-   *
+   * @param tableSchemaId the id table schema
    * @throws EEAException the EEA exception
    */
-  void createRecords(@DatasetId Long datasetId, List<RecordVO> records, String idTableSchema)
+  void insertRecords(@DatasetId Long datasetId, List<RecordVO> records, String tableSchemaId)
       throws EEAException;
 
   /**
@@ -368,11 +366,9 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param type the type
-   *
    * @return the table read only
    */
   Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
-
 
   /**
    * Release lock.
@@ -484,7 +480,6 @@ public interface DatasetService {
    */
   Boolean getTableFixedNumberOfRecords(Long datasetId, String objectId, EntityTypeEnum type);
 
-
   /**
    * Find record schema id by id.
    *
@@ -493,7 +488,6 @@ public interface DatasetService {
    * @return the string
    */
   String findRecordSchemaIdById(@DatasetId Long datasetId, String idRecord);
-
 
   /**
    * Find field schema id by id.
@@ -504,7 +498,6 @@ public interface DatasetService {
    */
   String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
 
-
   /**
    * Spread data Prefill.
    *
@@ -513,7 +506,6 @@ public interface DatasetService {
    * @param idDatasetSchema the id dataset schema
    */
   void spreadDataPrefill(List<DesignDataset> designs, Long datasetId, String idDatasetSchema);
-
 
   /**
    * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
