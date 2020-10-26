@@ -1569,8 +1569,7 @@ public class RulesServiceImplTest {
    */
   @Test
   public void findSqlSentencesByDatasetSchemaIdTest() {
-    Mockito.when(rulesRepository.findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac")))
-        .thenReturn(new ArrayList());
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(new ArrayList());
     rulesServiceImpl.findSqlSentencesByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1))
         .findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac"));

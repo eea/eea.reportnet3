@@ -27,7 +27,13 @@ public enum ConditionsDrools {
   DATASCHEMA_ID("dataSchemaId"),
 
   /** The origin name. */
-  ORIGIN_NAME("originName");
+  TABLE_NAME("tableName"),
+
+  /** The short code. */
+  SHORT_CODE("shortCode"),
+
+  /** The field name. */
+  FIELD_NAME("fieldName");
 
   /** The value. */
   private final String value;

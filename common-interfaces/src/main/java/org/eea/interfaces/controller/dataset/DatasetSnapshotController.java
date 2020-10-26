@@ -164,7 +164,7 @@ public interface DatasetSnapshotController {
    * @return the response entity
    */
   @GetMapping(value = "/receiptPDF/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+      produces = MediaType.APPLICATION_PDF_VALUE)
   ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
       @PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId);

@@ -115,7 +115,7 @@ public class ValidationControllerImpl implements ValidationController {
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
     if (StringUtils.isNotBlank(fields)) {
-      fields = fields.replace("tableSchemaName", "originName");
+      fields = fields.replace("tableSchemaName", "tableName");
       fields = fields.replace("entityType", "typeEntity");
       Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
       PageRequest.of(pageNum, pageSize, order);
@@ -166,7 +166,7 @@ public class ValidationControllerImpl implements ValidationController {
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
     if (StringUtils.isNotBlank(fields)) {
-      fields = fields.replace("tableSchemaName", "originName");
+      fields = fields.replace("tableSchemaName", "tableName");
       fields = fields.replace("entityType", "typeEntity");
       Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
       PageRequest.of(pageNum, pageSize, order);
@@ -176,7 +176,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     try {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
-          levelErrorsFilter, typeEntitiesFilter, originsFilter, originsFilter, asc);
+          levelErrorsFilter, typeEntitiesFilter, originsFilter, fields, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.Optional;
@@ -9,8 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 /**
  * The Interface PartitionDataSetMetabaseRepository.
- *
- *
  */
 public interface PartitionDataSetMetabaseRepository
     extends CrudRepository<PartitionDataSetMetabase, Long> {
@@ -26,7 +21,6 @@ public interface PartitionDataSetMetabaseRepository
   Optional<PartitionDataSetMetabase> findFirstByIdDataSet_idAndUsername(Long idDataset,
       String username);
 
-
   /**
    * Find first by id data set id.
    *
@@ -34,5 +28,4 @@ public interface PartitionDataSetMetabaseRepository
    * @return the optional
    */
   Optional<PartitionDataSetMetabase> findFirstByIdDataSet_id(Long idDataset);
-
 }
