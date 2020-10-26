@@ -84,4 +84,12 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    */
   Long countByDataSetNameIgnoreCaseAndDataflowId(String datasetName, Long dataflowId);
 
+  /**
+   * Exists by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   */
+  boolean existsByDataflowIdAndDataProviderId(Long dataflowId, Long dataProviderId);
 }

@@ -12,6 +12,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -54,14 +55,10 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Dataflows : Dataflows Manager")
 public class DataFlowControllerImpl implements DataFlowController {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The dataflow service.
-   */
+  /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
 
@@ -69,7 +66,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find by id.
    *
    * @param dataflowId the dataflow id
-   *
    * @return the data flow VO
    */
   @Override
@@ -103,7 +99,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find by status.
    *
    * @param status the status
-   *
    * @return the list
    */
   @Override
@@ -154,7 +149,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    *
    * @param pageNum the page num
    * @param pageSize the page size
-   *
    * @return the list
    */
   @Override
@@ -186,7 +180,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find user dataflows by status.
    *
    * @param type the type
-   *
    * @return the list
    */
   @Override
@@ -468,6 +461,59 @@ public class DataFlowControllerImpl implements DataFlowController {
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  /**
+   * Creates the message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param content the content
+   * @return the message VO
+   */
+  @Override
+  @PostMapping("/{dataflowId}/createMessage")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestBody String content) {
+    try {
+      return dataflowService.createMessage(dataflowId, providerId, content);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Find messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param page the offset
+   * @return the list
+   */
+  @Override
+  @GetMapping("/{dataflowId}/findMessages")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "read", required = false) boolean read,
+      @RequestParam("page") int page) {
+    return dataflowService.findMessages(dataflowId, read, page);
+  }
+
+  /**
+   * Update message read status.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @param read the read
+   * @return true, if successful
+   */
+  @Override
+  @PutMapping("/{dataflowId}/updateMessageReadStatus")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  public boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("messageId") Long messageId, @RequestParam("read") boolean read) {
+    return dataflowService.updateMessageReadStatus(dataflowId, messageId, read);
   }
 
   /**

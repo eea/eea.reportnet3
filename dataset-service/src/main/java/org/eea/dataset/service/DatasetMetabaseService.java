@@ -228,4 +228,14 @@ public interface DatasetMetabaseService {
    * @return the long
    */
   Long countDatasetNameByDataflowId(Long dataflowId, String datasetSchemaName);
+
+
+  /**
+   * Exists by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   */
+  boolean existsByDataflowIdAndProviderId(Long dataflowId, Long dataProviderId);
 }

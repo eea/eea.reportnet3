@@ -813,4 +813,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         dataflowId);
   }
 
+  /**
+   * Exists by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   */
+  @Override
+  public boolean existsByDataflowIdAndProviderId(Long dataflowId, Long dataProviderId) {
+    return dataSetMetabaseRepository.existsByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
+  }
 }

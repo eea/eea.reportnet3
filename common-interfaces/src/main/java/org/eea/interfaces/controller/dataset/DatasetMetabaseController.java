@@ -192,4 +192,15 @@ public interface DatasetMetabaseController {
   @GetMapping("/private/getType/{datasetId}")
   DatasetTypeEnum getType(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Exists by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   */
+  @GetMapping("/private/existsByDataflowIdAndDataProviderId")
+  boolean existsByDataflowIdAndDataProviderId(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId);
+
 }
