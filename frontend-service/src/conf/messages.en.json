@@ -916,6 +916,8 @@
     "webformTableWithLessRecords": "There are no records in the table.",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
     "noDatasetsWithSelectedParameters": "There are no datasets with the selected parameters",
-    "noDatasets": "There are no datasets yet"
+    "noDatasets": "There are no datasets yet",
+    "technicalStatus": "Technical status",
+    "isReleased": "Released"
   }
 }

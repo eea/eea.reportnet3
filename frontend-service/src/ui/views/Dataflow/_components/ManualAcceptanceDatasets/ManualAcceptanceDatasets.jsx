@@ -1,5 +1,8 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ManualAcceptanceDatasets.module.scss';
@@ -53,8 +56,10 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
   const isLoading = value => manualAcceptanceDatasetsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const response = [
-    { id: 1, countryCode: 'Austria', status: 'technicallyAccept', datasetName: 'ds1' },
-    { id: 2, countryCode: 'Belgium', status: 'correctionRequested', datasetName: 'ds2' }
+    { id: 1, countryCode: 'Austria', technicalStatus: 'technicallyAccept', datasetName: 'ds1', isReleased: true },
+    { id: 2, countryCode: 'Belgium', technicalStatus: 'correctionRequested', datasetName: 'ds2', isReleased: false },
+    { id: 3, countryCode: 'Austria', technicalStatus: 'technicallyAccept', datasetName: 'ds1', isReleased: false },
+    { id: 4, countryCode: 'Belgium', technicalStatus: 'correctionRequested', datasetName: 'ds2', isReleased: true }
   ];
 
   const onLoadManualAcceptanceDatasets = async () => {
@@ -77,7 +82,8 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
     const datasetsWithPriority = [
       { id: 'countryCode', index: 0 },
       { id: 'datasetName', index: 1 },
-      { id: 'status', index: 2 }
+      { id: 'technicalStatus', index: 2 },
+      { id: 'isReleased', index: 3 }
     ];
 
     return datasets
@@ -97,9 +103,15 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
     />
   );
 
+  const isReleasedTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
   const renderActionButtonsColumn = (
     <Column
-      body={row => actionsTemplate(row)}
+      body={row => row.isReleased && actionsTemplate(row)}
       className={styles.validationCol}
       header={resources.messages['actions']}
       key="actions"
@@ -112,7 +124,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
       // .filter(key => key.includes('datasetName') || key.includes('releasedDate'))
       .map(field => {
         let template = null;
-        // if (field === 'releasedDate') template = releasedDateTemplate;
+        if (field === 'isReleased') template = isReleasedTemplate;
         return (
           <Column
             body={template}
@@ -128,17 +140,27 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
     return fieldColumns;
   };
 
+  if (manualAcceptanceDatasetsState.isLoading)
+    return (
+      <div className={styles.manualAcceptanceDatasetsWithoutTable}>
+        <div className={styles.spinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      </div>
+    );
+
   return isEmpty(manualAcceptanceDatasetsState.data) ? (
     <div className={styles.historicReleasesWithoutTable}>
-      <div className={styles.noHistoricReleases}>{resources.messages['noHistoricReleases']}</div>
+      <div className={styles.noManualAcceptanceDatasets}>{resources.messages['noDatasets']}</div>
     </div>
   ) : (
-    <div className={styles.historicReleases}>
+    <div className={styles.manualAcceptanceDatasets}>
       <Filters
+        checkboxOptions={['isReleased']}
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
-        selectOptions={['countryCode', 'datasetName', 'status']}
+        selectOptions={['countryCode', 'datasetName', 'technicalStatus']}
       />
 
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
@@ -153,7 +175,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
           {renderColumns(manualAcceptanceDatasetsState.filteredData)}
         </DataTable>
       ) : (
-        <div className={styles.emptyFilteredData}>{resources.messages['noHistoricReleasesWithSelectedParameters']}</div>
+        <div className={styles.emptyFilteredData}>{resources.messages['noDatasetsWithSelectedParameters']}</div>
       )}
     </div>
   );

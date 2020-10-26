@@ -491,6 +491,7 @@ export const BigButtonList = ({
           footer={renderDialogFooter}
           header={`${resources.messages['manualTechnicalAcceptanceHeader']} ${dataflowName}`}
           onHide={() => setIsManualTechnicalAcceptanceDialogVisible(false)}
+          style={{ width: '80%' }}
           visible={isManualTechnicalAcceptanceDialogVisible}>
           <ManualAcceptanceDatasets
             dataflowData={dataflowData}
