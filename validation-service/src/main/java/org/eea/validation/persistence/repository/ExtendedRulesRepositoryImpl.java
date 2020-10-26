@@ -358,18 +358,19 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public List<Rule> findSqlRules(ObjectId datasetSchemaId) {
+
+    Document exist = new Document("$ne", Arrays.asList("$$rule.sqlSentence", "$exist"));
+    Document vacio = new Document("$ne", Arrays.asList("$$rule.sqlSentence", ""));
     Document filterExpression = new Document();
     filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
-
-    filterExpression.append("cond", new Document("$ne", Arrays.asList("$$rule.sqlSentence", "")));
+    filterExpression.append("cond", new Document("$and", Arrays.asList(exist, vacio)));
     Document filter = new Document(FILTER, filterExpression);
     RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
         Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
         Aggregation.project().and(aggregationOperationContext -> filter)
             .as(LiteralConstants.RULES)),
         RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
-
     return rulesSchema.getRules();
   }
 }

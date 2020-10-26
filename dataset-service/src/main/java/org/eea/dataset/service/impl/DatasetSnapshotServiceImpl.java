@@ -47,6 +47,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -59,11 +60,13 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -71,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -179,6 +183,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The release mapper. */
   @Autowired
   private ReleaseMapper releaseMapper;
+
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -798,10 +806,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
+
     ReleaseReceiptVO receipt = new ReleaseReceiptVO();
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
     receipt.setIdDataflow(dataflowId);
     receipt.setDataflowName(dataflow.getName());
+    receipt.setObligationId(dataflow.getObligation().getObligationId());
+    receipt.setObligationTitle(dataflow.getObligation().getOblTitle());
     receipt.setDatasets(dataflow.getReportingDatasets().stream()
         .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
         .collect(Collectors.toList()));
@@ -813,6 +824,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
             .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
+
+    UserRepresentationVO user = userManagementControllerZull.getUserByUserId(
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID));
+    receipt.setUserName(user.getUsername());
+    receipt.setFullUserName((null != user.getFirstName() ? user.getFirstName() : "") + " "
+        + (null != user.getLastName() ? user.getLastName() : ""));
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);

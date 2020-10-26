@@ -94,8 +94,8 @@ public interface DatasetSchemaController {
    * @param datasetSchemaVO the dataset schema VO
    */
   @PutMapping("/{datasetId}/datasetSchema")
-  void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
-      @RequestBody(required = false) DataSetSchemaVO datasetSchemaVO);
+  void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO);
 
   /**
    * Creates the table schema.
@@ -289,4 +289,5 @@ public interface DatasetSchemaController {
   SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
 }

@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  @Autowired
+  private RuleMapper ruleMapper;
 
 
   /**
@@ -467,6 +470,23 @@ public class RulesControllerImpl implements RulesController {
   public void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
     sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
+  }
+
+
+  /**
+   * Validate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/validateSqlRule")
+  public void validateSqlRule(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
+
+    sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, ruleMapper.classToEntity(ruleVO));
   }
 
 
