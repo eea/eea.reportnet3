@@ -71,9 +71,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -754,6 +754,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const validateQcRules = () => {
+    setSqlValidationRunning(true);
+    setTimeout(() => {
+      setSqlValidationRunning(false);
+    }, 1000);
+  };
+
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
@@ -776,6 +783,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         label={resources.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
         style={{ float: 'left' }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
+        label={resources.messages['validateRulesBtn']}
+        onClick={() => {
+          validateQcRules();
+        }}
+        style={{ float: 'left' }}
+        tooltip={resources.messages['validateRulesBtnTootip']}
+        tooltipOptions={{ position: 'top' }}
       />
 
       <Button

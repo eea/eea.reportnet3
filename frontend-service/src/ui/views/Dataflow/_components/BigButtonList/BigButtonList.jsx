@@ -36,6 +36,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { IntegrationsUtils } from 'ui/views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { isUndefined } from 'lodash';
 
 export const BigButtonList = ({
   dataflowState,
@@ -81,6 +82,8 @@ export const BigButtonList = ({
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const [areQCsValid, setAreQCsValid] = useState(false);
+  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
 
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
@@ -315,15 +318,31 @@ export const BigButtonList = ({
     }
   };
 
+  //check if there are not valid QCs
+  const onCheckQCs = () => {
+    //show alert dialog
+    if (true) {
+      setIsQCsNotValidWarningVisible(true);
+    } else {
+      setAreQCsValid(true);
+    }
+  };
+
+  useEffect(() => {
+    if (areQCsValid) {
+      setDataCollectionDialog(true);
+    }
+  }, [areQCsValid]);
+
   const onShowCopyDataCollectionToEuDatasetModal = () => setIsCopyDataCollectionToEuDatasetDialogVisible(true);
 
-  const onShowDataCollectionModal = () => setDataCollectionDialog(true);
+  const onShowDataCollectionModal = () => onCheckQCs();
 
   const onShowExportEuDatasetModal = () => setIsExportEuDatasetDialogVisible(true);
 
   const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
-  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
+  const onShowUpdateDataCollectionModal = () => setIsHistoricReleasesDialogVisible(false);
 
   const renderDialogFooter = isHistoricReleasesDialogVisible ? (
     <Fragment>
@@ -557,6 +576,19 @@ export const BigButtonList = ({
           visible={isConfirmCollectionDialog}>
           <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
           {resources.messages['createDataCollectionConfirm']}
+        </ConfirmDialog>
+      )}
+
+      {isQCsNotValidWarningVisible && (
+        <ConfirmDialog
+          header={resources.messages['notValidQCWarningTitle']}
+          labelCancel={resources.messages['cancel']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => {}}
+          onHide={() => setIsQCsNotValidWarningVisible(false)}
+          visible={isQCsNotValidWarningVisible}>
+          {console.log('isQCsNotValidWarningVisible', isQCsNotValidWarningVisible)}
+          {resources.messages['notValidQCWarningTitle']}
         </ConfirmDialog>
       )}
 

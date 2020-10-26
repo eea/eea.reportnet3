@@ -911,6 +911,10 @@
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
     "webformTableWithLessRecords": "There are no records in the table.",
-    "webformTableWithoutFixedNumber": "This table should have fixed number of records."
+    "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
+    "validateRulesBtn": "Validate QC rules",
+    "validateRulesBtnTootip": "QCs with SQL sentences need to be re-validated after changing table or field names",
+    "notValidQCWarningTitle": "There are invalid QC rules",
+    "notValidQCWarningBody": "There are invalid QC rules"
   }
 }
