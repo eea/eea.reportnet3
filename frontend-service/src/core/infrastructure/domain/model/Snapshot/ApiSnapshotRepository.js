@@ -11,6 +11,7 @@ const allDesigner = async datasetSchemaId => {
             creationDate: snapshotDTO.creationDate,
             description: snapshotDTO.description,
             id: snapshotDTO.id,
+            isAutomatic: snapshotDTO.isAutomatic,
             isBlocked: snapshotDTO.blocked,
             isReleased: snapshotDTO.release
           })
@@ -43,6 +44,7 @@ const allReporter = async datasetId => {
         creationDate: snapshotDTO.creationDate,
         description: snapshotDTO.description,
         id: snapshotDTO.id,
+        isAutomatic: snapshotDTO.isAutomatic,
         isBlocked: snapshotDTO.blocked,
         isReleased: snapshotDTO.release
       })

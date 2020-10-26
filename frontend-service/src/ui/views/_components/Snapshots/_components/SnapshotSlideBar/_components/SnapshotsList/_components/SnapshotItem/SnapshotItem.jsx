@@ -82,7 +82,7 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
           <></>
         )}
 
-        {!itemData.isReleased /* || itemData.whereReleased --- */&& (
+        {!itemData.isAutomatic && (
           <Button
             tooltip={resources.messages.deleteSnapshotTooltip}
             tooltipOptions={{ position: 'left' }}
