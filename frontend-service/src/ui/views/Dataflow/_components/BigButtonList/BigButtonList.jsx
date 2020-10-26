@@ -212,7 +212,7 @@ export const BigButtonList = ({
     }
   };
 
-  const onShowFinalFeedbackDialog = () => setIsFinalFeedbackDialogVisible(true);
+  const onShowManualTechnicalAcceptanceDialog = () => setIsManualTechnicalAcceptanceDialogVisible(true);
 
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);
@@ -268,6 +268,7 @@ export const BigButtonList = ({
   const onChangeManualTechnicalAcceptanceCheckbox = () => {
     setManualTechnicalAcceptance(!manualTechnicalAcceptance);
   };
+
   const onCopyDataCollectionToEuDataset = async () => {
     setIsCopyDataCollectionToEuDatasetDialogVisible(false);
     setIsCopyDataCollectionToEuDatasetLoading(true);
@@ -336,7 +337,7 @@ export const BigButtonList = ({
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
   const renderDialogFooter =
-    isHistoricReleasesDialogVisible || isFinalFeedbackDialogVisible ? (
+    isHistoricReleasesDialogVisible || isManualTechnicalAcceptanceDialogVisible ? (
       <Fragment>
         <Button
           className="p-button-secondary p-button-animated-blink"
@@ -344,7 +345,7 @@ export const BigButtonList = ({
           label={resources.messages['close']}
           onClick={() => {
             setIsHistoricReleasesDialogVisible(false);
-            setIsFinalFeedbackDialogVisible(false);
+            setIsManualTechnicalAcceptanceDialogVisible(false);
           }}
         />
       </Fragment>
@@ -383,7 +384,7 @@ export const BigButtonList = ({
       onShowCopyDataCollectionToEuDatasetModal,
       onShowDataCollectionModal,
       onShowExportEuDatasetModal,
-      onShowFinalFeedbackDialog,
+      onShowManualTechnicalAcceptanceDialog,
       onShowHistoricReleases,
       onShowManageReportersDialog,
       onShowNewSchemaDialog,
@@ -479,20 +480,18 @@ export const BigButtonList = ({
         </Dialog>
       )}
 
-      {isFinalFeedbackDialogVisible && (
+      {isManualTechnicalAcceptanceDialogVisible && (
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={resources.messages['finalFeedback']}
-          onHide={() => setIsFinalFeedbackDialogVisible(false)}
-          // style={{ width: '80%' }}
-          visible={isFinalFeedbackDialogVisible}>
-          {/* <HistoricReleases
+          header={`${resources.messages['manualTechnicalAcceptanceHeader']} ${dataflowName}`}
+          onHide={() => setIsManualTechnicalAcceptanceDialogVisible(false)}
+          visible={isManualTechnicalAcceptanceDialogVisible}>
+          <ManualAcceptanceDatasets
+            dataflowData={dataflowData}
             dataflowId={dataflowId}
-            dataProviderId={dataProviderId}
-            datasetId={datasetId}
-            historicReleasesView={historicReleasesView}
-          /> */}
+            manualTechnicalAcceptance={manualTechnicalAcceptance}
+          />
         </Dialog>
       )}
 

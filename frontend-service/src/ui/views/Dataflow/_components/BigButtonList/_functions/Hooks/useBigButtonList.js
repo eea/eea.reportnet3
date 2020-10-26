@@ -30,9 +30,9 @@ const useBigButtonList = ({
   onShowCopyDataCollectionToEuDatasetModal,
   onShowDataCollectionModal,
   onShowExportEuDatasetModal,
-  onShowFinalFeedbackDialog,
   onShowHistoricReleases,
   onShowManageReportersDialog,
+  onShowManualTechnicalAcceptanceDialog,
   onShowNewSchemaDialog,
   onShowSnapshotDialog,
   onShowUpdateDataCollectionModal,
@@ -94,7 +94,7 @@ const useBigButtonList = ({
       roles.includes(config.permissions['LEAD_REPORTER']) &&
       !roles.includes(config.permissions['REPORTER_WRITE']) &&
       !roles.includes(config.permissions['REPORTER_READ']),
-    finalFeedback: roles.includes(config.permissions['DATA_CUSTODIAN'])
+    manualTechnicalAcceptance: roles.includes(config.permissions['DATA_CUSTODIAN'])
   });
 
   const manageReportersBigButton = [
@@ -508,12 +508,12 @@ const useBigButtonList = ({
     }
   ];
 
-  const finalFeedbackBigButton = [
+  const manualTechnicalAcceptanceBigButton = [
     {
       buttonClass: 'schemaDataset',
       buttonIcon: 'comments',
-      caption: resources.messages['finalFeedback'],
-      handleRedirect: () => onShowFinalFeedbackDialog(),
+      caption: resources.messages['manualTechnicalAcceptance'],
+      handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
       layout: 'defaultBigButton',
       visibility:
         buttonsVisibility.createDataCollection && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
@@ -533,7 +533,7 @@ const useBigButtonList = ({
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
     ...designDatasetModels,
-    ...finalFeedbackBigButton,
+    ...manualTechnicalAcceptanceBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,
