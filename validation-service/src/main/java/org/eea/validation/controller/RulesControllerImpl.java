@@ -490,4 +490,20 @@ public class RulesControllerImpl implements RulesController {
   }
 
 
+
+  /**
+   * Validate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/validateSqlRules")
+  public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    sqlRulesService.validateSQLRules(datasetId, datasetSchemaId);
+  }
+
 }

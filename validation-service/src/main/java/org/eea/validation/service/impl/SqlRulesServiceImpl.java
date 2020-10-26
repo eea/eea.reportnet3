@@ -39,6 +39,7 @@ import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +96,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
+  /** The eu dataset controller. */
   @Autowired
   private EUDatasetController euDatasetController;
 
+  /** The data collection controller. */
   @Autowired
   private DataCollectionController dataCollectionController;
 
@@ -105,8 +108,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
+  /** The representative controller. */
   @Autowired
   private RepresentativeController representativeController;
+
+  /** The rules service. */
+  @Autowired
+  private RulesService rulesService;
 
   /**
    * The rule mapper.
@@ -194,7 +202,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
-   *
+   * @param ischeckDC the ischeck DC
    * @return the boolean
    */
 
@@ -276,10 +284,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
-   * @param ischeckDC
-   *
+   * @param ischeckDC the ischeck DC
    * @return the table value
-   *
    * @throws SQLException the SQL exception
    */
 
@@ -657,6 +663,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
 
 
+  /**
+   * Gets the list of datasets on query.
+   *
+   * @param query the query
+   * @return the list of datasets on query
+   */
   private Map<String, Long> getListOfDatasetsOnQuery(String query) {
     Map<String, Long> datasetSchamasMap = new HashMap<>();
     String dataset = "dataset_";
@@ -674,4 +686,25 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return datasetSchamasMap;
   }
 
+
+
+  /**
+   * Validate SQL rules.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  public void validateSQLRules(Long datasetId, String datasetSchemaId) {
+    List<RuleVO> rulesSql = rulesService.findSqlSentencesByDatasetSchemaId(datasetSchemaId);
+    if (null != rulesSql && !rulesSql.isEmpty()) {
+      rulesSql.stream().forEach(ruleVO -> {
+        validateRule(datasetSchemaId, datasetId, ruleMapper.classToEntity(ruleVO), Boolean.FALSE);
+
+      });
+    }
+  }
+
 }
+
+

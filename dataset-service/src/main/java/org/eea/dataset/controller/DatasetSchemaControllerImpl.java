@@ -110,10 +110,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
-
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreController;
 
   /**
    * Creates the empty dataset schema.
@@ -452,6 +456,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Add UniqueConstraint if needed
       dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
 
+      // Create query view
+      recordStoreController.createUpdateQueryView(datasetId);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -503,6 +509,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
         }
       }
+      // Create query view
+      recordStoreController.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);
@@ -549,6 +557,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
         // Delete the foreign relation between idDatasets in metabase, if needed
         dataschemaService.deleteForeignRelation(datasetId, fieldVO);
+
+        // Create query view
+        recordStoreController.createUpdateQueryView(datasetId);
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
