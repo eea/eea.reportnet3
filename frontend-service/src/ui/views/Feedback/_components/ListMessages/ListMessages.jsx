@@ -11,22 +11,32 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
-export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages, newMessageAdded, onLazyLoad }) => {
+export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages = [], newMessageAdded, onLazyLoad }) => {
   const messagesWrapperRef = useRef();
   const resources = useContext(ResourcesContext);
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
-    isLoadingNewMessages: false
+    isLoadingNewMessages: false,
+    separatorIndex: -1
   });
 
-  const { isLoadingNewMessages } = listMessagesState;
+  const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
   useEffect(() => {
     if (!isNil(messagesWrapperRef)) {
       messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
       // messagesWrapperRef.current.addEventListener = onScroll();
     }
+    dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
   }, []);
+
+  const getIndexByHeader = messagesArray => {
+    return messagesArray
+      .map(message => {
+        return message.read;
+      })
+      .indexOf(false);
+  };
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
@@ -60,7 +70,7 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages, 
           <span>{resources.messages['noMessagesScroll']}</span>
         </div>
       ) : (
-        messages.map(message => <Message message={message} />)
+        messages.map((message, i) => <Message message={message} hasSeparator={i === separatorIndex} />)
       )}
     </div>
   );

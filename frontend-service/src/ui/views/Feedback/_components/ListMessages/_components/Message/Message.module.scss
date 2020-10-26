@@ -82,3 +82,24 @@
     }
   }
 }
+
+.unreadSeparator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--main-font-color);
+}
+.unreadSeparator::before,
+.unreadSeparator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--main-font-color);
+}
+.unreadSeparator::before {
+  margin-right: 0.25em;
+}
+.unreadSeparator::after {
+  margin-left: 0.25em;
+}

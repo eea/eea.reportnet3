@@ -917,6 +917,7 @@
     "writeMessagePlaceholder": "Write your message",
     "noMessages": "You have no unread messages.",
     "noMessagesCustodian": "Please, select a data provider.",
-    "noMessagesScroll": "Scroll up to the top to load read messages."
+    "noMessagesScroll": "Scroll up to the top to load read messages.",
+    "unreadMessageSeparator": "Unread messages"
   }
 }
