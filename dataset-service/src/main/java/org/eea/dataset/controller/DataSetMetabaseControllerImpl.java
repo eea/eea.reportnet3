@@ -341,9 +341,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * @return true, if successful
    */
   @Override
-  @GetMapping("/private/existsByDataflowIdAndDataProviderId")
-  public boolean existsByDataflowIdAndDataProviderId(@RequestParam("dataflowId") Long dataflowId,
+  @GetMapping("/private/getDatasetIdByDataflowIdAndDataProviderId")
+  public Long getDatasetIdByDataflowIdAndDataProviderId(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("dataProviderId") Long dataProviderId) {
-    return datasetMetabaseService.existsByDataflowIdAndProviderId(dataflowId, dataProviderId);
+    return datasetMetabaseService.getDatasetIdByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
   }
 }

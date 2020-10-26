@@ -518,24 +518,32 @@ public class DataflowServiceImpl implements DataflowService {
   public MessageVO createMessage(Long dataflowId, Long providerId, String content)
       throws EEAException {
 
-    if (datasetMetabaseControllerZuul.existsByDataflowIdAndDataProviderId(dataflowId, providerId)) {
+    Long datasetId = datasetMetabaseControllerZuul
+        .getDatasetIdByDataflowIdAndDataProviderId(dataflowId, providerId);
 
-      if (content.length() > maxMessageLength) {
-        content = content.substring(0, maxMessageLength);
-      }
-
+    if (null != datasetId) {
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      Message message = new Message();
-      message.setContent(content);
-      message.setDataflowId(dataflowId);
-      message.setProviderId(providerId);
-      message.setDate(new Date());
-      message.setRead(false);
-      message.setUserName(authentication.getName());
-      message.setDirection(authentication.getAuthorities().contains(new SimpleGrantedAuthority(
-          ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(dataflowId))));
+      boolean isLeadReporter = authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+          ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(dataflowId)));
 
-      return messageMapper.entityToClass(messageRepository.save(message));
+      if (!isLeadReporter || authentication.getAuthorities().contains(new SimpleGrantedAuthority(
+          ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(datasetId)))) {
+
+        if (content.length() > maxMessageLength) {
+          content = content.substring(0, maxMessageLength);
+        }
+
+        Message message = new Message();
+        message.setContent(content);
+        message.setDataflowId(dataflowId);
+        message.setProviderId(providerId);
+        message.setDate(new Date());
+        message.setRead(false);
+        message.setUserName(authentication.getName());
+        message.setDirection(isLeadReporter);
+
+        return messageMapper.entityToClass(messageRepository.save(message));
+      }
     }
 
     throw new EEAException(EEAErrorMessage.CREATE_MESSAGE_ERROR);
