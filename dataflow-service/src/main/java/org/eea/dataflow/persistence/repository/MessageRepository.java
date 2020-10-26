@@ -37,12 +37,11 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    *
    * @param dataflowId the dataflow id
    * @param messageId the message id
-   * @param userName the user name
    * @param read the read
    * @return the int
    */
   @Modifying
-  @Query("UPDATE Message m SET m.read = :read WHERE m.id = :messageId AND m.dataflowId = :dataflowId AND m.userName = :userName")
+  @Query("UPDATE Message m SET m.read = :read WHERE m.id = :messageId AND m.dataflowId = :dataflowId")
   int updateReadStatus(@Param("dataflowId") Long dataflowId, @Param("messageId") Long messageId,
-      @Param("userName") String userName, @Param("read") boolean read);
+      @Param("read") boolean read);
 }

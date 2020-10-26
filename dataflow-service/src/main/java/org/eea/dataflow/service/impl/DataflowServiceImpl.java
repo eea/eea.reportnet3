@@ -70,6 +70,7 @@ public class DataflowServiceImpl implements DataflowService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
+  /** The max message length. */
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
 
@@ -553,6 +554,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Find messages.
    *
    * @param dataflowId the dataflow id
+   * @param read the read
    * @param page the offset
    * @return the list
    */
@@ -576,8 +578,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   @Transactional
   public boolean updateMessageReadStatus(Long dataflowId, Long messageId, boolean read) {
-    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-    return messageRepository.updateReadStatus(dataflowId, messageId, userName, read) > 0;
+    return messageRepository.updateReadStatus(dataflowId, messageId, read) > 0;
   }
 
   /**
