@@ -238,12 +238,10 @@ const allUnread = async (first, rows) => {
       sender: true
     }
   ];
-  console.log({ first, rows });
   let messages = [];
   for (let i = first; i < rows; i++) {
     messages.push(new Feedback({ ...data[i] }));
   }
-  console.log({ messages });
   return messages;
 };
 

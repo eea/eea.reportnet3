@@ -1,7 +1,7 @@
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ON_LOAD_MORE_MESSAGES':
-      console.log({payload});
+      console.log({ payload });
       const inmAllMessages = [...payload, ...state.messages];
       return {
         ...state,
@@ -20,6 +20,11 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         dataflowName: payload
       };
+    case 'SET_IS_CUSTODIAN':
+      return {
+        ...state,
+        isCustodian: payload
+      };
     case 'SET_IS_LOADING':
       return {
         ...state,
@@ -28,10 +33,8 @@ export const feedbackReducer = (state, { type, payload }) => {
     case 'SET_IS_VISIBLE_DIALOG':
       return { ...state, isDialogVisible: payload };
     case 'SET_MESSAGE_TO_SHOW':
-      console.log(payload);
       return { ...state, isDialogVisible: true, messageToShow: payload };
     case 'SET_MESSAGES':
-      console.log(payload);
       return {
         ...state,
         messages: payload,

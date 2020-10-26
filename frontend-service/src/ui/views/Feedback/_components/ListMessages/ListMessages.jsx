@@ -17,17 +17,24 @@ export const ListMessages = ({ lazyLoading = true, messages, onLazyLoad }) => {
 
   const { isLoadingNewMessages } = listMessagesState;
 
+  useEffect(() => {
+    if (!isNil(messagesWrapperRef)) {
+      messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
+      // messagesWrapperRef.current.addEventListener = onScroll();
+    }
+  }, []);
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
-  }, [messages])
+    messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
+  }, [messages]);
 
-  const onScroll = e => {    
+  const onScroll = e => {
     if (!isNil(e)) {
       if (e.target.scrollTop <= 0 && lazyLoading) {
         dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
         onLazyLoad(10, 20);
-        // messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight/2;
+        messagesWrapperRef.current.scrollTop = 100;
       }
     }
   };
@@ -39,7 +46,6 @@ export const ListMessages = ({ lazyLoading = true, messages, onLazyLoad }) => {
           <Spinner className={styles.lazyLoadingSpinner} />
         </div>
       )}
-      {console.log(messages)}
       {messages.map(message => (
         <Message message={message} />
       ))}

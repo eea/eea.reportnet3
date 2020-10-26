@@ -1,21 +1,28 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 import dayjs from 'dayjs';
+import isNil from 'lodash/isNil';
+
+import { config } from 'conf';
 
 import styles from './Feedback.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 
+import { DataflowService } from 'core/services/Dataflow';
 import { FeedbackService } from 'core/services/Feedback';
+import { RepresentativeService } from 'core/services/Representative';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
@@ -32,32 +39,46 @@ export const Feedback = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     dataflowName: '',
-    isDialogVisible: false,
+    isCustodian: false,
     isLoading: false,
     messages: [],
-    messageToSend: ''
+    messageToSend: '',
+    dataProviders: []
   });
 
-  const { dataflowName, isDialogVisible, isLoading, messages, messageToSend } = feedbackState;
+  const { dataflowName, isCustodian, isLoading, messages, messageToSend } = feedbackState;
 
   useEffect(() => {
     onGetDataflowName();
     onGetUnreadMessages();
+    leftSideBarContext.removeModels();
+    onLoadRepresentatives();
   }, []);
 
+  const onLoadRepresentatives = async () => {
+    const allRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+    const responseAllDataProviders = await RepresentativeService.allDataProviders({ dataProviderGroupId: 1 });
+    allRepresentatives.representatives.forEach(representative => {});
+    console.log(allRepresentatives, responseAllDataProviders);
+  };
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+      dispatchFeedback({
+        type: 'SET_IS_CUSTODIAN',
+        payload:
+          userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+          userRoles.includes(config.permissions['DATA_STEWARD'])
+      });
+    }
+  }, [userContext]);
+
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
-
-  const loadingText = () => {
-    return <span className="loading-text"></span>;
-  };
-
-  const onCloseDialog = () => {
-    console.log('CLOSE');
-    dispatchFeedback({ type: 'SET_IS_VISIBLE_DIALOG', payload: false });
-  };
 
   const onGetDataflowName = async () => {
     try {
@@ -80,7 +101,6 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     const data = await onLoadMessages(0, 25);
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
-    dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
   };
 
   const onKeyChange = event => {
@@ -95,35 +115,25 @@ export const Feedback = withRouter(({ match, history }) => {
     return data;
   };
 
-  // const onMessageSelect = event => {
-  //   console.log(event);
-  //   dispatchFeedback({ type: 'SET_MESSAGE_TO_SHOW', payload: event.data.message });
-  // };
-
   const onSendMessage = message => {
-    console.log('message :>> ', message);
-    //Send message to BE
-    let sended = true;
-    if (sended) {
-      dispatchFeedback({
-        type: 'ON_SEND_MESSAGE',
-        payload: {
-          value: {
-            datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-            id: messages.length + 1,
-            message,
-            read: true,
-            sender: true
+    if (message.trim() !== '') {
+      //Send message to BE
+      let sended = true;
+      if (sended) {
+        dispatchFeedback({
+          type: 'ON_SEND_MESSAGE',
+          payload: {
+            value: {
+              datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+              id: messages.length + 1,
+              message,
+              read: false,
+              sender: true
+            }
           }
-        }
-      });
+        });
+      }
     }
-  };
-
-  const onVirtualScroll = async event => {
-    console.log(event);
-    const data = await onLoadMessages(event.first, event.rows);
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
   };
 
   const layout = children => {
@@ -147,6 +157,16 @@ export const Feedback = withRouter(({ match, history }) => {
         iconSize="3.5rem"
       />
       <div className={styles.feedbackWrapper}>
+        {/* {isCustodian && (
+          <Dropdown
+            onChange={e => {
+              onChangeForm(field, e.target.value.value);
+            }}
+            optionLabel="itemType"
+            options={getCodelistItemsWithEmptyOption()}
+            value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+          />
+        )} */}
         <ListMessages messages={messages} onLazyLoad={onGetReadMessages} />
         <InputTextarea
           // autoFocus={true}
@@ -167,7 +187,7 @@ export const Feedback = withRouter(({ match, history }) => {
           iconPos="right"
           onClick={e => onSendMessage(e.target.value)}
         />
-      </div>     
+      </div>
     </Fragment>
   );
 });
