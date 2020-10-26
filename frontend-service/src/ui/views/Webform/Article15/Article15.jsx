@@ -40,7 +40,10 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
 
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: { isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables, tables), data: parsedData }
+      payload: {
+        isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables, tables),
+        data: parsedData
+      }
     });
   };
 

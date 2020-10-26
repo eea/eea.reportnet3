@@ -67,11 +67,21 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   /**
    * Find first by dataset schema and data provider id.
    *
-   * @param idDatasetSchemaReferenced the id dataset schema referenced
+   * @param datasetSchema the dataset schema
    * @param dataProviderId the data provider id
    * @return the data set metabase
    */
   Optional<DataSetMetabase> findFirstByDatasetSchemaAndDataProviderId(
       @Param("datasetSchema") String datasetSchema, @Param("dataProviderId") Long dataProviderId);
+
+
+  /**
+   * Count by data set name ignore case and dataflow id.
+   *
+   * @param datasetName the dataset name
+   * @param dataflowId the dataflow id
+   * @return the long
+   */
+  Long countByDataSetNameIgnoreCaseAndDataflowId(String datasetName, Long dataflowId);
 
 }

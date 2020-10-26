@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import styles from './Snapshots.module.scss';
 
@@ -69,7 +69,7 @@ const Snapshots = ({
           <ul>
             <li>
               <strong>{resources.messages.creationDate}: </strong>
-              {moment(snapshotContext.snapshotState.creationDate).format(
+              {dayjs(snapshotContext.snapshotState.creationDate).format(
                 `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                   userContext.userProps.amPm24h ? '' : ' A'
                 }`
