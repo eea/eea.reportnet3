@@ -133,7 +133,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     String query = proccessQuery(datasetId, rule.getSqlSentence(), datasetSchemaId);
 
-    if (validateRule(query, datasetId, rule).equals(Boolean.TRUE)) {
+    if (validateRule(query, datasetId, rule, Boolean.FALSE).equals(Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
@@ -162,7 +162,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     String query = proccessQuery(datasetId, ruleVO.getSqlSentence(), datasetSchemaId);
     boolean verifAndEnabled = true;
-    if (validateRule(query, datasetId, rule).equals(Boolean.FALSE)) {
+    if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.FALSE)) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
     }
@@ -198,7 +198,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @return the boolean
    */
 
-  private Boolean validateRule(String query, Long datasetId, Rule rule) {
+  private Boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
     Boolean isSQLCorrect = Boolean.TRUE;
     // validate query
     if (!StringUtils.isBlank(query)) {
@@ -211,7 +211,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           } else {
             preparedquery = query + " limit 5";
           }
-          retrieveTableData(preparedquery, datasetId, rule);
+          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
         } catch (SQLException e) {
           LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
@@ -276,6 +276,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
+   * @param ischeckDC
    *
    * @return the table value
    *
@@ -283,7 +284,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
 
   @Override
-  public TableValue retrieveTableData(String query, Long datasetId, Rule rule) throws SQLException {
+  public TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
+      throws SQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
     Long idTable = null;
@@ -314,8 +316,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     } catch (SQLException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
-    if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
-      retrieveValidations(table.getRecords(), datasetId);
+    if (ischeckDC.equals(Boolean.FALSE)) {
+      if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
+        retrieveValidations(table.getRecords(), datasetId);
+      }
     }
     return table;
   }
@@ -617,9 +621,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           dataprovidersVOList
               .removeIf(dataprovider -> dataprovider.getDataProviderId() != providerId);
           List<Long> dataprovidersIdList = new ArrayList<>();
-          List<Long> datasetIdList = new ArrayList<>();
+          List<String> datasetIdList = new ArrayList<>();
           for (ReportingDatasetVO dataset : reportingDatasetList) {
-            datasetIdList.add(dataset.getId());
+            datasetIdList.add(dataset.getDatasetSchema());
           }
           for (RepresentativeVO provider : dataprovidersVOList) {
             dataprovidersIdList.add(provider.getDataProviderId());
@@ -632,7 +636,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             }
           }
           for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
-            if (datasetIdList.contains(auxDatasetMap.getValue())) {
+            if (datasetIdList.contains(auxDatasetMap.getKey())) {
               String key = auxDatasetMap.getKey();
               Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
               datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);

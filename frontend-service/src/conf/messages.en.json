@@ -882,10 +882,10 @@
     "currentPoint": "Current point",
     "newPoint": "New point",
     "manageRolesEditorDialogInputPlaceholder": "Editor account...",
-    "sqlSentenceHelpNote": "Note: Table name must be in<strong>&nbsp<u>quotes</u>&nbsp</strong>if it <u>begins with a number</u> or it contains <u>special characters or blank spaces</u> (e.g.  3tableName ->  &quot3tableName&quot)",
-    "sqlSentenceHelpField": "SELECT * FROM <strong>\"tableName\"</strong><br/>SELECT <strong>\"record_id\", \"[fieldName]_id\", \"fieldName\"</strong> FROM <strong>\"tableName\"</strong><br/>SELECT * FROM <strong>\"table1\"</strong> JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong>",
-    "sqlSentenceHelpRow": "SELECT * FROM <strong>\"tableName\"</strong><br/>SELECT <strong>\"record_id\"</strong> FROM <strong>\"tableName\"</strong><br/>SELECT * FROM <strong>\"table1\"</strong> JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong>",
-    "sqlSentenceHelpTable": "SELECT * FROM <strong>\"tableName\"</strong><br/>SELECT * FROM <strong>\"table1\"</strong> JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong>",
+    "sqlSentenceHelpNote": "Note: Table and field name must be in<strong>&nbsp<u>quotes</u></strong>.",
+    "sqlSentenceHelpField": "<p>SELECT * FROM <strong>\"tableName\"</strong></p><p>SELECT <strong>\"record_id\", \"[fieldName]_id\", \"fieldName\"</strong> FROM <strong>\"tableName\"</strong></p><p>SELECT * FROM <strong>\"table1\"</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong></p>",
+    "sqlSentenceHelpRow": "<p>SELECT * FROM <strong>\"tableName\"</strong></p><p>SELECT <strong>\"record_id\"</strong> FROM <strong>\"tableName\"</strong></p><p>SELECT * FROM <strong>\"table1\"</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong></p>",
+    "sqlSentenceHelpTable": "<p>SELECT * FROM <strong>\"tableName\"</strong></p><p>SELECT * FROM <strong>\"table1\"</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong></p>",
     "sqlSentenceHelpDescription": "The sentences should look like the following examples (quotes are mandatory only if the name contains blank spaces):",
     "configureWebform": "Configure webform",
     "configureWebformMessage": "Please, select a webform to configure it",
@@ -910,7 +910,7 @@
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
-    "webformTableWithLessRecords": "There is no records in the table.",
+    "webformTableWithLessRecords": "There are no records in the table.",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records."
   }
 }
