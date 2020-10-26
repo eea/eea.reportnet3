@@ -86,11 +86,11 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
             transition: '0.5s'
           });
           setHeaderElementStyle({
-            height: '70px',
+            height: '64px',
             transition: '0.5s'
           });
           onMainContentStyleChange({
-            marginTop: '70px',
+            marginTop: '64px',
             transition: '0.5s'
           });
         }
