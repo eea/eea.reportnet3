@@ -5,7 +5,8 @@ export const feedbackReducer = (state, { type, payload }) => {
       const inmAllMessages = [...payload, ...state.messages];
       return {
         ...state,
-        messages: inmAllMessages
+        messages: inmAllMessages,
+        newMessageAdded: false
       };
     case 'ON_SEND_MESSAGE':
       const inmMessages = [...state.messages];
@@ -13,13 +14,16 @@ export const feedbackReducer = (state, { type, payload }) => {
       return {
         ...state,
         messages: inmMessages,
-        messageToSend: ''
+        messageToSend: '',
+        newMessageAdded: true
       };
     case 'SET_DATAFLOW_NAME':
       return {
         ...state,
         dataflowName: payload
       };
+    case 'SET_DATAPROVIDERS':
+      return { ...state, dataProviders: payload };
     case 'SET_IS_CUSTODIAN':
       return {
         ...state,
@@ -39,6 +43,11 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         messages: payload,
         isLoading: false
+      };
+    case 'SET_SELECTED_DATAPROVIDER':
+      return {
+        ...state,
+        selectedDataProvider: payload
       };
     case 'ON_UPDATE_MESSAGE':
       return {

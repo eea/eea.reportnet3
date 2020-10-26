@@ -1,3 +1,14 @@
+.dataProviderWrapper {
+  margin: 0rem 0rem 1rem 1rem;
+  vertical-align: middle;
+  .dataProvider {
+    margin-left: 0.5rem;
+    min-width: 8%;
+  }
+  span {
+    font-weight: bold;
+  }
+}
 .feedbackWrapper {
   display: flex;
   flex-direction: column;
@@ -10,5 +21,9 @@
   }
   .sendMessageButton {
     margin-bottom: 1rem;
+  }
+  .spinnerLoadingMessages {
+    top: 0 !important;
+    left: 0 !important;
   }
 }

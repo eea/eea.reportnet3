@@ -8,8 +8,8 @@ const all = async () => {
   return await apiFeedback.all();
 };
 
-const allUnread = async (first, rows) => {
-  const response = await apiFeedback.allUnread();
+const allUnread = async (first, rows, dataProviderId) => {
+  const response = await apiFeedback.allUnread(first, rows, dataProviderId);
 
   const data = [
     {

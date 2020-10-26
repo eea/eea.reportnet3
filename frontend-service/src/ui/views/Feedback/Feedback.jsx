@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 import dayjs from 'dayjs';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -15,7 +16,6 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 
-import { DataflowService } from 'core/services/Dataflow';
 import { FeedbackService } from 'core/services/Feedback';
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -43,28 +43,42 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     dataflowName: '',
+    dataProviders: [],
     isCustodian: false,
     isLoading: false,
     messages: [],
     messageToSend: '',
-    dataProviders: []
+    newMessageAdded: false,
+    selectedDataProvider: {}
   });
 
-  const { dataflowName, isCustodian, isLoading, messages, messageToSend } = feedbackState;
+  const {
+    dataflowName,
+    dataProviders,
+    isCustodian,
+    isLoading,
+    messages,
+    messageToSend,
+    newMessageAdded,
+    selectedDataProvider
+  } = feedbackState;
 
   useEffect(() => {
     onGetDataflowName();
-    onGetUnreadMessages();
     leftSideBarContext.removeModels();
-    onLoadRepresentatives();
   }, []);
 
-  const onLoadRepresentatives = async () => {
-    const allRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const responseAllDataProviders = await RepresentativeService.allDataProviders({ dataProviderGroupId: 1 });
-    allRepresentatives.representatives.forEach(representative => {});
-    console.log(allRepresentatives, responseAllDataProviders);
-  };
+  useEffect(() => {
+    if (isCustodian) {
+      onLoadDataProviders();
+    }
+  }, [isCustodian]);
+
+  useEffect(() => {
+    if (!isEmpty(selectedDataProvider)) {
+      onGetUnreadMessages(selectedDataProvider.id);
+    }
+  }, [selectedDataProvider]);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
@@ -80,6 +94,10 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
+  const onChangeDataProvider = value => {
+    dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
+  };
+
   const onGetDataflowName = async () => {
     try {
       const name = await DataflowUtils.getDataflowName(dataflowId);
@@ -93,13 +111,13 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onGetReadMessages = async (first, rows) => {
-    const data = await onLoadMessages(first, rows);
+    const data = await onLoadMessages(first, rows, isCustodian ? selectedDataProvider.id : 1);
     dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
   };
 
-  const onGetUnreadMessages = async () => {
+  const onGetUnreadMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
-    const data = await onLoadMessages(0, 25);
+    const data = await onLoadMessages(0, 25, dataProviderId);
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
   };
 
@@ -110,9 +128,24 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadMessages = async (first, rows) => {
-    const data = await FeedbackService.allUnread(first, rows);
+  const onLoadMessages = async (first, rows, dataProviderId) => {
+    const data = await FeedbackService.allUnread(first, rows, dataProviderId);
     return data;
+  };
+
+  const onLoadDataProviders = async () => {
+    const allRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+    const responseAllDataProviders = await RepresentativeService.allDataProviders(allRepresentatives.group);
+
+    const filteredDataProviders = responseAllDataProviders.filter(dataProvider =>
+      allRepresentatives.representatives.some(
+        representative => representative.dataProviderId === dataProvider.dataProviderId
+      )
+    );
+
+    dispatchFeedback({ type: 'SET_DATAPROVIDERS', payload: filteredDataProviders });
+
+    console.log(allRepresentatives, responseAllDataProviders, filteredDataProviders);
   };
 
   const onSendMessage = message => {
@@ -144,10 +177,6 @@ export const Feedback = withRouter(({ match, history }) => {
     );
   };
 
-  if (isLoading) {
-    return layout(<Spinner />);
-  }
-
   return layout(
     <Fragment>
       <Title
@@ -156,18 +185,33 @@ export const Feedback = withRouter(({ match, history }) => {
         icon="info"
         iconSize="3.5rem"
       />
-      <div className={styles.feedbackWrapper}>
-        {/* {isCustodian && (
+      {isCustodian && (
+        <div className={styles.dataProviderWrapper}>
+          <span>{resources.messages['manageRolesDialogDataProviderColumn']}</span>
           <Dropdown
+            className={styles.dataProvider}
             onChange={e => {
-              onChangeForm(field, e.target.value.value);
+              onChangeDataProvider(e.target.value);
             }}
-            optionLabel="itemType"
-            options={getCodelistItemsWithEmptyOption()}
-            value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+            optionLabel="label"
+            options={dataProviders}
+            value={selectedDataProvider}
           />
-        )} */}
-        <ListMessages messages={messages} onLazyLoad={onGetReadMessages} />
+        </div>
+      )}
+      <div className={styles.feedbackWrapper}>
+        {isLoading ? (
+          <Spinner className={styles.spinnerLoadingMessages} />
+        ) : (
+          <ListMessages
+            emptyMessage={`${resources.messages['noMessages']} ${
+              isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
+            }`}
+            messages={messages}
+            newMessageAdded={newMessageAdded}
+            onLazyLoad={onGetReadMessages}
+          />
+        )}
         <InputTextarea
           // autoFocus={true}
           className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
