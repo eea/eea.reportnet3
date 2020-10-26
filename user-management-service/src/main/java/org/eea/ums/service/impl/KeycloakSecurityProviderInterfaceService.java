@@ -669,9 +669,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         if (groupInfo.getName()
             .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))
             || groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
+                .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
             || groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
+                .equals(ResourceGroupEnum.DATAFLOW_REPORTER_WRITE.getGroupName(dataflowId))
+            || groupInfo.getName()
+                .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
           userGroups.add(groupInfo.getName());
         }
       }
@@ -706,8 +708,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         }
         if (userRepresentations.size() == 0) {
           usersReload++;
-          if (usersReload
-              < 2) { //ensure that there is only one invocation to Keycloak to retrieve users
+          if (usersReload < 2) { // ensure that there is only one invocation to Keycloak to retrieve
+                                 // users
             users.clear(); // just in case the user was not found in
             users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
           }
@@ -875,11 +877,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> !groups.isEmpty()).ifPresent(groups -> groups.stream().map(group -> {
-        if (group.startsWith("/")) {
-          group = group.substring(1);
-        }
-        return group.toUpperCase();
-      }).forEach(eeaGroups::add));
+            if (group.startsWith("/")) {
+              group = group.substring(1);
+            }
+            return group.toUpperCase();
+          }).forEach(eeaGroups::add));
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());

@@ -67,7 +67,18 @@ public class Validation {
   @Enumerated(EnumType.STRING)
   private EntityTypeEnum typeEntity;
 
-  /** The origin name. */
-  @Column(name = "ORIGIN_NAME")
-  private String originName;
+
+  /** The table name. */
+  @Column(name = "TABLE_NAME")
+  private String tableName;
+
+
+  /** The field name. */
+  @Column(name = "FIELD_NAME")
+  private String fieldName;
+
+
+  /** The short code. */
+  @Column(name = "SHORT_CODE")
+  private String shortCode;
 }

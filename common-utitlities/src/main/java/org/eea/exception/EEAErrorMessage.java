@@ -32,6 +32,9 @@ public final class EEAErrorMessage {
   /** The Constant DATASET_INCORRECT_ID: {@value}. */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
+  /** The Constant DATASET_NAME_DUPLICATED: {@value}. */
+  public static final String DATASET_NAME_DUPLICATED = "Dataset name duplicated in this dataflow";
+
   /** The Constant IDTABLESCHEMA_INCORRECT: {@value}. */
   public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
 
@@ -58,6 +61,9 @@ public final class EEAErrorMessage {
 
   /** The Constant RECORD_NOTFOUND: {@value}. */
   public static final String RECORD_NOTFOUND = "Record not found";
+
+  /** The Constant RECORD_REQUIRED: {@value}. */
+  public static final String RECORD_REQUIRED = "Error inserting records. At least one record is required";
 
   /** The Constant PARTITION_ID_NOTFOUND: {@value}. */
   public static final String PARTITION_ID_NOTFOUND = "Partition not found";

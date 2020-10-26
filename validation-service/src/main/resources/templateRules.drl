@@ -6,7 +6,9 @@ typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
-originName
+tableName
+shortCode
+fieldName
 package src.main.resources
 
 import org.eea.validation.persistence.data.domain.*;
@@ -26,7 +28,7 @@ dialect "java"
   when
     dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && !(@{whencondition}));
   then
-   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{originName}");
+   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{tableName}","@{shortCode}","@{fieldName}");
 
 
 end
@@ -209,5 +211,5 @@ function boolean isTableEmpty(TableValue tableValue){
 //////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
 function boolean isSQLSentence(Long datasetId, String ruleId){	
 	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId);
-	return false;
+	return true;
 }

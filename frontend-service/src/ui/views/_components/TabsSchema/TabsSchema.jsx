@@ -41,10 +41,6 @@ export const TabsSchema = ({
   tables,
   tableSchemaColumns
 }) => {
-  let tableHasErrors = true;
-  if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
-    tableHasErrors = tables[activeIndex].hasErrors;
-  }
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
@@ -69,7 +65,7 @@ export const TabsSchema = ({
                   reporting={reporting}
                   showWriteButtons={showWriteButtons}
                   tableFixedNumber={table.fixedNumber}
-                  tableHasErrors={tableHasErrors}
+                  tableHasErrors={table.hasErrors}
                   tableId={table.id}
                   tableName={table.name}
                   tableReadOnly={table.readOnly}
@@ -80,7 +76,7 @@ export const TabsSchema = ({
                           .filter(f => f.length > 0)[0]
                       : []
                   }
-                  recordPositionId={table.id === activeIndex ? recordPositionId : -1}
+                  recordPositionId={table.id === tableSchemaId ? recordPositionId : -1}
                   selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
