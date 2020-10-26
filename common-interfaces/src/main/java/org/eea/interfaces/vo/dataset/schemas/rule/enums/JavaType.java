@@ -20,6 +20,9 @@ public final class JavaType {
   /** The Constant JSON: {@value}. */
   public static final String JSON = "JsonNode";
 
+  /** The Constant OBJECT: {@value}. */
+  public static final String OBJECT = "Object";
+
   /** The Constant UNSUPPORTED: {@value}. */
   public static final String UNSUPPORTED = "Unsupported";
 

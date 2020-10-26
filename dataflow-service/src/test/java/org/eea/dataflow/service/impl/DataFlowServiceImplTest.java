@@ -21,6 +21,7 @@ import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -73,12 +74,14 @@ public class DataFlowServiceImplTest {
   @InjectMocks
   private DataflowServiceImpl dataflowServiceImpl;
 
+  @Mock
+  private DataProviderRepository dataProviderRepository;
+
   /**
    * The dataflow repository.
    */
   @Mock
   private DataflowRepository dataflowRepository;
-
 
   /**
    * The user request repository.
@@ -307,7 +310,8 @@ public class DataFlowServiceImplTest {
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito.when(dataflowRepository.findAllById(Mockito.any())).thenReturn(list);
+    Mockito.when(dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(Mockito.any()))
+        .thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(new DataFlowVO());
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
   }
@@ -868,7 +872,6 @@ public class DataFlowServiceImplTest {
     }
   }
 
-
   @Test
   public void testUpdateDataflowStatus() throws EEAException {
 
@@ -876,7 +879,6 @@ public class DataFlowServiceImplTest {
     dataflowServiceImpl.updateDataFlowStatus(1L, TypeStatusEnum.DESIGN, null);
     Mockito.verify(dataflowRepository, times(1)).save(Mockito.any());
   }
-
 
   @Test(expected = EEAException.class)
   public void testUpdateDataflowStatusException() throws EEAException {
@@ -887,6 +889,4 @@ public class DataFlowServiceImplTest {
       throw e;
     }
   }
-
-
 }

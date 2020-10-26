@@ -65,8 +65,9 @@ const checkValidJSONCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
     return checkValidCoordinates(parsedJSON.geometry.coordinates);
+  } else {
+    return false;
   }
-  return true;
 };
 
 const latLngToLngLat = (coordinates = []) =>
