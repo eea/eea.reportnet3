@@ -24,6 +24,15 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
   Page<Message> findByDataflowIdAndRead(Long dataflowId, boolean read, Pageable pageable);
 
   /**
+   * Find by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @param pageable the pageable
+   * @return the page
+   */
+  Page<Message> findByDataflowId(Long dataflowId, Pageable pageable);
+
+  /**
    * Update read status.
    *
    * @param dataflowId the dataflow id

@@ -176,7 +176,7 @@ public interface DataFlowController {
    */
   @GetMapping("/{dataflowId}/findMessages")
   List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam(value = "read", required = false) boolean read, @RequestParam("page") int page);
+      @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
 
   /**
    * Update message read status.

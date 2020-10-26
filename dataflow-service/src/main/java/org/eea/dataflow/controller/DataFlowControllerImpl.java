@@ -495,7 +495,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping("/{dataflowId}/findMessages")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam(value = "read", required = false) boolean read,
+      @RequestParam(value = "read", required = false) Boolean read,
       @RequestParam("page") int page) {
     return dataflowService.findMessages(dataflowId, read, page);
   }

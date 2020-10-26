@@ -557,10 +557,11 @@ public class DataflowServiceImpl implements DataflowService {
    * @return the list
    */
   @Override
-  public List<MessageVO> findMessages(Long dataflowId, boolean read, int page) {
-    PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").ascending());
+  public List<MessageVO> findMessages(Long dataflowId, Boolean read, int page) {
+    PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
     Page<Message> pageResponse =
-        messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest);
+        null != read ? messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest)
+            : messageRepository.findByDataflowId(dataflowId, pageRequest);
     return messageMapper.entityListToClass(pageResponse.getContent());
   }
 
