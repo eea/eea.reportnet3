@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import dayjs from 'dayjs';
@@ -8,8 +9,6 @@ import isEmpty from 'lodash/isEmpty';
 import uniq from 'lodash/uniq';
 
 import styles from './HistoricReleases.module.scss';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
