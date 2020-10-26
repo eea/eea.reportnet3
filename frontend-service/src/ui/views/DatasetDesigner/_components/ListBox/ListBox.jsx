@@ -10,6 +10,7 @@ import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
 import { ListBoxItem } from './_components/ListBoxItem';
 import { ListBoxHeader } from './_components/ListBoxHeader';
+import { Spinner } from 'ui/views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
 
 const ListBox = ({
@@ -28,6 +29,7 @@ const ListBox = ({
   optionLabel = null,
   options = null,
   style = null,
+  spinner = false,
   tabIndex = '0',
   title = '',
   tooltip = null,
@@ -246,13 +248,21 @@ const ListBox = ({
     return (
       <div ref={inputElement} id={id} className={classes} style={style}>
         {header}
-        <div className="p-listbox-title-wrapper">
-          <span className="p-listbox-title">{title}</span>
-        </div>
+        {title && (
+          <div className="p-listbox-title-wrapper">
+            <span className="p-listbox-title">{title}</span>
+          </div>
+        )}
         <div className="p-listbox-list-wrapper">
-          <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
-            {items}
-          </ul>
+          {!items && spinner ? (
+            <div className="listbox-spinner-wrapper" style={listStyle}>
+              <Spinner style={{ top: 0, left: 0, maxWidth: '15%' }} />
+            </div>
+          ) : (
+            <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
+              {items}
+            </ul>
+          )}
         </div>
       </div>
     );

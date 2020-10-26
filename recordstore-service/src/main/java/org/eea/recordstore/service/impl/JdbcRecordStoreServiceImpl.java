@@ -1112,11 +1112,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws RecordStoreAccessException {
     String querySelectPermission = "GRANT SELECT ON dataset_" + datasetId + "." + "\""
         + queryViewName + "\"" + " TO " + datasetUsers;
-    executeQueryViewCommands(querySelectPermission.toLowerCase());
+    executeQueryViewCommands(querySelectPermission);
 
     String queryDeletePermission = "GRANT DELETE ON dataset_" + datasetId + "." + "\""
         + queryViewName + "\"" + " TO " + userPostgreDb;
-    executeQueryViewCommands(queryDeletePermission.toLowerCase());
+    executeQueryViewCommands(queryDeletePermission);
 
   }
 
@@ -1189,7 +1189,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
         + "')");
 
-    executeQueryViewCommands(stringQuery.toString().toLowerCase());
+    executeQueryViewCommands(stringQuery.toString());
   }
 
 }

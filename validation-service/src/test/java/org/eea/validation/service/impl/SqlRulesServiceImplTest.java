@@ -368,7 +368,7 @@ public class SqlRulesServiceImplTest {
         .thenReturn(recordsValidation);
 
 
-    sqlRulesServiceImpl.retrieveTableData("", 1L, rule);
+    sqlRulesServiceImpl.retrieveTableData("", 1L, rule, Boolean.FALSE);
 
     Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());

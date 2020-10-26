@@ -365,7 +365,7 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, ")
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
           .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
@@ -657,7 +657,7 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, ")
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
           .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
@@ -1089,6 +1089,15 @@ public class RulesServiceImpl implements RulesService {
                 "dataset_" + newDatasetId.toString());
             rule.setWhenCondition(newWhenCondition);
           }
+          // Do the same in the property SqlSentence
+          if (StringUtils.isNotBlank(rule.getSqlSentence())
+              && rule.getSqlSentence().contains("dataset_")) {
+            String newSqlSentence = rule.getSqlSentence();
+            newSqlSentence = newSqlSentence.replace("dataset_" + oldDatasetId.toString(),
+                "dataset_" + newDatasetId.toString());
+            rule.setSqlSentence(newSqlSentence);
+          }
+
         });
       }
     }
