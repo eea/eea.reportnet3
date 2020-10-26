@@ -10,11 +10,13 @@ import styles from './BigButtonList.module.css';
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
+import { ManualAcceptanceDatasets } from 'ui/views/Dataflow/_components/ManualAcceptanceDatasets';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
@@ -77,10 +79,11 @@ export const BigButtonList = ({
     false
   );
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
-  const [isFinalFeedbackDialogVisible, setIsFinalFeedbackDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
+  const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
+  const [manualTechnicalAcceptance, setManualTechnicalAcceptance] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
 
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
@@ -88,6 +91,7 @@ export const BigButtonList = ({
 
   const dataflowId = dataflowState.id;
   const dataflowName = dataflowState.name;
+  const dataflowData = dataflowState.data;
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -261,6 +265,9 @@ export const BigButtonList = ({
     setErrorDialogData({ isVisible: false, message: '' });
   };
 
+  const onChangeManualTechnicalAcceptanceCheckbox = () => {
+    setManualTechnicalAcceptance(!manualTechnicalAcceptance);
+  };
   const onCopyDataCollectionToEuDataset = async () => {
     setIsCopyDataCollectionToEuDatasetDialogVisible(false);
     setIsCopyDataCollectionToEuDatasetLoading(true);
@@ -571,6 +578,24 @@ export const BigButtonList = ({
           }
           onHide={() => setIsConfirmCollectionDialog(false)}
           visible={isConfirmCollectionDialog}>
+          <span className={styles.checkboxWrap}>
+            {resources.messages['manualTechnicalAcceptanceCheck']}
+            <span className={styles.checkbox}>
+              <Checkbox
+                id={'manualTechnicalAcceptance'}
+                inputId={'manualTechnicalAcceptance'}
+                isChecked={manualTechnicalAcceptance}
+                label={'manualTechnicalAcceptance'}
+                onChange={() => onChangeManualTechnicalAcceptanceCheckbox()}
+                style={{ marginRight: '50px' }}
+              />
+              <label htmlFor={'manualTechnicalAcceptance'} className="srOnly">
+                {resources.messages['manualTechnicalAcceptance']}
+              </label>
+            </span>
+          </span>
+
+          <br />
           <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
           {resources.messages['createDataCollectionConfirm']}
         </ConfirmDialog>
