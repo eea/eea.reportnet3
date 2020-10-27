@@ -92,7 +92,7 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
-       
+
         {
           "key": "DATASET_SCHEMA_CREATION_ERROR",
           "navigateTo": {
@@ -535,11 +535,7 @@
           }
         },
         {
-          "key": "RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
-          }
+          "key": "RELEASE_SNAPSHOT_COMPLETED_EVENT"
         },
         {
           "key": "UPLOAD_DOCUMENT_COMPLETED_EVENT",
