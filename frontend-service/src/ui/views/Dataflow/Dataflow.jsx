@@ -6,6 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
+import map from 'lodash/map';
 
 import styles from './Dataflow.module.scss';
 
@@ -208,12 +209,16 @@ const Dataflow = withRouter(({ history, match }) => {
       };
     }
 
-    let insideACountry = !isUndefined(representativeId) || dataflowState.data.representatives.length === 1;
+    const isInsideACountry =
+      !isUndefined(representativeId) ||
+      (!isEmpty(dataflowState.data) &&
+        !isEmpty(dataflowState.data.datasets) &&
+        uniq(map(dataflowState.data.datasets, 'dataProviderId')).length === 1);
 
     return {
       apiKeyBtn:
         userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) ||
-        (userRoles.includes(config.permissions['LEAD_REPORTER']) && insideACountry),
+        (userRoles.includes(config.permissions['LEAD_REPORTER']) && isInsideACountry),
 
       editBtn:
         userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
@@ -221,7 +226,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageEditorsBtn:
         isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']),
 
-      manageReportersBtn: isDraft && userRoles.includes(config.permissions['LEAD_REPORTER']) && insideACountry,
+      manageReportersBtn: isDraft && isInsideACountry && userRoles.includes(config.permissions['LEAD_REPORTER']),
 
       propertiesBtn: true
     };
