@@ -9,6 +9,8 @@ import { DeleteReporter } from './DeleteReporter';
 import { GetAllReporter } from './GetAllReporter';
 import { ReleaseReporter } from './ReleaseReporter';
 import { RestoreReporter } from './RestoreReporter';
+
+import { ReleaseDataflow } from './ReleaseDataflow';
 import { snapshotRepository } from 'core/domain/model/Snapshot/SnapshotRepository';
 
 export const SnapshotService = {
@@ -22,5 +24,6 @@ export const SnapshotService = {
   createByIdReporter: CreateReporter({ snapshotRepository }),
   deleteByIdReporter: DeleteReporter({ snapshotRepository }),
   releaseByIdReporter: ReleaseReporter({ snapshotRepository }),
-  restoreByIdReporter: RestoreReporter({ snapshotRepository })
+  restoreByIdReporter: RestoreReporter({ snapshotRepository }),
+  releaseDataflow: ReleaseDataflow({ snapshotRepository })
 };

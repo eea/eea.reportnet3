@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import styles from './SnapshotsDialog.module.scss';
 

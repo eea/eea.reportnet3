@@ -69,8 +69,6 @@ const Notifications = () => {
                 })
               }}></div>
           ));
-      console.log('notification.message', notification.message);
-      console.log('message', message);
 
       growlRef.current.show({
         severity: notification.type,

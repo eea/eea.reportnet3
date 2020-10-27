@@ -11,7 +11,9 @@ export const SnapshotRepository = {
   createByIdReporter: () => Promise.reject('[SnapshotReporterDatasetRepository#createById] must be implemented'),
   deleteByIdReporter: () => Promise.reject('[SnapshotReporterDatasetRepository#deleteById] must be implemented'),
   releaseByIdReporter: () => Promise.reject('[SnapshotReporterDatasetRepository#releaseById] must be implemented'),
-  restoreByIdReporter: () => Promise.reject('[SnapshotReporterDatasetRepository#restoreById] must be implemented')
+  restoreByIdReporter: () => Promise.reject('[SnapshotReporterDatasetRepository#restoreById] must be implemented'),
+
+  releaseDataflow: () => Promise.reject('[SnapshotReporterDatasetRepository#releaseDataflow] must be implemented')
 };
 
 export const snapshotRepository = Object.assign({}, SnapshotRepository, ApiSnapshotRepository);

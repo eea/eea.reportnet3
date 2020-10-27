@@ -77,7 +77,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
     try {
       setIsLoadingSnapshotListData(true);
 
-      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
+      //SetTimeout for avoiding the overlapping between the slidebar transition and the api call
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.allReporter(datasetId);
 

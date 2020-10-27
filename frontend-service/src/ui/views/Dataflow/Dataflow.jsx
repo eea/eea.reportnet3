@@ -38,6 +38,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotService } from 'core/services/Snapshot';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
@@ -430,7 +431,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
- /*  const onShowSnapshotDialog = async (datasetId, datasetName) => {
+  /*  const onShowSnapshotDialog = async (datasetId, datasetName) => {
     dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId, name: datasetName } });
     manageDialogs('isSnapshotDialogVisible', true);
   };
@@ -439,9 +440,15 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isReleaseDialogVisible', true);
   };
 
-  const onConfirmRelease = () => {
-    console.log('confirmed RELEASE');
-    manageDialogs('isReleaseDialogVisible', false);
+  const onConfirmRelease = async () => {
+    const providerId = isNil(representativeId) ? dataflowState.dataProviderId : representativeId;
+    try {
+      await SnapshotService.releaseDataflow(dataflowId, providerId);
+    } catch (error) {
+      notificationContext.add({ type: 'RELEASED_BY_ID_REPORTER_ERROR', content: {} });
+    } finally {
+      manageDialogs('isReleaseDialogVisible', false);
+    }
   };
 
   useCheckNotifications(
@@ -490,7 +497,7 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         )}
 
-      {/*   {dataflowState.isSnapshotDialogVisible && (
+        {/*   {dataflowState.isSnapshotDialogVisible && (
           <SnapshotsDialog
             dataflowId={dataflowId}
             datasetId={dataflowState.datasetIdToSnapshotProps}

@@ -69,6 +69,9 @@ const releaseByIdReporter = async (dataflowId, datasetId, snapshotId) => {
   return new Snapshot({ id: snapshotId, isReleased });
 };
 
+const releaseDataflow = async (dataflowId, dataProviderId) => {
+  return await apiSnapshot.releaseDataflow(dataflowId, dataProviderId);
+};
 export const ApiSnapshotRepository = {
   allDesigner,
   createByIdDesigner,
@@ -80,5 +83,7 @@ export const ApiSnapshotRepository = {
   createByIdReporter,
   deleteByIdReporter,
   restoreByIdReporter,
-  releaseByIdReporter
+  releaseByIdReporter,
+
+  releaseDataflow
 };
