@@ -147,7 +147,7 @@ export const FieldDesigner = ({
     dropDowns.forEach(dropDown => {
       const dropDownDisplay = dropDown.style.display;
       if (dropDownDisplay) {
-        if (headerInitialHeight === 70 || headerInitialHeight === 180) {
+        if (headerInitialHeight === 64 || headerInitialHeight === 180) {
           dropDown.style.marginTop = `${headerHeight - headerInitialHeight}px`;
         }
       }
