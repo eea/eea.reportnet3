@@ -92,13 +92,7 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
-        {
-          "key": "SNAPSHOT_RELEASE_ERROR",
-          "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
+       
         {
           "key": "DATASET_SCHEMA_CREATION_ERROR",
           "navigateTo": {

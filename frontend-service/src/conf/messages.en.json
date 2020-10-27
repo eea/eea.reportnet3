@@ -466,7 +466,6 @@
     "snapshotIsReleased": "RELEASED",
     "snapshotItemRestoreProcessDetail": "Restoring...",
     "snapshotItemRestoreProcessSummary": "Restoring copy",
-    "snapshotReleaseError": "Copy release error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotRestoringError": "Copy restoring error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotRestoringSuccess": "Copy restoring success at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshots": "Manage copies",
