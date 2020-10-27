@@ -96,6 +96,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  const isInsideACountry =
+  !isUndefined(representativeId) ||
+  (!isEmpty(dataflowState.data) &&
+    !isEmpty(dataflowState.data.datasets) &&
+    uniq(map(dataflowState.data.datasets, 'dataProviderId')).length === 1);
+
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
     dataflowId,
@@ -209,11 +215,7 @@ const Dataflow = withRouter(({ history, match }) => {
       };
     }
 
-    const isInsideACountry =
-      !isUndefined(representativeId) ||
-      (!isEmpty(dataflowState.data) &&
-        !isEmpty(dataflowState.data.datasets) &&
-        uniq(map(dataflowState.data.datasets, 'dataProviderId')).length === 1);
+   
 
     return {
       apiKeyBtn:
@@ -464,6 +466,7 @@ const Dataflow = withRouter(({ history, match }) => {
             className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            isInsideACountry={isInsideACountry}
             onCleanUpReceipt={onCleanUpReceipt}
             onSaveName={onSaveName}
             onShowManageReportersDialog={onShowManageReportersDialog}
@@ -478,6 +481,7 @@ const Dataflow = withRouter(({ history, match }) => {
           <BigButtonListRepresentative
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            isInsideACountry={isInsideACountry}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
             onShowSnapshotDialog={onShowSnapshotDialog}

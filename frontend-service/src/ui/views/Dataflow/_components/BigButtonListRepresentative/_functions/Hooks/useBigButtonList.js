@@ -16,6 +16,7 @@ const useBigButtonList = ({
   dataflowState,
   getDataHistoricReleases,
   handleRedirect,
+  isInsideACountry,
   match,
   onLoadReceiptData,
   onShowHistoricReleases,
@@ -37,6 +38,8 @@ const useBigButtonList = ({
   }, [userContext]);
 
   const getButtonsVisibility = roles => ({
+    feedback: (roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+    roles.includes(config.permissions['DATA_STEWARD']) && dataflowState.status !== 'DESIGN')  || (roles.includes(config.permissions['LEAD_REPORTER'])&& dataflowState.status !== 'DESIGN' && isInsideACountry),
     receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
     release:
       roles.includes(config.permissions['LEAD_REPORTER']) &&
@@ -67,7 +70,7 @@ const useBigButtonList = ({
       },
       true
     ),
-    visibility: dataflowState.status !== 'DESIGN'
+    visibility: buttonsVisibility.feedback
   };
 
   const helpButton = {

@@ -23,6 +23,7 @@ const useBigButtonList = ({
   handleExportEuDataset,
   handleRedirect,
   isActiveButton,
+  isInsideACountry,
   onCloneDataflow,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
@@ -73,6 +74,9 @@ const useBigButtonList = ({
       roles.includes(config.permissions['DATA_CUSTODIAN']) ||
       roles.includes(config.permissions['DATA_STEWARD']) ||
       roles.includes(config.permissions['EDITOR_WRITE']),
+    feedback:
+    (roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) && dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'])  || (roles.includes(config.permissions['LEAD_REPORTER'])&& dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] && isInsideACountry),
     groupByRepresentative:
       roles.includes(config.permissions['DATA_CUSTODIAN']) ||
       roles.includes(config.permissions['DATA_STEWARD']) ||
@@ -116,7 +120,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),
-      visibility: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN']
+      visibility: buttonsVisibility.feedback
     }
   ];
 
