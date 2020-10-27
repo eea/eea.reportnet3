@@ -9,8 +9,8 @@ const create = async (dataflowId, message, providerId) => {
   return created;
 };
 
-const loadAllMessages = async (dataProviderId, page) => {
-  const response = await apiFeedback.loadAllMessages(dataProviderId, page);
+const loadMessages = async (dataProviderId, page) => {
+  const response = await apiFeedback.loadMessages(dataProviderId, page);
   console.log(response);
   // const data = [
   //   {
@@ -360,7 +360,7 @@ const markAsRead = async (dataflowId, messageIds, read) => {};
 
 export const ApiFeedbackRepository = {
   create,
-  loadAllMessages,
+  loadMessages,
   loadMessagesByFlag,
   markAsRead
 };

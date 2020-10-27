@@ -5,6 +5,6 @@ import { feedbackRepository } from 'core/domain/model/Feedback/FeedbackRepositor
 
 export const FeedbackService = {
   create: Create({ feedbackRepository }),
-  loadAllMessages: GetAll({ feedbackRepository }),
+  loadMessages: GetAll({ feedbackRepository }),
   loadMessagesByFlag: GetAllByFlag({ feedbackRepository })
 };

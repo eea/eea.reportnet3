@@ -42,6 +42,7 @@ export const Feedback = withRouter(({ match, history }) => {
   const userContext = useContext(UserContext);
 
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
+    currentPage: 0,
     dataflowName: '',
     dataProviders: [],
     isCustodian: undefined,
@@ -53,6 +54,7 @@ export const Feedback = withRouter(({ match, history }) => {
   });
 
   const {
+    currentPage,
     dataflowName,
     dataProviders,
     isCustodian,
@@ -118,8 +120,8 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onGetMoreMessages = async page => {
-    const data = await onLoadMessages(isCustodian ? selectedDataProvider.dataProviderId : 1, page);
+  const onGetMoreMessages = async () => {
+    const data = await onLoadMessages(isCustodian ? selectedDataProvider.dataProviderId : 1, currentPage);
     dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
   };
 
@@ -137,7 +139,7 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadMessages = async (dataProviderId, page) => {
-    const data = await FeedbackService.loadAllMessages(dataflowId, page);
+    const data = await FeedbackService.loadMessages(dataflowId, page);
     return data;
   };
 

@@ -10,10 +10,10 @@ export const apiFeedback = {
     });
     return response.status >= 200 && response.status <= 299;
   },
-  loadAllMessages: async (dataflowId, page) => {
+  loadMessages: async (dataflowId, page) => {
     console.log({ dataflowId, page });
     const response = await HTTPRequester.get({
-      url: getUrl(FeedbackConfig.loadAllMessages, { dataflowId, page })
+      url: getUrl(FeedbackConfig.loadMessages, { dataflowId, page })
     });
 
     return response.data;

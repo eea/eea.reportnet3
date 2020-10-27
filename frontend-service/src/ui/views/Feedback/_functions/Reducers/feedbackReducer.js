@@ -5,6 +5,7 @@ export const feedbackReducer = (state, { type, payload }) => {
       const inmAllMessages = [...payload, ...state.messages];
       return {
         ...state,
+        currentPage: state.currentPage + 1,
         messages: inmAllMessages,
         newMessageAdded: false
       };
