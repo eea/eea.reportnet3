@@ -102,8 +102,8 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
   const getOrderedValidations = datasets => {
     const datasetsWithPriority = [
-      { id: 'datasetSchemaName', index: 0 },
-      { id: 'name', index: 1 },
+      { id: 'name', index: 0 },
+      { id: 'datasetSchemaName', index: 1 },
       { id: 'status', index: 2 },
       { id: 'isReleased', index: 3 }
     ];
@@ -179,8 +179,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
-        searchAll
-        searchBy={['name']}
+        inputOptions={['name']}
         selectOptions={['datasetSchemaName', 'status']}
       />
 

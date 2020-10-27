@@ -38,3 +38,7 @@
 .checkedValueColumn {
   text-align: center;
 }
+
+:global .p-datatable-row {
+  height: 51px !important;
+}

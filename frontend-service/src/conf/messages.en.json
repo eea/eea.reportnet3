@@ -924,6 +924,7 @@
     "correctionRequested": "Correction requested",
     "technicallyAccept": "Technically accept",
     "datasetStatus": "Dataset Status",
-    "loadDatasetsReleasesError": "Error loading datasets releases"
+    "loadDatasetsReleasesError": "Error loading datasets releases",
+    "datasetSchemaName": "Country"
   }
 }
