@@ -278,7 +278,7 @@ public interface RulesController {
    * @param ruleVO the rule VO
    */
   @PostMapping("/private/validateSqlRuleDataCollection")
-  void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+  boolean validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO);
 
 

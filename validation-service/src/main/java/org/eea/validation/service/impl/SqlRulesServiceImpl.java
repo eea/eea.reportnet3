@@ -164,7 +164,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param ruleVO the rule VO
    */
   @Override
-  public void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
+  public boolean validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
       RuleVO ruleVO) {
     Rule rule = ruleMapper.classToEntity(ruleVO);
 
@@ -179,6 +179,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
         .append(rule.getRuleId().toString()).append("')").toString());
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+
+    return verifAndEnabled;
   }
 
   /**
@@ -694,7 +696,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
+  @Async
   @Override
+  @Transactional
   public void validateSQLRules(Long datasetId, String datasetSchemaId) {
     List<RuleVO> rulesSql = rulesService.findSqlSentencesByDatasetSchemaId(datasetSchemaId);
     if (null != rulesSql && !rulesSql.isEmpty()) {

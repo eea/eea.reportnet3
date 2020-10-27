@@ -467,9 +467,9 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @PostMapping("/private/validateSqlRuleDataCollection")
-  public void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+  public boolean validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
-    sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
+    return sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
   }
 
 

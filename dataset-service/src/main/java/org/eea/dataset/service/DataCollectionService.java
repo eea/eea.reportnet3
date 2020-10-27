@@ -40,7 +40,7 @@ public interface DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    */
-  void createEmptyDataCollection(Long dataflowId, Date dueDate);
+  void createEmptyDataCollection(Long dataflowId, Date dueDate, Boolean checkRules);
 
   /**
    * Adds the foreign relations from new reportings.

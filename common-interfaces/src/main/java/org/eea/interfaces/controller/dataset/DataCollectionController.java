@@ -37,7 +37,8 @@ public interface DataCollectionController {
    * @param dataCollectionVO the data collection VO
    */
   @PostMapping("/create")
-  void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO);
+  void createEmptyDataCollection(@RequestParam("checkRules") Boolean checkRules,
+      @RequestBody DataCollectionVO dataCollectionVO);
 
 
   /**
@@ -56,4 +57,5 @@ public interface DataCollectionController {
    */
   @PutMapping("/update/{dataflowId}")
   void updateDataCollection(@PathVariable("dataflowId") Long dataflowId);
+
 }
