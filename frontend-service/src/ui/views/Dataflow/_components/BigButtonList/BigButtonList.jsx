@@ -584,7 +584,9 @@ export const BigButtonList = ({
           header={resources.messages['notValidQCWarningTitle']}
           labelCancel={resources.messages['cancel']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => {}}
+          onConfirm={() => {
+            setDataCollectionDialog(true);
+          }}
           onHide={() => setIsQCsNotValidWarningVisible(false)}
           visible={isQCsNotValidWarningVisible}>
           {console.log('isQCsNotValidWarningVisible', isQCsNotValidWarningVisible)}
