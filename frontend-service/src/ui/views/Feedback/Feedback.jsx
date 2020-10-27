@@ -44,7 +44,7 @@ export const Feedback = withRouter(({ match, history }) => {
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     dataflowName: '',
     dataProviders: [],
-    isCustodian: false,
+    isCustodian: undefined,
     isLoading: false,
     messages: [],
     messageToSend: '',
@@ -75,12 +75,16 @@ export const Feedback = withRouter(({ match, history }) => {
   }, [isCustodian]);
 
   useEffect(() => {
-    if (isCustodian) {
-      if (!isEmpty(selectedDataProvider)) {
-        onGetInitialMessages(selectedDataProvider.id);
+    console.log(selectedDataProvider);
+    if (!isNil(isCustodian)) {
+      if (isCustodian) {
+        if (!isEmpty(selectedDataProvider)) {
+          onGetInitialMessages(selectedDataProvider.dataProviderId);
+        }
+      } else {
+        console.log('LLEGO');
+        onGetInitialMessages();
       }
-    } else {
-      onGetInitialMessages();
     }
   }, [selectedDataProvider]);
 
@@ -114,14 +118,14 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onGetMoreMessages = async (first, rows) => {
-    const data = await onLoadMessages(first, rows, isCustodian ? selectedDataProvider.id : 1);
+  const onGetMoreMessages = async page => {
+    const data = await onLoadMessages(isCustodian ? selectedDataProvider.dataProviderId : 1, page);
     dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
   };
 
   const onGetInitialMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
-    const data = await onLoadMessages(0, 25, dataProviderId);
+    const data = await onLoadMessages(dataProviderId, 0);
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
   };
 
@@ -132,8 +136,8 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadMessages = async (first, rows, dataProviderId) => {
-    const data = await FeedbackService.allUnread(first, rows, dataProviderId);
+  const onLoadMessages = async (dataProviderId, page) => {
+    const data = await FeedbackService.loadAllMessages(dataflowId, page);
     return data;
   };
 
@@ -152,23 +156,31 @@ export const Feedback = withRouter(({ match, history }) => {
     console.log(allRepresentatives, responseAllDataProviders, filteredDataProviders);
   };
 
-  const onSendMessage = message => {
+  const onSendMessage = async message => {
+    console.log({ message });
     if (message.trim() !== '') {
       //Send message to BE
-      let sended = true;
-      if (sended) {
-        dispatchFeedback({
-          type: 'ON_SEND_MESSAGE',
-          payload: {
-            value: {
-              datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-              id: messages.length + 1,
-              message,
-              read: false,
-              sender: true
-            }
+      try {
+        if (isCustodian && !isEmpty(selectedDataProvider)) {
+          const created = await FeedbackService.create(dataflowId, message, selectedDataProvider.dataProviderId);
+          console.log({ created });
+          if (created) {
+            dispatchFeedback({
+              type: 'ON_SEND_MESSAGE',
+              payload: {
+                value: {
+                  datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+                  id: messages.length + 1,
+                  message,
+                  read: false,
+                  sender: true
+                }
+              }
+            });
           }
-        });
+        }
+      } catch (error) {
+        console.error(error);
       }
     }
   };
@@ -233,7 +245,7 @@ export const Feedback = withRouter(({ match, history }) => {
           label={resources.messages['send']}
           icon={'comment'}
           iconPos="right"
-          onClick={e => onSendMessage(e.target.value)}
+          onClick={() => onSendMessage(messageToSend)}
         />
       </div>
     </Fragment>

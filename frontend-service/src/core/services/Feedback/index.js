@@ -1,8 +1,10 @@
 import { GetAll } from './GetAll';
-import { GetAllUnread } from './GetAllUnread';
+import { Create } from './Create';
+import { GetAllByFlag } from './GetAllByFlag';
 import { feedbackRepository } from 'core/domain/model/Feedback/FeedbackRepository';
 
 export const FeedbackService = {
-  all: GetAll({ feedbackRepository }),
-  allUnread: GetAllUnread({ feedbackRepository })
+  create: Create({ feedbackRepository }),
+  loadAllMessages: GetAll({ feedbackRepository }),
+  loadMessagesByFlag: GetAllByFlag({ feedbackRepository })
 };

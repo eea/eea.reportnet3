@@ -1,4 +1,6 @@
 {
-  "loadAll": "",
-  "loadAllUnread": "/dataflow/pendingaccepted"
+  "create":"/dataflow/{:dataflowId}/createMessage",
+  "loadMessagesByFlag": "/dataflow/{:dataflowId}/findMessages?page={:page}&read={:read}",  
+  "loadAllMessages": "/dataflow/{:dataflowId}/findMessages?page={:page}",
+  "markAsRead": "/dataflow/{:dataflowId}/updateMessageReadStatus?messageId={:messageId}&read={read}"
 }

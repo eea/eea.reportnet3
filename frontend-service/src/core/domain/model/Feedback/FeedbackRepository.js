@@ -1,8 +1,9 @@
 import { ApiFeedbackRepository } from 'core/infrastructure/domain/model/Feedback/ApiFeedbackRepository';
 
 export const FeedbackRepository = {
-  all: () => Promise.reject('[FeedbackRepository#all] must be implemented'),
-  allUnread: () => Promise.reject('[FeedbackRepository#allUnread] must be implemented')
+  create: () => Promise.reject('[FeedbackRepository#create] must be implemented'),
+  loadMessages: () => Promise.reject('[FeedbackRepository#loadMessages] must be implemented'),
+  markAsRead: () => Promise.reject('[FeedbackRepository#markAsRead] must be implemented')
 };
 
 export const feedbackRepository = Object.assign({}, FeedbackRepository, ApiFeedbackRepository);
