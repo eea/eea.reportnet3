@@ -560,8 +560,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Long dataflowId =
           datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
 
-
-
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
         case DESIGN:
