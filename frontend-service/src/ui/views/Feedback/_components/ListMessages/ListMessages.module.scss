@@ -9,9 +9,11 @@
   overflow: scroll;
   width: 100%;
   .emptyMessageWrapper {
+    align-items: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    min-height: 40vh;
+    padding-top: 10rem;
     span {
       color: var(--main-font-color);
       font-style: italic;

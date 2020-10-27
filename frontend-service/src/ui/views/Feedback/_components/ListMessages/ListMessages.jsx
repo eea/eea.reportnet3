@@ -23,7 +23,7 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
   useEffect(() => {
-    if (!isNil(messagesWrapperRef)) {
+    if (!isNil(messagesWrapperRef)) {      
       messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
       // messagesWrapperRef.current.addEventListener = onScroll();
     }
