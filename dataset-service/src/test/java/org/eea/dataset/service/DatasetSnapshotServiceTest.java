@@ -54,6 +54,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -259,7 +260,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false, null);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -278,7 +279,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false, 1L);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -298,7 +299,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", true, 1L);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -309,9 +310,30 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void testDeleteSnapshots() throws Exception {
-
+    Snapshot snap = new Snapshot();
+    Mockito.when(snapshotRepository.findById(1L)).thenReturn(Optional.of(snap));
     datasetSnapshotService.removeSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).deleteById(Mockito.anyLong());
+
+
+  }
+
+  /**
+   * Test delete snapshots fail.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void testDeleteSnapshotsFail() throws Exception {
+    Snapshot snap = new Snapshot();
+    snap.setAutomatic(Boolean.TRUE);
+    Mockito.when(snapshotRepository.findById(1L)).thenReturn(Optional.of(snap));
+    try {
+      datasetSnapshotService.removeSnapshot(1L, 1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.ERROR_DELETING_SNAPSHOT, e.getMessage());
+      throw e;
+    }
 
 
   }
@@ -667,22 +689,6 @@ public class DatasetSnapshotServiceTest {
         .findByDesignDatasetIdOrderByCreationDateDesc(Mockito.any());
   }
 
-  /**
-   * Test delete all snapshots.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testDeleteAllSnapshots() throws Exception {
-
-    SnapshotVO snap = new SnapshotVO();
-    snap.setId(1L);
-    List<SnapshotVO> snapshots = new ArrayList<>();
-    snapshots.add(snap);
-    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
-    datasetSnapshotService.deleteAllSnapshots(1L);
-    Mockito.verify(snapshotMapper, times(1)).entityListToClass(Mockito.any());
-  }
 
   /**
    * After tests.

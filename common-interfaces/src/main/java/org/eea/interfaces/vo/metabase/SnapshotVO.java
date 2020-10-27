@@ -12,6 +12,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class SnapshotVO implements Serializable {
 
@@ -36,5 +42,7 @@ public class SnapshotVO implements Serializable {
   /** The reporting dataset id. */
   private Long datasetId;
 
+  /** The automatic. */
+  private Boolean automatic;
 
 }

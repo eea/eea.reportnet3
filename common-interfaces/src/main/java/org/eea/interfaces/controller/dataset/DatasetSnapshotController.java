@@ -199,4 +199,15 @@ public interface DatasetSnapshotController {
    */
   @PutMapping("/private/eurelease/{idDataset}")
   void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId);
+
+
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
+      @PathVariable(value = "dataProviderId", required = true) Long dataProviderId);
 }
