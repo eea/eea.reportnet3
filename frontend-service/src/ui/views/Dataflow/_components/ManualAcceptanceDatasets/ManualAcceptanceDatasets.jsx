@@ -160,7 +160,9 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
-        selectOptions={['countryCode', 'datasetName', 'technicalStatus']}
+        searchAll
+        searchBy={['datasetName']}
+        selectOptions={['countryCode', 'status']}
       />
 
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
