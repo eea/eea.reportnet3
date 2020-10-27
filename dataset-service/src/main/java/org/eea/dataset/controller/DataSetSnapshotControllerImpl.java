@@ -150,8 +150,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot.getDescription(),
-        createSnapshot.getReleased(), null);
+    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null);
   }
 
   /**
@@ -458,7 +457,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
   public void createReleaseSnapshots(
       @LockCriteria(name = "dataflowId") @PathVariable(value = "dataflowId",
           required = true) Long dataflowId,

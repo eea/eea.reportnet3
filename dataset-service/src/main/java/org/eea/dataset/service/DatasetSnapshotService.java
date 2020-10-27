@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -50,8 +51,7 @@ public interface DatasetSnapshotService {
    * @param released the released
    * @param partitionIdDestination the partition id destination
    */
-  void addSnapshot(Long idDataset, String description, Boolean released,
-      Long partitionIdDestination);
+  void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination);
 
   /**
    * Removes the snapshot.
@@ -147,13 +147,6 @@ public interface DatasetSnapshotService {
    */
   void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException;
 
-  /**
-   * Delete all snapshots.
-   *
-   * @param idDataset the id dataset
-   * @throws EEAException the EEA exception
-   */
-  void deleteAllSnapshots(Long idDataset) throws EEAException;
 
   /**
    * Creates the receipt PDF.

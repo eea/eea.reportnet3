@@ -56,6 +56,7 @@ import org.eea.interfaces.controller.validation.ValidationController.ValidationC
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -272,7 +273,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void addSnapshot(Long idDataset, String description, Boolean released,
+  public void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO,
       Long partitionIdDestination) {
 
 
@@ -284,7 +285,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-      snap.setDescription(description);
+      snap.setDescription(createSnapshotVO.getDescription());
       DataSetMetabase dataset = new DataSetMetabase();
       dataset.setId(idDataset);
       if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(idDataset))) {
@@ -297,11 +298,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      snap.setDcReleased(released);
+      snap.setDcReleased(createSnapshotVO.getReleased());
       snap.setEuReleased(false);
       snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
 
-      snap.setAutomatic(Boolean.TRUE.equals(released) ? true : false);
+      snap.setAutomatic(
+          Boolean.TRUE.equals(createSnapshotVO.getAutomatic()) ? Boolean.TRUE : Boolean.FALSE);
 
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
@@ -328,7 +330,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
       criteria.add(idDataset);
-      criteria.add(released);
+      criteria.add(createSnapshotVO.getReleased());
       lockService.removeLockByCriteria(criteria);
     }
     // release snapshot when the user press create+release
@@ -368,7 +370,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
-    if (Boolean.TRUE.equals(snapshotRepository.findAutomaticById(idSnapshot))) {
+    if (Boolean.TRUE.equals(snapshotRepository.findById(idSnapshot).get().getAutomatic())) {
       LOG_ERROR.error("Error deleting snapshot, the snapshot is automatic");
       throw new EEAException(EEAErrorMessage.ERROR_DELETING_SNAPSHOT);
     }
@@ -773,29 +775,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     });
   }
 
-  /**
-   * Delete all snapshots.
-   *
-   * @param idDataset the id dataset
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Async
-  public void deleteAllSnapshots(Long idDataset) throws EEAException {
-
-    LOG.info("Deleting all snapshots when the dataset it's going to be deleted");
-    List<SnapshotVO> snapshots = getSnapshotsByIdDataset(idDataset);
-    snapshots.stream().forEach(s -> {
-      try {
-        removeSnapshot(idDataset, s.getId());
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error deleting the snapshot with id {} due to reason {} ", s.getId(),
-            e.getMessage(), e);
-      }
-    });
-
-  }
 
   /**
    * Obtain partition.
