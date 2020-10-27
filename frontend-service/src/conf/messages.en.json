@@ -413,7 +413,7 @@
     "releaseDataCollection": "Release to data collection",
     "releaseSnapshotCompletedEvent": "Dataflow released successfully",
     "releaseSnapshotFailedEvent": "Failed releasing the dataflow",
-    "releasedByIdReporterError": "Error releasing copy",
+    "releasedByIdReporterError": "Error releasing the dataflow",
     "releasedSnapshotTooltip": "Released",
     "releaseSnapshotMessage": "Release copy",
     "releaseSnapshotTooltip": "Release copy",
