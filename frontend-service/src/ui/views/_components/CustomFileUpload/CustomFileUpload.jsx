@@ -243,7 +243,7 @@ export const CustomFileUpload = ({
     }
 
     xhr.open(operation, nUrl, true);
-    const tokens = userStorage.get();
+    const tokens = userStorage.getTokens();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {
