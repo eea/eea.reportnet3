@@ -912,6 +912,6 @@
     "webformTableWithLessRecords": "There are no records in the table.",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
     "confirmReleaseHeader": "Confirm Release",
-    "confirmReleaseQuestion": "Are you sure you want to release all datasets?"
+    "confirmReleaseQuestion": "Are you sure you want to release all the datasets to the data collection?"
   }
 }
