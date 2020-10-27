@@ -47,17 +47,6 @@ export const apiSnapshot = {
     return response.data;
   },
 
-  releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
-        datasetSchemaId: datasetSchemaId,
-        snapshotId: snapshotId
-      }),
-      data: { snapshotId }
-    });
-    return response;
-  },
-
   allReporter: async datasetId => {
     const response = await HTTPRequester.get({
       url: getUrl(SnapshotConfig.loadSnapshotsListReporter, {

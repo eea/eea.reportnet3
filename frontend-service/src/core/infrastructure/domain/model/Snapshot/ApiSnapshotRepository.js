@@ -31,10 +31,6 @@ const restoreByIdDesigner = async (datasetSchemaId, snapshotId) => {
   return await apiSnapshot.restoreByIdDesigner(datasetSchemaId, snapshotId);
 };
 
-const releaseByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  return await apiSnapshot.releaseByIdDesigner(datasetSchemaId, snapshotId);
-};
-
 const allReporter = async datasetId => {
   const snapshotsDTO = await apiSnapshot.allReporter(datasetId);
 
@@ -77,7 +73,6 @@ export const ApiSnapshotRepository = {
   createByIdDesigner,
   deleteByIdDesigner,
   restoreByIdDesigner,
-  releaseByIdDesigner,
 
   allReporter,
   createByIdReporter,

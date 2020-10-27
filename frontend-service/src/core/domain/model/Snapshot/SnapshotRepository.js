@@ -4,7 +4,6 @@ export const SnapshotRepository = {
   allDesigner: () => Promise.reject('[SnapshotDatasetDesignerRepository#all] must be implemented'),
   createByIdDesigner: () => Promise.reject('[SnapshotDatasetDesignerRepository#createById] must be implemented'),
   deleteByIdDesigner: () => Promise.reject('[SnapshotDatasetDesignerRepository#deleteById] must be implemented'),
-  releaseByIdDesigner: () => Promise.reject('[SnapshotDatasetDesignerRepository#releaseById] must be implemented'),
   restoreByIdDesigner: () => Promise.reject('[SnapshotDatasetDesignerRepository#restoreById] must be implemented'),
 
   allReporter: () => Promise.reject('[SnapshotReporterDatasetRepository#all] must be implemented'),
