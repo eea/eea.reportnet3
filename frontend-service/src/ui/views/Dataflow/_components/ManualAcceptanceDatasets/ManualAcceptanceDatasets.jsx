@@ -70,7 +70,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData }) => {
         payload: { data: response, filteredData: response, filtered: false }
       });
     } catch (error) {
-      notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' });
     } finally {
       isLoading(false);
     }

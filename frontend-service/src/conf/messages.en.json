@@ -918,6 +918,8 @@
     "noDatasetsWithSelectedParameters": "There are no datasets with the selected parameters",
     "noDatasets": "There are no datasets yet",
     "technicalStatus": "Technical status",
-    "isReleased": "Released"
+    "isReleased": "Released",
+    "datasetStatus": "Dataset Status",
+    "loadDatasetsReleasesError": "Error loading datasets releases"
   }
 }
