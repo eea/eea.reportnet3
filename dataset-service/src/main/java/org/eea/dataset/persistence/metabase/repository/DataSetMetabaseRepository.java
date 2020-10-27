@@ -11,8 +11,6 @@ import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DataSetMetabaseRepository.
- *
- *
  */
 public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Long> {
 
@@ -84,4 +82,14 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    */
   Long countByDataSetNameIgnoreCaseAndDataflowId(String datasetName, Long dataflowId);
 
+  /**
+   * Gets the dataset id by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataflow id and data provider id
+   */
+  @Query("SELECT d.id FROM DataSetMetabase d WHERE d.dataflowId = :dataflowId AND d.dataProviderId = :providerId")
+  Long getDatasetIdByDataflowIdAndDataProviderId(@Param("dataflowId") Long dataflowId,
+      @Param("providerId") Long dataProviderId);
 }

@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -152,4 +153,40 @@ public interface DataFlowController {
   void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,
       @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
+
+  /**
+   * Creates the message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param content the content
+   * @return the message VO
+   */
+  @PostMapping("/{dataflowId}/createMessage")
+  MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestBody String content);
+
+  /**
+   * Find messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param read the read
+   * @param page the offset
+   * @return the list
+   */
+  @GetMapping("/{dataflowId}/findMessages")
+  List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
+
+  /**
+   * Update message read status.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @param read the read
+   * @return true, if successful
+   */
+  @PutMapping("/{dataflowId}/updateMessageReadStatus")
+  boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("messageId") Long messageId, @RequestParam("read") boolean read);
 }

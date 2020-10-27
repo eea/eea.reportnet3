@@ -192,4 +192,14 @@ public interface DatasetMetabaseController {
   @GetMapping("/private/getType/{datasetId}")
   DatasetTypeEnum getType(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Gets the dataset id by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataflow id and data provider id
+   */
+  @GetMapping("/private/getDatasetIdByDataflowIdAndDataProviderId")
+  Long getDatasetIdByDataflowIdAndDataProviderId(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId);
 }
