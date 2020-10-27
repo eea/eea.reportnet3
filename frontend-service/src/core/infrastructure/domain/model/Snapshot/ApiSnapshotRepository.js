@@ -11,7 +11,7 @@ const allDesigner = async datasetSchemaId => {
             creationDate: snapshotDTO.creationDate,
             description: snapshotDTO.description,
             id: snapshotDTO.id,
-            isAutomatic: snapshotDTO.isAutomatic,
+            isAutomatic: snapshotDTO.automatic,
             isBlocked: snapshotDTO.blocked,
             isReleased: snapshotDTO.release
           })
