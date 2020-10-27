@@ -27,6 +27,9 @@ public enum LockSignature {
   /** DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..) */
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
+  /** DataSetSnapshotControllerImpl.createReleaseSnapshots(..) */
+  RELEASE_SNAPSHOTS("DataSetSnapshotControllerImpl.createReleaseSnapshots(..)"),
+
   /** DataSetSnapshotControllerImpl.releaseSnapshot(..) */
   RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
 

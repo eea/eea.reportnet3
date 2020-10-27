@@ -17,6 +17,7 @@ import org.eea.dataset.service.EUDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -118,8 +119,11 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
     // Store the data in snapshots for quick import
     for (DataCollection dataCollection : dataCollectionList) {
-      datasetSnapshotService.addSnapshot(dataCollection.getId(), dataCollection.getDatasetSchema(),
-          false, obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId());
+      CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+      createSnapshotVO.setDescription(dataCollection.getDatasetSchema());
+      createSnapshotVO.setReleased(false);
+      datasetSnapshotService.addSnapshot(dataCollection.getId(), createSnapshotVO,
+          obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId());
     }
     LOG.info("EU dataset populated with dataflowId {}", dataflowId);
 
