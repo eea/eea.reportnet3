@@ -21,6 +21,7 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
 
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
+
 
 
   @Override
@@ -57,16 +62,17 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   @Override
   @Transactional
   public TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
-      Long datasetId, Long idTable) throws SQLException {
+      Long datasetId, Long idTable) {
     Session session = (Session) entityManager.getDelegate();
     return session.doReturningWork(new ReturningWork<TableValue>() {
       @Override
       public TableValue execute(Connection conn) throws SQLException {
         conn.setSchema("dataset_" + datasetId);
+        TableValue tableValue;
         try (PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();) {
-          LOG.info("Query: {}", query);
-          TableValue tableValue = new TableValue();
+            ResultSet rs = stmt.executeQuery()) {
+          LOG.info("Query executed: {}", query);
+          tableValue = new TableValue();
           List<RecordValue> records = new ArrayList<>();
 
           while (rs.next()) {
@@ -94,14 +100,14 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
               case DATASET:
                 break;
             }
-
           }
-
-          return tableValue;
+        } catch (PSQLException | RuntimeException e) {
+          LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
+          tableValue = null;
         }
+        return tableValue;
       }
     });
-
   }
 
 

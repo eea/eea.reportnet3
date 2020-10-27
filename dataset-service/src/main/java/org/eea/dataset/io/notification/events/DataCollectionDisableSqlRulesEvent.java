@@ -30,12 +30,12 @@ public class DataCollectionDisableSqlRulesEvent implements NotificableEventHandl
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-    String datasetSchemaId = notificationVO.getDatasetSchemaId();
     Long dataflowId = notificationVO.getDataflowId();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("dataflowId", datasetSchemaId);
+    notification.put("dataflowId", dataflowId);
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 
