@@ -685,6 +685,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Override
   @Transactional
   public void validateSQLRules(Long datasetId, String datasetSchemaId) {
+    List<Rule> errorRulesList = new ArrayList<>();
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     if (null != rulesSql && !rulesSql.isEmpty()) {
@@ -695,10 +696,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         } else {
           rule.setVerified(false);
           rule.setEnabled(false);
+          errorRulesList.add(rule);
         }
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }
+    String notificationError = errorRulesList.size() + " SQL rules contains errors.";
+    NotificationVO notificationVO =
+        NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            .datasetId(datasetId).error(notificationError).build();
+    LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+    releaseNotification(EventType.DISABLE_SQL_RULES_EVENT, notificationVO);
+
   }
 
 }
