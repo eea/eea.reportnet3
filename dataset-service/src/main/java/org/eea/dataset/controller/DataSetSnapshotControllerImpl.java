@@ -451,4 +451,23 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId) {
     datasetSnapshotService.updateSnapshotEURelease(datasetId);
   }
+
+
+  @Override
+  @LockMethod(removeWhenFinish = false)
+  @HystrixCommand
+  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
+  public void createReleaseSnapshots(
+      @LockCriteria(name = "dataflowId") @PathVariable(value = "dataflowId",
+          required = true) Long dataflowId,
+      @LockCriteria(name = "dataProviderId") @PathVariable(value = "dataProviderId",
+          required = true) Long dataProviderId) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+  }
 }

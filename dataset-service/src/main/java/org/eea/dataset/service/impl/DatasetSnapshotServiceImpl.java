@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
+import org.eea.dataset.controller.DataSetSnapshotControllerImpl;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
@@ -22,12 +23,14 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -49,6 +52,7 @@ import org.eea.interfaces.controller.document.DocumentController.DocumentControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -131,6 +135,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ValidationRepository validationRepository;
 
+  @Autowired
+  private ReportingDatasetRepository reportingDatasetRepository;
+
   /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
@@ -187,6 +194,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
+
+  @Autowired
+  private ValidationControllerZuul validationControllerZuul;
+
+  @Autowired
+  private DataSetSnapshotControllerImpl dataSetSnapshotControllerImpl;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -287,6 +300,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDcReleased(released);
       snap.setEuReleased(false);
       snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
+
+      snap.setAutomatic(Boolean.TRUE.equals(released) ? true : false);
+
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
       snap.getId();
@@ -351,6 +367,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
+
+    if (Boolean.TRUE.equals(snapshotRepository.findAutomaticById(idSnapshot))) {
+      LOG_ERROR.error("Error deleting snapshot, the snapshot is automatic");
+      throw new EEAException(EEAErrorMessage.ERROR_DELETING_SNAPSHOT);
+    }
     // Remove from the metabase
     snapshotRepository.deleteById(idSnapshot);
     // Delete the file
@@ -985,6 +1006,47 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
     return releases;
+  }
+
+
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  @Override
+  @Async
+  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId) {
+    List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
+        .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
+        .collect(Collectors.toList());
+
+    List<Boolean> oneHaveBlockers = new ArrayList();
+    // validationControllerZuul.validateDataSetDataFuture(datasetsFilters);
+    datasetsFilters.forEach(id -> {
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, id));
+      oneHaveBlockers.add(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER));
+    });
+
+    if (oneHaveBlockers.contains(Boolean.TRUE)) {
+      System.err.println("ERROR");
+    } else {
+      // datasetsFilters.forEach(id -> {
+      // CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+      // createSnapshotVO.setReleased(true);
+      // createSnapshotVO.setAutomatic(Boolean.TRUE);
+      // Date ahora = new Date();
+      // SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      // createSnapshotVO.setDescription("Release " + formateador.format(ahora).toString());
+      // dataSetSnapshotControllerImpl.createSnapshot(id, createSnapshotVO);
+      // });
+    }
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
+    criteria.add(dataflowId);
+    criteria.add(dataProviderId);
+    lockService.removeLockByCriteria(criteria);
   }
 
 }

@@ -88,4 +88,14 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    * @return the list
    */
   List<Snapshot> findByDataCollectionIdOrderByCreationDateDesc(@Param("idDataset") Long idDataset);
+
+
+  /**
+   * Find automatic by id.
+   *
+   * @param id the id
+   * @return the boolean
+   */
+  @Query("SELECT s.automatic FROM Snapshot s where s.id = ?1")
+  Boolean findAutomaticById(@Param("id") Long id);
 }

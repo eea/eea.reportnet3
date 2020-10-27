@@ -309,9 +309,27 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void testDeleteSnapshots() throws Exception {
-
+    Mockito.when(snapshotRepository.findAutomaticById(1L)).thenReturn(Boolean.FALSE);
     datasetSnapshotService.removeSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).deleteById(Mockito.anyLong());
+
+
+  }
+
+  /**
+   * Test delete snapshots fail.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void testDeleteSnapshotsFail() throws Exception {
+    Mockito.when(snapshotRepository.findAutomaticById(1L)).thenReturn(Boolean.TRUE);
+    try {
+      datasetSnapshotService.removeSnapshot(1L, 1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.ERROR_DELETING_SNAPSHOT, e.getMessage());
+      throw e;
+    }
 
 
   }

@@ -56,6 +56,9 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "DATACOLLECTION_ID")
   private Long dataCollectionId;
 
+  @Column(name = "AUTOMATIC")
+  private Boolean automatic;
+
   /**
    * Equals.
    *
@@ -82,7 +85,7 @@ public class Snapshot extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, reportingDataset);
+    return Objects.hash(id, description, reportingDataset, automatic);
   }
 
 }
