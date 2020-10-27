@@ -82,8 +82,8 @@ export const BigButtonList = ({
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
+  const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
-  const [manualTechnicalAcceptance, setManualTechnicalAcceptance] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
 
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
@@ -266,7 +266,7 @@ export const BigButtonList = ({
   };
 
   const onChangeManualTechnicalAcceptanceCheckbox = () => {
-    setManualTechnicalAcceptance(!manualTechnicalAcceptance);
+    setIsManualTechnicalAcceptance(!isManualTechnicalAcceptance);
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
@@ -496,7 +496,7 @@ export const BigButtonList = ({
           <ManualAcceptanceDatasets
             dataflowData={dataflowData}
             dataflowId={dataflowId}
-            manualTechnicalAcceptance={manualTechnicalAcceptance}
+            isManualTechnicalAcceptance={isManualTechnicalAcceptance}
           />
         </Dialog>
       )}
@@ -593,7 +593,7 @@ export const BigButtonList = ({
               <Checkbox
                 id={'manualTechnicalAcceptance'}
                 inputId={'manualTechnicalAcceptance'}
-                isChecked={manualTechnicalAcceptance}
+                isChecked={isManualTechnicalAcceptance}
                 label={'manualTechnicalAcceptance'}
                 onChange={() => onChangeManualTechnicalAcceptanceCheckbox()}
                 style={{ marginRight: '50px' }}

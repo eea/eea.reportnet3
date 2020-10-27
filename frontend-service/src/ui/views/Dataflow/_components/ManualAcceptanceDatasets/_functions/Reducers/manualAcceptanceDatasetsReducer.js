@@ -12,6 +12,15 @@ export const manualAcceptanceDatasetsReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
+    case 'ON_CLOSE_EDIT_DIALOG':
+      return { ...state, isManageDatasetDialogVisible: payload.value };
+
+    case 'ON_EDIT_DATASET':
+      return { ...state, datasetToEdit: payload.datasetToEdit, isManageDatasetDialogVisible: payload.value };
+
+    case 'ON_UPDATED_DATA':
+      return { ...state, isUpdatedData: payload.value };
+
     default:
       return state;
   }

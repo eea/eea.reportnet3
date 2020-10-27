@@ -919,6 +919,10 @@
     "noDatasets": "There are no datasets yet",
     "technicalStatus": "Technical status",
     "isReleased": "Released",
+    "changeStatus": "Change status",
+    "editStatusDataset": "Edit the status of the dataset ",
+    "correctionRequested": "Correction requested",
+    "technicallyAccept": "Technically accept",
     "datasetStatus": "Dataset Status",
     "loadDatasetsReleasesError": "Error loading datasets releases"
   }
