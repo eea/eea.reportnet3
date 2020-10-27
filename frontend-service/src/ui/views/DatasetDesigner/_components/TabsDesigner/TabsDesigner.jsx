@@ -28,7 +28,7 @@ import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
 export const TabsDesigner = withRouter(
   ({
     changeMode,
-    datasetSchemaDTO,
+    datasetSchema,
     datasetSchemas,
     datasetStatistics,
     editable = false,
@@ -45,6 +45,8 @@ export const TabsDesigner = withRouter(
     onLoadTableData,
     onTabChange,
     onUpdateTable,
+    onUpdateSchema,
+    getUpdatedTabs,
     recordPositionId,
     selectedRecordErrorId,
     selectedRuleId,
@@ -59,9 +61,6 @@ export const TabsDesigner = withRouter(
     } = match;
     const validationContext = useContext(ValidationContext);
 
-    // const [activeIndex, setActiveIndex] = useState(activeIdx);
-
-    const [datasetSchema, setDatasetSchema] = useState(datasetSchemaDTO);
     const [errorMessage, setErrorMessage] = useState();
     const [errorMessageTitle, setErrorMessageTitle] = useState();
     const [initialTabIndexDrag, setInitialTabIndexDrag] = useState();
@@ -73,7 +72,7 @@ export const TabsDesigner = withRouter(
     const resources = useContext(ResourcesContext);
 
     useEffect(() => {
-      if (!isNil(datasetSchemaDTO) && !isEmpty(datasetSchemaDTO)) {
+      if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
         onLoadSchema();
       }
     }, [datasetStatistics]);
@@ -85,14 +84,12 @@ export const TabsDesigner = withRouter(
     }, [scrollFn, tabs, isEditing]);
 
     useEffect(() => {
-      onUpdateTable(tabs);
-    }, [tabs]);
-
-    useEffect(() => {
-      if (!isUndefined(datasetSchema) && !isEmpty(datasetSchema)) {
-        setTabs(datasetSchema.tables);
+      if (!isEmpty(tabs)) {
+        getUpdatedTabs(tabs);
+        onUpdateTable(tabs);
+        onUpdateSchema(tabs);
       }
-    }, [datasetSchema]);
+    }, [tabs]);
 
     useEffect(() => {
       if (isErrorDialogVisible) {
@@ -136,13 +133,12 @@ export const TabsDesigner = withRouter(
 
     const onLoadSchema = async () => {
       try {
-        const inmDatasetSchema = { ...datasetSchemaDTO };
-
+        const inmDatasetSchema = { ...datasetSchema };
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
-          table.description = table.tableSchemaDescription;
+          table.description = table.description || table.tableSchemaDescription;
           table.editable = editable;
-          table.fixedNumber = table.tableSchemaFixedNumber;
+          table.fixedNumber = table.fixedNumber || table.tableSchemaFixedNumber;
           table.hasErrors =
             !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
               ? {
@@ -153,19 +149,19 @@ export const TabsDesigner = withRouter(
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
           table.newTab = false;
-          table.notEmpty = table.tableSchemaNotEmpty;
-          table.readOnly = table.tableSchemaReadOnly;
+          table.notEmpty = table.notEmpty || table.tableSchemaNotEmpty;
+          table.readOnly = table.readOnly || table.tableSchemaReadOnly;
           table.showContextMenu = false;
           table.tableSchemaId = table.tableSchemaId;
-          table.toPrefill = table.tableSchemaToPrefill;
+          table.toPrefill = table.toPrefill || table.tableSchemaToPrefill;
         });
         //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
         inmDatasetSchema.tables = inmDatasetSchema.tables.filter(
-          table => table.tableSchemaId !== undefined && table.addTab === false
+          table => table.tableSchemaId !== undefined && table.addTab === false && table.tableSchemaId !== ''
         );
         inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
 
-        setDatasetSchema(inmDatasetSchema);
+        setTabs(inmDatasetSchema.tables);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
         if (error.response.status === 401 || error.response.status === 403) {
@@ -200,7 +196,7 @@ export const TabsDesigner = withRouter(
     };
 
     const onTabClicked = event => {
-      if (event.header !== '') {        
+      if (event.header !== '') {
         setActiveTableSchemaId(event.tableSchemaId);
         onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }

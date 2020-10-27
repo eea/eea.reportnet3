@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -78,6 +82,10 @@ public class IntegrationServiceImplTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
 
   /**
    * Inits the mocks.
@@ -337,5 +345,39 @@ public class IntegrationServiceImplTest {
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, true);
     Mockito.verify(datasetControllerZuul, times(1)).deleteDataBeforeReplacing(Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void copyIntegrationsTest() throws EEAException {
+    List<String> originDatasetSchemaIds = new ArrayList<>();
+    originDatasetSchemaIds.add("5ce524fad31fc52540abae73");
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+    integrationService.copyIntegrations(1L, originDatasetSchemaIds, dictionaryOriginTargetObjectId);
+    Mockito.verify(crudManager, times(1)).get(Mockito.any());
+  }
+
+  @Test
+  public void addPopulateEUDatasetLockTest() throws EEAException {
+
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    integrationService.addPopulateEUDatasetLock(1L);
+    Mockito.verify(lockService, times(1)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+
+  @Test
+  public void releasePopulateEUDatasetLockTest() {
+    integrationService.releasePopulateEUDatasetLock(1L);
+    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 }

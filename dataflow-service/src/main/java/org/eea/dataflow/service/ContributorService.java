@@ -29,10 +29,11 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @param role the role
    * @param dataProviderId the data provider id
+   * @param persistDataflowPermission the persist dataflow permission
    * @throws EEAException the EEA exception
    */
   void createContributor(Long dataflowId, ContributorVO contributorVO, String role,
-      Long dataProviderId) throws EEAException;
+      Long dataProviderId, Boolean persistDataflowPermission) throws EEAException;
 
   /**
    * Find role users by id dataflow.

@@ -12,6 +12,13 @@ export const webformTableReducer = (state, { type, payload }) => {
     case 'ON_UPDATE_DATA':
       return { ...state, isDataUpdated: payload.value };
 
+    case 'SET_IS_ADDING_MULTIPLE':
+      return {
+        ...state,
+        isAddingMultiple: payload.isAddingMultiple,
+        addingOnTableSchemaId: payload.addingOnTableSchemaId
+      };
+
     default:
       return state;
   }

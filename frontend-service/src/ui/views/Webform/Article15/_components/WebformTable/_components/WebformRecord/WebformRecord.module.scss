@@ -99,6 +99,16 @@
       }
     }
   }
+
+  .errorList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .errorItem {
+      padding: 0.5rem;
+    }
+  }
 }
 
 .subTable {

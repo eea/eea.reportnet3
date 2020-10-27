@@ -104,19 +104,20 @@ public class KieBaseManager {
         && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";
-        String originName = "";
+        String tableName = "";
+        String fieldName = "";
         TypeValidation typeValidation = null;
         switch (rule.getType()) {
           case DATASET:
             schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
             typeValidation = TypeValidation.DATASET;
-            originName =
+            tableName =
                 datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
             break;
           case TABLE:
             schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
             typeValidation = TypeValidation.TABLE;
-            originName = fillTableOriginName(dataSetSchema, rule, originName);
+            tableName = fillTableOriginName(dataSetSchema, rule, tableName);
             break;
           case RECORD:
             // transform the rule to a tablerule
@@ -131,7 +132,7 @@ public class KieBaseManager {
             } else {
               schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
               typeValidation = TypeValidation.RECORD;
-              originName = fillRecordOriginName(dataSetSchema, rule, originName);
+              tableName = fillRecordOriginName(dataSetSchema, rule, tableName);
             }
             break;
           case FIELD:
@@ -149,7 +150,8 @@ public class KieBaseManager {
             } else {
               schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
               typeValidation = TypeValidation.FIELD;
-              originName = fillFieldOriginName(dataSetSchema, rule, originName);
+              tableName = fillFieldOriginName(dataSetSchema, rule).get(0);
+              fieldName = fillFieldOriginName(dataSetSchema, rule).get(1);
             }
             break;
           default:
@@ -158,7 +160,8 @@ public class KieBaseManager {
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
             rule.getRuleId().toString(), typeValidation, schemasDrools,
             "RuleOperators.setEntity(this) && " + rule.getWhenCondition(),
-            rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
+            rule.getThenCondition().get(0), rule.getThenCondition().get(1), tableName,
+            rule.getShortCode(), fieldName));
       });
     }
 
@@ -173,16 +176,16 @@ public class KieBaseManager {
    *
    * @param dataSetSchema the data set schema
    * @param rule the rule
-   * @param originName the origin name
+   * @param tableName the origin name
    * @return the string
    */
-  private String fillTableOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+  private String fillTableOriginName(DataSetSchema dataSetSchema, Rule rule, String tableName) {
     for (TableSchema table : dataSetSchema.getTableSchemas()) {
       if (table.getIdTableSchema().equals(rule.getReferenceId())) {
-        originName = table.getNameTableSchema();
+        tableName = table.getNameTableSchema();
       }
     }
-    return originName;
+    return tableName;
   }
 
   /**
@@ -190,35 +193,38 @@ public class KieBaseManager {
    *
    * @param dataSetSchema the data set schema
    * @param rule the rule
-   * @param originName the origin name
+   * @param tableName the origin name
    * @return the string
    */
-  private String fillRecordOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+  private String fillRecordOriginName(DataSetSchema dataSetSchema, Rule rule, String tableName) {
     for (TableSchema table : dataSetSchema.getTableSchemas()) {
       if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
-        originName = table.getNameTableSchema();
+        tableName = table.getNameTableSchema();
       }
     }
-    return originName;
+    return tableName;
   }
+
 
   /**
    * Fill field origin name.
    *
    * @param dataSetSchema the data set schema
    * @param rule the rule
-   * @param originName the origin name
-   * @return the string
+   * @param tableName the table name
+   * @return the list
    */
-  private String fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+  private List<String> fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule) {
+    List<String> listValue = new ArrayList();
     for (TableSchema table : dataSetSchema.getTableSchemas()) {
       for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
         if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
-          originName = table.getNameTableSchema();
+          listValue.add(table.getNameTableSchema());
+          listValue.add(field.getHeaderName());
         }
       }
     }
-    return originName;
+    return listValue;
   }
 
   /**
@@ -294,8 +300,8 @@ public class KieBaseManager {
 
       ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
           TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(), rule.getWhenCondition(),
-          rule.getThenCondition().get(0), rule.getThenCondition().get(1), ""));
-
+          rule.getThenCondition().get(0), rule.getThenCondition().get(1), "tableName", "shortcode",
+          "fieldName"));
       // We create the same text like in kiebase and with that part we check if the rule is correct
       KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
@@ -353,12 +359,13 @@ public class KieBaseManager {
    * @param message the message
    * @param error the error
    * @param tableSchemaName the table schema name
-   *
+   * @param shortCode the short code
+   * @param fieldName the field name
    * @return the map
    */
   private Map<String, String> passDataToMap(String idSchema, String idRule,
       TypeValidation typeValidation, String schemaName, String whenCondition, String message,
-      String error, String tableSchemaName) {
+      String error, String tableSchemaName, String shortCode, String fieldName) {
     Map<String, String> ruleAdd = new HashMap<>();
     ruleAdd.put(ConditionsDrools.DATASCHEMA_ID.getValue(), idSchema);
     ruleAdd.put(ConditionsDrools.RULE_ID.getValue(), idRule);
@@ -368,8 +375,16 @@ public class KieBaseManager {
     ruleAdd.put(ConditionsDrools.WHEN_CONDITION.getValue(), whenCondition);
     ruleAdd.put(ConditionsDrools.MESSAGE_FAIL_VALIDATION.getValue(), message);
     ruleAdd.put(ConditionsDrools.TYPE_FAIL_VALIDATION.getValue(), error);
-    ruleAdd.put(ConditionsDrools.ORIGIN_NAME.getValue(),
-        tableSchemaName != null ? tableSchemaName : "");
+    // the fieldname and table_name should have any value to put in the map because without it
+    // drools doesnt
+    // work
+    ruleAdd.put(ConditionsDrools.TABLE_NAME.getValue(),
+        null != tableSchemaName && !tableSchemaName.isEmpty() ? tableSchemaName
+            : "Dataset Table Name");
+    ruleAdd.put(ConditionsDrools.FIELD_NAME.getValue(),
+        null != tableSchemaName && !fieldName.isEmpty() ? fieldName : "None Field Name");
+    ruleAdd.put(ConditionsDrools.SHORT_CODE.getValue(), shortCode);
+
     return ruleAdd;
   }
 

@@ -177,6 +177,7 @@ export const FieldsDesigner = ({
     if (fieldIndex > -1) {
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].fieldType = type;
       inmFields[fieldIndex].maxSize = maxSize;
       inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;
@@ -497,6 +498,7 @@ export const FieldsDesigner = ({
       );
       if (fieldOrdered) {
         setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+        onChangeFields(inmFields, false, table.tableSchemaId);
       }
     } catch (error) {
       console.error(`There has been an error during the field reorder: ${error}`);

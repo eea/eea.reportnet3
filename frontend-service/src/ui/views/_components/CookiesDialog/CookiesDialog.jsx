@@ -1,23 +1,32 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import isUndefined from 'lodash/isUndefined';
+import startsWith from 'lodash/startsWith';
 
 import styles from './CookiesDialog.module.scss';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
-import { userStorage } from 'core/domain/model/User/UserStorage';
-
 export const CookiesDialog = () => {
   const themeContext = useContext(ThemeContext);
   const [isVisible, setIsVisible] = useState(false);
 
+  const isEuCookie = () => {
+    const decodedCookies = decodeURIComponent(document.cookie);
+    const cookiesArray = decodedCookies.split('; ');
+    for (let i = 0; i <= cookiesArray.length; i++) {
+      const cookie = cookiesArray[i];
+      if (startsWith(cookie, 'eu_cookie_consent=')) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   useEffect(() => {
-    const cookieConsent = userStorage.getPropertyFromLocalStorage('cookieConsent');
-    if (isUndefined(cookieConsent)) {
-      setIsVisible(true);
-    } else {
+    if (isEuCookie()) {
       setIsVisible(false);
+    } else {
+      setIsVisible(true);
     }
   }, []);
 
@@ -26,11 +35,11 @@ export const CookiesDialog = () => {
   }, [isVisible]);
 
   const onAcceptCookies = () => {
-    userStorage.setPropertyToLocalStorage({ cookieConsent: true });
+    document.cookie = 'eu_cookie_consent=true;path=/';
     setIsVisible(false);
   };
   const onRefuseCookies = () => {
-    userStorage.setPropertyToLocalStorage({ cookieConsent: false });
+    document.cookie = 'eu_cookie_consent=false;path=/';
     setIsVisible(false);
   };
 

@@ -103,6 +103,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
+   * @param idRules the id rules
    * @return the data tables values
    */
   @Override
@@ -114,7 +115,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError) {
+      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
+      @RequestParam(value = "idRules", required = false) String[] idRules) {
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -130,8 +132,8 @@ public class DataSetControllerImpl implements DatasetController {
     // else pageable will be null, it will be created inside the service
     TableVO result = null;
     try {
-      result =
-          datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields, levelError);
+      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields,
+          levelError, idRules);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -447,42 +449,20 @@ public class DataSetControllerImpl implements DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param records the records
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{id}/table/{idTableSchema}/record")
+  @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void insertRecords(@PathVariable("id") Long datasetId,
-      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records) {
-    if (datasetId == null || records == null || records.isEmpty()) {
-      LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    // Not allow insert if the table is marked as read only. This not applies to design datasets
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE.equals(
-            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
-      LOG_ERROR.error("Error inserting records in the datasetId {}. The table is read only",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-    }
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, idTableSchema,
-            EntityTypeEnum.TABLE))) {
-      LOG_ERROR.error(
-          "Error inserting records in the datasetId {}. The table has a fixed number of records",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
-    }
+  public void insertRecords(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records) {
     try {
-      updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
+      updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting records in the datasetId {}. Message {}:", datasetId,
-          e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error("Error inserting records: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 

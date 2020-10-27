@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -48,6 +49,7 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -57,6 +59,8 @@ import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
@@ -69,6 +73,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -88,6 +95,10 @@ public class DatasetSnapshotServiceTest {
   /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The user management controller zull. */
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
 
   /** The lock service. */
   @Mock
@@ -686,12 +697,20 @@ public class DatasetSnapshotServiceTest {
    * Creates the recepit PDF.
    */
   @Test
-  public void createRecepitPDF() {
+  public void createRecepitPDFTest() {
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    SecurityContextHolder.setContext(securityContext);
     ReportingDatasetVO dataset = new ReportingDatasetVO();
     RepresentativeVO representative = new RepresentativeVO();
     List<ReportingDatasetVO> datasets = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     DataFlowVO dataflowVO = new DataFlowVO();
+    ObligationVO obligationVO = new ObligationVO();
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("userName");
+    userRepresentationVO.setFirstName("First Name");
+    userRepresentationVO.setLastName("Last Name");
     dataset.setIsReleased(true);
     dataset.setDataProviderId(1L);
     dataset.setDataSetName("datsetName");
@@ -701,11 +720,18 @@ public class DatasetSnapshotServiceTest {
     representative.setReceiptOutdated(true);
     datasets.add(dataset);
     representatives.add(representative);
+    obligationVO.setObligationId(1);
+    obligationVO.setOblTitle("Obligation title");
     dataflowVO.setName("name");
     dataflowVO.setReportingDatasets(datasets);
+    dataflowVO.setObligation(obligationVO);
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.when(userManagementControllerZull.getUserByUserId(Mockito.any()))
+        .thenReturn(userRepresentationVO);
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
     Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
   }

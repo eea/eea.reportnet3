@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
 /**
  * The Class ReleaseReceiptVO.
  */
@@ -34,4 +33,15 @@ public class ReleaseReceiptVO implements Serializable {
   /** The provider assignation. */
   private String providerAssignation;
 
+  /** The obligation title. */
+  private String obligationTitle;
+
+  /** The obligation id. */
+  private Integer obligationId;
+
+  /** The user name. */
+  private String userName;
+
+  /** The full user name. */
+  private String fullUserName;
 }

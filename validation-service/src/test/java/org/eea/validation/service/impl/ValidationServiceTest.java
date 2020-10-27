@@ -803,7 +803,8 @@ public class ValidationServiceTest {
     validationAux.setIdRule("1");
     validationAux.setLevelError(ErrorTypeEnum.ERROR);
     validationAux.setMessage("ERROR");
-    validationAux.setOriginName("DATASET");
+    validationAux.setTableName("DATASET");
+    validationAux.setShortCode("SC");
     validationAux.setTypeEntity(EntityTypeEnum.DATASET);
     validationAux.setValidationDate(new Date().toString());
     datasetValidation.setValidation(validationAux);

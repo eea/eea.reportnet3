@@ -23,6 +23,7 @@ import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.SqlRulesService;
@@ -115,10 +116,12 @@ public class SQLValidationUtils {
    * @param ruleId the rule id
    */
   public static void executeValidationSQLRule(Long datasetId, String ruleId) {
-    // retrive the rule
+    // Retrieve the rule
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
-    // retrive sql sentence
+    // Retrieve sql sentence
     String query = rule.getSqlSentence();
+    // Checking SQL sentence and if the rule does not work it will be disabled
+    // TODO
     // Execute query
     TableValue tableToEvaluate = new TableValue();
     if (rule.getType().equals(EntityTypeEnum.TABLE)) {
@@ -133,138 +136,172 @@ public class SQLValidationUtils {
         } else {
           preparedquery = query;
         }
-        tableToEvaluate = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule);
+        tableToEvaluate =
+            sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
       } catch (SQLException e) {
         LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
       }
     }
-    String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    DataSetSchema schema =
-        schemasRepository.findById(new ObjectId(schemaId)).orElse(new DataSetSchema());
+    if (null != tableToEvaluate.getId()) {
+      String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+      DataSetSchema schema =
+          schemasRepository.findById(new ObjectId(schemaId)).orElse(new DataSetSchema());
 
+      TableValue table = null;
+      table = tableRepository.findById(tableToEvaluate.getId()).orElse(new TableValue());
+      String tableName = "";
+      for (TableSchema tableschema : schema.getTableSchemas()) {
+        if (table.getIdTableSchema().equals(tableschema.getIdTableSchema().toString())) {
+          tableName = tableschema.getNameTableSchema();
+          break;
+        }
+      }
+      String fieldName = null;
+
+
+
+      EntityTypeEnum ruleType = rule.getType();
+      switch (ruleType) {
+        case DATASET:
+          DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+          DataSetMetabaseVO datasetMetabase =
+              datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+          Validation validationDataset = createValidation(rule, tableName, null);
+          validationDataset.setTableName(datasetMetabase.getDataSetName());
+          if (dataset.getDatasetValidations().isEmpty()) {
+            DatasetValidation datasetValidation = new DatasetValidation();
+            datasetValidation.setDatasetValue(dataset);
+            datasetValidation.setValidation(validationDataset);
+            List<DatasetValidation> datasetValidations = new ArrayList<>();
+            datasetValidations.add(datasetValidation);
+            dataset.setDatasetValidations(datasetValidations);
+          } else {
+            List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
+            DatasetValidation datasetValidation = new DatasetValidation();
+            datasetValidation.setDatasetValue(dataset);
+            datasetValidation.setValidation(createValidation(rule, tableName, null));
+            datasetValidations.add(datasetValidation);
+            dataset.setDatasetValidations(datasetValidations);
+          }
+          saveDataset(dataset);
+          break;
+        case TABLE:
+          if (table.getTableValidations().isEmpty()) {
+            TableValidation tableValidation = new TableValidation();
+            tableValidation.setTableValue(tableToEvaluate);
+            tableValidation.setValidation(createValidation(rule, tableName, null));
+            List<TableValidation> tableValidations = new ArrayList<>();
+            tableValidations.add(tableValidation);
+            tableToEvaluate.setTableValidations(tableValidations);
+          } else {
+            List<TableValidation> tableValidations = tableToEvaluate.getTableValidations();
+            TableValidation tablevalidation = new TableValidation();
+            tablevalidation.setTableValue(tableToEvaluate);
+            tablevalidation.setValidation(createValidation(rule, tableName, null));
+            tableValidations.add(tablevalidation);
+            tableToEvaluate.setTableValidations(tableValidations);
+          }
+          saveTable(table);
+          break;
+        case RECORD:
+          List<String> recordsToEvauate = new ArrayList<>();
+          tableToEvaluate.getRecords().stream().forEach(record -> {
+            recordsToEvauate.add(record.getId());
+          });
+
+          for (RecordValue record : table.getRecords()) {
+            if (recordsToEvauate.contains(record.getId())) {
+              if (null == record.getRecordValidations()
+                  || record.getRecordValidations().isEmpty()) {
+                RecordValidation recordValidation = new RecordValidation();
+                recordValidation.setRecordValue(record);
+                recordValidation.setValidation(createValidation(rule, tableName, null));
+                List<RecordValidation> recordValidations = new ArrayList<>();
+                recordValidations.add(recordValidation);
+                record.setRecordValidations(recordValidations);
+              } else {
+                List<RecordValidation> recordValidations = record.getRecordValidations();
+                RecordValidation recordValidation = new RecordValidation();
+                recordValidation.setRecordValue(record);
+                recordValidation.setValidation(createValidation(rule, tableName, null));
+                recordValidations.add(recordValidation);
+                record.setRecordValidations(recordValidations);
+              }
+            }
+          }
+          saveTable(table);
+          break;
+        case FIELD:
+          List<String> fieldsToEvauate = new ArrayList<>();
+          tableToEvaluate.getRecords().stream().forEach(record -> {
+            record.getFields().stream().forEach(field -> {
+              fieldsToEvauate.add(field.getId());
+
+            });
+          });
+          String fieldSchema = "";
+          for (RecordValue record : table.getRecords()) {
+            for (FieldValue field : record.getFields()) {
+              if (rule.getReferenceId().toString().equals(field.getIdFieldSchema())) {
+                fieldSchema = field.getIdFieldSchema();
+                break;
+              }
+            }
+          }
+
+          for (TableSchema tableschema : schema.getTableSchemas()) {
+            if (table.getIdTableSchema().equals(tableschema.getIdTableSchema().toString())) {
+              for (FieldSchema field : tableschema.getRecordSchema().getFieldSchema()) {
+                if (field.getIdFieldSchema().toString().equals(fieldSchema)) {
+                  fieldName = field.getHeaderName();
+                }
+              }
+            }
+          }
+
+          for (RecordValue record : table.getRecords()) {
+            for (FieldValue field : record.getFields()) {
+              if (rule.getReferenceId().toString().equals(field.getIdFieldSchema())) {
+                if (fieldsToEvauate.contains(field.getId())) {
+                  if (field.getFieldValidations().isEmpty()) {
+                    FieldValidation fieldValidation = new FieldValidation();
+                    fieldValidation.setFieldValue(field);
+                    fieldValidation.setValidation(createValidation(rule, tableName, fieldName));
+                    List<FieldValidation> fieldValidations = new ArrayList<>();
+                    fieldValidations.add(fieldValidation);
+                    field.setFieldValidations(fieldValidations);
+                  } else {
+                    List<FieldValidation> fieldValidations = field.getFieldValidations();
+                    FieldValidation fieldValidation = new FieldValidation();
+                    fieldValidation.setFieldValue(field);
+                    fieldValidation.setValidation(createValidation(rule, tableName, fieldName));
+                    fieldValidations.add(fieldValidation);
+                    field.setFieldValidations(fieldValidations);
+                  }
+                }
+              }
+            }
+          }
+          saveTable(table);
+          break;
+      }
+    }
+
+  }
+
+  private static Validation createValidation(Rule rule, String tableName, String fieldName) {
     Validation validation = new Validation();
     validation.setIdRule(rule.getRuleId().toString());
     validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(1)));
     validation.setMessage(rule.getThenCondition().get(0));
     validation.setTypeEntity((rule.getType()));
     validation.setValidationDate(new Date().toString());
-    TableValue table = null;
-    table = tableRepository.findById(tableToEvaluate.getId()).orElse(new TableValue());
-    String tableOrigName = "";
-    for (TableSchema tableschema : schema.getTableSchemas()) {
-      if (table.getIdTableSchema().equals(tableschema.getIdTableSchema().toString())) {
-        tableOrigName = tableschema.getNameTableSchema();
-        break;
-      }
+    validation.setTableName(tableName);
+    if (null != fieldName) {
+      validation.setFieldName(fieldName);
     }
-    validation.setOriginName(tableOrigName);
-
-    EntityTypeEnum ruleType = rule.getType();
-    switch (ruleType) {
-      case DATASET:
-        DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-        DataSetMetabaseVO datasetMetabase =
-            datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-        validation.setOriginName(datasetMetabase.getDataSetName());
-        if (dataset.getDatasetValidations().isEmpty()) {
-          DatasetValidation datasetValidation = new DatasetValidation();
-          datasetValidation.setDatasetValue(dataset);
-          datasetValidation.setValidation(validation);
-          List<DatasetValidation> datasetValidations = new ArrayList<>();
-          datasetValidations.add(datasetValidation);
-          dataset.setDatasetValidations(datasetValidations);
-        } else {
-          List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
-          DatasetValidation datasetValidation = new DatasetValidation();
-          datasetValidation.setDatasetValue(dataset);
-          datasetValidation.setValidation(validation);
-          datasetValidations.add(datasetValidation);
-          dataset.setDatasetValidations(datasetValidations);
-        }
-        saveDataset(dataset);
-        break;
-      case TABLE:
-        if (table.getTableValidations().isEmpty()) {
-          TableValidation tableValidation = new TableValidation();
-          tableValidation.setTableValue(tableToEvaluate);
-          tableValidation.setValidation(validation);
-          List<TableValidation> tableValidations = new ArrayList<>();
-          tableValidations.add(tableValidation);
-          tableToEvaluate.setTableValidations(tableValidations);
-        } else {
-          List<TableValidation> tableValidations = tableToEvaluate.getTableValidations();
-          TableValidation tablevalidation = new TableValidation();
-          tablevalidation.setTableValue(tableToEvaluate);
-          tablevalidation.setValidation(validation);
-          tableValidations.add(tablevalidation);
-          tableToEvaluate.setTableValidations(tableValidations);
-        }
-        saveTable(table);
-        break;
-      case RECORD:
-        List<String> recordsToEvauate = new ArrayList<>();
-        tableToEvaluate.getRecords().stream().forEach(record -> {
-          recordsToEvauate.add(record.getId());
-        });
-
-        for (RecordValue record : table.getRecords()) {
-          if (recordsToEvauate.contains(record.getId())) {
-            if (null == record.getRecordValidations() || record.getRecordValidations().isEmpty()) {
-              RecordValidation recordValidation = new RecordValidation();
-              recordValidation.setRecordValue(record);
-              recordValidation.setValidation(validation);
-              List<RecordValidation> recordValidations = new ArrayList<>();
-              recordValidations.add(recordValidation);
-              record.setRecordValidations(recordValidations);
-            } else {
-              List<RecordValidation> recordValidations = record.getRecordValidations();
-              RecordValidation recordValidation = new RecordValidation();
-              recordValidation.setRecordValue(record);
-              recordValidation.setValidation(validation);
-              recordValidations.add(recordValidation);
-              record.setRecordValidations(recordValidations);
-            }
-          }
-        }
-        saveTable(table);
-        break;
-      case FIELD:
-        List<String> fieldsToEvauate = new ArrayList<>();
-        tableToEvaluate.getRecords().stream().forEach(record -> {
-          record.getFields().stream().forEach(field -> {
-            System.out.println(field.getId());
-            fieldsToEvauate.add(field.getId());
-          });
-        });
-
-        for (RecordValue record : table.getRecords()) {
-          for (FieldValue field : record.getFields()) {
-            if (rule.getReferenceId().toString().equals(field.getIdFieldSchema())) {
-              if (fieldsToEvauate.contains(field.getId())) {
-                if (field.getFieldValidations().isEmpty()) {
-                  FieldValidation fieldValidation = new FieldValidation();
-                  fieldValidation.setFieldValue(field);
-                  fieldValidation.setValidation(validation);
-                  List<FieldValidation> fieldValidations = new ArrayList<>();
-                  fieldValidations.add(fieldValidation);
-                  field.setFieldValidations(fieldValidations);
-                } else {
-                  List<FieldValidation> fieldValidations = field.getFieldValidations();
-                  FieldValidation fieldValidation = new FieldValidation();
-                  fieldValidation.setFieldValue(field);
-                  fieldValidation.setValidation(validation);
-                  fieldValidations.add(fieldValidation);
-                  field.setFieldValidations(fieldValidations);
-                }
-              }
-            }
-          }
-        }
-        saveTable(table);
-        break;
-    }
-
-
+    validation.setShortCode(rule.getShortCode());
+    return validation;
   }
 
   /**
