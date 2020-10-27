@@ -116,7 +116,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),
-      visibility: true
+      visibility: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN']
     }
   ];
 

@@ -67,7 +67,7 @@ const useBigButtonList = ({
       },
       true
     ),
-    visibility: true
+    visibility: dataflowState.status !== 'DESIGN'
   };
 
   const helpButton = {

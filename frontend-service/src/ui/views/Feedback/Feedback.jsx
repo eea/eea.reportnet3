@@ -75,8 +75,12 @@ export const Feedback = withRouter(({ match, history }) => {
   }, [isCustodian]);
 
   useEffect(() => {
-    if (!isEmpty(selectedDataProvider)) {
-      onGetUnreadMessages(selectedDataProvider.id);
+    if (isCustodian) {
+      if (!isEmpty(selectedDataProvider)) {
+        onGetInitialMessages(selectedDataProvider.id);
+      }
+    } else {
+      onGetInitialMessages();
     }
   }, [selectedDataProvider]);
 
@@ -110,12 +114,12 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onGetReadMessages = async (first, rows) => {
+  const onGetMoreMessages = async (first, rows) => {
     const data = await onLoadMessages(first, rows, isCustodian ? selectedDataProvider.id : 1);
     dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
   };
 
-  const onGetUnreadMessages = async dataProviderId => {
+  const onGetInitialMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     const data = await onLoadMessages(0, 25, dataProviderId);
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
@@ -209,7 +213,7 @@ export const Feedback = withRouter(({ match, history }) => {
             }`}
             messages={messages}
             newMessageAdded={newMessageAdded}
-            onLazyLoad={onGetReadMessages}
+            onLazyLoad={onGetMoreMessages}
           />
         )}
         <InputTextarea
