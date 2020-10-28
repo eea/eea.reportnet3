@@ -473,14 +473,14 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/{dataflowId}/createMessage")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId, @RequestBody String content) {
     try {
       return dataflowService.createMessage(dataflowId, providerId, content);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
     }
   }
 
@@ -493,7 +493,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @GetMapping("/{dataflowId}/findMessages")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam(value = "read", required = false) Boolean read,
       @RequestParam("page") int page) {
@@ -510,7 +510,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("messageId") Long messageId, @RequestParam("read") boolean read) {
     return dataflowService.updateMessageReadStatus(dataflowId, messageId, read);

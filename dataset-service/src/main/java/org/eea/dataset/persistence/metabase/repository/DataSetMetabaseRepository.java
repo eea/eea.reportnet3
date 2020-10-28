@@ -83,13 +83,13 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   Long countByDataSetNameIgnoreCaseAndDataflowId(String datasetName, Long dataflowId);
 
   /**
-   * Gets the dataset id by dataflow id and data provider id.
+   * Gets the dataset ids by dataflow id and data provider id.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @return the dataset id by dataflow id and data provider id
+   * @return the dataset ids by dataflow id and data provider id
    */
   @Query("SELECT d.id FROM DataSetMetabase d WHERE d.dataflowId = :dataflowId AND d.dataProviderId = :providerId")
-  Long getDatasetIdByDataflowIdAndDataProviderId(@Param("dataflowId") Long dataflowId,
+  List<Long> getDatasetIdsByDataflowIdAndDataProviderId(@Param("dataflowId") Long dataflowId,
       @Param("providerId") Long dataProviderId);
 }

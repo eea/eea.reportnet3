@@ -292,6 +292,9 @@ public final class EEAErrorMessage {
   /** The Constant EMPTY_MESSAGE_CONTENT: {@value}. */
   public static final String CREATE_MESSAGE_ERROR = "Provider not found in the dataflow";
 
+  /** The Constant MESSAGING_AUTHORIZATION_FAILED: {@value}. */
+  public static final String MESSAGING_AUTHORIZATION_FAILED = "Messaging authorization failed";
+
   /**
    * Instantiates a new EEA error message.
    */

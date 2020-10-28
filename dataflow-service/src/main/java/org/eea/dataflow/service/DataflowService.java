@@ -183,7 +183,7 @@ public interface DataflowService {
    *
    * @param dataflowId the dataflow id
    * @param read the read
-   * @param page the offset
+   * @param page the page
    * @return the list
    */
   List<MessageVO> findMessages(Long dataflowId, Boolean read, int page);

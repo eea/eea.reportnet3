@@ -814,15 +814,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
   /**
-   * Gets the dataset id by dataflow id and data provider id.
+   * Gets the dataset ids by dataflow id and data provider id.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @return the dataset id by dataflow id and data provider id
+   * @return the dataset ids by dataflow id and data provider id
    */
   @Override
-  public Long getDatasetIdByDataflowIdAndDataProviderId(Long dataflowId, Long dataProviderId) {
-    return dataSetMetabaseRepository.getDatasetIdByDataflowIdAndDataProviderId(dataflowId,
+  public List<Long> getDatasetIdsByDataflowIdAndDataProviderId(Long dataflowId,
+      Long dataProviderId) {
+    return dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
         dataProviderId);
   }
 }
