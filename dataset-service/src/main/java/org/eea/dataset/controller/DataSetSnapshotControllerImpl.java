@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -51,13 +49,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
-
-  /** The data collection service. */
-  @Autowired
-  private DataCollectionService dataCollectionService;
 
   /** The reporting dataset repository. */
   @Autowired
@@ -452,6 +443,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
   @Override
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
@@ -466,7 +463,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-
-    datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+    try {
+      datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
   }
 }

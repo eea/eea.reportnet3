@@ -309,6 +309,8 @@ public class DataCollectionServiceTest {
         .thenReturn(representatives);
     Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
         .thenReturn(dataProviders);
+    Mockito.when(rulesControllerZuul.validateSqlRuleDataCollection(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(true);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
@@ -330,7 +332,7 @@ public class DataCollectionServiceTest {
         Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataCollectionService.createEmptyDataCollection(1L, new Date());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
   }
@@ -364,7 +366,7 @@ public class DataCollectionServiceTest {
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.doNothing().when(connection).rollback();
-    dataCollectionService.createEmptyDataCollection(1L, new Date());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -404,7 +406,7 @@ public class DataCollectionServiceTest {
         .deleteResourceByDatasetId(Mockito.any());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataCollectionService.createEmptyDataCollection(1L, new Date());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true);
     Mockito.verify(connection, times(1)).rollback();
   }
 

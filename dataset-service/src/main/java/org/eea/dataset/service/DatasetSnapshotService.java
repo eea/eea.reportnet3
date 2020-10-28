@@ -198,11 +198,13 @@ public interface DatasetSnapshotService {
    */
   List<ReleaseVO> getReleases(Long datasetId) throws EEAException;
 
+
   /**
    * Creates the release snapshots.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
    */
-  void createReleaseSnapshots(Long dataflowId, Long dataProviderId);
+  void createReleaseSnapshots(Long dataflowId, Long dataProviderId) throws EEAException;
 }

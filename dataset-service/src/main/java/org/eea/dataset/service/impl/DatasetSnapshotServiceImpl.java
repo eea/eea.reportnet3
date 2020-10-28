@@ -4,15 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
-import org.eea.dataset.controller.DataSetSnapshotControllerImpl;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
@@ -52,7 +53,6 @@ import org.eea.interfaces.controller.document.DocumentController.DocumentControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
-import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -196,11 +196,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  @Autowired
-  private ValidationControllerZuul validationControllerZuul;
-
-  @Autowired
-  private DataSetSnapshotControllerImpl dataSetSnapshotControllerImpl;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -526,13 +521,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG.info("Snapshot {} released", idSnapshot);
       } catch (EEAException e) {
         LOG_ERROR.error(e.getMessage());
-        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
+        releaseEvent(EventType.RELEASE_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
         removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
       }
     } else {
       LOG_ERROR.error("Error in release snapshot");
-      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
+      releaseEvent(EventType.RELEASE_SNAPSHOT_FAILED_EVENT, idSnapshot,
           "Error in release snapshot");
       removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
@@ -993,39 +988,96 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
+   * @throws EEAException
    */
   @Override
   @Async
-  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId) {
+  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId) throws EEAException {
+    // List of the datasets involved
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
+    // List of the representatives
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
+            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
+    // Lock all the operations related
+    addLocksRelatedToRelease(datasetsFilters, representatives);
 
-    List<Boolean> oneHaveBlockers = new ArrayList();
-    // validationControllerZuul.validateDataSetDataFuture(datasetsFilters);
+    // MISSING PART OF THE VALIDATIONS
     datasetsFilters.forEach(id -> {
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, id));
-      oneHaveBlockers.add(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER));
+      CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+      createSnapshotVO.setReleased(true);
+      createSnapshotVO.setAutomatic(Boolean.TRUE);
+      Date now = new Date();
+      SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      createSnapshotVO.setDescription("Release " + formateador.format(now).toString());
+      this.addSnapshot(id, createSnapshotVO, null);
     });
 
-    if (oneHaveBlockers.contains(Boolean.TRUE)) {
-      System.err.println("ERROR");
-    } else {
-      // datasetsFilters.forEach(id -> {
-      // CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
-      // createSnapshotVO.setReleased(true);
-      // createSnapshotVO.setAutomatic(Boolean.TRUE);
-      // Date ahora = new Date();
-      // SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      // createSnapshotVO.setDescription("Release " + formateador.format(ahora).toString());
-      // dataSetSnapshotControllerImpl.createSnapshot(id, createSnapshotVO);
-      // });
+    // Unlock all the operations when the release is finished
+    releaseLocksRelatedToRelease(datasetsFilters, representatives, dataflowId, dataProviderId);
+  }
+
+
+  /**
+   * Adds the locks related to release.
+   *
+   * @param datasets the datasets
+   * @param representatives the representatives
+   * @throws EEAException the EEA exception
+   */
+  private void addLocksRelatedToRelease(List<Long> datasets, List<RepresentativeVO> representatives)
+      throws EEAException {
+    // We have to lock all the dataset operations (insert, delete, update...)
+    for (Long datasetId : datasets) {
+      // Insert
+      Map<String, Object> mapCriteriaInsert = new HashMap<>();
+      mapCriteriaInsert.put("signature", LockSignature.INSERT_RECORDS.getValue());
+      mapCriteriaInsert.put("datasetId", datasetId);
+      lockService.createLock(new Timestamp(System.currentTimeMillis()),
+          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+          mapCriteriaInsert);
     }
+    // Also, we have to update the representative 'releasing' property to true
+    if (!representatives.isEmpty()) {
+      RepresentativeVO representative = representatives.get(0);
+      representative.setReleasing(true);
+      representativeControllerZuul.updateRepresentative(representative);
+    }
+  }
+
+
+  /**
+   * Release locks related to release.
+   *
+   * @param datasets the datasets
+   * @param representatives the representatives
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  private void releaseLocksRelatedToRelease(List<Long> datasets,
+      List<RepresentativeVO> representatives, Long dataflowId, Long dataProviderId) {
+    // We have to lock all the dataset operations (insert, delete, update...)
+    for (Long datasetId : datasets) {
+      List<Object> criteriaInsert = new ArrayList<>();
+      criteriaInsert.add(LockSignature.INSERT_RECORDS.getValue());
+      criteriaInsert.add(datasetId);
+      lockService.removeLockByCriteria(criteriaInsert);
+    }
+    // Also, we have to update the representative 'releasing' property to false
+    if (!representatives.isEmpty()) {
+      RepresentativeVO representative = representatives.get(0);
+      representative.setReleasing(false);
+      representativeControllerZuul.updateRepresentative(representative);
+    }
+    // Finally, unlock the release operation itself
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
     criteria.add(dataflowId);
     criteria.add(dataProviderId);
     lockService.removeLockByCriteria(criteria);
   }
+
 
 }

@@ -43,7 +43,7 @@ public class ReleaseDatasetSnapshotCompletedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT,
+    Assert.assertEquals(EventType.RELEASE_SNAPSHOT_COMPLETED_EVENT,
         releaseDatasetSnapshotCompletedEvent.getEventType());
   }
 
