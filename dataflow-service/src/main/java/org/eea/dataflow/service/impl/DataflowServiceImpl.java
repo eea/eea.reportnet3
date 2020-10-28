@@ -583,14 +583,29 @@ public class DataflowServiceImpl implements DataflowService {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageId the message id
-   * @param read the read
-   * @return true, if successful
+   * @param messageVOs the message V os
    */
   @Override
   @Transactional
-  public boolean updateMessageReadStatus(Long dataflowId, Long messageId, boolean read) {
-    return messageRepository.updateReadStatus(dataflowId, messageId, read) > 0;
+  public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) {
+    List<Long> readTrueMessageIds = new ArrayList<>();
+    List<Long> readFalseMessageIds = new ArrayList<>();
+
+    for (MessageVO messageVO : messageVOs) {
+      if (messageVO.isRead()) {
+        readTrueMessageIds.add(messageVO.getId());
+      } else {
+        readFalseMessageIds.add(messageVO.getId());
+      }
+    }
+
+    if (!readTrueMessageIds.isEmpty()) {
+      messageRepository.updateReadStatus(dataflowId, readTrueMessageIds, true);
+    }
+
+    if (!readFalseMessageIds.isEmpty()) {
+      messageRepository.updateReadStatus(dataflowId, readFalseMessageIds, false);
+    }
   }
 
   /**

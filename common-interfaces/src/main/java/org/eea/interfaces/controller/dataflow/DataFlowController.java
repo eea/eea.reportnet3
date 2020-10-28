@@ -181,10 +181,9 @@ public interface DataFlowController {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageVO the message VO
-   * @return true, if successful
+   * @param messageVOs the message V os
    */
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
-  boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody MessageVO messageVO);
+  void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody List<MessageVO> messageVOs);
 }

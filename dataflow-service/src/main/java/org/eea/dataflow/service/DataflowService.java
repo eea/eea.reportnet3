@@ -192,9 +192,7 @@ public interface DataflowService {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageId the message id
-   * @param read the read
-   * @return true, if successful
+   * @param messageVOs the message V os
    */
-  boolean updateMessageReadStatus(Long dataflowId, Long messageId, boolean read);
+  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs);
 }

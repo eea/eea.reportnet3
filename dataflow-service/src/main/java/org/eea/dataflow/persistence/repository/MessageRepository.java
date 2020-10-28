@@ -39,7 +39,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    * @param dataflowId the dataflow id
    * @param providerIds the provider ids
    * @param read the read
-   * @param pageRequest the page request
+   * @param page the page
    * @return the page
    */
   Page<Message> findByDataflowIdAndProviderIdInAndRead(Long dataflowId, List<Long> providerIds,
@@ -50,7 +50,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    *
    * @param dataflowId the dataflow id
    * @param providerIds the provider ids
-   * @param pageRequest the page request
+   * @param page the page
    * @return the page
    */
   Page<Message> findByDataflowIdAndProviderIdIn(Long dataflowId, List<Long> providerIds,
@@ -60,12 +60,12 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    * Update read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageId the message id
+   * @param messageIds the message ids
    * @param read the read
    * @return the int
    */
   @Modifying
-  @Query("UPDATE Message m SET m.read = :read WHERE m.id = :messageId AND m.dataflowId = :dataflowId")
-  int updateReadStatus(@Param("dataflowId") Long dataflowId, @Param("messageId") Long messageId,
-      @Param("read") boolean read);
+  @Query("UPDATE Message m SET m.read = :read WHERE m.id in :messageIds AND m.dataflowId = :dataflowId")
+  int updateReadStatus(@Param("dataflowId") Long dataflowId,
+      @Param("messageIds") List<Long> messageIds, @Param("read") boolean read);
 }

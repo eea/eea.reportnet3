@@ -505,16 +505,14 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageVO the message VO
-   * @return true, if successful
+   * @param messageVOs the message V os
    */
   @Override
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody MessageVO messageVO) {
-    return dataflowService.updateMessageReadStatus(dataflowId, messageVO.getId(),
-        messageVO.isRead());
+  public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody List<MessageVO> messageVOs) {
+    dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
   }
 
   /**
