@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1001,26 +1002,25 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
 
-    List<Boolean> oneHaveBlockers = new ArrayList();
-    // validationControllerZuul.validateDataSetDataFuture(datasetsFilters);
-    datasetsFilters.forEach(id -> {
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, id));
-      oneHaveBlockers.add(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER));
-    });
+    Collections.sort(datasetsFilters);
+    TenantResolver
+        .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetsFilters.get(0)));
+    validationControllerZuul.validateDataSetData(datasetsFilters.get(0), true);
+    // oneHaveBlockers.add(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER));
 
-    if (oneHaveBlockers.contains(Boolean.TRUE)) {
-      System.err.println("ERROR");
-    } else {
-      // datasetsFilters.forEach(id -> {
-      // CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
-      // createSnapshotVO.setReleased(true);
-      // createSnapshotVO.setAutomatic(Boolean.TRUE);
-      // Date ahora = new Date();
-      // SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      // createSnapshotVO.setDescription("Release " + formateador.format(ahora).toString());
-      // dataSetSnapshotControllerImpl.createSnapshot(id, createSnapshotVO);
-      // });
-    }
+    // if (oneHaveBlockers.contains(Boolean.TRUE)) {
+    // System.err.println("ERROR");
+    // } else {
+    // datasetsFilters.forEach(id -> {
+    // CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+    // createSnapshotVO.setReleased(true);
+    // createSnapshotVO.setAutomatic(Boolean.TRUE);
+    // Date ahora = new Date();
+    // SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    // createSnapshotVO.setDescription("Release " + formateador.format(ahora).toString());
+    // dataSetSnapshotControllerImpl.createSnapshot(id, createSnapshotVO);
+    // });
+    // }
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
     criteria.add(dataflowId);

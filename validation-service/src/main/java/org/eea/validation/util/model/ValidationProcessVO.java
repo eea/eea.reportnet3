@@ -20,5 +20,5 @@ public class ValidationProcessVO {
   private KieBase kieBase;
   private boolean coordinatorProcess;
   private String requestingUser;
-
+  private boolean released;
 }
