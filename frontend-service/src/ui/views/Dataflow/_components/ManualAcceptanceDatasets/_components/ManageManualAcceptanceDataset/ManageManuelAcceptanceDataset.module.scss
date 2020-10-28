@@ -1,0 +1,37 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 1rem 0;
+  user-select: none;
+
+  .group {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+
+    .radioButton {
+      border-radius: 10px;
+      padding: 0.5rem;
+
+      &:hover {
+        background: var(--gray-5);
+      }
+
+      .button {
+        margin-right: 0.5rem;
+        padding-left: 1rem;
+      }
+
+      .label {
+        cursor: pointer;
+      }
+    }
+
+    .datasetMessage {
+      width: 39rem;
+    }
+  }
+}

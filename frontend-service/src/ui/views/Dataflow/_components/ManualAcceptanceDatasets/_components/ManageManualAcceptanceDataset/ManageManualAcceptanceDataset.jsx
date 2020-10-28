@@ -97,7 +97,7 @@ export const ManageManualAcceptanceDataset = ({
           footer={renderDialogFooter}
           header={`${resources.messages['editStatusDataset']} ${dataset.datasetName}`}
           onHide={() => manageDialogs(false)}
-          style={{ width: '975px' }}
+          style={{ width: '60%' }}
           visible={isManageDatasetDialogVisible}>
           {children}
         </Dialog>
@@ -115,11 +115,7 @@ export const ManageManualAcceptanceDataset = ({
           expandableOnClick={true}
           id="datasetMessage"
           key="datasetMessage"
-          // onBlur={e => onBlurMessage(e.target.value)}
-          onChange={e => {
-            onChangeMessage(e.target.value);
-            // manageManualAcceptanceDatasetDispatch({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } });
-          }}
+          onChange={e => onChangeMessage(e.target.value)}
           onFocus={e =>
             manageManualAcceptanceDatasetDispatch({
               type: 'INITIAL_DATASET_MESSAGE',
@@ -134,24 +130,27 @@ export const ManageManualAcceptanceDataset = ({
     ));
   };
 
+  const allFeedbackStatus = ['correctionRequested', 'technicallyAccept'];
+
   const renderRadioButtons = () =>
-    allStatus.map((status, index) => (
-      <div className={styles.radioButton} key={index}>
-        <label className={styles.label} htmlFor={status}>
-          {resources.messages[status]}
-        </label>
-        <RadioButton
-          className={styles.button}
-          checked={manageManualAcceptanceDatasetState.datasetStatus}
-          inputId={status}
-          onChange={event => {
-            onChangeStatus(event.target.value);
-            // changeMode(status);
-          }}
-          value={status}
-        />
-      </div>
-    ));
+    allFeedbackStatus.map(feedBackStatus => {
+      return (
+        <div className={styles.radioButton} key={feedBackStatus}>
+          <label className={styles.label} htmlFor={feedBackStatus}>
+            {resources.messages[feedBackStatus]}
+          </label>
+          <RadioButton
+            className={styles.button}
+            checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus}
+            inputId={feedBackStatus}
+            onChange={event => {
+              onChangeStatus(event.target.value);
+            }}
+            value={feedBackStatus}
+          />
+        </div>
+      );
+    });
 
   return renderDialogLayout(
     <Fragment>
