@@ -13,7 +13,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { manageManualAcceptanceDatasetReducer } from './_functions/Reducers/manageManualAcceptanceDatasetReducer';
 
 export const ManageManualAcceptanceDataset = ({
-  allStatus,
   dataset,
   isManageDatasetDialogVisible,
   manageDialogs,
@@ -26,13 +25,10 @@ export const ManageManualAcceptanceDataset = ({
     {
       initialDatasetMessage: '',
       datasetMessage: '',
-      datasetStatus: dataset.status,
+      datasetFeedbackStatus: dataset.feedbackStatus,
       updateButtonEnabled: false
     }
   );
-
-  // console.log('dataset', dataset);
-  // console.log('manageManualAcceptanceDatasetState.datasetStatus', manageManualAcceptanceDatasetState);
 
   const onBlurMessage = message => {
     if (message !== manageManualAcceptanceDatasetState.initialDatasetMessage) {
@@ -42,7 +38,6 @@ export const ManageManualAcceptanceDataset = ({
 
   const onChangeMessage = message => {
     if (message !== manageManualAcceptanceDatasetState.initialDatasetMessage) {
-      // return manageManualAcceptanceDatasetDispatch({ type: 'UPDATE_BUTTON_DISABLED', payload: { value: true } });
       return manageManualAcceptanceDatasetDispatch({
         type: 'ON_UPDATE_MESSAGE',
         payload: { message: message, value: true }
@@ -71,7 +66,7 @@ export const ManageManualAcceptanceDataset = ({
     console.log(
       'update',
       manageManualAcceptanceDatasetState.datasetMessage,
-      manageManualAcceptanceDatasetState.datasetStatus
+      manageManualAcceptanceDatasetState.datasetFeedbackStatus
     );
 
     onUpdatedData(true);
@@ -115,7 +110,7 @@ export const ManageManualAcceptanceDataset = ({
       <div key={index}>
         <label htmlFor="datasetMessage">{resources.messages[option]}</label>
         <InputTextarea
-          className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
+          className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
           collapsedHeight={55}
           expandableOnClick={true}
           id="datasetMessage"
@@ -162,7 +157,7 @@ export const ManageManualAcceptanceDataset = ({
     <Fragment>
       <div className={styles.content}>
         <div className={styles.group}>
-          <div>{resources.messages['datasetStatus']}</div>
+          <div>{resources.messages['feedbackStatus']}</div>
           {renderRadioButtons()}
         </div>
         <div className={styles.group}>{renderInputTextLayout(['message'])}</div>

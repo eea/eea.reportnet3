@@ -29,7 +29,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
     {
-      allFinalFeedbackStatus: [],
+      allfeedbackStatus: [],
       data: [],
       datasetToEdit: {},
       filtered: false,
@@ -71,14 +71,14 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
       isLoading(true);
 
       const response = await DataflowService.datasetsFinalFeedback(dataflowId);
-      const allFinalFeedbackStatus = uniq(Object.values(response.map(dataset => dataset.finalFeedbackStatus)));
+      const allFeedbackStatus = uniq(Object.values(response.map(dataset => dataset.feedbackStatus)));
       manualAcceptanceDatasetsDispatch({
         type: 'INITIAL_LOAD',
         payload: {
           data: response,
           filteredData: response,
           filtered: false,
-          allFinalFeedbackStatus: allFinalFeedbackStatus
+          allFeedbackStatus: allFeedbackStatus
         }
       });
     } catch (error) {
@@ -96,7 +96,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
     const datasetsWithPriority = [
       { id: 'datasetName', index: 0 },
       { id: 'dataProviderName', index: 1 },
-      { id: 'finalFeedbackStatus', index: 2 },
+      { id: 'feedbackStatus', index: 2 },
       { id: 'isReleased', index: 3 }
     ];
 
@@ -172,7 +172,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
         inputOptions={['datasetName']}
-        selectOptions={['dataProviderName', 'finalFeedbackStatus']}
+        selectOptions={['dataProviderName', 'feedbackStatus']}
       />
 
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
@@ -192,7 +192,6 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
       {manualAcceptanceDatasetsState.isManageDatasetDialogVisible && (
         <ManageManualAcceptanceDataset
-          allFinalFeedbackStatus={manualAcceptanceDatasetsState.allFinalFeedbackStatus}
           dataset={manualAcceptanceDatasetsState.datasetToEdit}
           isManageDatasetDialogVisible={manualAcceptanceDatasetsState.isManageDatasetDialogVisible}
           manageDialogs={handleManageAcceptanceDatasetDialog}

@@ -923,7 +923,7 @@
     "editStatusDataset": "Edit the status of the dataset ",
     "correctionRequested": "Correction requested",
     "technicallyAccept": "Technically accept",
-    "finalFeedbackStatus": "Feedback Status",
+    "feedbackStatus": "Feedback Status",
     "loadDatasetsReleasesError": "Error loading datasets releases",
     "dataProviderName": "Country"
   }
