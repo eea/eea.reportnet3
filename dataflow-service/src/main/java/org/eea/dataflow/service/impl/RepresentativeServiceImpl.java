@@ -142,7 +142,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
             : representative.getUserMail(),
         representative.getDataflow().getId())
-        && !changesInReceiptStatus(representative, representativeVO)) {
+        && !changesInReceiptStatus(representative, representativeVO)
+        && !changesInReleasingStatus(representative, representativeVO)) {
       LOG_ERROR.error("Duplicated representative relationship");
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
     } else {
@@ -160,6 +161,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
       if (representativeVO.getReceiptOutdated() != null) {
         representative.setReceiptOutdated(representativeVO.getReceiptOutdated());
+      }
+      if (representativeVO.getReleasing() != null) {
+        representative.setReleasing(representativeVO.getReleasing());
       }
       // save changes
       return representativeRepository.save(representative).getId();
@@ -247,25 +251,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   }
 
-
-  /**
-   * Changes in receipt status.
-   *
-   * @param representative the representative
-   * @param representativeVO the representative VO
-   * @return true, if successful
-   */
-  private boolean changesInReceiptStatus(Representative representative,
-      RepresentativeVO representativeVO) {
-
-    Boolean changes = true;
-    if (representative.getReceiptDownloaded().equals(representativeVO.getReceiptDownloaded())
-        && representative.getReceiptOutdated().equals(representativeVO.getReceiptOutdated())) {
-      changes = false;
-    }
-    return changes;
-  }
-
   /**
    * Find data providers by ids.
    *
@@ -293,4 +278,41 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return representativeMapper
         .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
   }
+
+
+  /**
+   * Changes in receipt status.
+   *
+   * @param representative the representative
+   * @param representativeVO the representative VO
+   * @return true, if successful
+   */
+  private boolean changesInReceiptStatus(Representative representative,
+      RepresentativeVO representativeVO) {
+
+    Boolean changes = true;
+    if (representative.getReceiptDownloaded().equals(representativeVO.getReceiptDownloaded())
+        && representative.getReceiptOutdated().equals(representativeVO.getReceiptOutdated())) {
+      changes = false;
+    }
+    return changes;
+  }
+
+  /**
+   * Changes in releasing status.
+   *
+   * @param representative the representative
+   * @param representativeVO the representative VO
+   * @return true, if successful
+   */
+  private boolean changesInReleasingStatus(Representative representative,
+      RepresentativeVO representativeVO) {
+
+    Boolean changes = true;
+    if (representative.getReleasing().equals(representativeVO.getReleasing())) {
+      changes = false;
+    }
+    return changes;
+  }
+
 }
