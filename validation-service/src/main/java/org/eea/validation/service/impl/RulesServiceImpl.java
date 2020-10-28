@@ -19,7 +19,6 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -38,7 +37,6 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
-import org.eea.validation.util.SQLValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,17 +85,9 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
-  /** The sql valitaion utils. */
-  @Autowired
-  private SQLValidationUtils sqlValidationUtils;
-
   /** The sql rules service. */
   @Autowired
   private SqlRulesService sqlRulesService;
-
-  /** The kafka sender utils. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The record store controller. */
   @Autowired
@@ -1089,6 +1079,15 @@ public class RulesServiceImpl implements RulesService {
                 "dataset_" + newDatasetId.toString());
             rule.setWhenCondition(newWhenCondition);
           }
+          // Do the same in the property SqlSentence
+          if (StringUtils.isNotBlank(rule.getSqlSentence())
+              && rule.getSqlSentence().contains("dataset_")) {
+            String newSqlSentence = rule.getSqlSentence();
+            newSqlSentence = newSqlSentence.replace("dataset_" + oldDatasetId.toString(),
+                "dataset_" + newDatasetId.toString());
+            rule.setSqlSentence(newSqlSentence);
+          }
+
         });
       }
     }

@@ -19,6 +19,8 @@ public class CreateSnapshotVO {
   /** The released. */
   private Boolean released;
 
+  private Boolean automatic;
+
   /**
    * Hash code.
    *
@@ -26,7 +28,7 @@ public class CreateSnapshotVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(description, released);
+    return Objects.hash(description, released, automatic);
   }
 
   /**
@@ -45,7 +47,7 @@ public class CreateSnapshotVO {
       return false;
     CreateSnapshotVO other = (CreateSnapshotVO) obj;
     return Objects.equals(description, other.description)
-        && Objects.equals(released, other.released);
+        && Objects.equals(released, other.released) && Objects.equals(automatic, other.automatic);
   }
 
 }

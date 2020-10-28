@@ -44,35 +44,26 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Representatives : Representatives Manager")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /**
-   * The representative service.
-   */
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
+
+  /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
 
-  /**
-   * The user management controller zull.
-   */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
-   * The Constant EMAIL_REGEX: {@value}.
-   */
-  private static final String EMAIL_REGEX =
-      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
 
   /**
    * Creates the representative.
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
-   *
    * @return the long
    */
   @Override
@@ -109,7 +100,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find all data provider by group id.
    *
    * @param groupId the group id
-   *
    * @return the list
    */
   @Override
@@ -144,12 +134,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeService.getAllDataProviderTypes();
   }
 
-
   /**
    * Find representatives by id data flow.
    *
    * @param dataflowId the dataflow id
-   *
    * @return the list
    */
   @Override
@@ -176,20 +164,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeVOs;
   }
 
-
   /**
    * Update representative.
    *
    * @param representativeVO the representative VO
-   *
    * @return the response entity
    */
   @Override
   @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
-  @ApiOperation(value = "Update a Representative",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+  @ApiOperation(value = "Update a Representative", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = ResponseEntity.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Email field provider is not an email"),
       @ApiResponse(code = 404, message = "1-Representative not found \n 2-User request not found "),
       @ApiResponse(code = 409, message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED)})
@@ -257,12 +243,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
   }
 
-
   /**
    * Find data provider by id.
    *
    * @param dataProviderId the data provider id
-   *
    * @return the data provider VO
    */
   @Override
@@ -284,13 +268,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find data providers by ids.
    *
    * @param dataProviderIds the data provider ids
-   *
    * @return the list
    */
   @Override
   @GetMapping("/private/dataProvider")
-  @ApiOperation(value = "Find DataProviders based on a list of Id's", response = DataProviderVO.class,
-      responseContainer = "List", hidden = true)
+  @ApiOperation(value = "Find DataProviders based on a list of Id's",
+      response = DataProviderVO.class, responseContainer = "List", hidden = true)
   public List<DataProviderVO> findDataProvidersByIds(@ApiParam(value = "Dataproviders List",
       type = "Long List") @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);

@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -59,6 +61,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -813,4 +818,46 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         dataflowId);
   }
 
+  /**
+   * Gets the dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset ids by dataflow id and data provider id
+   */
+  @Override
+  public List<Long> getDatasetIdsByDataflowIdAndDataProviderId(Long dataflowId,
+      Long dataProviderId) {
+    return dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
+  }
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  @Override
+  public List<Long> getUserProviderIdsByDataflowId(Long dataflowId) {
+
+    List<Long> providerIds = new ArrayList<>();
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+    for (DataSetMetabase dataset : dataSetMetabaseRepository
+        .findByDataflowIdAndProviderIdNotNull(dataflowId)) {
+      if (authorities
+          .contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(dataset.getId())))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(dataset.getId())))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(dataset.getId())))) {
+        providerIds.add(dataset.getDataProviderId());
+      }
+    }
+
+    return providerIds;
+  }
 }

@@ -153,7 +153,7 @@ export const WebformRecord = ({
 
   const onEditorSubmitValue = async (field, option, value) => {
     const parsedValue =
-      field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+      field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
@@ -501,23 +501,35 @@ export const WebformRecord = ({
             />
           </div>
         )}
-        {isEmpty(errorMessages) ? renderElements(content.elements) : errorMessages}
+        {isEmpty(errorMessages) ? (
+          renderElements(content.elements)
+        ) : (
+          <ul className={styles.errorList}>
+            {errorMessages.map(msg => (
+              <li className={styles.errorItem}>{msg}</li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   };
 
   const renderErrorMessages = content => {
+    const errorMessages = [];
     if (hasFields) {
-      return resources.messages['emptyWebformTable'];
-    } else if (content.totalRecords === 0) {
-      return resources.messages['webformTableWithLessRecords'];
-    } else if (content.totalRecords > 1) {
-      return resources.messages['webformTableWithMoreRecords'];
-    } else if (!isFixedNumber) {
-      return resources.messages['webformTableWithoutFixedNumber'];
-    } else {
-      return '';
+      errorMessages.push(resources.messages['emptyWebformTable']);
     }
+    if (content.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+    }
+    if (content.totalRecords > 1) {
+      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
+    }
+    if (!isFixedNumber) {
+      errorMessages.push(resources.messages['webformTableWithoutFixedNumber']);
+    }
+
+    return errorMessages;
   };
 
   return (
