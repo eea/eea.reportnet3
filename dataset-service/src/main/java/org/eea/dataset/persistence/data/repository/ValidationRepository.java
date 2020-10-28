@@ -18,4 +18,13 @@ public interface ValidationRepository extends PagingAndSortingRepository<Validat
    */
   List<Validation> findByLevelError(ErrorTypeEnum levelError);
 
+
+  /**
+   * Exists by level error.
+   *
+   * @param errorTypeEnum the error type enum
+   * @return true, if successful
+   */
+  boolean existsByLevelError(ErrorTypeEnum errorTypeEnum);
+
 }

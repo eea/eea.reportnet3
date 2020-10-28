@@ -289,6 +289,8 @@ public final class EEAErrorMessage {
   public static final String ERROR_UPDATING_TABLE_SCHEMA =
       "Error updating the table with id schema %s from the dataset id %s";
 
+  /** The Constant ERROR_DELETING_SNAPSHOT: {@value}. */
+  public static final String ERROR_DELETING_SNAPSHOT = "Snapshot didn't deleted , It is Automatic";
   /** The Constant EMPTY_MESSAGE_CONTENT: {@value}. */
   public static final String CREATE_MESSAGE_ERROR = "Provider not found in the dataflow";
 
