@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -51,13 +49,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
-
-  /** The data collection service. */
-  @Autowired
-  private DataCollectionService dataCollectionService;
 
   /** The reporting dataset repository. */
   @Autowired
