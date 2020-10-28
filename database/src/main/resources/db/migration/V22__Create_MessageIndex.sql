@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS message_date_idx ON public.message ("date");
