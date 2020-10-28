@@ -3,24 +3,13 @@ package org.eea.dataset.io.notification.events;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * The Class RestoreDatasetSnapshotFailedEvent.
- */
 @Component
-public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandler {
-
-
-  /** The dataset metabase controller zuul. */
-  @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
-
+public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -29,7 +18,7 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_SNAPSHOT_FAILED_EVENT;
+    return EventType.DISABLE_SQL_RULES_ERROR_EVENT;
   }
 
   /**
@@ -41,16 +30,14 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-    Long snapshotId = notificationVO.getDatasetId();
-    String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-        : datasetMetabaseController.findDatasetMetabaseById(snapshotId).getDataSetName();
+    Long dataflowId = notificationVO.getDataflowId();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("snapshotId", snapshotId);
-    notification.put("snapshotName", datasetName);
+    notification.put("dataflowId", dataflowId);
     notification.put("error", notificationVO.getError());
     return notification;
   }
+
 
 }

@@ -642,12 +642,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         ? Boolean.TRUE.equals(isSchemaSnapshot)
             ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
+        : EventType.RELEASE_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
             ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
-        : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
+        : EventType.RELEASE_SNAPSHOT_FAILED_EVENT;
 
     // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
     // The main difference

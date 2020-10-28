@@ -383,8 +383,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateRecord")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateRecords(@PathVariable("id") Long datasetId,
+  public void updateRecords(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestBody List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
@@ -416,8 +417,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @DeleteMapping("/{id}/record/{recordId}")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void deleteRecord(@PathVariable("id") Long datasetId,
+  public void deleteRecord(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @PathVariable("recordId") String recordId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
@@ -455,8 +457,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void insertRecords(@PathVariable("datasetId") Long datasetId,
+  public void insertRecords(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records) {
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
@@ -604,8 +608,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field) {
+  public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @RequestBody FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
             EntityTypeEnum.FIELD))) {

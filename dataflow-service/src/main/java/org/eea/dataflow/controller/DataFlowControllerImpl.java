@@ -467,20 +467,20 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Creates the message.
    *
    * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param content the content
+   * @param messageVO the message VO
    * @return the message VO
    */
   @Override
   @PostMapping("/{dataflowId}/createMessage")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId, @RequestBody String content) {
+      @RequestBody MessageVO messageVO) {
     try {
-      return dataflowService.createMessage(dataflowId, providerId, content);
+      return dataflowService.createMessage(dataflowId, messageVO.getProviderId(),
+          messageVO.getContent());
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
     }
   }
 
@@ -488,12 +488,13 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find messages.
    *
    * @param dataflowId the dataflow id
+   * @param read the read
    * @param page the offset
    * @return the list
    */
   @Override
   @GetMapping("/{dataflowId}/findMessages")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam(value = "read", required = false) Boolean read,
       @RequestParam("page") int page) {
@@ -504,16 +505,14 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageId the message id
-   * @param read the read
-   * @return true, if successful
+   * @param messageVOs the message V os
    */
   @Override
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
-  public boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("messageId") Long messageId, @RequestParam("read") boolean read) {
-    return dataflowService.updateMessageReadStatus(dataflowId, messageId, read);
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody List<MessageVO> messageVOs) {
+    dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
   }
 
   /**

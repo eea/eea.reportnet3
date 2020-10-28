@@ -232,12 +232,14 @@ public enum EventType {
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC,
       "execute_new_field_propagation", false),
 
-  /** The release dataset snapshot completed event. */
-  RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+
+  /** The release snapshot completed event. */
+  RELEASE_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_released_completed_key", true),
 
-  /** The release dataset snapshot failed event. */
-  RELEASE_DATASET_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+
+  /** The release snapshot failed event. */
+  RELEASE_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_released_failed_key", true),
 
   /** The command new design field propagation. */
@@ -273,6 +275,10 @@ public enum EventType {
 
   /** The validated qc rule event. */
   VALIDATED_QC_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validated_qc_rule_event", true),
+
+  /** The disable sql rules event. */
+  DISABLE_SQL_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "disable_sql_rules_error_event", true),
 
   /** The copy dataset schema completed event. */
   COPY_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

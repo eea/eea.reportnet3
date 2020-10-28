@@ -55,7 +55,14 @@ public enum LockSignature {
   LOAD_DATASET_DATA("DataSetControllerImpl.loadDatasetData(..)"),
 
   /** IntegrationControllerImpl.executeEUDatasetExport(..) */
-  EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)");
+  EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)"),
+
+  /** The delete records. */
+  DELETE_RECORDS("DataSetControllerImpl.deleteRecord(..)"),
+
+  /** The insert records. */
+  INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)");
+
 
   /** The value. */
   private final String value;
