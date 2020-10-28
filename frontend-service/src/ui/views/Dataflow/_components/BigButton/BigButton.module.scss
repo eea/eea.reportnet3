@@ -55,6 +55,14 @@
     }
   }
 
+  .dataflowFeedback {
+    background-color: var(--c-black-rose-100);
+
+    span:hover {
+      background-color: var(--c-black-rose-200);
+    }
+  }
+
   .dataflowHelp {
     background-color: var(--c-orange-200);
 

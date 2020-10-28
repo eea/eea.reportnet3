@@ -42,6 +42,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 export const BigButtonList = ({
   dataflowState,
   handleRedirect,
+  isLeadReporterOfCountry,
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
@@ -377,6 +378,7 @@ export const BigButtonList = ({
       handleExportEuDataset,
       handleRedirect,
       isActiveButton,
+      isLeadReporterOfCountry,
       onCloneDataflow,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,

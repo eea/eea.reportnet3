@@ -4,7 +4,6 @@ import { withRouter } from 'react-router-dom';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 import map from 'lodash/map';
 
@@ -95,6 +94,20 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+
+  const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
+  const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
+
+  const isInsideACountry = !isNil(representativeId) || uniqDataProviders.length === 1;
+  const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
+    config.permissions.LEAD_REPORTER
+  ]);
+  console.log({ uniqRepresentatives }, representativeId);
+  const isLeadReporterOfCountry =
+    isLeadReporter &&
+    isInsideACountry &&
+    ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
+      (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
@@ -196,8 +209,11 @@ const Dataflow = withRouter(({ history, match }) => {
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
 
+    const isLeadDesigner = userRoles.includes(
+      config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']
+    );
+
     const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
-    const isDraft = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
 
     if (isEmpty(dataflowState.data)) {
       return {
@@ -209,25 +225,11 @@ const Dataflow = withRouter(({ history, match }) => {
       };
     }
 
-    const isInsideACountry =
-      !isUndefined(representativeId) ||
-      (!isEmpty(dataflowState.data) &&
-        !isEmpty(dataflowState.data.datasets) &&
-        uniq(map(dataflowState.data.datasets, 'dataProviderId')).length === 1);
-
     return {
-      apiKeyBtn:
-        userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) ||
-        (userRoles.includes(config.permissions['LEAD_REPORTER']) && isInsideACountry),
-
-      editBtn:
-        userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
-
-      manageEditorsBtn:
-        isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']),
-
-      manageReportersBtn: isDraft && isInsideACountry && userRoles.includes(config.permissions['LEAD_REPORTER']),
-
+      apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
+      editBtn: isDesign && isLeadDesigner,
+      manageEditorsBtn: isDesign && isLeadDesigner,
+      manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
     };
   };
@@ -464,6 +466,7 @@ const Dataflow = withRouter(({ history, match }) => {
             className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            isLeadReporterOfCountry={isLeadReporterOfCountry}
             onCleanUpReceipt={onCleanUpReceipt}
             onSaveName={onSaveName}
             onShowManageReportersDialog={onShowManageReportersDialog}
@@ -478,6 +481,7 @@ const Dataflow = withRouter(({ history, match }) => {
           <BigButtonListRepresentative
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            isLeadReporterOfCountry={isLeadReporterOfCountry}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
             onShowSnapshotDialog={onShowSnapshotDialog}
