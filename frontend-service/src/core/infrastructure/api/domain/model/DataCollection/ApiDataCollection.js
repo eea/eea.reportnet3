@@ -3,9 +3,11 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiDataCollection = {
-  create: async (dataflowId, endDate) => {
+  create: async (dataflowId, endDate, isManualTechnicalAcceptance) => {
     const response = await HTTPRequester.post({
-      url: getUrl(DataCollectionConfig.createDataCollection),
+      url: getUrl(DataCollectionConfig.createDataCollection, {
+        isManualTechnicalAcceptance
+      }),
       data: {
         idDataflow: dataflowId,
         dueDate: endDate

@@ -197,7 +197,7 @@ export const BigButtonList = ({
     setIsActiveButton(false);
 
     try {
-      return await DataCollectionService.create(dataflowId, date);
+      return await DataCollectionService.create(dataflowId, date, isManualTechnicalAcceptance);
     } catch (error) {
       console.error(error);
       const {

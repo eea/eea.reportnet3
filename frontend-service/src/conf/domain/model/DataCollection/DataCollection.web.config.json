@@ -1,4 +1,4 @@
 {
-  "createDataCollection": "/datacollection/create?isManualTechnicalAcceptance={:isManualTechnicalAcceptance}",
+  "createDataCollection": "/datacollection/create?manualCheck={:isManualTechnicalAcceptance}",
   "updateDataCollectionNewRepresentatives": "/datacollection/update/{:dataflowId}"
 }
