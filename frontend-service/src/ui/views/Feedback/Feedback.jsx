@@ -84,7 +84,6 @@ export const Feedback = withRouter(({ match, history }) => {
           onGetInitialMessages(selectedDataProvider.dataProviderId);
         }
       } else {
-        console.log('LLEGO');
         onGetInitialMessages();
       }
     }
