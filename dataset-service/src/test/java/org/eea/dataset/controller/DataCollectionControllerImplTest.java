@@ -121,13 +121,13 @@ public class DataCollectionControllerImplTest {
     Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
         .thenReturn(TypeStatusEnum.DESIGN);
     Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.anyBoolean());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
     dataCollectionControllerImpl.createEmptyDataCollection(false, dc);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.anyBoolean());
   }
 
   @Test(expected = ResponseStatusException.class)
