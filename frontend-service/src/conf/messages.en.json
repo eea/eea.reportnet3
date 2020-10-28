@@ -923,8 +923,8 @@
     "editStatusDataset": "Edit the status of the dataset ",
     "correctionRequested": "Correction requested",
     "technicallyAccept": "Technically accept",
-    "datasetStatus": "Dataset Status",
+    "finalFeedbackStatus": "Feedback Status",
     "loadDatasetsReleasesError": "Error loading datasets releases",
-    "datasetSchemaName": "Country"
+    "dataProviderName": "Country"
   }
 }

@@ -29,7 +29,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
     {
-      allStatus: [],
+      allFinalFeedbackStatus: [],
       data: [],
       datasetToEdit: {},
       filtered: false,
@@ -66,29 +66,21 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
   const isLoading = value => manualAcceptanceDatasetsDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const response = [
-    { id: 1, datasetSchemaName: 'Austria', status: 'technicallyAccept', name: 'ds1', isReleased: true },
-    { id: 2, datasetSchemaName: 'Belgium', status: 'correctionRequested', name: 'ds2', isReleased: false },
-    { id: 3, datasetSchemaName: 'Austria', status: 'technicallyAccept', name: 'ds1', isReleased: false },
-    { id: 4, datasetSchemaName: 'Belgium', status: 'correctionRequested', name: 'ds2', isReleased: true }
-  ];
-
   const onLoadManualAcceptanceDatasets = async () => {
     try {
       isLoading(true);
-      const allStatus = uniq(Object.values(response.map(dataset => dataset.status)));
+
+      const response = await DataflowService.datasetsFinalFeedback(dataflowId);
+      const allFinalFeedbackStatus = uniq(Object.values(response.map(dataset => dataset.finalFeedbackStatus)));
       manualAcceptanceDatasetsDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: response, filteredData: response, filtered: false, allStatus: allStatus }
+        payload: {
+          data: response,
+          filteredData: response,
+          filtered: false,
+          allFinalFeedbackStatus: allFinalFeedbackStatus
+        }
       });
-
-      // const response = await DataflowService.reporting(dataflowId);
-      // console.log('response', response.datasets);
-      // const allStatus = uniq(Object.values(response.map(dataset => dataset.status)));
-      // manualAcceptanceDatasetsDispatch({
-      //   type: 'INITIAL_LOAD',
-      //   payload: { data: response.datasets, filteredData: response.datasets, filtered: false, allStatus: allStatus }
-      // });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' });
     } finally {
@@ -102,9 +94,9 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
   const getOrderedValidations = datasets => {
     const datasetsWithPriority = [
-      { id: 'name', index: 0 },
-      { id: 'datasetSchemaName', index: 1 },
-      { id: 'status', index: 2 },
+      { id: 'datasetName', index: 0 },
+      { id: 'dataProviderName', index: 1 },
+      { id: 'finalFeedbackStatus', index: 2 },
       { id: 'isReleased', index: 3 }
     ];
 
@@ -179,8 +171,8 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
-        inputOptions={['name']}
-        selectOptions={['datasetSchemaName', 'status']}
+        inputOptions={['datasetName']}
+        selectOptions={['dataProviderName', 'finalFeedbackStatus']}
       />
 
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
@@ -200,7 +192,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
       {manualAcceptanceDatasetsState.isManageDatasetDialogVisible && (
         <ManageManualAcceptanceDataset
-          allStatus={manualAcceptanceDatasetsState.allStatus}
+          allFinalFeedbackStatus={manualAcceptanceDatasetsState.allFinalFeedbackStatus}
           dataset={manualAcceptanceDatasetsState.datasetToEdit}
           isManageDatasetDialogVisible={manualAcceptanceDatasetsState.isManageDatasetDialogVisible}
           manageDialogs={handleManageAcceptanceDatasetDialog}

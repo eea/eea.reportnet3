@@ -234,6 +234,21 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   return datasetsDashboardsData;
 };
 
+const datasetsFinalFeedback = async dataflowId => {
+  const datasetsFinalFeedbackDTO = await apiDataflow.datasetsFinalFeedback(dataflowId);
+
+  const datasetsFeedback = datasetsFinalFeedbackDTO.map(dataset => {
+    return {
+      dataProviderName: dataset.dataSetName,
+      datasetName: dataset.nameDatasetSchema,
+      isReleased: dataset.isReleased,
+      finalFeedbackStatus: dataset.finalFeedbackStatus || 'technicallyAccept'
+    };
+  });
+
+  return datasetsFeedback;
+};
+
 const datasetsReleasedStatus = async dataflowId => {
   const datasetsReleasedStatusDTO = await apiDataflow.datasetsReleasedStatus(dataflowId);
   datasetsReleasedStatusDTO.sort((a, b) => {
@@ -583,6 +598,7 @@ export const ApiDataflowRepository = {
   completed,
   create,
   dataflowDetails,
+  datasetsFinalFeedback,
   datasetsReleasedStatus,
   datasetsValidationStatistics,
   deleteById,
