@@ -338,15 +338,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         long errorsCount =
             rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE.equals(ruleStatus)).count();
         if (errorsCount > 0) {
-          String notificationError =
-              "Data Collection creation proccess stoped by SQL rules contains errors: "
-                  + errorsCount;
-          NotificationVO notificationVO =
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .dataflowId(dataflowId).error(notificationError).build();
+          NotificationVO notificationVO = NotificationVO.builder()
+              .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
+              .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
+              .disabledRules(rulesControllerZuul.getAllDisabledRules(dataflowId, designs)).build();
           LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
           releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
-          releaseLockAndNotification(dataflowId, notificationError, isCreation);
+          releaseLockAndNotification(dataflowId, null, isCreation);
           rulesOk = false;
         }
       }

@@ -5,6 +5,7 @@ package org.eea.interfaces.controller.validation;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -304,6 +305,28 @@ public interface RulesController {
   @PostMapping("/validateSqlRules")
   public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  Integer getAllDisabledRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs);
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  Integer getAllUncheckedRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs);
 
 
 }

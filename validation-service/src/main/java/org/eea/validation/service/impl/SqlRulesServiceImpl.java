@@ -701,13 +701,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }
-    String notificationError = errorRulesList.size() + " SQL rules contains errors.";
-    NotificationVO notificationVO =
-        NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-            .datasetId(datasetId).error(notificationError).build();
-    LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-    releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+    if (!errorRulesList.isEmpty()) {
 
+      RulesSchema rulesdisabled =
+          rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
+      RulesSchema rulesUnchecked =
+          rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+      NotificationVO notificationVO =
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetId(datasetId).invalidRules(rulesUnchecked.getRules().size())
+              .disabledRules(rulesdisabled.getRules().size()).build();
+      LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+      releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+    }
   }
 
 }
