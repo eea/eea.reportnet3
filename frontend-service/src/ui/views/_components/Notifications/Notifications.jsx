@@ -91,7 +91,7 @@ const Notifications = () => {
       });
     }
 
-    if (headerHeight === 70) {
+    if (headerHeight === 64) {
       setPosition({
         marginTop: `${-5}px`
       });

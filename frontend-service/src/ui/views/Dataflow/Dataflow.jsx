@@ -6,6 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
+import map from 'lodash/map';
 
 import styles from './Dataflow.module.scss';
 
@@ -145,13 +146,22 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'edit'
       };
 
-      const manageRightsBtn = {
+      const manageEditorsBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
-        isVisible: buttonsVisibility.manageRightsBtn,
-        label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
+        isVisible: buttonsVisibility.manageEditorsBtn,
+        label: 'manageEditorsRights',
         onClick: () => manageDialogs('isShareRightsDialogVisible', true),
-        title: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights'
+        title: 'manageEditorsRights'
+      };
+
+      const manageReportersBtn = {
+        className: 'dataflow-manage-rights-help-step',
+        icon: 'userConfig',
+        isVisible: buttonsVisibility.manageReportersBtn,
+        label: 'manageReportersRights',
+        onClick: () => manageDialogs('isShareRightsDialogVisible', true),
+        title: 'manageReportersRights'
       };
 
       const propertiesBtn = {
@@ -163,7 +173,7 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRightsBtn];
+      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
@@ -193,35 +203,33 @@ const Dataflow = withRouter(({ history, match }) => {
     const isDraft = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
 
     if (isEmpty(dataflowState.data)) {
-      return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
+      return {
+        apiKeyBtn: false,
+        editBtn: false,
+        manageEditorsBtn: false,
+        manageReportersBtn: false,
+        propertiesBtn: false
+      };
     }
 
-    let buttonsVisibility;
-    if (isDesign) {
-      buttonsVisibility = true;
-    }
-
-    if (isDraft) {
-      if (dataflowState.isCustodian) {
-        buttonsVisibility = isUndefined(representativeId);
-      } else {
-        if (!isUndefined(representativeId)) {
-          buttonsVisibility = true;
-        } else {
-          buttonsVisibility = dataflowState.data.representatives.length === 1;
-        }
-      }
-    }
+    const isInsideACountry =
+      !isUndefined(representativeId) ||
+      (!isEmpty(dataflowState.data) &&
+        !isEmpty(dataflowState.data.datasets) &&
+        uniq(map(dataflowState.data.datasets, 'dataProviderId')).length === 1);
 
     return {
-      apiKeyBtn: buttonsVisibility,
+      apiKeyBtn:
+        userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) ||
+        (userRoles.includes(config.permissions['LEAD_REPORTER']) && isInsideACountry),
 
       editBtn:
         userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
 
-      manageRightsBtn:
-        (isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD'])) ||
-        (isDraft && buttonsVisibility && userRoles.includes(config.permissions['LEAD_REPORTER'])),
+      manageEditorsBtn:
+        isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']),
+
+      manageReportersBtn: isDraft && isInsideACountry && userRoles.includes(config.permissions['LEAD_REPORTER']),
 
       propertiesBtn: true
     };
