@@ -39,6 +39,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowState,
+  dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
   onCleanUpReceipt,
@@ -64,7 +65,6 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
-  const [dataProviderId, setDataProviderId] = useState(null);
   const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -82,7 +82,7 @@ export const BigButtonList = ({
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-
+  const [providerId, setProviderId] = useState(null);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
@@ -149,10 +149,10 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, dataProviderId) => {
+  const getDataHistoricReleases = (datasetId, value, providerId) => {
     setDatasetId(datasetId);
     setHistoricReleasesDialogHeader(value);
-    setDataProviderId(dataProviderId);
+    setProviderId(providerId);
   };
 
   const getDeleteSchemaIndex = index => {
@@ -357,6 +357,7 @@ export const BigButtonList = ({
     useBigButtonList({
       dataflowId,
       dataflowState,
+      dataProviderId,
       getDatasetData,
       getDataHistoricReleases,
       getDeleteSchemaIndex,
@@ -464,7 +465,7 @@ export const BigButtonList = ({
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}
-            dataProviderId={dataProviderId}
+            dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />

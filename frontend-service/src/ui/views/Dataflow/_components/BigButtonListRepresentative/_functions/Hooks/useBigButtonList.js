@@ -14,6 +14,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowState,
+  dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
@@ -26,7 +27,16 @@ const useBigButtonList = ({
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
-
+  console.log(
+    getUrl(
+      routes.DATAFLOW_FEEDBACK,
+      {
+        dataflowId: dataflowState.id,
+        representativeId: dataProviderId
+      },
+      true
+    )
+  );
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
@@ -34,7 +44,7 @@ const useBigButtonList = ({
   }, [userContext]);
 
   const getButtonsVisibility = () => ({
-    feedback: false, //isLeadReporterOfCountry,
+    feedback: isLeadReporterOfCountry,
     receipt: isLeadReporterOfCountry,
     release: isLeadReporterOfCountry
   });
@@ -44,21 +54,25 @@ const useBigButtonList = ({
     buttonClass: 'dataflowFeedback',
     buttonIcon: 'comments',
     caption: resources.messages['dataflowFeedback'],
-    handleRedirect: () =>
-      handleRedirect(
+    handleRedirect: () => {
+      console.log({ dataProviderId });
+      return handleRedirect(
         getUrl(
           routes.DATAFLOW_FEEDBACK,
           {
-            dataflowId: dataflowState.id
+            dataflowId: dataflowState.id,
+            representativeId: dataProviderId
           },
           true
         )
-      ),
+      );
+    },
     helpClassName: 'dataflow-feedback-help-step',
     onWheel: getUrl(
       routes.DATAFLOW_FEEDBACK,
       {
-        dataflowId: dataflowState.id
+        dataflowId: dataflowState.id,
+        representativeId: dataProviderId
       },
       true
     ),
@@ -134,14 +148,7 @@ const useBigButtonList = ({
           },
           true
         ),
-        // model: !dataflowState.hasWritePermissions && [
-        //   {
-        //     label: resources.messages['properties'],
-        //     icon: 'info',
-        //     disabled: true
-        //   }
-        // ],
-        visibility: !isEmpty(dataflowState.data.datasets)
+        visibility: true
       };
     });
 

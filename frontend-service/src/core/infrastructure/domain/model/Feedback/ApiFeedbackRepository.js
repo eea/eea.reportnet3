@@ -356,7 +356,13 @@ const loadMessagesByFlag = async () => {
   return await apiFeedback.loadMessagesByFlag();
 };
 
-const markAsRead = async (dataflowId, messageIds, read) => {};
+const markAsRead = async (dataflowId, messageIds, read) => {
+  const messages = messageIds.map(messageId => {
+    return { id: messageId, read };
+  });
+  const updated = await apiFeedback.markAsRead(dataflowId, messages);
+  return updated;
+};
 
 export const ApiFeedbackRepository = {
   create,

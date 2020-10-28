@@ -19,6 +19,7 @@ export const apiDataset = {
     }
   },
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
+    console.log(datasetTableRecords);
     try {
       const response = await HTTPRequester.post({
         url: getUrl(DatasetConfig.addNewRecord, {
