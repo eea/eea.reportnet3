@@ -452,6 +452,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
   @Override
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
@@ -466,7 +472,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-
-    datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+    try {
+      datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
   }
 }

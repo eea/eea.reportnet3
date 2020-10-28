@@ -29,7 +29,7 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
+    return EventType.RELEASE_SNAPSHOT_FAILED_EVENT;
   }
 
   /**
