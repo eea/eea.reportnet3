@@ -298,8 +298,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   @Override
   @Async
-  public void createEmptyDataCollection(Long dataflowId, Date dueDate, Boolean checkRules) {
-    manageDataCollection(dataflowId, dueDate, true, checkRules);
+  public void createEmptyDataCollection(Long dataflowId, Date dueDate,
+      Boolean stopAndNotifySQLErrors) {
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors);
   }
 
   /**
@@ -310,7 +311,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param isCreation the is creation
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      Boolean checkRules) {
+      Boolean stopAndNotifySQLErrors) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
@@ -331,21 +332,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           });
         }
       });
-      if (checkRules && rulesWithError.contains(false)) {
-        int errorsCount = 0;
-        for (Boolean ruleStatus : rulesWithError) {
-          if (ruleStatus.equals(Boolean.FALSE)) {
-            errorsCount++;
-          }
+      if (stopAndNotifySQLErrors) {
+        long errorsCount =
+            rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE.equals(ruleStatus)).count();
+        if (errorsCount > 0) {
+          String notificationError =
+              "Data Collection creation proccess stoped by SQL rules contains errors: "
+                  + errorsCount;
+          NotificationVO notificationVO =
+              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                  .dataflowId(dataflowId).error(notificationError).build();
+          LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+          releaseNotification(EventType.DATA_COLLECTION_DISABLE_SQL_RULES_EVENT, notificationVO);
+          releaseLockAndNotification(dataflowId, notificationError, isCreation);
+          rulesOk = false;
         }
-        String notificationError =
-            "Data Collection creation proccess stoped by SQL rules contains errors: " + errorsCount;
-        NotificationVO notificationVO =
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .dataflowId(dataflowId).error(notificationError).build();
-        LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-        releaseNotification(EventType.DATA_COLLECTION_DISABLE_SQL_RULES_EVENT, notificationVO);
-        rulesOk = false;
       }
     }
     if (rulesOk) {

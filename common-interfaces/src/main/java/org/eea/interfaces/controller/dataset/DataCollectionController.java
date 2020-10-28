@@ -38,7 +38,8 @@ public interface DataCollectionController {
    */
   @PostMapping("/create")
   void createEmptyDataCollection(
-      @RequestParam(defaultValue = "true", name = "checkRules") Boolean checkRules,
+      @RequestParam(defaultValue = "true",
+          name = "stopAndNotifySQLErrors") Boolean stopAndNotifySQLErrors,
       @RequestBody DataCollectionVO dataCollectionVO);
 
 

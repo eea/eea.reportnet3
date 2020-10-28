@@ -91,7 +91,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void createEmptyDataCollection(
-      @RequestParam(defaultValue = "true", name = "checkRules") Boolean checkRules,
+      @RequestParam(defaultValue = "true",
+          name = "stopAndNotifySQLErrors") Boolean stopAndNotifySQLErrors,
       @RequestBody @LockCriteria(name = "dataflowId",
           path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
@@ -115,7 +116,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    dataCollectionService.createEmptyDataCollection(dataflowId, date, checkRules);
+    dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 
