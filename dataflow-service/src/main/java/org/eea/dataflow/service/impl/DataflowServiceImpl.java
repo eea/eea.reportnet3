@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
@@ -597,7 +596,7 @@ public class DataflowServiceImpl implements DataflowService {
     messageVOs.forEach(messageVO -> map.put(messageVO.getId(), messageVO.isRead()));
 
     List<Message> messages = messageRepository.findByDataflowIdAndIdIn(dataflowId, map.keySet());
-    Stream<Message> messageStream = messages.stream();
+    int previousSize = messages.size();
 
     Collection<? extends GrantedAuthority> authorities =
         SecurityContextHolder.getContext().getAuthentication().getAuthorities();
@@ -609,7 +608,7 @@ public class DataflowServiceImpl implements DataflowService {
             ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
 
       // Allowed messages to update: direction=TRUE and providerId=ANY
-      messageStream = messageStream.filter(Message::isDirection);
+      messages = messages.stream().filter(Message::isDirection).collect(Collectors.toList());
     }
 
     // Case: DATAFLOW_LEAD_REPORTER, DATAFLOW_REPORTER_READ, DATAFLOW_REPOTER_WRITE
@@ -618,19 +617,21 @@ public class DataflowServiceImpl implements DataflowService {
           datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
 
       // Allowed messages to update: direction=FALSE and providerId=USER_DEPENDANT
-      messageStream = messageStream.filter(message -> !message.isDirection())
-          .filter(message -> providerIds.contains(message.getProviderId()));
+      messages = messages.stream()
+          .filter(
+              message -> !message.isDirection() && providerIds.contains(message.getProviderId()))
+          .collect(Collectors.toList());
     }
 
-    List<Message> messagesFiltered = messageStream.map(message -> {
-      message.setRead(map.get(message.getId()));
-      return message;
-    }).collect(Collectors.toList());
-
-    if (messages.size() != messagesFiltered.size()) {
+    if (messages.size() != previousSize) {
       LOG_ERROR.error("Messaging authorization failed: unable to update all messages");
       throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
     }
+
+    messages = messages.stream().map(message -> {
+      message.setRead(map.get(message.getId()));
+      return message;
+    }).collect(Collectors.toList());
 
     messageRepository.saveAll(messages);
   }
