@@ -11,5 +11,5 @@
   "releaseSnapshotReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/release",
   "restoreSnapshotReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/restore",
 
-  "releaseDataflow": "/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release"
+  "releaseDataflow": "/snapshot/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release"
 }
