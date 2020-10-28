@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,9 @@ public class DataflowServiceImpl implements DataflowService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The max message length. */
   @Value("${spring.health.db.check.frequency}")
@@ -519,35 +523,25 @@ public class DataflowServiceImpl implements DataflowService {
   public MessageVO createMessage(Long dataflowId, Long providerId, String content)
       throws EEAException {
 
-    Long datasetId = datasetMetabaseControllerZuul
-        .getDatasetIdByDataflowIdAndDataProviderId(dataflowId, providerId);
+    boolean direction = verifyMessagingPermissionsAndGetDirection(dataflowId, providerId);
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    if (null != datasetId) {
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      boolean isLeadReporter = authentication.getAuthorities().contains(new SimpleGrantedAuthority(
-          ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(dataflowId)));
-
-      if (!isLeadReporter || authentication.getAuthorities().contains(new SimpleGrantedAuthority(
-          ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(datasetId)))) {
-
-        if (content.length() > maxMessageLength) {
-          content = content.substring(0, maxMessageLength);
-        }
-
-        Message message = new Message();
-        message.setContent(content);
-        message.setDataflowId(dataflowId);
-        message.setProviderId(providerId);
-        message.setDate(new Date());
-        message.setRead(false);
-        message.setUserName(authentication.getName());
-        message.setDirection(isLeadReporter);
-
-        return messageMapper.entityToClass(messageRepository.save(message));
-      }
+    if (content.length() > maxMessageLength) {
+      content = content.substring(0, maxMessageLength);
     }
 
-    throw new EEAException(EEAErrorMessage.CREATE_MESSAGE_ERROR);
+    Message message = new Message();
+    message.setContent(content);
+    message.setDataflowId(dataflowId);
+    message.setProviderId(providerId);
+    message.setDate(new Date());
+    message.setRead(false);
+    message.setUserName(userName);
+    message.setDirection(direction);
+    message = messageRepository.save(message);
+
+    LOG.info("Message created: message={}", message);
+    return messageMapper.entityToClass(message);
   }
 
   /**
@@ -560,10 +554,28 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public List<MessageVO> findMessages(Long dataflowId, Boolean read, int page) {
+
+    Page<Message> pageResponse;
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
-    Page<Message> pageResponse =
-        null != read ? messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest)
-            : messageRepository.findByDataflowId(dataflowId, pageRequest);
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+    if (authorities.contains(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
+      pageResponse =
+          null != read ? messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest)
+              : messageRepository.findByDataflowId(dataflowId, pageRequest);
+    } else {
+      List<Long> providerIds =
+          datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
+      pageResponse = null != read
+          ? messageRepository.findByDataflowIdAndProviderIdInAndRead(dataflowId, providerIds, read,
+              pageRequest)
+          : messageRepository.findByDataflowIdAndProviderIdIn(dataflowId, providerIds, pageRequest);
+    }
+
     return messageMapper.entityListToClass(pageResponse.getContent());
   }
 
@@ -571,14 +583,29 @@ public class DataflowServiceImpl implements DataflowService {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageId the message id
-   * @param read the read
-   * @return true, if successful
+   * @param messageVOs the message V os
    */
   @Override
   @Transactional
-  public boolean updateMessageReadStatus(Long dataflowId, Long messageId, boolean read) {
-    return messageRepository.updateReadStatus(dataflowId, messageId, read) > 0;
+  public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) {
+    List<Long> readTrueMessageIds = new ArrayList<>();
+    List<Long> readFalseMessageIds = new ArrayList<>();
+
+    for (MessageVO messageVO : messageVOs) {
+      if (messageVO.isRead()) {
+        readTrueMessageIds.add(messageVO.getId());
+      } else {
+        readFalseMessageIds.add(messageVO.getId());
+      }
+    }
+
+    if (!readTrueMessageIds.isEmpty()) {
+      messageRepository.updateReadStatus(dataflowId, readTrueMessageIds, true);
+    }
+
+    if (!readFalseMessageIds.isEmpty()) {
+      messageRepository.updateReadStatus(dataflowId, readFalseMessageIds, false);
+    }
   }
 
   /**
@@ -756,5 +783,53 @@ public class DataflowServiceImpl implements DataflowService {
         dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
       }
     }
+  }
+
+  /**
+   * Verify messaging permissions and get direction.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return true if sender (reporter) or false if receiver (custodian)
+   * @throws EEAException the EEA exception
+   */
+  private boolean verifyMessagingPermissionsAndGetDirection(Long dataflowId, Long providerId)
+      throws EEAException {
+
+    List<Long> datasetIds = datasetMetabaseControllerZuul
+        .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providerId);
+
+    if (null != datasetIds && !datasetIds.isEmpty()) {
+      Collection<? extends GrantedAuthority> authorities =
+          SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+      boolean direction = authorities
+          .contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(dataflowId)));
+
+      boolean authorizedSender = false;
+      if (direction) {
+        authorizedSender = datasetIds.stream()
+            .anyMatch(datasetId -> authorities
+                .contains(new SimpleGrantedAuthority(
+                    ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(datasetId)))
+                || authorities.contains(new SimpleGrantedAuthority(
+                    ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(datasetId)))
+                || authorities.contains(new SimpleGrantedAuthority(
+                    ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(datasetId))));
+      }
+
+      if (!direction || authorizedSender) {
+        return direction;
+      }
+    }
+
+    LOG_ERROR.error("Messaging authorization failed: dataflowId={}, providerId={}", dataflowId,
+        providerId);
+    throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
   }
 }
