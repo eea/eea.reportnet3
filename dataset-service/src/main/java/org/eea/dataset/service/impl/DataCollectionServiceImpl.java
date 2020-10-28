@@ -295,11 +295,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      Boolean stopAndNotifySQLErrors) {
+      boolean stopAndNotifySQLErrors) {
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors);
   }
 
@@ -309,9 +310,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    * @param isCreation the is creation
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      Boolean stopAndNotifySQLErrors) {
+      boolean stopAndNotifySQLErrors) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
@@ -343,7 +345,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                   .dataflowId(dataflowId).error(notificationError).build();
           LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-          releaseNotification(EventType.DATA_COLLECTION_DISABLE_SQL_RULES_EVENT, notificationVO);
+          releaseNotification(EventType.DATA_COLLECTION_SQL_RULES_VALIDATION_ERROR_EVENT,
+              notificationVO);
           releaseLockAndNotification(dataflowId, notificationError, isCreation);
           rulesOk = false;
         }

@@ -39,8 +39,9 @@ public interface DataCollectionService {
    *
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
    */
-  void createEmptyDataCollection(Long dataflowId, Date dueDate, Boolean checkRules);
+  void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean stopAndNotifySQLErrors);
 
   /**
    * Adds the foreign relations from new reportings.

@@ -83,6 +83,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   /**
    * Creates the empty data collection.
    *
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param dataCollectionVO the dataflow collection vo
    */
   @Override
@@ -92,7 +93,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
-          name = "stopAndNotifySQLErrors") Boolean stopAndNotifySQLErrors,
+          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestBody @LockCriteria(name = "dataflowId",
           path = "idDataflow") DataCollectionVO dataCollectionVO) {
 

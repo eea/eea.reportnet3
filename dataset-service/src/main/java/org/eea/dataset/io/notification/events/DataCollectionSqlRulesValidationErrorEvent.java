@@ -9,7 +9,7 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataCollectionDisableSqlRulesEvent implements NotificableEventHandler {
+public class DataCollectionSqlRulesValidationErrorEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -18,7 +18,7 @@ public class DataCollectionDisableSqlRulesEvent implements NotificableEventHandl
    */
   @Override
   public EventType getEventType() {
-    return EventType.DATA_COLLECTION_DISABLE_SQL_RULES_EVENT;
+    return EventType.DATA_COLLECTION_SQL_RULES_VALIDATION_ERROR_EVENT;
   }
 
   /**

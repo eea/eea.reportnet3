@@ -276,8 +276,8 @@ public enum EventType {
 
 
   /** The data collection disable sql rules event. */
-  DATA_COLLECTION_DISABLE_SQL_RULES_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "data_collection_disable_sql_rules_event", true),
+  DATA_COLLECTION_SQL_RULES_VALIDATION_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "data_collection_sql_rules_validation_error_event", true),
 
   /** The disable sql rules event. */
   DISABLE_SQL_RULES_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_sql_rules_event", true),
