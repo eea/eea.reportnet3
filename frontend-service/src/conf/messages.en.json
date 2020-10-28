@@ -911,7 +911,7 @@
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "manualTechnicalAcceptanceHeader": "Datasets with manual technical acceptance for dataflow",
     "manualTechnicalAcceptance": "Manual technical acceptance",
-    "manualTechnicalAcceptanceCheck": "Will this data collection have a manual technical acceptance after release data?",
+    "manualTechnicalAcceptanceCheck": "Check this checkbox if you want that this data collection have a manual technical acceptance after release data.",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
     "webformTableWithLessRecords": "There are no records in the table.",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records.",

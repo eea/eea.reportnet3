@@ -510,8 +510,8 @@ const useBigButtonList = ({
 
   const manualTechnicalAcceptanceBigButton = [
     {
-      buttonClass: 'schemaDataset',
-      buttonIcon: 'comments',
+      buttonClass: 'manualTechnicalAcceptance',
+      buttonIcon: 'reply',
       caption: resources.messages['manualTechnicalAcceptance'],
       handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
       layout: 'defaultBigButton',
