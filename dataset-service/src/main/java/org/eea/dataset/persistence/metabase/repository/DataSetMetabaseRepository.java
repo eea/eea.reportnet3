@@ -92,4 +92,13 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   @Query("SELECT d.id FROM DataSetMetabase d WHERE d.dataflowId = :dataflowId AND d.dataProviderId = :providerId")
   List<Long> getDatasetIdsByDataflowIdAndDataProviderId(@Param("dataflowId") Long dataflowId,
       @Param("providerId") Long dataProviderId);
+
+  /**
+   * Find by dataflow id and provider id not null.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Query("SELECT d FROM DataSetMetabase d WHERE d.dataflowId = :dataflowId AND d.dataProviderId is not null")
+  List<DataSetMetabase> findByDataflowIdAndProviderIdNotNull(@Param("dataflowId") Long dataflowId);
 }

@@ -202,4 +202,13 @@ public interface DatasetMetabaseController {
   @GetMapping("/private/getDatasetIdsByDataflowIdAndDataProviderId")
   List<Long> getDatasetIdsByDataflowIdAndDataProviderId(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("dataProviderId") Long dataProviderId);
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  @GetMapping("/private/getUserProviderIdsByDataflowId")
+  List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId);
 }

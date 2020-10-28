@@ -348,4 +348,16 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
         dataProviderId);
   }
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  @Override
+  @GetMapping("/private/getUserProviderIdsByDataflowId")
+  public List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId) {
+    return datasetMetabaseService.getUserProviderIdsByDataflowId(dataflowId);
+  }
 }

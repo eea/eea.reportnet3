@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.List;
 import org.eea.dataflow.persistence.domain.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,29 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    * @return the page
    */
   Page<Message> findByDataflowId(Long dataflowId, Pageable pageable);
+
+  /**
+   * Find by dataflow id and provider ids and read.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerIds the provider ids
+   * @param read the read
+   * @param pageRequest the page request
+   * @return the page
+   */
+  Page<Message> findByDataflowIdAndProviderIdInAndRead(Long dataflowId, List<Long> providerIds,
+      Boolean read, Pageable page);
+
+  /**
+   * Find by dataflow id and provider ids.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerIds the provider ids
+   * @param pageRequest the page request
+   * @return the page
+   */
+  Page<Message> findByDataflowIdAndProviderIdIn(Long dataflowId, List<Long> providerIds,
+      Pageable page);
 
   /**
    * Update read status.

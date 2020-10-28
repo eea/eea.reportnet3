@@ -554,10 +554,28 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public List<MessageVO> findMessages(Long dataflowId, Boolean read, int page) {
+
+    Page<Message> pageResponse;
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
-    Page<Message> pageResponse =
-        null != read ? messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest)
-            : messageRepository.findByDataflowId(dataflowId, pageRequest);
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+    if (authorities.contains(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
+      pageResponse =
+          null != read ? messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest)
+              : messageRepository.findByDataflowId(dataflowId, pageRequest);
+    } else {
+      List<Long> providerIds =
+          datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
+      pageResponse = null != read
+          ? messageRepository.findByDataflowIdAndProviderIdInAndRead(dataflowId, providerIds, read,
+              pageRequest)
+          : messageRepository.findByDataflowIdAndProviderIdIn(dataflowId, providerIds, pageRequest);
+    }
+
     return messageMapper.entityListToClass(pageResponse.getContent());
   }
 

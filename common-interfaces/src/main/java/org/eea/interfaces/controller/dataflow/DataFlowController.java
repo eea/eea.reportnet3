@@ -158,13 +158,12 @@ public interface DataFlowController {
    * Creates the message.
    *
    * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param content the content
+   * @param messageVO the message VO
    * @return the message VO
    */
   @PostMapping("/{dataflowId}/createMessage")
   MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId, @RequestBody String content);
+      @RequestBody MessageVO messageVO);
 
   /**
    * Find messages.
@@ -182,11 +181,10 @@ public interface DataFlowController {
    * Update message read status.
    *
    * @param dataflowId the dataflow id
-   * @param messageId the message id
-   * @param read the read
+   * @param messageVO the message VO
    * @return true, if successful
    */
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
   boolean updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("messageId") Long messageId, @RequestParam("read") boolean read);
+      @RequestBody MessageVO messageVO);
 }
