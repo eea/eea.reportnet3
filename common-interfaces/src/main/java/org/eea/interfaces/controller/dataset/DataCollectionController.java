@@ -37,8 +37,9 @@ public interface DataCollectionController {
    * @param dataCollectionVO the data collection VO
    */
   @PostMapping("/create")
-  void createEmptyDataCollection(@RequestParam(defaultValue = "true", required = false,
-      name = "checkRules") Boolean checkRules, @RequestBody DataCollectionVO dataCollectionVO);
+  void createEmptyDataCollection(
+      @RequestParam(defaultValue = "true", name = "checkRules") Boolean checkRules,
+      @RequestBody DataCollectionVO dataCollectionVO);
 
 
   /**

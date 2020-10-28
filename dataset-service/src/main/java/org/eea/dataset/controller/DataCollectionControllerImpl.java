@@ -91,8 +91,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void createEmptyDataCollection(
-      @RequestParam(defaultValue = "true", required = false,
-          name = "checkRules") Boolean checkRules,
+      @RequestParam(defaultValue = "true", name = "checkRules") Boolean checkRules,
       @RequestBody @LockCriteria(name = "dataflowId",
           path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
