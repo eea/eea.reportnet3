@@ -9,7 +9,7 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataCollectionSqlRulesValidationErrorEvent implements NotificableEventHandler {
+public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -18,7 +18,7 @@ public class DataCollectionSqlRulesValidationErrorEvent implements NotificableEv
    */
   @Override
   public EventType getEventType() {
-    return EventType.DATA_COLLECTION_SQL_RULES_VALIDATION_ERROR_EVENT;
+    return EventType.DISABLE_SQL_RULES_ERROR_EVENT;
   }
 
   /**
@@ -30,11 +30,11 @@ public class DataCollectionSqlRulesValidationErrorEvent implements NotificableEv
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-    Long dataflowId = notificationVO.getDataflowId();
+    Long datasetId = notificationVO.getDatasetId();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("dataflowId", dataflowId);
+    notification.put("datasetId", datasetId);
     notification.put("error", notificationVO.getError());
     return notification;
   }

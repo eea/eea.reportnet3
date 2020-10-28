@@ -706,7 +706,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
             .datasetId(datasetId).error(notificationError).build();
     LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-    releaseNotification(EventType.DISABLE_SQL_RULES_EVENT, notificationVO);
+    releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
 
   }
 

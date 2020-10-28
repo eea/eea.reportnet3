@@ -274,13 +274,9 @@ public enum EventType {
   /** The validated qc rule event. */
   VALIDATED_QC_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validated_qc_rule_event", true),
 
-
-  /** The data collection disable sql rules event. */
-  DATA_COLLECTION_SQL_RULES_VALIDATION_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "data_collection_sql_rules_validation_error_event", true),
-
   /** The disable sql rules event. */
-  DISABLE_SQL_RULES_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_sql_rules_event", true),
+  DISABLE_SQL_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "disable_sql_rules_error_event", true),
 
   /** The copy dataset schema completed event. */
   COPY_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

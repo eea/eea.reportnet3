@@ -345,8 +345,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                   .dataflowId(dataflowId).error(notificationError).build();
           LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-          releaseNotification(EventType.DATA_COLLECTION_SQL_RULES_VALIDATION_ERROR_EVENT,
-              notificationVO);
+          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
           releaseLockAndNotification(dataflowId, notificationError, isCreation);
           rulesOk = false;
         }
