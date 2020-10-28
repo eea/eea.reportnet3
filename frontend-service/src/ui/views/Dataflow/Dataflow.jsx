@@ -102,7 +102,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
     config.permissions.LEAD_REPORTER
   ]);
-  console.log({ uniqRepresentatives }, representativeId);
+
   const isLeadReporterOfCountry =
     isLeadReporter &&
     isInsideACountry &&

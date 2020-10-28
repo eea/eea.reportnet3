@@ -81,7 +81,8 @@ const useBigButtonList = ({
       newSchema: isDesigner,
       updateReporters: isLeadDesigner,
       receipt: isLeadReporterOfCountry,
-      release: isLeadReporterOfCountry
+      release: isLeadReporterOfCountry,
+      manualTechnicalAcceptance: isLeadDesigner
     };
   };
 
@@ -501,7 +502,7 @@ const useBigButtonList = ({
       layout: 'defaultBigButton',
       model: exportEuDatasetModel,
       visibility:
-        buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
+        buttonsVisibility.manualTechnicalAcceptance && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }
   ];
 
