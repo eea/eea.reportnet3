@@ -91,6 +91,8 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
             const parsedTable = onParseWebformData([elements[index]], filteredTable);
 
             result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
+          } else if (elements[index].type === 'LABEL') {
+            result.push({ ...elements[index] });
           }
         }
 
@@ -146,7 +148,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
             }
             iconPos={'right'}
             key={i}
-            label={webform.title}
+            label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
             style={{ display: isReporting && !isCreated ? 'none' : '' }}
           />

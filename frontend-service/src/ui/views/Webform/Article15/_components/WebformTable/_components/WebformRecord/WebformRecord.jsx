@@ -424,6 +424,8 @@ export const WebformRecord = ({
             </div>
           )
         );
+      } else if (element.type === 'LABEL') {
+        return <h2 className={styles[element.level]}>{element.title}</h2>;
       } else {
         return (
           !isSubTableVisible && (
