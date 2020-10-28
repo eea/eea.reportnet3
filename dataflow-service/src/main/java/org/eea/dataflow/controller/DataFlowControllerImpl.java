@@ -512,7 +512,12 @@ public class DataFlowControllerImpl implements DataFlowController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs) {
-    dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
+    try {
+      dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+    }
   }
 
   /**

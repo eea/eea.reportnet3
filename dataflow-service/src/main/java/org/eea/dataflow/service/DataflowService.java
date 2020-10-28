@@ -193,6 +193,7 @@ public interface DataflowService {
    *
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
+   * @throws EEAException
    */
-  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs);
+  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) throws EEAException;
 }
