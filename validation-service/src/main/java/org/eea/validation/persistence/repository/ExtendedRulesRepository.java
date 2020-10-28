@@ -164,4 +164,20 @@ public interface ExtendedRulesRepository {
    * @return the list
    */
   List<Rule> findSqlRules(ObjectId datasetSchemaId);
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the all disabled rules
+   */
+  RulesSchema getAllDisabledRules(ObjectId datasetSchemaId);
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the all unchecked rules
+   */
+  RulesSchema getAllUncheckedRules(ObjectId datasetSchemaId);
 }
