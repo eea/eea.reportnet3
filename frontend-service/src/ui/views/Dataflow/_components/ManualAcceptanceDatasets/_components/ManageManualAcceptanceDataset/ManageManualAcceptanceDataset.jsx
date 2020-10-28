@@ -130,10 +130,8 @@ export const ManageManualAcceptanceDataset = ({
     ));
   };
 
-  const allFeedbackStatus = ['correctionRequested', 'technicallyAccept'];
-
   const renderRadioButtons = () =>
-    allFeedbackStatus.map(feedBackStatus => {
+    ['correctionRequested', 'technicallyAccept'].map(feedBackStatus => {
       return (
         <div className={styles.radioButton} key={feedBackStatus}>
           <label className={styles.label} htmlFor={feedBackStatus}>

@@ -29,7 +29,6 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
     {
-      allfeedbackStatus: [],
       data: [],
       datasetToEdit: {},
       filtered: false,
@@ -71,14 +70,12 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
       isLoading(true);
 
       const response = await DataflowService.datasetsFinalFeedback(dataflowId);
-      const allFeedbackStatus = uniq(Object.values(response.map(dataset => dataset.feedbackStatus)));
       manualAcceptanceDatasetsDispatch({
         type: 'INITIAL_LOAD',
         payload: {
           data: response,
           filteredData: response,
-          filtered: false,
-          allFeedbackStatus: allFeedbackStatus
+          filtered: false
         }
       });
     } catch (error) {
