@@ -74,7 +74,7 @@ const useBigButtonList = ({
           config.permissions.EDITOR_READ
         ]),
       designDatasetsActions: isDesigner,
-      feedback: isLeadDesigner || isLeadReporterOfCountry,
+      feedback: false, // isLeadDesigner || isLeadReporterOfCountry,
       groupByRepresentative: isLeadDesigner,
       manageReporters: isLeadDesigner,
       newSchema: isDesigner,
