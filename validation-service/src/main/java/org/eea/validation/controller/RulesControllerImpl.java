@@ -467,9 +467,9 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @PostMapping("/private/validateSqlRuleDataCollection")
-  public void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+  public boolean validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
-    sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
+    return sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
   }
 
 
@@ -489,5 +489,21 @@ public class RulesControllerImpl implements RulesController {
     sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, ruleMapper.classToEntity(ruleVO));
   }
 
+
+
+  /**
+   * Validate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/validateSqlRules")
+  public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    sqlRulesService.validateSQLRules(datasetId, datasetSchemaId);
+  }
 
 }
