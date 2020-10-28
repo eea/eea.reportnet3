@@ -292,7 +292,7 @@ export class CustomFileUpload extends Component {
     }
 
     xhr.open(this.props.operation, url, true);
-    const tokens = userStorage.get();
+    const tokens = userStorage.getTokens();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (this.props.onBeforeSend) {

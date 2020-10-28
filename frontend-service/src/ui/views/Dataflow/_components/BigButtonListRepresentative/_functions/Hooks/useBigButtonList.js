@@ -16,6 +16,7 @@ const useBigButtonList = ({
   dataflowState,
   getDataHistoricReleases,
   handleRedirect,
+  isLeadReporterOfCountry,
   match,
   onLoadReceiptData,
   onShowHistoricReleases,
@@ -28,21 +29,41 @@ const useBigButtonList = ({
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowState.id}`);
-      setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
-      // setButtonsVisibility(
-      //   getButtonsVisibility(['LEAD_REPORTER', 'REPORTER_READ'].map(userRole => config.permissions[userRole]))
-      // );
+      setButtonsVisibility(getButtonsVisibility());
     }
   }, [userContext]);
 
-  const getButtonsVisibility = roles => ({
-    receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
-    release:
-      roles.includes(config.permissions['LEAD_REPORTER']) &&
-      !roles.includes(config.permissions['REPORTER_WRITE']) &&
-      !roles.includes(config.permissions['REPORTER_READ'])
+  const getButtonsVisibility = () => ({
+    feedback: false, //isLeadReporterOfCountry,
+    receipt: isLeadReporterOfCountry,
+    release: isLeadReporterOfCountry
   });
+
+  const feedbackButton = {
+    layout: 'defaultBigButton',
+    buttonClass: 'dataflowFeedback',
+    buttonIcon: 'comments',
+    caption: resources.messages['dataflowFeedback'],
+    handleRedirect: () =>
+      handleRedirect(
+        getUrl(
+          routes.DATAFLOW_FEEDBACK,
+          {
+            dataflowId: dataflowState.id
+          },
+          true
+        )
+      ),
+    helpClassName: 'dataflow-feedback-help-step',
+    onWheel: getUrl(
+      routes.DATAFLOW_FEEDBACK,
+      {
+        dataflowId: dataflowState.id
+      },
+      true
+    ),
+    visibility: buttonsVisibility.feedback
+  };
 
   const helpButton = {
     layout: 'defaultBigButton',
@@ -187,7 +208,7 @@ const useBigButtonList = ({
 
   const releaseBigButton = onBuildReleaseButton();
 
-  return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
+  return [helpButton, feedbackButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };
 
 export { useBigButtonList };

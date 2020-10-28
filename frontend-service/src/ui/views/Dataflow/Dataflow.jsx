@@ -4,8 +4,8 @@ import { withRouter } from 'react-router-dom';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
+import map from 'lodash/map';
 
 import styles from './Dataflow.module.scss';
 
@@ -95,6 +95,20 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
+  const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
+
+  const isInsideACountry = !isNil(representativeId) || uniqDataProviders.length === 1;
+  const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
+    config.permissions.LEAD_REPORTER
+  ]);
+  console.log({ uniqRepresentatives }, representativeId);
+  const isLeadReporterOfCountry =
+    isLeadReporter &&
+    isInsideACountry &&
+    ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
+      (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
+
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
     dataflowId,
@@ -142,13 +156,22 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'edit'
       };
 
-      const manageRightsBtn = {
+      const manageEditorsBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
-        isVisible: buttonsVisibility.manageRightsBtn,
-        label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
+        isVisible: buttonsVisibility.manageEditorsBtn,
+        label: 'manageEditorsRights',
         onClick: () => manageDialogs('isShareRightsDialogVisible', true),
-        title: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights'
+        title: 'manageEditorsRights'
+      };
+
+      const manageReportersBtn = {
+        className: 'dataflow-manage-rights-help-step',
+        icon: 'userConfig',
+        isVisible: buttonsVisibility.manageReportersBtn,
+        label: 'manageReportersRights',
+        onClick: () => manageDialogs('isShareRightsDialogVisible', true),
+        title: 'manageReportersRights'
       };
 
       const propertiesBtn = {
@@ -160,7 +183,7 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRightsBtn];
+      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
@@ -186,40 +209,27 @@ const Dataflow = withRouter(({ history, match }) => {
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
 
+    const isLeadDesigner = userRoles.includes(
+      config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']
+    );
+
     const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
-    const isDraft = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
 
     if (isEmpty(dataflowState.data)) {
-      return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
-    }
-
-    let buttonsVisibility;
-    if (isDesign) {
-      buttonsVisibility = true;
-    }
-
-    if (isDraft) {
-      if (dataflowState.isCustodian) {
-        buttonsVisibility = isUndefined(representativeId);
-      } else {
-        if (!isUndefined(representativeId)) {
-          buttonsVisibility = true;
-        } else {
-          buttonsVisibility = dataflowState.data.representatives.length === 1;
-        }
-      }
+      return {
+        apiKeyBtn: false,
+        editBtn: false,
+        manageEditorsBtn: false,
+        manageReportersBtn: false,
+        propertiesBtn: false
+      };
     }
 
     return {
-      apiKeyBtn: buttonsVisibility,
-
-      editBtn:
-        userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
-
-      manageRightsBtn:
-        (isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD'])) ||
-        (isDraft && buttonsVisibility && userRoles.includes(config.permissions['LEAD_REPORTER'])),
-
+      apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
+      editBtn: isDesign && isLeadDesigner,
+      manageEditorsBtn: isDesign && isLeadDesigner,
+      manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
     };
   };
@@ -456,6 +466,7 @@ const Dataflow = withRouter(({ history, match }) => {
             className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            isLeadReporterOfCountry={isLeadReporterOfCountry}
             onCleanUpReceipt={onCleanUpReceipt}
             onSaveName={onSaveName}
             onShowManageReportersDialog={onShowManageReportersDialog}
@@ -470,6 +481,7 @@ const Dataflow = withRouter(({ history, match }) => {
           <BigButtonListRepresentative
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            isLeadReporterOfCountry={isLeadReporterOfCountry}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
             onShowSnapshotDialog={onShowSnapshotDialog}

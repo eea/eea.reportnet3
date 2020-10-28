@@ -911,6 +911,13 @@
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
     "webformTableWithLessRecords": "There are no records in the table.",
-    "webformTableWithoutFixedNumber": "This table should have fixed number of records."
+    "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
+    "dataflowFeedback":"Feedback",
+    "send":"Send",
+    "writeMessagePlaceholder": "Write your message",
+    "noMessages": "You have no unread messages.",
+    "noMessagesCustodian": "Please, select a data provider.",
+    "noMessagesScroll": "Scroll up to the top to load read messages.",
+    "unreadMessageSeparator": "Unread messages"
   }
 }

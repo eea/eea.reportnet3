@@ -1,6 +1,7 @@
 export const routes = {
   ACCESS_POINT: '/',
   CODELISTS: '/codelists',
+  DATAFLOW_FEEDBACK: '/dataflow/:dataflowId/feedback',
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
   DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/representativeId/:representativeId',

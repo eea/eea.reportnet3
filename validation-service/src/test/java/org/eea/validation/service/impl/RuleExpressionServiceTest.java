@@ -253,6 +253,14 @@ public class RuleExpressionServiceTest {
     fieldNumberEquals.setOperator(RuleOperatorEnum.FIELD_EQ);
     fieldNumberEquals.setParams(params_12);
 
+    RuleExpressionDTO recordNotNull = new RuleExpressionDTO();
+    recordNotNull.setOperator(RuleOperatorEnum.RECORD_NOT_NULL);
+    recordNotNull.setParams(params_5);
+
+    RuleExpressionDTO fieldNotNull = new RuleExpressionDTO();
+    fieldNotNull.setOperator(RuleOperatorEnum.FIELD_NOT_NULL);
+    fieldNotNull.setParams(params_5);
+
     return Arrays.asList(new Object[][] {
         // Case 0: RECORD_IF
         {recordIfThen,
@@ -475,7 +483,15 @@ public class RuleExpressionServiceTest {
             EntityTypeEnum.RECORD},
 
         // Case 45: FIELD_EQ
-        {fieldNumberEquals, "RuleOperators.fieldNumberEquals(value, 5)", EntityTypeEnum.FIELD}
+        {fieldNumberEquals, "RuleOperators.fieldNumberEquals(value, 5)", EntityTypeEnum.FIELD},
+
+        // Case 46: RECORD_NOT_NULL
+        {recordNotNull, "RuleOperators.recordNotNull(\"5ef4843ca99fd54e786953e0\")",
+            EntityTypeEnum.RECORD},
+
+        // Case 47: FIELD_NOT_NULL
+        {fieldNotNull, "RuleOperators.fieldNotNull(\"5ef4843ca99fd54e786953e0\")",
+            EntityTypeEnum.FIELD}
 
     });
   }

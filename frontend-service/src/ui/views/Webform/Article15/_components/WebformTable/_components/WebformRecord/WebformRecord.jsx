@@ -153,7 +153,7 @@ export const WebformRecord = ({
 
   const onEditorSubmitValue = async (field, option, value) => {
     const parsedValue =
-      field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+      field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 

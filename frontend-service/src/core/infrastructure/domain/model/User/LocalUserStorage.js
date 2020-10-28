@@ -1,48 +1,57 @@
-import { isNil } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
 const { storage: storageConfig } = config;
 
-const getLocalStorage = () => {
-  const cLocalStorage = JSON.parse(localStorage.getItem(storageConfig.LOCAL_KEY));
+const getSessionStorage = () => {
+  const cLocalStorage = JSON.parse(sessionStorage.getItem(storageConfig.LOCAL_KEY));
   if (!isNil(cLocalStorage)) return cLocalStorage;
   return;
 };
 
-const removeLocalStorage = () => {
-  localStorage.clear();
+const removeSessionStorage = () => {
+  sessionStorage.clear();
 };
 
-const setPropertyToLocalStorage = prop => {
-  const cLocalStorage = getLocalStorage();
-  const nLocalStorage = {};
-  localStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify({ ...cLocalStorage, ...prop }));
+const setPropertyToSessionStorage = prop => {
+  const cLocalStorage = getSessionStorage();
+  sessionStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify({ ...cLocalStorage, ...prop }));
 };
 
-const removeLocalProperty = key => {
-  const cLocalStorage = getLocalStorage();
-  delete cLocalStorage[key];
-  setLocalStorage(cLocalStorage);
+const removeSessionStorageProperty = key => {
+  const cLocalStorage = getSessionStorage();
+  if (!isNil(cLocalStorage)) {
+    delete cLocalStorage[key];
+    if (!isNil(cLocalStorage) && !isEmpty(cLocalStorage)) {
+      setSessionStorage(cLocalStorage);
+    } else {
+      sessionStorage.removeItem(storageConfig.LOCAL_KEY);
+    }
+  }
 };
 
-const getPropertyFromLocalStorage = key => {
-  const cLocalStorage = getLocalStorage();
+const getPropertyFromSessionStorage = key => {
+  const cLocalStorage = getSessionStorage();
   if (cLocalStorage) return cLocalStorage[key];
   return;
 };
 
-const setLocalStorage = value => {
-  localStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify(value));
+const setSessionStorage = value => {
+  sessionStorage.setItem(storageConfig.LOCAL_KEY, JSON.stringify(value));
 };
 
-const get = () => {
-  const tokens = JSON.parse(sessionStorage.getItem(storageConfig.LOCAL_KEY));
-
-  if (isNil(tokens)) {
+const getTokens = () => {
+  const cSessionStorage = getSessionStorage();
+  if (!isNil(cSessionStorage)) {
+    const { accessToken, refreshToken } = cSessionStorage;
+    if (accessToken && refreshToken) {
+      return { accessToken, refreshToken };
+    }
     return;
   }
-  return tokens;
+  return;
 };
 
 const set = tokens => {
@@ -52,20 +61,20 @@ const set = tokens => {
 const remove = () => sessionStorage.removeItem(storageConfig.LOCAL_KEY);
 
 const hasToken = () => {
-  const tokens = get();
+  const tokens = getTokens();
 
   return !isNil(tokens);
 };
 
 export const LocalUserStorage = {
-  get,
-  getLocalStorage,
-  getPropertyFromLocalStorage,
+  getTokens,
+  getSessionStorage,
+  getPropertyFromSessionStorage,
   hasToken,
   remove,
-  removeLocalProperty,
-  removeLocalStorage,
+  removeSessionStorageProperty,
+  removeSessionStorage,
   set,
-  setLocalStorage,
-  setPropertyToLocalStorage
+  setSessionStorage,
+  setPropertyToSessionStorage
 };

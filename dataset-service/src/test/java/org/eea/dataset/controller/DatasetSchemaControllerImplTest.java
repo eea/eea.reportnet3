@@ -36,6 +36,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -300,6 +301,20 @@ public class DatasetSchemaControllerImplTest {
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetSchemaRepeatTest() throws EEAException {
+    Mockito.when(datasetMetabaseService.countDatasetNameByDataflowId(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals(EEAErrorMessage.DATASET_NAME_DUPLICATED, ex.getReason());
+      throw ex;
+    }
+
   }
 
   /**
@@ -845,30 +860,20 @@ public class DatasetSchemaControllerImplTest {
   @Test
   public void updateDatasetSchemaDescriptionTest1() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
-        .thenReturn(true);
-    dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, datasetSchemaVO);
+    dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
     Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
         Mockito.any());
   }
 
-  /**
-   * Update dataset schema description test 2.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateDatasetSchemaDescriptionTest2() throws EEAException {
+  @Test
+  public void updateDatasetSchemaWebformTest1() throws EEAException {
+    WebformVO webform = new WebformVO();
+    webform.setName("name");
+    datasetSchemaVO.setWebform(webform);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
-        .thenReturn(false);
-    try {
-      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, datasetSchemaVO);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      throw e;
-    }
+    dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
+    Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -880,7 +885,7 @@ public class DatasetSchemaControllerImplTest {
   public void updateDatasetSchemaDescriptionTest3() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
     try {
-      dataSchemaControllerImpl.updateDatasetSchemaDescription(1L, datasetSchemaVO);
+      dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.SCHEMA_NOT_FOUND, e.getReason());
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());

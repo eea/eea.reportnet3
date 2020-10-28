@@ -13,12 +13,16 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class ErrorsValidationVO implements Serializable {
 
-  /**
-   * 
-   */
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 5689991711182227303L;
 
   /** The id validation. */
@@ -45,5 +49,9 @@ public class ErrorsValidationVO implements Serializable {
   /** The validation date. */
   private String validationDate;
 
+  /** The field name schema. */
+  private String nameFieldSchema;
 
+  /** The short code. */
+  private String shortCode;
 }

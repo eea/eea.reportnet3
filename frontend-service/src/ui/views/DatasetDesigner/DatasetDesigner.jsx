@@ -165,7 +165,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       // setIsLoading(true);
-      const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
+      const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
         config.permissions.EDITOR_WRITE
