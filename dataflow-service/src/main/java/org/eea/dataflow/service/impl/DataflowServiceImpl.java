@@ -3,6 +3,7 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -584,28 +585,55 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
+   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) {
-    List<Long> readTrueMessageIds = new ArrayList<>();
-    List<Long> readFalseMessageIds = new ArrayList<>();
+  public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs)
+      throws EEAException {
 
-    for (MessageVO messageVO : messageVOs) {
-      if (messageVO.isRead()) {
-        readTrueMessageIds.add(messageVO.getId());
-      } else {
-        readFalseMessageIds.add(messageVO.getId());
-      }
+    Map<Long, Boolean> map = new HashMap<>();
+    messageVOs.forEach(messageVO -> map.put(messageVO.getId(), messageVO.isRead()));
+
+    List<Message> messages = messageRepository.findByDataflowIdAndIdIn(dataflowId, map.keySet());
+    int previousSize = messages.size();
+
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+    // Case: DATAFLOW_STEWARD or DATAFLOW_CUSTODIAN
+    if (authorities.contains(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
+
+      // Allowed messages to update: direction=TRUE and providerId=ANY
+      messages = messages.stream().filter(Message::isDirection).collect(Collectors.toList());
     }
 
-    if (!readTrueMessageIds.isEmpty()) {
-      messageRepository.updateReadStatus(dataflowId, readTrueMessageIds, true);
+    // Case: DATAFLOW_LEAD_REPORTER, DATAFLOW_REPORTER_READ, DATAFLOW_REPOTER_WRITE
+    else {
+      List<Long> providerIds =
+          datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
+
+      // Allowed messages to update: direction=FALSE and providerId=USER_DEPENDANT
+      messages = messages.stream()
+          .filter(
+              message -> !message.isDirection() && providerIds.contains(message.getProviderId()))
+          .collect(Collectors.toList());
     }
 
-    if (!readFalseMessageIds.isEmpty()) {
-      messageRepository.updateReadStatus(dataflowId, readFalseMessageIds, false);
+    if (messages.size() != previousSize) {
+      LOG_ERROR.error("Messaging authorization failed: unable to update all messages");
+      throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
     }
+
+    messages = messages.stream().map(message -> {
+      message.setRead(map.get(message.getId()));
+      return message;
+    }).collect(Collectors.toList());
+
+    messageRepository.saveAll(messages);
   }
 
   /**
