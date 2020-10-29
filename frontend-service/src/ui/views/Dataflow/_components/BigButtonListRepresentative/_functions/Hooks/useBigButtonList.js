@@ -181,8 +181,7 @@ const useBigButtonList = ({
             ? () => {}
             : () => onShowSnapshotDialog(filteredDatasets[0].datasetId, filteredDatasets[0].name),
         layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
-        visibility:
-          buttonsVisibility.release && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
+        visibility: buttonsVisibility.release
       }
     ];
 
