@@ -45,6 +45,9 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
   const getFiltered = value => manualAcceptanceDatasetsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
+  const getManageAcceptanceDataset = data =>
+    manualAcceptanceDatasetsDispatch({ type: 'ON_ROW_CLICK', payload: { data } });
+
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {manualAcceptanceDatasetsState.filtered &&
@@ -104,11 +107,10 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = row => (
+  const actionsTemplate = () => (
     <ActionsColumn
       onEditClick={() => {
-        const [datasetToEdit] = manualAcceptanceDatasetsState.data.filter(dataset => dataset.id === row.id && row);
-        manualAcceptanceDatasetsDispatch({ type: 'ON_EDIT_DATASET', payload: { datasetToEdit, value: true } });
+        manualAcceptanceDatasetsDispatch({ type: 'ON_EDIT_DATASET', payload: { value: true } });
       }}
     />
   );
@@ -175,6 +177,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
         <DataTable
           autoLayout={true}
+          onRowClick={event => getManageAcceptanceDataset(event.data)}
           paginator={true}
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
@@ -189,6 +192,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
       {manualAcceptanceDatasetsState.isManageDatasetDialogVisible && (
         <ManageManualAcceptanceDataset
+          dataflowId={dataflowId}
           dataset={manualAcceptanceDatasetsState.datasetToEdit}
           isManageDatasetDialogVisible={manualAcceptanceDatasetsState.isManageDatasetDialogVisible}
           manageDialogs={handleManageAcceptanceDatasetDialog}
