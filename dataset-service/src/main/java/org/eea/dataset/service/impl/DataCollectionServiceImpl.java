@@ -1018,6 +1018,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
 
+  /**
+   * Release notification.
+   *
+   * @param eventType the event type
+   * @param notificationVO the notification VO
+   */
   private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
