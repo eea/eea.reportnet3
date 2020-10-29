@@ -915,9 +915,8 @@
     "dataflowFeedback":"Feedback",
     "send":"Send",
     "writeMessagePlaceholder": "Write your message",
-    "noMessages": "You have no unread messages.",
+    "noMessages": "You have no messages.",
     "noMessagesCustodian": "Please, select a data provider.",
-    "noMessagesScroll": "Scroll up to the top to load read messages.",
     "unreadMessageSeparator": "Unread messages"
   }
 }

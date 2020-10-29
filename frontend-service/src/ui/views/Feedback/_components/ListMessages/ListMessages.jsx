@@ -23,7 +23,7 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
   useEffect(() => {
-    if (!isNil(messagesWrapperRef)) {      
+    if (!isNil(messagesWrapperRef)) {
       messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
       // messagesWrapperRef.current.addEventListener = onScroll();
     }
@@ -67,7 +67,6 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
       {isEmpty(messages) ? (
         <div className={styles.emptyMessageWrapper}>
           <span>{emptyMessage}</span>
-          <span>{resources.messages['noMessagesScroll']}</span>
         </div>
       ) : (
         messages.map((message, i) => <Message message={message} hasSeparator={i === separatorIndex} />)

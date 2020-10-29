@@ -83,20 +83,15 @@ export const Feedback = withRouter(({ match, history }) => {
           onGetInitialMessages(selectedDataProvider.dataProviderId);
         }
       } else {
-        onGetInitialMessages();
+        onGetInitialMessages(representativeId);
       }
     }
-  }, [selectedDataProvider]);
+  }, [selectedDataProvider, isCustodian]);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-      dispatchFeedback({
-        type: 'SET_IS_CUSTODIAN',
-        payload:
-          userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
-          userRoles.includes(config.permissions['DATA_STEWARD'])
-      });
+      const isCustodian = userContext.hasPermission([config.permissions.DATA_CUSTODIAN]);
+      dispatchFeedback({ type: 'SET_IS_CUSTODIAN', payload: isCustodian });
     }
   }, [userContext]);
 
@@ -125,6 +120,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetInitialMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
+    console.log({ dataProviderId });
     const data = await onLoadMessages(dataProviderId, 0);
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
   };

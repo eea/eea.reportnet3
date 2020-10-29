@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import dayjs from 'dayjs';
 
 import styles from './Message.module.scss';
 
@@ -10,10 +11,10 @@ export const Message = ({ hasSeparator, message }) => {
   const renderMessage = () => {
     return (
       <div className={styles.messageWrapper} key={message.id}>
-        <div className={`${styles.message} ${message.sender ? styles.sender : styles.receiver}`}>
+        <div className={`${styles.message} ${message.direction ? styles.sender : styles.receiver}`}>
           <div className={styles.messageTextWrapper}>
-            <span className={styles.datetime}>{message.datetime}</span>
-            <span className={`${styles.messageText} ${message.sender ? styles.sender : styles.receiver}`}>
+            <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm:ss')}</span>
+            <span className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}>
               {message.content}
             </span>
           </div>
@@ -25,9 +26,7 @@ export const Message = ({ hasSeparator, message }) => {
   const renderSeparator = () => {
     return (
       <div
-        className={
-          styles.unreadSeparator
-        }>{`${resources.messages['unreadMessageSeparator']} (${message.datetime})`}</div>
+        className={styles.unreadSeparator}>{`${resources.messages['unreadMessageSeparator']} (${message.date})`}</div>
     );
   };
 

@@ -11,11 +11,8 @@ const create = async (dataflowId, message, providerId) => {
 
 const loadMessages = async (dataProviderId, page) => {
   const response = await apiFeedback.loadMessages(dataProviderId, page);
-  const messagesDTO = response.map(
-    message =>
-      new Feedback({ content: message.content, datetime: message.datetime, id: message.id, read: message.read })
-  );
-
+  const messagesDTO = response.map(message => new Feedback({ ...message }));
+  console.log({ messagesDTO });
   return messagesDTO;
 };
 
