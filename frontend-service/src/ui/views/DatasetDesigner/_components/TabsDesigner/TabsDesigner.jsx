@@ -152,7 +152,6 @@ export const TabsDesigner = withRouter(
           table.notEmpty = table.notEmpty || table.tableSchemaNotEmpty;
           table.readOnly = table.readOnly || table.tableSchemaReadOnly;
           table.showContextMenu = false;
-          table.tableSchemaId = table.tableSchemaId;
           table.toPrefill = table.toPrefill || table.tableSchemaToPrefill;
         });
         //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
@@ -167,8 +166,6 @@ export const TabsDesigner = withRouter(
         if (error.response.status === 401 || error.response.status === 403) {
           history.push(getUrl(routes.DATAFLOWS, true));
         }
-      } finally {
-        // setIsLoading(false);
       }
     };
 
