@@ -49,10 +49,8 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
     if (!isNil(e)) {
       if (e.target.scrollTop <= 0 && lazyLoading) {
         dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
-        setTimeout(() => {
           onLazyLoad();
           messagesWrapperRef.current.scrollTop = 100;
-        }, 1500);
       }
     }
   };

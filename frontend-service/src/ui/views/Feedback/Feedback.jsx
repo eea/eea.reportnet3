@@ -153,24 +153,19 @@ export const Feedback = withRouter(({ match, history }) => {
   const onSendMessage = async message => {
     if (message.trim() !== '') {
       try {
-        const created = await FeedbackService.create(
+        const messageCreated = await FeedbackService.create(
           dataflowId,
           message,
           isCustodian && !isEmpty(selectedDataProvider)
             ? selectedDataProvider.dataProviderId
             : parseInt(representativeId)
         );
-        if (created) {
+        console.log({ messageCreated });
+        if (messageCreated) {
           dispatchFeedback({
             type: 'ON_SEND_MESSAGE',
             payload: {
-              value: {
-                datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-                id: messages.length + 1,
-                message,
-                read: false,
-                sender: true
-              }
+              value: { ...messageCreated }
             }
           });
         }
@@ -193,7 +188,7 @@ export const Feedback = withRouter(({ match, history }) => {
       <Title
         title={`${resources.messages['dataflowFeedback']} `}
         subtitle={dataflowName}
-        icon="info"
+        icon="comments"
         iconSize="3.5rem"
       />
       {isCustodian && (

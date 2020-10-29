@@ -8,7 +8,7 @@ export const apiFeedback = {
       url: getUrl(FeedbackConfig.create, { dataflowId }),
       data: { content: message, providerId }
     });
-    return response.status >= 200 && response.status <= 299;
+    return response.data;
   },
   loadMessages: async (dataflowId, page) => {
     const response = await HTTPRequester.get({
