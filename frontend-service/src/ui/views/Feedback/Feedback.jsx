@@ -163,23 +163,27 @@ export const Feedback = withRouter(({ match, history }) => {
     if (message.trim() !== '') {
       //Send message to BE
       try {
-        if (isCustodian && !isEmpty(selectedDataProvider)) {
-          const created = await FeedbackService.create(dataflowId, message, selectedDataProvider.dataProviderId);
-          console.log({ created });
-          if (created) {
-            dispatchFeedback({
-              type: 'ON_SEND_MESSAGE',
-              payload: {
-                value: {
-                  datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-                  id: messages.length + 1,
-                  message,
-                  read: false,
-                  sender: true
-                }
+        const created = await FeedbackService.create(
+          dataflowId,
+          message,
+          isCustodian && !isEmpty(selectedDataProvider)
+            ? selectedDataProvider.dataProviderId
+            : parseInt(representativeId)
+        );
+        console.log({ created });
+        if (created) {
+          dispatchFeedback({
+            type: 'ON_SEND_MESSAGE',
+            payload: {
+              value: {
+                datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+                id: messages.length + 1,
+                message,
+                read: false,
+                sender: true
               }
-            });
-          }
+            }
+          });
         }
       } catch (error) {
         console.error(error);

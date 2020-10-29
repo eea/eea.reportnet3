@@ -44,6 +44,11 @@ const useBigButtonList = ({
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
 
+  const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
+    config.permissions.DATA_STEWARD,
+    config.permissions.DATA_CUSTODIAN
+  ]);
+
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
@@ -51,12 +56,6 @@ const useBigButtonList = ({
   }, [userContext]);
 
   const getButtonsVisibility = () => {
-    const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-      config.permissions.DATA_STEWARD,
-      config.permissions.DATA_CUSTODIAN
-    ]);
-
-    // roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']);
     const isDesigner =
       isLeadDesigner ||
       userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
@@ -64,6 +63,7 @@ const useBigButtonList = ({
       ]);
     const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
     const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
+
     return {
       createDataCollection: isLeadDesigner && isDesignStatus,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
@@ -98,14 +98,18 @@ const useBigButtonList = ({
       visibility: buttonsVisibility.manageReporters
     }
   ];
-
+  console.log({ isLeadDesigner });
   const feedbackBigButton = [
     {
       buttonClass: 'dataflowFeedback',
       buttonIcon: 'comments',
       caption: resources.messages['dataflowFeedback'],
       handleRedirect: () =>
-        handleRedirect(getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId, representativeId: dataProviderId }, true)),
+        handleRedirect(
+          !isLeadDesigner
+            ? getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId, representativeId: dataProviderId }, true)
+            : getUrl(routes.DATAFLOW_FEEDBACK_CUSTODIAN, { dataflowId }, true)
+        ),
       helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),

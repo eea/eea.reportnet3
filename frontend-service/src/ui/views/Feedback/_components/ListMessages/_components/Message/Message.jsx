@@ -14,7 +14,7 @@ export const Message = ({ hasSeparator, message }) => {
           <div className={styles.messageTextWrapper}>
             <span className={styles.datetime}>{message.datetime}</span>
             <span className={`${styles.messageText} ${message.sender ? styles.sender : styles.receiver}`}>
-              {message.message}
+              {message.content}
             </span>
           </div>
         </div>
@@ -38,6 +38,4 @@ export const Message = ({ hasSeparator, message }) => {
   ) : (
     renderMessage()
   );
-
-  // <div key={message.id}>{message.message}</div>;
 };
