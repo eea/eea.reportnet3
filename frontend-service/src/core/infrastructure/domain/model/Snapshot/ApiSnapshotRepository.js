@@ -59,12 +59,6 @@ const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
   return await apiSnapshot.restoreByIdReporter(dataflowId, datasetId, snapshotId);
 };
 
-const releaseByIdReporter = async (dataflowId, datasetId, snapshotId) => {
-  const isReleased = await apiSnapshot.releaseByIdReporter(dataflowId, datasetId, snapshotId);
-
-  return new Snapshot({ id: snapshotId, isReleased });
-};
-
 const releaseDataflow = async (dataflowId, dataProviderId) => {
   return await apiSnapshot.releaseDataflow(dataflowId, dataProviderId);
 };
@@ -78,7 +72,6 @@ export const ApiSnapshotRepository = {
   createByIdReporter,
   deleteByIdReporter,
   restoreByIdReporter,
-  releaseByIdReporter,
 
   releaseDataflow
 };

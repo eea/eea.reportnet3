@@ -91,14 +91,6 @@ export const apiSnapshot = {
     return response.data;
   },
 
-  releaseByIdReporter: async (dataflowId, datasetId, snapshotId) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(SnapshotConfig.releaseSnapshotReporter, { dataflowId, datasetId, snapshotId }),
-      data: { snapshotId }
-    });
-    return response.data;
-  },
-
   releaseDataflow: async (dataflowId, dataProviderId) => {
     const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId })
