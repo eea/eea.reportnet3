@@ -110,7 +110,7 @@ export const ManageManualAcceptanceDataset = ({
           footer={renderDialogFooter}
           header={`${resources.messages['editStatusDataset']} ${datasetName}`}
           onHide={() => manageDialogs(false)}
-          style={{ width: '60%' }}
+          style={{ width: '50%' }}
           visible={isManageDatasetDialogVisible}>
           {children}
         </Dialog>
@@ -118,40 +118,37 @@ export const ManageManualAcceptanceDataset = ({
     </Fragment>
   );
 
-  const renderInputTextLayout = (options = []) => {
-    return options.map((option, index) => (
-      <div key={index}>
-        <label htmlFor="datasetMessage">{resources.messages[option]}</label>
-        <InputTextarea
-          className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
-          collapsedHeight={55}
-          expandableOnClick={true}
-          id="datasetMessage"
-          key="datasetMessage"
-          onChange={e => onChangeMessage(e.target.value)}
-          onFocus={e =>
-            manageManualAcceptanceDatasetDispatch({
-              type: 'INITIAL_DATASET_MESSAGE',
-              payload: { value: e.target.value }
-            })
-          }
-          onKeyDown={e => onKeyChange(e)}
-          placeholder={resources.messages['message']}
-          // value={manageManualAcceptanceDatasetState.datasetMessage}
-        />
-      </div>
-    ));
-  };
+  const renderInputTextLayout = option => (
+    <span>
+      <label htmlFor="datasetMessage">{resources.messages[option]}</label>
+      <InputTextarea
+        className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
+        collapsedHeight={85}
+        // expandableOnClick={true}
+        id="datasetMessage"
+        key="datasetMessage"
+        onChange={e => onChangeMessage(e.target.value)}
+        onFocus={e =>
+          manageManualAcceptanceDatasetDispatch({
+            type: 'INITIAL_DATASET_MESSAGE',
+            payload: { value: e.target.value }
+          })
+        }
+        onKeyDown={e => onKeyChange(e)}
+        placeholder={resources.messages['message']}
+      />
+    </span>
+  );
 
   const renderRadioButtons = () =>
     ['correctionRequested', 'technicallyAccept'].map(feedBackStatus => {
       return (
-        <div className={styles.radioButton} key={feedBackStatus}>
+        <div className={styles.radioButtonWrapper} key={feedBackStatus}>
           <label className={styles.label} htmlFor={feedBackStatus}>
             {resources.messages[feedBackStatus]}
           </label>
           <RadioButton
-            className={styles.button}
+            className={styles.radioButton}
             checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus}
             inputId={feedBackStatus}
             onChange={event => {
@@ -170,7 +167,7 @@ export const ManageManualAcceptanceDataset = ({
           <div>{resources.messages['feedbackStatus']}</div>
           {renderRadioButtons()}
         </div>
-        <div className={styles.group}>{renderInputTextLayout(['message'])}</div>
+        <div className={styles.group}>{renderInputTextLayout('message')}</div>
       </div>
     </Fragment>
   );

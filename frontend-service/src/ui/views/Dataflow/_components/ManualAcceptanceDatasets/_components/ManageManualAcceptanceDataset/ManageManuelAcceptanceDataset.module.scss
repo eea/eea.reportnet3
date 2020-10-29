@@ -9,20 +9,21 @@
     align-items: center;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     margin-bottom: 1.5rem;
 
-    .radioButton {
+    .radioButtonWrapper {
       border-radius: 10px;
       padding: 0.5rem;
+      margin-left: 2rem;
+      margin-top: 1px;
 
       &:hover {
         background: var(--gray-5);
       }
 
-      .button {
-        margin-right: 0.5rem;
-        padding-left: 1rem;
+      .radioButton {
+        padding-left: 0.5rem;
       }
 
       .label {
@@ -31,7 +32,8 @@
     }
 
     .datasetMessage {
-      width: 39rem;
+      width: 48.5vw;
+      margin-top: 0.5rem;
     }
   }
 }
