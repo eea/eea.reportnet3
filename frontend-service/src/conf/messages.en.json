@@ -921,6 +921,6 @@
     "confirmReleaseHeader": "Confirm Release",
     "confirmReleaseQuestion": "Are you sure you want to release all the datasets to the data collection?",
     "deleteAutomaticSnapshotTooltip": " You are not allowed to delete an automatic copy",
-    "releaseSnapshotsBlockedFailedEvent": "Datasets contain blocker QC. Release could not be completed."
+    "releaseSnapshotsBlockedFailedEvent": "The data can't be released because contains blocker errors."
   }
 }
