@@ -35,13 +35,12 @@ export const Feedback = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, representativeId }
   } = match;
-  console.log({ representativeId });
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  console.log(userContext);
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     currentPage: 0,
     dataflowName: '',
@@ -78,7 +77,6 @@ export const Feedback = withRouter(({ match, history }) => {
   }, [isCustodian]);
 
   useEffect(() => {
-    console.log(selectedDataProvider);
     if (!isNil(isCustodian)) {
       if (isCustodian) {
         if (!isEmpty(selectedDataProvider)) {
@@ -154,14 +152,10 @@ export const Feedback = withRouter(({ match, history }) => {
     );
 
     dispatchFeedback({ type: 'SET_DATAPROVIDERS', payload: filteredDataProviders });
-
-    console.log(allRepresentatives, responseAllDataProviders, filteredDataProviders);
   };
 
   const onSendMessage = async message => {
-    console.log({ message });
     if (message.trim() !== '') {
-      //Send message to BE
       try {
         const created = await FeedbackService.create(
           dataflowId,
@@ -170,7 +164,6 @@ export const Feedback = withRouter(({ match, history }) => {
             ? selectedDataProvider.dataProviderId
             : parseInt(representativeId)
         );
-        console.log({ created });
         if (created) {
           dispatchFeedback({
             type: 'ON_SEND_MESSAGE',
