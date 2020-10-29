@@ -105,7 +105,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
         });
       } else {
         notificationContext.add({
-          type: 'RELEASED_BY_ID_REPORTER_ERROR',
+          type: 'RELEASE_DATAFLOW_ERROR',
           content: {}
         });
       }

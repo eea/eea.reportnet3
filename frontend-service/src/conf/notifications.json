@@ -177,7 +177,10 @@
           "key": "ALL_REPORTER_ERROR"
         },
         {
-          "key": "RELEASED_BY_ID_REPORTER_ERROR"
+          "key": "RELEASE_DATAFLOW_ERROR"
+        },
+        {
+          "key": "RELEASE_SNAPSHOTS_BLOCKED_FAILED_EVENT"
         },
         {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
@@ -535,7 +538,7 @@
           }
         },
         {
-          "key": "RELEASE_SNAPSHOT_COMPLETED_EVENT"
+          "key": "RELEASE_SNAPSHOTS_COMPLETED_EVENT"
         },
         {
           "key": "UPLOAD_DOCUMENT_COMPLETED_EVENT",

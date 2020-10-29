@@ -420,7 +420,7 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  useCheckNotifications(['RELEASE_SNAPSHOT_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['RELEASE_SNAPSHOTS_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
@@ -454,7 +454,7 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, providerId);
     } catch (error) {
-      notificationContext.add({ type: 'RELEASED_BY_ID_REPORTER_ERROR', content: {} });
+      notificationContext.add({ type: 'RELEASE_DATAFLOW_ERROR', content: {} });
     } finally {
       manageDialogs('isReleaseDialogVisible', false);
     }

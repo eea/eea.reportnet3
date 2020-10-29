@@ -68,7 +68,7 @@ export const ReleaseSnapshotDialog = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
       } else {
-        notificationContext.add({ type: 'RELEASED_BY_ID_REPORTER_ERROR', content: {} });
+        notificationContext.add({ type: 'RELEASE_DATAFLOW_ERROR', content: {} });
       }
     } finally {
       hideReleaseDialog();

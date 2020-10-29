@@ -60,7 +60,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
   };
 
   useCheckNotifications(
-    ['RELEASE_DATASET_SNAPSHOT_FAILED_EVENT', 'DATA_COLLECTION_LOCKED_ERROR', 'RELEASED_BY_ID_REPORTER_ERROR'],
+    ['RELEASE_DATASET_SNAPSHOT_FAILED_EVENT', 'DATA_COLLECTION_LOCKED_ERROR', 'RELEASE_DATAFLOW_ERROR'],
     clearSnapshotToRelease
   );
 
