@@ -486,7 +486,8 @@
         },
         {
           "key": "LOAD_DATASETS_RELEASES_ERROR"
-        }
+        },
+        { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" }
       ]
     },
     {

@@ -932,6 +932,7 @@
     "noMessages": "You have no unread messages.",
     "noMessagesCustodian": "Please, select a data provider.",
     "noMessagesScroll": "Scroll up to the top to load read messages.",
-    "unreadMessageSeparator": "Unread messages"
+    "unreadMessageSeparator": "Unread messages",
+    "updateDatasetFeedbackStatusError": "Error updating dataset feedback status"
   }
 }

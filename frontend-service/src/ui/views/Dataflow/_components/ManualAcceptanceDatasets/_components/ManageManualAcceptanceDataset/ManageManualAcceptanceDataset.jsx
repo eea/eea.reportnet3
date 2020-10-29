@@ -82,6 +82,7 @@ export const ManageManualAcceptanceDataset = ({
         manageDialogs(false);
       }
     } catch (error) {
+      notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });
     }
   };
 
