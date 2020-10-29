@@ -136,7 +136,8 @@ public class SQLValidationUtils {
         } else {
           preparedquery = query;
         }
-        tableToEvaluate = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule);
+        tableToEvaluate =
+            sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
       } catch (SQLException e) {
         LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
       }

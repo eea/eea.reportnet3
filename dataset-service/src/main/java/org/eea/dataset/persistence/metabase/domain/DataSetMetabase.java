@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.Date;
@@ -17,18 +14,12 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
- * The Class DataSetMetabase.
- *
- * 
+ * Instantiates a new data set metabase.
  */
-@Getter
-@Setter
-@ToString
+@Data
 @Entity
 @Table(name = "DATASET")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -106,7 +97,4 @@ public class DataSetMetabase {
     return Objects.equals(dataSetName, other.dataSetName) && Objects.equals(id, other.id)
         && Objects.equals(partitions, other.partitions);
   }
-
-
-
 }

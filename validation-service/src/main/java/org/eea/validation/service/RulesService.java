@@ -3,6 +3,7 @@ package org.eea.validation.service;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -228,4 +229,23 @@ public interface RulesService {
    * @return the list
    */
   List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId);
+
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  Integer getAllDisabledRules(Long dataflowId, List<DesignDatasetVO> designs);
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  Integer getAllUncheckedRules(Long dataflowId, List<DesignDatasetVO> designs);
 }

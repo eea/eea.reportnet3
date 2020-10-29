@@ -88,4 +88,5 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    * @return the list
    */
   List<Snapshot> findByDataCollectionIdOrderByCreationDateDesc(@Param("idDataset") Long idDataset);
+
 }

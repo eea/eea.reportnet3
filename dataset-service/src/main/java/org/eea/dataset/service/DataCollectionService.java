@@ -39,9 +39,10 @@ public interface DataCollectionService {
    *
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck enable the manual check for the custodian approval
    */
-  void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean manualCheck);
+  void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean stopAndNotifySQLErrors, boolean manualCheck);
 
   /**
    * Adds the foreign relations from new reportings.

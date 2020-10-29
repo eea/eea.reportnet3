@@ -108,7 +108,7 @@ public class DataCollectionControllerImplTest {
       DataCollectionVO dc = new DataCollectionVO();
       dc.setIdDataflow(1L);
       dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-      dataCollectionControllerImpl.createEmptyDataCollection(dc, false);
+      dataCollectionControllerImpl.createEmptyDataCollection(true, dc);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
     }
@@ -125,7 +125,7 @@ public class DataCollectionControllerImplTest {
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-    dataCollectionControllerImpl.createEmptyDataCollection(dc, false);
+    dataCollectionControllerImpl.createEmptyDataCollection(false, dc);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
   }

@@ -34,11 +34,14 @@ public interface DataCollectionController {
   /**
    * Creates the empty data collection.
    *
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param dataCollectionVO the data collection VO
    */
   @PostMapping("/create")
-  void createEmptyDataCollection(@RequestBody DataCollectionVO dataCollectionVO,
-      @RequestParam(value = "manualCheck", required = false) boolean manualCheck);
+  void createEmptyDataCollection(
+      @RequestParam(defaultValue = "true",
+          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,@RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+      @RequestBody DataCollectionVO dataCollectionVO);
 
 
   /**
@@ -57,4 +60,5 @@ public interface DataCollectionController {
    */
   @PutMapping("/update/{dataflowId}")
   void updateDataCollection(@PathVariable("dataflowId") Long dataflowId);
+
 }

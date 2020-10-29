@@ -24,7 +24,7 @@ public interface DatasetExtendedRepository {
    * @throws SQLException the SQL exception
    */
   TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
-      Long datasetId, Long idTable) throws SQLException;
+      Long datasetId, Long idTable);
 
   /**
    * Query record validation execution.

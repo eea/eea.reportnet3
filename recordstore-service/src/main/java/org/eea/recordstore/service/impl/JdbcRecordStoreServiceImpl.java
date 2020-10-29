@@ -642,12 +642,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         ? Boolean.TRUE.equals(isSchemaSnapshot)
             ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
+        : EventType.RELEASE_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
             ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
-        : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
+        : EventType.RELEASE_SNAPSHOT_FAILED_EVENT;
 
     // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
     // The main difference
@@ -1112,11 +1112,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws RecordStoreAccessException {
     String querySelectPermission = "GRANT SELECT ON dataset_" + datasetId + "." + "\""
         + queryViewName + "\"" + " TO " + datasetUsers;
-    executeQueryViewCommands(querySelectPermission);
+    executeQueryViewCommands(querySelectPermission.toLowerCase());
 
     String queryDeletePermission = "GRANT DELETE ON dataset_" + datasetId + "." + "\""
         + queryViewName + "\"" + " TO " + userPostgreDb;
-    executeQueryViewCommands(queryDeletePermission);
+    executeQueryViewCommands(queryDeletePermission.toLowerCase());
 
   }
 
@@ -1189,7 +1189,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
         + "')");
 
-    executeQueryViewCommands(stringQuery.toString());
+    executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
 
 }

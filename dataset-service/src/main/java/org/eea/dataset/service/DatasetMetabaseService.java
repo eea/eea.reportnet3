@@ -19,21 +19,17 @@ public interface DatasetMetabaseService {
    * Gets the data set id by dataflow id.
    *
    * @param idFlow the id flow
-   *
    * @return the data set id by dataflow id
    */
   List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
 
-
   /**
-   * Gets the dataset name.
+   * Find dataset metabase.
    *
    * @param idDataset the id dataset
-   *
-   * @return the dataset name
+   * @return the data set metabase VO
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
-
 
   /**
    * Delete design dataset.
@@ -47,19 +43,15 @@ public interface DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @param datasetName the dataset name
-   *
    * @return true, if successful
    */
   boolean updateDatasetName(Long datasetId, String datasetName);
-
 
   /**
    * Gets the statistics.
    *
    * @param datasetId the dataset id
-   *
    * @return the statistics
-   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -67,14 +59,11 @@ public interface DatasetMetabaseService {
   StatisticsVO getStatistics(Long datasetId)
       throws EEAException, InstantiationException, IllegalAccessException;
 
-
   /**
    * Gets the global statistics.
    *
    * @param idDataschema the id dataschema
-   *
    * @return the global statistics
-   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -90,7 +79,7 @@ public interface DatasetMetabaseService {
   void createGroupDcAndAddUser(Long datasetId);
 
   /**
-   * Creates the schema group and add user.
+   * Creates the schema group.
    *
    * @param datasetId the dataset id
    */
@@ -106,9 +95,7 @@ public interface DatasetMetabaseService {
    * @param dueDate the due date
    * @param representatives the representatives
    * @param iterationDC the iteration DC
-   *
    * @return the future
-   *
    * @throws EEAException the EEA exception
    */
   Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
@@ -127,7 +114,6 @@ public interface DatasetMetabaseService {
    * Find dataset schema id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the string
    */
   String findDatasetSchemaIdById(long datasetId);
@@ -148,7 +134,6 @@ public interface DatasetMetabaseService {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
-   *
    * @return the dataset destination foreign relation
    */
   Long getDatasetDestinationForeignRelation(Long datasetIdOrigin, String idPk);
@@ -165,15 +150,12 @@ public interface DatasetMetabaseService {
       String idFkOrigin);
 
   /**
-   * Gets dataset type.
+   * Gets the dataset type.
    *
    * @param datasetId the dataset id
-   *
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
-
-
 
   /**
    * Gets the integrity dataset id.
@@ -186,7 +168,6 @@ public interface DatasetMetabaseService {
   Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
       String datasetReferencedSchemaId);
 
-
   /**
    * Creates the foreign relationship.
    *
@@ -194,7 +175,6 @@ public interface DatasetMetabaseService {
    * @param datasetReferencedId the dataset referenced id
    * @param originDatasetSchemaId the origin dataset schema id
    * @param referencedDatasetSchemaId the referenced dataset schema id
-   * @return the object
    */
   void createForeignRelationship(long datasetOriginId, long datasetReferencedId,
       String originDatasetSchemaId, String referencedDatasetSchemaId);
@@ -228,4 +208,21 @@ public interface DatasetMetabaseService {
    * @return the long
    */
   Long countDatasetNameByDataflowId(Long dataflowId, String datasetSchemaName);
+
+  /**
+   * Gets the dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset ids by dataflow id and data provider id
+   */
+  List<Long> getDatasetIdsByDataflowIdAndDataProviderId(Long dataflowId, Long dataProviderId);
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  List<Long> getUserProviderIdsByDataflowId(Long dataflowId);
 }

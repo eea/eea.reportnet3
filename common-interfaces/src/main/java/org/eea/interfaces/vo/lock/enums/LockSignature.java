@@ -27,6 +27,9 @@ public enum LockSignature {
   /** DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..) */
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
+  /** DataSetSnapshotControllerImpl.createReleaseSnapshots(..) */
+  RELEASE_SNAPSHOTS("DataSetSnapshotControllerImpl.createReleaseSnapshots(..)"),
+
   /** DataSetSnapshotControllerImpl.releaseSnapshot(..) */
   RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
 
@@ -52,7 +55,14 @@ public enum LockSignature {
   LOAD_DATASET_DATA("DataSetControllerImpl.loadDatasetData(..)"),
 
   /** IntegrationControllerImpl.executeEUDatasetExport(..) */
-  EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)");
+  EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)"),
+
+  /** The delete records. */
+  DELETE_RECORDS("DataSetControllerImpl.deleteRecord(..)"),
+
+  /** The insert records. */
+  INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)");
+
 
   /** The value. */
   private final String value;

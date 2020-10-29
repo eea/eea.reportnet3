@@ -39,7 +39,7 @@ public class ReleaseDatasetSnapshotCompletedEvent implements NotificableEventHan
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
+    return EventType.RELEASE_SNAPSHOT_COMPLETED_EVENT;
   }
 
   /**
