@@ -59,21 +59,24 @@ const SnapshotItem = ({ itemData }) => {
           }}
         />
 
-        {!itemData.isAutomatic && (
-          <Button
-            tooltip={resources.messages.deleteSnapshotTooltip}
-            tooltipOptions={{ position: 'left' }}
-            icon="trash"
-            disabled={itemData.isReleased}
-            className={`${styles.btn} rp-btn warning`}
-            onClick={() =>
-              snapshotContext.snapshotDispatch({
-                type: 'DELETE_SNAPSHOT',
-                payload: { ...itemData }
-              })
-            }
-          />
-        )}
+        <Button
+          tooltip={
+            itemData.isAutomatic
+              ? resources.messages['deleteAutomaticSnapshotTooltip']
+              : resources.messages['deleteSnapshotTooltip']
+          }
+          tooltipOptions={{ position: 'left' }}
+          icon="trash"
+          className={`${styles.btn} rp-btn warning deleteButton ${itemData.isAutomatic && 'p-disabled'}`}
+          onClick={() =>
+            itemData.isAutomatic
+              ? {}
+              : snapshotContext.snapshotDispatch({
+                  type: 'DELETE_SNAPSHOT',
+                  payload: { ...itemData }
+                })
+          }
+        />
       </div>
     </li>
   );
