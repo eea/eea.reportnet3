@@ -501,8 +501,7 @@ const useBigButtonList = ({
       handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onShowExportEuDatasetModal(),
       layout: 'defaultBigButton',
       model: exportEuDatasetModel,
-      visibility:
-        buttonsVisibility.manualTechnicalAcceptance && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
+      visibility: buttonsVisibility.exportEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }
   ];
 
@@ -514,7 +513,7 @@ const useBigButtonList = ({
       handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
       layout: 'defaultBigButton',
       visibility:
-        buttonsVisibility.createDataCollection && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
+        buttonsVisibility.manualTechnicalAcceptance && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }
   ];
 
