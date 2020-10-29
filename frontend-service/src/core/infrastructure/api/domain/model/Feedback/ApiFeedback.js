@@ -11,7 +11,6 @@ export const apiFeedback = {
     return response.status >= 200 && response.status <= 299;
   },
   loadMessages: async (dataflowId, page) => {
-    console.log({ dataflowId, page });
     const response = await HTTPRequester.get({
       url: getUrl(FeedbackConfig.loadMessages, { dataflowId, page })
     });

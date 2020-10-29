@@ -98,7 +98,7 @@ const useBigButtonList = ({
       visibility: buttonsVisibility.manageReporters
     }
   ];
-  console.log({ isLeadDesigner });
+
   const feedbackBigButton = [
     {
       buttonClass: 'dataflowFeedback',
@@ -418,12 +418,6 @@ const useBigButtonList = ({
 
   const onBuildReleaseButton = () => {
     const { datasets } = dataflowState.data;
-
-    // const allDatasets = datasets.map(dataset => {
-    //   return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
-    // });
-
-    // const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
     const properties = [
       {

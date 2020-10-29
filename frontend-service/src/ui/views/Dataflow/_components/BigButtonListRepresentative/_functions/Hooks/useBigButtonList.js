@@ -27,16 +27,7 @@ const useBigButtonList = ({
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
-  console.log(
-    getUrl(
-      routes.DATAFLOW_FEEDBACK,
-      {
-        dataflowId: dataflowState.id,
-        representativeId: dataProviderId
-      },
-      true
-    )
-  );
+
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
@@ -54,9 +45,8 @@ const useBigButtonList = ({
     buttonClass: 'dataflowFeedback',
     buttonIcon: 'comments',
     caption: resources.messages['dataflowFeedback'],
-    handleRedirect: () => {
-      console.log({ dataProviderId });
-      return handleRedirect(
+    handleRedirect: () =>
+      handleRedirect(
         getUrl(
           routes.DATAFLOW_FEEDBACK,
           {
@@ -65,8 +55,7 @@ const useBigButtonList = ({
           },
           true
         )
-      );
-    },
+      ),
     helpClassName: 'dataflow-feedback-help-step',
     onWheel: getUrl(
       routes.DATAFLOW_FEEDBACK,
@@ -192,8 +181,7 @@ const useBigButtonList = ({
             ? () => {}
             : () => onShowSnapshotDialog(filteredDatasets[0].datasetId, filteredDatasets[0].name),
         layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
-        visibility:
-          buttonsVisibility.release && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
+        visibility: buttonsVisibility.release
       }
     ];
 

@@ -102,13 +102,13 @@ const Dataflow = withRouter(({ history, match }) => {
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
     config.permissions.LEAD_REPORTER
   ]);
-  console.log({ uniqRepresentatives }, representativeId);
+
   const isLeadReporterOfCountry =
     isLeadReporter &&
     isInsideACountry &&
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
-  console.log({ isInsideACountry }, uniqDataProviders[0], representativeId);
+
   const dataProviderId = isInsideACountry ? (!isNil(representativeId) ? representativeId : uniqDataProviders[0]) : null;
 
   useBreadCrumbs({
@@ -382,7 +382,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
-      console.log({ dataProviderId });
+
       if (!isNil(dataProviderId)) {
         dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id: dataProviderId } });
       }
