@@ -177,10 +177,10 @@
           "key": "ALL_REPORTER_ERROR"
         },
         {
-          "key": "RELEASE_DATAFLOW_ERROR"
+          "key": "RELEASE_FAILED_EVENT"
         },
         {
-          "key": "RELEASE_SNAPSHOTS_BLOCKED_FAILED_EVENT"
+          "key": "RELEASE_BLOCKERS_FAILED_EVENT"
         },
         {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
@@ -316,10 +316,6 @@
         },
         {
           "key": "DATA_COLLECTION_LOCKED_ERROR"
-        },
-        {
-          "key": "RELEASE_BLOCKED_EVENT",
-          "lifeTime": 5000
         },
         {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
@@ -538,7 +534,7 @@
           }
         },
         {
-          "key": "RELEASE_SNAPSHOTS_COMPLETED_EVENT"
+          "key": "RELEASE_COMPLETED_EVENT"
         },
         {
           "key": "UPLOAD_DOCUMENT_COMPLETED_EVENT",
