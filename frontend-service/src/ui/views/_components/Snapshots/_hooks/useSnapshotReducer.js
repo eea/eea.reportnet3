@@ -43,21 +43,6 @@ const useSnapshotReducer = (
           isConfirmDisabled: false
         };
 
-      case 'RELEASE_SNAPSHOT':
-        setIsSnapshotDialogVisible(true);
-
-        return {
-          ...state,
-          action: onReleaseSnapshot,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogConfirmMessage: resources.messages.releaseSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resources.messages.releaseSnapshotConfirmationQuestion,
-          dialogMessage: resources.messages.releaseSnapshotMessage,
-          snapShotId: payload.id,
-          isConfirmDisabled: false
-        };
-
       case 'RESTORE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 

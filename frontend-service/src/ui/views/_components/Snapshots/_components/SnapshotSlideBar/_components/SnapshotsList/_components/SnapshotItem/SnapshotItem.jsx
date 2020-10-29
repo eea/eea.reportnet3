@@ -12,7 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const SnapshotItem = ({ itemData, isReleaseVisible }) => {
+const SnapshotItem = ({ itemData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -44,6 +44,7 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
         )}
         <p className={itemData.isReleased ? `${styles.released_mt}` : null}>{itemData.description}</p>
       </div>
+
       <div className={styles.listActions}>
         <Button
           tooltip={resources.messages.restoreSnapshotTooltip}
@@ -57,30 +58,6 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
             });
           }}
         />
-        {isReleaseVisible ? (
-          <Button
-            tooltip={
-              itemData.isReleased
-                ? resources.messages.releasedSnapshotTooltip
-                : resources.messages.releaseSnapshotTooltip
-            }
-            tooltipOptions={{ position: 'top' }}
-            icon={itemData.isReleased ? 'check' : 'cloudUpload'}
-            className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
-            onClick={() =>
-              snapshotContext.snapshotDispatch(
-                itemData.isReleased
-                  ? {}
-                  : {
-                      type: 'RELEASE_SNAPSHOT',
-                      payload: { ...itemData }
-                    }
-              )
-            }
-          />
-        ) : (
-          <></>
-        )}
 
         {!itemData.isAutomatic && (
           <Button
