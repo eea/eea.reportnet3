@@ -450,9 +450,8 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onConfirmRelease = async () => {
-    const providerId = isNil(representativeId) ? dataflowState.dataProviderId : representativeId;
     try {
-      await SnapshotService.releaseDataflow(dataflowId, providerId);
+      await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
     } catch (error) {
       notificationContext.add({ type: 'RELEASE_DATAFLOW_ERROR', content: {} });
     } finally {
