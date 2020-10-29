@@ -77,7 +77,7 @@ const useBigButtonList = ({
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
-      feedback: (isLeadDesigner && isDraftStatus) || isLeadReporterOfCountry,
+      feedback: false, //(isLeadDesigner && isDraftStatus) || isLeadReporterOfCountry,
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner && isDesignStatus,
       newSchema: isDesigner && isDesignStatus,
