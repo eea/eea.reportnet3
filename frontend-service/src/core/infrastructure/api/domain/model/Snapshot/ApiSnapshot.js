@@ -100,7 +100,7 @@ export const apiSnapshot = {
   },
 
   releaseDataflow: async (dataflowId, dataProviderId) => {
-    const response = await HTTPRequester.update({
+    const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId })
     });
     return response.data;
