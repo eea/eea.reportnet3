@@ -91,7 +91,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
-      "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
+      "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
 
   /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
@@ -287,7 +287,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false);
+    manageDataCollection(dataflowId, null, false, false);
   }
 
   /**
@@ -295,11 +295,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param manualCheck enable the manual check for the custodian approval
    */
   @Override
   @Async
-  public void createEmptyDataCollection(Long dataflowId, Date dueDate) {
-    manageDataCollection(dataflowId, dueDate, true);
+  public void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean manualCheck) {
+    manageDataCollection(dataflowId, dueDate, true, manualCheck);
   }
 
   /**
@@ -309,7 +310,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param isCreation the is creation
    */
-  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation) {
+  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
+      boolean manualCheck) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     // 1. Get the design datasets
@@ -360,8 +362,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         if (isCreation) {
           // 5. Set dataflow to DRAFT
-          statement.addBatch(
-              String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
+          statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+              manualCheck, dueDate, dataflowId));
         }
 
         for (RepresentativeVO representative : representatives) {
