@@ -315,6 +315,7 @@ public interface RulesController {
    * @param designs the designs
    * @return the all disabled rules
    */
+  @PostMapping("/private/getAllDisabledRules")
   Integer getAllDisabledRules(@RequestParam("dataflowId") Long dataflowId,
       @RequestBody List<DesignDatasetVO> designs);
 
@@ -325,8 +326,8 @@ public interface RulesController {
    * @param designs the designs
    * @return the all unchecked rules
    */
+  @PostMapping("/private/getAllUncheckedRules")
   Integer getAllUncheckedRules(@RequestParam("dataflowId") Long dataflowId,
       @RequestBody List<DesignDatasetVO> designs);
-
 
 }
