@@ -20,13 +20,14 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
 export const BigButtonListRepresentative = ({
   dataflowState,
+  dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
   match,
   onCleanUpReceipt,
- /*  onShowSnapshotDialog, */
   onOpenReleaseConfirmDialog,
-  setIsReceiptLoading
+  setIsReceiptLoading,
+  uniqRepresentatives
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -106,14 +107,15 @@ export const BigButtonListRepresentative = ({
           <div className={styles.datasetItem}>
             {useBigButtonList({
               dataflowState,
+              dataProviderId,
               getDataHistoricReleases,
               handleRedirect,
               isLeadReporterOfCountry,
               match,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
-              onShowHistoricReleases,
-             /*  onShowSnapshotDialog, */
+              onShowHistoricReleases,           
+              uniqRepresentatives
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
         </div>

@@ -6,7 +6,6 @@ export const listMessagesReducer = (state, { type, payload }) => {
         isLoadingNewMessages: payload
       };
     case 'SET_SEPARATOR_INDEX':
-      console.log(payload);
       return {
         ...state,
         separatorIndex: payload

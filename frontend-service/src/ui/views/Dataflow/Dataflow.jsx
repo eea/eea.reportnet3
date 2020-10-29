@@ -105,12 +105,14 @@ const Dataflow = withRouter(({ history, match }) => {
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
     config.permissions.LEAD_REPORTER
   ]);
-  console.log({ uniqRepresentatives }, representativeId);
+
   const isLeadReporterOfCountry =
     isLeadReporter &&
     isInsideACountry &&
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
+
+  const dataProviderId = isInsideACountry ? (!isNil(representativeId) ? representativeId : uniqDataProviders[0]) : null;
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
@@ -384,11 +386,8 @@ const Dataflow = withRouter(({ history, match }) => {
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
 
-      if (!isEmpty(dataflow.datasets)) {
-        const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
-        if (uniq(dataProviderIds).length === 1) {
-          dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id: dataProviderIds[0] } });
-        }
+      if (!isNil(dataProviderId)) {
+        dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id: dataProviderId } });
       }
 
       if (representativeId) {
@@ -483,6 +482,7 @@ const Dataflow = withRouter(({ history, match }) => {
           <BigButtonList
             className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
+            dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
             onCleanUpReceipt={onCleanUpReceipt}
@@ -499,6 +499,7 @@ const Dataflow = withRouter(({ history, match }) => {
         ) : (
           <BigButtonListRepresentative
             dataflowState={dataflowState}
+            dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
             match={match}
@@ -565,7 +566,7 @@ const Dataflow = withRouter(({ history, match }) => {
               <ManageRights
                 dataflowId={dataflowId}
                 dataflowState={dataflowState}
-                dataProviderId={dataflowState.dataProviderId}
+                dataProviderId={dataProviderId}
                 isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
               />
             </div>
@@ -584,7 +585,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isShareRightsDialogVisible}>
             <ShareRights
               dataflowId={dataflowId}
-              dataProviderId={dataflowState.dataProviderId}
+              dataProviderId={dataProviderId}
               isCustodian={dataflowState.isCustodian}
               representativeId={representativeId}
             />
@@ -606,7 +607,7 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog
             dataflowId={dataflowId}
-            dataProviderId={dataflowState.dataProviderId}
+            dataProviderId={dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}

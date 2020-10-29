@@ -122,7 +122,13 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.DATAFLOW_FEEDBACK) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowFeedbackCrumb()]);
+      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+
+      if (breadCrumbContext.prevModel.length === 4 && !isNil(breadCrumbContext.prevModel[3].href)) {
+        datasetBreadCrumbs.push(getRepresentativeCrumb());
+      }
+
+      breadCrumbContext.add([...datasetBreadCrumbs, getDataflowFeedbackCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW_HELP) {

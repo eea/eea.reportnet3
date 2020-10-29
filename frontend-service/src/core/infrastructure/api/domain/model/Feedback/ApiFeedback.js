@@ -11,7 +11,6 @@ export const apiFeedback = {
     return response.status >= 200 && response.status <= 299;
   },
   loadMessages: async (dataflowId, page) => {
-    console.log({ dataflowId, page });
     const response = await HTTPRequester.get({
       url: getUrl(FeedbackConfig.loadMessages, { dataflowId, page })
     });
@@ -25,11 +24,12 @@ export const apiFeedback = {
 
     return response.data;
   },
-  markAsRead: async (dataflowId, messageIds, read) => {
-    const response = await HTTPRequester.get({
-      url: getUrl(FeedbackConfig.markAsRead, { dataflowId, messageIds, read })
+  markAsRead: async (dataflowId, messages) => {
+    const response = await HTTPRequester.update({
+      url: getUrl(FeedbackConfig.markAsRead, { dataflowId }),
+      data: messages
     });
 
-    return response.data;
+    return response.status >= 200 && response.status <= 299;
   }
 };
