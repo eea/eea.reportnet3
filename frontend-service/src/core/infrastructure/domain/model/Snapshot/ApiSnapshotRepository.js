@@ -40,7 +40,7 @@ const allReporter = async datasetId => {
         creationDate: snapshotDTO.creationDate,
         description: snapshotDTO.description,
         id: snapshotDTO.id,
-        isAutomatic: snapshotDTO.isAutomatic,
+        isAutomatic: snapshotDTO.automatic,
         isBlocked: snapshotDTO.blocked,
         isReleased: snapshotDTO.release
       })
