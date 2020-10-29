@@ -48,6 +48,10 @@ export const useBreadCrumbs = ({
     return { label: resources.messages['dashboards'], icon: 'barChart' };
   };
 
+  const getDataflowFeedbackCrumb = () => {
+    return { label: resources.messages['dataflowFeedback'], icon: 'comments' };
+  };
+
   const getDataflowHelpCrumb = () => {
     return { label: resources.messages['dataflowHelp'], icon: 'info' };
   };
@@ -115,6 +119,10 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.DATAFLOW_DASHBOARDS) {
       breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowDashboardsCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.DATAFLOW_FEEDBACK) {
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowFeedbackCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW_HELP) {

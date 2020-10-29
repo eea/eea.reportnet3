@@ -23,6 +23,7 @@ const useBigButtonList = ({
   handleExportEuDataset,
   handleRedirect,
   isActiveButton,
+  isLeadReporterOfCountry,
   onCloneDataflow,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
@@ -45,56 +46,44 @@ const useBigButtonList = ({
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-      setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
-      // setButtonsVisibility(getButtonsVisibility(['LEAD_REPORTER'].map(userRole => config.permissions[userRole])));
+      setButtonsVisibility(getButtonsVisibility());
     }
   }, [userContext]);
 
-  const getButtonsVisibility = roles => ({
-    createDataCollection:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
-    cloneSchemasFromDataflow:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
-    copyDataCollectionToEuDataset:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
-    exportEuDataset:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
-    dashboard:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']) ||
-      roles.includes(config.permissions['EDITOR_READ']),
-    designDatasets:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']) ||
-      roles.includes(config.permissions['EDITOR_READ']),
-    designDatasetsActions:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']),
-    groupByRepresentative:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']) ||
-      roles.includes(config.permissions['EDITOR_READ']),
-    manageReporters:
-      (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
-      (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
-    newSchema:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']),
-    updateReporters:
-      (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
-      (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
-    receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
-    release:
-      roles.includes(config.permissions['LEAD_REPORTER']) &&
-      !roles.includes(config.permissions['REPORTER_WRITE']) &&
-      !roles.includes(config.permissions['REPORTER_READ'])
-  });
+  const getButtonsVisibility = () => {
+    const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
+      config.permissions.DATA_STEWARD,
+      config.permissions.DATA_CUSTODIAN
+    ]);
+
+    // roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']);
+    const isDesigner =
+      isLeadDesigner ||
+      userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
+        config.permissions.EDITOR_WRITE
+      ]);
+
+    return {
+      createDataCollection: isLeadDesigner,
+      cloneSchemasFromDataflow: isLeadDesigner,
+      copyDataCollectionToEuDataset: isLeadDesigner,
+      exportEuDataset: isLeadDesigner,
+      dashboard: isLeadDesigner,
+      designDatasets:
+        isDesigner ||
+        userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
+          config.permissions.EDITOR_READ
+        ]),
+      designDatasetsActions: isDesigner,
+      feedback: false, // isLeadDesigner || isLeadReporterOfCountry,
+      groupByRepresentative: isLeadDesigner,
+      manageReporters: isLeadDesigner,
+      newSchema: isDesigner,
+      updateReporters: isLeadDesigner,
+      receipt: isLeadReporterOfCountry,
+      release: isLeadReporterOfCountry
+    };
+  };
 
   const manageReportersBigButton = [
     {
@@ -105,6 +94,19 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-big-buttons-manageReporters-help-step',
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
+    }
+  ];
+
+  const feedbackBigButton = [
+    {
+      buttonClass: 'dataflowFeedback',
+      buttonIcon: 'comments',
+      caption: resources.messages['dataflowFeedback'],
+      handleRedirect: () => handleRedirect(getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true)),
+      helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
+      layout: 'defaultBigButton',
+      onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),
+      visibility: buttonsVisibility.feedback
     }
   ];
 
@@ -418,13 +420,6 @@ const useBigButtonList = ({
   };
 
   const onBuildReleaseButton = () => {
-    const { datasets } = dataflowState.data;
-
-    const allDatasets = datasets.map(dataset => {
-      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
-    });
-
-    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
     return [
       {
         buttonClass: 'schemaDataset',
@@ -433,56 +428,11 @@ const useBigButtonList = ({
         handleRedirect: () => onOpenReleaseConfirmDialog(),
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
-        visibility:
-          buttonsVisibility.release &&
-          dataflowState.status !== 'DESIGN' &&
-          !isEmpty(dataflowState.data.datasets) &&
-          isUniqRepresentative
+        visibility: buttonsVisibility.release
       }
     ];
   };
-
-  /*  const onBuildReleaseButton = () => {
-    const { datasets } = dataflowState.data;
-
-    const allDatasets = datasets.map(dataset => {
-      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
-    });
-
-    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
-
-    const properties = [
-      {
-        buttonClass: 'schemaDataset',
-        buttonIcon: 'released',
-        buttonIconClass: 'released',
-        caption: resources.messages['releaseDataCollection'],
-        handleRedirect:
-          datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId, datasets[0].name),
-        helpClassName: 'dataflow-big-buttons-release-help-step',
-        layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
-        visibility:
-          buttonsVisibility.release &&
-          dataflowState.status !== 'DESIGN' &&
-          !isEmpty(dataflowState.data.datasets) &&
-          isUniqRepresentative
-      }
-    ];
-
-    if (datasets.length > 1) {
-      properties[0].model = datasets.map(dataset => {
-        return {
-          label: dataset.name,
-          icon: 'cloudUpload',
-          command: () => onShowSnapshotDialog(dataset.datasetId, dataset.name),
-          disabled: false
-        };
-      });
-    }
-
-    return properties;
-  }; */
-
+>
   const copyDataCollectionToEuDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
@@ -539,6 +489,7 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
+    ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
     ...copyDataCollectionToEuDatasetBigButton,

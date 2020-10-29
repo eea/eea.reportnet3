@@ -21,6 +21,7 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 export const BigButtonListRepresentative = ({
   dataflowState,
   handleRedirect,
+  isLeadReporterOfCountry,
   match,
   onCleanUpReceipt,
  /*  onShowSnapshotDialog, */
@@ -107,6 +108,7 @@ export const BigButtonListRepresentative = ({
               dataflowState,
               getDataHistoricReleases,
               handleRedirect,
+              isLeadReporterOfCountry,
               match,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
