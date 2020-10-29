@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import styles from './ReleaseSnapshotDialog.module.scss';
 
@@ -106,7 +106,7 @@ export const ReleaseSnapshotDialog = ({
         </li>
         <li>
           <strong>{resources.messages['creationDate']}: </strong>
-          {moment(snapshotDataToRelease.creationDate).format(
+          {dayjs(snapshotDataToRelease.creationDate).format(
             `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
               userContext.userProps.amPm24h ? '' : ' A'
             }`
@@ -132,7 +132,7 @@ export const ReleaseSnapshotDialog = ({
         </li>
         <li>
           <strong>{resources.messages['creationDate']}: </strong>
-          {moment(snapshotDataToRelease.creationDate).format(
+          {dayjs(snapshotDataToRelease.creationDate).format(
             `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
               userContext.userProps.amPm24h ? '' : ' A'
             }`

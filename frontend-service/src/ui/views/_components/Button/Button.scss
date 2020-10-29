@@ -250,6 +250,16 @@ body .p-button.p-button-animated-blink span:first-child:hover {
   transition: 0.08s auto;
 }
 
+body .p-button.p-button-animated-right-blink:hover span:last-child:not(:hover) {
+  transform: scale(1.25);
+  transition: 0.08s auto;
+}
+
+body .p-button.p-button-animated-right-blink span:last-child:hover {
+  transform: scale(1.25);
+  transition: 0.08s auto;
+}
+
 // body .p-button.p-button-animated-success:hover span:first-child:not(:hover) {
 //   color: var(--success-color);
 // }

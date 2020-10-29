@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import styles from './SnapshotItem.module.scss';
 
@@ -21,7 +21,7 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
         <h5>
-          {moment(itemData.creationDate).format(
+          {dayjs(itemData.creationDate).format(
             `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
               userContext.userProps.amPm24h ? '' : ' A'
             }`
