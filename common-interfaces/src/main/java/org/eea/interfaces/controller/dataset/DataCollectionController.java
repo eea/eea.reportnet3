@@ -40,7 +40,8 @@ public interface DataCollectionController {
   @PostMapping("/create")
   void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
-          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,@RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
+      @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
       @RequestBody DataCollectionVO dataCollectionVO);
 
 

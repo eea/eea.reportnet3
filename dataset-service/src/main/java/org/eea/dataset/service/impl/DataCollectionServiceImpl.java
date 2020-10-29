@@ -287,7 +287,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false, false);
+    manageDataCollection(dataflowId, null, false, false, false);
   }
 
   /**
@@ -302,7 +302,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck) {
-    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors);
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
   }
 
   /**
@@ -312,7 +312,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param isCreation the is creation
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
-     @param manualCheck enable the manual check for the custodian approval
+   * @param manualCheck enable the manual check for the custodian approval
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck) {
@@ -385,8 +385,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
           if (isCreation) {
             // 5. Set dataflow to DRAFT
-          statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
-              manualCheck, dueDate, dataflowId));
+            statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+                manualCheck, dueDate, dataflowId));
           }
 
           for (RepresentativeVO representative : representatives) {
