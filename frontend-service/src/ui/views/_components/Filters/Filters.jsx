@@ -3,7 +3,6 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'reac
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import uuid from 'uuid';
 
 import styles from './Filters.module.scss';
