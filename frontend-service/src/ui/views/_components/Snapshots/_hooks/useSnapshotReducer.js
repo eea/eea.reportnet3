@@ -6,8 +6,7 @@ const useSnapshotReducer = (
   setIsSnapshotDialogVisible,
   onCreateSnapshot,
   onDeleteSnapshot,
-  onRestoreSnapshot,
-  onReleaseSnapshot
+  onRestoreSnapshot
 ) => {
   const resources = useContext(ResourcesContext);
 
