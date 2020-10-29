@@ -1,8 +1,8 @@
 export class Feedback {
-  constructor({ datetime, id, message, read, sender } = {}) {
+  constructor({ datetime, id, content, read, sender } = {}) {
     this.datetime = datetime;
     this.id = id;
-    this.message = message;
+    this.content = content;
     this.read = read;
     this.sender = sender;
   }
