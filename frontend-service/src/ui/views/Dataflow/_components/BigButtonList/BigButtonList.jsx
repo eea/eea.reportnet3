@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import remove from 'lodash/remove';
 import uniqBy from 'lodash/uniqBy';
 
@@ -39,7 +39,9 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowState,
+  dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
@@ -63,7 +65,6 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
-  const [dataProviderId, setDataProviderId] = useState(null);
   const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -81,7 +82,7 @@ export const BigButtonList = ({
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-
+  const [providerId, setProviderId] = useState(null);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
@@ -148,10 +149,10 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, dataProviderId) => {
+  const getDataHistoricReleases = (datasetId, value, providerId) => {
     setDatasetId(datasetId);
     setHistoricReleasesDialogHeader(value);
-    setDataProviderId(dataProviderId);
+    setProviderId(providerId);
   };
 
   const getDeleteSchemaIndex = index => {
@@ -356,12 +357,14 @@ export const BigButtonList = ({
     useBigButtonList({
       dataflowId,
       dataflowState,
+      dataProviderId,
       getDatasetData,
       getDataHistoricReleases,
       getDeleteSchemaIndex,
       handleExportEuDataset,
       handleRedirect,
       isActiveButton,
+      isLeadReporterOfCountry,
       onCloneDataflow,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
@@ -389,6 +392,7 @@ export const BigButtonList = ({
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
+
       {isIntegrationManageDialogVisible && (
         <ManageIntegrations
           dataflowId={dataflowId}
@@ -399,6 +403,7 @@ export const BigButtonList = ({
           updatedData={euDatasetExportIntegration}
         />
       )}
+
       {newDatasetDialog && (
         <Dialog
           className={styles.dialog}
@@ -414,6 +419,7 @@ export const BigButtonList = ({
           />
         </Dialog>
       )}
+
       {cloneDialogVisible && (
         <Dialog
           className={styles.dialog}
@@ -425,6 +431,7 @@ export const BigButtonList = ({
           <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
         </Dialog>
       )}
+
       {errorDialogData.isVisible && (
         <Dialog
           footer={errorDialogFooter}
@@ -434,6 +441,7 @@ export const BigButtonList = ({
           <div className="p-grid p-fluid">{errorDialogData.message}</div>
         </Dialog>
       )}
+
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -457,7 +465,7 @@ export const BigButtonList = ({
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}
-            dataProviderId={dataProviderId}
+            dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />
@@ -475,6 +483,7 @@ export const BigButtonList = ({
           <p>{resources.messages['updateDataCollectionMessage']}</p>
         </ConfirmDialog>
       )}
+
       {dataCollectionDialog && (
         <ConfirmDialog
           className={styles.calendarConfirm}
@@ -489,7 +498,7 @@ export const BigButtonList = ({
             <p
               dangerouslySetInnerHTML={{
                 __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                  expirationData: moment(dataflowState.obligations.expirationDate).format(
+                  expirationData: dayjs(dataflowState.obligations.expirationDate).format(
                     userContext.userProps.dateFormat
                   )
                 })
@@ -514,6 +523,7 @@ export const BigButtonList = ({
           />
         </ConfirmDialog>
       )}
+
       {isCopyDataCollectionToEuDatasetDialogVisible && (
         <ConfirmDialog
           header={resources.messages['copyDataCollectionToEuDatasetHeader']}
@@ -525,6 +535,7 @@ export const BigButtonList = ({
           <p>{resources.messages['copyDataCollectionToEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
+
       {isExportEuDatasetDialogVisible && (
         <ConfirmDialog
           header={resources.messages['exportEuDatasetHeader']}
@@ -536,13 +547,14 @@ export const BigButtonList = ({
           <p>{resources.messages['exportEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
+
       {isConfirmCollectionDialog && (
         <ConfirmDialog
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() =>
-            onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
+            onCreateDataCollection(new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
           }
           onHide={() => setIsConfirmCollectionDialog(false)}
           visible={isConfirmCollectionDialog}>
@@ -550,6 +562,7 @@ export const BigButtonList = ({
           {resources.messages['createDataCollectionConfirm']}
         </ConfirmDialog>
       )}
+
       <button
         className="dataflow-big-buttons-confirmation-receipt-help-step"
         ref={receiptBtnRef}
