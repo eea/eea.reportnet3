@@ -236,11 +236,11 @@ const datasetsValidationStatistics = async datasetSchemaId => {
 
 const datasetsFinalFeedback = async dataflowId => {
   const datasetsFinalFeedbackDTO = await apiDataflow.datasetsFinalFeedback(dataflowId);
-
   const datasetsFeedback = datasetsFinalFeedbackDTO.map(dataset => {
     return {
       dataProviderName: dataset.dataSetName,
       datasetName: dataset.nameDatasetSchema,
+      datasetId: dataset.id,
       isReleased: dataset.isReleased,
       feedbackStatus: dataset.feedbackStatus || 'technicallyAccept'
     };

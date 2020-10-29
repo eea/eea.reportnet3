@@ -354,6 +354,14 @@ export const apiDataset = {
 
     return response.data;
   },
+  updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {
+    const response = await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDatasetFeedbackStatus),
+      data: { dataflowId, datasetId, message, status: feedbackStatus }
+    });
+
+    return response;
+  },
   updateFieldById: async (datasetId, datasetTableRecords) => {
     try {
       const response = await HTTPRequester.update({

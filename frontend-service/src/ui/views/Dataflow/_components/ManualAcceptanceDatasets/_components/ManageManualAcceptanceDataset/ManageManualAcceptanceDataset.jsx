@@ -10,14 +10,18 @@ import { RadioButton } from 'ui/views/_components/RadioButton';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { DatasetService } from 'core/services/Dataset';
+
 import { manageManualAcceptanceDatasetReducer } from './_functions/Reducers/manageManualAcceptanceDatasetReducer';
 
 export const ManageManualAcceptanceDataset = ({
+  dataflowId,
   dataset,
   isManageDatasetDialogVisible,
   manageDialogs,
   onUpdatedData
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [manageManualAcceptanceDatasetState, manageManualAcceptanceDatasetDispatch] = useReducer(
@@ -29,6 +33,8 @@ export const ManageManualAcceptanceDataset = ({
       updateButtonEnabled: false
     }
   );
+
+  const { datasetId, datasetName } = dataset;
 
   const onBlurMessage = message => {
     if (message !== manageManualAcceptanceDatasetState.initialDatasetMessage) {
@@ -62,15 +68,21 @@ export const ManageManualAcceptanceDataset = ({
     }
   };
 
-  const onUpdateDataset = () => {
-    console.log(
-      'update',
-      manageManualAcceptanceDatasetState.datasetMessage,
-      manageManualAcceptanceDatasetState.datasetFeedbackStatus
-    );
+  const onUpdateDataset = async () => {
+    try {
+      const response = await DatasetService.updateDatasetFeedbackStatus(
+        dataflowId,
+        datasetId,
+        manageManualAcceptanceDatasetState.datasetMessage,
+        manageManualAcceptanceDatasetState.datasetFeedbackStatus
+      );
 
-    onUpdatedData(true);
-    manageDialogs(false);
+      if (response.status >= 200 && response.status <= 299) {
+        onUpdatedData(true);
+        manageDialogs(false);
+      }
+    } catch (error) {
+    }
   };
 
   const renderDialogFooter = (
@@ -95,7 +107,7 @@ export const ManageManualAcceptanceDataset = ({
       {isManageDatasetDialogVisible && (
         <Dialog
           footer={renderDialogFooter}
-          header={`${resources.messages['editStatusDataset']} ${dataset.datasetName}`}
+          header={`${resources.messages['editStatusDataset']} ${datasetName}`}
           onHide={() => manageDialogs(false)}
           style={{ width: '60%' }}
           visible={isManageDatasetDialogVisible}>

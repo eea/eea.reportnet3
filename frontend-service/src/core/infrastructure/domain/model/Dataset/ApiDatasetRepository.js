@@ -545,6 +545,10 @@ const updateRecordsById = async (datasetId, record) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
 };
 
+const updateDatasetFeedbackStatus = async (ataflowId, datasetId, message, feedbackStatus) => {
+  return await apiDataset.updateDatasetFeedbackStatus(ataflowId, datasetId, message, feedbackStatus);
+};
+
 const updateDatasetSchemaDesign = async (datasetId, datasetSchema) => {
   return await apiDataset.updateDatasetSchemaById(datasetId, datasetSchema);
 };
@@ -620,6 +624,7 @@ export const ApiDatasetRepository = {
   schemaById,
   tableDataById,
   updateDatasetSchemaDesign,
+  updateDatasetFeedbackStatus,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
