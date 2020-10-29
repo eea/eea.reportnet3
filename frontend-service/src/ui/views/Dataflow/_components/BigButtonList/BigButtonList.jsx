@@ -46,7 +46,6 @@ export const BigButtonList = ({
   onSaveName,
   onShowManageReportersDialog,
   onOpenReleaseConfirmDialog,
- /*  onShowSnapshotDialog, */
   onUpdateData,
   setIsCopyDataCollectionToEuDatasetLoading,
   setIsExportEuDatasetLoading,
@@ -66,7 +65,6 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
-  const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
@@ -375,8 +373,7 @@ export const BigButtonList = ({
       onShowExportEuDatasetModal,
       onShowHistoricReleases,
       onShowManageReportersDialog,
-      onShowNewSchemaDialog,
-      /* onShowSnapshotDialog, */
+      onShowNewSchemaDialog,   
       onOpenReleaseConfirmDialog,
       onShowUpdateDataCollectionModal,
       setErrorDialogData,
@@ -462,8 +459,7 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resources.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
-          onHide={() => setIsHistoricReleasesDialogVisible(false)}
-          // style={{ width: '80%' }}
+          onHide={() => setIsHistoricReleasesDialogVisible(false)}          
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}

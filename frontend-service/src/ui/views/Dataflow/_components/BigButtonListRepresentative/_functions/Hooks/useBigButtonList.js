@@ -21,7 +21,6 @@ const useBigButtonList = ({
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
   onShowHistoricReleases
-  /*   onShowSnapshotDialog, */
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);

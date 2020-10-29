@@ -28,7 +28,6 @@ import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
-/* import { SnapshotsDialog } from './_components/SnapshotsDialog'; */
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 
@@ -63,8 +62,6 @@ const Dataflow = withRouter(({ history, match }) => {
     currentUrl: '',
     data: {},
     dataProviderId: [],
-    datasetIdToSnapshotProps: undefined,
-    datasetNameToSnapshotProps: undefined,
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
@@ -440,11 +437,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
-  /*  const onShowSnapshotDialog = async (datasetId, datasetName) => {
-    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId, name: datasetName } });
-    manageDialogs('isSnapshotDialogVisible', true);
-  };
- */
   const onOpenReleaseConfirmDialog = () => {
     manageDialogs('isReleaseDialogVisible', true);
   };
@@ -488,7 +480,6 @@ const Dataflow = withRouter(({ history, match }) => {
             onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
             onSaveName={onSaveName}
             onShowManageReportersDialog={onShowManageReportersDialog}
-            /* onShowSnapshotDialog={onShowSnapshotDialog} */
             onUpdateData={setIsDataUpdated}
             setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
             setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
@@ -503,21 +494,10 @@ const Dataflow = withRouter(({ history, match }) => {
             isLeadReporterOfCountry={isLeadReporterOfCountry}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
-            /* onShowSnapshotDialog={onShowSnapshotDialog} */
             onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
             setIsReceiptLoading={setIsReceiptLoading}
           />
         )}
-
-        {/*   {dataflowState.isSnapshotDialogVisible && (
-          <SnapshotsDialog
-            dataflowId={dataflowId}
-            datasetId={dataflowState.datasetIdToSnapshotProps}
-            datasetName={dataflowState.datasetNameToSnapshotProps}
-            isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
-            manageDialogs={manageDialogs}
-          />
-        )} */}
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog

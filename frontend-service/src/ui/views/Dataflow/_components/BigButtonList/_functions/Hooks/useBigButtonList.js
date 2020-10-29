@@ -37,7 +37,6 @@ const useBigButtonList = ({
   onShowNewSchemaDialog,
   onShowUpdateDataCollectionModal,
   setErrorDialogData
-  /*  onShowSnapshotDialog, */
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
