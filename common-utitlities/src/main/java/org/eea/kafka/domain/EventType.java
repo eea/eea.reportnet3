@@ -14,6 +14,10 @@ public enum EventType {
   /** The validation finished event. */
   VALIDATION_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_finished_key", true),
 
+  /** The validation release finished event. */
+  VALIDATION_RELEASE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validation_release_finished_key", true),
+
   /** The import reporting completed event. */
   IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_completed_event", true),
@@ -241,6 +245,10 @@ public enum EventType {
   /** The release snapshot failed event. */
   RELEASE_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_released_failed_key", true),
+
+  /** The release snapshot blocked failed event. */
+  RELEASE_SNAPSHOT_BLOCKED_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataset_snapshot_released_blocked_failed_key", true),
 
   /** The command new design field propagation. */
   COMMAND_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC, "new_field_propagation",

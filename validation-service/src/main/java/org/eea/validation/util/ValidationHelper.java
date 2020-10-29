@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -128,6 +130,12 @@ public class ValidationHelper implements DisposableBean {
    */
   private ExecutorService validationExecutorService;
 
+
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  @Autowired
+  private ValidationController validationController;
 
   /**
    * Instantiates a new file loader helper.
@@ -536,8 +544,17 @@ public class ValidationHelper implements DisposableBean {
 
       boolean isRelease = processesMap.get(processId).isReleased() ? true : false;
       this.finishProcess(processId);
+
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-      if (processesMap.get(processId).isReleased()) {
+      if (isRelease) {
+        Long nextData =
+            datasetMetabaseControllerZuul.lastDatasetValidationForReleasingById(datasetId);
+        if (null != nextData) {
+          validationController.validateDataSetData(nextData, true);
+        } else {
+          kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+        }
+
       } else {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
             NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());

@@ -459,7 +459,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    * @param dataProviderId the data provider id
    */
   @Override
-  @LockMethod(removeWhenFinish = false)
+  // @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)

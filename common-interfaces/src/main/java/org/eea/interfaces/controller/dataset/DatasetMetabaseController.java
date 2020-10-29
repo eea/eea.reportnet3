@@ -211,4 +211,8 @@ public interface DatasetMetabaseController {
    */
   @GetMapping("/private/getUserProviderIdsByDataflowId")
   List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId);
+
+  @GetMapping(value = "/private/lastDatasetValidationForReleasingById/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Long lastDatasetValidationForReleasingById(@PathVariable("id") Long datasetId);
 }

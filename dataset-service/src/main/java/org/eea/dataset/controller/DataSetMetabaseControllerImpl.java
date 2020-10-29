@@ -360,4 +360,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId) {
     return datasetMetabaseService.getUserProviderIdsByDataflowId(dataflowId);
   }
+
+  @Override
+  @GetMapping(value = "/private/lastDatasetValidationForReleasingById/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public Long lastDatasetValidationForReleasingById(@PathVariable("id") Long datasetId) {
+    return datasetMetabaseService.lastDatasetValidationForReleasingById(datasetId);
+  }
 }

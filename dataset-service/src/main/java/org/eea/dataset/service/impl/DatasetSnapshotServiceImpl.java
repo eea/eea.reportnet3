@@ -4,10 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1001,29 +999,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void createReleaseSnapshots(Long dataflowId, Long dataProviderId) throws EEAException {
     // List of the datasets involved
-    List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
-        .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
-        .collect(Collectors.toList());
-    // List of the representatives
-    List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
-            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
-    // Lock all the operations related
-    addLocksRelatedToRelease(datasetsFilters, representatives);
+    ReportingDataset dataset = reportingDatasetRepository
+        .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(dataflowId, dataProviderId);
+    validationControllerZuul.validateDataSetData(dataset.getId(), true);
 
-    // MISSING PART OF THE VALIDATIONS
-    datasetsFilters.forEach(id -> {
-      CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
-      createSnapshotVO.setReleased(true);
-      createSnapshotVO.setAutomatic(Boolean.TRUE);
-      Date now = new Date();
-      SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      createSnapshotVO.setDescription("Release " + formateador.format(now).toString());
-      this.addSnapshot(id, createSnapshotVO, null);
-    });
 
     // Unlock all the operations when the release is finished
-    releaseLocksRelatedToRelease(datasetsFilters, representatives, dataflowId, dataProviderId);
+    // releaseLocksRelatedToRelease(datasetsFilters, representatives, dataflowId, dataProviderId);
   }
 
 

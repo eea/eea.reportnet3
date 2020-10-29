@@ -225,4 +225,14 @@ public interface DatasetMetabaseService {
    * @return the user provider ids by dataflow id
    */
   List<Long> getUserProviderIdsByDataflowId(Long dataflowId);
+
+
+
+  /**
+   * Last dataset validation for releasing by id.
+   *
+   * @param datasetId the datasetId id
+   * @return true, if successful
+   */
+  Long lastDatasetValidationForReleasingById(Long datasetId);
 }
