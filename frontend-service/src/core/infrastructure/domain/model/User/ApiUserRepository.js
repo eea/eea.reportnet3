@@ -1,5 +1,4 @@
-import moment from 'moment';
-
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -26,23 +25,25 @@ const login = async code => {
     preferredUsername: userDTO.preferredUsername,
     tokenExpireTime: userDTO.accessTokenExpiration
   });
-  userStorage.set({ accessToken, refreshToken });
+  userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
   const userInfoDTO = await apiUser.userInfo(userDTO.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - moment().unix();
+  const remain = userDTO.accessTokenExpiration - dayjs().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
 
 const logout = async () => {
-  const currentTokens = userStorage.get();
+  const currentTokens = userStorage.getTokens();
   userStorage.remove();
-  userStorage.removeLocalProperty('redirectUrl');
-  const response = await apiUser.logout(currentTokens.refreshToken);
-  return response;
+  if (currentTokens) {
+    const response = await apiUser.logout(currentTokens.refreshToken);
+    return response;
+  }
+  return;
 };
 
 const uploadImg = async (userId, imgData) => {
@@ -144,20 +145,20 @@ const oldLogin = async (userName, password) => {
     preferredUsername: userDTO.preferredUsername,
     tokenExpireTime: userDTO.accessTokenExpiration
   });
-  userStorage.set({ accessToken, refreshToken });
+  userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
   const userInfoDTO = await apiUser.userInfo(userDTO.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - moment().unix();
+  const remain = userDTO.accessTokenExpiration - dayjs().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
 
 const refreshToken = async () => {
   try {
-    const currentTokens = userStorage.get();
+    const currentTokens = userStorage.getTokens();
     const userDTO = await apiUser.refreshToken(currentTokens.refreshToken);
     const { accessToken, refreshToken } = userDTO;
     const user = new User({
@@ -168,13 +169,13 @@ const refreshToken = async () => {
       preferredUsername: userDTO.preferredUsername,
       tokenExpireTime: userDTO.accessTokenExpiration
     });
-    userStorage.set({ accessToken, refreshToken });
+    userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
     const userInfoDTO = await apiUser.userInfo(userDTO.userId);
     user.email = userInfoDTO.data.email;
     user.firstName = userInfoDTO.data.firstName;
     user.lastName = userInfoDTO.data.lastName;
     //calculate difference between now and expiration
-    const remain = userDTO.accessTokenExpiration - moment().unix();
+    const remain = userDTO.accessTokenExpiration - dayjs().unix();
     timeOut((remain - 10) * 1000);
     return user;
   } catch (error) {
@@ -192,7 +193,7 @@ const userRole = (user, entity) => {
 };
 
 const getToken = () => {
-  return userStorage.get().accessToken;
+  return userStorage.getTokens().accessToken;
 };
 
 export const ApiUserRepository = {
