@@ -16,6 +16,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import lombok.Data;
 
 /**
