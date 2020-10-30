@@ -634,8 +634,8 @@ public class DatasetMetabaseServiceTest {
     DatasetStatusMessageVO datasetStatusMessage = new DatasetStatusMessageVO();
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
-
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
+    Mockito.verify(dataFlowControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any());
   }
 
 }
