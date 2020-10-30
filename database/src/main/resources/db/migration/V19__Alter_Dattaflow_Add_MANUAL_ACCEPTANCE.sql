@@ -1,1 +1,0 @@
-ALTER TABLE public.dataflow ADD manual_acceptance bool NULL;
