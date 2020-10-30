@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -707,11 +708,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
       RulesSchema rulesUnchecked =
           rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
-      NotificationVO notificationVO =
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetId(datasetId).invalidRules(rulesUnchecked.getRules().size())
-              .disabledRules(rulesdisabled.getRules().size()).build();
-      LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).invalidRules(rulesUnchecked.getRules().size())
+          .disabledRules(rulesdisabled.getRules().size()).build();
+      LOG.info("SQL rules contains errors");
       releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
     }
   }
