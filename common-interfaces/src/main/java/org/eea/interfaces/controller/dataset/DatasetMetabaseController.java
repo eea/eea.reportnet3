@@ -2,10 +2,10 @@ package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
-import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -81,6 +81,14 @@ public interface DatasetMetabaseController {
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
+
+  /**
+   * Update dataset status and send message.
+   *
+   * @param statusMessageVO the status message VO
+   */
+  @PutMapping(value = "/updateDatasetStatus")
+  void updateDatasetStatus(@RequestBody DatasetStatusMessageVO statusMessageVO);
 
   /**
    * Gets the statistics by id.
@@ -213,13 +221,5 @@ public interface DatasetMetabaseController {
    */
   @GetMapping("/private/getUserProviderIdsByDataflowId")
   List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId);
-
-  /**
-   * Update dataset status and send message.
-   *
-   * @param statusMessageVO the status message VO
-   */
-  @PutMapping(value = "/updateDatasetStatus")
-  void updateDatasetStatus(@RequestBody DatasetStatusMessageVO statusMessageVO);
 
 }
