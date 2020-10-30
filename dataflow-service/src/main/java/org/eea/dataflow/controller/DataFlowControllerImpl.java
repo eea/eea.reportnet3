@@ -488,6 +488,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find messages.
    *
    * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param read the read
    * @param page the offset
    * @return the list
@@ -496,9 +497,15 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping("/{dataflowId}/findMessages")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read,
       @RequestParam("page") int page) {
-    return dataflowService.findMessages(dataflowId, read, page);
+    try {
+      return dataflowService.findMessages(dataflowId, providerId, read, page);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+    }
   }
 
   /**
