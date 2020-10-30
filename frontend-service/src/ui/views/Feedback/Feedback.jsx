@@ -97,6 +97,8 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
+  const unreadMessages = messgs => messgs.filter(msg => !msg.read);
+
   const onChangeDataProvider = value => {
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
@@ -114,7 +116,10 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onGetMoreMessages = async () => {
-    const data = await onLoadMessages(isCustodian ? selectedDataProvider.dataProviderId : 1, currentPage);
+    const data = await onLoadMessages(
+      isCustodian ? selectedDataProvider.dataProviderId : representativeId,
+      currentPage
+    );
     dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
   };
 
@@ -122,7 +127,17 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     console.log({ dataProviderId });
     const data = await onLoadMessages(dataProviderId, 0);
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
+    //mark unread messages as read
+    if (data.unreadMessages.length > 0) {
+      const marked = await FeedbackService.markAsRead(
+        dataflowId,
+        data.unreadMessages.map(unreadMessage => {
+          return { id: unreadMessage.id, read: true };
+        })
+      );
+    }
+
+    dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
   };
 
   const onKeyChange = event => {
@@ -133,8 +148,8 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadMessages = async (dataProviderId, page) => {
-    const data = await FeedbackService.loadMessages(dataflowId, page);
-    return data;
+    const data = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
+    return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
   };
 
   const onLoadDataProviders = async () => {

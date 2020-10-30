@@ -10,16 +10,16 @@ export const apiFeedback = {
     });
     return response.data;
   },
-  loadMessages: async (dataflowId, page) => {
+  loadMessages: async (dataflowId, page, dataProviderId) => {
     const response = await HTTPRequester.get({
-      url: getUrl(FeedbackConfig.loadMessages, { dataflowId, page })
+      url: getUrl(FeedbackConfig.loadMessages, { dataflowId, page, providerId: dataProviderId })
     });
 
     return response.data;
   },
-  loadMessagesByFlag: async (dataflowId, page, read) => {
+  loadMessagesByFlag: async (dataflowId, page, read, dataProviderId) => {
     const response = await HTTPRequester.get({
-      url: getUrl(FeedbackConfig.loadMessagesByFlag, { dataflowId, page, read })
+      url: getUrl(FeedbackConfig.loadMessagesByFlag, { dataflowId, page, read, providerId: dataProviderId })
     });
 
     return response.data;
