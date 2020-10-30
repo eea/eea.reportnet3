@@ -31,10 +31,14 @@ public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long dataflowId = notificationVO.getDataflowId();
+    Integer disabledRules = notificationVO.getDisabledRules();
+    Integer invalidRules = notificationVO.getInvalidRules();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
+    notification.put("disabledRules", disabledRules);
+    notification.put("invalidRules", invalidRules);
     notification.put("error", notificationVO.getError());
     return notification;
   }

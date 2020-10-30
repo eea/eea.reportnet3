@@ -5,6 +5,7 @@ import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -505,5 +506,35 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetSchemaId") String datasetSchemaId) {
     sqlRulesService.validateSQLRules(datasetId, datasetSchemaId);
   }
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  @Override
+  @PostMapping("/private/getAllDisabledRules")
+  public Integer getAllDisabledRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs) {
+    return rulesService.getAllDisabledRules(dataflowId, designs);
+  }
+
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  @Override
+  @PostMapping("/private/getAllUncheckedRules")
+  public Integer getAllUncheckedRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs) {
+    return rulesService.getAllUncheckedRules(dataflowId, designs);
+  }
+
 
 }

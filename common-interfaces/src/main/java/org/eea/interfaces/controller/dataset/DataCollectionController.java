@@ -35,12 +35,14 @@ public interface DataCollectionController {
    * Creates the empty data collection.
    *
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck the manual check
    * @param dataCollectionVO the data collection VO
    */
   @PostMapping("/create")
   void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
+      @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
       @RequestBody DataCollectionVO dataCollectionVO);
 
 
