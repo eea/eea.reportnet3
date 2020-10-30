@@ -82,6 +82,9 @@ public class DataFlowVO implements Serializable {
   /** The obligation. */
   private ObligationVO obligation;
 
+  /** The manual acceptance. */
+  private boolean manualAcceptance;
+
   /**
    * Equals.
    *
