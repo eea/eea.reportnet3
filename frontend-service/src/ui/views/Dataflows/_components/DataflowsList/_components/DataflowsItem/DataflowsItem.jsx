@@ -6,7 +6,7 @@ import uuid from 'uuid';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import styles from './DataflowsItem.module.scss';
 
@@ -95,7 +95,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
             <span className={`${styles.dateBlock}`}>
               {itemContent.expirationDate == '-'
                 ? resources.messages['pending']
-                : moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
             </span>
           </>
         </p>

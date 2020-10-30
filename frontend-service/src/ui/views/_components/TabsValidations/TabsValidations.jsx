@@ -31,13 +31,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 
 const TabsValidations = withRouter(
-  ({
-    dataset,
-    datasetSchemaAllTables,
-    datasetSchemaId,
-    reporting = false,
-    setHasValidations = () => {}
-  }) => {
+  ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
@@ -176,10 +170,13 @@ const TabsValidations = withRouter(
       datasetSchemaAllTables.forEach(table => {
         if (!isUndefined(table.records)) {
           if (entityType.toUpperCase() === 'TABLE') {
-            if (table.tableSchemaId === referenceId)
+            if (table.tableSchemaId === referenceId) {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            }
           } else if (entityType.toUpperCase() === 'RECORD') {
-            additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            if (table.recordSchemaId === referenceId) {
+              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            }
           } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'TABLE') {
             table.records.forEach(record =>
               record.fields.forEach(field => {

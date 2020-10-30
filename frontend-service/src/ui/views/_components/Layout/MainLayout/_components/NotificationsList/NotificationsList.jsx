@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import moment from 'moment';
+import React, { useState, useEffect, useContext } from 'react';
 
+import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import sanitizeHtml from 'sanitize-html';
+import DOMPurify from 'dompurify';
 
 import styles from './NotificationsList.module.scss';
 
@@ -61,20 +61,16 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     setColumns(columnsArray);
 
     const notificationsArray = notificationContext.all.map(notification => {
-      const message = sanitizeHtml(notification.message, {
-        allowedTags: [],
-        allowedAttributes: {
-          a: []
-        }
-      });
+      const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
       const capitalizedMessageLevel = !isUndefined(notification.type)
         ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
         : notification.type;
+
       return {
         message: message,
         messageLevel: capitalizedMessageLevel,
-        date: moment(notification.date).format(
+        date: dayjs(notification.date).format(
           `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
             userContext.userProps.amPm24h ? '' : ' A'
           }`
