@@ -74,6 +74,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
+  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
+    invalidRules: 0,
+    disabledRules: 0
+  });
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -754,12 +759,29 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const validateQcRules = () => {
+  const validateQcRules = async () => {
+    console.log('validateQcRules');
     setSqlValidationRunning(true);
-    setTimeout(() => {
+    try {
+      const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
+    } catch (error) {
+    } finally {
       setSqlValidationRunning(false);
-    }, 1000);
+    }
   };
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(
+      notification => notification.key === 'DISABLE_SQL_RULES_ERROR_EVENT'
+    );
+    if (response) {
+      const {
+        content: { invalidRules, disabledRules }
+      } = response;
+      setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
+      setIsQCsNotValidWarningVisible(true);
+    }
+  }, [notificationContext]);
 
   const renderActionButtonsValidationDialog = (
     <Fragment>
@@ -829,6 +851,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => cleanImportOtherSystemsDialog()}
       />
     </Fragment>
+  );
+
+  const sqlQCsNotValidWarningFooter = (
+    <Button
+      className="p-button-secondary"
+      icon="cancel"
+      label={resources.messages['cancel']}
+      onClick={() => setIsQCsNotValidWarningVisible(false)}
+    />
   );
 
   const renderValidationsFooter = (
@@ -1333,6 +1364,20 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 </a>
               </label>
             </div>
+          </Dialog>
+        )}
+
+        {isQCsNotValidWarningVisible && (
+          <Dialog
+            header={resources.messages['notValidQCWarningTitle']}
+            footer={sqlQCsNotValidWarningFooter}
+            onHide={() => setIsQCsNotValidWarningVisible(false)}
+            visible={isQCsNotValidWarningVisible}>
+            {console.log('invalidAndDisabledRulesAmount', invalidAndDisabledRulesAmount)}
+            {TextUtils.parseText(resources.messages['notValidQCWarningBody'], {
+              disabled: invalidAndDisabledRulesAmount.disabledRules,
+              invalid: invalidAndDisabledRulesAmount.invalidRules
+            })}
           </Dialog>
         )}
       </div>

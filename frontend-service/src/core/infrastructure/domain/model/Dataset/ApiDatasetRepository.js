@@ -583,6 +583,11 @@ const validateDataById = async datasetId => {
   return dataValidation;
 };
 
+const validateSqlRules = async (datasetId, datasetSchemaId) => {
+  console.log('[ApiDatasetRepository, validateSqlRules]', datasetId, datasetSchemaId);
+  return await apiDataset.validateSqlRules(datasetId, datasetSchemaId);
+};
+
 // const getPercentage = valArr => {
 //   let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
 //   return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
@@ -626,5 +631,6 @@ export const ApiDatasetRepository = {
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
-  validateDataById
+  validateDataById,
+  validateSqlRules
 };
