@@ -5,12 +5,13 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { FeedbackRequesterEmptyHelpConfig } from 'conf/help/feedback/requester/empty';
 
 import styles from './Feedback.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -69,6 +70,19 @@ export const Feedback = withRouter(({ match, history }) => {
     onGetDataflowName();
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (isCustodian) {
+      if (isEmpty(messages)) {
+      } else {
+      }
+    } else {
+    }
+    leftSideBarContext.addHelpSteps(
+      isCustodian ? FeedbackRequesterEmptyHelpConfig : FeedbackRequesterEmptyHelpConfig,
+      'dataflowHelpHelp'
+    );
+  }, [messages, isCustodian]);
 
   useEffect(() => {
     if (isCustodian) {
@@ -205,55 +219,58 @@ export const Feedback = withRouter(({ match, history }) => {
         icon="comments"
         iconSize="3.5rem"
       />
-      {isCustodian && (
-        <div className={styles.dataProviderWrapper}>
-          <span>{resources.messages['feedbackDataProvider']}</span>
-          <Dropdown
-            className={styles.dataProvider}
-            onChange={e => {
-              onChangeDataProvider(e.target.value);
-            }}
-            optionLabel="label"
-            options={dataProviders}
-            value={selectedDataProvider}
-          />
-        </div>
-      )}
-      <div className={styles.feedbackWrapper}>
-        {isLoading ? (
-          <Spinner className={styles.spinnerLoadingMessages} />
-        ) : (
-          <ListMessages
-            canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
-            emptyMessage={`${resources.messages['noMessages']} ${
-              isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
-            }`}
-            messages={messages}
-            newMessageAdded={newMessageAdded}
-            onLazyLoad={onGetMoreMessages}
-          />
+      <div className={`${styles.feedbackWrapper} feedback-wrapper-help-step`}>
+        {isCustodian && (
+          <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
+            <ListBox
+              className={styles.dataProvider}
+              options={dataProviders}
+              onChange={e => {
+                onChangeDataProvider(e.target.value);
+              }}
+              optionLabel="label"
+              title={resources.messages['feedbackDataProvider']}
+              value={selectedDataProvider}></ListBox>
+          </div>
         )}
-        <div className={styles.sendMessageWrapper}>
-          <InputTextarea
-            // autoFocus={true}
-            className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
-            collapsedHeight={100}
-            // expandableOnClick={true}
-            id="feedbackSender"
-            key="feedbackSender"
-            onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
-            onKeyDown={e => onKeyChange(e)}
-            placeholder={resources.messages['writeMessagePlaceholder']}
-            value={messageToSend}
-          />
-          <Button
-            className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
-            disabled={messageToSend === ''}
-            label={resources.messages['send']}
-            icon={'comment'}
-            iconPos="right"
-            onClick={() => onSendMessage(messageToSend)}
-          />
+        <div
+          className={`${styles.messagesWrapper} ${isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider}`}>
+          {isLoading ? (
+            <Spinner className={styles.spinnerLoadingMessages} />
+          ) : (
+            <ListMessages
+              canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
+              className={`feedback-messages-help-step`}
+              emptyMessage={`${resources.messages['noMessages']} ${
+                isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
+              }`}
+              messages={messages}
+              newMessageAdded={newMessageAdded}
+              onLazyLoad={onGetMoreMessages}
+            />
+          )}
+          <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
+            <InputTextarea
+              // autoFocus={true}
+              className={styles.sendMessageTextarea}
+              collapsedHeight={100}
+              // expandableOnClick={true}
+              id="feedbackSender"
+              key="feedbackSender"
+              onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
+              onKeyDown={e => onKeyChange(e)}
+              placeholder={resources.messages['writeMessagePlaceholder']}
+              value={messageToSend}
+            />
+            <Button
+              className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
+              disabled={messageToSend === ''}
+              label={resources.messages['send']}
+              icon={'comment'}
+              iconPos="right"
+              onClick={() => onSendMessage(messageToSend)}
+            />
+          </div>
         </div>
       </div>
     </Fragment>

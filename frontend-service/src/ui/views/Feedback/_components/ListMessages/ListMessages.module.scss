@@ -5,6 +5,9 @@
   top: 0 !important;
 }
 .messagesWrapper {
+  border: var(--inputtext-border);
+  border-radius: 3px;
+  margin-left: 1rem;
   max-height: 40vh;
   overflow: scroll;
   width: 100%;

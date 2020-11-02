@@ -1,0 +1,11 @@
+{
+    "steps": [
+        {
+         "content":   "This is the feedback page",
+         "target":".feedback-wrapper-help-step"
+        },
+      {
+        "content": "",
+        "target": ".feedback-send-message-help-step"
+      }]
+}

@@ -13,6 +13,7 @@ import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
 export const ListMessages = ({
   canLoad = true,
+  className = '',
   emptyMessage = '',
   lazyLoading = true,
   messages = [],
@@ -63,7 +64,7 @@ export const ListMessages = ({
   };
 
   return (
-    <div className={styles.messagesWrapper} onScroll={onScroll} ref={messagesWrapperRef}>
+    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
       {isLoadingNewMessages && (
         <div className={styles.lazyLoadingWrapper}>
           <Spinner className={styles.lazyLoadingSpinner} />
