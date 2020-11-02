@@ -2,10 +2,11 @@ package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
 import java.util.Date;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 
 /**
@@ -56,5 +57,8 @@ public class DataSetMetabaseVO implements Serializable {
    * The dataset type enum
    */
   private DatasetTypeEnum datasetTypeEnum;
+
+  /** The status. */
+  private DatasetStatusEnum status;
 
 }

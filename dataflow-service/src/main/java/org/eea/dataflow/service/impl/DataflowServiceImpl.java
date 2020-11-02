@@ -549,32 +549,26 @@ public class DataflowServiceImpl implements DataflowService {
    * Find messages.
    *
    * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param read the read
    * @param page the offset
    * @return the list
+   * @throws EEAException
    */
   @Override
-  public List<MessageVO> findMessages(Long dataflowId, Boolean read, int page) {
+  public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+      throws EEAException {
 
     Page<Message> pageResponse;
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
-    Collection<? extends GrantedAuthority> authorities =
-        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+    verifyMessagingPermissionsAndGetDirection(dataflowId, providerId);
 
-    if (authorities.contains(
-        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
-        || authorities.contains(new SimpleGrantedAuthority(
-            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
-      pageResponse =
-          null != read ? messageRepository.findByDataflowIdAndRead(dataflowId, read, pageRequest)
-              : messageRepository.findByDataflowId(dataflowId, pageRequest);
+    if (null != read) {
+      pageResponse = messageRepository.findByDataflowIdAndProviderIdAndRead(dataflowId, providerId,
+          read, pageRequest);
     } else {
-      List<Long> providerIds =
-          datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
-      pageResponse = null != read
-          ? messageRepository.findByDataflowIdAndProviderIdInAndRead(dataflowId, providerIds, read,
-              pageRequest)
-          : messageRepository.findByDataflowIdAndProviderIdIn(dataflowId, providerIds, pageRequest);
+      pageResponse =
+          messageRepository.findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest);
     }
 
     return messageMapper.entityListToClass(pageResponse.getContent());

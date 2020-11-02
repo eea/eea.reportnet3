@@ -6,6 +6,8 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,6 +16,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import lombok.Data;
 
 /**
@@ -54,7 +57,8 @@ public class DataSetMetabase {
 
   /** The status. */
   @Column(name = "STATUS")
-  private String status;
+  @Enumerated(EnumType.STRING)
+  private DatasetStatusEnum status;
 
   /** The dataset schema. */
   @Column(name = "DATASET_SCHEMA")
