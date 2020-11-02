@@ -7,10 +7,7 @@ export const manageManualAcceptanceDatasetReducer = (state, { type, payload }) =
       return { ...state, datasetFeedbackStatus: payload.value };
 
     case 'ON_UPDATE_MESSAGE':
-      return { ...state, datasetMessage: payload.message, updateButtonEnabled: payload.value };
-
-    case 'UPDATE_BUTTON_DISABLED':
-      return { ...state, updateButtonEnabled: payload.value };
+      return { ...state, datasetMessage: payload.message };
 
     default:
       return state;

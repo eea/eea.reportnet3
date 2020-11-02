@@ -29,24 +29,17 @@ export const ManageManualAcceptanceDataset = ({
     {
       initialDatasetMessage: '',
       datasetMessage: '',
-      datasetFeedbackStatus: dataset.feedbackStatus,
-      updateButtonEnabled: false
+      datasetFeedbackStatus: dataset.feedbackStatus
     }
   );
 
   const { datasetId, datasetName } = dataset;
 
-  const onBlurMessage = message => {
-    if (message !== manageManualAcceptanceDatasetState.initialDatasetMessage) {
-      return manageManualAcceptanceDatasetDispatch({ type: 'UPDATE_BUTTON_DISABLED', payload: { value: true } });
-    }
-  };
-
   const onChangeMessage = message => {
     if (message !== manageManualAcceptanceDatasetState.initialDatasetMessage) {
       return manageManualAcceptanceDatasetDispatch({
         type: 'ON_UPDATE_MESSAGE',
-        payload: { message: message, value: true }
+        payload: { message }
       });
     }
   };
@@ -64,7 +57,9 @@ export const ManageManualAcceptanceDataset = ({
       event.preventDefault();
       const value = event.target.value;
       manageManualAcceptanceDatasetDispatch({ type: 'ON_UPDATE_MESSAGE', payload: { value } });
-      onBlurMessage(event.target.value);
+      !isEmpty(manageManualAcceptanceDatasetState.datasetMessage) &&
+        !isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus) &&
+        onUpdateDataset();
     }
   };
 
@@ -90,7 +85,10 @@ export const ManageManualAcceptanceDataset = ({
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink"
-        disabled={!manageManualAcceptanceDatasetState.updateButtonEnabled}
+        disabled={
+          isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
+          isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)
+        }
         icon={'check'}
         label={resources.messages['update']}
         onClick={() => onUpdateDataset()}
