@@ -480,7 +480,7 @@ public class DataFlowControllerImpl implements DataFlowController {
           messageVO.getContent());
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
   }
 
@@ -504,7 +504,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       return dataflowService.findMessages(dataflowId, providerId, read, page);
     } catch (EEAException e) {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
   }
 
@@ -523,7 +523,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
   }
 
