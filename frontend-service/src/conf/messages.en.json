@@ -915,6 +915,6 @@
     "validateRulesBtn": "Validate QC rules",
     "validateRulesBtnTootip": "QCs with SQL sentences need to be re-validated after changing table or field names",
     "notValidQCWarningTitle": "There are invalid QC rules",
-    "notValidQCWarningBody": "There are invalid QC rules"
+    "notValidQCWarningBody": "You have {:invalid} invalid QCs and {:disabled} disabled QCs. Do you want to go ahead with the creation of the data collection? The above rules will be disabled."
   }
 }
