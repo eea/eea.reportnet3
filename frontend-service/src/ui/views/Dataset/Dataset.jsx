@@ -62,6 +62,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
@@ -191,6 +192,7 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     callSetMetaData();
     getDataflowName();
+    getDatasetFeedbackStatus();
     getDatasetSchemaId();
     onLoadDataflow();
   }, []);
@@ -272,6 +274,15 @@ export const Dataset = withRouter(({ match, history }) => {
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', response));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
+    }
+  };
+
+  const getDatasetFeedbackStatus = async () => {
+    try {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
+    } catch (error) {
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
   };
 
@@ -771,7 +782,8 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={`${datasetTitle()}`}
+        title={`${datasetTitle()} `}
+        insideTitle={`- ${datasetFeedbackStatus} `}
         subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"

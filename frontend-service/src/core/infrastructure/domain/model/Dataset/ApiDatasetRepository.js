@@ -244,7 +244,8 @@ const getMetaData = async datasetId => {
 
   const dataset = new Dataset({
     datasetSchemaName: datasetTableDataDTO.dataSetName,
-    datasetSchemaId: datasetTableDataDTO.datasetSchema
+    datasetSchemaId: datasetTableDataDTO.datasetSchema,
+    datasetFeedbackStatus: datasetTableDataDTO.status
   });
   return dataset;
 };

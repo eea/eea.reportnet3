@@ -157,10 +157,7 @@ export const ManageManualAcceptanceDataset = ({
             className={styles.radioButton}
             checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus}
             inputId={feedBackStatus}
-            onChange={event => {
-              console.log('event.target.value', event.target.value);
-              onChangeStatus(event.target.value);
-            }}
+            onChange={event => onChangeStatus(event.target.value)}
             value={feedBackStatus}
           />
         </div>
