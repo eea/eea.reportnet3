@@ -7,6 +7,8 @@ import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 
+import styles from './TableManagement.module.scss';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -19,155 +21,130 @@ import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { DatasetService } from 'core/services/Dataset';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const TableManagement = () => {
+import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
+
+export const TableManagement = ({ dataflowId, datasetId, records }) => {
+  const resources = useContext(ResourcesContext);
+
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [PaMNumberToDelete, setPaMNumberToDelete] = useState(null);
   const [tableToCreate, setTableToCreate] = useState(null);
-
-  const resources = useContext(ResourcesContext);
+  const [tableRecords, setTableRecords] = useState([]);
 
   useEffect(() => {
-    console.log('tableToCreate', tableToCreate);
-  }, [tableToCreate]);
+    parsePamsRecords();
+  }, [records]);
 
-  const data = [
-    {
-      PaMNumber: 1,
-      nameOfPolicy: 'test',
-      singleOrGroup: 'single',
-      table1: 'aaaa',
-      table2: 'bbbb',
-      table3: 'cccc'
-    },
-    {
-      PaMNumber: 2,
-      nameOfPolicy: 'test',
-      singleOrGroup: 'group',
-      table1: 'dddd',
-      table2: 'eeee',
-      table3: 'ffff'
-    }
-  ];
+  const parsePamsRecords = () => {
+    setTableRecords(
+      records.map(record => {
+        let data = {};
 
-  const deletePamBodyTemplate = rowData => {
-    return (
-      <React.Fragment>
-        <span>{rowData.PaMNumber}</span>
-        <Button
-          icon={'trash'}
-          className="p-button-danger"
-          onClick={() => {
-            setPaMNumberToDelete(rowData.PaMNumber);
-            setIsConfirmDeleteVisible(true);
-          }}
-        />
-      </React.Fragment>
+        record.elements.forEach(element => (data = { ...data, [element.name]: element.value }));
+
+        return data;
+      })
     );
   };
 
-  const addTable1 = rowData => {
-    return (
-      <React.Fragment>
-        <Button
-          label={'Create Table'}
-          icon={'add'}
-          onClick={() => {
-            setTableToCreate(rowData.table1);
-          }}
-        />
-      </React.Fragment>
-    );
-  };
+  const addTable1 = rowData => (
+    <Button label={'Create Table'} icon={'add'} onClick={() => setTableToCreate(rowData.table1)} />
+  );
 
-  const addTable2 = rowData => {
-    return (
-      <React.Fragment>
-        <Button
-          label={'Create Table'}
-          icon={'add'}
-          onClick={() => {
-            setTableToCreate(rowData.table2);
-          }}
-        />
-      </React.Fragment>
-    );
-  };
+  const addTable2 = rowData => (
+    <Button label={'Create Table'} icon={'add'} onClick={() => setTableToCreate(rowData.table2)} />
+  );
 
-  const addTable3 = rowData => {
-    return (
-      <React.Fragment>
-        <Button
-          label={'Create Table'}
-          icon={'add'}
-          onClick={() => {
-            setTableToCreate(rowData.table3);
-          }}
-        />
-      </React.Fragment>
-    );
-  };
+  const addTable3 = rowData => (
+    <Button label={'Create Table'} icon={'add'} onClick={() => setTableToCreate(rowData.table3)} />
+  );
 
   const confirmDelete = PaMNumberToDelete => {
-    console.log('PaMNumberToDelete', PaMNumberToDelete);
+    // console.log('PaMNumberToDelete', PaMNumberToDelete);
+  };
+
+  const addTableTemplate = rowData => {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          className={'p-button-secondary'}
+          icon={'add'}
+          label={'Create Table'}
+          onClick={() => setTableToCreate(rowData.table3)}
+        />
+      </div>
+    );
   };
 
   const tableColumns = [
-    { body: deletePamBodyTemplate, field: 'PaMNumber', header: 'PaMnumber' },
-    { field: 'nameOfPolicy', header: 'Name of policy or measure' },
-    { field: 'singleOrGroup', header: 'PaM or group of PaMs' },
+    { field: 'Id', header: 'PaMnumber' },
+    { field: 'Title', header: 'Name of policy or measure' },
+    { field: 'IsGroup', header: 'PaM or group of PaMs' },
     {
-      body: addTable1,
+      body: addTableTemplate,
       field: 'table1',
       header:
         'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
     },
     {
-      body: addTable2,
+      body: addTableTemplate,
       field: 'table2',
       header:
         'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
     },
     {
-      body: addTable3,
+      body: addTableTemplate,
       field: 'table3',
       header:
         'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
     }
   ];
 
-  const renderTableColumns = tableColumns.map(col => {
-    return isNil(col.body) ? (
-      <Column key={col.field} field={col.field} header={col.header} />
-    ) : (
-      <Column key={col.field} field={col.field} header={col.header} body={col.body} />
-    );
-  });
+  const renderActionButtonsColumn = (
+    <Column
+      body={row => actionsTemplate(row)}
+      header={resources.messages['actions']}
+      key="actions"
+      style={{ width: '100px' }}
+    />
+  );
+
+  const actionsTemplate = () => (
+    <ActionsColumn
+      onDeleteClick={() => setIsConfirmDeleteVisible(true)}
+      // onEditClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
+      onEditClick={() => {}}
+    />
+  );
+
+  const renderTableColumns = () => {
+    const data = tableColumns.map(col => {
+      return <Column key={col.field} field={col.field} header={col.header} body={col.body} />;
+    });
+
+    data.push(renderActionButtonsColumn);
+
+    return data;
+  };
+
+  console.log('tableRecords', tableRecords);
+
   return (
     <Fragment>
-      <DataTable
-        autoLayout={true}
-        // totalRecords={constraintsState.filteredData.length}
-        // value={constraintsState.filteredData}
-        value={data}>
-        {data.map(datos => {
-          Object.keys(datos).map(d => {
-            return (
-              <Column
-                // header={messages[selected]['hours']}
-                // headerStyle={{ background: online ? '#ff3800' : '', color: online ? 'white' : '' }}
-                field={d}
-              />
-            );
-          });
-        })}
+      <DataTable autoLayout={true} value={tableRecords}>
+        {renderTableColumns()}
       </DataTable>
 
-      <DataTable autoLayout={true} value={data}>
-        {renderTableColumns}
-      </DataTable>
+      <div className={styles.addButtons}>
+        <Button label={'Add Single'} icon={'add'} />
+        <Button label={'Add Group'} icon={'add'} />
+      </div>
 
       {isConfirmDeleteVisible && (
         <ConfirmDialog

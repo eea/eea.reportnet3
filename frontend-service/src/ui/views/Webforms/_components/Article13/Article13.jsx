@@ -23,10 +23,14 @@ import { TableManagement } from './_components/TableManagement';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformView } from './_components/WebformView';
 
+import { DatasetService } from 'core/services/Dataset';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { Article15Utils } from '../Article15/_functions/Utils/Article15Utils';
+import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Article13 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
@@ -42,6 +46,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       case 'ON_TOGGLE_VIEW':
         return { ...state, isWebformView: payload.view };
 
+      case 'ON_LOAD_PAMS_DATA':
+        return { ...state, pamsRecords: payload.records };
+
       default:
         return state;
     }
@@ -50,14 +57,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
     isWebformView: false,
+    pamsRecords: [],
     tableList: { group: [], single: [] }
   });
+
+  const { isWebformView, pamsRecords, tableList } = article13State;
 
   useEffect(() => {
     initialLoad();
   }, []);
 
-  const { isWebformView, tableList } = article13State;
+  useEffect(() => {
+    onLoadPamsData();
+  }, [article13State.data]);
 
   const initialLoad = () => {
     const allTables = tables.map(table => table.name);
@@ -68,6 +80,78 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onLoadData = () => {
     if (!isEmpty(datasetSchema)) return onParseWebformData(tables, datasetSchema.tables);
+  };
+
+  const onLoadPamsData = async () => {
+    const tableSchemaId = article13State.data.map(table => table.tableSchemaId);
+
+    try {
+      const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
+        'CORRECT',
+        'INFO',
+        'WARNING',
+        'ERROR',
+        'BLOCKER'
+      ]);
+
+      if (!isNil(parentTableData.records)) {
+        const tableData = {};
+
+        const records = onParseWebformRecords(
+          parentTableData.records,
+          article13State.data[0],
+          tableData,
+          parentTableData.totalRecords
+        );
+
+        article13Dispatch({ type: 'ON_LOAD_PAMS_DATA', payload: { records } });
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
+    return records.map(record => {
+      const { fields } = record;
+      const { elements } = webform;
+
+      const result = [];
+
+      for (let index = 0; index < elements.length; index++) {
+        const element = elements[index];
+
+        if (element.type === 'FIELD') {
+          result.push({
+            fieldType: 'EMPTY',
+            ...element,
+            ...fields.find(field => field['fieldSchemaId'] === element['fieldSchema']),
+            codelistItems: element.codelistItems || [],
+            description: element.description || '',
+            isDisabled: isNil(element.fieldSchema),
+            maxSize: element.maxSize,
+            name: element.name,
+            recordId: record.recordId,
+            type: element.type,
+            validExtensions: element.validExtensions
+          });
+        } else {
+          if (tableData[element.tableSchemaId]) {
+            const tableElementsRecords = onParseWebformRecords(
+              tableData[element.tableSchemaId].records,
+              element,
+              tableData,
+              totalRecords
+            );
+            result.push({ ...element, elementsRecords: tableElementsRecords });
+          } else {
+            result.push({ ...element, tableNotCreated: true, elementsRecords: [] });
+          }
+        }
+      }
+
+      return { ...record, elements: result, totalRecords };
+    });
   };
 
   const onParseWebformData = (allTables, schemaTables) => {
@@ -121,12 +205,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         Questionnaire for reporting on Policies and Measures under the Monitoring Mechanism Regulation
       </h3>
 
-      {/* <div className={styles.switch}>
-        <span className={styles.option}>overView</span>
-        <InputSwitch checked={isWebformView} onChange={event => onToggleView(event.value)} />
-        <span className={styles.option}>{resources.messages['webform']}</span>
-      </div> */}
-
       <div className={styles.tabBar}>
         <div className={styles.indicator} style={{ left: isWebformView ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
         <div
@@ -167,7 +245,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           tables={tables}
         />
       ) : (
-        <TableManagement />
+        <TableManagement dataflowId={dataflowId} datasetId={datasetId} records={pamsRecords} />
       )}
     </Fragment>
   );
