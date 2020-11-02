@@ -703,7 +703,7 @@ public class DataFlowControllerImplTest {
     try {
       dataFlowControllerImpl.createMessage(1L, messageVO);
     } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
   }
@@ -732,7 +732,7 @@ public class DataFlowControllerImplTest {
     try {
       dataFlowControllerImpl.findMessages(1L, 1L, true, 1);
     } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
   }
@@ -761,7 +761,7 @@ public class DataFlowControllerImplTest {
     try {
       dataFlowControllerImpl.updateMessageReadStatus(1L, new ArrayList<MessageVO>());
     } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
   }
