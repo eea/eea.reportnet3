@@ -498,7 +498,7 @@ export const BigButtonList = ({
           visible={isManualTechnicalAcceptanceDialogVisible}>
           <ManualAcceptanceDatasets
             dataflowData={dataflowData}
-            dataflowId={dataflowId}
+            dataflowId={dataflowData.id}
             isManualTechnicalAcceptance={isManualTechnicalAcceptance}
           />
         </Dialog>

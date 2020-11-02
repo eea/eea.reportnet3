@@ -242,7 +242,7 @@ const datasetsFinalFeedback = async dataflowId => {
       datasetName: dataset.nameDatasetSchema,
       datasetId: dataset.id,
       isReleased: dataset.isReleased,
-      feedbackStatus: dataset.feedbackStatus || 'technicallyAccept'
+      feedbackStatus: dataset.status
     };
   });
 

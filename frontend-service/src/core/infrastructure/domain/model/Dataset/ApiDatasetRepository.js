@@ -545,8 +545,8 @@ const updateRecordsById = async (datasetId, record) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
 };
 
-const updateDatasetFeedbackStatus = async (ataflowId, datasetId, message, feedbackStatus) => {
-  return await apiDataset.updateDatasetFeedbackStatus(ataflowId, datasetId, message, feedbackStatus);
+const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {
+  return await apiDataset.updateDatasetFeedbackStatus(dataflowId, datasetId, message, feedbackStatus);
 };
 
 const updateDatasetSchemaDesign = async (datasetId, datasetSchema) => {

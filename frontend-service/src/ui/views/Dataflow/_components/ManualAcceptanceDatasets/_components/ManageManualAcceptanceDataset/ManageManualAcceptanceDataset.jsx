@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useReducer } from 'react';
 
 import styles from './ManageManualAcceptanceDataset.module.scss';
 
+import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 
 import { Button } from 'ui/views/_components/Button';
@@ -146,17 +147,18 @@ export const ManageManualAcceptanceDataset = ({
   );
 
   const renderRadioButtons = () =>
-    ['correctionRequested', 'technicallyAccept'].map(feedBackStatus => {
+    ['Technically accept', 'Correction requested'].map(feedBackStatus => {
       return (
         <div className={styles.radioButtonWrapper} key={feedBackStatus}>
           <label className={styles.label} htmlFor={feedBackStatus}>
-            {resources.messages[feedBackStatus]}
+            {resources.messages[camelCase(feedBackStatus)]}
           </label>
           <RadioButton
             className={styles.radioButton}
             checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus}
             inputId={feedBackStatus}
             onChange={event => {
+              console.log('event.target.value', event.target.value);
               onChangeStatus(event.target.value);
             }}
             value={feedBackStatus}

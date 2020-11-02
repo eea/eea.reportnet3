@@ -41,7 +41,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
   useEffect(() => {
     onLoadManualAcceptanceDatasets();
-  }, [manualAcceptanceDatasetsState.isUpdatedData]);
+  }, [manualAcceptanceDatasetsState.isUpdatedData, manualAcceptanceDatasetsState.isManageDatasetDialogVisible]);
 
   const getFiltered = value => manualAcceptanceDatasetsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
@@ -173,7 +173,6 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
         inputOptions={['datasetName']}
         selectOptions={['dataProviderName', 'feedbackStatus']}
       />
-
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
         <DataTable
           autoLayout={true}
