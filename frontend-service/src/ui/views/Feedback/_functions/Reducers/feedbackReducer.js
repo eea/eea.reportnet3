@@ -1,7 +1,6 @@
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ON_LOAD_MORE_MESSAGES':
-      console.log({ payload });
       const inmAllMessages = [...payload, ...state.messages];
       return {
         ...state,
