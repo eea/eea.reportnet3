@@ -40,7 +40,9 @@ import { isUndefined } from 'lodash';
 
 export const BigButtonList = ({
   dataflowState,
+  dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
@@ -64,7 +66,6 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
-  const [dataProviderId, setDataProviderId] = useState(null);
   const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -88,6 +89,7 @@ export const BigButtonList = ({
     disabledRules: 0
   });
 
+  const [providerId, setProviderId] = useState(null);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
@@ -154,10 +156,10 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, dataProviderId) => {
+  const getDataHistoricReleases = (datasetId, value, providerId) => {
     setDatasetId(datasetId);
     setHistoricReleasesDialogHeader(value);
-    setDataProviderId(dataProviderId);
+    setProviderId(providerId);
   };
 
   const getDeleteSchemaIndex = index => {
@@ -320,7 +322,7 @@ export const BigButtonList = ({
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.download(dataflowId, dataflowState.dataProviderId);
+      const response = await ConfirmationReceiptService.download(dataflowId, dataProviderId);
 
       downloadPdf(response);
       onCleanUpReceipt();
@@ -397,12 +399,14 @@ export const BigButtonList = ({
     useBigButtonList({
       dataflowId,
       dataflowState,
+      dataProviderId,
       getDatasetData,
       getDataHistoricReleases,
       getDeleteSchemaIndex,
       handleExportEuDataset,
       handleRedirect,
       isActiveButton,
+      isLeadReporterOfCountry,
       onCloneDataflow,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
@@ -503,7 +507,7 @@ export const BigButtonList = ({
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}
-            dataProviderId={dataProviderId}
+            dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />

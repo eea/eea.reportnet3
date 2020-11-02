@@ -20,11 +20,14 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
 export const BigButtonListRepresentative = ({
   dataflowState,
+  dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
   match,
   onCleanUpReceipt,
   onShowSnapshotDialog,
-  setIsReceiptLoading
+  setIsReceiptLoading,
+  uniqRepresentatives
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -69,7 +72,7 @@ export const BigButtonListRepresentative = ({
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowState.id, match.params.representativeId);
+      const response = await ConfirmationReceiptService.download(dataflowState.id, match.params.representativeId);
       downloadPdf(response);
       onCleanUpReceipt();
     } catch (error) {
@@ -104,12 +107,15 @@ export const BigButtonListRepresentative = ({
           <div className={styles.datasetItem}>
             {useBigButtonList({
               dataflowState,
+              dataProviderId,
               getDataHistoricReleases,
               handleRedirect,
+              isLeadReporterOfCountry,
               match,
               onLoadReceiptData,
               onShowHistoricReleases,
-              onShowSnapshotDialog
+              onShowSnapshotDialog,
+              uniqRepresentatives
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
         </div>
