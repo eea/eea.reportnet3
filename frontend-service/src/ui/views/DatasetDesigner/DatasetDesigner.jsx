@@ -15,8 +15,7 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { routes } from 'ui/routes';
 import WebformsConfig from 'conf/webforms.config.json';
 
-import { Article13 } from 'ui/views/Webform/Article13';
-import { Article15 } from 'ui/views/Webform/Article15';
+import { Webforms } from 'ui/views/Webforms';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -1132,8 +1131,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         </div>
         {renderSwitchView()}
         {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
-          // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
-          <Article13 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+          <Webforms
+            dataflowId={dataflowId}
+            datasetId={datasetId}
+            state={designerState}
+            webformType={designerState.webform.value}
+          />
         ) : (
           <TabsDesigner
             changeMode={changeMode}
