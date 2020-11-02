@@ -51,12 +51,7 @@ export const ManageManualAcceptanceDataset = ({
     manageManualAcceptanceDatasetDispatch({ type: 'ON_CHANGE_STATUS', payload: { value } });
 
   const onKeyChange = event => {
-    if (event.key === 'Escape') {
-      manageManualAcceptanceDatasetDispatch({
-        type: 'ON_UPDATE_MESSAGE',
-        payload: { value: manageManualAcceptanceDatasetState.initialDatasetMessage }
-      });
-    } else if (event.key === 'Enter') {
+    if (event.key === 'Enter') {
       event.preventDefault();
       const value = event.target.value;
       manageManualAcceptanceDatasetDispatch({ type: 'ON_UPDATE_MESSAGE', payload: { value } });
@@ -77,10 +72,11 @@ export const ManageManualAcceptanceDataset = ({
 
       if (response.status >= 200 && response.status <= 299) {
         onUpdatedData(true);
-        manageDialogs(false);
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });
+    } finally {
+      manageDialogs(false);
     }
   };
 
