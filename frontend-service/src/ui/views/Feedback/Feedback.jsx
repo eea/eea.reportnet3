@@ -33,7 +33,7 @@ import { DataflowUtils } from 'ui/views/_functions/Utils/DataflowUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
-    params: { dataflowId }
+    params: { dataflowId, representativeId }
   } = match;
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -77,7 +77,6 @@ export const Feedback = withRouter(({ match, history }) => {
   }, [isCustodian]);
 
   useEffect(() => {
-    console.log(selectedDataProvider);
     if (!isNil(isCustodian)) {
       if (isCustodian) {
         if (!isEmpty(selectedDataProvider)) {
@@ -153,32 +152,31 @@ export const Feedback = withRouter(({ match, history }) => {
     );
 
     dispatchFeedback({ type: 'SET_DATAPROVIDERS', payload: filteredDataProviders });
-
-    console.log(allRepresentatives, responseAllDataProviders, filteredDataProviders);
   };
 
   const onSendMessage = async message => {
-    console.log({ message });
     if (message.trim() !== '') {
-      //Send message to BE
       try {
-        if (isCustodian && !isEmpty(selectedDataProvider)) {
-          const created = await FeedbackService.create(dataflowId, message, selectedDataProvider.dataProviderId);
-          console.log({ created });
-          if (created) {
-            dispatchFeedback({
-              type: 'ON_SEND_MESSAGE',
-              payload: {
-                value: {
-                  datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-                  id: messages.length + 1,
-                  message,
-                  read: false,
-                  sender: true
-                }
+        const created = await FeedbackService.create(
+          dataflowId,
+          message,
+          isCustodian && !isEmpty(selectedDataProvider)
+            ? selectedDataProvider.dataProviderId
+            : parseInt(representativeId)
+        );
+        if (created) {
+          dispatchFeedback({
+            type: 'ON_SEND_MESSAGE',
+            payload: {
+              value: {
+                datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+                id: messages.length + 1,
+                message,
+                read: false,
+                sender: true
               }
-            });
-          }
+            }
+          });
         }
       } catch (error) {
         console.error(error);

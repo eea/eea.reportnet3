@@ -14,6 +14,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowState,
+  dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
@@ -49,7 +50,8 @@ const useBigButtonList = ({
         getUrl(
           routes.DATAFLOW_FEEDBACK,
           {
-            dataflowId: dataflowState.id
+            dataflowId: dataflowState.id,
+            representativeId: dataProviderId
           },
           true
         )
@@ -58,7 +60,8 @@ const useBigButtonList = ({
     onWheel: getUrl(
       routes.DATAFLOW_FEEDBACK,
       {
-        dataflowId: dataflowState.id
+        dataflowId: dataflowState.id,
+        representativeId: dataProviderId
       },
       true
     ),
@@ -134,14 +137,7 @@ const useBigButtonList = ({
           },
           true
         ),
-        // model: !dataflowState.hasWritePermissions && [
-        //   {
-        //     label: resources.messages['properties'],
-        //     icon: 'info',
-        //     disabled: true
-        //   }
-        // ],
-        visibility: !isEmpty(dataflowState.data.datasets)
+        visibility: true
       };
     });
 
@@ -185,8 +181,7 @@ const useBigButtonList = ({
             ? () => {}
             : () => onShowSnapshotDialog(filteredDatasets[0].datasetId, filteredDatasets[0].name),
         layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
-        visibility:
-          buttonsVisibility.release && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
+        visibility: buttonsVisibility.release
       }
     ];
 
