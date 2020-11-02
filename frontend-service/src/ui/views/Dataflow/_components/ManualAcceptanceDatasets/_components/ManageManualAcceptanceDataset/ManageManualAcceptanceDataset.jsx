@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useReducer } from 'react';
 
-import styles from './ManageManuelAcceptanceDataset.module.scss';
+import styles from './ManageManualAcceptanceDataset.module.scss';
 
 import isEmpty from 'lodash/isEmpty';
 
