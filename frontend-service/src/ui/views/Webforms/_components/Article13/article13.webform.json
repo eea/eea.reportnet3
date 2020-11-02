@@ -1,8 +1,8 @@
 {
   "tables": [
     {
-      "type": "TABLE",
       "name": "PaMs",
+      "type": "TABLE",
       "label": "PaMs",
       "title": "Overview Table",
       "multipleRecords": false,
@@ -48,6 +48,7 @@
       ]
     },
     {
+      "type": "TABLE",
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
@@ -359,6 +360,7 @@
       ]
     },
     {
+      "type": "TABLE",
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
@@ -660,6 +662,7 @@
       ]
     },
     {
+      "type": "TABLE",
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",
