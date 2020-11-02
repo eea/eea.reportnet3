@@ -1,7 +1,7 @@
 {
   "tables": [
     {
-      "type": "LABEL",
+      "type": "TABLE",
       "name": "PaMs",
       "label": "PaMs",
       "title": "Overview Table",

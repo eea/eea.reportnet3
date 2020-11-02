@@ -10,3 +10,85 @@
   .option {
   }
 }
+
+.tabBar {
+  align-items: center;
+  background-color: #f1f4f7;
+  border-radius: 8px;
+  display: flex;
+  padding: 0 1rem;
+  position: relative;
+  width: calc(300px + 2rem);
+
+  .tabItem {
+    align-items: center;
+    color: #818997;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: 0 0.5rem;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 150px;
+
+    .tabLabel {
+      margin: 0;
+      padding: 1rem;
+      pointer-events: none;
+      position: relative;
+    }
+  }
+
+  .indicator {
+    background-color: var(--bg);
+    border-radius: 6px;
+    box-shadow: 0px 2px 5px rgba(11, 37, 105, 0.04), 0px 1px 0px rgba(11, 37, 105, 0.04);
+    height: 32px;
+    position: absolute;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: calc(150px - 1rem);
+  }
+
+  .selected {
+    color: var(--c-corporate-blue);
+  }
+}
+
+.tableList {
+  color: black;
+  padding: 0;
+
+  .tableListItem {
+    list-style: none;
+    display: flex;
+    margin: 1rem 0;
+    justify-content: space-between;
+    padding: 0.5rem;
+    align-items: center;
+    border: 0.1rem solid #818997;
+    border-radius: 6px;
+
+    .tableListTitleWrapper {
+      background: var(--c-corporate-blue-lighter);
+      color: var(--white);
+      padding: 0.5rem;
+      border-radius: 6px;
+
+      .icon {
+        color: var(--white);
+      }
+
+      .tableListTitle {
+        text-transform: capitalize;
+      }
+    }
+
+    .tableListIds {
+      color: black;
+
+      .tableListId {
+        color: black;
+      }
+    }
+  }
+}
