@@ -2,10 +2,13 @@ import React, { Fragment, useContext, useReducer } from 'react';
 
 import styles from './ManageManuelAcceptanceDataset.module.scss';
 
+import isEmpty from 'lodash/isEmpty';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { RadioButton } from 'ui/views/_components/RadioButton';
+import ReactTooltip from 'react-tooltip';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -83,22 +86,30 @@ export const ManageManualAcceptanceDataset = ({
 
   const renderDialogFooter = (
     <Fragment>
-      <Button
-        className="p-button-primary p-button-animated-blink"
-        disabled={
-          isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
-          isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)
-        }
-        icon={'check'}
-        label={resources.messages['update']}
-        onClick={() => onUpdateDataset()}
-      />
+      <span data-tip data-for="createTooltip">
+        <Button
+          className="p-button-primary p-button-animated-blink"
+          disabled={
+            isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
+            isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)
+          }
+          icon={'check'}
+          label={resources.messages['update']}
+          onClick={() => onUpdateDataset()}
+        />
+      </span>
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => manageDialogs(false)}
       />
+      {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
+        isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)) && (
+        <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+          <span>{resources.messages['fcSubmitButtonDisabled']}</span>
+        </ReactTooltip>
+      )}
     </Fragment>
   );
   const renderDialogLayout = children => (
