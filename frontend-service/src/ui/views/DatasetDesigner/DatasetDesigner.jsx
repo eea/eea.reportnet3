@@ -15,6 +15,7 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { routes } from 'ui/routes';
 import WebformsConfig from 'conf/webforms.config.json';
 
+import { Article13 } from 'ui/views/Webform/Article13';
 import { Article15 } from 'ui/views/Webform/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
@@ -22,8 +23,8 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
@@ -1132,7 +1133,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {renderSwitchView()}
         {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
           // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
-          <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+          <Article13 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
         ) : (
           <TabsDesigner
             changeMode={changeMode}
