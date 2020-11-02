@@ -11,7 +11,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
-export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages = [], newMessageAdded, onLazyLoad }) => {
+export const ListMessages = ({
+  canLoad = true,
+  emptyMessage = '',
+  lazyLoading = true,
+  messages = [],
+  newMessageAdded,
+  onLazyLoad
+}) => {
   const messagesWrapperRef = useRef();
   const resources = useContext(ResourcesContext);
 
@@ -47,10 +54,10 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
 
   const onScroll = e => {
     if (!isNil(e)) {
-      if (e.target.scrollTop <= 0 && lazyLoading) {
+      if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
         dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
-          onLazyLoad();
-          messagesWrapperRef.current.scrollTop = 100;
+        onLazyLoad();
+        messagesWrapperRef.current.scrollTop = 1;
       }
     }
   };

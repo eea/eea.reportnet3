@@ -97,8 +97,6 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
-  const unreadMessages = messgs => messgs.filter(msg => !msg.read);
-
   const onChangeDataProvider = value => {
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
@@ -116,24 +114,26 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onGetMoreMessages = async () => {
+    if ((isCustodian && isEmpty(selectedDataProvider)) || isLoading) return;
     const data = await onLoadMessages(
       isCustodian ? selectedDataProvider.dataProviderId : representativeId,
       currentPage
     );
-    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
+    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
   };
 
   const onGetInitialMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
-    console.log({ dataProviderId });
     const data = await onLoadMessages(dataProviderId, 0);
     //mark unread messages as read
     if (data.unreadMessages.length > 0) {
       const marked = await FeedbackService.markAsRead(
         dataflowId,
-        data.unreadMessages.map(unreadMessage => {
-          return { id: unreadMessage.id, read: true };
-        })
+        data.unreadMessages
+          .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
+          .map(unreadMessage => {
+            return { id: unreadMessage.id, read: true };
+          })
       );
     }
 
@@ -175,7 +175,6 @@ export const Feedback = withRouter(({ match, history }) => {
             ? selectedDataProvider.dataProviderId
             : parseInt(representativeId)
         );
-        console.log({ messageCreated });
         if (messageCreated) {
           dispatchFeedback({
             type: 'ON_SEND_MESSAGE',
@@ -208,7 +207,7 @@ export const Feedback = withRouter(({ match, history }) => {
       />
       {isCustodian && (
         <div className={styles.dataProviderWrapper}>
-          <span>{resources.messages['manageRolesDialogDataProviderColumn']}</span>
+          <span>{resources.messages['feedbackDataProvider']}</span>
           <Dropdown
             className={styles.dataProvider}
             onChange={e => {
@@ -225,6 +224,7 @@ export const Feedback = withRouter(({ match, history }) => {
           <Spinner className={styles.spinnerLoadingMessages} />
         ) : (
           <ListMessages
+            canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             emptyMessage={`${resources.messages['noMessages']} ${
               isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
             }`}
@@ -233,25 +233,28 @@ export const Feedback = withRouter(({ match, history }) => {
             onLazyLoad={onGetMoreMessages}
           />
         )}
-        <InputTextarea
-          // autoFocus={true}
-          className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
-          collapsedHeight={55}
-          expandableOnClick={true}
-          id="feedbackSender"
-          key="feedbackSender"
-          onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
-          onKeyDown={e => onKeyChange(e)}
-          placeholder={resources.messages['writeMessagePlaceholder']}
-          value={messageToSend}
-        />
-        <Button
-          className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
-          label={resources.messages['send']}
-          icon={'comment'}
-          iconPos="right"
-          onClick={() => onSendMessage(messageToSend)}
-        />
+        <div className={styles.sendMessageWrapper}>
+          <InputTextarea
+            // autoFocus={true}
+            className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
+            collapsedHeight={100}
+            // expandableOnClick={true}
+            id="feedbackSender"
+            key="feedbackSender"
+            onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
+            onKeyDown={e => onKeyChange(e)}
+            placeholder={resources.messages['writeMessagePlaceholder']}
+            value={messageToSend}
+          />
+          <Button
+            className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
+            disabled={messageToSend === ''}
+            label={resources.messages['send']}
+            icon={'comment'}
+            iconPos="right"
+            onClick={() => onSendMessage(messageToSend)}
+          />
+        </div>
       </div>
     </Fragment>
   );

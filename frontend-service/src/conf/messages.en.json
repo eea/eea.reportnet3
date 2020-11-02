@@ -917,6 +917,7 @@
     "writeMessagePlaceholder": "Write your message",
     "noMessages": "You have no messages.",
     "noMessagesCustodian": "Please, select a data provider.",
-    "unreadMessageSeparator": "Unread messages"
+    "unreadMessageSeparator": "Unread messages",
+    "feedbackDataProvider": "Data provider: "
   }
 }

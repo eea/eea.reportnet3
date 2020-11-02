@@ -4,7 +4,7 @@ export const feedbackReducer = (state, { type, payload }) => {
       const inmAllMessages = [...payload, ...state.messages];
       return {
         ...state,
-        currentPage: payload > state.messages.length ? state.currentPage + 1: state.currentPage,
+        currentPage: payload.length > 0 ? state.currentPage + 1 : state.currentPage,
         messages: inmAllMessages,
         newMessageAdded: false
       };
@@ -41,6 +41,7 @@ export const feedbackReducer = (state, { type, payload }) => {
     case 'SET_MESSAGES':
       return {
         ...state,
+        currentPage: payload.length === 50 ? 1 : 0,
         messages: payload,
         isLoading: false
       };
