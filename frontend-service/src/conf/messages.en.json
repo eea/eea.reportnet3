@@ -882,7 +882,7 @@
     "currentPoint": "Current point",
     "newPoint": "New point",
     "manageRolesEditorDialogInputPlaceholder": "Editor account...",
-    "sqlSentenceHelpNote": "Note: Table and field name must be in<strong>&nbsp<u>quotes</u></strong>.",
+    "sqlSentenceHelpNote": "Note: Table and field name must be in<strong>&nbsp<u>quotes</u></strong> and in lower case.",
     "sqlSentenceHelpField": "<p>SELECT * FROM <strong>\"tableName\"</strong></p><p>SELECT <strong>\"record_id\", \"[fieldName]_id\", \"fieldName\"</strong> FROM <strong>\"tableName\"</strong></p><p>SELECT * FROM <strong>\"table1\"</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong></p>",
     "sqlSentenceHelpRow": "<p>SELECT * FROM <strong>\"tableName\"</strong></p><p>SELECT <strong>\"record_id\"</strong> FROM <strong>\"tableName\"</strong></p><p>SELECT * FROM <strong>\"table1\"</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong></p>",
     "sqlSentenceHelpTable": "<p>SELECT * FROM <strong>\"tableName\"</strong></p><p>SELECT * FROM <strong>\"table1\"</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>\"table2\"</strong> ON <strong>\"table2\".\"fieldName\"</strong> = <strong>\"table1\".\"fieldName\"</strong></p>",
