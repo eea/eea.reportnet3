@@ -1,6 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
  * The Class PropagateNewFieldCommand.
  */
 @Component
-public class ReleaseDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
+public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
 
   @Autowired
@@ -65,7 +66,7 @@ public class ReleaseDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
     DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
     List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
         dataset.getDataflowId(), dataset.getDataProviderId());
-
+    Collections.sort(datasets);
     // we check if one or more dataset have error, if have we create a notification and abort
     // process of releasing
     boolean haveBlockers = false;
@@ -73,8 +74,7 @@ public class ReleaseDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
       setTenant(id);
       if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
         haveBlockers = true;
-        kafkaSenderUtils.releaseNotificableKafkaEvent(
-            EventType.RELEASE_SNAPSHOT_BLOCKED_FAILED_EVENT, null,
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                 .datasetId(datasetId)
                 .error("One or more datasets have blockers errors, Release aborted")
@@ -82,17 +82,15 @@ public class ReleaseDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
         break;
       }
     }
-    // if we havent blockers we will do release in all datasets
+    // if we havent blockers we will do release 1st dataset and do it one by one
     if (!haveBlockers) {
-      datasets.stream().forEach(id -> {
-        CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
-        createSnapshotVO.setReleased(true);
-        createSnapshotVO.setAutomatic(Boolean.TRUE);
-        Date ahora = new Date();
-        SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        createSnapshotVO.setDescription("Release " + formateador.format(ahora));
-        datasetSnapshotController.createSnapshot(datasetId, createSnapshotVO);
-      });
+      CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+      createSnapshotVO.setReleased(true);
+      createSnapshotVO.setAutomatic(Boolean.TRUE);
+      Date ahora = new Date();
+      SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      createSnapshotVO.setDescription("Release " + formateador.format(ahora));
+      datasetSnapshotController.createSnapshot(datasets.get(0), createSnapshotVO);
     }
   }
 

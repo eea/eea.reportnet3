@@ -242,4 +242,12 @@ public class DataSetMetabaseControllerImplTest {
         Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void lastDatasetValidationForReleasingById() {
+    dataSetMetabaseControllerImpl.lastDatasetValidationForReleasingById(1L);
+    Mockito.when(datasetMetabaseService.lastDatasetValidationForReleasingById(Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals((Long) 1L,
+        dataSetMetabaseControllerImpl.lastDatasetValidationForReleasingById(1L));
+  }
 }

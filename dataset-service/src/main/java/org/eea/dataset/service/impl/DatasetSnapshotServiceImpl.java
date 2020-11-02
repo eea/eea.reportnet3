@@ -443,40 +443,34 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Long dataflowId = datasetService.getDataFlowIdById(idDataset);
     addLockRelatedToCopyDataToEUDataset(dataflowId);
 
-    // Get if the snapshot contains blocker errors
-    setTenant(idDataset);
-    List<Validation> isBlocked = validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER);
-
-    if (isBlocked != null && isBlocked.isEmpty()) {
-      Long providerId = 0L;
-      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
-      if (metabase.getDataProviderId() != null) {
-        providerId = metabase.getDataProviderId();
-      }
-
-      final Long idDataProvider = providerId;
-
-      // Get the provider
-      DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
-
-      // Get the dataCollection
-      Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
-      String datasetSchema =
-          designDataset.isPresent() ? designDataset.get().getDatasetSchema() : "";
-      Optional<DataCollection> dataCollection =
-          dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
-      Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
-
-      // Delete data of the same provider
-      deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
-      removeLockRelatedToCopyDataToEUDataset(dataflowId);
-    } else {
-      LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
-      releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot,
-          "The snapshot contains blocker errors");
-      removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
-      removeLockRelatedToCopyDataToEUDataset(dataflowId);
+    Long providerId = 0L;
+    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
+    if (metabase.getDataProviderId() != null) {
+      providerId = metabase.getDataProviderId();
     }
+
+    final Long idDataProvider = providerId;
+
+    // Get the provider
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
+
+    // Get the dataCollection
+    Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
+    String datasetSchema = designDataset.isPresent() ? designDataset.get().getDatasetSchema() : "";
+    Optional<DataCollection> dataCollection =
+        dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
+    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
+
+    // Delete data of the same provider
+    deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
+
+    removeLockRelatedToCopyDataToEUDataset(dataflowId);
+    removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
+    removeLockRelatedToCopyDataToEUDataset(dataflowId);
+
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.DATASET_ID, idDataset);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
   }
 
   /**
@@ -526,14 +520,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG.info("Snapshot {} released", idSnapshot);
       } catch (EEAException e) {
         LOG_ERROR.error(e.getMessage());
-        releaseEvent(EventType.RELEASE_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
+        releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage());
         removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
       }
     } else {
       LOG_ERROR.error("Error in release snapshot");
-      releaseEvent(EventType.RELEASE_SNAPSHOT_FAILED_EVENT, idSnapshot,
-          "Error in release snapshot");
+      releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot");
       removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
     }
@@ -1003,9 +996,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(dataflowId, dataProviderId);
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
 
-
-    // Unlock all the operations when the release is finished
-    // releaseLocksRelatedToRelease(datasetsFilters, representatives, dataflowId, dataProviderId);
   }
 
 

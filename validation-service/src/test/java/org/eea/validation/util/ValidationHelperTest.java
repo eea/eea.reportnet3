@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -84,6 +85,11 @@ public class ValidationHelperTest {
    */
   @Mock
   private LockService lockService;
+
+  /** The dataset metabase controller zuul. */
+  @Mock
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
   /**
    * The data.
    */
@@ -98,6 +104,8 @@ public class ValidationHelperTest {
    * The processes map.
    */
   private Map<String, ValidationProcessVO> processesMap;
+
+  /** The executor service. */
   private ExecutorService executorService;
 
   /**
@@ -118,6 +126,9 @@ public class ValidationHelperTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Finish tasks.
+   */
   @After
   public void finishTasks() {
     executorService.shutdown();
@@ -239,17 +250,18 @@ public class ValidationHelperTest {
 
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     processesMap.put("1",
-        new ValidationProcessVO(1, pendingValidations, null, true, "user1", false));
+        new ValidationProcessVO(1, pendingValidations, null, true, "user1", true));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-
+    Mockito
+        .when(datasetMetabaseControllerZuul.lastDatasetValidationForReleasingById(Mockito.eq(1l)))
+        .thenReturn(null);
     validationHelper.reducePendingTasks(1l, "1");
 
     Mockito.verify(kafkaSenderUtils, Mockito.times(1))
         .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_CLEAN_KYEBASE), Mockito.anyMap());
 
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(
-        Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
-        Mockito.any(NotificationVO.class));
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseKafkaEvent(
+        Mockito.eq(EventType.VALIDATION_RELEASE_FINISHED_EVENT), Mockito.anyMap());
     Assert.assertNull(processesMap.get("1"));
   }
 
@@ -328,6 +340,12 @@ public class ValidationHelperTest {
     Assert.assertNotNull(processesMap.get("1"));
   }
 
+  /**
+   * Process validation exceding maximum parallelism.
+   *
+   * @throws EEAException the EEA exception
+   * @throws InterruptedException the interrupted exception
+   */
   @Test
   public void processValidationExcedingMaximumParallelism()
       throws EEAException, InterruptedException {
@@ -370,6 +388,12 @@ public class ValidationHelperTest {
   }
 
 
+  /**
+   * Process validation one task as not coordinator.
+   *
+   * @throws EEAException the EEA exception
+   * @throws InterruptedException the interrupted exception
+   */
   @Test
   public void processValidationOneTaskAsNotCoordinator() throws EEAException, InterruptedException {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
@@ -397,6 +421,12 @@ public class ValidationHelperTest {
         Mockito.eq(EventType.COMMAND_VALIDATED_RECORD_COMPLETED), Mockito.eq(eeaEventVO.getData()));
   }
 
+  /**
+   * Process validation one task as coordinator.
+   *
+   * @throws EEAException the EEA exception
+   * @throws InterruptedException the interrupted exception
+   */
   @Test
   public void processValidationOneTaskAsCoordinator() throws EEAException, InterruptedException {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();

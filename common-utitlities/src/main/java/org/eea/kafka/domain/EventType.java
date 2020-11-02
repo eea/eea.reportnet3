@@ -238,17 +238,19 @@ public enum EventType {
 
 
   /** The release snapshot completed event. */
-  RELEASE_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "dataset_snapshot_released_completed_key", true),
+  RELEASE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_completed_key",
+      true),
 
+  /** The release snapshot onebyone completed event. */
+  RELEASE_ONEBYONE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataset_onebyone_released_completed_key", true),
 
   /** The release snapshot failed event. */
-  RELEASE_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "dataset_snapshot_released_failed_key", true),
+  RELEASE_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_failed_key", true),
 
   /** The release snapshot blocked failed event. */
-  RELEASE_SNAPSHOT_BLOCKED_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "dataset_snapshot_released_blocked_failed_key", true),
+  RELEASE_BLOCKERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataset_released_blockers_failed_key", true),
 
   /** The command new design field propagation. */
   COMMAND_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC, "new_field_propagation",

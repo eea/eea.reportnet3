@@ -642,12 +642,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         ? Boolean.TRUE.equals(isSchemaSnapshot)
             ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_SNAPSHOT_COMPLETED_EVENT;
-    EventType failEventType = Boolean.TRUE.equals(deleteData)
-        ? Boolean.TRUE.equals(isSchemaSnapshot)
-            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
-        : EventType.RELEASE_SNAPSHOT_FAILED_EVENT;
+        : EventType.RELEASE_COMPLETED_EVENT;
+    EventType failEventType =
+        Boolean.TRUE.equals(deleteData)
+            ? Boolean.TRUE.equals(isSchemaSnapshot)
+                ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+                : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RELEASE_FAILED_EVENT;
 
     // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
     // The main difference
@@ -920,12 +921,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   void releaseNotificableKafkaEvent(EventType event, Map<String, Object> value, Long datasetId,
       String error) {
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetId(datasetId).error(error).build());
-    } catch (EEAException ex) {
-      LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
+
+    if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
+            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                .datasetId(datasetId).error(error).build());
+      } catch (EEAException ex) {
+        LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
+      }
     }
   }
 

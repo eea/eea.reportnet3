@@ -43,7 +43,7 @@ public class ExecuteValidationProcessCommandTest {
     eeaEventVO.setData(data);
     executeValidationProcessCommand.execute(eeaEventVO);
     Mockito.verify(validationHelper, Mockito.times(1)).executeValidation(Mockito.eq(1l),
-        Mockito.anyString(), Mockito.any());
+        Mockito.anyString(), Mockito.anyBoolean());
   }
 
 }

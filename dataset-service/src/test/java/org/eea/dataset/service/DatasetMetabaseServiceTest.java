@@ -611,4 +611,25 @@ public class DatasetMetabaseServiceTest {
         .thenReturn(1L);
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
+
+  /**
+   * Last dataset validation for releasing by id.
+   */
+  @Test
+  public void lastDatasetValidationForReleasingById() {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDataflowId(1L);
+    datasetMetabase.setDataProviderId(1L);
+    List<Long> datasetsId = new ArrayList();
+    datasetsId.add(1L);
+    datasetsId.add(2L);
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito
+        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
+        .thenReturn(datasetsId);
+    Assert.assertEquals((Long) 2L,
+        datasetMetabaseService.lastDatasetValidationForReleasingById(1L));
+  }
 }

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * The Class RestoreDatasetSnapshotFailedEvent.
  */
 @Component
-public class ReleaseValidationBlockedFailEvent implements NotificableEventHandler {
+public class ReleaseFinishEvent implements NotificableEventHandler {
 
 
   @Autowired
@@ -27,7 +27,7 @@ public class ReleaseValidationBlockedFailEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_SNAPSHOT_BLOCKED_FAILED_EVENT;
+    return EventType.RELEASE_COMPLETED_EVENT;
   }
 
   /**
