@@ -280,6 +280,10 @@ public enum EventType {
   DISABLE_SQL_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "disable_sql_rules_error_event", true),
 
+  /** The validate rules finish event. */
+  VALIDATE_RULES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_rules_completed_event", true),
+
   /** The copy dataset schema completed event. */
   COPY_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_completed_event", true),
