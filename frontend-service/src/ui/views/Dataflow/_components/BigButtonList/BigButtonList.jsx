@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import remove from 'lodash/remove';
 import uniqBy from 'lodash/uniqBy';
 
-import styles from './BigButtonList.module.css';
+import styles from './BigButtonList.module.scss';
 
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
@@ -29,6 +29,7 @@ import { ManageIntegrations } from 'ui/views/_components/ManageIntegrations/Mana
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { RadioButton } from 'ui/views/_components/RadioButton';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -82,9 +83,13 @@ export const BigButtonList = ({
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
-  const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(false);
+  const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
+  const [manualTechnicalAcceptanceOptions, setManualTechnicalAcceptanceOptions] = useState({
+    Yes: false,
+    No: false
+  });
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [providerId, setProviderId] = useState(null);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
@@ -266,10 +271,6 @@ export const BigButtonList = ({
     setErrorDialogData({ isVisible: false, message: '' });
   };
 
-  const onChangeManualTechnicalAcceptanceCheckbox = () => {
-    setIsManualTechnicalAcceptance(!isManualTechnicalAcceptance);
-  };
-
   const onCopyDataCollectionToEuDataset = async () => {
     setIsCopyDataCollectionToEuDatasetDialogVisible(false);
     setIsCopyDataCollectionToEuDatasetLoading(true);
@@ -367,6 +368,44 @@ export const BigButtonList = ({
         />
       </Fragment>
     );
+
+  const onResetRadioButtonOptions = () => {
+    setIsManualTechnicalAcceptance(false);
+    setManualTechnicalAcceptanceOptions({
+      Yes: false,
+      No: false
+    });
+  };
+
+  const onChangeRadioButton = value => {
+    const options = { ...manualTechnicalAcceptanceOptions };
+    Object.keys(options).forEach(option => {
+      options[option] = false;
+      options[value] = true;
+    });
+
+    setIsManualTechnicalAcceptance(value.toString() === 'Yes');
+    setManualTechnicalAcceptanceOptions(options);
+  };
+
+  const renderRadioButtonsCreateDC = () => {
+    return Object.keys(manualTechnicalAcceptanceOptions).map((value, index) => (
+      <div className={styles.radioButton} key={index}>
+        <Fragment>
+          <RadioButton
+            checked={manualTechnicalAcceptanceOptions[value]}
+            className={styles.button}
+            inputId={`technicalAcceptance${value}`}
+            onChange={event => onChangeRadioButton(event.target.value)}
+            value={value}
+          />
+          <label className={styles.label} htmlFor={`technicalAcceptance${value}`}>
+            {value}
+          </label>
+        </Fragment>
+      </div>
+    ));
+  };
 
   const bigButtonList = uniqBy(
     useBigButtonList({
@@ -582,34 +621,24 @@ export const BigButtonList = ({
 
       {isConfirmCollectionDialog && (
         <ConfirmDialog
+          disabledConfirm={!isManualTechnicalAcceptance}
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() =>
             onCreateDataCollection(new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
           }
-          onHide={() => setIsConfirmCollectionDialog(false)}
+          onHide={() => {
+            setIsConfirmCollectionDialog(false);
+            onResetRadioButtonOptions();
+          }}
           visible={isConfirmCollectionDialog}>
-          <span className={styles.checkboxWrap}>
-            {resources.messages['manualTechnicalAcceptanceCheck']}
-            <span className={styles.checkbox}>
-              <Checkbox
-                id={'manualTechnicalAcceptance'}
-                inputId={'manualTechnicalAcceptance'}
-                isChecked={isManualTechnicalAcceptance}
-                label={'manualTechnicalAcceptance'}
-                onChange={() => onChangeManualTechnicalAcceptanceCheckbox()}
-                style={{ marginRight: '50px' }}
-              />
-              <label htmlFor={'manualTechnicalAcceptance'} className="srOnly">
-                {resources.messages['manualTechnicalAcceptance']}
-              </label>
-            </span>
-          </span>
-
-          <br />
           <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
-          {resources.messages['createDataCollectionConfirm']}
+          <div>{resources.messages['createDataCollectionConfirm']}</div>
+          <div className={styles.radioButtonDiv}>
+            <label>{resources.messages['manualTechnicalAcceptanceTitle']}</label>
+            {renderRadioButtonsCreateDC()}
+          </div>
         </ConfirmDialog>
       )}
 

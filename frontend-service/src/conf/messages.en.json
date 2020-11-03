@@ -910,8 +910,6 @@
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "manualTechnicalAcceptanceHeader": "Datasets with manual technical acceptance for dataflow",
-    "manualTechnicalAcceptance": "Manual technical acceptance",
-    "manualTechnicalAcceptanceCheck": "Check this checkbox if you want that this data collection have a manual technical acceptance after release data.",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
     "webformTableWithLessRecords": "There are no records in the table.",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
@@ -935,6 +933,9 @@
     "updateDatasetFeedbackStatusError": "Error updating dataset feedback status",
     "unreadMessageSeparator": "Unread messages",
     "feedbackDataProvider": "Data provider: ",
-    "feedbackHelp": "Dataflow feedback help"
+    "feedbackHelp": "Dataflow feedback help",
+    "updateDatasetFeedbackStatusError": "Error updating dataset feedback status",
+    "manualTechnicalAcceptanceTitle": "Do you wish to add a technical acceptance step for the reporter submissions? ",
+    "manualTechnicalAcceptanceBigButton": "Manual technical acceptance"
   }
 }

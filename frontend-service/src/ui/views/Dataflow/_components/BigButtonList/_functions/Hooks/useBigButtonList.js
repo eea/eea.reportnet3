@@ -500,7 +500,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'manualTechnicalAcceptance',
       buttonIcon: 'reply',
-      caption: resources.messages['manualTechnicalAcceptance'],
+      caption: resources.messages['manualTechnicalAcceptanceBigButton'],
       handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
       layout: 'defaultBigButton',
       visibility:
