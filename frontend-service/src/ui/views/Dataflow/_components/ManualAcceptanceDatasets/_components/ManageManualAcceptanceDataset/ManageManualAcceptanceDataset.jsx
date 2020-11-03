@@ -79,7 +79,7 @@ export const ManageManualAcceptanceDataset = ({
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });
     } finally {
-      manageDialogs(false);
+      manageDialogs('isManageDatasetDialogVisible', false);
     }
   };
 
@@ -101,7 +101,7 @@ export const ManageManualAcceptanceDataset = ({
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs(false)}
+        onClick={() => manageDialogs('isManageDatasetDialogVisible', false)}
       />
       {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
         isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)) && (
@@ -117,7 +117,7 @@ export const ManageManualAcceptanceDataset = ({
         <Dialog
           footer={renderDialogFooter}
           header={`${resources.messages['editStatusDataset']} ${datasetName}`}
-          onHide={() => manageDialogs(false)}
+          onHide={() => manageDialogs('isManageDatasetDialogVisible', false)}
           style={{ width: '50%' }}
           visible={isManageDatasetDialogVisible}>
           {children}

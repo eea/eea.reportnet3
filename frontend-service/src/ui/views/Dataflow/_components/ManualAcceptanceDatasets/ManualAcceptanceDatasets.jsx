@@ -63,10 +63,11 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
     </Fragment>
   );
 
-  const handleManageAcceptanceDatasetDialog = value =>
-    manualAcceptanceDatasetsDispatch({ type: 'ON_CLOSE_EDIT_DIALOG', payload: { value } });
-
   const isLoading = value => manualAcceptanceDatasetsDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const manageDialogs = (dialog, value, secondDialog, secondValue) => {
+    manualAcceptanceDatasetsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
+  };
 
   const onLoadManualAcceptanceDatasets = async () => {
     try {
@@ -110,7 +111,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
   const actionsTemplate = () => (
     <ActionsColumn
       onEditClick={() => {
-        manualAcceptanceDatasetsDispatch({ type: 'ON_EDIT_DATASET', payload: { value: true } });
+        manageDialogs('isManageDatasetDialogVisible', true);
       }}
     />
   );
@@ -194,7 +195,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
           dataflowId={dataflowId}
           dataset={manualAcceptanceDatasetsState.datasetToEdit}
           isManageDatasetDialogVisible={manualAcceptanceDatasetsState.isManageDatasetDialogVisible}
-          manageDialogs={handleManageAcceptanceDatasetDialog}
+          manageDialogs={manageDialogs}
           onUpdatedData={onUpdatedData}
         />
       )}
