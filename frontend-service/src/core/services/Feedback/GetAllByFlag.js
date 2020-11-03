@@ -1,2 +1,2 @@
-export const GetAllByFlag = ({ feedbackRepository }) => async (dataflowId, page, read) =>
-  feedbackRepository.loadMessagesByFlag(dataflowId, page, read);
+export const GetAllByFlag = ({ feedbackRepository }) => async (dataflowId, page, read, dataProviderId) =>
+  feedbackRepository.loadMessagesByFlag(dataflowId, page, read, dataProviderId);
