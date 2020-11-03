@@ -158,7 +158,11 @@ export const ManageManualAcceptanceDataset = ({
           </label>
           <RadioButton
             className={styles.radioButton}
-            checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus}
+            checked={
+              feedBackStatus === 'Technically accept'
+                ? manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus.concat('ed')
+                : manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus
+            }
             inputId={feedBackStatus}
             onChange={event => onChangeStatus(event.target.value)}
             value={feedBackStatus}
