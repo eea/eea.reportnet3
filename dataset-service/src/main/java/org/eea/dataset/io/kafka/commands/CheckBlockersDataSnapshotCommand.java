@@ -78,14 +78,14 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       setTenant(id);
       if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
         haveBlockers = true;
+        // Release the locks
+        datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
+            dataset.getDataProviderId());
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                 .datasetId(datasetId)
                 .error("One or more datasets have blockers errors, Release aborted")
                 .providerId(dataset.getDataProviderId()).build());
-        // Release the locks
-        datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-            dataset.getDataProviderId());
         break;
       }
     }
