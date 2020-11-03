@@ -75,14 +75,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null);
     } else {
       DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId()).build());
-
       // AT THIS POINT, THE PROCESS OF RELEASING ALL THE DATASETS HAS BEEN FINISHED, WE UNLOCK
       // EVERYTHING INVOLVED
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
           dataset.getDataProviderId());
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId()).build());
     }
 
   }
