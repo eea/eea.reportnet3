@@ -5,7 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { FeedbackRequesterEmptyHelpConfig } from 'conf/help/feedback/requester/empty';
+import { FeedbackReporterHelpConfig } from 'conf/help/feedback/reporter';
+import { FeedbackRequesterHelpConfig } from 'conf/help/feedback/requester';
 
 import styles from './Feedback.module.scss';
 
@@ -48,6 +49,7 @@ export const Feedback = withRouter(({ match, history }) => {
     dataProviders: [],
     isCustodian: undefined,
     isLoading: false,
+    isSending: false,
     messages: [],
     messageToSend: '',
     newMessageAdded: false,
@@ -60,6 +62,7 @@ export const Feedback = withRouter(({ match, history }) => {
     dataProviders,
     isCustodian,
     isLoading,
+    isSending,
     messages,
     messageToSend,
     newMessageAdded,
@@ -79,8 +82,8 @@ export const Feedback = withRouter(({ match, history }) => {
     } else {
     }
     leftSideBarContext.addHelpSteps(
-      isCustodian ? FeedbackRequesterEmptyHelpConfig : FeedbackRequesterEmptyHelpConfig,
-      'dataflowHelpHelp'
+      isCustodian ? FeedbackRequesterHelpConfig : FeedbackReporterHelpConfig,
+      'feedbackHelp'
     );
   }, [messages, isCustodian]);
 
@@ -112,6 +115,9 @@ export const Feedback = withRouter(({ match, history }) => {
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
   const onChangeDataProvider = value => {
+    if (isNil(value)) {
+      dispatchFeedback({ type: 'RESET_MESSAGES', payload: {} });
+    }
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
 
@@ -182,6 +188,7 @@ export const Feedback = withRouter(({ match, history }) => {
   const onSendMessage = async message => {
     if (message.trim() !== '') {
       try {
+        dispatchFeedback({ type: 'SET_IS_SENDING', payload: true });
         const messageCreated = await FeedbackService.create(
           dataflowId,
           message,
@@ -199,6 +206,8 @@ export const Feedback = withRouter(({ match, history }) => {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        dispatchFeedback({ type: 'SET_IS_SENDING', payload: false });
       }
     }
   };
@@ -234,7 +243,9 @@ export const Feedback = withRouter(({ match, history }) => {
           </div>
         )}
         <div
-          className={`${styles.messagesWrapper} ${isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider}`}>
+          className={`${styles.listMessagesWrapper} ${
+            isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
+          }`}>
           {isLoading ? (
             <Spinner className={styles.spinnerLoadingMessages} />
           ) : (
@@ -244,6 +255,7 @@ export const Feedback = withRouter(({ match, history }) => {
               emptyMessage={`${resources.messages['noMessages']} ${
                 isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
               }`}
+              isCustodian={isCustodian}
               messages={messages}
               newMessageAdded={newMessageAdded}
               onLazyLoad={onGetMoreMessages}
@@ -255,16 +267,21 @@ export const Feedback = withRouter(({ match, history }) => {
               className={styles.sendMessageTextarea}
               collapsedHeight={100}
               // expandableOnClick={true}
+              disabled={isCustodian && isEmpty(selectedDataProvider)}
               id="feedbackSender"
               key="feedbackSender"
               onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
               onKeyDown={e => onKeyChange(e)}
-              placeholder={resources.messages['writeMessagePlaceholder']}
+              placeholder={
+                isCustodian && isEmpty(selectedDataProvider)
+                  ? resources.messages['noMessagesCustodian']
+                  : resources.messages['writeMessagePlaceholder']
+              }
               value={messageToSend}
             />
             <Button
               className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
-              disabled={messageToSend === ''}
+              disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
               label={resources.messages['send']}
               icon={'comment'}
               iconPos="right"

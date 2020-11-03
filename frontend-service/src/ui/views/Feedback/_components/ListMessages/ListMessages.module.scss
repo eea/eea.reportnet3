@@ -8,7 +8,7 @@
   border: var(--inputtext-border);
   border-radius: 3px;
   margin-left: 1rem;
-  max-height: 40vh;
+  height: 40vh;
   overflow: scroll;
   width: 100%;
   .emptyMessageWrapper {
@@ -21,5 +21,8 @@
       color: var(--main-font-color);
       font-style: italic;
     }
+  }
+  .scrollMessagesWrapper {
+    height: 41vh;
   }
 }

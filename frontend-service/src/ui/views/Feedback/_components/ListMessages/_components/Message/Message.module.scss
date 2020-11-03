@@ -81,10 +81,10 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 1rem 0;
+  margin: 1rem 10rem;
   font-style: italic;
   font-weight: bold;
-  color: var(--main-font-color);
+  color: var(--feedback-separator-color);
 }
 .unreadSeparator::before,
 .unreadSeparator::after {

@@ -918,6 +918,7 @@
     "noMessages": "You have no messages.",
     "noMessagesCustodian": "Please, select a data provider.",
     "unreadMessageSeparator": "Unread messages",
-    "feedbackDataProvider": "Data provider: "
+    "feedbackDataProvider": "Data provider: ",
+    "feedbackHelp":"Dataflow feedback help"
   }
 }

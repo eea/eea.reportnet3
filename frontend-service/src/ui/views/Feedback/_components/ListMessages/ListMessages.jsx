@@ -7,21 +7,19 @@ import styles from './ListMessages.module.scss';
 import { Message } from './_components/Message';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
 export const ListMessages = ({
   canLoad = true,
   className = '',
   emptyMessage = '',
+  isCustodian,
   lazyLoading = true,
   messages = [],
   newMessageAdded,
   onLazyLoad
 }) => {
   const messagesWrapperRef = useRef();
-  const resources = useContext(ResourcesContext);
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
     isLoadingNewMessages: false,
@@ -32,11 +30,17 @@ export const ListMessages = ({
 
   useEffect(() => {
     if (!isNil(messagesWrapperRef)) {
-      messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
-      // messagesWrapperRef.current.addEventListener = onScroll();
+      if (messages.length === 1) {
+        messagesWrapperRef.current.scrollTop = 1;
+      } else {
+        messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
+      }
     }
-    dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
   }, []);
+
+  useEffect(() => {
+    dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
+  }, [messages]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -75,7 +79,16 @@ export const ListMessages = ({
           <span>{emptyMessage}</span>
         </div>
       ) : (
-        messages.map((message, i) => <Message message={message} hasSeparator={i === separatorIndex} />)
+        <div className={styles.scrollMessagesWrapper}>
+          {messages.map((message, i) => (
+            <Message
+              message={message}
+              hasSeparator={
+                i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
+              }
+            />
+          ))}
+        </div>
       )}
     </div>
   );
