@@ -189,7 +189,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
 
   const renderArticle13WebformRecords = () => {
     const filteredRecord = webformData.elementsRecords.filter(record => record.recordId === selectedId);
-    console.log('filteredRecord', filteredRecord);
     return renderWebformRecord(!isEmpty(filteredRecord) ? filteredRecord[0] : webformData.elementsRecords[0], null);
   };
 

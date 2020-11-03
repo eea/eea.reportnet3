@@ -57,12 +57,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onAddRecord = async type => {
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
-
     const newEmptyRecord = parseNewRecord(table.elements);
 
-    newEmptyRecord.dataRow[3].fieldData.value = type;
+    const getId = table.elements.filter(element => element.name === 'IsGroup').map(table => table.fieldSchema)[0];
 
-    console.log('newEmptyRecord.dataRow[3].fieldData', newEmptyRecord.dataRow[3].fieldData);
+    const data = [];
+    for (let index = 0; index < newEmptyRecord.dataRow.length; index++) {
+      const row = newEmptyRecord.dataRow[index];
+
+      row.fieldData[getId] = type;
+
+      data.push({ ...row });
+    }
+    newEmptyRecord.dataRow = data;
 
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);

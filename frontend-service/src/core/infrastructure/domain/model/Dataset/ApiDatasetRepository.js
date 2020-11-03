@@ -39,13 +39,11 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
 const addRecordsById = async (datasetId, tableSchemaId, records) => {
   const datasetTableRecords = [];
   records.forEach(record => {
-    console.log('record.dataRow', record.dataRow);
     let fields = record.dataRow.map(dataTableFieldDTO => {
       let newField = new DatasetTableField({});
       newField.id = null;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
       newField.type = dataTableFieldDTO.fieldData.type;
-
       newField.value = parseValue(
         dataTableFieldDTO.fieldData.type,
         dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
