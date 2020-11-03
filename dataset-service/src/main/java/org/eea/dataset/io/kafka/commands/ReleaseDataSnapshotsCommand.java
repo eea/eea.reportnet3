@@ -4,10 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -27,11 +26,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
   /** The dataset metabase controller. */
   @Autowired
-  private DatasetMetabaseController datasetMetabaseController;
-
-  /** The dataset snapshot controller. */
-  @Autowired
-  private DatasetSnapshotController datasetSnapshotController;
+  private DatasetMetabaseService datasetMetabaseService;
 
   /** The kafka sender utils. */
   @Autowired
@@ -69,7 +64,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
 
-    Long nextData = datasetMetabaseController.lastDatasetValidationForReleasingById(datasetId);
+    Long nextData = datasetMetabaseService.lastDatasetValidationForReleasingById(datasetId);
     if (null != nextData) {
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setReleased(true);
@@ -77,7 +72,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       Date ahora = new Date();
       SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
-      datasetSnapshotController.createSnapshot(nextData, createSnapshotVO);
+      datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null);
     } else {
       DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,

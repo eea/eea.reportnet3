@@ -9,7 +9,6 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -33,10 +32,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
-
-  /** The dataset snapshot controller. */
-  @Autowired
-  private DatasetSnapshotController datasetSnapshotController;
 
   /** The validation repository. */
   @Autowired
@@ -101,7 +96,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       Date ahora = new Date();
       SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
-      datasetSnapshotController.createSnapshot(datasets.get(0), createSnapshotVO);
+      datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null);
     }
   }
 
