@@ -919,11 +919,13 @@
     "dataflowFeedback": "Feedback",
     "send": "Send",
     "writeMessagePlaceholder": "Write your message",
-    "noMessages": "You have no unread messages.",
+    "noMessages": "You have no messages.",
     "noMessagesCustodian": "Please, select a data provider.",
     "noMessagesScroll": "Scroll up to the top to load read messages.",
     "unreadMessageSeparator": "Unread messages",
     "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>dataset</a>",
-    "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs."
+    "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs.",
+    "feedbackDataProvider": "Data provider: ",
+    "feedbackHelp": "Dataflow feedback help"
   }
 }
