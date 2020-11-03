@@ -1,0 +1,17 @@
+{
+  "steps": [
+    {
+      "content": "This is the feedback page",
+      "target": ".feedback-wrapper-help-step"
+    },
+    {
+      "content": "Here you can see the messages. Scroll up to load more messages",
+      "target": ".feedback-messages-help-step"
+    },
+    { "content": "Select a data provider to view it's messages", "target": ".feedback-dataProvider-help-step" },
+    {
+      "content": "Write a message and send it",
+      "target": ".feedback-send-message-help-step"
+    }
+  ]
+}
