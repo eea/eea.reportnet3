@@ -25,10 +25,13 @@ import { Article13Utils } from './_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
+import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
+
 export const Article13 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
   const { getTypeList } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord } = WebformsUtils;
+  const { parsePamsRecords } = TableManagementUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -55,20 +58,35 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const onAddRecord = async type => {
+  const generatePamId = () => {
+    if (pamsRecords.length === 0) {
+      return 1;
+    }
+    const records = parsePamsRecords(pamsRecords);
+    const allIds = records.map(record => parseInt(record.Id));
+    return Math.max(...allIds) + 1;
+  };
+
+  const onAddRecord = async type => {   
+
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 
-    const getId = table.elements.filter(element => element.name === 'IsGroup').map(table => table.fieldSchema)[0];
+    const getIsGroupId = table.elements
+      .filter(element => element.name === 'IsGroup')
+      .map(table => table.fieldSchema)[0];
+    const getId = table.elements.filter(element => element.name === 'Id').map(table => table.fieldSchema)[0];
 
     const data = [];
     for (let index = 0; index < newEmptyRecord.dataRow.length; index++) {
       const row = newEmptyRecord.dataRow[index];
 
-      row.fieldData[getId] = type;
+      row.fieldData[getIsGroupId] = type;
+      row.fieldData[getId] = generatePamId();
 
       data.push({ ...row });
     }
+
     newEmptyRecord.dataRow = data;
 
     try {
