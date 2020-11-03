@@ -666,9 +666,14 @@ export const Dataset = withRouter(({ match, history }) => {
       tableSchemaId: table.tableSchemaId
     });
 
-  const datasetTitle = () => {
-    let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
+  const datasetInsideTitle = () => {
+    if (!isEmpty(datasetFeedbackStatus)) {
+      return `${datasetFeedbackStatus} `;
+    } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
+      return `${resources.messages['released'].toString()}`;
+    } else {
+      return '';
+    }
   };
 
   const validationListFooter = (
@@ -782,8 +787,8 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={`${datasetTitle()} `}
-        insideTitle={`- ${datasetFeedbackStatus} `}
+        title={datasetSchemaName}
+        insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
