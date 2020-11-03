@@ -2,6 +2,7 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -14,6 +15,8 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +44,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(ExecutePropagateNewFieldCommand.class);
 
 
   /**
@@ -69,6 +76,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setReleased(true);
       createSnapshotVO.setAutomatic(Boolean.TRUE);
+      TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
       Date ahora = new Date();
       SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
@@ -79,6 +87,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       // EVERYTHING INVOLVED
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
           dataset.getDataProviderId());
+
+      LOG.info("Release datasets in dataflow {} ends", dataset.getDataflowId());
+
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId()).build());

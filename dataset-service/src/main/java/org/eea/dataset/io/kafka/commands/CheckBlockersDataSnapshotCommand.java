@@ -20,6 +20,8 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +49,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   private DatasetSnapshotService datasetSnapshotService;
 
   /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(ExecutePropagateNewFieldCommand.class);
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * Gets the event type.
    *
    * @return the event type
@@ -55,7 +67,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   public EventType getEventType() {
     return EventType.VALIDATION_RELEASE_FINISHED_EVENT;
   }
-
 
   /**
    * Execute.
@@ -81,6 +92,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         // Release the locks
         datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
             dataset.getDataProviderId());
+        LOG_ERROR.error("Error releasing, the datasets have blockers errors");
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                 .datasetId(datasetId)
@@ -91,6 +103,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
     }
     // if we havent blockers we will do release 1st dataset and do it one by one
     if (!haveBlockers) {
+      LOG.info("Release datasets in dataflow {} starts", dataset.getDataflowId());
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setReleased(true);
       createSnapshotVO.setAutomatic(Boolean.TRUE);

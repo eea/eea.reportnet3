@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -28,11 +27,11 @@ import org.mockito.junit.MockitoJUnitRunner;
  * The Class RestoreDataCollectionSnapshotCommandTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CheckBlockersDataSnapshotCommandTest {
+public class ReleaseDataSnapshotsCommandTest {
 
   /** The restore data collection snapshot command. */
   @InjectMocks
-  private CheckBlockersDataSnapshotCommand checkBlockersDataSnapshotCommand;
+  private ReleaseDataSnapshotsCommand releaseDataSnapshotsCommand;
 
   /** The dataset snapshot service. */
   @Mock
@@ -40,13 +39,12 @@ public class CheckBlockersDataSnapshotCommandTest {
 
   /** The eu dataset service. */
   @Mock
-  private ValidationRepository validationRepository;
+  private DatasetMetabaseService datasetMetabaseService;
 
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset snapshot service. */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -62,7 +60,7 @@ public class CheckBlockersDataSnapshotCommandTest {
   @Before
   public void initMocks() {
     eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.VALIDATION_RELEASE_FINISHED_EVENT);
+    eeaEventVO.setEventType(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -72,7 +70,7 @@ public class CheckBlockersDataSnapshotCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testExecuteWithoutBlockers() throws EEAException {
+  public void testExecuteFinish() throws EEAException {
     data = new HashMap<>();
     data.put("dataset_id", 1L);
     data.put("user", "user1");
@@ -85,14 +83,10 @@ public class CheckBlockersDataSnapshotCommandTest {
     datasetsId.add(1L);
     datasetsId.add(2L);
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Mockito
-        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
-        .thenReturn(datasetsId);
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
+    Mockito.when(datasetMetabaseService.lastDatasetValidationForReleasingById(1L)).thenReturn(null);
 
-    checkBlockersDataSnapshotCommand.execute(eeaEventVO);
-    Mockito.verify(dataSetMetabaseRepository, times(1)).findById(1L);
+    releaseDataSnapshotsCommand.execute(eeaEventVO);
+    Mockito.verify(datasetMetabaseService, times(1)).lastDatasetValidationForReleasingById(1L);
 
   }
 
@@ -102,7 +96,7 @@ public class CheckBlockersDataSnapshotCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testExecuteWithBlockers() throws EEAException {
+  public void testExecuteContinue() throws EEAException {
     data = new HashMap<>();
     data.put("dataset_id", 1L);
     data.put("user", "user1");
@@ -114,14 +108,8 @@ public class CheckBlockersDataSnapshotCommandTest {
     List<Long> datasetsId = new ArrayList<>();
     datasetsId.add(1L);
     datasetsId.add(2L);
-    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Mockito
-        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
-        .thenReturn(datasetsId);
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(true);
-    checkBlockersDataSnapshotCommand.execute(eeaEventVO);
-    Mockito.verify(validationRepository, times(1)).existsByLevelError(ErrorTypeEnum.BLOCKER);
+    releaseDataSnapshotsCommand.execute(eeaEventVO);
+    Mockito.verify(datasetMetabaseService, times(1)).lastDatasetValidationForReleasingById(1L);
 
   }
 
