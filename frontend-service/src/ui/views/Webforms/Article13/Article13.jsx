@@ -28,7 +28,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 export const Article13 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
   const { getTypeList } = Article13Utils;
-  const { onParseWebformData, onParseWebformRecords, parseNewRecord } = WebformsUtils;
+  const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -53,10 +53,34 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
 
   const onAddRecord = async type => {
+    console.log({ type });
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
 
     const newEmptyRecord = parseNewRecord(table.elements);
 
+    try {
+      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+      if (response) {
+        onUpdateData();
+      }
+    } catch (error) {
+      console.error('error', error);
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'ADD_RECORDS_BY_ID_ERROR',
+        content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+      });
+    }
+  };
+
+  const onAddTableRecord = async table => {
+    // const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
+    console.log({ table });
+    const newEmptyRecord = parseNewTableRecord(table);
+    console.log({ newEmptyRecord });
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
       if (response) {
@@ -177,8 +201,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           dataflowId={dataflowId}
           datasetId={datasetId}
           onAddRecord={onAddRecord}
+          onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
           records={pamsRecords}
+          tableList={tableList}
           schemaTables={datasetSchema.tables}
         />
       )}

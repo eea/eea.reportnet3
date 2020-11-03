@@ -33,6 +33,28 @@ const parseNewRecord = (columnsSchema, data) => {
   }
 };
 
+const parseNewTableRecord = (table) => {
+  if (!isNil(table.records) && !isEmpty(table.records)) {
+    let fields;
+
+    if (!isUndefined(table)) {
+      fields = table.records[0].fields.map(field => {
+          return {
+            fieldData: { [field.fieldSchema]: null, type: field.type, fieldSchemaId: field.fieldSchema }
+          };
+        
+      });
+    }
+
+    const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
+
+    obj.datasetPartitionId = null;
+    // if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
+
+    return obj;
+  }
+};
+
 const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
   return records.map(record => {
     const { fields } = record;
@@ -119,4 +141,4 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
   return data;
 };
 
-export const WebformsUtils = { mergeArrays, onParseWebformData, onParseWebformRecords, parseNewRecord };
+export const WebformsUtils = { mergeArrays, onParseWebformData, onParseWebformRecords, parseNewRecord,parseNewTableRecord };

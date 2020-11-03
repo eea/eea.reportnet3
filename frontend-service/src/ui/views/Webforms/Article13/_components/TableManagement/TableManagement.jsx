@@ -22,7 +22,16 @@ import { useLoadColsSchemasAndColumnOptions } from 'ui/views/_components/DataVie
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 
-export const TableManagement = ({ dataflowId, datasetId, onAddRecord, onRefresh, records, schemaTables = [] }) => {
+export const TableManagement = ({
+  dataflowId,
+  datasetId,
+  onAddRecord,
+  onAddTableRecord,
+  onRefresh,
+  records,
+  schemaTables = [],
+  tableList
+}) => {
   const { parsePamsRecords, parseTableSchemaColumns } = TableManagementUtils;
 
   const resources = useContext(ResourcesContext);
@@ -44,6 +53,7 @@ export const TableManagement = ({ dataflowId, datasetId, onAddRecord, onRefresh,
   }, [records]);
 
   const initialLoad = () => {
+    console.log({ records, schemaTables });
     const parsedRecords = parsePamsRecords(records);
     const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
 
@@ -76,7 +86,7 @@ export const TableManagement = ({ dataflowId, datasetId, onAddRecord, onRefresh,
     }
   };
 
-  const addTableTemplate = rowData => {
+  const addTableTemplate = (rowData, colData) => {
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
@@ -84,7 +94,17 @@ export const TableManagement = ({ dataflowId, datasetId, onAddRecord, onRefresh,
           icon={'add'}
           label={resources.messages['webformTableCreation']}
           onClick={() => {
-            console.log({ rowData });
+            console.log(
+              schemaTables.filter(
+                schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
+              )[0].tableSchemaId
+            );
+            console.log({ rowData, colData, records, tableList });
+            onAddTableRecord(
+              schemaTables.filter(
+                schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
+              )[0]
+            );
           }}
           // onClick={() => setTableToCreate(rowData.table3)}
         />
