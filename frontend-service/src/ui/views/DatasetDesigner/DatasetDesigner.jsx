@@ -765,10 +765,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
-    } finally {
-      setSqlValidationRunning(false);
+      console.log(error);
     }
   };
+
+  useEffect(() => {
+    const response = notificationContext.toShow.find(
+      notification => notification.key === 'VALIDATE_RULES_COMPLETED_EVENT'
+    );
+    if (response) {
+      setSqlValidationRunning(false);
+    }
+  }, [notificationContext]);
 
   useEffect(() => {
     const response = notificationContext.hidden.find(
@@ -780,6 +788,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       } = response;
       setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
       setIsQCsNotValidWarningVisible(true);
+      setSqlValidationRunning(false);
     }
   }, [notificationContext]);
 
@@ -809,7 +818,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
-        label={resources.messages['validateRulesBtn']}
+        label={resources.messages['validateSqlRulesBtn']}
         onClick={() => {
           validateQcRules();
         }}
@@ -857,7 +866,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     <Button
       className="p-button-secondary"
       icon="cancel"
-      label={resources.messages['cancel']}
+      label={resources.messages['close']}
       onClick={() => setIsQCsNotValidWarningVisible(false)}
     />
   );
@@ -1373,8 +1382,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             footer={sqlQCsNotValidWarningFooter}
             onHide={() => setIsQCsNotValidWarningVisible(false)}
             visible={isQCsNotValidWarningVisible}>
-            {console.log('invalidAndDisabledRulesAmount', invalidAndDisabledRulesAmount)}
-            {TextUtils.parseText(resources.messages['notValidQCWarningBody'], {
+            {TextUtils.parseText(resources.messages['notValidSqlQCWarningBody'], {
               disabled: invalidAndDisabledRulesAmount.disabledRules,
               invalid: invalidAndDisabledRulesAmount.invalidRules
             })}

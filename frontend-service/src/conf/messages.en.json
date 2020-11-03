@@ -912,7 +912,7 @@
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
     "webformTableWithLessRecords": "There are no records in the table.",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
-    "validateRulesBtn": "Validate QC rules",
+    "validateSqlRulesBtn": "Validate SQL QC rules",
     "validateRulesBtnTootip": "QCs with SQL sentences need to be re-validated after changing table or field names",
     "notValidQCWarningTitle": "There are invalid QC rules",
     "notValidQCWarningBody": "You have {:invalid} invalid QCs and {:disabled} disabled QCs. Do you want to go ahead with the creation of the data collection? The above rules will be disabled.",
@@ -922,6 +922,8 @@
     "noMessages": "You have no unread messages.",
     "noMessagesCustodian": "Please, select a data provider.",
     "noMessagesScroll": "Scroll up to the top to load read messages.",
-    "unreadMessageSeparator": "Unread messages"
+    "unreadMessageSeparator": "Unread messages",
+    "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>dataset</a>",
+    "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs."
   }
 }
