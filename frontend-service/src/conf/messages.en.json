@@ -922,7 +922,7 @@
     "changeStatus": "Change status",
     "editStatusDataset": "Edit the status of the dataset ",
     "correctionRequested": "Correction requested",
-    "technicallyAccept": "Technically accept",
+    "technicallyAccept": "Technically accepted",
     "feedbackStatus": "Feedback Status",
     "loadDatasetsReleasesError": "Error loading datasets releases",
     "dataProviderName": "Country",

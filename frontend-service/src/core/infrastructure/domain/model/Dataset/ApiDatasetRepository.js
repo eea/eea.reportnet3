@@ -245,7 +245,10 @@ const getMetaData = async datasetId => {
   const dataset = new Dataset({
     datasetSchemaName: datasetTableDataDTO.dataSetName,
     datasetSchemaId: datasetTableDataDTO.datasetSchema,
-    datasetFeedbackStatus: datasetTableDataDTO.status
+    datasetFeedbackStatus:
+      datasetTableDataDTO.status === 'Technically accept'
+        ? datasetTableDataDTO.status.concat('ed')
+        : datasetTableDataDTO.status
   });
   return dataset;
 };
