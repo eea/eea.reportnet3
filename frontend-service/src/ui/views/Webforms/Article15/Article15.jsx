@@ -76,6 +76,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
         isReporting={isReporting}
         onTabChange={article15State.isVisible}
         webform={visibleContent}
+        webformType={'ARTICLE_15'}
       />
     );
   };

@@ -14,7 +14,7 @@ import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 
-export const WebformView = ({ data, dataflowId, datasetId, isReporting, state, tables }) => {
+export const WebformView = ({ data, dataflowId, datasetId, isReporting, selectedId, state, tables }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
@@ -75,7 +75,9 @@ export const WebformView = ({ data, dataflowId, datasetId, isReporting, state, t
         datasetId={datasetId}
         isReporting={isReporting}
         onTabChange={isVisible}
+        selectedId={selectedId}
         webform={visibleContent}
+        webformType={'ARTICLE_13'}
       />
     );
   };

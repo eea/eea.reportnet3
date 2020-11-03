@@ -38,10 +38,11 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     isDataUpdated: false,
     isWebformView: false,
     pamsRecords: [],
+    selectedId: null,
     tableList: { group: [], single: [] }
   });
 
-  const { isDataUpdated, isWebformView, pamsRecords, tableList } = article13State;
+  const { isDataUpdated, isWebformView, pamsRecords, tableList, selectedId } = article13State;
 
   useEffect(() => initialLoad(), []);
 
@@ -112,6 +113,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     }
   };
 
+  const onSelectRecord = record => article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { record } });
+
   const onToggleView = view => article13Dispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
   const onUpdateData = () => article13Dispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
@@ -145,7 +148,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
             </div>
             <div className={styles.tableListIds}>
               {tableList[list].map(items => (
-                <span className={styles.tableListId}>{items.title}</span>
+                <span className={styles.tableListId} onClick={() => onSelectRecord(items.recordId)}>
+                  {items.id}
+                </span>
               ))}
             </div>
             <Button label={'add'} icon={'add'} onClick={() => onAddRecord()} />
@@ -160,6 +165,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           datasetId={datasetId}
           state={state}
           tables={tables}
+          selectedId={selectedId}
         />
       ) : (
         <TableManagement

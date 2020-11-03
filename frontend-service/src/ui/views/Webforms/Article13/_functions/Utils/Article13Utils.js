@@ -4,7 +4,9 @@ const getTypeList = (records = []) => {
   const typeList = records.map(record => {
     let data = {};
 
-    record.elements.forEach(element => (data = { ...data, [lowerFirst(element.name)]: element.value }));
+    record.elements.forEach(
+      element => (data = { ...data, [lowerFirst(element.name)]: element.value, recordId: record.recordId })
+    );
 
     return data;
   });

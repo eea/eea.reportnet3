@@ -16,6 +16,9 @@ export const article13Reducer = (state, { type, payload }) => {
     case 'ON_UPDATE_DATA':
       return { ...state, isDataUpdated: payload.value };
 
+    case 'ON_SELECT_RECORD':
+      return { ...state, selectedId: payload.record };
+
     default:
       return state;
   }

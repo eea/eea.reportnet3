@@ -45,7 +45,8 @@ export const WebformRecord = ({
   onTabChange,
   record,
   tableId,
-  tableName
+  tableName,
+  webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -517,6 +518,16 @@ export const WebformRecord = ({
   };
 
   const renderErrorMessages = content => {
+    switch (webformType) {
+      case 'ARTICLE_15':
+        return renderArticle15ErrorMessages(content);
+
+      default:
+        return [];
+    }
+  };
+
+  const renderArticle15ErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
       errorMessages.push(resources.messages['emptyWebformTable']);
