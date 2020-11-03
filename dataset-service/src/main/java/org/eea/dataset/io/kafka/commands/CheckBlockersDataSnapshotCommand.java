@@ -7,6 +7,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -29,18 +30,25 @@ import org.springframework.stereotype.Component;
 public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The dataset snapshot controller. */
   @Autowired
   private DatasetSnapshotController datasetSnapshotController;
 
+  /** The validation repository. */
   @Autowired
   private ValidationRepository validationRepository;
 
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataset snapshot service. */
+  @Autowired
+  private DatasetSnapshotService datasetSnapshotService;
 
   /**
    * Gets the event type.
@@ -79,6 +87,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
                 .datasetId(datasetId)
                 .error("One or more datasets have blockers errors, Release aborted")
                 .providerId(dataset.getDataProviderId()).build());
+        // Release the locks
+        datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
+            dataset.getDataProviderId());
         break;
       }
     }

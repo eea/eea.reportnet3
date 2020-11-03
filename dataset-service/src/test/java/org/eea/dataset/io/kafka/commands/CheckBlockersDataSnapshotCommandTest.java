@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -42,9 +43,15 @@ public class CheckBlockersDataSnapshotCommandTest {
   @Mock
   private ValidationRepository validationRepository;
 
+
+  /** The dataset snapshot service. */
+  @Mock
+  private DatasetSnapshotService datasetSnapshotService;
+
   /** The dataset snapshot controller. */
   @Mock
   private DatasetSnapshotController datasetSnapshotController;
+
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
@@ -80,7 +87,7 @@ public class CheckBlockersDataSnapshotCommandTest {
     datasetMetabase.setId(1L);
     datasetMetabase.setDataflowId(1L);
     datasetMetabase.setDataProviderId(1L);
-    List<Long> datasetsId = new ArrayList();
+    List<Long> datasetsId = new ArrayList<>();
     datasetsId.add(1L);
     datasetsId.add(2L);
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
@@ -110,7 +117,7 @@ public class CheckBlockersDataSnapshotCommandTest {
     datasetMetabase.setId(1L);
     datasetMetabase.setDataflowId(1L);
     datasetMetabase.setDataProviderId(1L);
-    List<Long> datasetsId = new ArrayList();
+    List<Long> datasetsId = new ArrayList<>();
     datasetsId.add(1L);
     datasetsId.add(2L);
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
