@@ -19,7 +19,10 @@ public enum DatasetStatusEnum {
   PENDING_RELEASE("Pending release"),
 
   /** The correction requested. */
-  CORRECTION_REQUESTED("Correction requested");
+  CORRECTION_REQUESTED("Correction requested"),
+  
+  /** The released. */
+  RELEASED("Released");
 
   /** The value. */
   private final String value;
