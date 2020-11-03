@@ -1,6 +1,9 @@
 import React, { Fragment, useContext, useReducer } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './ManageManualAcceptanceDataset.module.scss';
+
+import uuid from 'uuid';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -9,7 +12,6 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { RadioButton } from 'ui/views/_components/RadioButton';
-import ReactTooltip from 'react-tooltip';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -124,15 +126,16 @@ export const ManageManualAcceptanceDataset = ({
     </Fragment>
   );
 
+  const idTextArea = uuid.v4();
+
   const renderInputTextLayout = option => (
     <span>
-      <label htmlFor="datasetMessage">{resources.messages[option]}</label>
+      <label htmlFor={idTextArea}>{resources.messages[option]}</label>
       <InputTextarea
         className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
         collapsedHeight={85}
-        // expandableOnClick={true}
         id="datasetMessage"
-        key="datasetMessage"
+        id={idTextArea}
         onChange={e => onChangeMessage(e.target.value)}
         onFocus={e =>
           manageManualAcceptanceDatasetDispatch({
