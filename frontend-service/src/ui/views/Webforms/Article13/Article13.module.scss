@@ -89,10 +89,15 @@
       width: 75%;
 
       .tableListId {
-        color: black;
+        cursor: pointer;
         padding: 0.5rem;
         margin: 0.5rem;
         border: 0.1rem solid var(--c-corporate-blue-lighter);
+      }
+
+      .selected {
+        color: var(--white);
+        background-color: var(--c-corporate-blue-lighter);
       }
     }
   }

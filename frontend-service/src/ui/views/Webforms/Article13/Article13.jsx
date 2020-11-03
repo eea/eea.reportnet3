@@ -148,7 +148,12 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
             </div>
             <div className={styles.tableListIds}>
               {tableList[list].map(items => (
-                <span className={styles.tableListId} onClick={() => onSelectRecord(items.recordId)}>
+                <span
+                  className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
+                  onClick={() => {
+                    onSelectRecord(items.recordId);
+                    onToggleView(true);
+                  }}>
                   {items.id}
                 </span>
               ))}
