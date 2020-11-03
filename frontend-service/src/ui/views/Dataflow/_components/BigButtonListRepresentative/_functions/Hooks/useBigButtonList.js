@@ -35,7 +35,7 @@ const useBigButtonList = ({
   }, [userContext]);
 
   const getButtonsVisibility = () => ({
-    feedback: false, //isLeadReporterOfCountry,
+    feedback: isLeadReporterOfCountry,
     receipt: isLeadReporterOfCountry,
     release: isLeadReporterOfCountry
   });
