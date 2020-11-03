@@ -1,9 +1,10 @@
 export class Feedback {
-  constructor({ datetime, id, content, read, sender } = {}) {
-    this.datetime = datetime;
-    this.id = id;
+  constructor({ content, date, id, providerId, read, direction } = {}) {
     this.content = content;
+    this.date = date;
+    this.id = id;
+    this.providerId = providerId;
     this.read = read;
-    this.sender = sender;
+    this.direction = direction;
   }
 }
