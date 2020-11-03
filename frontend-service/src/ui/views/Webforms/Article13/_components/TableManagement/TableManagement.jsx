@@ -82,7 +82,10 @@ export const TableManagement = ({ dataflowId, datasetId, onAddRecord, onRefresh,
         <Button
           className={'p-button-secondary'}
           icon={'add'}
-          label={'Create Table'}
+          label={resources.messages['webformTableCreation']}
+          onClick={() => {
+            console.log({ rowData });
+          }}
           // onClick={() => setTableToCreate(rowData.table3)}
         />
       </div>
