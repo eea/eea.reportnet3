@@ -306,6 +306,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       tableSchemaVO = dataschemaService.createTableSchema(
           dataschemaService.getDatasetSchemaId(datasetId), tableSchemaVO, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
       return tableSchemaVO;
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -327,6 +328,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
@@ -376,6 +378,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
       datasetService.deleteTableValue(datasetId, tableSchemaId);
 
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
