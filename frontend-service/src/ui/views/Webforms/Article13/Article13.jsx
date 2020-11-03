@@ -36,13 +36,14 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
     isDataUpdated: false,
+    isLoading: true,
     isWebformView: false,
     pamsRecords: [],
     selectedId: null,
     tableList: { group: [], single: [] }
   });
 
-  const { isDataUpdated, isWebformView, pamsRecords, tableList, selectedId } = article13State;
+  const { isDataUpdated, isLoading, isWebformView, pamsRecords, selectedId, tableList } = article13State;
 
   useEffect(() => initialLoad(), []);
 
@@ -51,6 +52,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   }, [article13State.data, isDataUpdated]);
 
   const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
+
+  const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onAddRecord = async type => {
     console.log({ type });
@@ -134,6 +137,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       }
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -153,7 +158,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         <div className={styles.indicator} style={{ left: isWebformView ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
         <div
           className={`${styles.tabItem} ${!isWebformView ? styles.selected : null}`}
-          onClick={() => onToggleView(false)}>
+          onClick={() => {
+            onToggleView(false);
+            onSelectRecord(null);
+          }}>
           <p className={styles.tabLabel}>Overview</p>
         </div>
         <div
@@ -192,14 +200,15 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           data={article13State.data}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          selectedId={selectedId}
           state={state}
           tables={tables}
-          selectedId={selectedId}
         />
       ) : (
         <TableManagement
           dataflowId={dataflowId}
           datasetId={datasetId}
+          loading={isLoading}
           onAddRecord={onAddRecord}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}

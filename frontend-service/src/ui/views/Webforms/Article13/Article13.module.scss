@@ -4,8 +4,8 @@
 .switch {
   align-items: center;
   display: flex;
-  padding: 1rem;
   justify-content: space-around;
+  padding: 1rem;
 
   .option {
   }
@@ -55,24 +55,23 @@
 }
 
 .tableList {
-  color: black;
   padding: 0;
 
   .tableListItem {
-    list-style: none;
-    display: flex;
-    margin: 1rem 0;
-    justify-content: space-between;
-    padding: 0.5rem;
     align-items: center;
-    border: 0.1rem solid #818997;
     border-radius: 6px;
+    border: 0.1rem solid #818997;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    margin: 1rem 0;
+    padding: 0.5rem;
 
     .tableListTitleWrapper {
       background: var(--c-corporate-blue-lighter);
+      border-radius: 6px;
       color: var(--white);
       padding: 0.5rem;
-      border-radius: 6px;
 
       .icon {
         color: var(--white);
@@ -84,20 +83,19 @@
     }
 
     .tableListIds {
-      color: black;
       padding: 0.5rem;
       width: 75%;
 
       .tableListId {
-        cursor: pointer;
-        padding: 0.5rem;
-        margin: 0.5rem;
         border: 0.1rem solid var(--c-corporate-blue-lighter);
+        cursor: pointer;
+        margin: 0.5rem;
+        padding: 0.5rem;
       }
 
       .selected {
-        color: var(--white);
         background-color: var(--c-corporate-blue-lighter);
+        color: var(--white);
       }
     }
   }

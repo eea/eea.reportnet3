@@ -22,16 +22,7 @@ import { useLoadColsSchemasAndColumnOptions } from 'ui/views/_components/DataVie
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 
-export const TableManagement = ({
-  dataflowId,
-  datasetId,
-  onAddRecord,
-  onAddTableRecord,
-  onRefresh,
-  records,
-  schemaTables = [],
-  tableList
-}) => {
+export const TableManagement = ({ dataflowId, datasetId, loading, onAddRecord, onAddTableRecord,onRefresh, records, schemaTables,tableList }) => {
   const { parsePamsRecords, parseTableSchemaColumns } = TableManagementUtils;
 
   const resources = useContext(ResourcesContext);
@@ -165,10 +156,11 @@ export const TableManagement = ({
   return (
     <Fragment>
       <DataTable
+        autoLayout={true}
+        loading={loading}
         onRowClick={event =>
           tableManagementDispatch({ type: 'GET_DELETE_ID', payload: { deleteId: event.data.recordId } })
         }
-        autoLayout={true}
         value={tableManagementState.records}>
         {renderTableColumns()}
       </DataTable>
