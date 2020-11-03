@@ -1,4 +1,3 @@
-// import { config } from 'conf';
 import reverse from 'lodash/reverse';
 
 import { apiFeedback } from 'core/infrastructure/api/domain/model/Feedback';
