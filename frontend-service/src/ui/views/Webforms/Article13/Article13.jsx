@@ -57,8 +57,13 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
     const newEmptyRecord = parseNewRecord(table.elements);
 
+    newEmptyRecord.dataRow[3].fieldData.value = type;
+
+    console.log('newEmptyRecord.dataRow[3].fieldData', newEmptyRecord.dataRow[3].fieldData);
+
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+
       if (response) {
         onUpdateData();
       }
@@ -158,7 +163,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
                 </span>
               ))}
             </div>
-            <Button label={'add'} icon={'add'} onClick={() => onAddRecord()} />
+            <Button label={'add'} icon={'add'} onClick={() => onAddRecord(list === 'group' ? 'Group' : 'Single')} />
           </li>
         ))}
       </ul>

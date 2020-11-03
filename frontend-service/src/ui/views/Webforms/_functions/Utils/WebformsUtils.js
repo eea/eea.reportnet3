@@ -18,7 +18,11 @@ const parseNewRecord = (columnsSchema, data) => {
       fields = columnsSchema.map(column => {
         if (column.type === 'FIELD') {
           return {
-            fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
+            fieldData: {
+              [column.fieldSchema]: null,
+              type: column.fieldType,
+              fieldSchemaId: column.fieldSchema
+            }
           };
         }
       });

@@ -151,8 +151,8 @@ export const TableManagement = ({ dataflowId, datasetId, onAddRecord, onRefresh,
       </DataTable>
 
       <div className={styles.addButtons}>
-        <Button label={'Add Single'} icon={'add'} onClick={() => onAddRecord()} />
-        <Button label={'Add Group'} icon={'add'} onClick={() => onAddRecord()} />
+        <Button label={'Add Single'} icon={'add'} onClick={() => onAddRecord('Single')} />
+        <Button label={'Add Group'} icon={'add'} onClick={() => onAddRecord('Group')} />
       </div>
 
       {isDialogVisible.delete && (
