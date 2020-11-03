@@ -1,7 +1,5 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
-import ReactTooltip from 'react-tooltip';
+import React, { Fragment, useReducer } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
@@ -9,26 +7,14 @@ import pickBy from 'lodash/pickBy';
 import styles from './WebformView.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { WebformTable } from '../../../Article15/_components/WebformTable';
+import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
+
+import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 
 export const WebformView = ({ data, dataflowId, datasetId, isReporting, state, tables }) => {
-  const webformViewReducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'INITIAL_LOAD':
-        return { ...state, ...payload };
-
-      case 'ON_CHANGE_TAB':
-        return { ...state, isVisible: payload.isVisible };
-
-      default:
-        return state;
-    }
-  };
-
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {

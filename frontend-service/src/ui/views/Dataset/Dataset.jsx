@@ -14,7 +14,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
-import { Article15 } from 'ui/views/Webforms/_components/Article15';
+import { Article15 } from 'ui/views/Webforms/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -741,7 +741,8 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) && hasWritePermissions && (
+    !isNil(webformData) &&
+    hasWritePermissions && (
       <div className={styles.switch}>
         <div className={`${styles.wrap}`}>
           <span className={styles.text}>{resources.messages['tabularData']}</span>

@@ -20,8 +20,11 @@ import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, webform }) => {
+  const { onParseWebformRecords, parseNewRecord } = WebformsUtils;
+
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -55,29 +58,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   }, [isDataUpdated, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
-
-  const parseNewRecord = (columnsSchema, data) => {
-    if (!isEmpty(columnsSchema)) {
-      let fields;
-
-      if (!isUndefined(columnsSchema)) {
-        fields = columnsSchema.map(column => {
-          if (column.type === 'FIELD') {
-            return {
-              fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
-            };
-          }
-        });
-      }
-
-      const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
-
-      obj.datasetPartitionId = null;
-      if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
-      return obj;
-    }
-  };
 
   const onAddMultipleWebform = async tableSchemaId => {
     webformTableDispatch({
@@ -171,49 +151,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
       });
     }
-  };
-
-  const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
-    return records.map(record => {
-      const { fields } = record;
-      const { elements } = webform;
-
-      const result = [];
-
-      for (let index = 0; index < elements.length; index++) {
-        const element = elements[index];
-
-        if (element.type === 'FIELD') {
-          result.push({
-            fieldType: 'EMPTY',
-            ...element,
-            ...fields.find(field => field['fieldSchemaId'] === element['fieldSchema']),
-            codelistItems: element.codelistItems || [],
-            description: element.description || '',
-            isDisabled: isNil(element.fieldSchema),
-            maxSize: element.maxSize,
-            name: element.name,
-            recordId: record.recordId,
-            type: element.type,
-            validExtensions: element.validExtensions
-          });
-        } else {
-          if (tableData[element.tableSchemaId]) {
-            const tableElementsRecords = onParseWebformRecords(
-              tableData[element.tableSchemaId].records,
-              element,
-              tableData,
-              totalRecords
-            );
-            result.push({ ...element, elementsRecords: tableElementsRecords });
-          } else {
-            result.push({ ...element, tableNotCreated: true, elementsRecords: [] });
-          }
-        }
-      }
-
-      return { ...record, elements: result, totalRecords };
-    });
   };
 
   const onUpdateData = () => {

@@ -37,12 +37,4 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
   return initialValues;
 };
 
-const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
-  const result = [];
-  for (let i = 0; i < array1.length; i++) {
-    result.push({ ...array1[i], ...array2.find(element => element[array2Key] === array1[i][array1Key]) });
-  }
-  return result;
-};
-
-export const Article15Utils = { getWebformTabs, mergeArrays };
+export const Article15Utils = { getWebformTabs };

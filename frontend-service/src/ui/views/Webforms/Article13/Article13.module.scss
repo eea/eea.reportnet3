@@ -85,9 +85,14 @@
 
     .tableListIds {
       color: black;
+      padding: 0.5rem;
+      width: 75%;
 
       .tableListId {
         color: black;
+        padding: 0.5rem;
+        margin: 0.5rem;
+        border: 0.1rem solid var(--c-corporate-blue-lighter);
       }
     }
   }

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Article13 } from './_components/Article13';
-import { Article15 } from './_components/Article15';
+import React, { Fragment } from 'react';
 
-const Webforms = ({ webformType, dataflowId, datasetId, state }) => {
+import { Article13 } from './Article13';
+import { Article15 } from './Article15';
+
+export const Webforms = ({ dataflowId, datasetId, state, webformType }) => {
   switch (webformType) {
     case 'MMR-ART13':
       return <Article13 dataflowId={dataflowId} datasetId={datasetId} state={state} />;
@@ -11,8 +12,6 @@ const Webforms = ({ webformType, dataflowId, datasetId, state }) => {
       return <Article15 dataflowId={dataflowId} datasetId={datasetId} state={state} />;
 
     default:
-      return <></>;
+      return <Fragment />;
   }
 };
-
-export { Webforms };
