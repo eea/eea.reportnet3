@@ -12,8 +12,8 @@ const getTypeList = (records = []) => {
   });
 
   return {
-    single: typeList.filter(list => list.isGroup === 'Single'),
-    group: typeList.filter(list => list.isGroup === 'Group')
+    single: typeList.filter(list => list.isGroup === 'Single').sort((a, b) => a.id - b.id),
+    group: typeList.filter(list => list.isGroup === 'Group').sort((a, b) => a.id - b.id)
   };
 };
 

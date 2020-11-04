@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import capitalize from 'lodash/capitalize';
 
 import styles from './Article13.module.scss';
 
@@ -25,10 +26,13 @@ import { Article13Utils } from './_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
+import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
+
 export const Article13 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
   const { getTypeList } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
+  const { parsePamsRecords } = TableManagementUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -55,11 +59,36 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
+  const generatePamId = () => {
+    if (isEmpty(pamsRecords)) return 1;
+
+    const recordIds = parsePamsRecords(pamsRecords)
+      .map(record => parseInt(record.Id))
+      .filter(id => !Number.isNaN(id));
+
+    return Math.max(...recordIds) + 1;
+  };
+
+  const getParamFieldSchemaId = (param, table) => {
+    return table.elements.filter(element => element.name === param).map(table => table.fieldSchema)[0];
+  };
+
   const onAddRecord = async type => {
     console.log({ type });
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
-
     const newEmptyRecord = parseNewRecord(table.elements);
+
+    const data = [];
+    for (let index = 0; index < newEmptyRecord.dataRow.length; index++) {
+      const row = newEmptyRecord.dataRow[index];
+
+      row.fieldData[getParamFieldSchemaId('IsGroup', table)] = type;
+      row.fieldData[getParamFieldSchemaId('Id', table)] = generatePamId();
+
+      data.push({ ...row });
+    }
+
+    newEmptyRecord.dataRow = data;
 
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
@@ -190,7 +219,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
                 </span>
               ))}
             </div>
-            <Button label={'add'} icon={'add'} onClick={() => onAddRecord()} />
+            <Button label={'add'} icon={'add'} onClick={() => onAddRecord(capitalize(list))} />
           </li>
         ))}
       </ul>

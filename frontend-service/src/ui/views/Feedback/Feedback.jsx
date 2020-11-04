@@ -5,12 +5,14 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { FeedbackReporterHelpConfig } from 'conf/help/feedback/reporter';
+import { FeedbackRequesterHelpConfig } from 'conf/help/feedback/requester';
 
 import styles from './Feedback.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -47,6 +49,7 @@ export const Feedback = withRouter(({ match, history }) => {
     dataProviders: [],
     isCustodian: undefined,
     isLoading: false,
+    isSending: false,
     messages: [],
     messageToSend: '',
     newMessageAdded: false,
@@ -59,6 +62,7 @@ export const Feedback = withRouter(({ match, history }) => {
     dataProviders,
     isCustodian,
     isLoading,
+    isSending,
     messages,
     messageToSend,
     newMessageAdded,
@@ -69,6 +73,19 @@ export const Feedback = withRouter(({ match, history }) => {
     onGetDataflowName();
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (isCustodian) {
+      if (isEmpty(messages)) {
+      } else {
+      }
+    } else {
+    }
+    leftSideBarContext.addHelpSteps(
+      isCustodian ? FeedbackRequesterHelpConfig : FeedbackReporterHelpConfig,
+      'feedbackHelp'
+    );
+  }, [messages, isCustodian]);
 
   useEffect(() => {
     if (isCustodian) {
@@ -83,26 +100,24 @@ export const Feedback = withRouter(({ match, history }) => {
           onGetInitialMessages(selectedDataProvider.dataProviderId);
         }
       } else {
-        onGetInitialMessages();
+        onGetInitialMessages(representativeId);
       }
     }
-  }, [selectedDataProvider]);
+  }, [selectedDataProvider, isCustodian]);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-      dispatchFeedback({
-        type: 'SET_IS_CUSTODIAN',
-        payload:
-          userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
-          userRoles.includes(config.permissions['DATA_STEWARD'])
-      });
+      const isCustodian = userContext.hasPermission([config.permissions.DATA_CUSTODIAN]);
+      dispatchFeedback({ type: 'SET_IS_CUSTODIAN', payload: isCustodian });
     }
   }, [userContext]);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
   const onChangeDataProvider = value => {
+    if (isNil(value)) {
+      dispatchFeedback({ type: 'RESET_MESSAGES', payload: {} });
+    }
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
 
@@ -119,14 +134,30 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onGetMoreMessages = async () => {
-    const data = await onLoadMessages(isCustodian ? selectedDataProvider.dataProviderId : 1, currentPage);
-    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data });
+    if ((isCustodian && isEmpty(selectedDataProvider)) || isLoading) return;
+    const data = await onLoadMessages(
+      isCustodian ? selectedDataProvider.dataProviderId : representativeId,
+      currentPage
+    );
+    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
   };
 
   const onGetInitialMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     const data = await onLoadMessages(dataProviderId, 0);
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: data });
+    //mark unread messages as read
+    if (data.unreadMessages.length > 0) {
+      const marked = await FeedbackService.markAsRead(
+        dataflowId,
+        data.unreadMessages
+          .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
+          .map(unreadMessage => {
+            return { id: unreadMessage.id, read: true };
+          })
+      );
+    }
+
+    dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
   };
 
   const onKeyChange = event => {
@@ -137,8 +168,8 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadMessages = async (dataProviderId, page) => {
-    const data = await FeedbackService.loadMessages(dataflowId, page);
-    return data;
+    const data = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
+    return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
   };
 
   const onLoadDataProviders = async () => {
@@ -157,29 +188,26 @@ export const Feedback = withRouter(({ match, history }) => {
   const onSendMessage = async message => {
     if (message.trim() !== '') {
       try {
-        const created = await FeedbackService.create(
+        dispatchFeedback({ type: 'SET_IS_SENDING', payload: true });
+        const messageCreated = await FeedbackService.create(
           dataflowId,
           message,
           isCustodian && !isEmpty(selectedDataProvider)
             ? selectedDataProvider.dataProviderId
             : parseInt(representativeId)
         );
-        if (created) {
+        if (messageCreated) {
           dispatchFeedback({
             type: 'ON_SEND_MESSAGE',
             payload: {
-              value: {
-                datetime: dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-                id: messages.length + 1,
-                message,
-                read: false,
-                sender: true
-              }
+              value: { ...messageCreated }
             }
           });
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        dispatchFeedback({ type: 'SET_IS_SENDING', payload: false });
       }
     }
   };
@@ -197,55 +225,70 @@ export const Feedback = withRouter(({ match, history }) => {
       <Title
         title={`${resources.messages['dataflowFeedback']} `}
         subtitle={dataflowName}
-        icon="info"
+        icon="comments"
         iconSize="3.5rem"
       />
-      {isCustodian && (
-        <div className={styles.dataProviderWrapper}>
-          <span>{resources.messages['manageRolesDialogDataProviderColumn']}</span>
-          <Dropdown
-            className={styles.dataProvider}
-            onChange={e => {
-              onChangeDataProvider(e.target.value);
-            }}
-            optionLabel="label"
-            options={dataProviders}
-            value={selectedDataProvider}
-          />
-        </div>
-      )}
-      <div className={styles.feedbackWrapper}>
-        {isLoading ? (
-          <Spinner className={styles.spinnerLoadingMessages} />
-        ) : (
-          <ListMessages
-            emptyMessage={`${resources.messages['noMessages']} ${
-              isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
-            }`}
-            messages={messages}
-            newMessageAdded={newMessageAdded}
-            onLazyLoad={onGetMoreMessages}
-          />
+      <div className={`${styles.feedbackWrapper} feedback-wrapper-help-step`}>
+        {isCustodian && (
+          <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
+            <ListBox
+              className={styles.dataProvider}
+              options={dataProviders}
+              onChange={e => {
+                onChangeDataProvider(e.target.value);
+              }}
+              optionLabel="label"
+              title={resources.messages['feedbackDataProvider']}
+              value={selectedDataProvider}></ListBox>
+          </div>
         )}
-        <InputTextarea
-          // autoFocus={true}
-          className={`${styles.sendMessageTextarea} feedback-send-message-help-step`}
-          collapsedHeight={55}
-          expandableOnClick={true}
-          id="feedbackSender"
-          key="feedbackSender"
-          onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
-          onKeyDown={e => onKeyChange(e)}
-          placeholder={resources.messages['writeMessagePlaceholder']}
-          value={messageToSend}
-        />
-        <Button
-          className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
-          label={resources.messages['send']}
-          icon={'comment'}
-          iconPos="right"
-          onClick={() => onSendMessage(messageToSend)}
-        />
+        <div
+          className={`${styles.listMessagesWrapper} ${
+            isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
+          }`}>
+          {isLoading ? (
+            <Spinner className={styles.spinnerLoadingMessages} />
+          ) : (
+            <ListMessages
+              canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
+              className={`feedback-messages-help-step`}
+              emptyMessage={`${resources.messages['noMessages']} ${
+                isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
+              }`}
+              isCustodian={isCustodian}
+              messages={messages}
+              newMessageAdded={newMessageAdded}
+              onLazyLoad={onGetMoreMessages}
+            />
+          )}
+          <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
+            <InputTextarea
+              // autoFocus={true}
+              className={styles.sendMessageTextarea}
+              collapsedHeight={100}
+              // expandableOnClick={true}
+              disabled={isCustodian && isEmpty(selectedDataProvider)}
+              id="feedbackSender"
+              key="feedbackSender"
+              onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
+              onKeyDown={e => onKeyChange(e)}
+              placeholder={
+                isCustodian && isEmpty(selectedDataProvider)
+                  ? resources.messages['noMessagesCustodian']
+                  : resources.messages['writeMessagePlaceholder']
+              }
+              value={messageToSend}
+            />
+            <Button
+              className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
+              disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
+              label={resources.messages['send']}
+              icon={'comment'}
+              iconPos="right"
+              onClick={() => onSendMessage(messageToSend)}
+            />
+          </div>
+        </div>
       </div>
     </Fragment>
   );

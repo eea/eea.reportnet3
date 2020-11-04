@@ -915,8 +915,11 @@
     "dataflowFeedback":"Feedback",
     "send":"Send",
     "writeMessagePlaceholder": "Write your message",
-    "noMessages": "You have no unread messages.",
+    "noMessages": "You have no messages.",
     "noMessagesCustodian": "Please, select a data provider.",
+    "unreadMessageSeparator": "Unread messages",
+    "feedbackDataProvider": "Data provider: ",
+    "feedbackHelp":"Dataflow feedback help",
     "noMessagesScroll": "Scroll up to the top to load read messages.",
     "unreadMessageSeparator": "Unread messages",
     "webformTableCreation": "Create table"

@@ -500,8 +500,11 @@
   --card-item-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.4);
   --card-item-box-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25);
 
-  /*Cookies notice*/
+  /* Cookies notice */
   --cookies-bg: #033166;
+
+  /* Feedback chat */
+  --feedback-separator-color: var(--c-corporate-blue);
 }
 body {
   margin: 0px;
