@@ -302,6 +302,7 @@ export const WebformRecord = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            className={field.required ? styles.required : undefined}
             id={field.fieldId}
             // keyfilter={getInputType[type]}
             maxLength={getInputMaxLength[type]}
@@ -407,7 +408,15 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              <label>{element.title}</label>
+              <label>{`${element.required ? '*' : ''}${element.title}`}</label>
+              {element.tooltip && (
+                <Button
+                  className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                  icon="infoCircle"
+                  tooltip={element.tooltip}
+                  tooltipOptions={{ position: 'top' }}
+                />
+              )}
               <div>
                 <div className={styles.template}>
                   {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
