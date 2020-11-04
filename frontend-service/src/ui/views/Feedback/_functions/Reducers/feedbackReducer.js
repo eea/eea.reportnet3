@@ -1,11 +1,19 @@
+import isNil from 'lodash/isNil';
+import uniqBy from 'lodash/uniqBy';
+
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ON_LOAD_MORE_MESSAGES':
-      const inmAllMessages = [...payload, ...state.messages];
+      let inmAllMessages = [];
+      if (payload.length !== state.messages.length) {
+        inmAllMessages = [...payload, ...state.messages];
+      } else {
+        inmAllMessages = [...state.messages];
+      }
       return {
         ...state,
-        currentPage: state.currentPage + 1,
-        messages: inmAllMessages,
+        currentPage: payload.length === 50 ? state.currentPage + 1 : state.currentPage,
+        messages: uniqBy(inmAllMessages, 'id'),
         newMessageAdded: false
       };
     case 'ON_SEND_MESSAGE':
@@ -34,6 +42,11 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         isLoading: payload
       };
+    case 'SET_IS_SENDING':
+      return {
+        ...state,
+        isSending: payload
+      };
     case 'SET_IS_VISIBLE_DIALOG':
       return { ...state, isDialogVisible: payload };
     case 'SET_MESSAGE_TO_SHOW':
@@ -41,13 +54,16 @@ export const feedbackReducer = (state, { type, payload }) => {
     case 'SET_MESSAGES':
       return {
         ...state,
-        messages: payload,
+        currentPage: payload.length === 50 ? 1 : 0,
+        messages: payload.length !== state.messages.length ? payload : state.messages,
         isLoading: false
       };
     case 'SET_SELECTED_DATAPROVIDER':
       return {
         ...state,
-        selectedDataProvider: payload
+        selectedDataProvider: payload,
+        messages: !isNil(payload) ? state.messages : [],
+        currentPage: !isNil(payload) ? state.currentPage : 0
       };
     case 'ON_UPDATE_MESSAGE':
       return {
