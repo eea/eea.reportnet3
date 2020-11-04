@@ -225,6 +225,7 @@ export const BigButtonList = ({
       } = response;
       setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
       setIsQCsNotValidWarningVisible(true);
+      setIsActiveButton(true);
     }
   }, [notificationContext]);
 
