@@ -74,7 +74,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onAddRecord = async type => {
-    console.log({ type });
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 

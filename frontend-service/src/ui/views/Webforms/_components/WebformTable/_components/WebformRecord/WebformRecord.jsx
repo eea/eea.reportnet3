@@ -50,7 +50,7 @@ export const WebformRecord = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  console.log({ record });
+
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,

@@ -16,7 +16,6 @@ import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Uti
 
 export const WebformView = ({ data, dataflowId, datasetId, isReporting, selectedId, state, tables }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
-  console.log({ state, tables });
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isVisible: Article15Utils.getWebformTabs(
       tables.map(table => table.name),

@@ -24,7 +24,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 
 export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, selectedId, webform, webformType }) => {
   const { onParseWebformRecords, parseNewRecord } = WebformsUtils;
-  console.log({ webform });
+
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -102,7 +102,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         'ERROR',
         'BLOCKER'
       ]);
-      console.log({ parentTableData });
       if (!isNil(parentTableData.records)) {
         const tableSchemaIds = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.tableSchemaId))

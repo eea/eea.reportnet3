@@ -24,16 +24,33 @@ const parseTableSchemaColumns = schemaTables => {
   });
 };
 
-const parsePamsRecords = records =>
-  records.map(record => {
+const parsePamsRecords = (records, parentTablesWithData) => {
+  const getHasRecordWithPamId = record => {
+    if (isNil(parentTablesWithData)) {
+      return '';
+    }
+    const filteredparentTablesWithData = parentTablesWithData.filter(
+      parentTableWithData => parentTableWithData.tableSchemaName !== 'PaMs'
+    );
+  };
+
+  return records.map(record => {
     const { recordId, recordSchemaId } = record;
     let data = {};
 
     record.elements.forEach(
-      element => (data = { ...data, [element.name]: element.value, recordId: recordId, recordSchemaId: recordSchemaId })
+      element =>
+        (data = {
+          ...data,
+          [element.name]: element.value,
+          recordId: recordId,
+          recordSchemaId: recordSchemaId,
+          hasRecord: getHasRecordWithPamId(record)
+        })
     );
 
     return data;
   });
+};
 
 export const TableManagementUtils = { parsePamsRecords, parseTableSchemaColumns };
