@@ -1,7 +1,6 @@
 import { apiDataCollection } from 'core/infrastructure/api/domain/model/DataCollection';
 
 const create = async (dataflowId, endDate, stopAndNotifySQLErrors) => {
-  console.log('create', dataflowId, endDate, stopAndNotifySQLErrors);
   return await apiDataCollection.create(dataflowId, endDate, stopAndNotifySQLErrors);
 };
 

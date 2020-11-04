@@ -611,7 +611,6 @@ export const BigButtonList = ({
           onConfirm={() => onCreateDataCollectionWithNotValids()}
           onHide={() => setIsQCsNotValidWarningVisible(false)}
           visible={isQCsNotValidWarningVisible}>
-          {console.log('invalidAndDisabledRulesAmount', invalidAndDisabledRulesAmount)}
           {TextUtils.parseText(resources.messages['notValidQCWarningBody'], {
             disabled: invalidAndDisabledRulesAmount.disabledRules,
             invalid: invalidAndDisabledRulesAmount.invalidRules
