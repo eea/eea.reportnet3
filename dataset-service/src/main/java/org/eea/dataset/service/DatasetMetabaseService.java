@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
@@ -235,4 +236,14 @@ public interface DatasetMetabaseService {
    * @return true, if successful
    */
   Long lastDatasetValidationForReleasingById(Long datasetId);
+
+  /**
+   * Update dataset status.
+   *
+   * @param datasetStatusMessageVO the dataset status message VO
+   * @return true, if successful
+   * @throws EEAException
+   */
+  void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO) throws EEAException;
+
 }

@@ -182,17 +182,21 @@ public interface DataflowService {
    * Find messages.
    *
    * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param read the read
    * @param page the page
    * @return the list
+   * @throws EEAException the EEA exception
    */
-  List<MessageVO> findMessages(Long dataflowId, Boolean read, int page);
+  List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+      throws EEAException;
 
   /**
    * Update message read status.
    *
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
+   * @throws EEAException
    */
-  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs);
+  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) throws EEAException;
 }

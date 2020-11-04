@@ -1,0 +1,28 @@
+.lazyLoadingWrapper {
+  display: block;
+}
+.lazyLoadingSpinner {
+  top: 0 !important;
+}
+.messagesWrapper {
+  border: var(--inputtext-border);
+  border-radius: 3px;
+  margin-left: 1rem;
+  height: 40vh;
+  overflow: scroll;
+  width: 100%;
+  .emptyMessageWrapper {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 40vh;
+    padding-top: 10rem;
+    span {
+      color: var(--main-font-color);
+      font-style: italic;
+    }
+  }
+  .scrollMessagesWrapper {
+    height: 41vh;
+  }
+}

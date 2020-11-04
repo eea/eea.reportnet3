@@ -91,7 +91,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
-      "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
+      "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
 
   /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
@@ -287,7 +287,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false, false);
+    manageDataCollection(dataflowId, null, false, false, false);
   }
 
   /**
@@ -296,12 +296,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck enable the manual check for the custodian approval
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors) {
-    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors);
+      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
   }
 
   /**
@@ -311,9 +312,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param isCreation the is creation
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck enable the manual check for the custodian approval
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
@@ -323,6 +325,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
+      LOG.info("Validate SQL Rules in Dataflow {},Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         List<RuleVO> rulesSql =
@@ -334,20 +337,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           });
         }
       });
+      LOG.info("Data Collection contains SQL rules contains: {} errors", rulesWithError.size());
       if (stopAndNotifySQLErrors) {
         long errorsCount =
             rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE.equals(ruleStatus)).count();
-        if (errorsCount > 0) {
-          String notificationError =
-              "Data Collection creation proccess stoped by SQL rules contains errors: "
-                  + errorsCount;
-          NotificationVO notificationVO =
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .dataflowId(dataflowId).error(notificationError).build();
+        int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
+        if (errorsCount > 0 || disabledRules > 0) {
+          NotificationVO notificationVO = NotificationVO.builder()
+              .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
+              .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
+              .disabledRules(disabledRules).build();
           LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
-          releaseLockAndNotification(dataflowId, notificationError, isCreation);
+          // remove lock
+          String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
+          List<Object> criteria = new ArrayList<>();
+          criteria.add(methodSignature);
+          criteria.add(dataflowId);
+          lockService.removeLockByCriteria(criteria);
+          // release notification
           rulesOk = false;
+          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
         }
       }
     }
@@ -385,8 +394,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
           if (isCreation) {
             // 5. Set dataflow to DRAFT
-            statement.addBatch(
-                String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
+            statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+                manualCheck, dueDate, dataflowId));
           }
 
           for (RepresentativeVO representative : representatives) {
@@ -1018,6 +1027,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
 
+  /**
+   * Release notification.
+   *
+   * @param eventType the event type
+   * @param notificationVO the notification VO
+   */
   private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);

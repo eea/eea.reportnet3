@@ -169,12 +169,14 @@ public interface DataFlowController {
    * Find messages.
    *
    * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param read the read
    * @param page the offset
    * @return the list
    */
   @GetMapping("/{dataflowId}/findMessages")
   List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
 
   /**

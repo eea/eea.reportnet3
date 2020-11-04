@@ -48,7 +48,7 @@ public class DisableSqlRulesErrorEventTest {
    */
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(3, disableSqlRulesErrorEvent
+    Assert.assertEquals(5, disableSqlRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 
@@ -60,7 +60,7 @@ public class DisableSqlRulesErrorEventTest {
    */
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Assert.assertEquals(3, disableSqlRulesErrorEvent
+    Assert.assertEquals(5, disableSqlRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 }

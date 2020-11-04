@@ -34,13 +34,16 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -78,6 +81,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The data flow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The data set metabase mapper. */
   @Autowired
@@ -227,6 +234,32 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Update dataset status.
+   *
+   * @param datasetStatusMessageVO the dataset status message VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO)
+      throws EEAException {
+    DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetStatusMessageVO.getDatasetId()).orElse(null);
+    if (datasetMetabase != null) {
+      datasetMetabase.setStatus(datasetStatusMessageVO.getStatus());
+      dataSetMetabaseRepository.save(datasetMetabase);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    MessageVO message = new MessageVO();
+    message.setContent(datasetStatusMessageVO.getMessage());
+    message.setProviderId(datasetMetabase.getDataProviderId());
+
+    // Send message to provider
+    dataFlowControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message);
   }
 
 

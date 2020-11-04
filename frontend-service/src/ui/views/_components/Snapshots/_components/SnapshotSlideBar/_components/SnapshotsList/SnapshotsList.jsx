@@ -4,7 +4,7 @@ import styles from './SnapshotsList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';
 
-export function SnapshotsList({ snapshotListData, isReleaseVisible }) {
+const SnapshotsList = ({ snapshotListData, isReleaseVisible }) => {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
@@ -14,4 +14,5 @@ export function SnapshotsList({ snapshotListData, isReleaseVisible }) {
       </ul>
     </div>
   );
-}
+};
+export { SnapshotsList };

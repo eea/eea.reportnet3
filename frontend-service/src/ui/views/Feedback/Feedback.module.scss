@@ -1,0 +1,47 @@
+.feedbackWrapper {
+  display: flex;
+  .dataProviderWrapper {
+    margin: 0rem 0rem 1rem 1rem;
+    vertical-align: middle;
+    .dataProvider {
+      margin-left: 0.5rem;
+      min-width: 8%;
+      flex-basis: 25%;
+    }
+    span {
+      color: var(--main-font-color);
+      font-weight: bold;
+    }
+  }
+  .flexBasisCustodian {
+    flex-basis: 75%;
+  }
+  .flexBasisProvider {
+    flex-basis: 100%;
+  }
+  .listMessagesWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .sendMessageWrapper {
+      display: flex;
+      align-items: center;
+      .sendMessageTextarea {
+        width: 50vw;
+        margin: 1rem 1rem !important;
+        &:disabled {
+          border: 1px solid var(--gray-50) !important;
+        }
+      }
+      .sendMessageButton {
+        margin-bottom: 1rem;
+        height: 40px;
+      }
+    }
+    .spinnerLoadingMessages {
+      top: 0 !important;
+      left: 0 !important;
+    }
+  }
+}

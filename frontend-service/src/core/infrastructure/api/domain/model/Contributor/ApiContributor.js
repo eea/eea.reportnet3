@@ -2,11 +2,11 @@ import { ContributorConfig } from 'conf/domain/model/Contributor';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 const apiContributor = {
-  all: async (dataflowId, dataProviderId = '') => {
-    const isReporter = !isEmpty(dataProviderId.toString());
+  all: async (dataflowId, dataProviderId) => {
+    const isReporter = !isNil(dataProviderId);
 
     const response = await HTTPRequester.get({
       url: isReporter
@@ -22,8 +22,8 @@ const apiContributor = {
     return response.data;
   },
 
-  delete: async (account, dataflowId, dataProviderId = '') => {
-    const isReporter = !isEmpty(dataProviderId.toString());
+  delete: async (account, dataflowId, dataProviderId) => {
+    const isReporter = !isNil(dataProviderId);
 
     const response = await HTTPRequester.delete({
       url: isReporter
@@ -37,8 +37,8 @@ const apiContributor = {
     return response;
   },
 
-  update: async (contributor, dataflowId, dataProviderId = '') => {
-    const isReporter = !isEmpty(dataProviderId.toString());
+  update: async (contributor, dataflowId, dataProviderId) => {
+    const isReporter = !isNil(dataProviderId);
 
     const response = await HTTPRequester.update({
       url: isReporter

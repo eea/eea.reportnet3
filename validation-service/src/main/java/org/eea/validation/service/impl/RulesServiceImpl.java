@@ -13,6 +13,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -1147,5 +1148,48 @@ public class RulesServiceImpl implements RulesService {
     List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
     return ruleMapper.entityListToClass(rules);
 
+  }
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  @Override
+  public Integer getAllDisabledRules(Long dataflowId, List<DesignDatasetVO> designs) {
+    int disabledRules = 0;
+
+    for (DesignDatasetVO schema : designs) {
+      RulesSchema scheamaAux =
+          rulesRepository.getAllDisabledRules(new ObjectId(schema.getDatasetSchema()));
+      if (null != scheamaAux.getRules()) {
+        disabledRules += scheamaAux.getRules().size();
+      }
+    }
+    return disabledRules;
+  }
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  @Override
+  public Integer getAllUncheckedRules(Long dataflowId, List<DesignDatasetVO> designs) {
+    int uncheckedRules = 0;
+
+    for (DesignDatasetVO schema : designs) {
+      RulesSchema scheamaAux =
+          rulesRepository.getAllUncheckedRules(new ObjectId(schema.getDatasetSchema()));
+      if (null != scheamaAux.getRules()) {
+        uncheckedRules += scheamaAux.getRules().size();
+      }
+    }
+
+    return uncheckedRules;
   }
 }

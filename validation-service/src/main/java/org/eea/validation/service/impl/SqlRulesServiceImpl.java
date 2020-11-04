@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -156,8 +157,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.FALSE)) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
+      rule.setEnabled(verifAndEnabled);
     }
-    rule.setEnabled(verifAndEnabled);
     rule.setVerified(verifAndEnabled);
     rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
         .append(rule.getRuleId().toString()).append("')").toString());
@@ -688,6 +689,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<Rule> errorRulesList = new ArrayList<>();
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
+    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+
+
+
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
         Rule rule = ruleMapper.classToEntity(ruleVO);
@@ -701,13 +706,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }
-    String notificationError = errorRulesList.size() + " SQL rules contains errors.";
-    NotificationVO notificationVO =
-        NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-            .datasetId(datasetId).error(notificationError).build();
-    LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-    releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+    if (!errorRulesList.isEmpty()) {
 
+      RulesSchema rulesdisabled =
+          rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
+      RulesSchema rulesUnchecked =
+          rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).dataflowId(dataflowId)
+          .invalidRules(rulesUnchecked.getRules().size())
+          .disabledRules(rulesdisabled.getRules().size()).build();
+      LOG.info("SQL rules contains errors");
+      releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+    } else {
+
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).dataflowId(dataflowId).build();
+      LOG.info("SQL rules contains 0 errors");
+      releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+    }
   }
 
 }

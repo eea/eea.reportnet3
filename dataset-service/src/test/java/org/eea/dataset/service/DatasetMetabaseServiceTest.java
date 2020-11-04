@@ -29,7 +29,9 @@ import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepositor
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -37,6 +39,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -120,6 +123,10 @@ public class DatasetMetabaseServiceTest {
   /** The eu dataset repository. */
   @Mock
   private EUDatasetRepository euDatasetRepository;
+
+  /** The data flow controller zuul. */
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The foreign relations. */
   private ForeignRelations foreignRelations;
@@ -632,4 +639,25 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 2L,
         datasetMetabaseService.lastDatasetValidationForReleasingById(1L));
   }
+
+  @Test(expected = EEAException.class)
+  public void updateDatasetStatusExceptionTest() throws EEAException {
+    try {
+      datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateDatasetStatusTest() throws EEAException {
+
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
+    Mockito.verify(dataFlowControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any());
+  }
+
+
 }
