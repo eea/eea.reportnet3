@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import capitalize from 'lodash/capitalize';
 
 import styles from './Article13.module.scss';
 
@@ -59,30 +60,29 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
   const generatePamId = () => {
-    if (pamsRecords.length === 0) {
-      return 1;
-    }
-    const records = parsePamsRecords(pamsRecords);
-    const allIds = records.map(record => parseInt(record.Id));
-    return Math.max(...allIds) + 1;
+    if (isEmpty(pamsRecords)) return 1;
+
+    const recordIds = parsePamsRecords(pamsRecords)
+      .map(record => parseInt(record.Id))
+      .filter(id => !Number.isNaN(id));
+
+    return Math.max(...recordIds) + 1;
   };
 
-  const onAddRecord = async type => {   
+  const getParamFieldSchemaId = (param, table) => {
+    return table.elements.filter(element => element.name === param).map(table => table.fieldSchema)[0];
+  };
 
+  const onAddRecord = async type => {
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
     const newEmptyRecord = parseNewRecord(table.elements);
-
-    const getIsGroupId = table.elements
-      .filter(element => element.name === 'IsGroup')
-      .map(table => table.fieldSchema)[0];
-    const getId = table.elements.filter(element => element.name === 'Id').map(table => table.fieldSchema)[0];
 
     const data = [];
     for (let index = 0; index < newEmptyRecord.dataRow.length; index++) {
       const row = newEmptyRecord.dataRow[index];
 
-      row.fieldData[getIsGroupId] = type;
-      row.fieldData[getId] = generatePamId();
+      row.fieldData[getParamFieldSchemaId('IsGroup', table)] = type;
+      row.fieldData[getParamFieldSchemaId('Id', table)] = generatePamId();
 
       data.push({ ...row });
     }
@@ -91,7 +91,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
-
       if (response) {
         onUpdateData();
       }
@@ -196,7 +195,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
                 </span>
               ))}
             </div>
-            <Button label={'add'} icon={'add'} onClick={() => onAddRecord(list === 'group' ? 'Group' : 'Single')} />
+            <Button label={'add'} icon={'add'} onClick={() => onAddRecord(capitalize(list))} />
           </li>
         ))}
       </ul>
