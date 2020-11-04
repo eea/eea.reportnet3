@@ -338,7 +338,6 @@ export const FieldsDesigner = ({
           levelErrorTypes={table.levelErrorTypes}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
-          recordPositionId={-1}
           recordPositionId={recordPositionId}
           reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
@@ -419,8 +418,7 @@ export const FieldsDesigner = ({
           fieldRequired={false}
           fieldType=""
           fieldValue=""
-          hasPK={!isNil(fields) && fields.filter(field => field.pk === true).length > 0}
-          // hasPK={true}
+          hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
           isCodelistOrLink={isCodelistOrLink}
@@ -459,7 +457,7 @@ export const FieldsDesigner = ({
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
-                hasPK={fields.filter(field => field.pk === true).length > 0}
+                hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
                 isCodelistOrLink={isCodelistOrLink}

@@ -1,2 +1,2 @@
-export const UpdateRead = ({ feedbackRepository }) => async (dataflowId, messageIds, read) =>
-  feedbackRepository.markAsRead(dataflowId, messageIds, read);
+export const UpdateRead = ({ feedbackRepository }) => async (dataflowId, messages) =>
+  feedbackRepository.markAsRead(dataflowId, messages);
