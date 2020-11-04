@@ -19,6 +19,7 @@ import { tableManagementReducer } from './_functions/Reducers/tableManagementRed
 
 import { useLoadColsSchemasAndColumnOptions } from 'ui/views/_components/DataViewer/_functions/Hooks/DataViewerHooks';
 
+import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 
@@ -30,7 +31,8 @@ export const TableManagement = ({
   onAddTableRecord,
   onRefresh,
   records,
-  schemaTables
+  schemaTables,
+  tables
 }) => {
   const { parsePamsRecords, parseTableSchemaColumns } = TableManagementUtils;
 
@@ -40,16 +42,18 @@ export const TableManagement = ({
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     deleteId: null,
     isDialogVisible: { delete: false, manageRows: false },
+    parentTablesWithData: [],
     records: [],
     tableSchemaColumns: []
   });
 
-  const { deleteId, isDialogVisible } = tableManagementState;
+  const { deleteId, isDialogVisible, parentTablesWithData } = tableManagementState;
 
   const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableManagementState.tableSchemaColumns);
 
   useEffect(() => {
     initialLoad();
+    onLoadParentTablesData();
   }, [records]);
 
   const initialLoad = () => {
@@ -86,13 +90,39 @@ export const TableManagement = ({
     }
   };
 
-  const addTableTemplate = (rowData, colData) => {
-    console.log({ rowData, colData });
-    console.log(
-      schemaTables.filter(
-        schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
-      )[0]
+  const onLoadParentTablesData = () => {
+    const configParentTables = Object.keys(
+      Article15Utils.getWebformTabs(
+        tables.map(table => table.name),
+        schemaTables,
+        tables
+      )
     );
+    const parentTables = schemaTables.filter(schemaTable => configParentTables.includes(schemaTable.header));
+    const parentTablesDataPromises = parentTables.map(async parentTable => {
+      return {
+        tableSchemaId: parentTable.tableSchemaId,
+        data: await DatasetService.tableDataById(datasetId, parentTable.tableSchemaId, '', 100, undefined, [
+          'CORRECT',
+          'INFO',
+          'WARNING',
+          'ERROR',
+          'BLOCKER'
+        ])
+      };
+    });
+    Promise.all(parentTablesDataPromises).then(parentTableData => {
+      tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
+    });
+  };
+
+  const addTableTemplate = (rowData, colData) => {
+    // console.log({ rowData, colData });
+    // console.log(
+    //   schemaTables.filter(
+    //     schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
+    //   )[0]
+    // );
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
@@ -100,15 +130,19 @@ export const TableManagement = ({
           icon={'add'}
           label={resources.messages['webformTableCreation']}
           onClick={() => {
-            // console.log(
-            //   schemaTables.filter(
-            //     schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
-            //   )[0].tableSchemaId
-            // );
-            // console.log({ rowData, colData, records, tableList });
+            console.log({ parentTablesWithData, rowData, colData });
+
+            const configParentTables = Object.keys(
+              Article15Utils.getWebformTabs(
+                tables.map(table => table.name),
+                schemaTables,
+                tables
+              )
+            );
             onAddTableRecord(
               schemaTables.filter(
-                schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
+                schemaTable =>
+                  configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
               )[0],
               rowData.Id
             );
@@ -125,19 +159,19 @@ export const TableManagement = ({
     { field: 'IsGroup', header: 'PaM or group of PaMs' },
     {
       body: addTableTemplate,
-      field: 'table1',
+      field: 'Table_1',
       header:
         'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
     },
     {
       body: addTableTemplate,
-      field: 'table2',
+      field: 'Table_2',
       header:
         'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
     },
     {
       body: addTableTemplate,
-      field: 'table3',
+      field: 'Table_3',
       header:
         'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
     }

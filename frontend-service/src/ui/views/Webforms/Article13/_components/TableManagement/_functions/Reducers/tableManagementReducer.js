@@ -8,7 +8,11 @@ export const tableManagementReducer = (state, { type, payload }) => {
 
     case 'MANAGE_DIALOGS':
       return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };
-
+    case 'SET_PARENT_TABLES_DATA':
+      return {
+        ...state,
+        parentTablesWithData: payload
+      };
     default:
       return state;
   }

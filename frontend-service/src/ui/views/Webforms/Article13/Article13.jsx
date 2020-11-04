@@ -213,8 +213,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
           records={pamsRecords}
-          tableList={tableList}
           schemaTables={datasetSchema.tables}
+          tables={tables}
         />
       )}
     </Fragment>
