@@ -79,6 +79,7 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
           maxSize: element.maxSize,
           name: element.name,
           recordId: record.recordId,
+          required: element.required,
           type: element.type,
           validExtensions: element.validExtensions
         });
