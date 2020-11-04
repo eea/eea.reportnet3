@@ -79,10 +79,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     }
   };
 
-  const onAddTableRecord = async table => {
+  const onAddTableRecord = async (table, pamNumber) => {
     // const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
-    console.log({ table });
-    const newEmptyRecord = parseNewTableRecord(table);
+    console.log({ table, pamNumber });
+    const newEmptyRecord = parseNewTableRecord(table, pamNumber);
     console.log({ newEmptyRecord });
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);

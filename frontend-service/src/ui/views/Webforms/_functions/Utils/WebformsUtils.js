@@ -33,16 +33,19 @@ const parseNewRecord = (columnsSchema, data) => {
   }
 };
 
-const parseNewTableRecord = (table) => {
+const parseNewTableRecord = (table, pamNumber) => {
   if (!isNil(table.records) && !isEmpty(table.records)) {
     let fields;
 
     if (!isUndefined(table)) {
       fields = table.records[0].fields.map(field => {
-          return {
-            fieldData: { [field.fieldSchema]: null, type: field.type, fieldSchemaId: field.fieldSchema }
-          };
-        
+        return {
+          fieldData: {
+            [field.fieldSchema]: field.name === 'Fk_PaMs' ? pamNumber : null,
+            type: field.type,
+            fieldSchemaId: field.fieldSchema
+          }
+        };
       });
     }
 
@@ -141,4 +144,10 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
   return data;
 };
 
-export const WebformsUtils = { mergeArrays, onParseWebformData, onParseWebformRecords, parseNewRecord,parseNewTableRecord };
+export const WebformsUtils = {
+  mergeArrays,
+  onParseWebformData,
+  onParseWebformRecords,
+  parseNewRecord,
+  parseNewTableRecord
+};

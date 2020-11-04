@@ -30,8 +30,7 @@ export const TableManagement = ({
   onAddTableRecord,
   onRefresh,
   records,
-  schemaTables,
-  tableList
+  schemaTables
 }) => {
   const { parsePamsRecords, parseTableSchemaColumns } = TableManagementUtils;
 
@@ -88,6 +87,12 @@ export const TableManagement = ({
   };
 
   const addTableTemplate = (rowData, colData) => {
+    console.log({ rowData, colData });
+    console.log(
+      schemaTables.filter(
+        schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
+      )[0]
+    );
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
@@ -95,16 +100,17 @@ export const TableManagement = ({
           icon={'add'}
           label={resources.messages['webformTableCreation']}
           onClick={() => {
-            console.log(
-              schemaTables.filter(
-                schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
-              )[0].tableSchemaId
-            );
-            console.log({ rowData, colData, records, tableList });
+            // console.log(
+            //   schemaTables.filter(
+            //     schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
+            //   )[0].tableSchemaId
+            // );
+            // console.log({ rowData, colData, records, tableList });
             onAddTableRecord(
               schemaTables.filter(
                 schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
-              )[0]
+              )[0],
+              rowData.Id
             );
           }}
           // onClick={() => setTableToCreate(rowData.table3)}
@@ -114,7 +120,7 @@ export const TableManagement = ({
   };
 
   const tableColumns = [
-    { field: 'Id', header: 'PaMnumber' },
+    { field: 'Id', header: 'PaM Number' },
     { field: 'Title', header: 'Name of policy or measure' },
     { field: 'IsGroup', header: 'PaM or group of PaMs' },
     {
