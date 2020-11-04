@@ -83,7 +83,7 @@ export const BigButtonList = ({
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
-  const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(false);
+  const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(null);
   const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [manualTechnicalAcceptanceOptions, setManualTechnicalAcceptanceOptions] = useState({
@@ -370,7 +370,7 @@ export const BigButtonList = ({
     );
 
   const onResetRadioButtonOptions = () => {
-    setIsManualTechnicalAcceptance(false);
+    setIsManualTechnicalAcceptance(null);
     setManualTechnicalAcceptanceOptions({
       Yes: false,
       No: false
@@ -621,7 +621,7 @@ export const BigButtonList = ({
 
       {isConfirmCollectionDialog && (
         <ConfirmDialog
-          disabledConfirm={!isManualTechnicalAcceptance}
+          disabledConfirm={isNil(isManualTechnicalAcceptance)}
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
