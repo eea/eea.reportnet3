@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1030,57 +1031,38 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // We have to lock all the dataset operations (insert, delete, update...)
     for (Long datasetId : datasets) {
       // Insert
-      List<Object> criteriaInsert = new ArrayList<>();
-      criteriaInsert.add(LockSignature.INSERT_RECORDS.getValue());
-      criteriaInsert.add(datasetId);
-      lockService.removeLockByCriteria(criteriaInsert);
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.INSERT_RECORDS.getValue(), datasetId));
       // Delete
-      List<Object> criteriaDelete = new ArrayList<>();
-      criteriaDelete.add(LockSignature.DELETE_RECORDS.getValue());
-      criteriaDelete.add(datasetId);
-      lockService.removeLockByCriteria(criteriaDelete);
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.DELETE_RECORDS.getValue(), datasetId));
       // Update
-      List<Object> criteriaUpdate = new ArrayList<>();
-      criteriaUpdate.add(LockSignature.UPDATE_FIELD.getValue());
-      criteriaUpdate.add(datasetId);
-      lockService.removeLockByCriteria(criteriaUpdate);
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_FIELD.getValue(), datasetId));
       // Delete dataset
-      List<Object> criteriaDeleteDataset = new ArrayList<>();
-      criteriaDeleteDataset.add(LockSignature.DELETE_DATASET_VALUES.getValue());
-      criteriaDeleteDataset.add(datasetId);
-      lockService.removeLockByCriteria(criteriaDeleteDataset);
+      lockService.removeLockByCriteria(
+          Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
       // Import
-      List<Object> criteriaImport = new ArrayList<>();
-      criteriaImport.add(LockSignature.LOAD_DATASET_DATA.getValue());
-      criteriaImport.add(datasetId);
-      lockService.removeLockByCriteria(criteriaImport);
+      lockService.removeLockByCriteria(
+          Arrays.asList(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId));
       // Import Etl
-      List<Object> criteriaImportEtl = new ArrayList<>();
-      criteriaImportEtl.add(LockSignature.IMPORT_ETL.getValue());
-      criteriaImportEtl.add(datasetId);
-      lockService.removeLockByCriteria(criteriaImportEtl);
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
       // Delete tables and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {
-        List<Object> criteriaDeleteTable = new ArrayList<>();
-        criteriaDeleteTable.add(LockSignature.DELETE_IMPORT_TABLE.getValue());
-        criteriaDeleteTable.add(datasetId);
-        criteriaDeleteTable.add(table.getIdTableSchema());
-        lockService.removeLockByCriteria(criteriaDeleteTable);
 
-        List<Object> criteriaImportTable = new ArrayList<>();
-        criteriaImportTable.add(LockSignature.LOAD_TABLE.getValue());
-        criteriaImportTable.add(datasetId);
-        criteriaImportTable.add(table.getIdTableSchema());
-        lockService.removeLockByCriteria(criteriaImportTable);
+        lockService.removeLockByCriteria(Arrays.asList(LockSignature.DELETE_IMPORT_TABLE.getValue(),
+            datasetId, table.getIdTableSchema()));
+
+        lockService.removeLockByCriteria(Arrays.asList(LockSignature.LOAD_TABLE.getValue(),
+            datasetId, table.getIdTableSchema()));
       }
 
     }
     // Unlock the copy from DC to EU
-    List<Object> criteriaCopyToEU = new ArrayList<>();
-    criteriaCopyToEU.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteriaCopyToEU.add(dataflowId);
-    lockService.removeLockByCriteria(criteriaCopyToEU);
+    lockService.removeLockByCriteria(
+        Arrays.asList(LockSignature.POPULATE_EU_DATASET.getValue(), dataflowId));
 
     // Also, we have to update the representative 'releasing' property to false
     if (!representatives.isEmpty()) {
@@ -1089,11 +1071,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       representativeControllerZuul.updateRepresentative(representative);
     }
     // Finally, unlock the release operation itself
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
-    criteria.add(dataflowId);
-    criteria.add(dataProviderId);
-    lockService.removeLockByCriteria(criteria);
+    lockService.removeLockByCriteria(
+        Arrays.asList(LockSignature.RELEASE_SNAPSHOTS.getValue(), dataflowId, dataProviderId));
   }
 
 
