@@ -584,7 +584,6 @@ const validateDataById = async datasetId => {
 };
 
 const validateSqlRules = async (datasetId, datasetSchemaId) => {
-  console.log('[ApiDatasetRepository, validateSqlRules]', datasetId, datasetSchemaId);
   return await apiDataset.validateSqlRules(datasetId, datasetSchemaId);
 };
 

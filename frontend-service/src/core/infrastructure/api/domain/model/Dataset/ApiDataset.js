@@ -484,7 +484,6 @@ export const apiDataset = {
     }
   },
   validateSqlRules: async (datasetId, datasetSchemaId) => {
-    console.log('validateSqlRules', datasetId, datasetSchemaId);
     try {
       const response = await HTTPRequester.post({
         url: getUrl(DatasetConfig.validateSql, {
