@@ -1193,7 +1193,7 @@ public class RulesServiceImpl implements RulesService {
 
     for (DesignDatasetVO schema : designs) {
       RulesSchema scheamaAux =
-          rulesRepository.getAllDisabledRules(new ObjectId(schema.getDatasetSchema()));
+          rulesRepository.getAllUncheckedRules(new ObjectId(schema.getDatasetSchema()));
       if (null != scheamaAux.getRules()) {
         uncheckedRules += scheamaAux.getRules().size();
       }

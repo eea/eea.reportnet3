@@ -157,8 +157,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.FALSE)) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
+      rule.setEnabled(verifAndEnabled);
     }
-    rule.setEnabled(verifAndEnabled);
     rule.setVerified(verifAndEnabled);
     rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
         .append(rule.getRuleId().toString()).append("')").toString());
