@@ -325,6 +325,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
+      LOG.info("Validate SQL Rules in Dataflow {},Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         List<RuleVO> rulesSql =
@@ -336,18 +337,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           });
         }
       });
+      LOG.info("Data Collection contains SQL rules contains: {} errors", rulesWithError.size());
       if (stopAndNotifySQLErrors) {
         long errorsCount =
             rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE.equals(ruleStatus)).count();
-        if (errorsCount > 0) {
+        int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
+        if (errorsCount > 0 || disabledRules > 0) {
           NotificationVO notificationVO = NotificationVO.builder()
               .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
               .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
-              .disabledRules(rulesControllerZuul.getAllDisabledRules(dataflowId, designs)).build();
+              .disabledRules(disabledRules).build();
           LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
-          releaseLockAndNotification(dataflowId, null, isCreation);
+          // remove lock
+          String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
+          List<Object> criteria = new ArrayList<>();
+          criteria.add(methodSignature);
+          criteria.add(dataflowId);
+          lockService.removeLockByCriteria(criteria);
+          // release notification
           rulesOk = false;
+          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
         }
       }
     }
