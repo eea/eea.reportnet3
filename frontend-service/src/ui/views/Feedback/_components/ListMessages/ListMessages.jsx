@@ -7,13 +7,19 @@ import styles from './ListMessages.module.scss';
 import { Message } from './_components/Message';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
-export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages = [], newMessageAdded, onLazyLoad }) => {
+export const ListMessages = ({
+  canLoad = true,
+  className = '',
+  emptyMessage = '',
+  isCustodian,
+  lazyLoading = true,
+  messages = [],
+  newMessageAdded,
+  onLazyLoad
+}) => {
   const messagesWrapperRef = useRef();
-  const resources = useContext(ResourcesContext);
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
     isLoadingNewMessages: false,
@@ -23,12 +29,18 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
   useEffect(() => {
-    if (!isNil(messagesWrapperRef)) {      
-      messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
-      // messagesWrapperRef.current.addEventListener = onScroll();
+    if (!isNil(messagesWrapperRef)) {
+      if (messages.length === 1) {
+        messagesWrapperRef.current.scrollTop = 1;
+      } else {
+        messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
+      }
     }
-    dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
   }, []);
+
+  useEffect(() => {
+    dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
+  }, [messages]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -47,18 +59,16 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
 
   const onScroll = e => {
     if (!isNil(e)) {
-      if (e.target.scrollTop <= 0 && lazyLoading) {
+      if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
         dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
-        setTimeout(() => {
-          onLazyLoad();
-          messagesWrapperRef.current.scrollTop = 100;
-        }, 1500);
+        onLazyLoad();
+        messagesWrapperRef.current.scrollTop = 1;
       }
     }
   };
 
   return (
-    <div className={styles.messagesWrapper} onScroll={onScroll} ref={messagesWrapperRef}>
+    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
       {isLoadingNewMessages && (
         <div className={styles.lazyLoadingWrapper}>
           <Spinner className={styles.lazyLoadingSpinner} />
@@ -67,10 +77,18 @@ export const ListMessages = ({ emptyMessage = '', lazyLoading = true, messages =
       {isEmpty(messages) ? (
         <div className={styles.emptyMessageWrapper}>
           <span>{emptyMessage}</span>
-          <span>{resources.messages['noMessagesScroll']}</span>
         </div>
       ) : (
-        messages.map((message, i) => <Message message={message} hasSeparator={i === separatorIndex} />)
+        <div className={styles.scrollMessagesWrapper}>
+          {messages.map((message, i) => (
+            <Message
+              message={message}
+              hasSeparator={
+                i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
+              }
+            />
+          ))}
+        </div>
       )}
     </div>
   );
