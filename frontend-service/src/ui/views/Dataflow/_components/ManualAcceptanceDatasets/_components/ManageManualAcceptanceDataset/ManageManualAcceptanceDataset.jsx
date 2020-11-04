@@ -30,6 +30,7 @@ export const ManageManualAcceptanceDataset = ({
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+
   const [manageManualAcceptanceDatasetState, manageManualAcceptanceDatasetDispatch] = useReducer(
     manageManualAcceptanceDatasetReducer,
     {
@@ -66,11 +67,15 @@ export const ManageManualAcceptanceDataset = ({
 
   const onUpdateDataset = async () => {
     try {
+      const datasetFeedbackStatus =
+        manageManualAcceptanceDatasetState.datasetFeedbackStatus === 'Technically accepted'
+          ? manageManualAcceptanceDatasetState.datasetFeedbackStatus.slice(0, -2)
+          : manageManualAcceptanceDatasetState.datasetFeedbackStatus;
       const response = await DatasetService.updateDatasetFeedbackStatus(
         dataflowId,
         datasetId,
         manageManualAcceptanceDatasetState.datasetMessage,
-        manageManualAcceptanceDatasetState.datasetFeedbackStatus
+        datasetFeedbackStatus
       );
 
       if (response.status >= 200 && response.status <= 299) {
@@ -150,23 +155,19 @@ export const ManageManualAcceptanceDataset = ({
   );
 
   const renderRadioButtons = () =>
-    ['Technically accept', 'Correction requested'].map(feedBackStatus => {
+    ['Technically accepted', 'Correction requested'].map(feedbackStatus => {
       return (
-        <div className={styles.radioButtonWrapper} key={feedBackStatus}>
-          <label className={styles.label} htmlFor={feedBackStatus}>
-            {resources.messages[camelCase(feedBackStatus)]}
-          </label>
+        <div className={styles.radioButtonWrapper} key={feedbackStatus}>
           <RadioButton
             className={styles.radioButton}
-            checked={
-              feedBackStatus === 'Technically accept'
-                ? manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus.concat('ed')
-                : manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedBackStatus
-            }
-            inputId={feedBackStatus}
+            checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedbackStatus}
+            inputId={feedbackStatus}
             onChange={event => onChangeStatus(event.target.value)}
-            value={feedBackStatus}
+            value={feedbackStatus}
           />
+          <label className={styles.label} htmlFor={feedbackStatus}>
+            {resources.messages[camelCase(feedbackStatus)]}
+          </label>
         </div>
       );
     });

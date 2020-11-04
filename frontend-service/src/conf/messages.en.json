@@ -920,7 +920,7 @@
     "changeStatus": "Change status",
     "editStatusDataset": "Edit the status of the dataset ",
     "correctionRequested": "Correction requested",
-    "technicallyAccept": "Technically accepted",
+    "technicallyAccepted": "Technically accepted",
     "feedbackStatus": "Feedback Status",
     "loadDatasetsReleasesError": "Error loading datasets releases",
     "dataProviderName": "Country",
