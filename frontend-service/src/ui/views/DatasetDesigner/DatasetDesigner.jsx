@@ -759,8 +759,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const validateQcRules = async () => {
-    console.log('validateQcRules');
+  const validateQcRules = async () => {    
     setSqlValidationRunning(true);
     try {
       const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
