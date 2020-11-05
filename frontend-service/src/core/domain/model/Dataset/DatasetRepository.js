@@ -33,7 +33,8 @@ export const DatasetRepository = {
   updateRecordsById: () => Promise.reject('[DatasetRepository#updateRecordsById] must be implemented'),
   updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
   updateTableDesign: () => Promise.reject('[DatasetRepository#updateTableDesign] must be implemented'),
-  validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented')
+  validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented'),
+  validateSqlRules: () => Promise.reject('[DatasetRepository#validateSqlRules] must be implemented')
 };
 
 export const datasetRepository = Object.assign({}, DatasetRepository, ApiDatasetRepository);
