@@ -74,7 +74,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onAddRecord = async type => {
-    console.log({ type });
     const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 
@@ -110,9 +109,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onAddTableRecord = async (table, pamNumber) => {
     // const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
-    console.log({ table, pamNumber });
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
-    console.log({ newEmptyRecord });
+
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
       if (response) {

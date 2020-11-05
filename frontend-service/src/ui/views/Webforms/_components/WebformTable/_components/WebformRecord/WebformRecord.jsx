@@ -27,6 +27,7 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { PaMsUtils } from './_functions/Utils/PaMsUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
@@ -50,7 +51,7 @@ export const WebformRecord = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  console.log({ record });
+
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
@@ -59,6 +60,7 @@ export const WebformRecord = ({
     isFileDialogVisible: false,
     newRecord: {},
     record,
+    sectorAffectedValue: null,
     selectedField: {},
     selectedFieldId: '',
     selectedFieldSchemaId: '',
@@ -71,6 +73,7 @@ export const WebformRecord = ({
     isDeleteAttachmentVisible,
     isDialogVisible,
     isFileDialogVisible,
+    sectorAffectedValue,
     selectedField,
     selectedFieldId,
     selectedFieldSchemaId,
@@ -86,6 +89,8 @@ export const WebformRecord = ({
     parseMultiselect,
     parseNewRecordData
   } = WebformRecordUtils;
+
+  const { getObjectiveOptions } = PaMsUtils;
 
   useEffect(() => {
     webformRecordDispatch({
@@ -261,7 +266,11 @@ export const WebformRecord = ({
             //     onEditorValueFocus(cells, codelistItemValue);
             //   }
             // }}
-            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
+            options={
+              field.name === 'Objective'
+                ? getObjectiveOptions(sectorAffectedValue)
+                : field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))
+            }
             // optionLabel="itemType"
             value={getMultiselectValues(
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
@@ -281,6 +290,7 @@ export const WebformRecord = ({
             // filterBy="itemType,value"
             onChange={event => {
               onFillField(field, option, event.target.value);
+              webformRecordDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value: event.target.value } });
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}

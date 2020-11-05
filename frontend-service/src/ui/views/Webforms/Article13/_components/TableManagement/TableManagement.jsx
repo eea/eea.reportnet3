@@ -57,7 +57,6 @@ export const TableManagement = ({
   }, [records]);
 
   const initialLoad = () => {
-    console.log({ records, schemaTables });
     const parsedRecords = parsePamsRecords(records);
     const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
 
@@ -130,8 +129,6 @@ export const TableManagement = ({
           icon={'add'}
           label={resources.messages['webformTableCreation']}
           onClick={() => {
-            console.log({ parentTablesWithData, rowData, colData });
-
             const configParentTables = Object.keys(
               Article15Utils.getWebformTabs(
                 tables.map(table => table.name),
