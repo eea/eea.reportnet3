@@ -1092,17 +1092,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private void addLocksRelatedToRelease(List<Long> datasets, List<RepresentativeVO> representatives,
       Long dataflowId) throws EEAException {
     // We have to lock all the dataset operations (insert, delete, update...)
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     for (Long datasetId : datasets) {
       Map<String, Object> mapCriteria = new HashMap<>();
       mapCriteria.put("datasetId", datasetId);
       // Insert
-      createlockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria);
+      createlockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
       // Delete
-      createlockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria);
+      createlockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
       // Update
-      createlockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria);
+      createlockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
       // Delete dataset
-      createlockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria);
+      createlockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
 
       // Delete table and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
@@ -1111,18 +1112,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         mapCriteriaTables.put("datasetId", datasetId);
         mapCriteriaTables.put("tableSchemaId", table.getIdTableSchema());
 
-        createlockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables);
-        createlockWithSignature(LockSignature.LOAD_TABLE, mapCriteriaTables);
+        createlockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables, userName);
+        createlockWithSignature(LockSignature.LOAD_TABLE, mapCriteriaTables, userName);
       }
       // Import
-      createlockWithSignature(LockSignature.LOAD_DATASET_DATA, mapCriteria);
+      createlockWithSignature(LockSignature.LOAD_DATASET_DATA, mapCriteria, userName);
       // ETL Import
-      createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria);
+      createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
     }
     // Lock the operation to copy from the DC to the EU
     Map<String, Object> mapCriteriaCopyToEu = new HashMap<>();
     mapCriteriaCopyToEu.put("dataflowId", dataflowId);
-    createlockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu);
+    createlockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu, userName);
 
     // Also, we have to update the representative 'releasing' property to true
     if (!representatives.isEmpty()) {
@@ -1138,13 +1139,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param lockSignature the lock signature
    * @param mapCriteria the map criteria
+   * @param userName the user name
    * @throws EEAException the EEA exception
    */
-  private void createlockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria)
-      throws EEAException {
+  private void createlockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+      String userName) throws EEAException {
     mapCriteria.put("signature", lockSignature.getValue());
-    lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+    lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
         mapCriteria);
   }
 
