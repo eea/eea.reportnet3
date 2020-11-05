@@ -36,6 +36,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { IntegrationsUtils } from 'ui/views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { isUndefined } from 'lodash';
 
 export const BigButtonList = ({
   dataflowState,
@@ -82,6 +83,12 @@ export const BigButtonList = ({
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
+  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
+    invalidRules: 0,
+    disabledRules: 0
+  });
+
   const [providerId, setProviderId] = useState(null);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
@@ -185,7 +192,7 @@ export const BigButtonList = ({
 
   const onCreateDatasetSchema = () => setNewDatasetDialog(false);
 
-  const onCreateDataCollection = async date => {
+  const onCreateDataCollection = async () => {
     setIsConfirmCollectionDialog(false);
 
     notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
@@ -193,7 +200,7 @@ export const BigButtonList = ({
     setIsActiveButton(false);
 
     try {
-      return await DataCollectionService.create(dataflowId, date);
+      return await DataCollectionService.create(dataflowId, getDate(), true);
     } catch (error) {
       console.error(error);
       const {
@@ -207,6 +214,20 @@ export const BigButtonList = ({
       setDataCollectionDialog(false);
     }
   };
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(
+      notification => notification.key === 'DISABLE_SQL_RULES_ERROR_EVENT'
+    );
+    if (response) {
+      const {
+        content: { invalidRules, disabledRules }
+      } = response;
+      setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
+      setIsQCsNotValidWarningVisible(true);
+      setIsActiveButton(true);
+    }
+  }, [notificationContext]);
 
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);
@@ -324,7 +345,29 @@ export const BigButtonList = ({
 
   const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
-  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
+  const onShowUpdateDataCollectionModal = () => setIsHistoricReleasesDialogVisible(false);
+
+  const getDate = () => {
+    return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000;
+  };
+
+  const onCreateDataCollectionWithNotValids = async () => {
+    setIsActiveButton(false);
+    try {
+      await DataCollectionService.create(dataflowId, getDate(), false);
+    } catch (error) {
+      console.error(error);
+      const {
+        dataflow: { name: dataflowName }
+      } = await getMetadata({ dataflowId });
+
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
+
+      setIsActiveButton(true);
+    } finally {
+      setIsQCsNotValidWarningVisible(false);
+    }
+  };
 
   const renderDialogFooter = isHistoricReleasesDialogVisible ? (
     <Fragment>
@@ -553,13 +596,26 @@ export const BigButtonList = ({
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() =>
-            onCreateDataCollection(new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
-          }
+          onConfirm={() => onCreateDataCollection()}
           onHide={() => setIsConfirmCollectionDialog(false)}
           visible={isConfirmCollectionDialog}>
           <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
           {resources.messages['createDataCollectionConfirm']}
+        </ConfirmDialog>
+      )}
+
+      {isQCsNotValidWarningVisible && (
+        <ConfirmDialog
+          header={resources.messages['notValidQCWarningTitle']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onCreateDataCollectionWithNotValids()}
+          onHide={() => setIsQCsNotValidWarningVisible(false)}
+          visible={isQCsNotValidWarningVisible}>
+          {TextUtils.parseText(resources.messages['notValidQCWarningBody'], {
+            disabled: invalidAndDisabledRulesAmount.disabledRules,
+            invalid: invalidAndDisabledRulesAmount.invalidRules
+          })}
         </ConfirmDialog>
       )}
 
