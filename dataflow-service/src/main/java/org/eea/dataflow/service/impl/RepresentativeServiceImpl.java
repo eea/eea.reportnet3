@@ -96,6 +96,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptDownloaded(false);
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
+    representative.setReleasing(false);
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();

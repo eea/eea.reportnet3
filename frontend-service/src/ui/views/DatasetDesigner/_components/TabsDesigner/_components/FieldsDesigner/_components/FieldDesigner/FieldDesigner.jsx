@@ -165,7 +165,7 @@ export const FieldDesigner = ({
 
   useEffect(() => {
     if (!isNil(totalFields)) {
-      if (totalFields === 0 && !isUndefined(tableSchemaId) && !isUndefined(inputRef.current)) {
+      if (totalFields === 0 && !isUndefined(tableSchemaId) && tableSchemaId !== '' && !isUndefined(inputRef.current)) {
         if (index === '-1') {
           inputRef.current.element.focus();
         }
@@ -199,7 +199,7 @@ export const FieldDesigner = ({
           }
         }
       } else {
-        if (type !== '' && type !== fieldDesignerState.fieldValue) {          
+        if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
             pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,

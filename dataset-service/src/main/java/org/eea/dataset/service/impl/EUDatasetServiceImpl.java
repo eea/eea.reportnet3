@@ -168,22 +168,13 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     for (ReportingDatasetVO reporting : reportings) {
       // Locks to avoid a provider can release a snapshot
       Map<String, Object> mapCriteria = new HashMap<>();
-      mapCriteria.put(SIGNATURE, LockSignature.RELEASE_SNAPSHOT.getValue());
-      mapCriteria.put("datasetId", reporting.getId());
+      mapCriteria.put(SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      mapCriteria.put("dataflowId", dataflowId);
+      mapCriteria.put("dataProviderId", reporting.getDataProviderId());
       lockService.createLock(new Timestamp(System.currentTimeMillis()),
           SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
           mapCriteria);
-
-      // Lock to avoid a provider can create+release a snapshot
-      Map<String, Object> mapCreateRelease = new HashMap<>();
-      mapCreateRelease.put(SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
-      mapCreateRelease.put("datasetId", reporting.getId());
-      mapCreateRelease.put("released", true);
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCreateRelease);
     }
-
 
     // Lock to avoid export EUDataset while is copying data
     Map<String, Object> mapCriteriaExport = new HashMap<>();
@@ -192,7 +183,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     lockService.createLock(new Timestamp(System.currentTimeMillis()),
         SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
         mapCriteriaExport);
-
   }
 
   /**
@@ -221,15 +211,10 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     for (ReportingDatasetVO reporting : reportings) {
       // Release locks to avoid a provider can release a snapshot
       List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
+      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
+      criteriaReporting.add(dataflowId);
+      criteriaReporting.add(reporting.getDataProviderId());
       lockService.removeLockByCriteria(criteriaReporting);
-      // Release locks to avoid a provider can create+release a snapshot
-      List<Object> criteriaCreateRelease = new ArrayList<>();
-      criteriaCreateRelease.add(LockSignature.CREATE_SNAPSHOT.getValue());
-      criteriaCreateRelease.add(reporting.getId());
-      criteriaCreateRelease.add(true);
-      lockService.removeLockByCriteria(criteriaCreateRelease);
     }
     return result;
   }

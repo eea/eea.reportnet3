@@ -1,32 +1,27 @@
-// import { config } from 'conf';
+import reverse from 'lodash/reverse';
 
 import { apiFeedback } from 'core/infrastructure/api/domain/model/Feedback';
 
 import { Feedback } from 'core/domain/model/Feedback/Feedback';
 
 const create = async (dataflowId, message, providerId) => {
-  const created = await apiFeedback.create(dataflowId, message, providerId);
-  return created;
+  const messageCreated = await apiFeedback.create(dataflowId, message, providerId);
+  return messageCreated;
 };
 
-const loadMessages = async (dataProviderId, page) => {
-  const response = await apiFeedback.loadMessages(dataProviderId, page);
-  const messagesDTO = response.map(
-    message =>
-      new Feedback({ content: message.content, datetime: message.datetime, id: message.id, read: message.read })
-  );
-
-  return messagesDTO;
+const loadMessages = async (dataflowId, page, dataProviderId) => {
+  const response = await apiFeedback.loadMessages(dataflowId, page, dataProviderId);
+  const messagesDTO = response.map(message => new Feedback({ ...message }));
+  return reverse(messagesDTO);
 };
 
-const loadMessagesByFlag = async () => {
-  return await apiFeedback.loadMessagesByFlag();
+const loadMessagesByFlag = async (dataflowId, page, read, dataProviderId) => {
+  const response = await apiFeedback.loadMessagesByFlag(dataflowId, page, read, dataProviderId);
+  const messagesDTO = response.map(message => new Feedback({ ...message }));
+  return reverse(messagesDTO);
 };
 
-const markAsRead = async (dataflowId, messageIds, read) => {
-  const messages = messageIds.map(messageId => {
-    return { id: messageId, read };
-  });
+const markAsRead = async (dataflowId, messages) => {
   const updated = await apiFeedback.markAsRead(dataflowId, messages);
   return updated;
 };

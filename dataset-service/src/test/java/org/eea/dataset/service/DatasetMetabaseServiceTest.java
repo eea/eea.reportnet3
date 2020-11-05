@@ -619,6 +619,26 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
 
+  /**
+   * Last dataset validation for releasing by id.
+   */
+  @Test
+  public void lastDatasetValidationForReleasingById() {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDataflowId(1L);
+    datasetMetabase.setDataProviderId(1L);
+    List<Long> datasetsId = new ArrayList();
+    datasetsId.add(1L);
+    datasetsId.add(2L);
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito
+        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
+        .thenReturn(datasetsId);
+    Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
+  }
+
   @Test(expected = EEAException.class)
   public void updateDatasetStatusExceptionTest() throws EEAException {
     try {
@@ -631,11 +651,12 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void updateDatasetStatusTest() throws EEAException {
-    DatasetStatusMessageVO datasetStatusMessage = new DatasetStatusMessageVO();
+
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
     Mockito.verify(dataFlowControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any());
   }
+
 
 }

@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -129,6 +131,12 @@ public class ValidationHelper implements DisposableBean {
   private ExecutorService validationExecutorService;
 
 
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  @Autowired
+  private ValidationController validationController;
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -164,7 +172,7 @@ public class ValidationHelper implements DisposableBean {
     KieBase kieBase = null;
     synchronized (processesMap) {
       if (!processesMap.containsKey(processId)) {
-        initializeProcess(processId, false);
+        initializeProcess(processId, false, false);
       }
       if (null == processesMap.get(processId).getKieBase()) {
         processesMap.get(processId).setKieBase(validationService.loadRulesKnowledgeBase(datasetId));
@@ -206,9 +214,10 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the process id
    * @param isCoordinator the is coordinator
    */
-  public void initializeProcess(String processId, boolean isCoordinator) {
+  public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
     ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
-        isCoordinator, (String) ThreadPropertiesManager.getVariable("user"));
+        isCoordinator, (String) ThreadPropertiesManager.getVariable("user"), released);
+
     synchronized (processesMap) {
       processesMap.put(processId, process);
     }
@@ -223,9 +232,9 @@ public class ValidationHelper implements DisposableBean {
   @Async
   @LockMethod(removeWhenFinish = false, isController = false)
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
-      String processId) {
+      String processId, boolean released) {
     // Initialize process as coordinator
-    initializeProcess(processId, true);
+    initializeProcess(processId, true, released);
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
@@ -532,11 +541,25 @@ public class ValidationHelper implements DisposableBean {
             "There are still {} pending tasks to be sent for process {}, they will not be sent as process is finished",
             pendingValidations, processId);
       }
+
+      boolean isRelease = processesMap.get(processId).isReleased() ? true : false;
       this.finishProcess(processId);
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
-          NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
+      if (isRelease) {
+        Long nextData = datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
+        if (null != nextData) {
+          validationController.validateDataSetData(nextData, true);
+        } else {
+          kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+        }
+
+      } else {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
+            NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
+      }
+
+
       isFinished = true;
     }
     return isFinished;
