@@ -44,10 +44,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     isWebformView: false,
     pamsRecords: [],
     selectedId: null,
+    selectedTableName: null,
     tableList: { group: [], single: [] }
   });
 
-  const { isDataUpdated, isLoading, isWebformView, pamsRecords, selectedId, tableList } = article13State;
+  const {
+    isDataUpdated,
+    isLoading,
+    isWebformView,
+    pamsRecords,
+    selectedId,
+    selectedTableName,
+    tableList
+  } = article13State;
 
   useEffect(() => initialLoad(), []);
 
@@ -108,10 +117,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onAddTableRecord = async (table, pamNumber) => {
-    // const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
-    console.log({ table, pamNumber });
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
-    console.log({ newEmptyRecord });
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
       if (response) {
@@ -170,7 +176,26 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     }
   };
 
+  const onSelectEditTable = (pamNumberId, tableName) => {
+    const pamSchemaId = article13State.data
+      .filter(table => table.name === 'PaMs')[0]
+      .records[0].fields.filter(field => field.name === 'Id')[0].fieldId;
+    let recordId = '';
+    pamsRecords.forEach(pamsRecord => {
+      pamsRecord.fields.forEach(field => {
+        if (field.fieldSchemaId === pamSchemaId && parseInt(field.value) === parseInt(pamNumberId)) {
+          recordId = pamsRecord.recordId;
+        }
+      });
+    });
+    onSelectRecord(recordId);
+    onSelectTableName(tableName);
+    onToggleView(true);
+  };
+
   const onSelectRecord = record => article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { record } });
+
+  const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
 
   const onToggleView = view => article13Dispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
@@ -229,6 +254,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           dataflowId={dataflowId}
           datasetId={datasetId}
           selectedId={selectedId}
+          selectedTableName={selectedTableName}
           state={state}
           tables={tables}
         />
@@ -240,6 +266,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           onAddRecord={onAddRecord}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
+          onSelectEditTable={onSelectEditTable}
           records={pamsRecords}
           schemaTables={datasetSchema.tables}
           tables={tables}

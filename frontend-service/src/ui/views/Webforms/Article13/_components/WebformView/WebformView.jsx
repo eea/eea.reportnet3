@@ -1,4 +1,4 @@
-import React, { Fragment, useReducer } from 'react';
+import React, { Fragment, useEffect, useReducer } from 'react';
 
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
@@ -14,7 +14,16 @@ import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 
-export const WebformView = ({ data, dataflowId, datasetId, isReporting, selectedId, state, tables }) => {
+export const WebformView = ({
+  data,
+  dataflowId,
+  datasetId,
+  isReporting,
+  selectedId,
+  selectedTableName,
+  state,
+  tables
+}) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isVisible: Article15Utils.getWebformTabs(
@@ -25,6 +34,12 @@ export const WebformView = ({ data, dataflowId, datasetId, isReporting, selected
   });
 
   const { isVisible } = webformViewState;
+
+  useEffect(() => {
+    if (!isNil(selectedTableName)) {
+      onChangeWebformTab(selectedTableName);
+    }
+  }, [selectedTableName]);
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {
@@ -48,7 +63,6 @@ export const WebformView = ({ data, dataflowId, datasetId, isReporting, selected
         .map(table => table.hasErrors);
 
       const hasErrors = [webform.hasErrors].concat(childHasErrors);
-
       return (
         <Button
           className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}

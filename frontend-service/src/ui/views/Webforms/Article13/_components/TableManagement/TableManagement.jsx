@@ -33,6 +33,7 @@ export const TableManagement = ({
   onAddRecord,
   onAddTableRecord,
   onRefresh,
+  onSelectEditTable,
   records,
   schemaTables,
   tables
@@ -61,17 +62,12 @@ export const TableManagement = ({
 
   useEffect(() => {
     if (!isEmpty(parentTablesWithData)) {
-      console.log({ parentTablesWithData });
       initialLoad();
-      // tableManagementDispatch({
-      //   type: 'SET_COLUMNS'
-      // });
     }
   }, [parentTablesWithData]);
 
   const initialLoad = () => {
-    console.log({ records, schemaTables, parentTablesWithData });
-    const parsedRecords = parsePamsRecords(records);
+    const parsedRecords = parsePamsRecords(records, parentTablesWithData, schemaTables);
     const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
 
     tableManagementDispatch({
@@ -102,10 +98,7 @@ export const TableManagement = ({
               'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
           },
           {
-            field: 'TableSchemaIds'
-          },
-          {
-            field: 'hasRecord'
+            field: 'TableSchemas'
           }
         ]
       }
@@ -166,35 +159,33 @@ export const TableManagement = ({
   };
 
   const addTableTemplate = (rowData, colData) => {
-    // console.log({ rowData, colData });
-    // console.log(
-    //   schemaTables.filter(
-    //     schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
-    //   )[0]
-    // );
+    const hasRecord = rowData.tableSchemas.filter(tableSchema => tableSchema.tableSchemaName === colData.field)[0]
+      .hasRecord;
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
           className={'p-button-secondary'}
-          icon={'add'}
-          label={resources.messages['webformTableCreation']}
+          icon={hasRecord ? 'edit' : 'add'}
+          label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
           onClick={() => {
-            console.log({ parentTablesWithData, rowData, colData });
-
-            const configParentTables = Object.keys(
-              Article15Utils.getWebformTabs(
-                tables.map(table => table.name),
-                schemaTables,
-                tables
-              )
-            );
-            onAddTableRecord(
-              schemaTables.filter(
-                schemaTable =>
-                  configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
-              )[0],
-              rowData.Id
-            );
+            if (hasRecord) {
+              onSelectEditTable(rowData.Id, colData.field);
+            } else {
+              const configParentTables = Object.keys(
+                Article15Utils.getWebformTabs(
+                  tables.map(table => table.name),
+                  schemaTables,
+                  tables
+                )
+              );
+              onAddTableRecord(
+                schemaTables.filter(
+                  schemaTable =>
+                    configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
+                )[0],
+                rowData.Id
+              );
+            }
           }}
           // onClick={() => setTableToCreate(rowData.table3)}
         />
@@ -221,7 +212,7 @@ export const TableManagement = ({
   const renderTableColumns = () => {
     const data = tableColumns.map(col => (
       <Column
-        className={col.field === 'TableSchemaIds' || col.field === 'hasRecord' ? styles.invisibleHeader : ''}
+        className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
         key={col.field}
         field={col.field}
         header={col.header}
