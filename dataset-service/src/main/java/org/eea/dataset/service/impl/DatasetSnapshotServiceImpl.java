@@ -1096,25 +1096,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Map<String, Object> mapCriteria = new HashMap<>();
       mapCriteria.put("datasetId", datasetId);
       // Insert
-      mapCriteria.put("signature", LockSignature.INSERT_RECORDS.getValue());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCriteria);
+      createlockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria);
       // Delete
-      mapCriteria.put("signature", LockSignature.DELETE_RECORDS.getValue());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCriteria);
+      createlockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria);
       // Update
-      mapCriteria.put("signature", LockSignature.UPDATE_FIELD.getValue());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCriteria);
+      createlockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria);
       // Delete dataset
-      mapCriteria.put("signature", LockSignature.DELETE_DATASET_VALUES.getValue());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCriteria);
+      createlockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria);
+
       // Delete table and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {
@@ -1122,34 +1111,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         mapCriteriaTables.put("datasetId", datasetId);
         mapCriteriaTables.put("tableSchemaId", table.getIdTableSchema());
 
-        mapCriteriaTables.put("signature", LockSignature.DELETE_IMPORT_TABLE.getValue());
-        lockService.createLock(new Timestamp(System.currentTimeMillis()),
-            SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-            mapCriteriaTables);
-
-        mapCriteriaTables.put("signature", LockSignature.LOAD_TABLE.getValue());
-        lockService.createLock(new Timestamp(System.currentTimeMillis()),
-            SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-            mapCriteriaTables);
+        createlockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables);
+        createlockWithSignature(LockSignature.LOAD_TABLE, mapCriteriaTables);
       }
       // Import
-      mapCriteria.put("signature", LockSignature.LOAD_DATASET_DATA.getValue());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCriteria);
+      createlockWithSignature(LockSignature.LOAD_DATASET_DATA, mapCriteria);
       // ETL Import
-      mapCriteria.put("signature", LockSignature.IMPORT_ETL.getValue());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-          mapCriteria);
+      createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria);
     }
     // Lock the operation to copy from the DC to the EU
     Map<String, Object> mapCriteriaCopyToEu = new HashMap<>();
-    mapCriteriaCopyToEu.put("signature", LockSignature.POPULATE_EU_DATASET.getValue());
     mapCriteriaCopyToEu.put("dataflowId", dataflowId);
-    lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-        mapCriteriaCopyToEu);
+    createlockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu);
 
     // Also, we have to update the representative 'releasing' property to true
     if (!representatives.isEmpty()) {
@@ -1157,6 +1130,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       representative.setReleasing(true);
       representativeControllerZuul.updateRepresentative(representative);
     }
+  }
+
+
+  /**
+   * Createlock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @throws EEAException the EEA exception
+   */
+  private void createlockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria)
+      throws EEAException {
+    mapCriteria.put("signature", lockSignature.getValue());
+    lockService.createLock(new Timestamp(System.currentTimeMillis()),
+        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+        mapCriteria);
   }
 
 
