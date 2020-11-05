@@ -10,7 +10,14 @@ import styles from './DatasetSchema.module.scss';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], uniqueList = [], validationList }) => {
+const DatasetSchema = ({
+  designDataset,
+  extensionsOperationsList = [],
+  index,
+  onGetReferencedFieldName,
+  uniqueList = [],
+  validationList
+}) => {
   const resources = useContext(ResourcesContext);
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
@@ -32,20 +39,21 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           groupable: true,
           names: {
             description: 'Description',
-            readOnly: 'Read only',
-            prefilled: 'Prefilled',
+            fixedNumber: 'Fixed number of rows',
             mandatory: 'Mandatory',
-            fixedNumber: 'Fixed number of rows'
+            prefilled: 'Prefilled',
+            readOnly: 'Read only'
           }
         },
         fields: {
           filtered: false,
           groupable: true,
           names: {
-            shortCode: 'Shortcode',
             codelistItems: 'Single select items',
             pk: 'Primary key',
-            readOnly: 'Read only'
+            readOnly: 'Read only',
+            referencedField: 'Referenced field',
+            shortCode: 'Shortcode'
           }
         },
         extensionsOperations: {
@@ -185,6 +193,11 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           );
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
+            let referencedField = {};
+            if (!isNil(fieldDTO.referencedField)) {
+              referencedField = onGetReferencedFieldName(fieldDTO.referencedField.idPk);
+            }
+
             field.pk = fieldDTO.pk;
             field.required = fieldDTO.required;
             field.readOnly = fieldDTO.readOnly;
@@ -199,6 +212,10 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
               }
             }
             field.format = getFieldFormat(fieldDTO);
+            if (!isNil(fieldDTO.referencedField)) {
+              field.referencedField = `${referencedField.tableName} - ${referencedField.fieldName}`;
+            }
+
             return field;
           });
           table.fields = fields;
