@@ -43,7 +43,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message VO
    */
   @Override
-  @PostMapping("/{dataflowId}/createMessage")
+  @PostMapping("/createMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody MessageVO messageVO) {
@@ -65,7 +65,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageVOs the message V os
    */
   @Override
-  @PutMapping("/{dataflowId}/updateMessageReadStatus")
+  @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs) {
@@ -90,7 +90,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the list
    */
   @Override
-  @GetMapping("/{dataflowId}/findMessages")
+  @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,

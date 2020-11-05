@@ -30,7 +30,7 @@ public interface CollaborationController {
    * @param messageVO the message VO
    * @return the message VO
    */
-  @PostMapping("/{dataflowId}/createMessage")
+  @PostMapping("/createMessage/dataflow/{dataflowId}")
   MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody MessageVO messageVO);
 
@@ -40,7 +40,7 @@ public interface CollaborationController {
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
    */
-  @PutMapping("/{dataflowId}/updateMessageReadStatus")
+  @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
   void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs);
 
@@ -53,7 +53,7 @@ public interface CollaborationController {
    * @param page the page
    * @return the list
    */
-  @GetMapping("/{dataflowId}/findMessages")
+  @GetMapping("/findMessages/dataflow/{dataflowId}")
   List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
