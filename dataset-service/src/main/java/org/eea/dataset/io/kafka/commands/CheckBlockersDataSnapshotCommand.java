@@ -92,7 +92,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         // Release the locks
         datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
             dataset.getDataProviderId());
-        LOG_ERROR.error("Error releasing, the datasets have blockers errors");
+        LOG_ERROR.error(
+            "Error in the releasing process of the dataflowId {} and dataProviderId {}, the datasets have blocker errors",
+            dataset.getDataflowId(), dataset.getDataProviderId());
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                 .datasetId(datasetId)
@@ -103,7 +105,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
     }
     // If none blocker errors has found, we have to release datasets one by one
     if (!haveBlockers) {
-      LOG.info("Release datasets in dataflow {} starts", dataset.getDataflowId());
+      LOG.info(
+          "Releasing datasets process continues. At this point, the datasets from the dataflowId {} and dataProviderId {} have no blockers",
+          dataset.getDataflowId(), dataset.getDataProviderId());
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setReleased(true);
       createSnapshotVO.setAutomatic(Boolean.TRUE);

@@ -15,10 +15,21 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ValidationProcessVO {
 
+  /** The pending oks. */
   private Integer pendingOks;
+
+  /** The pending validations. */
   private Deque<EEAEventVO> pendingValidations;
+
+  /** The kie base. */
   private KieBase kieBase;
+
+  /** The coordinator process. */
   private boolean coordinatorProcess;
+
+  /** The requesting user. */
   private String requestingUser;
+
+  /** The released. */
   private boolean released;
 }
