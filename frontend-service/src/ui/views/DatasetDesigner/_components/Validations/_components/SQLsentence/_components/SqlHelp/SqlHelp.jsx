@@ -14,6 +14,7 @@ import { DataflowService } from 'core/services/Dataflow';
 
 import { parseDatasetSchemas } from './_functions/utils/parseDatasetSchemas';
 import { parseHelpItem } from './_functions/utils/parseHelpItem';
+import { toLower } from 'lodash';
 
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
@@ -123,9 +124,9 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
   const onAddHelpItem = itemType => {
     const helpItem = parseHelpItem(itemType, state);
     if (!sqlSentence) {
-      onSetSqlSentence('sqlSentence', trim(helpItem));
+      onSetSqlSentence('sqlSentence', toLower(trim(helpItem)));
     } else {
-      onSetSqlSentence('sqlSentence', trim(`${sqlSentence}${helpItem}`));
+      onSetSqlSentence('sqlSentence', trim(`${sqlSentence}${toLower(helpItem)}`));
     }
   };
 

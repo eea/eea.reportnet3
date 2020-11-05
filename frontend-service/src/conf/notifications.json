@@ -659,6 +659,13 @@
         },
         {
           "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+        },
+        {
+          "key": "VALIDATE_RULES_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -709,6 +716,7 @@
   "hiddenNotifications": [
     "VALIDATED_QC_RULE_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
-    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
+    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
+    "DISABLE_SQL_RULES_ERROR_EVENT"
   ]
 }

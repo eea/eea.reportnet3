@@ -252,9 +252,11 @@ export const Feedback = withRouter(({ match, history }) => {
             <ListMessages
               canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
               className={`feedback-messages-help-step`}
-              emptyMessage={`${resources.messages['noMessages']} ${
-                isCustodian && isEmpty(selectedDataProvider) ? resources.messages['noMessagesCustodian'] : ''
-              }`}
+              emptyMessage={
+                isCustodian && isEmpty(selectedDataProvider)
+                  ? resources.messages['noMessagesCustodian']
+                  : resources.messages['noMessages']
+              }
               isCustodian={isCustodian}
               messages={messages}
               newMessageAdded={newMessageAdded}
