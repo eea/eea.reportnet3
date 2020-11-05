@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.transaction.Transactional;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
@@ -13,6 +14,8 @@ import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -20,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,40 +30,64 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class CollaborationServiceImpl.
+ */
 @Service
 public class CollaborationServiceImpl implements CollaborationService {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CollaborationServiceImpl.class);
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The max message length. */
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
 
+  /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The message repository. */
   @Autowired
   private MessageRepository messageRepository;
 
+  /** The message mapper. */
   @Autowired
   private MessageMapper messageMapper;
 
+  /**
+   * Creates the message.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVO the message VO
+   * @return the message VO
+   * @throws EEAException the EEA exception
+   */
   @Override
-  public MessageVO createMessage(Long dataflowId, MessageVO messageVO) throws EEAException {
+  public MessageVO createMessage(Long dataflowId, MessageVO messageVO)
+      throws EEAForbiddenException, EEAIllegalArgumentException {
+
+    Long providerId = messageVO.getProviderId();
+    String content = messageVO.getContent();
+
+    if (providerId == null || content == null || content.isEmpty()) {
+      throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
+    }
 
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-    boolean direction =
-        verifyMessagingPermissionsAndGetDirection(dataflowId, messageVO.getProviderId());
+    boolean direction = authorizeAndGetDirection(dataflowId, providerId);
 
-    if (messageVO.getContent().length() > maxMessageLength) {
-      messageVO.setContent(messageVO.getContent().substring(0, maxMessageLength));
+    if (content.length() > maxMessageLength) {
+      content = content.substring(0, maxMessageLength);
     }
 
     Message message = new Message();
-    message.setContent(messageVO.getContent());
+    message.setContent(content);
     message.setDataflowId(dataflowId);
-    message.setProviderId(messageVO.getProviderId());
+    message.setProviderId(providerId);
     message.setDate(new Date());
     message.setRead(false);
     message.setUserName(userName);
@@ -72,77 +98,91 @@ public class CollaborationServiceImpl implements CollaborationService {
     return messageMapper.entityToClass(message);
   }
 
+  /**
+   * Update message read status.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVOs the message V os
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs)
-      throws EEAException {
+      throws EEAIllegalArgumentException, EEAForbiddenException {
 
-    Map<Long, Boolean> map = new HashMap<>();
-    messageVOs.forEach(messageVO -> map.put(messageVO.getId(), messageVO.isRead()));
+    List<Message> messages;
+    List<Long> providerIds;
+    Map<Long, Boolean> messageMap = buildMessageMap(messageVOs);
 
-    List<Message> messages = messageRepository.findByDataflowIdAndIdIn(dataflowId, map.keySet());
+    messages = messageRepository.findByDataflowIdAndIdIn(dataflowId, messageMap.keySet());
     int previousSize = messages.size();
+    Stream<Message> stream = messages.stream();
 
     Collection<? extends GrantedAuthority> authorities =
         SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
     // Case: DATAFLOW_STEWARD or DATAFLOW_CUSTODIAN
+    // Allowed messages to update: direction=TRUE and providerId=ANY
     if (authorities.contains(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
         || authorities.contains(new SimpleGrantedAuthority(
             ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
-
-      // Allowed messages to update: direction=TRUE and providerId=ANY
-      messages = messages.stream().filter(Message::isDirection).collect(Collectors.toList());
+      stream = stream.filter(Message::isDirection);
     }
 
     // Case: DATAFLOW_LEAD_REPORTER, DATAFLOW_REPORTER_READ, DATAFLOW_REPOTER_WRITE
+    // Allowed messages to update: direction=FALSE and providerId=USER_DEPENDANT
     else {
-      List<Long> providerIds =
-          datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
-
-      // Allowed messages to update: direction=FALSE and providerId=USER_DEPENDANT
-      messages = messages.stream()
-          .filter(
-              message -> !message.isDirection() && providerIds.contains(message.getProviderId()))
-          .collect(Collectors.toList());
+      providerIds = datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
+      stream = stream.filter(m -> !m.isDirection() && providerIds.contains(m.getProviderId()));
     }
 
-    if (messages.size() != previousSize) {
-      LOG_ERROR.error("Messaging authorization failed: unable to update all messages");
-      throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
+    messages = stream.collect(Collectors.toList());
+
+    if (previousSize != messages.size()) {
+      LOG_ERROR.error("Messaging authorization failed: not allowed to update all messages");
+      throw new EEAForbiddenException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
     }
 
-    messages = messages.stream().map(message -> {
-      message.setRead(map.get(message.getId()));
-      return message;
-    }).collect(Collectors.toList());
-
+    messages.forEach(message -> message.setRead(messageMap.get(message.getId())));
     messageRepository.saveAll(messages);
   }
 
+  /**
+   * Find messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param read the read
+   * @param page the page
+   * @return the list
+   * @throws EEAForbiddenException the EEA forbidden exception
+   */
   @Override
   public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
-      throws EEAException {
+      throws EEAForbiddenException {
 
-    Page<Message> pageResponse;
+    authorizeAndGetDirection(dataflowId, providerId);
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
-    verifyMessagingPermissionsAndGetDirection(dataflowId, providerId);
 
-    if (null != read) {
-      pageResponse = messageRepository.findByDataflowIdAndProviderIdAndRead(dataflowId, providerId,
-          read, pageRequest);
-    } else {
-      pageResponse =
-          messageRepository.findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest);
-    }
-
-    return messageMapper.entityListToClass(pageResponse.getContent());
+    return null != read
+        ? messageMapper.entityListToClass(messageRepository
+            .findByDataflowIdAndProviderIdAndRead(dataflowId, providerId, read, pageRequest)
+            .getContent())
+        : messageMapper.entityListToClass(messageRepository
+            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent());
   }
 
-
-  private boolean verifyMessagingPermissionsAndGetDirection(Long dataflowId, Long providerId)
-      throws EEAException {
+  /**
+   * Verify messaging permissions and get direction.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  private boolean authorizeAndGetDirection(Long dataflowId, Long providerId)
+      throws EEAForbiddenException {
 
     List<Long> datasetIds = datasetMetabaseControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providerId);
@@ -178,6 +218,31 @@ public class CollaborationServiceImpl implements CollaborationService {
 
     LOG_ERROR.error("Messaging authorization failed: dataflowId={}, providerId={}", dataflowId,
         providerId);
-    throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
+    throw new EEAForbiddenException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
+  }
+
+  /**
+   * Builds the message map.
+   *
+   * @param messageVOs the message V os
+   * @return the map
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   */
+  private Map<Long, Boolean> buildMessageMap(List<MessageVO> messageVOs)
+      throws EEAIllegalArgumentException {
+
+    if (null == messageVOs || messageVOs.isEmpty()) {
+      throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
+    }
+
+    Map<Long, Boolean> messageMap = new HashMap<>();
+    for (MessageVO messageVO : messageVOs) {
+      if (null == messageVO.getId()) {
+        throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
+      }
+      messageMap.put(messageVO.getId(), messageVO.isRead());
+    }
+
+    return messageMap;
   }
 }

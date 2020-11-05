@@ -2,14 +2,46 @@ package org.eea.collaboration.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.exception.EEAForbiddenException;
+import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 
+/**
+ * The Interface CollaborationService.
+ */
 public interface CollaborationService {
 
-  MessageVO createMessage(Long dataflowId, MessageVO messageVO) throws EEAException;
+  /**
+   * Creates the message.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVO the message VO
+   * @return the message VO
+   * @throws EEAException the EEA exception
+   */
+  MessageVO createMessage(Long dataflowId, MessageVO messageVO)
+      throws EEAIllegalArgumentException, EEAForbiddenException;
 
-  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) throws EEAException;
+  /**
+   * Update message read status.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVOs the message V os
+   * @throws EEAException the EEA exception
+   */
+  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs)
+      throws EEAIllegalArgumentException, EEAForbiddenException;
 
+  /**
+   * Find messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param read the read
+   * @param page the page
+   * @return the list
+   * @throws EEAForbiddenException the EEA forbidden exception
+   */
   List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
-      throws EEAException;
+      throws EEAForbiddenException;
 }
