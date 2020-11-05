@@ -192,8 +192,7 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     callSetMetaData();
     getDataflowName();
-    getDatasetFeedbackStatus();
-    getDatasetSchemaId();
+    getDatasetData();
     onLoadDataflow();
   }, []);
 
@@ -277,19 +276,11 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getDatasetFeedbackStatus = async () => {
-    try {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
-      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
-    } catch (error) {
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-    }
-  };
-
-  const getDatasetSchemaId = async () => {
+  const getDatasetData = async () => {
     try {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
+      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
