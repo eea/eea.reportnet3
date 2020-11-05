@@ -102,7 +102,6 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
         'ERROR',
         'BLOCKER'
       ]);
-
       if (!isNil(parentTableData.records)) {
         const tableSchemaIds = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.tableSchemaId))

@@ -1,5 +1,8 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
 import styles from './TableManagement.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
@@ -30,6 +33,7 @@ export const TableManagement = ({
   onAddRecord,
   onAddTableRecord,
   onRefresh,
+  onSelectEditTable,
   records,
   schemaTables,
   tables
@@ -44,23 +48,61 @@ export const TableManagement = ({
     isDialogVisible: { delete: false, manageRows: false },
     parentTablesWithData: [],
     records: [],
+    tableColumns: [],
     tableSchemaColumns: []
   });
 
-  const { deleteId, isDialogVisible, parentTablesWithData } = tableManagementState;
+  const { deleteId, isDialogVisible, parentTablesWithData, tableColumns } = tableManagementState;
 
   const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableManagementState.tableSchemaColumns);
 
   useEffect(() => {
-    initialLoad();
     onLoadParentTablesData();
   }, [records]);
 
+  useEffect(() => {
+    if (!isEmpty(parentTablesWithData)) {
+      initialLoad();
+    }
+  }, [parentTablesWithData]);
+
   const initialLoad = () => {
-    const parsedRecords = parsePamsRecords(records);
+    const parsedRecords = parsePamsRecords(records, parentTablesWithData, schemaTables);
     const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
 
-    tableManagementDispatch({ type: 'INITIAL_LOAD', payload: { records: parsedRecords, tableSchemaColumns } });
+    tableManagementDispatch({
+      type: 'INITIAL_LOAD',
+      payload: {
+        records: parsedRecords,
+        tableSchemaColumns,
+        tableColumns: [
+          { field: 'Id', header: 'PaM Number' },
+          { field: 'Title', header: 'Name of policy or measure' },
+          { field: 'IsGroup', header: 'PaM or group of PaMs' },
+          {
+            body: addTableTemplate,
+            field: 'Table_1',
+            header:
+              'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
+          },
+          {
+            body: addTableTemplate,
+            field: 'Table_2',
+            header:
+              'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
+          },
+          {
+            body: addTableTemplate,
+            field: 'Table_3',
+            header:
+              'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
+          },
+          {
+            field: 'TableSchemas'
+          }
+        ]
+      }
+    });
   };
 
   const manageDialogs = (dialog, value) => {
@@ -101,6 +143,7 @@ export const TableManagement = ({
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       return {
         tableSchemaId: parentTable.tableSchemaId,
+        tableSchemaName: parentTable.tableSchemaName,
         data: await DatasetService.tableDataById(datasetId, parentTable.tableSchemaId, '', 100, undefined, [
           'CORRECT',
           'INFO',
@@ -116,63 +159,39 @@ export const TableManagement = ({
   };
 
   const addTableTemplate = (rowData, colData) => {
-    // console.log({ rowData, colData });
-    // console.log(
-    //   schemaTables.filter(
-    //     schemaTable => schemaTable.header === `Table_${colData.field.substring(colData.field.length - 1)}`
-    //   )[0]
-    // );
+    const hasRecord = rowData.tableSchemas.filter(tableSchema => tableSchema.tableSchemaName === colData.field)[0]
+      .hasRecord;
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
           className={'p-button-secondary'}
-          icon={'add'}
-          label={resources.messages['webformTableCreation']}
+          icon={hasRecord ? 'edit' : 'add'}
+          label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
           onClick={() => {
-            const configParentTables = Object.keys(
-              Article15Utils.getWebformTabs(
-                tables.map(table => table.name),
-                schemaTables,
-                tables
-              )
-            );
-            onAddTableRecord(
-              schemaTables.filter(
-                schemaTable =>
-                  configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
-              )[0],
-              rowData.Id
-            );
+            if (hasRecord) {
+              onSelectEditTable(rowData.Id, colData.field);
+            } else {
+              const configParentTables = Object.keys(
+                Article15Utils.getWebformTabs(
+                  tables.map(table => table.name),
+                  schemaTables,
+                  tables
+                )
+              );
+              onAddTableRecord(
+                schemaTables.filter(
+                  schemaTable =>
+                    configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
+                )[0],
+                rowData.Id
+              );
+            }
           }}
           // onClick={() => setTableToCreate(rowData.table3)}
         />
       </div>
     );
   };
-
-  const tableColumns = [
-    { field: 'Id', header: 'PaM Number' },
-    { field: 'Title', header: 'Name of policy or measure' },
-    { field: 'IsGroup', header: 'PaM or group of PaMs' },
-    {
-      body: addTableTemplate,
-      field: 'Table_1',
-      header:
-        'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
-    },
-    {
-      body: addTableTemplate,
-      field: 'Table_2',
-      header:
-        'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
-    },
-    {
-      body: addTableTemplate,
-      field: 'Table_3',
-      header:
-        'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
-    }
-  ];
 
   const renderActionButtonsColumn = (
     <Column
@@ -192,7 +211,13 @@ export const TableManagement = ({
 
   const renderTableColumns = () => {
     const data = tableColumns.map(col => (
-      <Column key={col.field} field={col.field} header={col.header} body={col.body} />
+      <Column
+        className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
+        key={col.field}
+        field={col.field}
+        header={col.header}
+        body={col.body}
+      />
     ));
 
     data.push(renderActionButtonsColumn);

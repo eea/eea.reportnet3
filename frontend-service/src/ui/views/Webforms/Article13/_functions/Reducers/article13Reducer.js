@@ -17,7 +17,10 @@ export const article13Reducer = (state, { type, payload }) => {
       return { ...state, isDataUpdated: payload.value };
 
     case 'ON_SELECT_RECORD':
-      return { ...state, selectedId: payload.record };
+      return { ...state, selectedId: payload.record, selectedTableName: null };
+
+    case 'ON_SELECT_TABLE':
+      return { ...state, selectedTableName: payload.name };
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
