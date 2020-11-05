@@ -25,6 +25,7 @@ export const WebformView = ({
   tables
 }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
+
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isVisible: Article15Utils.getWebformTabs(
       tables.map(table => table.name),
