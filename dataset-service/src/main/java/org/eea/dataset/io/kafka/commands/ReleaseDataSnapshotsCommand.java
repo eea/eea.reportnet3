@@ -71,7 +71,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
 
-    Long nextData = datasetMetabaseService.lastDatasetValidationForReleasingById(datasetId);
+    Long nextData = datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
     if (null != nextData) {
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setReleased(true);
@@ -83,8 +83,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null);
     } else {
       DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
-      // AT THIS POINT, THE PROCESS OF RELEASING ALL THE DATASETS HAS BEEN FINISHED, WE UNLOCK
-      // EVERYTHING INVOLVED
+      // At this point, the process of releasing all the datasets has been finished, we unlock
+      // everything involved
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
           dataset.getDataProviderId());
 

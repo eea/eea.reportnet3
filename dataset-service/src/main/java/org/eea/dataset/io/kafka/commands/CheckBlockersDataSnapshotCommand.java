@@ -101,7 +101,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         break;
       }
     }
-    // if we havent blockers we will do release 1st dataset and do it one by one
+    // If none blocker errors has found, we have to release datasets one by one
     if (!haveBlockers) {
       LOG.info("Release datasets in dataflow {} starts", dataset.getDataflowId());
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();

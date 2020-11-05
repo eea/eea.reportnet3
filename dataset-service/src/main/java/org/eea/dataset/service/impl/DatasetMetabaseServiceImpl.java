@@ -896,14 +896,15 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+
   /**
-   * Last dataset validation for releasing by id.
+   * Gets the last dataset validation for release.
    *
-   * @param dataflowId the datasetId id
-   * @return true, if successful
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
    */
   @Override
-  public Long lastDatasetValidationForReleasingById(Long datasetId) {
+  public Long getLastDatasetValidationForRelease(Long datasetId) {
     DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
     List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
         dataset.getDataflowId(), dataset.getDataProviderId());

@@ -636,8 +636,7 @@ public class DatasetMetabaseServiceTest {
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
-    Assert.assertEquals((Long) 2L,
-        datasetMetabaseService.lastDatasetValidationForReleasingById(1L));
+    Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
   }
 
   @Test(expected = EEAException.class)

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
@@ -224,13 +227,13 @@ public interface DatasetMetabaseController {
 
 
   /**
-   * Last dataset validation for releasing by id.
+   * Gets the last dataset validation for release.
    *
    * @param datasetId the dataset id
-   * @return the long
+   * @return the last dataset validation for release
    */
-  @GetMapping(value = "/private/lastDatasetValidationForReleasingById/{id}",
+  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  Long lastDatasetValidationForReleasingById(@PathVariable("id") Long datasetId);
+  Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId);
 
 }

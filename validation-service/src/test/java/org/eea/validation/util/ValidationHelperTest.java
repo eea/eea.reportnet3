@@ -252,8 +252,7 @@ public class ValidationHelperTest {
     processesMap.put("1",
         new ValidationProcessVO(1, pendingValidations, null, true, "user1", true));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    Mockito
-        .when(datasetMetabaseControllerZuul.lastDatasetValidationForReleasingById(Mockito.eq(1l)))
+    Mockito.when(datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(Mockito.eq(1l)))
         .thenReturn(null);
     validationHelper.reducePendingTasks(1l, "1");
 

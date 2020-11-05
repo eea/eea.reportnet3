@@ -83,10 +83,10 @@ public class ReleaseDataSnapshotsCommandTest {
     datasetsId.add(1L);
     datasetsId.add(2L);
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Mockito.when(datasetMetabaseService.lastDatasetValidationForReleasingById(1L)).thenReturn(null);
+    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(1L)).thenReturn(null);
 
     releaseDataSnapshotsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetMetabaseService, times(1)).lastDatasetValidationForReleasingById(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 
   }
 
@@ -109,7 +109,7 @@ public class ReleaseDataSnapshotsCommandTest {
     datasetsId.add(1L);
     datasetsId.add(2L);
     releaseDataSnapshotsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetMetabaseService, times(1)).lastDatasetValidationForReleasingById(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 
   }
 

@@ -151,10 +151,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
   /**
-   * Update dataset status and send Message
+   * Update dataset status and send Message.
    *
-   * @param datasetId the dataset id
-   * @param datasetName the dataset name
+   * @param datasetStatusMessageVO the dataset status message VO
    */
   @Override
   @PutMapping(value = "/updateDatasetStatus")
@@ -381,10 +380,16 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return datasetMetabaseService.getUserProviderIdsByDataflowId(dataflowId);
   }
 
+  /**
+   * Gets the last dataset validation for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
+   */
   @Override
-  @GetMapping(value = "/private/lastDatasetValidationForReleasingById/{id}",
+  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public Long lastDatasetValidationForReleasingById(@PathVariable("id") Long datasetId) {
-    return datasetMetabaseService.lastDatasetValidationForReleasingById(datasetId);
+  public Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId) {
+    return datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
   }
 }

@@ -235,7 +235,7 @@ public interface DatasetMetabaseService {
    * @param datasetId the datasetId id
    * @return true, if successful
    */
-  Long lastDatasetValidationForReleasingById(Long datasetId);
+  Long getLastDatasetValidationForRelease(Long datasetId);
 
   /**
    * Update dataset status.
