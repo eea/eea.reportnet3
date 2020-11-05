@@ -127,6 +127,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
       case 'DATE':
         return resources.messages['dateFieldFormatRestriction'];
       case 'TEXT':
+      case 'TEXTAREA':
         return resources.messages['textFieldFormatRestriction'];
       case 'RICH_TEXT':
         return resources.messages['richTextFieldFormatRestriction'];
