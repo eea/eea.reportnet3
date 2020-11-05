@@ -180,7 +180,7 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
   public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file,
-      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema,
+      @LockCriteria(name = "tableSchemaId") @PathVariable("idTableSchema") String idTableSchema,
       @RequestParam(value = "replace", required = false) boolean replace) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -293,7 +293,8 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("{id}/deleteImportData")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void deleteImportData(@LockCriteria(name = "id") @PathVariable("id") Long dataSetId) {
+  public void deleteImportData(
+      @LockCriteria(name = "datasetId") @PathVariable("id") Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
