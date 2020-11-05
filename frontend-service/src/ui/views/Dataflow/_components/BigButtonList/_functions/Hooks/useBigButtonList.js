@@ -419,7 +419,8 @@ const useBigButtonList = ({
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: 'released',
+        buttonIcon: isActiveButton ? 'released' : 'spinner',
+        buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
         caption: resources.messages['releaseDataCollection'],
         handleRedirect: () => onOpenReleaseConfirmDialog(),
         helpClassName: 'dataflow-big-buttons-release-help-step',

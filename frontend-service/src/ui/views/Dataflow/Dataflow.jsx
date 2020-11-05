@@ -85,6 +85,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReceiptOutdated: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
+    isReleaseCreating: false,
     isReleaseDialogVisible: false,
     name: '',
     obligations: {},
@@ -417,7 +418,15 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const setIsReleaseCreating = value => dataflowDispatch({ type: 'RELEASE_IS_CREATING', payload: { value } });
+
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
+
+  useCheckNotifications(
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    setIsReleaseCreating,
+    false
+  );
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
@@ -443,6 +452,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
+      setIsReleaseCreating(true);
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
     } catch (error) {
       notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
@@ -476,6 +486,7 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
+            isReleaseCreating={dataflowState.isReleaseCreating}
             onCleanUpReceipt={onCleanUpReceipt}
             onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
             onSaveName={onSaveName}

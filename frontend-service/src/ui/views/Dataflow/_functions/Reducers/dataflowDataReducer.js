@@ -39,7 +39,6 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_DATA_PROVIDER_ID':
       return { ...state, dataProviderId: payload.id };
 
-
     case 'SET_DESIGN_DATASET_SCHEMAS':
       return { ...state, designDatasetSchemas: payload.designDatasets };
 
@@ -69,6 +68,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
+
+    case 'RELEASE_IS_CREATING':
+      return { ...state, isReleaseCreating: payload.value };
 
     default:
       return state;

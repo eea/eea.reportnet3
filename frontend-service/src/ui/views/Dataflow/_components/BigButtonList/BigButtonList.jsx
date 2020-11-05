@@ -42,6 +42,7 @@ export const BigButtonList = ({
   dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
+  isReleaseCreating,
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
@@ -113,6 +114,10 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
+
+  useEffect(() => {
+    setIsActiveButton(!isReleaseCreating);
+  }, [isReleaseCreating]);
 
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
@@ -364,6 +369,7 @@ export const BigButtonList = ({
       handleRedirect,
       isActiveButton,
       isLeadReporterOfCountry,
+      isReleaseCreating,
       onCloneDataflow,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
@@ -373,7 +379,7 @@ export const BigButtonList = ({
       onShowExportEuDatasetModal,
       onShowHistoricReleases,
       onShowManageReportersDialog,
-      onShowNewSchemaDialog,   
+      onShowNewSchemaDialog,
       onOpenReleaseConfirmDialog,
       onShowUpdateDataCollectionModal,
       setErrorDialogData,
@@ -459,7 +465,7 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resources.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
-          onHide={() => setIsHistoricReleasesDialogVisible(false)}          
+          onHide={() => setIsHistoricReleasesDialogVisible(false)}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}
