@@ -13,7 +13,6 @@ import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.exception.EEAErrorMessage;
-import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -64,7 +63,8 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @param dataflowId the dataflow id
    * @param messageVO the message VO
    * @return the message VO
-   * @throws EEAException the EEA exception
+   * @throws EEAForbiddenException the EEA forbidden exception
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
    */
   @Override
   public MessageVO createMessage(Long dataflowId, MessageVO messageVO)
@@ -103,7 +103,8 @@ public class CollaborationServiceImpl implements CollaborationService {
    *
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
-   * @throws EEAException the EEA exception
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   * @throws EEAForbiddenException the EEA forbidden exception
    */
   @Override
   @Transactional
@@ -179,7 +180,7 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @return true, if successful
-   * @throws EEAException the EEA exception
+   * @throws EEAForbiddenException the EEA forbidden exception
    */
   private boolean authorizeAndGetDirection(Long dataflowId, Long providerId)
       throws EEAForbiddenException {

@@ -471,6 +471,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the message VO
    */
   @Override
+  @Deprecated
   @PostMapping("/{dataflowId}/createMessage")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
@@ -494,6 +495,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
+  @Deprecated
   @GetMapping("/{dataflowId}/findMessages")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
@@ -515,6 +517,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param messageVOs the message V os
    */
   @Override
+  @Deprecated
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,

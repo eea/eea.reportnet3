@@ -1,7 +1,6 @@
 package org.eea.collaboration.service;
 
 import java.util.List;
-import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -17,7 +16,8 @@ public interface CollaborationService {
    * @param dataflowId the dataflow id
    * @param messageVO the message VO
    * @return the message VO
-   * @throws EEAException the EEA exception
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   * @throws EEAForbiddenException the EEA forbidden exception
    */
   MessageVO createMessage(Long dataflowId, MessageVO messageVO)
       throws EEAIllegalArgumentException, EEAForbiddenException;
@@ -27,7 +27,8 @@ public interface CollaborationService {
    *
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
-   * @throws EEAException the EEA exception
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   * @throws EEAForbiddenException the EEA forbidden exception
    */
   void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs)
       throws EEAIllegalArgumentException, EEAForbiddenException;

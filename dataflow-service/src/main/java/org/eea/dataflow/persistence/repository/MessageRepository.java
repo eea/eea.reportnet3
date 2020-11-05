@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * The Interface MessageRepository.
  */
+@Deprecated
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
   /**
