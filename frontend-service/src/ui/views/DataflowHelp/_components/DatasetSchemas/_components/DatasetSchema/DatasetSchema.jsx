@@ -191,6 +191,7 @@ const DatasetSchema = ({
               fieldElmt => fieldElmt.type === 'CODELIST' || fieldElmt.type === 'MULTISELECT_CODELIST'
             )
           );
+          const containsLinks = !isEmpty(tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'LINK'));
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
             let referencedField = {};
@@ -212,8 +213,12 @@ const DatasetSchema = ({
               }
             }
             field.format = getFieldFormat(fieldDTO);
-            if (!isNil(fieldDTO.referencedField)) {
-              field.referencedField = `${referencedField.tableName} - ${referencedField.fieldName}`;
+            if (containsLinks) {
+              if (!isNil(fieldDTO.referencedField)) {
+                field.referencedField = `${referencedField.tableName} - ${referencedField.fieldName}`;
+              } else {
+                field.referencedField = '';
+              }
             }
 
             return field;
