@@ -815,6 +815,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
@@ -822,11 +823,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => {
           validateQcRules();
         }}
-        style={{ float: 'left' }}
         tooltip={resources.messages['validateRulesBtnTootip']}
         tooltipOptions={{ position: 'top' }}
       />
-
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
