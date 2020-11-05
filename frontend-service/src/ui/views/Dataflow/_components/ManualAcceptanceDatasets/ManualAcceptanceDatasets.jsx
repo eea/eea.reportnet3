@@ -4,14 +4,12 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isEmpty from 'lodash/isEmpty';
-import uniq from 'lodash/uniq';
 
 import styles from './ManualAcceptanceDatasets.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { ManageManualAcceptanceDataset } from './_components/ManageManualAcceptanceDataset/ManageManualAcceptanceDataset';
 import { Filters } from 'ui/views/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -22,7 +20,13 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { manualAcceptanceDatasetsReducer } from './_functions/Reducers/manualAcceptanceDatasetsReducer';
 
-export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTechnicalAcceptance }) => {
+export const ManualAcceptanceDatasets = ({
+  dataflowId,
+  getManageAcceptanceDataset,
+  isUpdatedManualAcceptanceDatasets,
+  manageDialogs,
+  refreshManualAcceptanceDatasets
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -30,23 +34,17 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
     manualAcceptanceDatasetsReducer,
     {
       data: [],
-      datasetToEdit: {},
       filtered: false,
       filteredData: [],
-      isLoading: true,
-      isManageDatasetDialogVisible: false,
-      isUpdatedData: false
+      isLoading: true
     }
   );
 
   useEffect(() => {
     onLoadManualAcceptanceDatasets();
-  }, [manualAcceptanceDatasetsState.isUpdatedData, manualAcceptanceDatasetsState.isManageDatasetDialogVisible]);
+  }, [isUpdatedManualAcceptanceDatasets]);
 
   const getFiltered = value => manualAcceptanceDatasetsDispatch({ type: 'IS_FILTERED', payload: { value } });
-
-  const getManageAcceptanceDataset = data =>
-    manualAcceptanceDatasetsDispatch({ type: 'ON_ROW_CLICK', payload: { data } });
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
@@ -65,10 +63,6 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
 
   const isLoading = value => manualAcceptanceDatasetsDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const manageDialogs = (dialog, value, secondDialog, secondValue) => {
-    manualAcceptanceDatasetsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
-  };
-
   const onLoadManualAcceptanceDatasets = async () => {
     try {
       isLoading(true);
@@ -82,6 +76,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
           filtered: false
         }
       });
+      refreshManualAcceptanceDatasets(false);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' });
     } finally {
@@ -90,8 +85,6 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
   };
 
   const onLoadFilteredData = data => manualAcceptanceDatasetsDispatch({ type: 'FILTERED_DATA', payload: { data } });
-
-  const onUpdatedData = value => manualAcceptanceDatasetsDispatch({ type: 'ON_UPDATED_DATA', payload: { value } });
 
   const getOrderedValidations = datasets => {
     const datasetsWithPriority = [
@@ -111,7 +104,7 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
   const actionsTemplate = () => (
     <ActionsColumn
       onEditClick={() => {
-        manageDialogs('isManageDatasetDialogVisible', true);
+        manageDialogs(true);
       }}
     />
   );
@@ -188,16 +181,6 @@ export const ManualAcceptanceDatasets = ({ dataflowId, dataflowData, isManualTec
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>{resources.messages['noDatasetsWithSelectedParameters']}</div>
-      )}
-
-      {manualAcceptanceDatasetsState.isManageDatasetDialogVisible && (
-        <ManageManualAcceptanceDataset
-          dataflowId={dataflowId}
-          dataset={manualAcceptanceDatasetsState.datasetToEdit}
-          isManageDatasetDialogVisible={manualAcceptanceDatasetsState.isManageDatasetDialogVisible}
-          manageDialogs={manageDialogs}
-          onUpdatedData={onUpdatedData}
-        />
       )}
     </div>
   );

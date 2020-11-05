@@ -16,6 +16,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
+import { ManageManualAcceptanceDataset } from 'ui/views/Dataflow/_components/ManageManualAcceptanceDataset';
 import { ManualAcceptanceDatasets } from 'ui/views/Dataflow/_components/ManualAcceptanceDatasets';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
@@ -67,6 +68,7 @@ export const BigButtonList = ({
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
+  const [datasetFeedbackStatusToEdit, setDatasetFeedbackStatusToEdit] = useState({});
   const [datasetId, setDatasetId] = useState(null);
   const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -83,8 +85,12 @@ export const BigButtonList = ({
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
+  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] = useState(
+    false
+  );
   const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(null);
   const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
+  const [isUpdatedManualAcceptanceDatasets, setIsUpdatedManualAcceptanceDatasets] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [manualTechnicalAcceptanceOptions, setManualTechnicalAcceptanceOptions] = useState({
     Yes: false,
@@ -188,6 +194,8 @@ export const BigButtonList = ({
   };
 
   const handleExportEuDataset = value => setIsIntegrationManageDialogVisible(value);
+
+  const manageManualAcceptanceDatasetDialog = value => setIsManageManualAcceptanceDatasetDialogVisible(value);
 
   const onCloneDataflow = async () => {
     setCloneDialogVisible(true);
@@ -388,6 +396,8 @@ export const BigButtonList = ({
     setManualTechnicalAcceptanceOptions(options);
   };
 
+  const refreshManualAcceptanceDatasets = value => setIsUpdatedManualAcceptanceDatasets(value);
+
   const renderRadioButtonsCreateDC = () => {
     return Object.keys(manualTechnicalAcceptanceOptions).map((value, index) => (
       <div className={styles.radioButton} key={index}>
@@ -439,6 +449,8 @@ export const BigButtonList = ({
   )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
+
+  const getManageAcceptanceDataset = data => setDatasetFeedbackStatusToEdit(data);
 
   return (
     <Fragment>
@@ -536,11 +548,23 @@ export const BigButtonList = ({
           style={{ width: '80%' }}
           visible={isManualTechnicalAcceptanceDialogVisible}>
           <ManualAcceptanceDatasets
-            dataflowData={dataflowData}
             dataflowId={dataflowData.id}
-            isManualTechnicalAcceptance={isManualTechnicalAcceptance}
+            getManageAcceptanceDataset={getManageAcceptanceDataset}
+            isUpdatedManualAcceptanceDatasets={isUpdatedManualAcceptanceDatasets}
+            manageDialogs={manageManualAcceptanceDatasetDialog}
+            refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
           />
         </Dialog>
+      )}
+
+      {isManageManualAcceptanceDatasetDialogVisible && (
+        <ManageManualAcceptanceDataset
+          dataflowId={dataflowId}
+          dataset={datasetFeedbackStatusToEdit}
+          isManageManualAcceptanceDatasetDialogVisible={isManageManualAcceptanceDatasetDialogVisible}
+          manageDialogs={manageManualAcceptanceDatasetDialog}
+          refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
+        />
       )}
 
       {isUpdateDataCollectionDialogVisible && (

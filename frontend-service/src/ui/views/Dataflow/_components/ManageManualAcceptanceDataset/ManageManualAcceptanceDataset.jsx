@@ -23,13 +23,12 @@ import { manageManualAcceptanceDatasetReducer } from './_functions/Reducers/mana
 export const ManageManualAcceptanceDataset = ({
   dataflowId,
   dataset,
-  isManageDatasetDialogVisible,
+  isManageManualAcceptanceDatasetDialogVisible,
   manageDialogs,
-  onUpdatedData
+  refreshManualAcceptanceDatasets
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-
 
   const [manageManualAcceptanceDatasetState, manageManualAcceptanceDatasetDispatch] = useReducer(
     manageManualAcceptanceDatasetReducer,
@@ -79,12 +78,12 @@ export const ManageManualAcceptanceDataset = ({
       );
 
       if (response.status >= 200 && response.status <= 299) {
-        onUpdatedData(true);
+        refreshManualAcceptanceDatasets(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });
     } finally {
-      manageDialogs('isManageDatasetDialogVisible', false);
+      manageDialogs(false);
     }
   };
 
@@ -106,7 +105,7 @@ export const ManageManualAcceptanceDataset = ({
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs('isManageDatasetDialogVisible', false)}
+        onClick={() => manageDialogs(false)}
       />
       {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
         isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)) && (
@@ -118,16 +117,15 @@ export const ManageManualAcceptanceDataset = ({
   );
   const renderDialogLayout = children => (
     <Fragment>
-      {isManageDatasetDialogVisible && (
-        <Dialog
-          footer={renderDialogFooter}
-          header={`${resources.messages['editStatusDataset']} ${datasetName}`}
-          onHide={() => manageDialogs('isManageDatasetDialogVisible', false)}
-          style={{ width: '50%' }}
-          visible={isManageDatasetDialogVisible}>
-          {children}
-        </Dialog>
-      )}
+      <Dialog
+        footer={renderDialogFooter}
+        header={`${resources.messages['editStatusDataset']} ${datasetName}`}
+        onHide={() => manageDialogs(false)}
+        style={{ width: '50%' }}
+        visible={isManageManualAcceptanceDatasetDialogVisible}>
+        {children}
+      </Dialog>
+      }
     </Fragment>
   );
 
