@@ -2,8 +2,8 @@ package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -14,13 +14,11 @@ import org.springframework.stereotype.Component;
  * The Class RestoreDatasetSnapshotFailedEvent.
  */
 @Component
-public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandler {
+public class ReleaseValidationBlockersFailEvent implements NotificableEventHandler {
 
 
-  /** The dataset metabase controller zuul. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
-
+  private DatasetService datasetService;
 
   /**
    * Gets the event type.
@@ -29,7 +27,7 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_FAILED_EVENT;
+    return EventType.RELEASE_BLOCKERS_FAILED_EVENT;
   }
 
   /**
@@ -41,14 +39,13 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-    Long snapshotId = notificationVO.getDatasetId();
-    String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-        : datasetMetabaseController.findDatasetMetabaseById(snapshotId).getDataSetName();
+    Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
+        : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("snapshotId", snapshotId);
-    notification.put("snapshotName", datasetName);
+    notification.put("dataflowId", dataflowId);
+    notification.put("providerId", notificationVO.getProviderId());
     notification.put("error", notificationVO.getError());
     return notification;
   }

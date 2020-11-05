@@ -143,7 +143,15 @@ public class LockServiceImpl implements LockService {
    * @return the integer
    */
   private Integer generateHashCode(List<Object> args) {
-    args.sort((o1, o2) -> (o1.hashCode() - o2.hashCode()));
+    args.sort((o1, o2) -> {
+      if (o1.hashCode() > o2.hashCode()) {
+        return 1;
+      } else if (o1.hashCode() == o2.hashCode()) {
+        return 0;
+      } else {
+        return -1;
+      }
+    });
     return args.hashCode();
   }
 

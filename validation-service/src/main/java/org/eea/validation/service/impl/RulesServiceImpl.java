@@ -991,18 +991,9 @@ public class RulesServiceImpl implements RulesService {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 
-      // Validate the rule if it's not automatic
-      if (!rule.isAutomatic()) {
-        validateRule(rule);
-      }
       // Create the new rule
       if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
         throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-      }
-
-      // Check if rule is valid
-      if (!rule.isAutomatic()) {
-        kieBaseManager.validateRule(newDatasetSchemaId, rule);
       }
 
       // add the rules sequence

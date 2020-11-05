@@ -209,7 +209,7 @@ public class EUDatasetServiceImplTest {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.any())).thenReturn(reportings);
     when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(Boolean.TRUE);
     assertTrue(euDatasetService.removeLocksRelatedToPopulateEU(1L));
-    Mockito.verify(lockService, times(4)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
 }
