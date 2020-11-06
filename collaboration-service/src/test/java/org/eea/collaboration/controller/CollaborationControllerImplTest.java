@@ -110,4 +110,11 @@ public class CollaborationControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void notifyNewMessagesTest() {
+    collaborationControllerImpl.notifyNewMessages(1L, 1L, "RECEIVED_MESSAGE");
+    Mockito.verify(collaborationService, Mockito.times(1)).notifyNewMessages(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any());
+  }
 }

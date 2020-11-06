@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.kafka.domain.EventType;
 
 /**
  * The Interface CollaborationService.
@@ -45,4 +46,13 @@ public interface CollaborationService {
    */
   List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException;
+
+  /**
+   * Notify new messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param eventType the event type
+   */
+  void notifyNewMessages(Long dataflowId, Long providerId, EventType eventType);
 }

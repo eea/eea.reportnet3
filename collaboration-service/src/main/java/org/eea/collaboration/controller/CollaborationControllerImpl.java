@@ -6,6 +6,7 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.kafka.domain.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,5 +103,19 @@ public class CollaborationControllerImpl implements CollaborationController {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
+  }
+
+  /**
+   * Notify new messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param eventType the event type
+   */
+  @Override
+  @GetMapping("/private/notifyNewMessages")
+  public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("eventType") String eventType) {
+    collaborationService.notifyNewMessages(dataflowId, providerId, EventType.valueOf(eventType));
   }
 }

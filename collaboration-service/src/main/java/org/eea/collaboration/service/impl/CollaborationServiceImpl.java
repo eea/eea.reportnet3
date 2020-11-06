@@ -3,8 +3,10 @@ package org.eea.collaboration.service.impl;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
@@ -13,10 +15,18 @@ import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,9 +56,21 @@ public class CollaborationServiceImpl implements CollaborationService {
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
 
+  /** The collaboration controller zuul. */
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
+
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The message repository. */
   @Autowired
@@ -93,6 +116,9 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setUserName(userName);
     message.setDirection(direction);
     message = messageRepository.save(message);
+
+    String eventType = EventType.RECEIVED_MESSAGE.toString();
+    collaborationControllerZuul.notifyNewMessages(dataflowId, providerId, eventType);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
@@ -175,6 +201,57 @@ public class CollaborationServiceImpl implements CollaborationService {
   }
 
   /**
+   * Notify new messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param eventType the event type
+   */
+  @Override
+  @Async
+  public void notifyNewMessages(Long dataflowId, Long providerId, EventType eventType) {
+
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+    Set<String> set = new HashSet<>();
+    boolean direction = authorities
+        .contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(dataflowId)));
+
+    if (direction) {
+      String custodian = ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId);
+      String steward = ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId);
+      addUsers(set, userManagementControllerZull.getUsersByGroup(custodian));
+      addUsers(set, userManagementControllerZull.getUsersByGroup(steward));
+    } else {
+      List<Long> datasetIds = datasetMetabaseControllerZuul
+          .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providerId);
+      for (Long datasetId : datasetIds) {
+        String leadReporter = ResourceGroupEnum.DATASET_LEAD_REPORTER.getGroupName(datasetId);
+        String reporterRead = ResourceGroupEnum.DATASET_REPORTER_READ.getGroupName(datasetId);
+        String reporterWrite = ResourceGroupEnum.DATASET_REPORTER_WRITE.getGroupName(datasetId);
+        addUsers(set, userManagementControllerZull.getUsersByGroup(leadReporter));
+        addUsers(set, userManagementControllerZull.getUsersByGroup(reporterRead));
+        addUsers(set, userManagementControllerZull.getUsersByGroup(reporterWrite));
+      }
+    }
+
+    try {
+      for (String user : set) {
+        NotificationVO notificationVO = NotificationVO.builder().user(user).dataflowId(dataflowId)
+            .providerId(providerId).build();
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Unexpected exception realasing new message notifications", e);
+    }
+  }
+
+  /**
    * Verify messaging permissions and get direction.
    *
    * @param dataflowId the dataflow id
@@ -245,5 +322,19 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     return messageMap;
+  }
+
+  /**
+   * Adds the users.
+   *
+   * @param set the set
+   * @param users the users
+   */
+  private void addUsers(Set<String> set, List<UserRepresentationVO> users) {
+    if (null != users) {
+      for (UserRepresentationVO user : users) {
+        set.add(user.getUsername());
+      }
+    }
   }
 }

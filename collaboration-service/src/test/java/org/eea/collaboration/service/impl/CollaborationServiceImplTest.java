@@ -12,8 +12,13 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +41,16 @@ public class CollaborationServiceImplTest {
   private CollaborationServiceImpl collaborationServiceImpl;
 
   @Mock
+  private CollaborationControllerZuul colaborationControllerZuul;
+
+  @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   @Mock
   private MessageRepository messageRepository;
@@ -258,5 +272,47 @@ public class CollaborationServiceImplTest {
     Mockito.when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, null, 1));
+  }
+
+  @Test
+  public void notifyNewMessagesCustodianTest() throws EEAException {
+    UserRepresentationVO user = new UserRepresentationVO();
+    user.setUsername("provider");
+    List<UserRepresentationVO> users = new ArrayList<>();
+    users.add(user);
+    List<Long> datasetIds = new ArrayList<>();
+    datasetIds.add(1L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities
+        .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito
+        .when(dataSetMetabaseControllerZuul
+            .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
+        .thenReturn(datasetIds);
+    Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
+        .thenReturn(users);
+    collaborationServiceImpl.notifyNewMessages(1L, 1L, EventType.RECEIVED_MESSAGE);
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void notifyNewMessagesLeadReporterTest() throws EEAException {
+    UserRepresentationVO user = new UserRepresentationVO();
+    user.setUsername("custodian");
+    List<UserRepresentationVO> users = new ArrayList<>();
+    users.add(user);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(1L)));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
+        .thenReturn(users);
+    collaborationServiceImpl.notifyNewMessages(1L, 1L, EventType.RECEIVED_MESSAGE);
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 }
