@@ -4,7 +4,6 @@ import java.util.List;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
-import org.eea.kafka.domain.EventType;
 
 /**
  * The Interface CollaborationService.
@@ -54,5 +53,5 @@ public interface CollaborationService {
    * @param providerId the provider id
    * @param eventType the event type
    */
-  void notifyNewMessages(Long dataflowId, Long providerId, EventType eventType);
+  void notifyNewMessages(Long dataflowId, Long providerId, String eventType);
 }
