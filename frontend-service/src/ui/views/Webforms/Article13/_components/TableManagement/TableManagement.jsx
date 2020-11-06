@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './TableManagement.module.scss';
 
@@ -12,6 +11,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataForm } from 'ui/views/_components/DataViewer/_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -79,6 +79,11 @@ export const TableManagement = ({
           { field: 'Id', header: 'PaM Number' },
           { field: 'Title', header: 'Name of policy or measure' },
           { field: 'IsGroup', header: 'PaM or group of PaMs' },
+          {
+            body: renderListOfSinglePamsTemplate,
+            field: 'ListOfSinglePams',
+            header: 'Which policies or measures does it cover?'
+          },
           {
             body: addTableTemplate,
             field: 'Table_1',
@@ -208,6 +213,33 @@ export const TableManagement = ({
       onEditClick={() => manageDialogs('manageRows', true)}
     />
   );
+
+  const getListOfSingleOptions = () => {
+    const singleRecords = tableManagementState.records.filter(record => record.IsGroup === 'Single');
+    return singleRecords.map(record => ({ label: record.Title, value: record.Title }));
+  };
+
+  const renderListOfSinglePamsTemplate = rowData => {
+    if (rowData.IsGroup === 'Group') {
+      return (
+        <MultiSelect
+          appendTo={document.body}
+          maxSelectedLabels={10}
+          id={rowData.recordId}
+          onChange={event => {
+            // onFillField(field, option, event.target.value);
+            // if (isNil(field.recordId)) onSaveField(option, event.target.value);
+            // else onEditorSubmitValue(field, option, event.target.value);
+          }}
+          options={getListOfSingleOptions()}
+          // value={getMultiselectValues(
+          //   field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
+          //   field.value
+          // )}
+        />
+      );
+    } else return '-';
+  };
 
   const renderTableColumns = () => {
     const data = tableColumns.map(col => (
