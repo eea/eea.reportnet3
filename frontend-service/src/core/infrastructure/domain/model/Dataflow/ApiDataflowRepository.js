@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
 import chunk from 'lodash/chunk';
 import chain from 'lodash/chain';
@@ -242,7 +243,7 @@ const datasetsFinalFeedback = async dataflowId => {
       datasetName: dataset.nameDatasetSchema,
       datasetId: dataset.id,
       isReleased: dataset.isReleased,
-      feedbackStatus: dataset.status === 'Technically accept' ? dataset.status.concat('ed') : dataset.status
+      feedbackStatus: capitalize(dataset.status.split('_').join(' '))
     };
   });
 

@@ -66,15 +66,11 @@ export const ManageManualAcceptanceDataset = ({
 
   const onUpdateDataset = async () => {
     try {
-      const datasetFeedbackStatus =
-        manageManualAcceptanceDatasetState.datasetFeedbackStatus === 'Technically accepted'
-          ? manageManualAcceptanceDatasetState.datasetFeedbackStatus.slice(0, -2)
-          : manageManualAcceptanceDatasetState.datasetFeedbackStatus;
       const response = await DatasetService.updateDatasetFeedbackStatus(
         dataflowId,
         datasetId,
         manageManualAcceptanceDatasetState.datasetMessage,
-        datasetFeedbackStatus
+        manageManualAcceptanceDatasetState.datasetFeedbackStatus
       );
 
       if (response.status >= 200 && response.status <= 299) {
