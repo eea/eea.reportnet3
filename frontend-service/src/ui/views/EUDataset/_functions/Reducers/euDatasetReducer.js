@@ -48,7 +48,7 @@ export const euDatasetReducer = (state, { type, payload }) => {
       };
 
     case 'ON_TAB_CHANGE':
-      return { ...state, dataViewerOptions: { ...state.dataViewerOptions, activeIndex: payload.activeIndex } };
+      return { ...state, dataViewerOptions: { ...state.dataViewerOptions, tableSchemaId: payload.tableSchemaId } };
 
     default:
       return state;
