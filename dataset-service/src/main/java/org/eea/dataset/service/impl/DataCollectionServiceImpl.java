@@ -114,7 +114,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
-      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id, status) values ('%s', %d, '%s', '%s', %d, 'PENDING') returning id";
 
   /** The Constant INSERT_RD_INTO_REPORTING_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_REPORTING_DATASET =
@@ -331,16 +331,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<RuleVO> rulesSql =
             rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
         if (null != rulesSql && !rulesSql.isEmpty()) {
-          rulesSql.stream().forEach(ruleVO -> {
-            rulesWithError.add(rulesControllerZuul.validateSqlRuleDataCollection(dataset.getId(),
-                dataset.getDatasetSchema(), ruleVO));
-          });
+          rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
+              .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
         }
       });
       LOG.info("Data Collection contains SQL rules contains: {} errors", rulesWithError.size());
       if (stopAndNotifySQLErrors) {
-        long errorsCount =
-            rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE.equals(ruleStatus)).count();
+        long errorsCount = rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE).count();
         int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
         if (errorsCount > 0 || disabledRules > 0) {
           NotificationVO notificationVO = NotificationVO.builder()
@@ -516,6 +513,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
       List<IntegrityVO> integritieVOs) throws SQLException {
     for (RepresentativeVO representative : representatives) {
+      // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
       datasetIdsEmails.put(datasetId, representative.getProviderAccount());
