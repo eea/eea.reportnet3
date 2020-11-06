@@ -43,10 +43,11 @@ export const BigButtonList = ({
   dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
+  isReleaseCreating,
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
-  onShowSnapshotDialog,
+  onOpenReleaseConfirmDialog,
   onUpdateData,
   setIsCopyDataCollectionToEuDatasetLoading,
   setIsExportEuDatasetLoading,
@@ -66,7 +67,6 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
-  const [datasetName, setDatasetName] = useState(null);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
@@ -121,6 +121,10 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
+
+  useEffect(() => {
+    setIsActiveButton(!isReleaseCreating);
+  }, [isReleaseCreating]);
 
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
@@ -408,6 +412,7 @@ export const BigButtonList = ({
       handleRedirect,
       isActiveButton,
       isLeadReporterOfCountry,
+      isReleaseCreating,
       onCloneDataflow,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
@@ -418,7 +423,7 @@ export const BigButtonList = ({
       onShowHistoricReleases,
       onShowManageReportersDialog,
       onShowNewSchemaDialog,
-      onShowSnapshotDialog,
+      onOpenReleaseConfirmDialog,
       onShowUpdateDataCollectionModal,
       setErrorDialogData,
       updatedDatasetSchema
@@ -504,7 +509,6 @@ export const BigButtonList = ({
           footer={renderDialogFooter}
           header={`${resources.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
           onHide={() => setIsHistoricReleasesDialogVisible(false)}
-          // style={{ width: '80%' }}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}
