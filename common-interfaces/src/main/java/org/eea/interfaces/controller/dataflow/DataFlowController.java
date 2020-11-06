@@ -161,6 +161,7 @@ public interface DataFlowController {
    * @param messageVO the message VO
    * @return the message VO
    */
+  @Deprecated
   @PostMapping("/{dataflowId}/createMessage")
   MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody MessageVO messageVO);
@@ -174,6 +175,7 @@ public interface DataFlowController {
    * @param page the offset
    * @return the list
    */
+  @Deprecated
   @GetMapping("/{dataflowId}/findMessages")
   List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
@@ -185,6 +187,7 @@ public interface DataFlowController {
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
    */
+  @Deprecated
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
   void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs);

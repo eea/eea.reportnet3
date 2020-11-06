@@ -4,7 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -18,10 +17,11 @@ const useBigButtonList = ({
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
+  isReleaseCreating,
   match,
   onLoadReceiptData,
-  onShowHistoricReleases,
-  onShowSnapshotDialog
+  onOpenReleaseConfirmDialog,
+  onShowHistoricReleases
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -163,45 +163,20 @@ const useBigButtonList = ({
     ];
   };
 
-  const onBuildReleaseButton = () => {
-    const { datasets } = dataflowState.data;
-
-    const filteredDatasets = datasets.filter(
-      dataset => dataset.dataProviderId === parseInt(match.params.representativeId)
-    );
-
-    const properties = [
-      {
-        buttonClass: 'schemaDataset',
-        buttonIcon: 'released',
-        buttonIconClass: 'released',
-        caption: resources.messages['releaseDataCollection'],
-        handleRedirect:
-          filteredDatasets.length > 1
-            ? () => {}
-            : () => onShowSnapshotDialog(filteredDatasets[0].datasetId, filteredDatasets[0].name),
-        layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
-        visibility: buttonsVisibility.release
-      }
-    ];
-
-    if (filteredDatasets.length > 1) {
-      properties[0].model = filteredDatasets.map(dataset => {
-        return {
-          label: dataset.name,
-          icon: 'cloudUpload',
-          command: () => onShowSnapshotDialog(dataset.datasetId, dataset.name),
-          disabled: false
-        };
-      });
-    }
-
-    return properties;
-  };
-
   const receiptBigButton = onBuildReceiptButton();
 
-  const releaseBigButton = onBuildReleaseButton();
+  const releaseBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: isReleaseCreating ? 'spinner' : 'released',
+      buttonIconClass: isReleaseCreating ? 'spinner' : 'released',
+      caption: resources.messages['releaseDataCollection'],
+      handleRedirect: () => onOpenReleaseConfirmDialog(),
+      helpClassName: 'dataflow-big-buttons-release-help-step',
+      layout: 'defaultBigButton',
+      visibility: buttonsVisibility.release
+    }
+  ];
 
   return [helpButton, feedbackButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };
