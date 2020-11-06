@@ -2,27 +2,32 @@ import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 
 const parseTableSchemaColumns = schemaTables => {
-  schemaTables.map(table => {
-    if (!isNil(table.records)) {
-      return table.records[0].fields.map(field => {
-        return {
-          codelistItems: field['codelistItems'],
-          description: field['description'],
-          field: field['fieldId'],
-          header: field['name'],
-          pk: field['pk'],
-          maxSize: field['maxSize'],
-          pkHasMultipleValues: field['pkHasMultipleValues'],
-          readOnly: field['readOnly'],
-          recordId: field['recordId'],
-          referencedField: field['referencedField'],
-          table: table['tableSchemaName'],
-          type: field['type'],
-          validExtensions: field['validExtensions']
-        };
-      });
-    }
-  });
+  console.log(schemaTables);
+  const columns = [];
+  schemaTables
+    .filter(schemaTable => schemaTable.tableSchemaName === 'PaMs')
+    .forEach(table => {
+      if (!isNil(table.records)) {
+        return table.records[0].fields.forEach(field => {
+          columns.push({
+            codelistItems: field['codelistItems'],
+            description: field['description'],
+            field: field['fieldId'],
+            header: field['name'],
+            pk: field['pk'],
+            maxSize: field['maxSize'],
+            pkHasMultipleValues: field['pkHasMultipleValues'],
+            readOnly: field['readOnly'],
+            recordId: field['recordId'],
+            referencedField: field['referencedField'],
+            table: table['tableSchemaName'],
+            type: field['type'],
+            validExtensions: field['validExtensions']
+          });
+        });
+      }
+    });
+  return columns;
 };
 
 const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {

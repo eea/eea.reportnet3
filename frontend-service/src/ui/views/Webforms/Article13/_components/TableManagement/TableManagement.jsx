@@ -8,10 +8,11 @@ import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { DataForm } from 'ui/views/_components/DataViewer/_components/DataForm';
+import { WebformDataForm } from './_components/WebformDataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -44,15 +45,22 @@ export const TableManagement = ({
   const notificationContext = useContext(NotificationContext);
 
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
-    deleteId: null,
+    initialSelectedRecord: {},
     isDialogVisible: { delete: false, manageRows: false },
     parentTablesWithData: [],
     records: [],
+    selectedRecord: {},
     tableColumns: [],
     tableSchemaColumns: []
   });
 
-  const { deleteId, isDialogVisible, parentTablesWithData, tableColumns } = tableManagementState;
+  const {
+    isDialogVisible,
+    parentTablesWithData,
+    selectedRecord,
+    tableColumns,
+    tableSchemaColumns
+  } = tableManagementState;
 
   const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableManagementState.tableSchemaColumns);
 
@@ -66,10 +74,34 @@ export const TableManagement = ({
     }
   }, [parentTablesWithData]);
 
+  const editRowDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      {/* <Button
+        className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
+        disabled={isSaving || records.isSaveDisabled}
+        icon={isSaving === true ? 'spinnerAnimate' : 'check'}
+        label={resources.messages['save']}
+        onClick={() => {
+          try {
+            onSaveRecord(selectedRecord);
+          } catch (error) {
+            console.error(error);
+          }
+        }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['cancel']}
+        onClick={onCancelRowEdit}
+      /> */}
+    </div>
+  );
+
   const initialLoad = () => {
     const parsedRecords = parsePamsRecords(records, parentTablesWithData, schemaTables);
     const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
-
+    console.log({ schemaTables, tableSchemaColumns });
     tableManagementDispatch({
       type: 'INITIAL_LOAD',
       payload: {
@@ -80,9 +112,12 @@ export const TableManagement = ({
           { field: 'Title', header: 'Name of policy or measure' },
           { field: 'IsGroup', header: 'PaM or group of PaMs' },
           {
-            body: renderListOfSinglePamsTemplate,
             field: 'ListOfSinglePams',
             header: 'Which policies or measures does it cover?'
+          },
+          {
+            field: 'ShortDescription',
+            header: 'Short description'
           },
           {
             body: addTableTemplate,
@@ -116,7 +151,7 @@ export const TableManagement = ({
 
   const onDeleteRow = async () => {
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, deleteId);
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
       if (isDataDeleted) {
         onRefresh();
       }
@@ -135,6 +170,9 @@ export const TableManagement = ({
       manageDialogs('delete', false);
     }
   };
+
+  const onEditFormInput = (property, value) =>
+    tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: { property, value } });
 
   const onLoadParentTablesData = () => {
     const configParentTables = Object.keys(
@@ -161,6 +199,56 @@ export const TableManagement = ({
     Promise.all(parentTablesDataPromises).then(parentTableData => {
       tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
     });
+  };
+
+  const onSaveRecord = async record => {
+    //Delete hidden column null values (datasetPartitionId and id)
+    // record.dataRow = record.dataRow.filter(
+    //   field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
+    // );
+    // //Check invalid coordinates and replace them
+    // record = MapUtils.changeIncorrectCoordinates(record);
+    // if (isNewRecord) {
+    //   try {
+    //     setIsSaving(true);
+    //     await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
+    //     setIsTableDeleted(false);
+    //     onRefresh();
+    //   } catch (error) {
+    //     const {
+    //       dataflow: { name: dataflowName },
+    //       dataset: { name: datasetName }
+    //     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    //     notificationContext.add({
+    //       type: 'ADD_RECORDS_BY_ID_ERROR',
+    //       content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+    //     });
+    //   } finally {
+    //     if (!addAnotherOne) {
+    //       setAddDialogVisible(false);
+    //     }
+    //     setIsLoading(false);
+    //     setIsSaving(false);
+    //   }
+    // } else {
+    //   try {
+    //     await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
+    //     onRefresh();
+    //   } catch (error) {
+    //     const {
+    //       dataflow: { name: dataflowName },
+    //       dataset: { name: datasetName }
+    //     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    //     notificationContext.add({
+    //       type: 'UPDATE_RECORDS_BY_ID_ERROR',
+    //       content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+    //     });
+    //   } finally {
+    //     onCancelRowEdit();
+    //     setIsLoading(false);
+    //     setIsSaving(false);
+    //   }
+    // }
   };
 
   const addTableTemplate = (rowData, colData) => {
@@ -219,27 +307,27 @@ export const TableManagement = ({
     return singleRecords.map(record => ({ label: record.Title, value: record.Title }));
   };
 
-  const renderListOfSinglePamsTemplate = rowData => {
-    if (rowData.IsGroup === 'Group') {
-      return (
-        <MultiSelect
-          appendTo={document.body}
-          maxSelectedLabels={10}
-          id={rowData.recordId}
-          onChange={event => {
-            // onFillField(field, option, event.target.value);
-            // if (isNil(field.recordId)) onSaveField(option, event.target.value);
-            // else onEditorSubmitValue(field, option, event.target.value);
-          }}
-          options={getListOfSingleOptions()}
-          // value={getMultiselectValues(
-          //   field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
-          //   field.value
-          // )}
-        />
-      );
-    } else return '-';
-  };
+  // const renderListOfSinglePamsTemplate = rowData => {
+  //   if (rowData.IsGroup === 'Group') {
+  //     return (
+  //       <MultiSelect
+  //         appendTo={document.body}
+  //         maxSelectedLabels={10}
+  //         id={rowData.recordId}
+  //         onChange={event => {
+  //           // onFillField(field, option, event.target.value);
+  //           // if (isNil(field.recordId)) onSaveField(option, event.target.value);
+  //           // else onEditorSubmitValue(field, option, event.target.value);
+  //         }}
+  //         options={getListOfSingleOptions()}
+  //         // value={getMultiselectValues(
+  //         //   field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
+  //         //   field.value
+  //         // )}
+  //       />
+  //     );
+  //   } else return '-';
+  // };
 
   const renderTableColumns = () => {
     const data = tableColumns.map(col => (
@@ -263,7 +351,7 @@ export const TableManagement = ({
         autoLayout={true}
         loading={loading}
         onRowClick={event =>
-          tableManagementDispatch({ type: 'GET_DELETE_ID', payload: { deleteId: event.data.recordId } })
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
         }
         value={tableManagementState.records}>
         {renderTableColumns()}
@@ -290,23 +378,21 @@ export const TableManagement = ({
       {isDialogVisible.manageRows && (
         <Dialog
           className={`calendar-table ${styles.addEditRecordDialog}`}
-          // footer={editRowDialogFooter}
+          footer={editRowDialogFooter}
           header={resources.messages['editRow']}
           modal={true}
           onHide={() => manageDialogs('manageRows', false)}
           visible={isDialogVisible.manageRows}
           zIndex={3003}>
           <div className="p-grid p-fluid">
-            <DataForm
-              colsSchema={colsSchema}
+            <WebformDataForm
+              colsSchema={tableSchemaColumns}
               datasetId={datasetId}
               editDialogVisible={isDialogVisible.manageRows}
-              formType="EDIT"
-              getTooltipMessage={''}
-              hasWritePermissions={true}
-              // onChangeForm={onEditAddFormInput}
+              onChangeForm={onEditFormInput}
               // onShowCoordinateError={onShowCoordinateError}
               // onShowFieldInfo={onShowFieldInfo}
+              selectedRecord={selectedRecord}
               records={tableManagementState.records}
               // reporting={reporting}
             />
