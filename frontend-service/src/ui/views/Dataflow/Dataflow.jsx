@@ -20,6 +20,7 @@ import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -27,7 +28,6 @@ import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
-import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 
@@ -37,6 +37,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { SnapshotService } from 'core/services/Snapshot';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
@@ -61,8 +62,6 @@ const Dataflow = withRouter(({ history, match }) => {
     currentUrl: '',
     data: {},
     dataProviderId: [],
-    datasetIdToSnapshotProps: undefined,
-    datasetNameToSnapshotProps: undefined,
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
@@ -86,6 +85,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isReceiptOutdated: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
+    isReleaseCreating: false,
+    isReleaseDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
@@ -417,7 +418,15 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  useCheckNotifications(['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadReportingDataflow);
+  const setIsReleaseCreating = value => dataflowDispatch({ type: 'RELEASE_IS_CREATING', payload: { value } });
+
+  useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
+
+  useCheckNotifications(
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    setIsReleaseCreating,
+    false
+  );
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
@@ -437,9 +446,19 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
-  const onShowSnapshotDialog = async (datasetId, datasetName) => {
-    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId, name: datasetName } });
-    manageDialogs('isSnapshotDialogVisible', true);
+  const onOpenReleaseConfirmDialog = () => {
+    manageDialogs('isReleaseDialogVisible', true);
+  };
+
+  const onConfirmRelease = async () => {
+    try {
+      setIsReleaseCreating(true);
+      await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
+    } catch (error) {
+      notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
+    } finally {
+      manageDialogs('isReleaseDialogVisible', false);
+    }
   };
 
   useCheckNotifications(
@@ -467,10 +486,11 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
+            isReleaseCreating={dataflowState.isReleaseCreating}
             onCleanUpReceipt={onCleanUpReceipt}
+            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
             onSaveName={onSaveName}
             onShowManageReportersDialog={onShowManageReportersDialog}
-            onShowSnapshotDialog={onShowSnapshotDialog}
             onUpdateData={setIsDataUpdated}
             setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
             setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
@@ -483,21 +503,24 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
+            isReleaseCreating={dataflowState.isReleaseCreating}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
-            onShowSnapshotDialog={onShowSnapshotDialog}
+            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
             setIsReceiptLoading={setIsReceiptLoading}
           />
         )}
 
-        {dataflowState.isSnapshotDialogVisible && (
-          <SnapshotsDialog
-            dataflowId={dataflowId}
-            datasetId={dataflowState.datasetIdToSnapshotProps}
-            datasetName={dataflowState.datasetNameToSnapshotProps}
-            isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
-            manageDialogs={manageDialogs}
-          />
+        {dataflowState.isReleaseDialogVisible && (
+          <ConfirmDialog
+            header={resources.messages['confirmReleaseHeader']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={() => onConfirmRelease()}
+            onHide={() => manageDialogs('isReleaseDialogVisible', false)}
+            visible={dataflowState.isReleaseDialogVisible}>
+            {resources.messages['confirmReleaseQuestion']}
+          </ConfirmDialog>
         )}
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (

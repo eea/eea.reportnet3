@@ -191,22 +191,20 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onRenderTabsSchema = (
     <TabsSchema
-      activeIndex={dataViewerOptions.activeIndex}
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}
-      onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+      onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
+      tableSchemaId={dataViewerOptions.tableSchemaId}
     />
   );
 
-  const onTabChange = tableSchemaId => {
-    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
-  };
+  const onTabChange = table => setDataViewerOptions({ ...dataViewerOptions, tableSchemaId: table.tableSchemaId });
 
   const layout = children => {
     return (
