@@ -228,6 +228,15 @@ public interface DatasetMetabaseService {
   List<Long> getUserProviderIdsByDataflowId(Long dataflowId);
 
 
+
+  /**
+   * Last dataset validation for releasing by id.
+   *
+   * @param datasetId the datasetId id
+   * @return true, if successful
+   */
+  Long getLastDatasetValidationForRelease(Long datasetId);
+
   /**
    * Update dataset status.
    *
@@ -236,4 +245,5 @@ public interface DatasetMetabaseService {
    * @throws EEAException
    */
   void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO) throws EEAException;
+
 }

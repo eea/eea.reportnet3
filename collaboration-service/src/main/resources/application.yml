@@ -1,33 +1,5 @@
 server:
-  port: 9010
+  port: 9060
 spring:
   application:
     name: collaboration
-  sleuth:
-    sampler:
-      probability: 1.0
-    web:
-      skipPattern: "(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)"
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "${ACTUATOR_EXPOSURE_INCLUDE:*}"
-  endpoint:
-    health:
-      show-details: always
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
-
-hystrix:
-  command:
-    default:
-      circuitBreaker:
-        requestVolumeThreshold: 2
-        sleepWindowInMilliseconds: 10000

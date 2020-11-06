@@ -92,13 +92,7 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
-        {
-          "key": "SNAPSHOT_RELEASE_ERROR",
-          "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
+
         {
           "key": "DATASET_SCHEMA_CREATION_ERROR",
           "navigateTo": {
@@ -183,7 +177,10 @@
           "key": "ALL_REPORTER_ERROR"
         },
         {
-          "key": "RELEASED_BY_ID_REPORTER_ERROR"
+          "key": "RELEASE_FAILED_EVENT"
+        },
+        {
+          "key": "RELEASE_BLOCKERS_FAILED_EVENT"
         },
         {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
@@ -319,10 +316,6 @@
         },
         {
           "key": "DATA_COLLECTION_LOCKED_ERROR"
-        },
-        {
-          "key": "RELEASE_BLOCKED_EVENT",
-          "lifeTime": 5000
         },
         {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
@@ -541,11 +534,7 @@
           }
         },
         {
-          "key": "RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
-          }
+          "key": "RELEASE_COMPLETED_EVENT"
         },
         {
           "key": "UPLOAD_DOCUMENT_COMPLETED_EVENT",
@@ -670,6 +659,13 @@
         },
         {
           "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+        },
+        {
+          "key": "VALIDATE_RULES_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -720,6 +716,7 @@
   "hiddenNotifications": [
     "VALIDATED_QC_RULE_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
-    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
+    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
+    "DISABLE_SQL_RULES_ERROR_EVENT"
   ]
 }

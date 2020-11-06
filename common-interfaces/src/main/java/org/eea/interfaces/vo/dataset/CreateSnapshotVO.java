@@ -19,6 +19,7 @@ public class CreateSnapshotVO {
   /** The released. */
   private Boolean released;
 
+  /** The automatic. */
   private Boolean automatic;
 
   /**

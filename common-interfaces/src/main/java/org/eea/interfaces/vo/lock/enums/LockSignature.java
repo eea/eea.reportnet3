@@ -61,7 +61,14 @@ public enum LockSignature {
   DELETE_RECORDS("DataSetControllerImpl.deleteRecord(..)"),
 
   /** The insert records. */
-  INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)");
+  INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)"),
+
+  /** The update field. */
+  UPDATE_FIELD("DataSetControllerImpl.updateField(..)"),
+
+  /** The import etl. */
+  IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)");
+
 
 
   /** The value. */

@@ -77,7 +77,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
     try {
       setIsLoadingSnapshotListData(true);
 
-      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
+      //SetTimeout for avoiding the overlapping between the slidebar transition and the api call
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.allReporter(datasetId);
 
@@ -91,26 +91,6 @@ const useReporterDataset = (datasetId, dataflowId) => {
         content: {}
       });
       setIsLoadingSnapshotListData(false);
-    }
-  };
-
-  const onReleaseSnapshot = async () => {
-    try {
-      await SnapshotService.releaseByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
-      onLoadSnapshotList();
-    } catch (error) {
-      if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
-        });
-      } else {
-        notificationContext.add({
-          type: 'RELEASED_BY_ID_REPORTER_ERROR',
-          content: {}
-        });
-      }
-    } finally {
-      setIsSnapshotDialogVisible(false);
     }
   };
 
@@ -137,18 +117,17 @@ const useReporterDataset = (datasetId, dataflowId) => {
     setIsSnapshotDialogVisible,
     onCreateSnapshot,
     onDeleteSnapshot,
-    onRestoreSnapshot,
-    onReleaseSnapshot
+    onRestoreSnapshot
   );
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
   return {
     isLoadingSnapshotListData,
-    isSnapshotsBarVisible,
-    setIsSnapshotsBarVisible,
     isSnapshotDialogVisible,
+    isSnapshotsBarVisible,
     setIsSnapshotDialogVisible,
+    setIsSnapshotsBarVisible,
     snapshotDispatch,
     snapshotListData,
     snapshotState

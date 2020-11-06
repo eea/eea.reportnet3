@@ -246,6 +246,15 @@ public class DataSetMetabaseControllerImplTest {
   }
 
   @Test
+  public void getLastDatasetValidationForRelease() {
+    dataSetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L);
+    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals((Long) 1L,
+        dataSetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L));
+  }
+
+  @Test
   public void updateDatasetStatusTest() throws EEAException {
     dataSetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
     Mockito.verify(datasetMetabaseService, times(1)).updateDatasetStatus(Mockito.any());

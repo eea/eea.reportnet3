@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -892,5 +893,28 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
 
     return providerIds;
+  }
+
+
+
+  /**
+   * Gets the last dataset validation for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
+   */
+  @Override
+  public Long getLastDatasetValidationForRelease(Long datasetId) {
+    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
+
   }
 }
