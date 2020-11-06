@@ -295,6 +295,9 @@ public final class EEAErrorMessage {
   /** The Constant MESSAGING_AUTHORIZATION_FAILED: {@value}. */
   public static final String MESSAGING_AUTHORIZATION_FAILED = "Messaging authorization failed";
 
+  /** The Constant MESSAGING_BAD_REQUEST: {@value}. */
+  public static final String MESSAGING_BAD_REQUEST = "Missing required data";
+
   /**
    * Instantiates a new EEA error message.
    */
