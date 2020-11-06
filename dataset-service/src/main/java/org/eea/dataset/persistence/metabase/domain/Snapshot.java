@@ -48,10 +48,6 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "DATE_RELEASED")
   private Date dateReleased;
 
-  /** The blocked. */
-  @Column(name = "BLOCKED")
-  private Boolean blocked;
-
   /** The data collection id. */
   @Column(name = "DATACOLLECTION_ID")
   private Long dataCollectionId;
