@@ -64,7 +64,7 @@ const getObjectiveOptions = value => {
       ];
 
     case 'Other sectors':
-      return [];
+      return ['Other objectives'];
 
     case 'Transport':
       return [

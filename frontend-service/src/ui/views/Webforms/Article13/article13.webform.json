@@ -95,7 +95,7 @@
             {
               "type": "FIELD",
               "name": "Other",
-              "title": "Other Objective(s)",
+              "title": "Other sector",
               "isPrimary": false
             }
           ]
