@@ -16,6 +16,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -326,7 +327,22 @@ export const WebformRecord = ({
             value={field.value}
           />
         );
-
+      case 'TEXTAREA':
+        return (
+          <InputTextarea
+            className={field.required ? styles.required : undefined}
+            id={field.fieldId}
+            maxLength={getInputMaxLength[type]}
+            collapsedHeight={150}
+            onBlur={event => {
+              if (isNil(field.recordId)) onSaveField(option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value);
+            }}
+            onChange={event => onFillField(field, option, event.target.value)}
+            onKeyDown={event => onEditorKeyChange(event, field, option)}
+            value={field.value}
+          />
+        );
       case 'EMPTY':
         return (
           <div className={styles.infoButtonWrapper}>
