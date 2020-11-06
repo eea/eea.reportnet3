@@ -16,7 +16,6 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -277,10 +276,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Long partitionIdDestination) {
 
 
-    List<Validation> isBlocked = null;
     try {
-      // setTenant(idDataset);
-      // isBlocked = validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER);
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
@@ -300,7 +296,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       snap.setDcReleased(createSnapshotVO.getReleased());
       snap.setEuReleased(false);
-      // snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
+
 
       snap.setAutomatic(
           Boolean.TRUE.equals(createSnapshotVO.getAutomatic()) ? Boolean.TRUE : Boolean.FALSE);
