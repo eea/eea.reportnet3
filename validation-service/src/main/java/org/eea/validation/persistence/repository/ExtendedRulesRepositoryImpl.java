@@ -82,6 +82,23 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteAutomaticRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Document pullCriteria = new Document(REFERENCE_ID, referenceId).append("automatic", true);
+    Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
+
+
   /**
    * Delete rule required.
    *

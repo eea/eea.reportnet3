@@ -304,6 +304,14 @@ public enum EventType {
   CREATED_QUERY_VIEWS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "created_query_views_event",
       true),
 
+  /** The validate manual qc event. */
+  VALIDATE_MANUAL_QC_COMMAND(LiteralConstants.DATA_REPORTING_TOPIC, "validate_manual_qc_command",
+      true),
+
+  /** The disable rules error event. */
+  DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
+      true),
+
   /** The create update rule event. */
   CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true);
 

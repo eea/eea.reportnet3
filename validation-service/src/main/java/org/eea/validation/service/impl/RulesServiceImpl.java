@@ -220,6 +220,19 @@ public class RulesServiceImpl implements RulesService {
         new ObjectId(referenceId));
   }
 
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  public void deleteAutomaticRuleByReferenceId(String datasetSchemaId, String referenceId) {
+    rulesRepository.deleteAutomaticRuleByReferenceId(new ObjectId(datasetSchemaId),
+        new ObjectId(referenceId));
+  }
+
   /**
    * Delete rule by reference field schema PK id.
    *
