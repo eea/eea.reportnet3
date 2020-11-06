@@ -63,6 +63,7 @@ const useBigButtonList = ({
       ]);
     const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
     const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
+    const isManualAcceptance = dataflowState.data.manualAcceptance;
 
     return {
       createDataCollection: isLeadDesigner && isDesignStatus,
@@ -84,7 +85,7 @@ const useBigButtonList = ({
       updateReporters: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry,
       release: isLeadReporterOfCountry,
-      manualTechnicalAcceptance: isLeadDesigner
+      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
     };
   };
 
@@ -486,8 +487,7 @@ const useBigButtonList = ({
       caption: resources.messages['manualTechnicalAcceptanceBigButton'],
       handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
       layout: 'defaultBigButton',
-      visibility:
-        buttonsVisibility.manualTechnicalAcceptance && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
+      visibility: buttonsVisibility.manualTechnicalAcceptance
     }
   ];
 
