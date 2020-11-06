@@ -17,6 +17,7 @@ const useBigButtonList = ({
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
+  isReleaseCreating,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -167,7 +168,8 @@ const useBigButtonList = ({
   const releaseBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: 'released',
+      buttonIcon: isReleaseCreating ? 'spinner' : 'released',
+      buttonIconClass: isReleaseCreating ? 'spinner' : 'released',
       caption: resources.messages['releaseDataCollection'],
       handleRedirect: () => onOpenReleaseConfirmDialog(),
       helpClassName: 'dataflow-big-buttons-release-help-step',

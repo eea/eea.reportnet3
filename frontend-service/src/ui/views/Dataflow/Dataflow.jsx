@@ -503,6 +503,7 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
+            isReleaseCreating={dataflowState.isReleaseCreating}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
             onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
