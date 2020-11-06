@@ -1,6 +1,6 @@
-package org.eea.dataflow.mapper;
+package org.eea.collaboration.mapper;
 
-import org.eea.dataflow.persistence.domain.Message;
+import org.eea.collaboration.persistence.domain.Message;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
@@ -8,7 +8,6 @@ import org.mapstruct.Mapper;
 /**
  * The Interface MessageMapper.
  */
-@Deprecated
 @Mapper(componentModel = "spring")
 public interface MessageMapper extends IMapper<Message, MessageVO> {
 
