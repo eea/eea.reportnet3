@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -23,9 +23,10 @@ export const BigButtonListRepresentative = ({
   dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
+  isReleaseCreating,
   match,
   onCleanUpReceipt,
-  onShowSnapshotDialog,
+  onOpenReleaseConfirmDialog,
   setIsReceiptLoading,
   uniqRepresentatives
 }) => {
@@ -111,10 +112,11 @@ export const BigButtonListRepresentative = ({
               getDataHistoricReleases,
               handleRedirect,
               isLeadReporterOfCountry,
+              isReleaseCreating,
               match,
               onLoadReceiptData,
+              onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
-              onShowSnapshotDialog,
               uniqRepresentatives
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
@@ -129,7 +131,6 @@ export const BigButtonListRepresentative = ({
           footer={renderDialogFooter}
           header={`${resources.messages['historicReleases']} ${bigButtonListRepresentativeState.historicReleasesDialogHeader}`}
           onHide={() => onCloseHistoricReleasesDialogVisible(false)}
-          // style={{ width: '80%' }}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
             datasetId={bigButtonListRepresentativeState.datasetId}
