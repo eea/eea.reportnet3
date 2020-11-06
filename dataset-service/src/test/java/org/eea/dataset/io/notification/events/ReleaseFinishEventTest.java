@@ -55,7 +55,7 @@ public class ReleaseFinishEventTest {
    */
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(4,
+    Assert.assertEquals(3,
         releaseFinishEvent.getMap(
             NotificationVO.builder().user("user").datasetId(1L).datasetName("datasetName").build())
             .size());
@@ -70,7 +70,7 @@ public class ReleaseFinishEventTest {
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
-    Assert.assertEquals(4, releaseFinishEvent
+    Assert.assertEquals(3, releaseFinishEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }
