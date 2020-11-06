@@ -16,7 +16,6 @@ import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
-import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.kafka.domain.EventType;
@@ -47,10 +46,6 @@ public class CollaborationServiceImpl implements CollaborationService {
   /** The max message length. */
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
-
-  /** The collaboration controller zuul. */
-  @Autowired
-  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The dataset metabase controller zuul. */
   @Autowired
@@ -105,8 +100,8 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setDirection(direction);
     message = messageRepository.save(message);
 
-    String eventType = EventType.RECEIVED_MESSAGE.toString();
-    collaborationControllerZuul.notifyNewMessages(dataflowId, providerId, eventType);
+    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId,
+        EventType.RECEIVED_MESSAGE);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
