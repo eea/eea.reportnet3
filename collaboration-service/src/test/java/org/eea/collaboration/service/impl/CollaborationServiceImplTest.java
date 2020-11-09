@@ -13,7 +13,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
-import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -38,9 +37,6 @@ public class CollaborationServiceImplTest {
 
   @InjectMocks
   private CollaborationServiceImpl collaborationServiceImpl;
-
-  @Mock
-  private CollaborationControllerZuul colaborationControllerZuul;
 
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
@@ -269,12 +265,5 @@ public class CollaborationServiceImplTest {
     Mockito.when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, null, 1));
-  }
-
-  @Test
-  public void notifyNewMessagesTest() throws EEAException {
-    collaborationServiceImpl.notifyNewMessages(1L, 1L, "RECEIVED_MESSAGE");
-    Mockito.verify(collaborationServiceHelper, Mockito.times(1))
-        .notifyNewMessages(Mockito.anyLong(), Mockito.anyLong(), Mockito.any());
   }
 }

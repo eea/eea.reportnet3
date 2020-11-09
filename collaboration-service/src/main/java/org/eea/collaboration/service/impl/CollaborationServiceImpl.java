@@ -100,8 +100,8 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setDirection(direction);
     message = messageRepository.save(message);
 
-    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId,
-        EventType.RECEIVED_MESSAGE);
+    String eventType = EventType.RECEIVED_MESSAGE.toString();
+    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, eventType);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
@@ -181,19 +181,6 @@ public class CollaborationServiceImpl implements CollaborationService {
             .getContent())
         : messageMapper.entityListToClass(messageRepository
             .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent());
-  }
-
-  /**
-   * Notify new messages.
-   *
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param eventType the event type
-   */
-  @Override
-  public void notifyNewMessages(Long dataflowId, Long providerId, String eventType) {
-    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId,
-        EventType.valueOf(eventType));
   }
 
   /**

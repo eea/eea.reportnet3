@@ -51,7 +51,8 @@ public class CollaborationServiceHelper {
    * @param eventType the event type
    */
   @Async
-  public void notifyNewMessages(Long dataflowId, Long providerId, EventType eventType) {
+  public void notifyNewMessages(Long dataflowId, Long providerId, String eventType) {
+    EventType event = EventType.valueOf(eventType);
     Collection<? extends GrantedAuthority> authorities =
         SecurityContextHolder.getContext().getAuthentication().getAuthorities();
     Set<String> set = new HashSet<>();
@@ -85,7 +86,7 @@ public class CollaborationServiceHelper {
       for (String user : set) {
         NotificationVO notificationVO = NotificationVO.builder().user(user).dataflowId(dataflowId)
             .providerId(providerId).build();
-        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(event, null, notificationVO);
       }
     } catch (EEAException e) {
       LOG_ERROR.error("Unexpected exception realasing new message notifications", e);

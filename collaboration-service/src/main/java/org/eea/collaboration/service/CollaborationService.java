@@ -45,13 +45,4 @@ public interface CollaborationService {
    */
   List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException;
-
-  /**
-   * Notify new messages.
-   *
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param eventType the event type
-   */
-  void notifyNewMessages(Long dataflowId, Long providerId, String eventType);
 }
