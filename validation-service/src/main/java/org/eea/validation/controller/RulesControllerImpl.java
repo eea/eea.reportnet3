@@ -537,4 +537,23 @@ public class RulesControllerImpl implements RulesController {
   }
 
 
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
+  public void deleteAutomaticRuleByReferenceId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    rulesService.deleteAutomaticRuleByReferenceId(datasetSchemaId, referenceId);
+    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
+        datasetSchemaId);
+  }
+
+
 }

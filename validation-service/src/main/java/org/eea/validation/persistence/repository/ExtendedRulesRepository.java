@@ -180,4 +180,14 @@ public interface ExtendedRulesRepository {
    * @return the all unchecked rules
    */
   RulesSchema getAllUncheckedRules(ObjectId datasetSchemaId);
+
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return true, if successful
+   */
+  boolean deleteAutomaticRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
 }
