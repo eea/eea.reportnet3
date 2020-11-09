@@ -34,5 +34,6 @@
   "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
   "updateTableDesign": "/dataschema/{:datasetId}/tableSchema",
   "validateDataset": "/validation/dataset/{:datasetId}",
-  "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}"
+  "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
+  "validateSql": "/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}"
 }

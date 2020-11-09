@@ -8,12 +8,15 @@ import java.util.List;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
+import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +40,15 @@ public class CollaborationServiceImplTest {
 
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private CollaborationServiceHelper collaborationServiceHelper;
 
   @Mock
   private MessageRepository messageRepository;
@@ -235,11 +247,6 @@ public class CollaborationServiceImplTest {
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, true, 1));
   }
 
-  /**
-   * Find messages test.
-   *
-   * @throws EEAException the EEA exception
-   */
   @Test
   public void findMessagesTest() throws EEAException {
     Page<Message> pageResponse = Mockito.mock(Page.class);

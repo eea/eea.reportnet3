@@ -13,6 +13,7 @@ export const Dialog = ({
   className,
   closeOnEscape = false,
   contentStyle,
+  dialogType,
   focusOnShow = true,
   footer,
   header,
@@ -30,12 +31,19 @@ export const Dialog = ({
     alignItems: 'center',
     zIndex: zIndex
   });
+  const [dialogClass, setDialogClass] = useState(styles.dialog_mask_wrapper);
 
   const dialogStyle = {
     top: 'auto',
     left: 'auto',
     zIndex: zIndex
   };
+
+  useEffect(() => {
+    if (dialogType) {
+      setDialogClass(`${styles.dialog_mask_wrapper} ${styles[dialogType]}`);
+    }
+  }, []);
 
   useEffect(() => {
     const newDialogId = uuid.v4();
@@ -67,7 +75,7 @@ export const Dialog = ({
     }
   }, [dialogContext.open]);
   return (
-    <div className={styles.dialog_mask_wrapper} style={maskStyle}>
+    <div className={dialogClass} style={maskStyle}>
       <PrimeDialog
         blockScroll={blockScroll}
         className={className}

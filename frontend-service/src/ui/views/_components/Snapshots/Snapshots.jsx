@@ -12,7 +12,6 @@ import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Snapshots = ({
-  isReleaseVisible = false,
   isLoadingSnapshotListData,
   isSnapshotDialogVisible,
   setIsSnapshotDialogVisible,
@@ -48,7 +47,6 @@ const Snapshots = ({
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
         snapshotListData={snapshotListData}
-        isReleaseVisible={isReleaseVisible}
       />
 
       {isSnapshotDialogVisible && (
