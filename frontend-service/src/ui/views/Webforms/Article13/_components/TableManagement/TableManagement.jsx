@@ -110,11 +110,11 @@ export const TableManagement = ({
     console.log({ records });
     if (!isEmpty(records)) {
       // console.log({ parsedTables, parentTablesWithData });
-      const parsedRecordsWithValidations = DataViewerUtils.parseData(parentTablesWithData[0].data);
+      const parsedTables = DataViewerUtils.parseData(parentTablesWithData[0].data);
       const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
-      console.log({ parsedRecordsWithValidations, tableSchemaColumns });
-      const parsedTables = parsePamsRecordsWithParentData(
-        parsedRecordsWithValidations,
+      console.log({ tableSchemaColumns });
+      const parsedRecordsWithValidations = parsePamsRecordsWithParentData(
+        parsedTables,
         parentTablesWithData,
         schemaTables
       );
@@ -123,7 +123,7 @@ export const TableManagement = ({
       tableManagementDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          records: parsedTables,
+          records: parsedRecordsWithValidations,
           tableSchemaColumns,
           tableColumns: [
             {
@@ -152,21 +152,18 @@ export const TableManagement = ({
               header: 'Short description'
             },
             {
-              body: addTableTemplate,
               field: 'Table_1',
               fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_1'),
               header:
                 'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
             },
             {
-              body: addTableTemplate,
               field: 'Table_2',
               fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_2'),
               header:
                 'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
             },
             {
-              body: addTableTemplate,
               field: 'Table_3',
               fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_3'),
               header:
@@ -335,7 +332,7 @@ export const TableManagement = ({
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.fieldSchemaId)[0];
-    console.log({ rowData, field, column });
+    // console.log({ rowData, field, column });
     if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
@@ -347,7 +344,7 @@ export const TableManagement = ({
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-          {field.fieldData[column.field]}
+          {field.fieldData[column.fieldSchemaId]}
           <IconTooltip levelError={levelError} message={message} />
         </div>
       );
@@ -359,7 +356,7 @@ export const TableManagement = ({
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-          {field.fieldData[column.field]}
+          {field.fieldData[column.fieldSchemaId]}
         </div>
       );
     }
@@ -412,7 +409,7 @@ export const TableManagement = ({
     console.log({ tableColumns, tableSchemaColumns });
     const data = tableColumns.map(col => (
       <Column
-        className={col.header === 'TableSchemas' ? styles.invisibleHeader : ''}
+        className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
         key={col.field}
         field={col.field}
         fieldSchemaId={col.fieldSchemaId}

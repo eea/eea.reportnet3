@@ -6,7 +6,8 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
   console.log({ colsSchema, selectedRecord, records });
   const editWebformRecordForm = colsSchema.map((column, i) => {
     // const field = selectedRecord.filter(r => r.field === column.field)[0];
-    // console.log({ field });
+    const field = selectedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+    console.log({ field, column, selectedRecord });
     return (
       <Fragment key={column.field}>
         <div className="p-col-4" style={{ padding: '.75em' }}>
@@ -25,20 +26,14 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
           className="p-col-8"
           style={{
             padding: '.5em',
-            width:
-              column.type === 'DATE' ||
-              column.type === 'CODELIST' ||
-              column.type === 'MULTISELECT_CODELIST' ||
-              column.type === 'LINK'
-                ? '30%'
-                : ''
+            width: column.type === 'CODELIST' || column.type === 'LINK' ? '30%' : ''
           }}>
           <WebformDataFormFieldEditor
             autoFocus={i === 0}
             column={column}
             datasetId={datasetId}
             field={column.header}
-            fieldValue={selectedRecord[column.header]}
+            fieldValue={field.fieldData[column.field]}
             // hasWritePermissions={hasWritePermissions}
             // isVisible={editDialogVisible}
             onChangeForm={onChangeForm}

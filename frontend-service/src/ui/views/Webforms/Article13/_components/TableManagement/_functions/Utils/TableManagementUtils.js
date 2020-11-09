@@ -45,7 +45,7 @@ const parsePamsRecords = records =>
   records.map(record => {
     const { recordId, recordSchemaId } = record;
     let data = {};
-    debugger;
+
     record.elements.forEach(
       element =>
         (data = {
@@ -55,6 +55,8 @@ const parsePamsRecords = records =>
           recordSchemaId: recordSchemaId
         })
     );
+
+    return data;
   });
 
 const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTables) => {
