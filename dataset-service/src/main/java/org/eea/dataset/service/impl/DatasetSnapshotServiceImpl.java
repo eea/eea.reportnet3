@@ -58,6 +58,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -454,8 +455,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
 
     // Get the dataCollection
-    Optional<DataSetMetabase> designDataset = metabaseRepository.findById(idDataset);
-    String datasetSchema = designDataset.isPresent() ? designDataset.get().getDatasetSchema() : "";
+    DataSetMetabase designDataset = metabaseRepository.findById(idDataset).orElse(null);
+
+    // Mark the released dataset with the status
+    String datasetSchema = "";
+    if (designDataset != null) {
+      datasetSchema = designDataset.getDatasetSchema();
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
+      designDataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
+          : DatasetStatusEnum.RELEASED);
+      metabaseRepository.save(designDataset);
+    }
     Optional<DataCollection> dataCollection =
         dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
     Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
@@ -507,7 +517,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
         // This method will release the lock and the notification
         restoreSnapshot(idDataCollection, idSnapshot, false);
-        // Check if the snapshot is released
+        // Mark the snapshot released
         snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
         // Add the date of the release
         Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
