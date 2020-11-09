@@ -89,6 +89,11 @@
         }
       }
     }
+
+    .required {
+      border: 0.1rem solid var(--yellow-100);
+    }
+
     :global .webform-validationErrors {
       width: 2em !important;
       &:first-of-type {
@@ -96,6 +101,26 @@
       }
       :global .pi {
         font-size: 1.8em;
+      }
+    }
+
+    .infoCircle {
+      background-color: var(--white);
+      border-radius: 50%;
+      color: var(--datatable-header-info-button-color);
+      font-size: 12pt;
+      height: 0.7em;
+      margin-left: 0.4rem;
+      width: 0.7em;
+
+      > span {
+        left: 46%;
+        margin-left: -0.48em;
+        margin-top: -0.5em;
+      }
+
+      &:focus {
+        box-shadow: none;
       }
     }
   }

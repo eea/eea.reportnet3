@@ -32,7 +32,7 @@ export class BodyCell extends Component {
 
   onKeyDown(event) {
     if (this.props.editMode !== 'row') {
-      if (event.which === 13 || event.which === 9) {
+      if (event.which === 9) {
         // tab || enter
         this.switchCellToViewMode(true);
       }
@@ -143,7 +143,8 @@ export class BodyCell extends Component {
     if (this.props.editMode !== 'row' && this.container && this.props.editor) {
       clearTimeout(this.tabindexTimeout);
       if (this.state.editing) {
-        let focusable = DomHandler.findSingle(this.container, 'input');
+        let focusable =
+          DomHandler.findSingle(this.container, 'input') || DomHandler.findSingle(this.container, 'textarea');
         if (focusable && document.activeElement !== focusable && !focusable.hasAttribute('data-isCellEditing')) {
           focusable.setAttribute('data-isCellEditing', true);
           focusable.focus();

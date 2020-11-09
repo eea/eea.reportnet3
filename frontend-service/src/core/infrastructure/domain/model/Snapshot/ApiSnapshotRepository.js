@@ -12,7 +12,6 @@ const allDesigner = async datasetSchemaId => {
             description: snapshotDTO.description,
             id: snapshotDTO.id,
             isAutomatic: snapshotDTO.automatic,
-            isBlocked: snapshotDTO.blocked,
             isReleased: snapshotDTO.release
           })
       )
@@ -41,7 +40,6 @@ const allReporter = async datasetId => {
         description: snapshotDTO.description,
         id: snapshotDTO.id,
         isAutomatic: snapshotDTO.automatic,
-        isBlocked: snapshotDTO.blocked,
         isReleased: snapshotDTO.release
       })
   );

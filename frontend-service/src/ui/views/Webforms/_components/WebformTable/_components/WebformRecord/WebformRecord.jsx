@@ -16,6 +16,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -27,6 +28,7 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { PaMsUtils } from './_functions/Utils/PaMsUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
@@ -45,7 +47,8 @@ export const WebformRecord = ({
   onTabChange,
   record,
   tableId,
-  tableName
+  tableName,
+  webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -58,6 +61,7 @@ export const WebformRecord = ({
     isFileDialogVisible: false,
     newRecord: {},
     record,
+    sectorAffectedValue: null,
     selectedField: {},
     selectedFieldId: '',
     selectedFieldSchemaId: '',
@@ -70,6 +74,7 @@ export const WebformRecord = ({
     isDeleteAttachmentVisible,
     isDialogVisible,
     isFileDialogVisible,
+    sectorAffectedValue,
     selectedField,
     selectedFieldId,
     selectedFieldSchemaId,
@@ -85,6 +90,8 @@ export const WebformRecord = ({
     parseMultiselect,
     parseNewRecordData
   } = WebformRecordUtils;
+
+  const { getObjectiveOptions } = PaMsUtils;
 
   useEffect(() => {
     webformRecordDispatch({
@@ -260,7 +267,11 @@ export const WebformRecord = ({
             //     onEditorValueFocus(cells, codelistItemValue);
             //   }
             // }}
-            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
+            options={
+              field.name === 'Objective'
+                ? getObjectiveOptions(sectorAffectedValue)
+                : field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))
+            }
             // optionLabel="itemType"
             value={getMultiselectValues(
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
@@ -280,6 +291,7 @@ export const WebformRecord = ({
             // filterBy="itemType,value"
             onChange={event => {
               onFillField(field, option, event.target.value);
+              webformRecordDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value: event.target.value } });
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
@@ -301,6 +313,7 @@ export const WebformRecord = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            className={field.required ? styles.required : undefined}
             id={field.fieldId}
             // keyfilter={getInputType[type]}
             maxLength={getInputMaxLength[type]}
@@ -314,7 +327,22 @@ export const WebformRecord = ({
             value={field.value}
           />
         );
-
+      case 'TEXTAREA':
+        return (
+          <InputTextarea
+            className={field.required ? styles.required : undefined}
+            id={field.fieldId}
+            maxLength={getInputMaxLength[type]}
+            collapsedHeight={150}
+            onBlur={event => {
+              if (isNil(field.recordId)) onSaveField(option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value);
+            }}
+            onChange={event => onFillField(field, option, event.target.value)}
+            onKeyDown={event => onEditorKeyChange(event, field, option)}
+            value={field.value}
+          />
+        );
       case 'EMPTY':
         return (
           <div className={styles.infoButtonWrapper}>
@@ -406,7 +434,15 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              <label>{element.title}</label>
+              <label>{`${element.required ? '*' : ''}${element.title}`}</label>
+              {element.tooltip && (
+                <Button
+                  className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                  icon="infoCircle"
+                  tooltip={element.tooltip}
+                  tooltipOptions={{ position: 'top' }}
+                />
+              )}
               <div>
                 <div className={styles.template}>
                   {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
@@ -424,6 +460,8 @@ export const WebformRecord = ({
             </div>
           )
         );
+      } else if (element.type === 'LABEL') {
+        return <h2 className={styles[element.level]}>{element.title}</h2>;
       } else {
         return (
           !isSubTableVisible && (
@@ -515,6 +553,16 @@ export const WebformRecord = ({
   };
 
   const renderErrorMessages = content => {
+    switch (webformType) {
+      case 'ARTICLE_15':
+        return renderArticle15ErrorMessages(content);
+
+      default:
+        return [];
+    }
+  };
+
+  const renderArticle15ErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
       errorMessages.push(resources.messages['emptyWebformTable']);

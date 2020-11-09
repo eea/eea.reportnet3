@@ -26,15 +26,6 @@ const SnapshotItem = ({ itemData }) => {
               userContext.userProps.amPm24h ? '' : ' A'
             }`
           )}
-          {itemData.isBlocked && (
-            <Button
-              className={`${styles.btn} rp-btn ${styles.hasBlockers}`}
-              icon="warning"
-              onClick={() => {}}
-              tooltip={resources.messages['recordBlockers']}
-              tooltipOptions={{ position: 'right' }}
-            />
-          )}
         </h5>
         {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
