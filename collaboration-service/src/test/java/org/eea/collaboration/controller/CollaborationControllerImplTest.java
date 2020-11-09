@@ -2,6 +2,7 @@ package org.eea.collaboration.controller;
 
 import java.util.ArrayList;
 import org.eea.collaboration.service.CollaborationService;
+import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -23,6 +24,10 @@ public class CollaborationControllerImplTest {
 
   @Mock
   private CollaborationService collaborationService;
+
+  @Mock
+  private CollaborationServiceHelper collaborationServiceHelper;
+
 
   @Test
   public void createMessageTest() throws EEAIllegalArgumentException, EEAForbiddenException {
@@ -109,5 +114,12 @@ public class CollaborationControllerImplTest {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void notifyNewMessagesTest() {
+    collaborationControllerImpl.notifyNewMessages(1L, 1L, "RECEIVED_MESSAGE");
+    Mockito.verify(collaborationServiceHelper, Mockito.times(1))
+        .notifyNewMessages(Mockito.anyLong(), Mockito.anyLong(), Mockito.any());
   }
 }
