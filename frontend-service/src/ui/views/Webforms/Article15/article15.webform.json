@@ -1,8 +1,9 @@
 {
   "tables": [
     {
-      "name": "QA_QC_C0",
-      "title": "QA_QC_C0",
+      "name": "General_Information",
+      "label": "General information",
+      "title": "General information",
       "multipleRecords": false,
       "elements": [
         {
@@ -13,64 +14,75 @@
         {
           "type": "FIELD",
           "name": "UpdateDate",
-          "title": "The information in this reporting is updated until:"
+          "title": "The information in this reporting is updated until (date: YYYY-MM-DD format):"
         },
         {
           "type": "FIELD",
           "name": "ReportingUnderArt19",
-          "title": "Is the mandatory reporting under Art. 19 and Part 1 of Annex VIII of the Governance Regulation and Annex 1 of the Implementing Act?"
+          "title": "Is this reporting the mandatory reporting under Art. 19 and Part 1 of Annex VIII of the Governance Regulation and Annex 1 of the Implementing Act?"
         }
       ]
     },
     {
-      "name": "QA_QC_C1",
-      "title": "QA_QC_C1",
+      "name": "National_Circumstances",
+      "label": "National circumstances",
+      "title": "National circumstances, impacts, vulnerabilities, risks and adaptive capacity",
       "multipleRecords": false,
       "elements": [
         {
+          "type": "LABEL",
+          "level": 2,
+          "title": "National circumstances relevant to adaptation actions"
+        },
+        {
           "type": "FIELD",
           "name": "NationalCircumstances",
-          "title": "Please describe the general  National circumstances"
+          "title": "Please describe the general  National circumstances (max. 1000 characters, details need to be provided in the following text fields)"
         },
         {
           "type": "FIELD",
           "name": "BiogeophysicalCharacteristics",
-          "title": "Please describe the biogeophysical characteristics relevant to adaptation actions"
+          "title": "Please describe the biogeophysical characteristics relevant to adaptation actions (max. 5000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DemographicSituation",
-          "title": "Please describe the demographic situation relevant to adaptation actions"
+          "title": "Please describe the demogrpahic situation relevant to adaptation actions (ma. 3000 characers)"
         },
         {
           "type": "FIELD",
           "name": "EconomicInfrastructuralSituation",
-          "title": "Please describe the economic and infrastructural situation relevant to adaptation actions"
+          "title": "Please describe the economic and infrastructural situation relevant to adaptation actions (max. 8 000 characters)"
         },
         {
           "type": "FIELD",
           "name": "AssessmentsIntroDocument",
-          "title": "If necessary, you can upload here an additional document"
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)"
+        },
+        {
+          "type": "LABEL",
+          "level": 2,
+          "title": "Climate monitoring and modelling framework"
         },
         {
           "type": "FIELD",
           "name": "GeneralAspectsClimateMonitoring",
-          "title": "Please describe the general aspects of the climate monitoring and modelling framework"
+          "title": "Please describe the general aspects of the climate monitoring and modelling framework (max. 1000 characters, details need to be provided in the following text fields)"
         },
         {
           "type": "FIELD",
           "name": "MainActivitiesClimateMonitoring",
-          "title": "Please describe the main activities on climate monitoring, modelling, projections and scenarios"
+          "title": "Please describe the main activities on climate monitoring, modelling, projections and scenarios (max. 8 000 characters)"
         },
         {
           "type": "FIELD",
           "name": "ApproachesMethodologiesTools",
-          "title": "Please describe the main approaches, methodologies and tools, and associated uncertainties and challenges"
+          "title": "Please describe the main approaches, methodologies and tools, and associated uncertainties and challenges (max. 10 000 characters)"
         },
         {
           "type": "FIELD",
           "name": "AssessmentsObservationDocument",
-          "title": "If necessary, you can upload here an additional document"
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)"
         },
         {
           "type": "TABLE",
@@ -114,14 +126,24 @@
             {
               "type": "FIELD",
               "name": "WebLink",
-              "title": "Web link to the climat eprojections and services"
+              "title": "Web link to the climate projections and services"
             }
           ]
         },
         {
+          "type": "LABEL",
+          "level": 2,
+          "title": "Assessment of climate impacts, vulnerability and risks, including adaptive capacity"
+        },
+        {
           "type": "FIELD",
           "name": "GeneralAspectsAssessment",
-          "title": "Please describe the general  aspects of the assessment of climate impacts, vulnerability and risks, including adaptive capacity"
+          "title": "Please describe the general  aspects of the assessment of climate impacts, vulnerability and risks, including adaptive capacity (max. 1000 characters, details need to be provided in the following text fields)"
+        },
+        {
+          "type": "LABEL",
+          "level": 3,
+          "title": "Select all hazards of relevance for your country - actual situation / present climate"
         },
         {
           "type": "FIELD",
@@ -206,7 +228,7 @@
         {
           "type": "FIELD",
           "name": "DescribeExistingEnvironmental",
-          "title": "Please describe the existing environmental, economic and social pressures that are likely to be significantly affected by climate change"
+          "title": "Please describe the existing environmental, economic and social pressures that are likely to be significantly affected by climate change (e.g. loss of biodiversity, poor harvest, energy poverty, unemployment, migration) (max. 5000 characters)"
         },
         {
           "type": "TABLE",
@@ -214,6 +236,11 @@
           "title": "Affected Sectors",
           "multipleRecords": true,
           "elements": [
+            {
+              "type": "LABEL",
+              "level": 3,
+              "title": "Select key affected sectors and apply the best available science to assess the different aspects of the vulnerability and risk analysis by the Intergovernmental Panel on Climate Change and the latest Commission guidance on the climate proofing of the EUfunded projects"
+            },
             {
               "type": "FIELD",
               "name": "SectorTitle",
@@ -232,7 +259,7 @@
             {
               "type": "FIELD",
               "name": "DescribeImpactsKeyHazards",
-              "title": "Please describe your assessment"
+              "title": "Please describe your assessment (max. 500 characters) "
             },
             {
               "type": "FIELD",
@@ -242,7 +269,7 @@
             {
               "type": "FIELD",
               "name": "DescribeLikelihood",
-              "title": "Please describe your assessment"
+              "title": "Please describe your assessment (max. 500 characters) "
             },
             {
               "type": "FIELD",
@@ -252,7 +279,7 @@
             {
               "type": "FIELD",
               "name": "DescribeVulnerability",
-              "title": "Please describe your assessment"
+              "title": "Please describe your assessment (max. 500 characters) "
             },
             {
               "type": "FIELD",
@@ -262,7 +289,7 @@
             {
               "type": "FIELD",
               "name": "DescribeRisk",
-              "title": "Please describe your assessment"
+              "title": "Please describe your assessment (max. 500 characters) "
             },
             {
               "type": "FIELD",
@@ -279,19 +306,20 @@
       ]
     },
     {
-      "name": "QA_QC_C2",
-      "title": "QA_QC_C2",
+      "name": "Legal_Policies",
+      "label": "Legal and policies",
+      "title": "Legal and policy frameworks and institutional arrangements",
       "multipleRecords": false,
       "elements": [
         {
           "type": "FIELD",
           "name": "LegalPolicyFrameworks",
-          "title": "Please introduce legal and policy frameworks and regulations"
+          "title": "Please introduce legal and policy frameworks and regulations (max. 750 characters)"
         },
         {
           "type": "TABLE",
           "name": "NAS",
-          "title": "NAS",
+          "title": "National Adaptation Strategies",
           "multipleRecords": true,
           "elements": [
             {
@@ -319,7 +347,7 @@
         {
           "type": "TABLE",
           "name": "NAP",
-          "title": "NAP",
+          "title": "National Adaptation Plans",
           "multipleRecords": true,
           "elements": [
             {
@@ -347,7 +375,7 @@
         {
           "type": "TABLE",
           "name": "SAP",
-          "title": "SAP",
+          "title": "Sectoral Adaptation Plans",
           "multipleRecords": true,
           "elements": [
             {
@@ -383,20 +411,25 @@
           ]
         },
         {
+          "type": "LABEL",
+          "level": 2,
+          "title": "Institutional arrangements and governance at the national level"
+        },
+        {
           "type": "FIELD",
           "name": "ArrangementsCCIV_assessments",
-          "title": "Please describe frameworks and institutional arrangements for the CCIVA assessments"
+          "title": "Please describe frameworks and institutional arrangements for the CCIVA assessments (max. 500 characters)"
         },
         {
           "type": "TABLE",
           "name": "CC_IVA",
-          "title": "CC_IVA",
+          "title": "CCIVA Assessments",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "Title",
-              "title": "Title of the CCIVA assessment"
+              "title": "Title of the CCIVA assessment (preferably translated into English)"
             },
             {
               "type": "FIELD",
@@ -428,27 +461,32 @@
         {
           "type": "FIELD",
           "name": "DescribeInstitutionalArrangements",
-          "title": "Please describe the institutional arrangements and governance at the national level for the planning, implementing, monitoring, evaluating and revising adaptation policy"
+          "title": "Please describe the institutional arrangements and governance at the national level for the planning, implementing, monitoring, evaluating and revising adaptation policy. (max. 3000 characters)This while considering the following aspects: decision making, planning and coordination related to adaptation strategies, policies, plans and goals, addressing cross-cutting issues, adjusting adaptation priorities and activities, implementing adaptation actions, including facilitating action to avert, minimise and address the adverse effect of climate change"
         },
         {
           "type": "FIELD",
           "name": "DescribeClimateChangeResilience",
-          "title": "Please describe how climate change impacts and resilience are integrated into environmental assessment procedures"
+          "title": "Please describe how climate change impacts and resilience are integrated into environmental assessment procedures (max. 750 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeCollection",
-          "title": "Please describe the collection, ownership and re-use of relevant data"
+          "title": "Please describe the collection, ownership and re-use of relevant data (such as climate-related disaster loss data or risk data) and access to it (max. 750 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeClimateChangeImpacts",
-          "title": "Please describe how climate change impacts and adaptation planning into disaster risk management frameworks are integrated, and vice versa. How are climate change impacts and adaptation planning integrated into disaster risk management frameworks and vice versa"
+          "title": "Please describe how climate change impacts and adaptation planning into disaster risk management frameworks are integrated, and vice versa. How are climate change impacts and adaptation planning integrated into disaster risk management frameworks and vice versa (max 750 characters). This by including relevant aspects of Article 6(1) of Decision No 1313/2013/EU of the European Parliament and of the Council of 17 December 2013 on a Union Civil Protection Mechanism (OJ L 347 I, 20.12.2013, p. 924)"
+        },
+        {
+          "type": "LABEL",
+          "level": 2,
+          "title": "Institutional arrangements and governance at the sub-national level (where  “sub-national” refers to local and regional)"
         },
         {
           "type": "FIELD",
           "name": "SummarizeLegalRequirements",
-          "title": "Please summarize the legal requirements and strategic documents for institutional arrangements and governance at the sub-national level"
+          "title": "Please summarize the legal requirements and strategic documents for institutional arrangements and governance at the sub-national level (max. 750 characters)"
         },
         {
           "type": "FIELD",
@@ -458,34 +496,35 @@
       ]
     },
     {
-      "name": "QA_QC_C3",
-      "title": "QA_QC_C3",
+      "name": "Strategies_Plans",
+      "label": "Strategies and plans",
+      "title": "Adaptation strategies, policies, plans and goals",
       "multipleRecords": false,
       "elements": [
         {
           "type": "FIELD",
           "name": "AdaptationPriorities",
-          "title": "Please describe the adaptation priorities"
+          "title": "Please describe the adaptation priorities (max. 750 characters)"
         },
         {
           "type": "FIELD",
           "name": "Challenges",
-          "title": "Please describe challenges, gaps and barriers to adaptation, including those institutional, governance-related and other barriers that restrict the adaptive capacity as identified in the vulnerability assessment"
+          "title": "Please describe challenges, gaps and barriers to adaptation, including those institutional, governance-related and other barriers that restrict the adaptive capacity as identified in the vulnerability assessment (see Chapter 2 of this reporting) (max. 2000 characters)"
         },
         {
           "type": "FIELD",
           "name": "SummaryNationalStrategies",
-          "title": "Please provide a summary of national strategies, policies, plans and efforts, with a focus on goals and objectives"
+          "title": "Please provide a summary of national strategies, policies, plans and efforts, with a focus on goals and objectives (max. 5000 characters)"
         },
         {
           "type": "FIELD",
           "name": "SummaryForeseenActions",
-          "title": "Please provide a summary of foreseen actions, budget and timeline"
+          "title": "Please provide a summary of foreseen actions, budget and timeline. This should include nature-based solutions and actions leading to mitigation co-benefits and other relevant co-benefits. The summaries shall also cover efforts to build resilience and avert, minimise and address the adverse consequences of climate change, and include an explanation how gender perspectives have been taken into account. (max. 10 000 characters)Consider also the following optional reporting to provide details on actions and (programmes of) measures"
         },
         {
           "type": "TABLE",
           "name": "ActionsMeasures",
-          "title": "Actions Measures",
+          "title": "Selection of actions and (programmes of) measures",
           "multipleRecords": true,
           "elements": [
             {
@@ -511,7 +550,7 @@
             {
               "type": "FIELD",
               "name": "ShortDescriptionMeasureAction",
-              "title": "Short description of the measure or action"
+              "title": "Short description of the measure or action (max. 500 characters)"
             },
             {
               "type": "FIELD",
@@ -530,7 +569,7 @@
             },
             {
               "type": "FIELD",
-              "name": "AdministrativeLevelMeasureImplemented",
+              "name": "AdministrativeLeveMeasureImplemented",
               "title": "Administrative level the measure is implemented"
             },
             {
@@ -541,66 +580,67 @@
             {
               "type": "FIELD",
               "name": "CostImplementingMeasure",
-              "title": "The cost of implementing the measure"
+              "title": "The cost of implementing the measure (max. 300 characters)"
             },
             {
               "type": "FIELD",
-              "name": "Websites",
+              "name": "Examples (websites)",
               "title": "Examples (websites)"
             }
           ]
         },
         {
           "type": "FIELD",
-          "name": "AdditionalDocument",
-          "title": "If necessary, you can upload here an additional document on the actions and (programmes of measures)"
+          "name": "AditionalDocument",
+          "title": "If necessary, you can upload here an additional document on the actions and (programmes of measures) (max. 2 MB)"
         },
         {
           "type": "FIELD",
           "name": "OverviewContent",
-          "title": "Please give an overview of the content of sub-national strategies, policies, plans and efforts"
+          "title": "Please give an overview of the content of sub-national strategies, policies, plans and efforts (max. 10 000 characters)"
         },
         {
           "type": "FIELD",
           "name": "OverviewEffortsClimate",
-          "title": "Please give an overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs"
+          "title": "Please give an overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs (max. 5000 characters)"
         },
         {
           "type": "FIELD",
           "name": "OverviewEffortsDisaster",
-          "title": "Please give an overview of efforts to integrate disaster risk management strategies and action plans"
+          "title": "Please give an overview of efforts to integrate disaster risk management strategies and action plans (max. 3000 characters)"
         },
         {
           "type": "FIELD",
           "name": "OverviewMeasures",
-          "title": "Please provide an overview of measures in adaptation policy at all governance levels to engage with stakeholders particularly vulnerable to climate change impacts"
+          "title": "Please provide an overview of measures in adaptation policy at all governance levels to engage with stakeholders particularly vulnerable to climate change impacts (max 10 000 characters)"
         },
         {
           "type": "FIELD",
           "name": "OverviewAvailable",
-          "title": "Please provide an overview of available information on private sector plans, priorities, actions and programmes, public/private partnerships, and other relevant private adaptation initiatives and/or projects"
+          "title": "Please provide an overview of available information on private sector plans, priorities, actions and programmes, public/private partnerships, and other relevant private adaptation initiatives and/or projects (max. 5000 characters)"
         }
       ]
     },
     {
-      "name": "QA_QC_C4",
-      "title": "QA_QC_C4",
+      "name": "Monitoring_Evaluation",
+      "label": "Monitoring and evaluation",
+      "title": "Monitoring, reporting and evaluation of adaptation actions and processes",
       "multipleRecords": false,
       "elements": [
         {
           "type": "FIELD",
           "name": "DescribeMonitoringReportingEvaluation",
-          "title": "Please describe the monitoring, reporting and evaluation (MRE) methodology related to reducing climate impacts, vulnerabilities, risks, and increasing adaptive capacity"
+          "title": "Please describe the monitoring, reporting and evaluation (MRE) methodology related to reducing climate impacts, vulnerabilities, risks, and increasing adaptive capacity. Report on approaches, systems used, transparency and indicators (max. 3000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeMREMethodology",
-          "title": "Please describe the MRE methodology related to the implementation of adaptation actions"
+          "title": "Please describe the MRE methodology related to the implementation of adaptation actions (max. 2000 characters)"
         },
         {
           "type": "TABLE",
           "name": "MonitoringIndicatorsMethodologies",
-          "title": "Monitoring Indicators and Methodologies",
+          "title": "Sources for MRE indicators and methodologies - sources",
           "multipleRecords": true,
           "elements": [
             {
@@ -623,104 +663,105 @@
         {
           "type": "FIELD",
           "name": "DescribeStatePlay",
-          "title": "Please describe the state of play of the implementation of measures, including an overview of the subnational level and the disbursement of funding to increase climate resilience"
+          "title": "Please describe the state of play of the implementation of measures, including an overview of the subnational level and the disbursement of funding to increase climate resilience. (max. 5000 characters)The information can also be provided in the detailed reporting on actions and measures in Chapter 3."
         },
         {
           "type": "FIELD",
           "name": "SummaryClimateAdaptation",
-          "title": "Please provide a summary of the spending earmarked for climate adaptation including in disaster risk management"
+          "title": "Please provide a summary of the spending earmarked for climate adaptation including in disaster risk management (max. 1500 characters)"
         },
         {
           "type": "FIELD",
           "name": "ProvideShareSpendingSupport",
-          "title": "Please provide, to the extent possible, the share of spending used to support climate adaptation in each sector"
+          "title": "Please provide, to the extent possible, the share of spending used to support climate adaptation in each sector (max. 1500 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeReducingClimateImpacts",
-          "title": "Please describe the evaluation progress towards reducing climate impacts, vulnerabilities and risks"
+          "title": "Please describe the evaluation progress towards reducing climate impacts, vulnerabilities and risks (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeIncreasingAdaptiveCapacity",
-          "title": "Please describe the evaluation progress towards increasing adaptive capacity"
+          "title": "Please describe the evaluation progress towards increasing adaptive capacity (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeMeetingAdaptationPriorities",
-          "title": "Please describe the evaluation progress towards meeting adaptation priorities"
+          "title": "Please describe the evaluation progress towards meeting adaptation priorities (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeProgressTowardsAddressing",
-          "title": "Please describe the evaluation progress towards addressing barriers to adaptation"
+          "title": "Please describe the evaluation progress towards addressing barriers to adaptation (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeVulnerability",
-          "title": "Please describe the steps taken to review and update vulnerability and risk assessments"
+          "title": "Please describe the steps taken to review and update vulnerability and risk assessments (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeNationalAdaptation",
-          "title": "Please describe the steps taken to review and update national adaptation policies, strategies, plans and measures"
+          "title": "Please describe the steps taken to review and update national adaptation policies, strategies, plans and measures (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeSubnationalAdaptation",
-          "title": "Please describe the steps taken to review and update subnational adaptation policies, strategies, plans and measures"
+          "title": "Please describe the steps taken to review and update subnational adaptation policies, strategies, plans and measures (max. 1000 characters)"
         }
       ]
     },
     {
-      "name": "QA_QC_C5",
-      "title": "QA_QC_C5",
+      "name": "Cooperation_Experience",
+      "label": "Cooperation and experience",
+      "title": "Cooperation, good practices, synergies, experience and lessons learned in the field of adaptation",
       "multipleRecords": false,
       "elements": [
         {
           "type": "FIELD",
           "name": "DescribeGeneralAspects",
-          "title": "Please describe general aspects of good practices and lessons learnt, including at sub-national level1"
+          "title": "Please describe general aspects of good practices and lessons learnt, including at sub-national level1 (max. 1000 characters, details need to be provided in the following text fields)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesClimate",
-          "title": "Please describe good practices and lessons learned related to climate modelling activities and methodologies - assessment of climate impacts, vulnerability and risks to climate change"
+          "title": "Please describe good practices and lessons learned related to climate modelling activities and methodologies - assessment of climate impacts, vulnerability and risks to climate change (including adaptive capacity) (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesInstitutional",
-          "title": "Please describe good practices and lessons learned related to institutional arrangements and governance at the national and sub-national level - policy and regulatory changes -  coordination mechanisms"
+          "title": "Please describe good practices and lessons learned related to institutional arrangements and governance at the national and sub-national level - policy and regulatory changes -  coordination mechanisms (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesAdaptation",
-          "title": "Please describe good practices and lessons learned related to adaptation priorities - adaptation barriers - adaptation goals, objectives, undertakings, efforts, strategies, policies and plans"
+          "title": "Please describe good practices and lessons learned related to adaptation priorities - adaptation barriers - adaptation goals, objectives, undertakings, efforts, strategies, policies and plans (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesEfforts",
-          "title": "Please describe good practices and lessons learned related to efforts to integrate climate change adaptation into development and sectoral policies, plans and programs - disaster risk reduction and management"
+          "title": "Please describe good practices and lessons learned related to efforts to integrate climate change adaptation into development and sectoral policies, plans and programs - disaster risk reduction and management (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesStakeholder",
-          "title": "Please describe good practices and lessons learned related to stakeholder engagement - integration of gender perspectives into climate adaptation - integration of indigenous, traditional and local knowledge into climate adaptation"
+          "title": "Please describe good practices and lessons learned related to stakeholder engagement - integration of gender perspectives into climate adaptation - integration of indigenous, traditional and local knowledge into climate adaptation (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesClimateRisk",
-          "title": "Please describe good practices and lessons learned related to climate risk communication"
+          "title": "Please describe good practices and lessons learned related to climate risk communication (max 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesMonitoring",
-          "title": "Please describe good practices and lessons learned related to monitoring, reporting and evaluation"
+          "title": "Please describe good practices and lessons learned related to monitoring, reporting and evaluation (max 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeGoodPracticesStrengthening",
-          "title": "Please describe good practices and lessons learned related to strengthening scientific research and knowledge - innovative adaptation solutions and innovative financing mechanisms"
+          "title": "Please describe good practices and lessons learned related to strengthening scientific research and knowledge - innovative adaptation solutions and innovative financing mechanisms (max. 2000 characters)"
         },
         {
           "type": "TABLE",
@@ -756,41 +797,47 @@
           ]
         },
         {
+          "type": "LABEL",
+          "level": 2,
+          "title": "International dimension"
+        },
+        {
           "type": "FIELD",
           "name": "GeneralInformationInternationalDimension",
-          "title": "Please provide general information on the international dimension of adaptation actions"
+          "title": "Please provide general information on the international dimension of adaptation actions (max. 750 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeCooperationEUMemberStates",
-          "title": "Please describe the general aspects of cooperation with EU Member States, international cooperation, and with regional and international organisations, excluding information on development cooperation required by Part 2 of Annex VIII of Regulation (EU) 2018/1999"
+          "title": "Please describe the general aspects of cooperation with EU Member States, international cooperation, and with regional and international organisations, excluding information on development cooperation required by Part 2 of Annex VIII of Regulation (EU) 2018/1999 (max. 750 characters) "
         },
         {
           "type": "FIELD",
           "name": "DescribeDetailShareInformation",
-          "title": "Please describe in some detail the cooperation to share information and to strengthen science, institutions and adaptation knowledge"
+          "title": "Please describe in some detail the cooperation to share information and to strengthen science, institutions and adaptation knowledge (max. 2000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeDetailCooperationEnhance",
-          "title": "Please describe in some detail the cooperation to enhance adaptation action at the sub-national, national, macroregional and international level, including the area, scale and types of cooperation"
+          "title": "Please describe in some detail the cooperation to enhance adaptation action at the sub-national, national, macroregional and international level, including the area, scale and types of cooperation (max. 2000 characters)"
         },
         {
           "type": "FIELD",
           "name": "DescribeSynergiesAdaptation",
-          "title": "Please describe the synergies of adaptation actions with other international frameworks and/or conventions, in particular the Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction"
+          "title": "Please describe the synergies of adaptation actions with other international frameworks and/or conventions, in particular the Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction (max. 3000 characters)"
         }
       ]
     },
     {
-      "name": "QA_QC_C6",
-      "title": "QA_QC_C6",
+      "name": "Contact",
+      "label": "Contact",
+      "title": "Any other information related to climate change impacts and adaptation",
       "multipleRecords": false,
       "elements": [
         {
           "type": "TABLE",
           "name": "ContactGeneral",
-          "title": "Contact General",
+          "title": "Contact information of organisation(s) responsible for adaptation - made available on Climate-ADAPT (max. 3 organisations)",
           "multipleRecords": true,
           "elements": [
             {
@@ -833,7 +880,7 @@
         {
           "type": "TABLE",
           "name": "ContactPersonal",
-          "title": "Contact Personal",
+          "title": "Contact information of organisation(s) responsible for adaptation - not published, to be used by the European Commission DG CLIMA and the European Environment Agency in case of questions about this reporting (max. 3 organisations)",
           "multipleRecords": true,
           "elements": [
             {
@@ -876,7 +923,7 @@
         {
           "type": "TABLE",
           "name": "Websites",
-          "title": "Websites",
+          "title": "Relevant websites and social media sources used for communication on adaptation action at national and sub-national level, as appropriate",
           "multipleRecords": true,
           "elements": [
             {
@@ -899,7 +946,7 @@
         {
           "type": "TABLE",
           "name": "CCIV_PortalsPlatforms",
-          "title": "CCIV PortalsPlatforms",
+          "title": "CCIV portals and platforms",
           "multipleRecords": true,
           "elements": [
             {
@@ -922,7 +969,7 @@
         {
           "type": "TABLE",
           "name": "Publications",
-          "title": "Publications",
+          "title": "Key reports and publications at national and sub-national level (including these mentioned in text fields but excluding those already reported elsewhere, like NAS, NAP, CCIV assessment or research programmes)",
           "multipleRecords": true,
           "elements": [
             {
@@ -944,18 +991,23 @@
               "type": "FIELD",
               "name": "Publisher",
               "title": "Publisher"
+            },
+            {
+              "type": "FIELD",
+              "name": "WebLink",
+              "title": "Weblink to the report"
             }
           ]
         },
         {
           "type": "FIELD",
           "name": "AdditionalInformation",
-          "title": "Please provide any additional information"
+          "title": "Please provide any additional information (max. 1000 characters)"
         },
         {
           "type": "FIELD",
           "name": "AdditionalDocument",
-          "title": "If necessary, you can upload here an additional document"
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)"
         }
       ]
     }
