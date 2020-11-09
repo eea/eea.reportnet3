@@ -201,8 +201,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<DataFlowVO>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
-    getDatasetsStatus(map);
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
 
     // Get user's dataflows sorted by status and creation date
     dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(
@@ -229,25 +228,25 @@ public class DataflowServiceImpl implements DataflowService {
   private void setReportingDatasetStatus(Map<Long, List<DataflowStatusDataset>> map,
       DataFlowVO dataflowVO) {
     boolean containsPending = false;
-    int containsReleased = 0;
-    int containstechAccepted = 0;
+    int releasedCount = 0;
+    int techAcceptedCount = 0;
     boolean containsCorrectionR = false;
     boolean containsFinalFeedback = false;
     List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
     if (datasetsStatusList != null) {
-      for (DataflowStatusDataset datasetsStatus : datasetsStatusList) {
-        switch (datasetsStatus.getStatus()) {
+      for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+        switch (datasetsStatusList.get(i).getStatus()) {
           case PENDING:
             containsPending = true;
             break;
           case RELEASED:
-            containsReleased++;
+            releasedCount++;
             break;
           case CORRECTION_REQUESTED:
             containsCorrectionR = true;
             break;
           case TECHNICALLY_ACCEPTED:
-            containstechAccepted++;
+            techAcceptedCount++;
             break;
           case FINAL_FEEDBACK:
             containsFinalFeedback = true;
@@ -260,9 +259,9 @@ public class DataflowServiceImpl implements DataflowService {
       if (containsPending) {
         dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
       } else {
-        if (containsReleased == datasetsStatusList.size()) {
+        if (releasedCount == datasetsStatusList.size()) {
           dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
-        } else if (containstechAccepted == datasetsStatusList.size()) {
+        } else if (techAcceptedCount == datasetsStatusList.size()) {
           dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
         } else if (containsCorrectionR) {
           dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
@@ -273,13 +272,14 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+
   /**
    * Gets the datasets status.
    *
-   * @param map the map
    * @return the datasets status
    */
-  private void getDatasetsStatus(Map<Long, List<DataflowStatusDataset>> map) {
+  private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus() {
+    Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
     List<Object[]> queryResult = dataflowRepository
         .getDataflows(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET)
             .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()));
@@ -297,6 +297,7 @@ public class DataflowServiceImpl implements DataflowService {
         map.put(dataflowStatusDataset.getId(), list2);
       }
     }
+    return map;
   }
 
   /**
