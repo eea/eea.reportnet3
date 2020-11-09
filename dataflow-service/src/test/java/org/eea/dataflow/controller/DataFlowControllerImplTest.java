@@ -186,6 +186,13 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void findCompleted() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
     when(dataflowService.getCompleted(Mockito.any(), Mockito.any())).thenReturn(new ArrayList<>());
     dataFlowControllerImpl.findCompleted(1, 1);
     assertEquals("fail", new ArrayList<>(),
