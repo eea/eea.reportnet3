@@ -34,6 +34,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -85,6 +86,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The collaboration controller zuul. */
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The data set metabase mapper. */
   @Autowired
@@ -254,12 +259,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
+    Long dataflowId = datasetStatusMessageVO.getDataflowId();
+    Long providerId = datasetMetabase.getDataProviderId();
+    EventType eventType = EventType.UPDATED_DATASET_STATUS;
+
     MessageVO message = new MessageVO();
     message.setContent(datasetStatusMessageVO.getMessage());
-    message.setProviderId(datasetMetabase.getDataProviderId());
+    message.setProviderId(providerId);
 
     // Send message to provider
-    dataFlowControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message);
+    collaborationControllerZuul.createMessage(dataflowId, message);
+    collaborationControllerZuul.notifyNewMessages(dataflowId, providerId, eventType.toString());
   }
 
 
