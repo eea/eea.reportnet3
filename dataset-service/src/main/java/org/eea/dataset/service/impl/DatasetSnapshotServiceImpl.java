@@ -71,7 +71,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
@@ -536,15 +535,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
     }
-  }
-
-  /**
-   * Sets the tenant.
-   *
-   * @param idDataset the new tenant
-   */
-  private void setTenant(Long idDataset) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
   }
 
   /**
