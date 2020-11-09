@@ -57,4 +57,15 @@ public interface CollaborationController {
   List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
+
+  /**
+   * Notify new messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param eventType the event type
+   */
+  @GetMapping("/private/notifyNewMessages")
+  void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("eventType") String eventType);
 }

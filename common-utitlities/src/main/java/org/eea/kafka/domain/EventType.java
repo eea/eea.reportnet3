@@ -315,7 +315,13 @@ public enum EventType {
       true),
 
   /** The create update rule event. */
-  CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true);
+  CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true),
+
+  /** The received message. */
+  RECEIVED_MESSAGE(LiteralConstants.DATA_REPORTING_TOPIC, "received_message", true),
+
+  /** The updated dataset status. */
+  UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true);
 
   /** The topic. */
   private String topic;

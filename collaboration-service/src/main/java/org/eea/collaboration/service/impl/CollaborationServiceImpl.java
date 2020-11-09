@@ -12,11 +12,13 @@ import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.CollaborationService;
+import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,10 @@ public class CollaborationServiceImpl implements CollaborationService {
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private CollaborationServiceHelper collaborationServiceHelper;
 
   /** The message repository. */
   @Autowired
@@ -93,6 +99,9 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setUserName(userName);
     message.setDirection(direction);
     message = messageRepository.save(message);
+
+    String eventType = EventType.RECEIVED_MESSAGE.toString();
+    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, eventType);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);

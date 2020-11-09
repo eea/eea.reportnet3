@@ -2,6 +2,7 @@ package org.eea.collaboration.controller;
 
 import java.util.List;
 import org.eea.collaboration.service.CollaborationService;
+import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
@@ -34,6 +35,9 @@ public class CollaborationControllerImpl implements CollaborationController {
   /** The collaboration service. */
   @Autowired
   private CollaborationService collaborationService;
+
+  @Autowired
+  private CollaborationServiceHelper collaborationServiceHelper;
 
   /**
    * Creates the message.
@@ -102,5 +106,19 @@ public class CollaborationControllerImpl implements CollaborationController {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
+  }
+
+  /**
+   * Notify new messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param eventType the event type
+   */
+  @Override
+  @GetMapping("/private/notifyNewMessages")
+  public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("eventType") String eventType) {
+    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, eventType);
   }
 }
