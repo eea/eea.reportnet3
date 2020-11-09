@@ -48,13 +48,12 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "DATE_RELEASED")
   private Date dateReleased;
 
-  /** The blocked. */
-  @Column(name = "BLOCKED")
-  private Boolean blocked;
-
   /** The data collection id. */
   @Column(name = "DATACOLLECTION_ID")
   private Long dataCollectionId;
+
+  @Column(name = "AUTOMATIC")
+  private Boolean automatic;
 
   /**
    * Equals.
@@ -82,7 +81,7 @@ public class Snapshot extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, reportingDataset);
+    return Objects.hash(id, description, reportingDataset, automatic);
   }
 
 }

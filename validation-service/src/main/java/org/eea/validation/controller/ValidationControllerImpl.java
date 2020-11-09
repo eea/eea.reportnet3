@@ -71,7 +71,8 @@ public class ValidationControllerImpl implements ValidationController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
   public void validateDataSetData(
-      @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId) {
+      @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @RequestParam(value = "released", required = false) boolean released) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -79,7 +80,7 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
+    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released);
   }
 
   /**

@@ -12,7 +12,6 @@ import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
@@ -40,10 +39,13 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.hibernate.exception.SQLGrammarException;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -67,27 +69,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
 
-  /**
-   * The dataset repository.
-   */
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /**
-   * The rules repository.
-   */
+  /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The dataset schema controller.
-   */
+  /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
@@ -95,22 +89,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
+  /** The eu dataset controller. */
   @Autowired
   private EUDatasetController euDatasetController;
 
+  /** The data collection controller. */
   @Autowired
   private DataCollectionController dataCollectionController;
 
-  /** The rule mapper. */
-  @Autowired
-  private DataSetControllerZuul datasetControllerZuul;
-
+  /** The representative controller. */
   @Autowired
   private RepresentativeController representativeController;
 
-  /**
-   * The rule mapper.
-   */
+  /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
 
@@ -154,9 +145,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
+   * @return true, if successful
    */
   @Override
-  public void validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
+  public boolean validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId,
       RuleVO ruleVO) {
     Rule rule = ruleMapper.classToEntity(ruleVO);
 
@@ -165,12 +157,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.FALSE)) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
+      rule.setEnabled(verifAndEnabled);
     }
-    rule.setEnabled(verifAndEnabled);
     rule.setVerified(verifAndEnabled);
     rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
         .append(rule.getRuleId().toString()).append("')").toString());
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+
+    return verifAndEnabled;
   }
 
   /**
@@ -194,7 +188,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
-   *
+   * @param ischeckDC the ischeck DC
    * @return the boolean
    */
 
@@ -211,12 +205,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           } else {
             preparedquery = query + " limit 5";
           }
-          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
-        } catch (SQLException e) {
-          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
-          isSQLCorrect = Boolean.FALSE;
-
-        } catch (Exception e) {
+          TableValue table = retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
+          if (null == table) {
+            isSQLCorrect = Boolean.FALSE;
+          }
+        } catch (PSQLException | SQLGrammarException e) {
           LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
@@ -226,7 +219,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     } else {
       isSQLCorrect = Boolean.FALSE;
     }
-
+    if (isSQLCorrect.equals(Boolean.FALSE)) {
+      LOG.info("Rule validation not passed: {}", rule);
+    } else {
+      LOG.info("Rule validation passed: {}", rule);
+    }
     return isSQLCorrect;
   }
 
@@ -276,16 +273,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
-   * @param ischeckDC
-   *
+   * @param ischeckDC the ischeck DC
    * @return the table value
-   *
    * @throws SQLException the SQL exception
    */
 
   @Override
   public TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws SQLException {
+      throws PSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
     Long idTable = null;
@@ -311,9 +306,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     TableValue table = new TableValue();
     try {
+      LOG.info("Query to be executed: {}", newQuery);
       table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
           idTable);
-    } catch (SQLException e) {
+    } catch (SQLGrammarException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
     if (ischeckDC.equals(Boolean.FALSE)) {
@@ -565,8 +561,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Long dataflowId =
           datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
 
-
-
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
         case DESIGN:
@@ -657,6 +651,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
 
 
+  /**
+   * Gets the list of datasets on query.
+   *
+   * @param query the query
+   * @return the list of datasets on query
+   */
   private Map<String, Long> getListOfDatasetsOnQuery(String query) {
     Map<String, Long> datasetSchamasMap = new HashMap<>();
     String dataset = "dataset_";
@@ -674,4 +674,61 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return datasetSchamasMap;
   }
 
+
+
+  /**
+   * Validate SQL rules.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Async
+  @Override
+  @Transactional
+  public void validateSQLRules(Long datasetId, String datasetSchemaId) {
+    List<Rule> errorRulesList = new ArrayList<>();
+    List<RuleVO> rulesSql =
+        ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
+    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+
+
+
+    if (null != rulesSql && !rulesSql.isEmpty()) {
+      rulesSql.stream().forEach(ruleVO -> {
+        Rule rule = ruleMapper.classToEntity(ruleVO);
+        if (validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.FALSE)) {
+          rule.setVerified(true);
+        } else {
+          rule.setVerified(false);
+          rule.setEnabled(false);
+          errorRulesList.add(rule);
+        }
+        rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+      });
+    }
+    if (!errorRulesList.isEmpty()) {
+
+      RulesSchema rulesdisabled =
+          rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
+      RulesSchema rulesUnchecked =
+          rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).dataflowId(dataflowId)
+          .invalidRules(rulesUnchecked.getRules().size())
+          .disabledRules(rulesdisabled.getRules().size()).build();
+      LOG.info("SQL rules contains errors");
+      releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+    } else {
+
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).dataflowId(dataflowId).build();
+      LOG.info("SQL rules contains 0 errors");
+      releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+    }
+  }
+
 }
+
+

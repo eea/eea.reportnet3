@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -51,13 +49,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
-
-  /** The data collection service. */
-  @Autowired
-  private DataCollectionService dataCollectionService;
 
   /** The reporting dataset repository. */
   @Autowired
@@ -150,8 +141,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot.getDescription(),
-        createSnapshot.getReleased(), null);
+    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null);
   }
 
   /**
@@ -451,4 +441,56 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId) {
     datasetSnapshotService.updateSnapshotEURelease(datasetId);
   }
+
+
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  @Override
+  @LockMethod(removeWhenFinish = false)
+  @HystrixCommand
+  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
+  public void createReleaseSnapshots(
+      @LockCriteria(name = "dataflowId") @PathVariable(value = "dataflowId",
+          required = true) Long dataflowId,
+      @LockCriteria(name = "dataProviderId") @PathVariable(value = "dataProviderId",
+          required = true) Long dataProviderId) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    try {
+      datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+  }
+
+
+  /**
+   * Release locks from release datasets.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  @Override
+  @PutMapping("/private/releaseLocksRelatedToReleaseDataset/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  public void releaseLocksFromReleaseDatasets(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId) {
+    try {
+      datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error releasing the locks in the operation release datasets. Error Message: {}",
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+  }
+
 }

@@ -268,6 +268,10 @@
     "value": "JHtTVFJFQU1fVElNRU9VVDozNjAwMDB9"
   },
   {
+    "key": "config/dataflow/message.maxLength",
+    "value": "JHtNRVNTQUdFX01BWF9MRU5HVEg6MTAwMDB9"
+  },
+  {
     "key": "config/recordstore/spring.datasource.url",
     "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
   },
@@ -1330,5 +1334,25 @@
   {
     "key": "config/recordstore/snapshot.task.parallelism",
     "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/collaboration/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/collaboration/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/collaboration/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/collaboration/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/collaboration/spring.jpa.hibernate.flushMode",
+    "value": "JHtGTFVTSF9NT0RFOmNvbW1pdH0="
   }
 ]

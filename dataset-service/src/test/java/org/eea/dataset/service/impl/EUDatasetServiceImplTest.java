@@ -148,10 +148,10 @@ public class EUDatasetServiceImplTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
         Mockito.any())).thenReturn(Optional.of(partitionDataset));
     doNothing().when(datasetSnapshotService).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
     euDatasetService.populateEUDatasetWithDataCollection(1L);
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**
@@ -209,7 +209,7 @@ public class EUDatasetServiceImplTest {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.any())).thenReturn(reportings);
     when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(Boolean.TRUE);
     assertTrue(euDatasetService.removeLocksRelatedToPopulateEU(1L));
-    Mockito.verify(lockService, times(4)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
 }
