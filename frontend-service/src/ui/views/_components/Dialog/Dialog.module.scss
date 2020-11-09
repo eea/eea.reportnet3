@@ -13,4 +13,12 @@
   ul li {
     margin-bottom: 0.5rem;
   }
+  &.alert {
+    :global .p-dialog-title {
+      color: var(--errors);
+    }
+    :global .p-dialog-content {
+      color: var(--errors);
+    }
+  }
 }

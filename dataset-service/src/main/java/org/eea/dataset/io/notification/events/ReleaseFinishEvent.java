@@ -46,7 +46,6 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
     notification.put("providerId", notificationVO.getProviderId());
-    notification.put("error", notificationVO.getError());
     return notification;
   }
 

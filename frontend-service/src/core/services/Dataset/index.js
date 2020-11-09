@@ -34,6 +34,7 @@ import { UpdateSchemaName } from './UpdateSchemaName';
 import { UpdateTableDescriptionDesign } from './UpdateTableDescriptionDesign';
 import { UpdateTableNameDesign } from './UpdateTableNameDesign';
 import { ValidateData } from './ValidateData';
+import { ValidateSqlRules } from './ValidateSqlRules';
 
 export const DatasetService = {
   addRecordFieldDesign: AddRecordFieldDesign({ datasetRepository }),
@@ -69,5 +70,6 @@ export const DatasetService = {
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
   updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
   updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),
-  validateDataById: ValidateData({ datasetRepository })
+  validateDataById: ValidateData({ datasetRepository }),
+  validateSqlRules: ValidateSqlRules({ datasetRepository })
 };

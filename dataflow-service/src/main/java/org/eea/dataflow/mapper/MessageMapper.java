@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 /**
  * The Interface MessageMapper.
  */
+@Deprecated
 @Mapper(componentModel = "spring")
 public interface MessageMapper extends IMapper<Message, MessageVO> {
 

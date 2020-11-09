@@ -439,4 +439,22 @@ public class DataSetSnapshotControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void testReleasingSnapshotsLock() throws Exception {
+    dataSetSnapshotControllerImpl.releaseLocksFromReleaseDatasets(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).releaseLocksRelatedToRelease(1L, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testReleasingSnapshotsLockException() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService).releaseLocksRelatedToRelease(1L, 1L);
+    try {
+      dataSetSnapshotControllerImpl.releaseLocksFromReleaseDatasets(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
 }
