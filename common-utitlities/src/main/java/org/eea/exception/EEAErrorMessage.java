@@ -63,7 +63,8 @@ public final class EEAErrorMessage {
   public static final String RECORD_NOTFOUND = "Record not found";
 
   /** The Constant RECORD_REQUIRED: {@value}. */
-  public static final String RECORD_REQUIRED = "Error inserting records. At least one record is required";
+  public static final String RECORD_REQUIRED =
+      "Error inserting records. At least one record is required";
 
   /** The Constant PARTITION_ID_NOTFOUND: {@value}. */
   public static final String PARTITION_ID_NOTFOUND = "Partition not found";
@@ -287,6 +288,15 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_UPDATING_TABLE_SCHEMA: {@value}. */
   public static final String ERROR_UPDATING_TABLE_SCHEMA =
       "Error updating the table with id schema %s from the dataset id %s";
+
+  /** The Constant ERROR_DELETING_SNAPSHOT: {@value}. */
+  public static final String ERROR_DELETING_SNAPSHOT = "Snapshot didn't deleted , It is Automatic";
+
+  /** The Constant MESSAGING_AUTHORIZATION_FAILED: {@value}. */
+  public static final String MESSAGING_AUTHORIZATION_FAILED = "Messaging authorization failed";
+
+  /** The Constant MESSAGING_BAD_REQUEST: {@value}. */
+  public static final String MESSAGING_BAD_REQUEST = "Missing required data";
 
   /**
    * Instantiates a new EEA error message.

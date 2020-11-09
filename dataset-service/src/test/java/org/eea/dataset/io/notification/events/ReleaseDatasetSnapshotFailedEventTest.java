@@ -34,7 +34,7 @@ public class ReleaseDatasetSnapshotFailedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT,
+    Assert.assertEquals(EventType.RELEASE_FAILED_EVENT,
         releaseDatasetSnapshotFailedEvent.getEventType());
   }
 
