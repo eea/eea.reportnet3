@@ -13,14 +13,18 @@ import { tables } from './article15.webform.json';
 import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { WebformTable } from './_components/WebformTable';
+import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 
 import { article15Reducer } from './_functions/Reducers/article15Reducer';
 
 import { Article15Utils } from './_functions/Utils/Article15Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const Article15 = ({ dataflowId, datasetId, isReporting = false, state }) => {
   const { datasetSchema } = state;
+  const { getWebformTabs } = Article15Utils;
+  const { onParseWebformData } = WebformsUtils;
+
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
   const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
@@ -40,10 +44,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
 
     article15Dispatch({
       type: 'INITIAL_LOAD',
-      payload: {
-        isVisible: Article15Utils.getWebformTabs(allTables, state.schemaTables, tables),
-        data: parsedData
-      }
+      payload: { isVisible: getWebformTabs(allTables, state.schemaTables, tables), data: parsedData }
     });
   };
 
@@ -60,49 +61,8 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
     article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
-  const onParseWebformData = (allTables, schemaTables) => {
-    const data = Article15Utils.mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
-    data.map(table => {
-      if (table.records) {
-        table.records[0].fields = table.records[0].fields.map(field => {
-          const { fieldId, recordId, type } = field;
-
-          return { fieldSchema: fieldId, fieldType: type, recordSchemaId: recordId, ...field };
-        });
-      }
-    });
-
-    for (let index = 0; index < data.length; index++) {
-      const table = data[index];
-
-      if (table.records) {
-        const { elements, records } = table;
-
-        const result = [];
-        for (let index = 0; index < elements.length; index++) {
-          if (elements[index].type === 'FIELD') {
-            result.push({
-              ...elements[index],
-              ...records[0].fields.find(element => element['name'] === elements[index]['name']),
-              type: elements[index].type
-            });
-          } else if (elements[index].type === 'TABLE') {
-            const filteredTable = datasetSchema.tables.filter(table => table.tableSchemaName === elements[index].name);
-            const parsedTable = onParseWebformData([elements[index]], filteredTable);
-
-            result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
-          }
-        }
-
-        table.elements = result;
-      }
-    }
-
-    return data;
-  };
-
   const onLoadData = () => {
-    if (!isEmpty(datasetSchema)) return onParseWebformData(tables, datasetSchema.tables);
+    if (!isEmpty(datasetSchema)) return onParseWebformData(datasetSchema, tables, datasetSchema.tables);
   };
 
   const renderWebFormContent = () => {
@@ -116,6 +76,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
         isReporting={isReporting}
         onTabChange={article15State.isVisible}
         webform={visibleContent}
+        webformType={'ARTICLE_15'}
       />
     );
   };
@@ -146,7 +107,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
             }
             iconPos={'right'}
             key={i}
-            label={webform.title}
+            label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
             style={{ display: isReporting && !isCreated ? 'none' : '' }}
           />
