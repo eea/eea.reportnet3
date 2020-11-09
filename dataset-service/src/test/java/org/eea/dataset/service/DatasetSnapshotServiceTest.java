@@ -24,6 +24,7 @@ import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -440,9 +441,14 @@ public class DatasetSnapshotServiceTest {
     representatives.add(rep);
     dataCollection.setId(1L);
     metabase.setDataProviderId(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setManualAcceptance(false);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     Mockito.when(snapshotRepository.findById(Mockito.any()))
@@ -498,7 +504,33 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(lockService, times(5)).removeLockByCriteria(Mockito.any());
   }
 
-
+  /**
+   * Release snapshot status.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void releaseSnapshotStatus() throws Exception {
+    DataSetMetabaseVO metabase = new DataSetMetabaseVO();
+    DataCollection dataCollection = new DataCollection();
+    dataCollection.setId(1L);
+    metabase.setDataProviderId(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setManualAcceptance(true);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
+    Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(dataCollection));
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
+    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
+  }
 
   /**
    * Test get schema snapshots.
