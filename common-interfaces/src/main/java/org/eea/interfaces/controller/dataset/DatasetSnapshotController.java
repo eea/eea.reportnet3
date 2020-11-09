@@ -210,4 +210,15 @@ public interface DatasetSnapshotController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
       @PathVariable(value = "dataProviderId", required = true) Long dataProviderId);
+
+
+  /**
+   * Release locks from release datasets.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  @PutMapping("/private/releaseLocksRelatedToReleaseDataset/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  void releaseLocksFromReleaseDatasets(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId);
 }

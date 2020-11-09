@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -84,6 +86,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The collaboration controller zuul. */
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The data set metabase mapper. */
   @Autowired
@@ -253,12 +259,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
+    Long dataflowId = datasetStatusMessageVO.getDataflowId();
+    Long providerId = datasetMetabase.getDataProviderId();
+    EventType eventType = EventType.UPDATED_DATASET_STATUS;
+
     MessageVO message = new MessageVO();
     message.setContent(datasetStatusMessageVO.getMessage());
-    message.setProviderId(datasetMetabase.getDataProviderId());
+    message.setProviderId(providerId);
 
     // Send message to provider
-    dataFlowControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message);
+    collaborationControllerZuul.createMessage(dataflowId, message);
+    collaborationControllerZuul.notifyNewMessages(dataflowId, providerId, eventType.toString());
   }
 
 
@@ -892,5 +903,28 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
 
     return providerIds;
+  }
+
+
+
+  /**
+   * Gets the last dataset validation for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
+   */
+  @Override
+  public Long getLastDatasetValidationForRelease(Long datasetId) {
+    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
+
   }
 }

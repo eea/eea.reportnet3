@@ -31,6 +31,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -95,6 +96,10 @@ public class DatasetMetabaseServiceTest {
   /** The user management controller zuul. */
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
+
+  /** The collaboration controller zuul. */
+  @Mock
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The resource management controller zuul. */
   @Mock
@@ -619,6 +624,26 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
 
+  /**
+   * Last dataset validation for releasing by id.
+   */
+  @Test
+  public void lastDatasetValidationForReleasingById() {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDataflowId(1L);
+    datasetMetabase.setDataProviderId(1L);
+    List<Long> datasetsId = new ArrayList();
+    datasetsId.add(1L);
+    datasetsId.add(2L);
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito
+        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
+        .thenReturn(datasetsId);
+    Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
+  }
+
   @Test(expected = EEAException.class)
   public void updateDatasetStatusExceptionTest() throws EEAException {
     try {
@@ -631,11 +656,13 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void updateDatasetStatusTest() throws EEAException {
-    DatasetStatusMessageVO datasetStatusMessage = new DatasetStatusMessageVO();
+
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
-    Mockito.verify(dataFlowControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any());
+    Mockito.verify(collaborationControllerZuul, times(1)).createMessage(Mockito.any(),
+        Mockito.any());
   }
+
 
 }

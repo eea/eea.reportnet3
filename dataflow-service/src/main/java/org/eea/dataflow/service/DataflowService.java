@@ -174,6 +174,7 @@ public interface DataflowService {
    * @return the message VO
    * @throws EEAException the EEA exception
    */
+  @Deprecated
   MessageVO createMessage(Long dataflowId, Long providerId, String content) throws EEAException;
 
   /**
@@ -186,6 +187,7 @@ public interface DataflowService {
    * @return the list
    * @throws EEAException the EEA exception
    */
+  @Deprecated
   List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAException;
 
@@ -196,5 +198,6 @@ public interface DataflowService {
    * @param messageVOs the message V os
    * @throws EEAException the EEA exception
    */
+  @Deprecated
   void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) throws EEAException;
 }

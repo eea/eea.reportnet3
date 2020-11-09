@@ -11,6 +11,7 @@ const allDesigner = async datasetSchemaId => {
             creationDate: snapshotDTO.creationDate,
             description: snapshotDTO.description,
             id: snapshotDTO.id,
+            isAutomatic: snapshotDTO.automatic,
             isBlocked: snapshotDTO.blocked,
             isReleased: snapshotDTO.release
           })
@@ -30,10 +31,6 @@ const restoreByIdDesigner = async (datasetSchemaId, snapshotId) => {
   return await apiSnapshot.restoreByIdDesigner(datasetSchemaId, snapshotId);
 };
 
-const releaseByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  return await apiSnapshot.releaseByIdDesigner(datasetSchemaId, snapshotId);
-};
-
 const allReporter = async datasetId => {
   const snapshotsDTO = await apiSnapshot.allReporter(datasetId);
 
@@ -43,6 +40,7 @@ const allReporter = async datasetId => {
         creationDate: snapshotDTO.creationDate,
         description: snapshotDTO.description,
         id: snapshotDTO.id,
+        isAutomatic: snapshotDTO.automatic,
         isBlocked: snapshotDTO.blocked,
         isReleased: snapshotDTO.release
       })
@@ -61,22 +59,19 @@ const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
   return await apiSnapshot.restoreByIdReporter(dataflowId, datasetId, snapshotId);
 };
 
-const releaseByIdReporter = async (dataflowId, datasetId, snapshotId) => {
-  const isReleased = await apiSnapshot.releaseByIdReporter(dataflowId, datasetId, snapshotId);
-
-  return new Snapshot({ id: snapshotId, isReleased });
+const releaseDataflow = async (dataflowId, dataProviderId) => {
+  return await apiSnapshot.releaseDataflow(dataflowId, dataProviderId);
 };
-
 export const ApiSnapshotRepository = {
   allDesigner,
   createByIdDesigner,
   deleteByIdDesigner,
   restoreByIdDesigner,
-  releaseByIdDesigner,
 
   allReporter,
   createByIdReporter,
   deleteByIdReporter,
   restoreByIdReporter,
-  releaseByIdReporter
+
+  releaseDataflow
 };

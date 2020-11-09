@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 import './Tooltip.scss';
 

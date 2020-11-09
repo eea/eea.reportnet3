@@ -114,7 +114,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
-      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id, status) values ('%s', %d, '%s', '%s', %d, 'PENDING') returning id";
 
   /** The Constant INSERT_RD_INTO_REPORTING_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_REPORTING_DATASET =
@@ -325,29 +325,35 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
+      LOG.info("Validate SQL Rules in Dataflow {},Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         List<RuleVO> rulesSql =
             rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
         if (null != rulesSql && !rulesSql.isEmpty()) {
-          rulesSql.stream().forEach(ruleVO -> {
-            rulesWithError.add(rulesControllerZuul.validateSqlRuleDataCollection(dataset.getId(),
-                dataset.getDatasetSchema(), ruleVO));
-          });
+          rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
+              .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
         }
       });
+      LOG.info("Data Collection contains SQL rules contains: {} errors", rulesWithError.size());
       if (stopAndNotifySQLErrors) {
-        long errorsCount =
-            rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE.equals(ruleStatus)).count();
-        if (errorsCount > 0) {
+        long errorsCount = rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE).count();
+        int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
+        if (errorsCount > 0 || disabledRules > 0) {
           NotificationVO notificationVO = NotificationVO.builder()
               .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
               .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
-              .disabledRules(rulesControllerZuul.getAllDisabledRules(dataflowId, designs)).build();
+              .disabledRules(disabledRules).build();
           LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
-          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
-          releaseLockAndNotification(dataflowId, null, isCreation);
+          // remove lock
+          String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
+          List<Object> criteria = new ArrayList<>();
+          criteria.add(methodSignature);
+          criteria.add(dataflowId);
+          lockService.removeLockByCriteria(criteria);
+          // release notification
           rulesOk = false;
+          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
         }
       }
     }
@@ -507,6 +513,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
       List<IntegrityVO> integritieVOs) throws SQLException {
     for (RepresentativeVO representative : representatives) {
+      // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
       datasetIdsEmails.put(datasetId, representative.getProviderAccount());

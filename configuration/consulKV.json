@@ -1334,5 +1334,25 @@
   {
     "key": "config/recordstore/snapshot.task.parallelism",
     "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/collaboration/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/collaboration/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/collaboration/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/collaboration/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/collaboration/spring.jpa.hibernate.flushMode",
+    "value": "JHtGTFVTSF9NT0RFOmNvbW1pdH0="
   }
 ]

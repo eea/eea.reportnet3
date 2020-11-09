@@ -470,4 +470,27 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
   }
+
+
+  /**
+   * Release locks from release datasets.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   */
+  @Override
+  @PutMapping("/private/releaseLocksRelatedToReleaseDataset/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  public void releaseLocksFromReleaseDatasets(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId) {
+    try {
+      datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error releasing the locks in the operation release datasets. Error Message: {}",
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+  }
+
 }

@@ -18,6 +18,13 @@ public enum DataType {
   TEXT("TEXT", JavaType.STRING),
 
   /**
+   * The Textarea.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  TEXTAREA("TEXTAREA", JavaType.STRING),
+
+  /**
    * The Text with more than 10000 characters.
    *
    * Cast in JPA: java.lang.String

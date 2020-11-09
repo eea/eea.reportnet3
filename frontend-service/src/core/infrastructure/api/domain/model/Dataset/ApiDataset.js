@@ -482,5 +482,19 @@ export const apiDataset = {
       console.error(`Error calling dataset data validation: ${error}`);
       return false;
     }
+  },
+  validateSqlRules: async (datasetId, datasetSchemaId) => {
+    try {
+      const response = await HTTPRequester.post({
+        url: getUrl(DatasetConfig.validateSql, {
+          datasetId,
+          datasetSchemaId
+        })
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error calling sql rules validation: ${error}`);
+      return false;
+    }
   }
 };

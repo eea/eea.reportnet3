@@ -589,6 +589,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Deprecated
   @Transactional
   public MessageVO createMessage(Long dataflowId, Long providerId, String content)
       throws EEAException {
@@ -622,9 +623,10 @@ public class DataflowServiceImpl implements DataflowService {
    * @param read the read
    * @param page the offset
    * @return the list
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
+  @Deprecated
   public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAException {
 
@@ -651,6 +653,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Deprecated
   @Transactional
   public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs)
       throws EEAException {
@@ -884,6 +887,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @return true if sender (reporter) or false if receiver (custodian)
    * @throws EEAException the EEA exception
    */
+  @Deprecated
   private boolean verifyMessagingPermissionsAndGetDirection(Long dataflowId, Long providerId)
       throws EEAException {
 
