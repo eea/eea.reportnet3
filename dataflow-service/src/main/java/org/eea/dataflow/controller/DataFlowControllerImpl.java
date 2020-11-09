@@ -119,25 +119,26 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+
   /**
-   * Find pending accepted.
+   * Find dataflows.
    *
    * @return the list
    */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find Dataflows in Pending or Accepted Status for the logged User",
+  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List")
-  public List<DataFlowVO> findPendingAccepted() {
+  public List<DataFlowVO> findDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getPendingAccepted(userId);
+      dataflows = dataflowService.getDataflows(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
