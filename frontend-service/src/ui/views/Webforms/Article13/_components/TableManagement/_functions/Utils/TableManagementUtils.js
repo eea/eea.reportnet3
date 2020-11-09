@@ -30,7 +30,23 @@ const parseTableSchemaColumns = schemaTables => {
   return columns;
 };
 
-const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {
+const parsePamsRecords = records =>
+  records.map(record => {
+    const { recordId, recordSchemaId } = record;
+    let data = {};
+
+    record.elements.forEach(
+      element =>
+        (data = {
+          ...data,
+          [element.name]: element.value,
+          recordId: recordId,
+          recordSchemaId: recordSchemaId
+        })
+    );
+  });
+
+const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTables) => {
   const getFilteredData = () => {
     if (isNil(parentTablesWithData) || isNil(schemaTables)) {
       return '';
@@ -95,19 +111,24 @@ const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {
     const additionalInfo = getAdditionalInfo(record);
     let data = {};
 
-    record.elements.forEach(
-      element =>
-        (data = {
-          ...data,
-          [element.name]: element.value,
-          recordId: recordId,
-          recordSchemaId: recordSchemaId,
-          tableSchemas: additionalInfo.tableSchemas
-        })
+    console.log({ record });
+    const fields = {};
+    record.elements.forEach(element =>
+      fields.push({
+        id: element.fieldId,
+        idFieldSchema: element.fieldSchemaId,
+        tableSchemas: additionalInfo.tableSchemas,
+        type: element.fieldType,
+        value: element.value
+      })
     );
+
+    data.fields = fields;
+    data.recordId = recordId;
+    data.recordSchemaId = recordSchemaId;
 
     return data;
   });
 };
 
-export const TableManagementUtils = { parsePamsRecords, parseTableSchemaColumns };
+export const TableManagementUtils = { parsePamsRecordsWithParentData, parsePamsRecords, parseTableSchemaColumns };

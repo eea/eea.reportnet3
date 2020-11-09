@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './TableManagement.module.scss';
 
@@ -11,6 +12,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { WebformDataForm } from './_components/WebformDataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
@@ -24,6 +26,7 @@ import { tableManagementReducer } from './_functions/Reducers/tableManagementRed
 import { useLoadColsSchemasAndColumnOptions } from 'ui/views/_components/DataViewer/_functions/Hooks/DataViewerHooks';
 
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
+import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 
@@ -39,7 +42,7 @@ export const TableManagement = ({
   schemaTables,
   tables
 }) => {
-  const { parsePamsRecords, parseTableSchemaColumns } = TableManagementUtils;
+  const { parsePamsRecordsWithParentData, parseTableSchemaColumns } = TableManagementUtils;
 
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
@@ -99,7 +102,8 @@ export const TableManagement = ({
   );
 
   const initialLoad = () => {
-    const parsedRecords = parsePamsRecords(records, parentTablesWithData, schemaTables);
+    console.log({ records });
+    const parsedRecords = parsePamsRecordsWithParentData(records, parentTablesWithData, schemaTables);
     const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
     console.log({ schemaTables, tableSchemaColumns });
     tableManagementDispatch({
@@ -286,6 +290,37 @@ export const TableManagement = ({
     );
   };
 
+  const dataTemplate = (rowData, column) => {
+    let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
+      const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+      const message = DataViewerUtils.formatValidations(validations);
+      const levelError = DataViewerUtils.getLevelError(validations);
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+          {field.fieldData[column.field]}
+          <IconTooltip levelError={levelError} message={message} />
+        </div>
+      );
+    } else {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+          {field.fieldData[column.field]}
+        </div>
+      );
+    }
+  };
+
   const renderActionButtonsColumn = (
     <Column
       body={row => renderActionsTemplate(row)}
@@ -336,7 +371,7 @@ export const TableManagement = ({
         key={col.field}
         field={col.field}
         header={col.header}
-        body={col.body}
+        body={dataTemplate}
       />
     ));
 
