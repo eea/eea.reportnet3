@@ -69,13 +69,14 @@ public interface DataFlowController {
   @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findUserDataflowsByStatus(@PathVariable("type") TypeRequestEnum type);
 
+
   /**
-   * Find pending accepted.
+   * Find dataflows.
    *
    * @return the list
    */
-  @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findPendingAccepted();
+  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findDataflows();
 
   /**
    * Update user request.

@@ -45,15 +45,13 @@ public interface DataflowService {
 
 
   /**
-   * Gets the pending accepted.
+   * Gets the dataflows.
    *
    * @param userId the user id
-   *
-   * @return the pending accepted
-   *
+   * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getPendingAccepted(String userId) throws EEAException;
+  List<DataFlowVO> getDataflows(String userId) throws EEAException;
 
 
   /**
@@ -196,7 +194,7 @@ public interface DataflowService {
    *
    * @param dataflowId the dataflow id
    * @param messageVOs the message V os
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) throws EEAException;
 }

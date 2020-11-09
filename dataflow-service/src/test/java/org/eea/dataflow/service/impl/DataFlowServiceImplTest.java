@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,7 +19,6 @@ import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.mapper.MessageMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
-import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Message;
 import org.eea.dataflow.persistence.domain.Representative;
@@ -50,6 +50,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -266,41 +267,15 @@ public class DataFlowServiceImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void getPendingAccepted() throws EEAException {
-    List<DataflowWithRequestType> dataflows = new ArrayList<>();
-    Dataflow dataflow = new Dataflow();
-    dataflow.setId(1L);
-    DataflowWithRequestType df = new DataflowWithRequestType() {
-
-      @Override
-      public TypeRequestEnum getTypeRequestEnum() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public Long getRequestId() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public Dataflow getDataflow() {
-        // TODO Auto-generated method stub
-        return dataflow;
-      }
-    };
-    dataflows.add(df);
-    when(dataflowRepository.findPending(Mockito.any())).thenReturn(dataflows);
-
+  public void getDataflows() throws EEAException {
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setId(1L);
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dfVO.setObligation(obligation);
+    dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
     List<DataFlowVO> dataflowsVO = new ArrayList<>();
     dataflowsVO.add(dfVO);
-    when(dataflowNoContentMapper.entityListToClass(Mockito.any())).thenReturn(dataflowsVO);
 
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -308,16 +283,22 @@ public class DataFlowServiceImplTest {
     resources.add(resource);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resources);
+    Object[] object = {BigInteger.ONE, DatasetStatusEnum.CORRECTION_REQUESTED.toString()};
+    Object[] object1 = {BigInteger.ONE, DatasetStatusEnum.FINAL_FEEDBACK.toString()};
+    Object[] object2 = {BigInteger.ONE, DatasetStatusEnum.PENDING.toString()};
+    Object[] object3 = {BigInteger.ONE, DatasetStatusEnum.TECHNICALLY_ACCEPTED.toString()};
+    Object[] object4 = {BigInteger.ONE, DatasetStatusEnum.RELEASED.toString()};
+    List<Object[]> listObject =
+        new ArrayList<>(Arrays.asList(object, object1, object2, object3, object4));
+    when(dataflowRepository.getDataflows(Mockito.any())).thenReturn(listObject);
 
-    Optional<Dataflow> df2 = Optional.of(df.getDataflow());
-
-    dataflowServiceImpl.getPendingAccepted(Mockito.any());
+    dataflowServiceImpl.getDataflows(Mockito.any());
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
     Mockito.when(dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(Mockito.any()))
         .thenReturn(list);
-    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(new DataFlowVO());
-    assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
+    assertEquals("fail", dataflowsVO, dataflowServiceImpl.getDataflows(Mockito.any()));
   }
 
   /**

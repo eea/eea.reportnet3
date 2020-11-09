@@ -10,19 +10,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum DatasetStatusEnum {
 
   /** The final feedback. */
-  FINAL_FEEDBACK("Final feedback"),
+  FINAL_FEEDBACK("FINAL_FEEDBACK"),
 
   /** The technically accept. */
-  TECHNICALLY_ACCEPT("Technically accept"),
+  TECHNICALLY_ACCEPTED("TECHNICALLY_ACCEPTED"),
 
   /** The pending release. */
-  PENDING_RELEASE("Pending release"),
+  PENDING("PENDING"),
 
   /** The correction requested. */
-  CORRECTION_REQUESTED("Correction requested"),
-  
+  CORRECTION_REQUESTED("CORRECTION_REQUESTED"),
+
   /** The released. */
-  RELEASED("Released");
+  RELEASED("RELEASED");
 
   /** The value. */
   private final String value;
