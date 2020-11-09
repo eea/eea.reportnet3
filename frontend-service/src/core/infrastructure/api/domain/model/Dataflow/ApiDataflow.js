@@ -12,7 +12,7 @@ export const apiDataflow = {
   },
   all: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
 
     return response.data;
@@ -25,7 +25,7 @@ export const apiDataflow = {
   },
   accepted: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
     return response.data;
   },
@@ -40,7 +40,7 @@ export const apiDataflow = {
   },
   completed: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
     return response.data;
   },
@@ -96,7 +96,7 @@ export const apiDataflow = {
   },
   pending: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
 
     return response.data;
