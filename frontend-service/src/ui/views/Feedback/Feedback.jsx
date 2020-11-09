@@ -112,6 +112,13 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   }, [userContext]);
 
+  useEffect(() => {
+    const textArea = document.querySelector(`.${styles.sendMessageTextarea}`);
+    if (textArea && textArea.scrollHeight > '48') {
+      textArea.style.height = `${textArea.scrollHeight}px`;
+    }
+  }, [messageToSend]);
+
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
   const onChangeDataProvider = value => {
@@ -161,9 +168,13 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onKeyChange = event => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       onSendMessage(event.target.value);
+    }
+    if (event.key === 'Enter' && event.shiftKey) {
+      event.preventDefault();
+      dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: `${messageToSend} \r\n` } });
     }
   };
 
@@ -267,7 +278,7 @@ export const Feedback = withRouter(({ match, history }) => {
             <InputTextarea
               // autoFocus={true}
               className={styles.sendMessageTextarea}
-              collapsedHeight={100}
+              collapsedHeight={50}
               // expandableOnClick={true}
               disabled={isCustodian && isEmpty(selectedDataProvider)}
               id="feedbackSender"
