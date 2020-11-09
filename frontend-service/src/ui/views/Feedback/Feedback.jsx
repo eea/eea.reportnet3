@@ -257,23 +257,20 @@ export const Feedback = withRouter(({ match, history }) => {
           className={`${styles.listMessagesWrapper} ${
             isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
           }`}>
-          {isLoading ? (
-            <Spinner className={styles.spinnerLoadingMessages} />
-          ) : (
-            <ListMessages
-              canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
-              className={`feedback-messages-help-step`}
-              emptyMessage={
-                isCustodian && isEmpty(selectedDataProvider)
-                  ? resources.messages['noMessagesCustodian']
-                  : resources.messages['noMessages']
-              }
-              isCustodian={isCustodian}
-              messages={messages}
-              newMessageAdded={newMessageAdded}
-              onLazyLoad={onGetMoreMessages}
-            />
-          )}
+          <ListMessages
+            canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
+            className={`feedback-messages-help-step`}
+            emptyMessage={
+              isCustodian && isEmpty(selectedDataProvider)
+                ? resources.messages['noMessagesCustodian']
+                : resources.messages['noMessages']
+            }
+            isCustodian={isCustodian}
+            isLoading={isLoading}
+            messages={messages}
+            newMessageAdded={newMessageAdded}
+            onLazyLoad={onGetMoreMessages}
+          />
           <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
             <InputTextarea
               // autoFocus={true}
