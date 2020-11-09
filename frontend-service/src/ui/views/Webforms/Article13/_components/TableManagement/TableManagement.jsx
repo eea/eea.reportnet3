@@ -27,7 +27,8 @@ import { useLoadColsSchemasAndColumnOptions } from 'ui/views/_components/DataVie
 
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
-import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
+import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 
 export const TableManagement = ({
@@ -42,7 +43,11 @@ export const TableManagement = ({
   schemaTables,
   tables
 }) => {
-  const { parsePamsRecordsWithParentData, parseTableSchemaColumns } = TableManagementUtils;
+  const {
+    getFieldSchemaColumnIdByHeader,
+    parsePamsRecordsWithParentData,
+    parseTableSchemaColumns
+  } = TableManagementUtils;
 
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
@@ -103,50 +108,77 @@ export const TableManagement = ({
 
   const initialLoad = () => {
     console.log({ records });
-    const parsedRecords = parsePamsRecordsWithParentData(records, parentTablesWithData, schemaTables);
-    const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
-    console.log({ schemaTables, tableSchemaColumns });
-    tableManagementDispatch({
-      type: 'INITIAL_LOAD',
-      payload: {
-        records: parsedRecords,
-        tableSchemaColumns,
-        tableColumns: [
-          { field: 'Id', header: 'PaM Number' },
-          { field: 'Title', header: 'Name of policy or measure' },
-          { field: 'IsGroup', header: 'PaM or group of PaMs' },
-          {
-            field: 'ListOfSinglePams',
-            header: 'Which policies or measures does it cover?'
-          },
-          {
-            field: 'ShortDescription',
-            header: 'Short description'
-          },
-          {
-            body: addTableTemplate,
-            field: 'Table_1',
-            header:
-              'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
-          },
-          {
-            body: addTableTemplate,
-            field: 'Table_2',
-            header:
-              'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
-          },
-          {
-            body: addTableTemplate,
-            field: 'Table_3',
-            header:
-              'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
-          },
-          {
-            field: 'TableSchemas'
-          }
-        ]
-      }
-    });
+    if (!isEmpty(records)) {
+      // console.log({ parsedTables, parentTablesWithData });
+      const parsedRecordsWithValidations = DataViewerUtils.parseData(parentTablesWithData[0].data);
+      const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
+      console.log({ parsedRecordsWithValidations, tableSchemaColumns });
+      const parsedTables = parsePamsRecordsWithParentData(
+        parsedRecordsWithValidations,
+        parentTablesWithData,
+        schemaTables
+      );
+
+      console.log({ schemaTables });
+      tableManagementDispatch({
+        type: 'INITIAL_LOAD',
+        payload: {
+          records: parsedTables,
+          tableSchemaColumns,
+          tableColumns: [
+            {
+              field: 'Id',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id'),
+              header: 'PaM Number'
+            },
+            {
+              field: 'Title',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Title'),
+              header: 'Name of policy or measure'
+            },
+            {
+              field: 'IsGroup',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'IsGroup'),
+              header: 'PaM or group of PaMs'
+            },
+            {
+              field: 'ListOfSinglePams',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'ListOfSinglePams'),
+              header: 'Which policies or measures does it cover?'
+            },
+            {
+              field: 'ShortDescription',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'ShortDescription'),
+              header: 'Short description'
+            },
+            {
+              body: addTableTemplate,
+              field: 'Table_1',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_1'),
+              header:
+                'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
+            },
+            {
+              body: addTableTemplate,
+              field: 'Table_2',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_2'),
+              header:
+                'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
+            },
+            {
+              body: addTableTemplate,
+              field: 'Table_3',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_3'),
+              header:
+                'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
+            },
+            {
+              field: 'TableSchemas'
+            }
+          ]
+        }
+      });
+    }
   };
 
   const manageDialogs = (dialog, value) => {
@@ -201,6 +233,7 @@ export const TableManagement = ({
       };
     });
     Promise.all(parentTablesDataPromises).then(parentTableData => {
+      console.log({ parentTableData });
       tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
     });
   };
@@ -256,8 +289,18 @@ export const TableManagement = ({
   };
 
   const addTableTemplate = (rowData, colData) => {
-    const hasRecord = rowData.tableSchemas.filter(tableSchema => tableSchema.tableSchemaName === colData.field)[0]
-      .hasRecord;
+    let hasRecord = false;
+    rowData.dataRow.forEach(row =>
+      row.fieldData.tableSchemas.forEach(tableSchema => {
+        if (tableSchema.tableSchemaName === colData.field) {
+          hasRecord = tableSchema.hasRecord;
+        }
+      })
+    );
+
+    const pamsIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
+    const pamsFieldSchemaValue = RecordUtils.getCellValue({ rowData: rowData }, pamsIdFieldSchemaId);
+
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
@@ -266,7 +309,7 @@ export const TableManagement = ({
           label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
           onClick={() => {
             if (hasRecord) {
-              onSelectEditTable(rowData.Id, colData.field);
+              onSelectEditTable(pamsFieldSchemaValue, colData.field);
             } else {
               const configParentTables = Object.keys(
                 Article15Utils.getWebformTabs(
@@ -280,7 +323,7 @@ export const TableManagement = ({
                   schemaTable =>
                     configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
                 )[0],
-                rowData.Id
+                pamsFieldSchemaValue
               );
             }
           }}
@@ -291,7 +334,8 @@ export const TableManagement = ({
   };
 
   const dataTemplate = (rowData, column) => {
-    let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.fieldSchemaId)[0];
+    console.log({ rowData, field, column });
     if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
@@ -365,13 +409,15 @@ export const TableManagement = ({
   // };
 
   const renderTableColumns = () => {
+    console.log({ tableColumns, tableSchemaColumns });
     const data = tableColumns.map(col => (
       <Column
-        className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
+        className={col.header === 'TableSchemas' ? styles.invisibleHeader : ''}
         key={col.field}
         field={col.field}
+        fieldSchemaId={col.fieldSchemaId}
         header={col.header}
-        body={dataTemplate}
+        body={!['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate}
       />
     ));
 

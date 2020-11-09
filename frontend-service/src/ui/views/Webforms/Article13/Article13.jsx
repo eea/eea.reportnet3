@@ -70,11 +70,11 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
-
     const recordIds = parsePamsRecords(pamsRecords)
       .map(record => parseInt(record.Id))
       .filter(id => !Number.isNaN(id));
 
+    console.log({ recordIds });
     return Math.max(...recordIds) + 1;
   };
 
@@ -141,33 +141,34 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onLoadPamsData = async () => {
-    const tableSchemaId = article13State.data.map(table => table.tableSchemaId);
-
+    const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
-      const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
-        'CORRECT',
-        'INFO',
-        'WARNING',
-        'ERROR',
-        'BLOCKER'
-      ]);
+      if (!isNil(tableSchemaId[0])) {
+        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
+          'CORRECT',
+          'INFO',
+          'WARNING',
+          'ERROR',
+          'BLOCKER'
+        ]);
+        console.log({ parentTableData });
+        if (!isNil(parentTableData.records)) {
+          const tableData = {};
 
-      if (!isNil(parentTableData.records)) {
-        const tableData = {};
+          const records = onParseWebformRecords(
+            parentTableData.records,
+            article13State.data[0],
+            tableData,
+            parentTableData.totalRecords
+          );
 
-        const records = onParseWebformRecords(
-          parentTableData.records,
-          article13State.data[0],
-          tableData,
-          parentTableData.totalRecords
-        );
+          const list = getTypeList(records);
 
-        const list = getTypeList(records);
-
-        article13Dispatch({
-          type: 'ON_LOAD_PAMS_DATA',
-          payload: { records, group: list['group'], single: list['single'] }
-        });
+          article13Dispatch({
+            type: 'ON_LOAD_PAMS_DATA',
+            payload: { records, group: list['group'], single: list['single'] }
+          });
+        }
       }
     } catch (error) {
       console.log('error', error);
@@ -225,6 +226,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       </div>
 
       <ul className={styles.tableList}>
+        {console.log(tableList)}
         {Object.keys(tableList).map(list => (
           <li className={styles.tableListItem}>
             <div className={styles.tableListTitleWrapper}>

@@ -1,6 +1,17 @@
 import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 
+import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
+
+const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
+  const filteredSchemaColumn = tableSchemaColumns.filter(tableSchemaColumn => tableSchemaColumn.header === header);
+  if (!isNil(filteredSchemaColumn) && !isEmpty(filteredSchemaColumn)) {
+    return filteredSchemaColumn[0].field;
+  } else {
+    return '';
+  }
+};
+
 const parseTableSchemaColumns = schemaTables => {
   console.log(schemaTables);
   const columns = [];
@@ -34,7 +45,7 @@ const parsePamsRecords = records =>
   records.map(record => {
     const { recordId, recordSchemaId } = record;
     let data = {};
-
+    debugger;
     record.elements.forEach(
       element =>
         (data = {
@@ -79,21 +90,30 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
     }
 
     const getHasRecordByPaMId = table => {
-      const fkPamId = filteredSchemaTables.filter(
+      const filteredSchemaTablesPams = filteredSchemaTables.filter(
         filteredSchemaTable => filteredSchemaTable.tableSchemaId === table.tableSchemaId
-      )[0].pamField.fieldSchema;
-      const pamValue = record.elements.filter(element => element.name === 'Id')[0].value;
-      let hasRecord = false;
-      table.data.records.forEach(record => {
-        if (!isEmpty(record.fields)) {
-          record.fields.forEach(field => {
-            if (field.fieldSchemaId === fkPamId && parseInt(field.value) === parseInt(pamValue)) {
-              hasRecord = true;
-            }
-          });
-        }
-      });
-      return hasRecord;
+      );
+      console.log({ filteredSchemaTablesPams, schemaTables });
+      if (!isNil(filteredSchemaTablesPams) && !isEmpty(filteredSchemaTablesPams)) {
+        const fkPamId = filteredSchemaTablesPams[0].pamField.fieldSchema;
+        const pamSchemaId = schemaTables
+          .filter(table => table.header === 'PaMs')[0]
+          .records[0].fields.filter(field => field.name === 'Id')[0].fieldId;
+        const pamValue = RecordUtils.getCellValue({ rowData: record }, pamSchemaId);
+        let hasRecord = false;
+        table.data.records.forEach(record => {
+          if (!isEmpty(record.fields)) {
+            record.fields.forEach(field => {
+              if (field.fieldSchemaId === fkPamId && parseInt(field.value) === parseInt(pamValue)) {
+                hasRecord = true;
+              }
+            });
+          }
+        });
+        return hasRecord;
+      } else {
+        return false;
+      }
     };
 
     const parentTablesIds = filteredParentTablesWithData.map(table => {
@@ -109,26 +129,33 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
   return records.map(record => {
     const { recordId, recordSchemaId } = record;
     const additionalInfo = getAdditionalInfo(record);
-    let data = {};
+    // let data = {};
 
     console.log({ record });
-    const fields = {};
-    record.elements.forEach(element =>
-      fields.push({
-        id: element.fieldId,
-        idFieldSchema: element.fieldSchemaId,
-        tableSchemas: additionalInfo.tableSchemas,
-        type: element.fieldType,
-        value: element.value
+    // const fields = [];
+
+    // data.dataRow = fields;
+    // data.recordId = recordId;
+    // data.recordSchemaId = recordSchemaId;
+
+    return {
+      ...record,
+      dataRow: record.dataRow.map(element => {
+        return {
+          ...element,
+          fieldData: {
+            ...element.fieldData,
+            tableSchemas: additionalInfo.tableSchemas
+          }
+        };
       })
-    );
-
-    data.fields = fields;
-    data.recordId = recordId;
-    data.recordSchemaId = recordSchemaId;
-
-    return data;
+    };
   });
 };
 
-export const TableManagementUtils = { parsePamsRecordsWithParentData, parsePamsRecords, parseTableSchemaColumns };
+export const TableManagementUtils = {
+  getFieldSchemaColumnIdByHeader,
+  parsePamsRecordsWithParentData,
+  parsePamsRecords,
+  parseTableSchemaColumns
+};
