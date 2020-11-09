@@ -31,6 +31,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -95,6 +96,10 @@ public class DatasetMetabaseServiceTest {
   /** The user management controller zuul. */
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
+
+  /** The collaboration controller zuul. */
+  @Mock
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The resource management controller zuul. */
   @Mock
@@ -655,7 +660,8 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
-    Mockito.verify(dataFlowControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any());
+    Mockito.verify(collaborationControllerZuul, times(1)).createMessage(Mockito.any(),
+        Mockito.any());
   }
 
 
