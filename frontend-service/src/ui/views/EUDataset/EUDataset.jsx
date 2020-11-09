@@ -199,9 +199,8 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const onLoadTableData = hasData => euDatasetDispatch({ type: 'ON_LOAD_TABLE_DATA', payload: { hasData } });
 
-  const onTabChange = tableSchemaId => {
-    euDatasetDispatch({ type: 'ON_TAB_CHANGE', payload: { activeIndex: tableSchemaId.index } });
-  };
+  const onTabChange = table =>
+    euDatasetDispatch({ type: 'ON_TAB_CHANGE', payload: { tableSchemaId: table.tableSchemaId } });
 
   const onSetIsValidationSelected = value => euDatasetDispatch({ type: 'IS_VALIDATION_SELECTED', payload: { value } });
 
@@ -213,7 +212,6 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
-      activeIndex={dataViewerOptions.activeIndex}
       hasWritePermissions={false}
       showWriteButtons={false}
       isDatasetDeleted={isDataDeleted}
@@ -224,12 +222,13 @@ export const EUDataset = withRouter(({ history, match }) => {
       isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
-      onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+      onTabChange={table => onTabChange(table)}
       recordPositionId={dataViewerOptions.recordPositionId}
       selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
       setIsValidationSelected={onSetIsValidationSelected}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
+      tableSchemaId={dataViewerOptions.tableSchemaId}
     />
   );
 
