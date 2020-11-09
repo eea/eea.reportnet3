@@ -49,6 +49,9 @@ export const webformRecordReducer = (state, { type, payload }) => {
     case 'SET_IS_DELETING':
       return { ...state, isDeleting: payload.isDeleting };
 
+    case 'SET_SECTOR_AFFECTED':
+      return { ...state, sectorAffectedValue: payload.value };
+
     default:
       return state;
   }

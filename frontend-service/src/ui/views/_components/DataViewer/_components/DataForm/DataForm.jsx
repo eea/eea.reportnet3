@@ -18,7 +18,7 @@ const DataForm = ({
   getTooltipMessage,
   hasWritePermissions,
   onChangeForm,
-  onShowCoordinateError,
+  onShowCoordinateError = () => {},
   records,
   reporting,
   onShowFieldInfo

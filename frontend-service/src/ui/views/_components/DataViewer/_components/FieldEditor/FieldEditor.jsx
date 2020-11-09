@@ -11,6 +11,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -189,6 +190,20 @@ const FieldEditor = ({
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
+            value={RecordUtils.getCellValue(cells, cells.field)}
+            maxLength={textCharacters}
+          />
+        );
+      case 'TEXTAREA':
+        return (
+          <InputTextarea
+            collapsedHeight={75}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record, false, '', type)}
             value={RecordUtils.getCellValue(cells, cells.field)}
             maxLength={textCharacters}
           />

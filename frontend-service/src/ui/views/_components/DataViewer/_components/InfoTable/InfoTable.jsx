@@ -73,6 +73,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       case 'DATE':
         return dateCharacters;
       case 'TEXT':
+      case 'TEXTAREA':
         return textCharacters;
       case 'RICH_TEXT':
       case 'LINK':
