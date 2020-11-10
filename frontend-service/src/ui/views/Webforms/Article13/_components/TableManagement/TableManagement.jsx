@@ -23,8 +23,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { tableManagementReducer } from './_functions/Reducers/tableManagementReducer';
 
-import { useLoadColsSchemasAndColumnOptions } from 'ui/views/_components/DataViewer/_functions/Hooks/DataViewerHooks';
-
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
@@ -64,6 +62,7 @@ export const TableManagement = ({
   });
 
   const {
+    initialSelectedRecord,
     isDialogVisible,
     isSaving,
     parentTablesWithData,
@@ -71,8 +70,6 @@ export const TableManagement = ({
     tableColumns,
     tableSchemaColumns
   } = tableManagementState;
-
-  const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableManagementState.tableSchemaColumns);
 
   useEffect(() => {
     onLoadParentTablesData();
@@ -84,6 +81,12 @@ export const TableManagement = ({
     }
   }, [parentTablesWithData]);
 
+  const onCancelRowEdit = () => {
+    const inmRecords = [...tableManagementState.records];
+    const recordIndex = RecordUtils.getRecordId(tableManagementState.records, selectedRecord);
+    inmRecords[recordIndex] = initialSelectedRecord;
+    tableManagementDispatch({ type: 'RESET_SELECTED_RECORD', payload: { records: inmRecords } });
+  };
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -109,19 +112,15 @@ export const TableManagement = ({
   );
 
   const initialLoad = () => {
-    console.log({ records });
     if (!isEmpty(records)) {
-      // console.log({ parsedTables, parentTablesWithData });
       const parsedTables = DataViewerUtils.parseData(parentTablesWithData[0].data);
       const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
-      console.log({ tableSchemaColumns });
       const parsedRecordsWithValidations = parsePamsRecordsWithParentData(
         parsedTables,
         parentTablesWithData,
         schemaTables
       );
 
-      console.log({ schemaTables });
       tableManagementDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -183,10 +182,6 @@ export const TableManagement = ({
   const manageDialogs = (dialog, value) =>
     tableManagementDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
 
-  const onCancelRowEdit = () => {
-    tableManagementDispatch({ type: 'RESET_SELECTED_RECORD' });
-  };
-
   const onDeleteRow = async () => {
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
@@ -225,12 +220,14 @@ export const TableManagement = ({
   const onLoadParentTablesData = () => {
     const configParentTables = Object.keys(
       Article15Utils.getWebformTabs(
-        tables.map(table => table.name),
+        tables.map(table => table.name.toUpperCase()),
         schemaTables,
         tables
       )
     );
-    const parentTables = schemaTables.filter(schemaTable => configParentTables.includes(schemaTable.header));
+    const parentTables = schemaTables.filter(schemaTable =>
+      configParentTables.includes(schemaTable.header.toUpperCase())
+    );
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       return {
         tableSchemaId: parentTable.tableSchemaId,
@@ -245,84 +242,73 @@ export const TableManagement = ({
       };
     });
     Promise.all(parentTablesDataPromises).then(parentTableData => {
-      console.log({ parentTableData });
       tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
     });
   };
 
   const onSaveRecord = async record => {
-    //Delete hidden column null values (datasetPartitionId and id)
-    // record.dataRow = record.dataRow.filter(
-    //   field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
-    // );
-    // //Check invalid coordinates and replace them
-    // record = MapUtils.changeIncorrectCoordinates(record);
-    // if (isNewRecord) {
-    //   try {
-    //     setIsSaving(true);
-    //     await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
-    //     setIsTableDeleted(false);
-    //     onRefresh();
-    //   } catch (error) {
-    //     const {
-    //       dataflow: { name: dataflowName },
-    //       dataset: { name: datasetName }
-    //     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    //     notificationContext.add({
-    //       type: 'ADD_RECORDS_BY_ID_ERROR',
-    //       content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-    //     });
-    //   } finally {
-    //     if (!addAnotherOne) {
-    //       setAddDialogVisible(false);
-    //     }
-    //     setIsLoading(false);
-    //     setIsSaving(false);
-    //   }
-    // } else {
-    //   try {
-    //     await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
-    //     onRefresh();
-    //   } catch (error) {
-    //     const {
-    //       dataflow: { name: dataflowName },
-    //       dataset: { name: datasetName }
-    //     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    //     notificationContext.add({
-    //       type: 'UPDATE_RECORDS_BY_ID_ERROR',
-    //       content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-    //     });
-    //   } finally {
-    //     onCancelRowEdit();
-    //     setIsLoading(false);
-    //     setIsSaving(false);
-    //   }
-    // }
+    record.dataRow = record.dataRow.filter(
+      field => !['datasetPartitionId', 'id'].includes(Object.keys(field.fieldData)[0])
+    );
+    try {
+      tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
+      await DatasetService.updateRecordsById(datasetId, record);
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'UPDATE_RECORDS_BY_ID_ERROR',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
+    } finally {
+      tableManagementDispatch({ type: 'ON_SAVE_RECORD' });
+      onRefresh();
+    }
+  };
+
+  const addIconLevelError = (validation, levelError, message) => {
+    let icon = [];
+    if (!isEmpty(validation)) {
+      icon.push(
+        <IconTooltip
+          className={styles.iconTooltipLevelError}
+          key={levelError}
+          levelError={levelError}
+          message={message}
+        />
+      );
+    }
+    return icon;
   };
 
   const addTableTemplate = (rowData, colData) => {
     let hasRecord = false;
+    let hasTable = false;
     rowData.dataRow.forEach(row =>
       row.fieldData.tableSchemas.forEach(tableSchema => {
         if (tableSchema.tableSchemaName === colData.field) {
           hasRecord = tableSchema.hasRecord;
+          hasTable = true;
         }
       })
     );
 
     const pamsIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
     const pamsFieldSchemaValue = RecordUtils.getCellValue({ rowData: rowData }, pamsIdFieldSchemaId);
-
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
           className={'p-button-secondary'}
-          icon={hasRecord ? 'edit' : 'add'}
+          disabled={!hasTable || isSaving}
+          icon={isSaving ? 'spinnerAnimate' : hasRecord ? 'edit' : 'add'}
           label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
-          onClick={() => {
+          onClick={async () => {
             if (hasRecord) {
               onSelectEditTable(pamsFieldSchemaValue, colData.field);
             } else {
+              tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
               const configParentTables = Object.keys(
                 Article15Utils.getWebformTabs(
                   tables.map(table => table.name),
@@ -330,16 +316,17 @@ export const TableManagement = ({
                   tables
                 )
               );
-              onAddTableRecord(
+              await onAddTableRecord(
                 schemaTables.filter(
                   schemaTable =>
-                    configParentTables.includes(colData.field) && schemaTable.tableSchemaName === colData.field
+                    configParentTables.includes(colData.field) &&
+                    schemaTable.tableSchemaName.toUpperCase() === colData.field.toUpperCase()
                 )[0],
                 pamsFieldSchemaValue
               );
+              tableManagementDispatch({ type: 'SET_IS_SAVING', payload: false });
             }
           }}
-          // onClick={() => setTableToCreate(rowData.table3)}
         />
       </div>
     );
@@ -347,34 +334,50 @@ export const TableManagement = ({
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.fieldSchemaId)[0];
-    // console.log({ rowData, field, column });
-    if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
-      const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
-      const message = DataViewerUtils.formatValidations(validations);
-      const levelError = DataViewerUtils.getLevelError(validations);
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-          {field.fieldData[column.fieldSchemaId]}
-          <IconTooltip levelError={levelError} message={message} />
-        </div>
-      );
-    } else {
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-          {field.fieldData[column.fieldSchemaId]}
-        </div>
-      );
+    if (!isNil(field) && !isNil(field.fieldData)) {
+      if (!isNil(field.fieldValidations)) {
+        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+        const message = DataViewerUtils.formatValidations(validations);
+        const levelError = DataViewerUtils.getLevelError(validations);
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+            {field.fieldData[column.fieldSchemaId]}
+            <IconTooltip levelError={levelError} message={message} />
+          </div>
+        );
+      } else {
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+            {field.fieldData[column.fieldSchemaId]}
+          </div>
+        );
+      }
     }
+  };
+
+  const getIconsValidationsErrors = validations => {
+    let icons = [];
+    if (isNil(validations)) {
+      return icons;
+    }
+
+    const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
+    const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
+    const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
+    const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
+
+    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
+    return <div className={styles.iconTooltipWrapper}>{icons}</div>;
   };
 
   const renderActionButtonsColumn = (
@@ -392,36 +395,29 @@ export const TableManagement = ({
       onEditClick={() => manageDialogs('manageRows', true)}
     />
   );
-
-  const getListOfSingleOptions = () => {
-    const singleRecords = tableManagementState.records.filter(record => record.IsGroup === 'Single');
-    return singleRecords.map(record => ({ label: record.Title, value: record.Title }));
+  const validationsTemplate = recordData => {
+    const validationsGroup = DataViewerUtils.groupValidations(
+      recordData,
+      resources.messages['recordBlockers'],
+      resources.messages['recordErrors'],
+      resources.messages['recordWarnings'],
+      resources.messages['recordInfos']
+    );
+    return getIconsValidationsErrors(validationsGroup);
   };
 
-  // const renderListOfSinglePamsTemplate = rowData => {
-  //   if (rowData.IsGroup === 'Group') {
-  //     return (
-  //       <MultiSelect
-  //         appendTo={document.body}
-  //         maxSelectedLabels={10}
-  //         id={rowData.recordId}
-  //         onChange={event => {
-  //           // onFillField(field, option, event.target.value);
-  //           // if (isNil(field.recordId)) onSaveField(option, event.target.value);
-  //           // else onEditorSubmitValue(field, option, event.target.value);
-  //         }}
-  //         options={getListOfSingleOptions()}
-  //         // value={getMultiselectValues(
-  //         //   field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
-  //         //   field.value
-  //         // )}
-  //       />
-  //     );
-  //   } else return '-';
-  // };
+  const renderValidationColumn = (
+    <Column
+      body={validationsTemplate}
+      header={resources.messages['validationsDataColumn']}
+      field="validations"
+      key="recordValidation"
+      sortable={false}
+      style={{ width: '100px' }}
+    />
+  );
 
   const renderTableColumns = () => {
-    console.log({ tableColumns, tableSchemaColumns });
     const data = tableColumns.map(col => (
       <Column
         className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
@@ -433,7 +429,8 @@ export const TableManagement = ({
       />
     ));
 
-    data.push(renderActionButtonsColumn);
+    data.unshift(renderValidationColumn);
+    data.unshift(renderActionButtonsColumn);
 
     return data;
   };
@@ -464,7 +461,7 @@ export const TableManagement = ({
           onConfirm={() => onDeleteRow()}
           onHide={() => manageDialogs('delete', false)}
           visible={isDialogVisible.delete}>
-          ARE YOU SURE YOU WANT TO DELETE
+          {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
 
@@ -483,11 +480,8 @@ export const TableManagement = ({
               datasetId={datasetId}
               editDialogVisible={isDialogVisible.manageRows}
               onChangeForm={onEditFormInput}
-              // onShowCoordinateError={onShowCoordinateError}
-              // onShowFieldInfo={onShowFieldInfo}
               selectedRecord={selectedRecord}
               records={tableManagementState.records}
-              // reporting={reporting}
             />
           </div>
         </Dialog>

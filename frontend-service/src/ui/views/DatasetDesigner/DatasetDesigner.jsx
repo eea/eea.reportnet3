@@ -759,12 +759,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const validateQcRules = async () => {    
+  const validateQcRules = async () => {
     setSqlValidationRunning(true);
     try {
       const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

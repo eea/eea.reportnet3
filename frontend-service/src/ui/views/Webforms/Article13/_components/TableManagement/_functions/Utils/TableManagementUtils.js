@@ -4,7 +4,9 @@ import isNil from 'lodash/isNil';
 import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
 
 const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
-  const filteredSchemaColumn = tableSchemaColumns.filter(tableSchemaColumn => tableSchemaColumn.header === header);
+  const filteredSchemaColumn = tableSchemaColumns.filter(
+    tableSchemaColumn => tableSchemaColumn.header.toUpperCase() === header.toUpperCase()
+  );
   if (!isNil(filteredSchemaColumn) && !isEmpty(filteredSchemaColumn)) {
     return filteredSchemaColumn[0].field;
   } else {
@@ -13,10 +15,9 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
 };
 
 const parseTableSchemaColumns = schemaTables => {
-  console.log(schemaTables);
   const columns = [];
   schemaTables
-    .filter(schemaTable => schemaTable.tableSchemaName === 'PaMs')
+    .filter(schemaTable => !isNil(schemaTable.tableSchemaName) && schemaTable.tableSchemaName.toUpperCase() === 'PAMS')
     .forEach(table => {
       if (!isNil(table.records)) {
         return table.records[0].fields.forEach(field => {
@@ -65,7 +66,7 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
       return '';
     }
     const filteredParentTablesWithData = parentTablesWithData.filter(
-      parentTableWithData => parentTableWithData.tableSchemaName !== 'PaMs'
+      parentTableWithData => parentTableWithData.tableSchemaName.toUpperCase() !== 'PAMS'
     );
 
     const filteredparentTablesNames = filteredParentTablesWithData.map(
@@ -78,7 +79,7 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
         return {
           tableSchemaId: table.tableSchemaId,
           tableSchemaName: table.tableSchemaName,
-          pamField: table.records[0].fields.filter(field => field.name === 'Fk_PaMs')[0]
+          pamField: table.records[0].fields.filter(field => field.name.toUpperCase() === 'FK_PAMS')[0]
         };
       });
     return { filteredParentTablesWithData, filteredSchemaTables };
@@ -95,24 +96,27 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
       const filteredSchemaTablesPams = filteredSchemaTables.filter(
         filteredSchemaTable => filteredSchemaTable.tableSchemaId === table.tableSchemaId
       );
-      console.log({ filteredSchemaTablesPams, schemaTables });
       if (!isNil(filteredSchemaTablesPams) && !isEmpty(filteredSchemaTablesPams)) {
         const fkPamId = filteredSchemaTablesPams[0].pamField.fieldSchema;
         const pamSchemaId = schemaTables
-          .filter(table => table.header === 'PaMs')[0]
-          .records[0].fields.filter(field => field.name === 'Id')[0].fieldId;
-        const pamValue = RecordUtils.getCellValue({ rowData: record }, pamSchemaId);
-        let hasRecord = false;
-        table.data.records.forEach(record => {
-          if (!isEmpty(record.fields)) {
-            record.fields.forEach(field => {
-              if (field.fieldSchemaId === fkPamId && parseInt(field.value) === parseInt(pamValue)) {
-                hasRecord = true;
-              }
-            });
-          }
-        });
-        return hasRecord;
+          .filter(table => table.header.toUpperCase() === 'PAMS')[0]
+          .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0];
+        if (!isNil(pamSchemaId) && !isEmpty(pamSchemaId)) {
+          const pamValue = RecordUtils.getCellValue({ rowData: record }, pamSchemaId.fieldId);
+          let hasRecord = false;
+          table.data.records.forEach(record => {
+            if (!isEmpty(record.fields)) {
+              record.fields.forEach(field => {
+                if (field.fieldSchemaId === fkPamId && parseInt(field.value) === parseInt(pamValue)) {
+                  hasRecord = true;
+                }
+              });
+            }
+          });
+          return hasRecord;
+        } else {
+          return false;
+        }
       } else {
         return false;
       }
@@ -129,17 +133,7 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
   };
 
   return records.map(record => {
-    const { recordId, recordSchemaId } = record;
     const additionalInfo = getAdditionalInfo(record);
-    // let data = {};
-
-    console.log({ record });
-    // const fields = [];
-
-    // data.dataRow = fields;
-    // data.recordId = recordId;
-    // data.recordSchemaId = recordSchemaId;
-
     return {
       ...record,
       dataRow: record.dataRow.map(element => {

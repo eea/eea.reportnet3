@@ -74,12 +74,13 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       .map(record => parseInt(record.Id))
       .filter(id => !Number.isNaN(id));
 
-    console.log({ recordIds });
     return Math.max(...recordIds) + 1;
   };
 
   const getParamFieldSchemaId = (param, table) => {
-    return table.elements.filter(element => element.name === param).map(table => table.fieldSchema)[0];
+    return table.elements
+      .filter(element => element.name.toUpperCase() === param.toUpperCase())
+      .map(table => table.fieldSchema)[0];
   };
 
   const onAddRecord = async type => {
@@ -151,7 +152,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           'ERROR',
           'BLOCKER'
         ]);
-        console.log({ parentTableData });
         if (!isNil(parentTableData.records)) {
           const tableData = {};
 
@@ -161,7 +161,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
             tableData,
             parentTableData.totalRecords
           );
-
           const list = getTypeList(records);
 
           article13Dispatch({
@@ -171,7 +170,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         }
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       setIsLoading(false);
     }
@@ -179,8 +178,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const pamSchemaId = article13State.data
-      .filter(table => table.name === 'PaMs')[0]
-      .records[0].fields.filter(field => field.name === 'Id')[0].fieldId;
+      .filter(table => table.name.toUpperCase() === 'PAMS')[0]
+      .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0].fieldId;
     let recordId = '';
     pamsRecords.forEach(pamsRecord => {
       pamsRecord.fields.forEach(field => {
@@ -226,7 +225,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       </div>
 
       <ul className={styles.tableList}>
-        {console.log(tableList)}
         {Object.keys(tableList).map(list => (
           <li className={styles.tableListItem}>
             <div className={styles.tableListTitleWrapper}>
