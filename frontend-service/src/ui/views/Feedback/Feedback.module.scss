@@ -37,6 +37,7 @@
       width: 100%;
       .sendMessageTextarea {
         width: 90%;
+        overflow: hidden;
         &:disabled {
           border: 1px solid var(--gray-50) !important;
         }

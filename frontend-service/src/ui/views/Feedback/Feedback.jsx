@@ -114,8 +114,16 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useEffect(() => {
     const textArea = document.querySelector(`.${styles.sendMessageTextarea}`);
-    if (textArea && textArea.scrollHeight > '48') {
+    if (textArea && textArea.scrollHeight >= '48' && textArea.scrollHeight <= 100) {
       textArea.style.height = `${textArea.scrollHeight}px`;
+      textArea.style.overflow = 'hidden';
+    }
+    if (textArea && textArea.scrollHeight > 100) {
+      textArea.style.height = '100px';
+      textArea.style.overflowY = 'scroll';
+    }
+    if (messageToSend === '') {
+      textArea.style.height = '48px';
     }
   }, [messageToSend]);
 
