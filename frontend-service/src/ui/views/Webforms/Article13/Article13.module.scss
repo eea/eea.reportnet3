@@ -16,8 +16,11 @@
   background-color: #f1f4f7;
   border-radius: 8px;
   display: flex;
+  left: 50%;
+  margin-bottom: 2rem;
   padding: 0 1rem;
   position: relative;
+  transform: translateX(-50%);
   width: calc(300px + 2rem);
 
   .tabItem {
@@ -55,22 +58,22 @@
 }
 
 .tableList {
+  display: flex;
+  flex-direction: column-reverse;
   padding: 0;
 
   .tableListItem {
     align-items: center;
     border-radius: 6px;
-    border: 0.1rem solid #818997;
+    background-color: #f1f4f7;
     display: flex;
-    justify-content: space-between;
+    // justify-content: space-between;
     list-style: none;
     margin: 1rem 0;
     padding: 0.5rem;
 
     .tableListTitleWrapper {
-      background: var(--c-corporate-blue-lighter);
       border-radius: 6px;
-      color: var(--white);
       padding: 0.5rem;
 
       .icon {
@@ -82,21 +85,42 @@
       }
     }
 
-    .tableListIds {
+    // .tableListIds {
+    // padding: 0.5rem;
+    // position: relative;
+    // width: 75%;
+
+    .tableListId {
+      border-radius: 50%;
+      // border: 0.1rem solid var(--c-corporate-blue-lighter);
+      cursor: pointer;
+      margin: 0.5rem 1rem;
+      min-height: 40px;
+      // background-color: var(--c-corporate-blue-lighter);
+      box-shadow: var(--card-item-box-shadow);
+      min-width: 40px;
       padding: 0.5rem;
-      width: 75%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      .tableListId {
-        border: 0.1rem solid var(--c-corporate-blue-lighter);
-        cursor: pointer;
-        margin: 0.5rem;
-        padding: 0.5rem;
+      &:hover {
+        box-shadow: var(--card-item-box-shadow-hover);
+        transform: scale(1.02, 1.02);
+        transition: transform 0.1s ease;
       }
+    }
 
-      .selected {
-        background-color: var(--c-corporate-blue-lighter);
-        color: var(--white);
-      }
+    .selected {
+      background-color: var(--c-corporate-blue-lighter);
+      color: var(--white);
+    }
+    // }
+
+    .addButton {
+      position: absolute;
+      right: 0;
+      transform: translateX(-50%);
     }
   }
 }

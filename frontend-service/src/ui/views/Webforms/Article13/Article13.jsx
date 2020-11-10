@@ -207,6 +207,34 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         Questionnaire for reporting on Policies and Measures under the Monitoring Mechanism Regulation
       </h3>
 
+      <ul className={styles.tableList}>
+        {Object.keys(tableList).map(list => (
+          <li className={styles.tableListItem}>
+            <div className={styles.tableListTitleWrapper}>
+              <span className={styles.tableListTitle}>{list}</span>:
+            </div>
+            {/* <div className={styles.tableListIds}> */}
+            {tableList[list].map(items => (
+              <span
+                className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
+                onClick={() => {
+                  onSelectRecord(items.recordId);
+                  onToggleView(true);
+                }}>
+                {items.id}
+              </span>
+            ))}
+            {/* </div> */}
+            <Button
+              className={styles.addButton}
+              label={resources.messages['add']}
+              icon={'add'}
+              onClick={() => onAddRecord(capitalize(list))}
+            />
+          </li>
+        ))}
+      </ul>
+
       <div className={styles.tabBar}>
         <div className={styles.indicator} style={{ left: isWebformView ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
         <div
@@ -220,33 +248,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         <div
           className={`${styles.tabItem} ${isWebformView ? styles.selected : null}`}
           onClick={() => onToggleView(true)}>
-          <p className={styles.tabLabel}>Webform</p>
+          <p className={styles.tabLabel}>Details</p>
         </div>
       </div>
-
-      <ul className={styles.tableList}>
-        {Object.keys(tableList).map(list => (
-          <li className={styles.tableListItem}>
-            <div className={styles.tableListTitleWrapper}>
-              <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('add')} />
-              <span className={styles.tableListTitle}>{list}</span>:
-            </div>
-            <div className={styles.tableListIds}>
-              {tableList[list].map(items => (
-                <span
-                  className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
-                  onClick={() => {
-                    onSelectRecord(items.recordId);
-                    onToggleView(true);
-                  }}>
-                  {items.id}
-                </span>
-              ))}
-            </div>
-            <Button label={'add'} icon={'add'} onClick={() => onAddRecord(capitalize(list))} />
-          </li>
-        ))}
-      </ul>
 
       {isWebformView ? (
         <WebformView
