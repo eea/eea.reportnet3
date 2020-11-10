@@ -909,7 +909,7 @@
     "dataProviderName": "Country",
     "confirmReleaseHeader": "Confirm Release",
     "confirmReleaseQuestion": "Are you sure you want to release all the datasets to the data collection?",
-    "deleteAutomaticSnapshotTooltip": " You can't' delete release copy",
+    "deleteAutomaticSnapshotTooltip": "You can't delete a release copy",
     "releaseBlockersFailedEvent": "You can't release data with <strong>blocker</strong> errors. Please check it and try again.",
     "validateSqlRulesBtn": "Validate QCs",
     "validateRulesBtnTootip": "Revalidates all the QC rules: QCs with SQL sentences need to be re-validated after changing table or field names",
