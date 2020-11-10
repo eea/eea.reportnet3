@@ -15,6 +15,7 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Map } from 'ui/views/_components/Map';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
@@ -239,6 +240,7 @@ const DataFormFieldEditor = ({
       case 'DATE':
         return dateCharacters;
       case 'TEXT':
+      case 'TEXTAREA':
         return textCharacters;
       case 'RICH_TEXT':
         return richTextCharacters;
@@ -266,6 +268,8 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
+    ) : type === 'TEXTAREA' ? (
+      renderTextarea(field, fieldValue)
     ) : (
       <InputText
         disabled={column.readOnly && reporting}
@@ -416,6 +420,19 @@ const DataFormFieldEditor = ({
         />
       </div>
     </div>
+  );
+
+  const renderTextarea = (field, fieldValue) => (
+    <InputTextarea
+      collapsedHeight={75}
+      disabled={column.readOnly && reporting}
+      id={field}
+      keyfilter={RecordUtils.getFilter(type)}
+      maxLength={getMaxCharactersByType(type)}
+      onChange={e => onChangeForm(field, e.target.value)}
+      style={{ width: '60%' }}
+      value={fieldValue}
+    />
   );
 
   const saveMapCoordinatesDialogFooter = (
