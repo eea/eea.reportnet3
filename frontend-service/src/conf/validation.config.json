@@ -10,15 +10,16 @@
     "NUMBER_INTEGER": ["number"],
     "PHONE": ["LEN", "string"],
     "TEXT": ["LEN", "string"],
+    "TEXTAREA": ["LEN", "string"],
     "URL": ["LEN", "string"]
   },
 
   "fieldByOperatorType": {
     "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
     "LEN": ["NUMBER_INTEGER"],
-    "string": ["EMAIL", "TEXT", "PHONE", "URL", "CODELIST", "LINK"],
-    "stringMatch": ["TEXT"],
-    "numberMatch": ["TEXT"],
+    "string": ["EMAIL", "TEXT", "TEXTAREA", "PHONE", "URL", "CODELIST", "LINK"],
+    "stringMatch": ["TEXT", "TEXTAREA"],
+    "numberMatch": ["TEXT", "TEXTAREA"],
     "date": ["DATE"],
     "month": ["DATE", "NUMBER_INTEGER"],
     "year": ["DATE", "NUMBER_INTEGER"],

@@ -14,6 +14,7 @@ export const ListMessages = ({
   className = '',
   emptyMessage = '',
   isCustodian,
+  isLoading,
   lazyLoading = true,
   messages = [],
   newMessageAdded,
@@ -67,29 +68,41 @@ export const ListMessages = ({
     }
   };
 
-  return (
-    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
-      {isLoadingNewMessages && (
+  const renderMessageList = () => {
+    if (isLoading) {
+      return <Spinner className={styles.spinnerLoadingMessages} />;
+    }
+    if (isLoadingNewMessages) {
+      return (
         <div className={styles.lazyLoadingWrapper}>
           <Spinner className={styles.lazyLoadingSpinner} />
         </div>
-      )}
-      {isEmpty(messages) ? (
+      );
+    }
+    if (isEmpty(messages)) {
+      return (
         <div className={styles.emptyMessageWrapper}>
           <span>{emptyMessage}</span>
         </div>
-      ) : (
-        <div className={styles.scrollMessagesWrapper}>
-          {messages.map((message, i) => (
-            <Message
-              message={message}
-              hasSeparator={
-                i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
-              }
-            />
-          ))}
-        </div>
-      )}
+      );
+    }
+    return (
+      <div className={styles.scrollMessagesWrapper}>
+        {messages.map((message, i) => (
+          <Message
+            message={message}
+            hasSeparator={
+              i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
+            }
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
+      {renderMessageList()}
     </div>
   );
 };
