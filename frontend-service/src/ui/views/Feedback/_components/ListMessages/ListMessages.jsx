@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef } from 'react';
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -27,6 +27,8 @@ export const ListMessages = ({
     separatorIndex: -1
   });
 
+  const [listContent, setListContent] = useState();
+
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
   useEffect(() => {
@@ -42,6 +44,10 @@ export const ListMessages = ({
   useEffect(() => {
     dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
   }, [messages]);
+
+  useEffect(() => {
+    setListContent(renderMessageList());
+  }, [isLoading, isLoadingNewMessages, messages]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -102,7 +108,7 @@ export const ListMessages = ({
 
   return (
     <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
-      {renderMessageList()}
+      {listContent}
     </div>
   );
 };
