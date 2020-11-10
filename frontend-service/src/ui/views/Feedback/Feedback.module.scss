@@ -49,6 +49,11 @@
         width: 10%;
         height: 100%;
         flex: 1 auto;
+        @media (max-width: 320px) {
+          :global .pi-comment {
+            display: none;
+          }
+        }
       }
       @media (max-width: 468px) {
         .sendMessageTextarea {
