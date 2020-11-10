@@ -7,6 +7,7 @@ import java.util.Set;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.domain.EventType;
@@ -48,10 +49,14 @@ public class CollaborationServiceHelper {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param modifiedDatasetId the modified dataset id
+   * @param datasetStatus the dataset status
+   * @param datasetName the dataset name
    * @param eventType the event type
    */
   @Async
-  public void notifyNewMessages(Long dataflowId, Long providerId, String eventType) {
+  public void notifyNewMessages(Long dataflowId, Long providerId, Long modifiedDatasetId,
+      DatasetStatusEnum datasetStatus, String datasetName, String eventType) {
     EventType event = EventType.valueOf(eventType);
     Collection<? extends GrantedAuthority> authorities =
         SecurityContextHolder.getContext().getAuthentication().getAuthorities();
@@ -85,6 +90,7 @@ public class CollaborationServiceHelper {
     try {
       for (String user : set) {
         NotificationVO notificationVO = NotificationVO.builder().user(user).dataflowId(dataflowId)
+            .datasetStatus(datasetStatus).datasetId(modifiedDatasetId).datasetName(datasetName)
             .providerId(providerId).build();
         kafkaSenderUtils.releaseNotificableKafkaEvent(event, null, notificationVO);
       }

@@ -7,6 +7,7 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Autowired
   private CollaborationService collaborationService;
 
+  /** The collaboration service helper. */
   @Autowired
   private CollaborationServiceHelper collaborationServiceHelper;
 
@@ -113,12 +115,20 @@ public class CollaborationControllerImpl implements CollaborationController {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param modifiedDatasetId the modified dataset id
+   * @param datasetStatus the dataset status
+   * @param datasetName the dataset name
    * @param eventType the event type
    */
   @Override
   @GetMapping("/private/notifyNewMessages")
   public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId, @RequestParam("eventType") String eventType) {
-    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, eventType);
+      @RequestParam("providerId") Long providerId,
+      @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
+      @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
+      @RequestParam("datasetName") String datasetName,
+      @RequestParam("eventType") String eventType) {
+    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, modifiedDatasetId,
+        datasetStatus, datasetName, eventType);
   }
 }

@@ -6,6 +6,7 @@ import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,8 +119,9 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void notifyNewMessagesTest() {
-    collaborationControllerImpl.notifyNewMessages(1L, 1L, "RECEIVED_MESSAGE");
-    Mockito.verify(collaborationServiceHelper, Mockito.times(1))
-        .notifyNewMessages(Mockito.anyLong(), Mockito.anyLong(), Mockito.any());
+    collaborationControllerImpl.notifyNewMessages(1L, 1L, null, null, null, "RECEIVED_MESSAGE");
+    Mockito.verify(collaborationServiceHelper, Mockito.times(1)).notifyNewMessages(
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.nullable(Long.class),
+        Mockito.nullable(DatasetStatusEnum.class), Mockito.nullable(String.class), Mockito.any());
   }
 }
