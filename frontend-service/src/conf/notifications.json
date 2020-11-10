@@ -670,6 +670,13 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "UPDATED_DATASET_STATUS",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -721,6 +728,7 @@
     "VALIDATED_QC_RULE_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
-    "DISABLE_SQL_RULES_ERROR_EVENT"
+    "DISABLE_SQL_RULES_ERROR_EVENT",
+    "RECEIVED_MESSAGE"
   ]
 }

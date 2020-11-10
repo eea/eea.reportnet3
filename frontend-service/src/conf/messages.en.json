@@ -931,6 +931,7 @@
     "manualTechnicalAcceptanceBigButton": "Manual technical acceptance",
     "webformTableCreation": "Create table",
     "webformTableEdit": "Edit table",
-    "reportingDatasetsStatus": "Reporting datasets status"
+    "reportingDatasetsStatus": "Reporting datasets status",
+    "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}"
   }
 }
