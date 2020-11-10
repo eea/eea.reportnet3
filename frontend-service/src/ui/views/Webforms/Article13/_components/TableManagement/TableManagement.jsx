@@ -55,6 +55,7 @@ export const TableManagement = ({
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
     isDialogVisible: { delete: false, manageRows: false },
+    isSaving: false,
     parentTablesWithData: [],
     records: [],
     selectedRecord: {},
@@ -64,6 +65,7 @@ export const TableManagement = ({
 
   const {
     isDialogVisible,
+    isSaving,
     parentTablesWithData,
     selectedRecord,
     tableColumns,
@@ -84,9 +86,9 @@ export const TableManagement = ({
 
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      {/* <Button
-        className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
-        disabled={isSaving || records.isSaveDisabled}
+      <Button
+        className={!isSaving && 'p-button-animated-blink'}
+        disabled={isSaving}
         icon={isSaving === true ? 'spinnerAnimate' : 'check'}
         label={resources.messages['save']}
         onClick={() => {
@@ -102,7 +104,7 @@ export const TableManagement = ({
         icon={'cancel'}
         label={resources.messages['cancel']}
         onClick={onCancelRowEdit}
-      /> */}
+      />
     </div>
   );
 
@@ -178,8 +180,11 @@ export const TableManagement = ({
     }
   };
 
-  const manageDialogs = (dialog, value) => {
+  const manageDialogs = (dialog, value) =>
     tableManagementDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+
+  const onCancelRowEdit = () => {
+    tableManagementDispatch({ type: 'RESET_SELECTED_RECORD' });
   };
 
   const onDeleteRow = async () => {
@@ -204,8 +209,18 @@ export const TableManagement = ({
     }
   };
 
-  const onEditFormInput = (property, value) =>
-    tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: { property, value } });
+  const onEditFormInput = (property, value) => {
+    let updatedRecord = RecordUtils.changeRecordValue(
+      { ...selectedRecord },
+      getFieldSchemaColumnIdByHeader(tableSchemaColumns, property),
+      value
+    );
+
+    tableManagementDispatch({
+      type: 'EDIT_SELECTED_RECORD',
+      payload: updatedRecord
+    });
+  };
 
   const onLoadParentTablesData = () => {
     const configParentTables = Object.keys(

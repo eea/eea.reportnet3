@@ -1,11 +1,9 @@
 export const tableManagementReducer = (state, { type, payload }) => {
   switch (type) {
     case 'EDIT_SELECTED_RECORD':
-      const inmSelectedRecord = { ...state.selectedRecord };
-      inmSelectedRecord[payload.property] = payload.value;
       return {
         ...state,
-        selectedRecord: inmSelectedRecord
+        selectedRecord: payload
       };
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
