@@ -17,6 +17,9 @@
         color: var(--gray-5);
       }
     }
+    @media (max-width: 468px) {
+      margin-right: 10px;
+    }
   }
   &.receiver {
     align-self: flex-start;
@@ -31,6 +34,9 @@
       .datetime {
         color: var(--gray-75);
       }
+    }
+    @media (max-width: 468px) {
+      margin-left: 10px;
     }
   }
 
@@ -74,6 +80,9 @@
   .bubbleArrow.sender:after {
     border-top: 15px solid #dcf8c6;
     transform: scaleX(-1);
+  }
+  @media (max-width: 468px) {
+    max-width: 85%;
   }
 }
 
