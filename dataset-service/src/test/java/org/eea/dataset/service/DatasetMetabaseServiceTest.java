@@ -29,7 +29,10 @@ import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepositor
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -37,6 +40,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -93,6 +97,10 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
 
+  /** The collaboration controller zuul. */
+  @Mock
+  private CollaborationControllerZuul collaborationControllerZuul;
+
   /** The resource management controller zuul. */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZuul;
@@ -120,6 +128,10 @@ public class DatasetMetabaseServiceTest {
   /** The eu dataset repository. */
   @Mock
   private EUDatasetRepository euDatasetRepository;
+
+  /** The data flow controller zuul. */
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The foreign relations. */
   private ForeignRelations foreignRelations;
@@ -611,4 +623,46 @@ public class DatasetMetabaseServiceTest {
         .thenReturn(1L);
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
+
+  /**
+   * Last dataset validation for releasing by id.
+   */
+  @Test
+  public void lastDatasetValidationForReleasingById() {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDataflowId(1L);
+    datasetMetabase.setDataProviderId(1L);
+    List<Long> datasetsId = new ArrayList();
+    datasetsId.add(1L);
+    datasetsId.add(2L);
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito
+        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
+        .thenReturn(datasetsId);
+    Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateDatasetStatusExceptionTest() throws EEAException {
+    try {
+      datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateDatasetStatusTest() throws EEAException {
+
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
+    Mockito.verify(collaborationControllerZuul, times(1)).createMessage(Mockito.any(),
+        Mockito.any());
+  }
+
+
 }
