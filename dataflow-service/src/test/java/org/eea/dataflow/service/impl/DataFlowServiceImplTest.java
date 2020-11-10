@@ -290,7 +290,7 @@ public class DataFlowServiceImplTest {
     Object[] object4 = {BigInteger.ONE, DatasetStatusEnum.RELEASED.toString()};
     List<Object[]> listObject =
         new ArrayList<>(Arrays.asList(object, object1, object2, object3, object4));
-    when(dataflowRepository.getDataflows(Mockito.any())).thenReturn(listObject);
+    when(dataflowRepository.getDatasetsStatus(Mockito.any())).thenReturn(listObject);
 
     dataflowServiceImpl.getDataflows(Mockito.any());
     List<Dataflow> list = new ArrayList<>();
