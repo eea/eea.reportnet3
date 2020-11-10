@@ -897,7 +897,7 @@
     "webformTableWithoutFixedNumber": "This table should have fixed number of records.",
     "confirmReleaseHeader": "Confirm Release",
     "confirmReleaseQuestion": "Are you sure you want to release all the datasets to the data collection?",
-    "deleteAutomaticSnapshotTooltip": " You can't' delete release copy",
+    "deleteAutomaticSnapshotTooltip": "You can't delete a release copy",
     "releaseBlockersFailedEvent": "You can't release data with <strong>blocker</strong> errors. Please check it and try again.",
     "validateSqlRulesBtn": "Validate QCs",
     "validateRulesBtnTootip": "Revalidates all the QC rules: QCs with SQL sentences need to be re-validated after changing table or field names",
@@ -908,11 +908,13 @@
     "writeMessagePlaceholder": "Write your message",
     "noMessages": "You have no messages",
     "noMessagesCustodian": "Please select a data provider",
-    "noMessagesScroll": "Scroll up to the top to load read messages.",
     "unreadMessageSeparator": "Unread messages",
     "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>dataset</a>",
     "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs.",
     "feedbackDataProvider": "Data provider: ",
+    "noMessagesScroll": "Scroll up to the top to load read messages.",
+    "webformTableCreation": "Create table",
+    "webformTableEdit": "Edit table",
     "feedbackHelp": "Dataflow feedback help"
   }
 }

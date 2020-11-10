@@ -79,7 +79,7 @@
       "legalInstrument": "Regulation on the Governance of the Energy Union and Climate Action",
       "legalInstrumentUrl": "https://rod.eionet.europa.eu/instruments/690",
       "dataflow": "National systems for policies and measures and projections",
-      "dataFlowUrl": "https://rod.eionet.europa.eu/obligations/798",
+      "dataFlowUrl": "https://rod.eionet.europa.eu/obligations/799",
       "reportingFrequency": "2-yearly",
       "targetDate": "15/03/2021",
       "pilotScenarioAmbition": "Deliver on 3.0"
@@ -103,7 +103,7 @@
       "dataflow": "Use of ETS auctioning revenues",
       "dataFlowUrl": "https://rod.eionet.europa.eu/obligations/800",
       "reportingFrequency": "Annual",
-      "targetDate": "30/07/2021",
+      "targetDate": "31/07/2021",
       "pilotScenarioAmbition": "Deliver on 3.0"
     },
     {
@@ -114,7 +114,7 @@
       "dataflow": "Support to developing countries",
       "dataFlowUrl": "https://rod.eionet.europa.eu/obligations/801",
       "reportingFrequency": "Annual",
-      "targetDate": "30/07/2021",
+      "targetDate": "30/09/2021",
       "pilotScenarioAmbition": "Deliver on 3.0"
     },
     {
@@ -125,7 +125,7 @@
       "dataflow": "Approximated greenhouse gas inventories",
       "dataFlowUrl": "https://rod.eionet.europa.eu/obligations/802",
       "reportingFrequency": "Annual",
-      "targetDate": "30/07/2021",
+      "targetDate": "31/07/2021",
       "pilotScenarioAmbition": "Deliver on 3.0"
     },
     {

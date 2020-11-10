@@ -330,4 +330,16 @@ public interface RulesController {
   Integer getAllUncheckedRules(@RequestParam("dataflowId") Long dataflowId,
       @RequestBody List<DesignDatasetVO> designs);
 
+
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
+  void deleteAutomaticRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
+
 }

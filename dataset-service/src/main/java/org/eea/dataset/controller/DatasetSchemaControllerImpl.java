@@ -326,6 +326,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/tableSchema")
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     try {
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
       recordStoreControllerZuul.createUpdateQueryView(datasetId);
@@ -476,6 +480,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/fieldSchema")
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     try {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema

@@ -248,4 +248,12 @@ public interface RulesService {
    * @return the all unchecked rules
    */
   Integer getAllUncheckedRules(Long dataflowId, List<DesignDatasetVO> designs);
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  void deleteAutomaticRuleByReferenceId(String datasetSchemaId, String referenceId);
 }

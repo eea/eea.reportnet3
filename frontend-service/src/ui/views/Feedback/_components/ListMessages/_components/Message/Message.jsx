@@ -31,14 +31,12 @@ export const Message = ({ hasSeparator, message }) => {
 
   const renderMessage = () => {
     return (
-      <div className={styles.messageWrapper} key={message.id}>
-        <div className={`${styles.message} ${getStyles()}`}>
-          <div className={styles.messageTextWrapper}>
-            <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
-            <span className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}>
-              {message.content}
-            </span>
-          </div>
+      <div key={message.id} className={`${styles.message} ${getStyles()}`}>
+        <div className={styles.messageTextWrapper}>
+          <span
+            className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}
+            dangerouslySetInnerHTML={{ __html: message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>') }}></span>
+          <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
       </div>
     );
