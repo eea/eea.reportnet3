@@ -320,6 +320,8 @@ export const TableManagement = ({
                 schemaTables.filter(
                   schemaTable =>
                     configParentTables.includes(colData.field) &&
+                    !isNil(schemaTable.tableSchemaName) &&
+                    !isNil(colData.field) &&
                     schemaTable.tableSchemaName.toUpperCase() === colData.field.toUpperCase()
                 )[0],
                 pamsFieldSchemaValue
