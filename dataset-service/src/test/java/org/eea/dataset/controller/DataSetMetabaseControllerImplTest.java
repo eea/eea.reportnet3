@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.junit.Assert;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -240,6 +243,33 @@ public class DataSetMetabaseControllerImplTest {
     dataSetMetabaseControllerImpl.deleteForeignRelationship(1L, 1L, "1", "1");
     Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void getLastDatasetValidationForRelease() {
+    dataSetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L);
+    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(Mockito.any()))
+        .thenReturn(1L);
+    Assert.assertEquals((Long) 1L,
+        dataSetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L));
+  }
+
+  @Test
+  public void updateDatasetStatusTest() throws EEAException {
+    dataSetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
+    Mockito.verify(datasetMetabaseService, times(1)).updateDatasetStatus(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateDatasetStatusException() throws EEAException {
+    doThrow(new EEAException()).when(datasetMetabaseService).updateDatasetStatus(Mockito.any());
+    try {
+      dataSetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw e;
+    }
   }
 
 }

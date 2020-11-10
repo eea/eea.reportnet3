@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
@@ -156,6 +159,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The web form mapper. */
   @Autowired
   private WebFormMapper webFormMapper;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Creates the empty data set schema.
@@ -431,6 +438,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
+
+    releaseValidateManualQCEvent(datasetId, false);
+
   }
 
   /**
@@ -927,7 +937,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     if (type != null) {
       // if we change the type we need to delete all rules
-      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
+      rulesControllerZuul.deleteAutomaticRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
       // Delete FK Rules
       rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
           fieldSchemaVO.getId());
@@ -942,6 +952,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // update the dataset field value
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+
+      releaseValidateManualQCEvent(datasetId, true);
+
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
@@ -960,6 +973,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
             fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
+
+      releaseValidateManualQCEvent(datasetId, false);
     }
 
 
@@ -1857,5 +1872,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void updateWebform(String datasetSchemaId, WebformVO webformVO) {
     schemasRepository.updateDatasetSchemaWebForm(datasetSchemaId,
         webFormMapper.classToEntity(webformVO));
+  }
+
+
+
+  private void releaseValidateManualQCEvent(Long datasetId, boolean checkNoSQL) {
+    Map<String, Object> result = new HashMap<>();
+    result.put(LiteralConstants.DATASET_ID, datasetId);
+    result.put("checkNoSQL", checkNoSQL);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATE_MANUAL_QC_COMMAND, result);
   }
 }

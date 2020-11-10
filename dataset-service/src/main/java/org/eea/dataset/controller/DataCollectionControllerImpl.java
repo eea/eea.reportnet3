@@ -83,6 +83,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   /**
    * Creates the empty data collection.
    *
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck the manual check
    * @param dataCollectionVO the dataflow collection vo
    */
   @Override
@@ -90,8 +92,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public void createEmptyDataCollection(@RequestBody @LockCriteria(name = "dataflowId",
-      path = "idDataflow") DataCollectionVO dataCollectionVO) {
+  public void createEmptyDataCollection(
+      @RequestParam(defaultValue = "true",
+          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
+      @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+      @RequestBody @LockCriteria(name = "dataflowId",
+          path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
@@ -113,7 +119,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    dataCollectionService.createEmptyDataCollection(dataflowId, date);
+    dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
+        manualCheck);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 

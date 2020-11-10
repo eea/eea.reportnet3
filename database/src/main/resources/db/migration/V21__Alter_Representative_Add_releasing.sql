@@ -1,0 +1,1 @@
+ALTER TABLE public."representative" ADD COLUMN IF NOT EXISTS releasing bool NULL DEFAULT false;
