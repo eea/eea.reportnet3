@@ -78,7 +78,7 @@ const useBigButtonList = ({
       designDatasetsActions: isDesigner && isDesignStatus,
       feedback: (isLeadDesigner && isDraftStatus) || isLeadReporterOfCountry,
       groupByRepresentative: isLeadDesigner && isDraftStatus,
-      manageReporters: isLeadDesigner && isDesignStatus,
+      manageReporters: isLeadDesigner,
       newSchema: isDesigner && isDesignStatus,
       updateReporters: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry,
@@ -422,7 +422,7 @@ const useBigButtonList = ({
         buttonIcon: isActiveButton ? 'released' : 'spinner',
         buttonIconClass: isActiveButton ? 'released' : 'spinner',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: () => onOpenReleaseConfirmDialog(),
+        handleRedirect: isActiveButton ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         visibility: buttonsVisibility.release
