@@ -12,7 +12,7 @@
   "getApiKey": "/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}",
   "getApiKeyCustodian": "/user/getApiKey?dataflowId={:dataflowId}",
   "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
-  "loadDataflowTaskPendingAccepted": "/dataflow/pendingaccepted",
+  "getDataflows": "/dataflow/getDataflows",
   "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
   "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
   "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
