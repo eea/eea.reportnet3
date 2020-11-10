@@ -1,6 +1,7 @@
 package org.eea.kafka.domain;
 
 import java.io.Serializable;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,4 +68,7 @@ public class NotificationVO implements Serializable {
 
   /** The disabled rules. */
   private Integer disabledRules;
+
+  /** The dataset status. */
+  private DatasetStatusEnum datasetStatus;
 }
