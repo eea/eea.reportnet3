@@ -227,46 +227,48 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private void setReportingDatasetStatus(Map<Long, List<DataflowStatusDataset>> map,
       DataFlowVO dataflowVO) {
-    boolean containsPending = false;
-    int releasedCount = 0;
-    int techAcceptedCount = 0;
-    boolean containsCorrectionR = false;
-    boolean containsFinalFeedback = false;
-    List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-    if (datasetsStatusList != null) {
-      for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
-        switch (datasetsStatusList.get(i).getStatus()) {
-          case PENDING:
-            containsPending = true;
-            break;
-          case RELEASED:
-            releasedCount++;
-            break;
-          case CORRECTION_REQUESTED:
-            containsCorrectionR = true;
-            break;
-          case TECHNICALLY_ACCEPTED:
-            techAcceptedCount++;
-            break;
-          case FINAL_FEEDBACK:
-            containsFinalFeedback = true;
-            break;
-          default:
-            containsPending = true;
-            break;
+    if (!map.isEmpty()) {
+      boolean containsPending = false;
+      int releasedCount = 0;
+      int techAcceptedCount = 0;
+      boolean containsCorrectionR = false;
+      boolean containsFinalFeedback = false;
+      List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+      if (datasetsStatusList != null) {
+        for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+          switch (datasetsStatusList.get(i).getStatus()) {
+            case PENDING:
+              containsPending = true;
+              break;
+            case RELEASED:
+              releasedCount++;
+              break;
+            case CORRECTION_REQUESTED:
+              containsCorrectionR = true;
+              break;
+            case TECHNICALLY_ACCEPTED:
+              techAcceptedCount++;
+              break;
+            case FINAL_FEEDBACK:
+              containsFinalFeedback = true;
+              break;
+            default:
+              containsPending = true;
+              break;
+          }
         }
-      }
-      if (containsPending) {
-        dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
-      } else {
-        if (releasedCount == datasetsStatusList.size()) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
-        } else if (techAcceptedCount == datasetsStatusList.size()) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
-        } else if (containsCorrectionR) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
-        } else if (containsFinalFeedback) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
+        if (containsPending) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
+        } else {
+          if (releasedCount == datasetsStatusList.size()) {
+            dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
+          } else if (techAcceptedCount == datasetsStatusList.size()) {
+            dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+          } else if (containsCorrectionR) {
+            dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
+          } else if (containsFinalFeedback) {
+            dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
+          }
         }
       }
     }
@@ -280,21 +282,25 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus() {
     Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
-    List<Object[]> queryResult = dataflowRepository
-        .getDataflows(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()));
-    for (Object[] object : queryResult) {
-      List<DataflowStatusDataset> list2 = new ArrayList<>();
-      DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
-      dataflowStatusDataset
-          .setId(object[0] instanceof BigInteger ? ((BigInteger) object[0]).longValue() : null);
-      dataflowStatusDataset.setStatus(
-          object[1] instanceof String ? DatasetStatusEnum.valueOf((String) object[1]) : null);
-      list2.add(dataflowStatusDataset);
-      if (map.get(dataflowStatusDataset.getId()) != null) {
-        map.get(dataflowStatusDataset.getId()).addAll(list2);
-      } else {
-        map.put(dataflowStatusDataset.getId(), list2);
+
+    List<Long> listDatasets =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (listDatasets != null && !listDatasets.isEmpty()) {
+      List<Object[]> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
+      for (Object[] object : queryResult) {
+        List<DataflowStatusDataset> list2 = new ArrayList<>();
+        DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
+        dataflowStatusDataset
+            .setId(object[0] instanceof BigInteger ? ((BigInteger) object[0]).longValue() : null);
+        dataflowStatusDataset.setStatus(
+            object[1] instanceof String ? DatasetStatusEnum.valueOf((String) object[1]) : null);
+        list2.add(dataflowStatusDataset);
+        if (map.get(dataflowStatusDataset.getId()) != null) {
+          map.get(dataflowStatusDataset.getId()).addAll(list2);
+        } else {
+          map.put(dataflowStatusDataset.getId(), list2);
+        }
       }
     }
     return map;

@@ -102,13 +102,13 @@ public interface DataflowRepository
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(List<Long> ids);
 
   /**
-   * Gets the dataflows.
+   * Gets the datasets status.
    *
    * @param datasetIds the dataset ids
-   * @return the dataflows
+   * @return the datasets status
    */
   @Query(nativeQuery = true,
       value = "select  df.id,ds.status  from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
-  List<Object[]> getDataflows(@Param("datasetIds") List<Long> datasetIds);
+  List<Object[]> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
 
 }
