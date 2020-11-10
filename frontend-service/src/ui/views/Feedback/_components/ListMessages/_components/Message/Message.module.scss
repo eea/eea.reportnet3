@@ -1,79 +1,88 @@
-.messageWrapper {
-  width: 100%;
-  height: auto;
-  display: block;
-  overflow: hidden;
+.message {
+  max-width: 50%;
+  background: #ebebeb;
+  margin: 10px 0 3px 25px;
+  box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.2);
 
-  .message {
-    float: left;
-    max-width: 50%;
-    width: auto;
-    height: auto;
-    display: block;
-    background: #ebebeb;
-    position: relative;
-    margin: 10px 0 3px 25px;
-    box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.2);
-
-    &.sender {
-      border-radius: 10px 0px 10px 10px;
-      margin: 10px 25px 3px 0px;
-      background: var(--c-khaki-100);
-      float: right;
-    }
-    &.receiver {
-      border-radius: 0 10px 10px 10px;
-      margin: 2px 0 3px 25px;
-      background: var(--c-lilac-100);
-    }
-
+  &.sender {
+    border-radius: 10px 0px 10px 10px;
+    margin: 10px 25px 3px 0px;
+    background: var(--c-corporate-blue);
+    align-self: flex-end;
     .messageTextWrapper {
-      padding: 8px 0 8px 0;
-      width: 100%;
       .messageText {
-        font-size: 14px;
-        font-weight: 500;
-        padding: 0 15px 0 15px;
-        margin: auto;
-        color: var(--c-black-400);
-        display: table;
+        color: var(--white);
       }
       .datetime {
-        font-size: 11px;
-        margin: auto;
-        padding: 0 15px 0 0;
-        display: table;
-        float: right;
-        position: relative;
-        text-transform: uppercase;
+        color: var(--gray-5);
+      }
+    }
+    @media (max-width: 468px) {
+      margin-right: 10px;
+    }
+  }
+  &.receiver {
+    align-self: flex-start;
+    border-radius: 0 10px 10px 10px;
+    margin: 2px 0 3px 25px;
+    color: var(--white);
+    background: var(--c-lilac-100);
+    .messageTextWrapper {
+      .messageText {
+        color: var(--c-black-400);
+      }
+      .datetime {
         color: var(--gray-75);
       }
     }
-    .bubbleArrow {
-      position: absolute;
-      float: left;
-      left: -11px;
-      top: 0px;
-      &.sender {
-        bottom: 20px;
-        left: auto;
-        right: 4px;
-        float: right;
-      }
+    @media (max-width: 468px) {
+      margin-left: 10px;
     }
-    .bubbleArrow:after {
-      content: '';
-      position: absolute;
-      border-top: 15px solid #ebebeb;
-      border-left: 15px solid transparent;
-      border-radius: 4px 0 0 0px;
-      width: 0;
-      height: 0;
+  }
+
+  .messageTextWrapper {
+    padding: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    .messageText {
+      font-size: 0.9rem;
+      font-weight: 500;
     }
-    .bubbleArrow.sender:after {
-      border-top: 15px solid #dcf8c6;
-      transform: scaleX(-1);
+    .datetime {
+      font-size: 0.7rem;
+      text-align: right;
+      white-space: nowrap;
+      margin-left: 0.5rem;
     }
+  }
+  .bubbleArrow {
+    position: absolute;
+    float: left;
+    left: -11px;
+    top: 0px;
+    &.sender {
+      bottom: 20px;
+      left: auto;
+      right: 4px;
+      float: right;
+    }
+  }
+  .bubbleArrow:after {
+    content: '';
+    position: absolute;
+    border-top: 15px solid #ebebeb;
+    border-left: 15px solid transparent;
+    border-radius: 4px 0 0 0px;
+    width: 0;
+    height: 0;
+  }
+  .bubbleArrow.sender:after {
+    border-top: 15px solid #dcf8c6;
+    transform: scaleX(-1);
+  }
+  @media (max-width: 468px) {
+    max-width: 85%;
   }
 }
 
