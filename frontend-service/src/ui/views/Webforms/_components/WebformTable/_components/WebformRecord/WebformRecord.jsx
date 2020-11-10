@@ -425,7 +425,7 @@ export const WebformRecord = ({
     }
   };
 
-  const renderElements = elements => {
+  const renderElements = (elements = []) => {
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
@@ -461,7 +461,12 @@ export const WebformRecord = ({
           )
         );
       } else if (element.type === 'LABEL') {
-        return <h2 className={styles[element.level]}>{element.title}</h2>;
+        return (
+          <Fragment>
+            {element.level === 2 && <h2 className={styles[`LABEL_${element.level}`]}>{element.title}</h2>}
+            {element.level === 3 && <h3 className={styles[`LABEL_${element.level}`]}>{element.title}</h3>}
+          </Fragment>
+        );
       } else {
         return (
           !isSubTableVisible && (
@@ -557,9 +562,20 @@ export const WebformRecord = ({
       case 'ARTICLE_15':
         return renderArticle15ErrorMessages(content);
 
+      case 'ARTICLE_13':
+        return renderArticle13ErrorMessages(content);
+
       default:
         return [];
     }
+  };
+
+  const renderArticle13ErrorMessages = content => {
+    const errorMessages = [];
+
+    if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
+
+    return errorMessages;
   };
 
   const renderArticle15ErrorMessages = content => {

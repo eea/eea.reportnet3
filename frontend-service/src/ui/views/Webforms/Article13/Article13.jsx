@@ -44,6 +44,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     isWebformView: false,
     pamsRecords: [],
     selectedId: null,
+    selectedTable: { tableName: null, recordId: null, pamsId: null },
     selectedTableName: null,
     tableList: { group: [], single: [] }
   });
@@ -193,7 +194,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     onToggleView(true);
   };
 
-  const onSelectRecord = record => article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { record } });
+  const onSelectRecord = (recordId, pamsId) => {
+    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
+  };
 
   const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
 
@@ -210,21 +213,17 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       <ul className={styles.tableList}>
         {Object.keys(tableList).map(list => (
           <li className={styles.tableListItem}>
-            <div className={styles.tableListTitleWrapper}>
-              <span className={styles.tableListTitle}>{list}</span>:
-            </div>
-            {/* <div className={styles.tableListIds}> */}
+            <span className={styles.tableListTitle}>{list}</span>:
             {tableList[list].map(items => (
               <span
                 className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
                 onClick={() => {
-                  onSelectRecord(items.recordId);
+                  onSelectRecord(items.recordId, items.id);
                   onToggleView(true);
                 }}>
                 {items.id}
               </span>
             ))}
-            {/* </div> */}
             <Button
               className={styles.addButton}
               label={resources.messages['add']}
@@ -241,7 +240,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           className={`${styles.tabItem} ${!isWebformView ? styles.selected : null}`}
           onClick={() => {
             onToggleView(false);
-            onSelectRecord(null);
+            onSelectRecord(null, null);
           }}>
           <p className={styles.tabLabel}>Overview</p>
         </div>
