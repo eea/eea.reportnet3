@@ -7,14 +7,31 @@
   &.sender {
     border-radius: 10px 0px 10px 10px;
     margin: 10px 25px 3px 0px;
-    background: var(--c-black-200);
+    background: var(--c-corporate-blue);
     align-self: flex-end;
+    .messageTextWrapper {
+      .messageText {
+        color: var(--white);
+      }
+      .datetime {
+        color: var(--gray-5);
+      }
+    }
   }
   &.receiver {
     align-self: flex-start;
     border-radius: 0 10px 10px 10px;
     margin: 2px 0 3px 25px;
-    background: var(--c-blue-100);
+    color: var(--white);
+    background: var(--c-lilac-100);
+    .messageTextWrapper {
+      .messageText {
+        color: var(--c-black-400);
+      }
+      .datetime {
+        color: var(--gray-75);
+      }
+    }
   }
 
   .messageTextWrapper {
@@ -25,11 +42,9 @@
     .messageText {
       font-size: 0.9rem;
       font-weight: 500;
-      color: var(--c-black-400);
     }
     .datetime {
       font-size: 0.7rem;
-      color: var(--gray-75);
       text-align: right;
       white-space: nowrap;
       margin-left: 0.5rem;
