@@ -108,7 +108,7 @@ public class DataCollectionControllerImplTest {
       DataCollectionVO dc = new DataCollectionVO();
       dc.setIdDataflow(1L);
       dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-      dataCollectionControllerImpl.createEmptyDataCollection(dc);
+      dataCollectionControllerImpl.createEmptyDataCollection(true, false, dc);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
     }
@@ -121,13 +121,13 @@ public class DataCollectionControllerImplTest {
     Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
         .thenReturn(TypeStatusEnum.DESIGN);
     Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-    dataCollectionControllerImpl.createEmptyDataCollection(dc);
+    dataCollectionControllerImpl.createEmptyDataCollection(false, false, dc);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
   @Test(expected = ResponseStatusException.class)

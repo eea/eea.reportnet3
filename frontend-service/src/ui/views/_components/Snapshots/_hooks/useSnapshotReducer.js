@@ -6,8 +6,7 @@ const useSnapshotReducer = (
   setIsSnapshotDialogVisible,
   onCreateSnapshot,
   onDeleteSnapshot,
-  onRestoreSnapshot,
-  onReleaseSnapshot
+  onRestoreSnapshot
 ) => {
   const resources = useContext(ResourcesContext);
 
@@ -39,21 +38,6 @@ const useSnapshotReducer = (
           dialogConfirmMessage: resources.messages.deleteSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.deleteSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          snapShotId: payload.id,
-          isConfirmDisabled: false
-        };
-
-      case 'RELEASE_SNAPSHOT':
-        setIsSnapshotDialogVisible(true);
-
-        return {
-          ...state,
-          action: onReleaseSnapshot,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogConfirmMessage: resources.messages.releaseSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resources.messages.releaseSnapshotConfirmationQuestion,
-          dialogMessage: resources.messages.releaseSnapshotMessage,
           snapShotId: payload.id,
           isConfirmDisabled: false
         };

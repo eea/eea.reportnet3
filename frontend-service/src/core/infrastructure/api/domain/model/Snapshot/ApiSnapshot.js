@@ -11,6 +11,7 @@ export const apiSnapshot = {
     });
     return response.data;
   },
+
   createByIdDesigner: async (datasetId, datasetSchemaId, description) => {
     const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.createSnapshotDesigner, {
@@ -18,12 +19,11 @@ export const apiSnapshot = {
         datasetSchemaId: datasetSchemaId,
         description: description
       }),
-      data: {
-        description: description
-      }
+      data: { description: description }
     });
     return response;
   },
+
   deleteByIdDesigner: async (datasetSchemaId, snapshotId) => {
     const response = await HTTPRequester.delete({
       url: getUrl(SnapshotConfig.deleteSnapshotByIdDesigner, {
@@ -34,30 +34,17 @@ export const apiSnapshot = {
 
     return response;
   },
+
   restoreByIdDesigner: async (datasetSchemaId, snapshotId) => {
     const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.restoreSnapshotDesigner, {
         datasetSchemaId: datasetSchemaId,
         snapshotId: snapshotId
       }),
-      data: {
-        snapshotId
-      }
+      data: { snapshotId }
     });
 
     return response.data;
-  },
-  releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
-        datasetSchemaId: datasetSchemaId,
-        snapshotId: snapshotId
-      }),
-      data: {
-        snapshotId
-      }
-    });
-    return response;
   },
 
   allReporter: async datasetId => {
@@ -68,6 +55,7 @@ export const apiSnapshot = {
     });
     return response.data;
   },
+
   createByIdReporter: async (datasetId, description, isReleased) => {
     const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.createSnapshotReporter, {
@@ -80,6 +68,7 @@ export const apiSnapshot = {
     });
     return response.data;
   },
+
   deleteByIdReporter: async (datasetId, snapshotId) => {
     const response = await HTTPRequester.delete({
       url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, {
@@ -89,6 +78,7 @@ export const apiSnapshot = {
     });
     return response.data;
   },
+
   restoreByIdReporter: async (dataflowId, datasetId, snapshotId) => {
     const response = await HTTPRequester.post({
       url: getUrl(SnapshotConfig.restoreSnapshotReporter, {
@@ -100,10 +90,10 @@ export const apiSnapshot = {
     });
     return response.data;
   },
-  releaseByIdReporter: async (dataflowId, datasetId, snapshotId) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(SnapshotConfig.releaseSnapshotReporter, { dataflowId, datasetId, snapshotId }),
-      data: { snapshotId }
+
+  releaseDataflow: async (dataflowId, dataProviderId) => {
+    const response = await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId })
     });
     return response.data;
   }

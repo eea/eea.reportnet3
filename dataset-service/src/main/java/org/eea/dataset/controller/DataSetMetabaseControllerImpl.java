@@ -15,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,6 +54,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
+
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -144,6 +147,22 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+  }
+
+  /**
+   * Update dataset status and send Message.
+   *
+   * @param datasetStatusMessageVO the dataset status message VO
+   */
+  @Override
+  @PutMapping(value = "/updateDatasetStatus")
+  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN')")
+  public void updateDatasetStatus(@RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
+    try {
+      datasetMetabaseService.updateDatasetStatus(datasetStatusMessageVO);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 
@@ -333,4 +352,44 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
+  /**
+   * Gets the dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset ids by dataflow id and data provider id
+   */
+  @Override
+  @GetMapping("/private/getDatasetIdsByDataflowIdAndDataProviderId")
+  public List<Long> getDatasetIdsByDataflowIdAndDataProviderId(
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId) {
+    return datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
+  }
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  @Override
+  @GetMapping("/private/getUserProviderIdsByDataflowId")
+  public List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId) {
+    return datasetMetabaseService.getUserProviderIdsByDataflowId(dataflowId);
+  }
+
+  /**
+   * Gets the last dataset validation for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
+   */
+  @Override
+  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId) {
+    return datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
+  }
 }

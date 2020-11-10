@@ -3,8 +3,8 @@ spring:
     consul:
       discovery:
         preferIpAddress: true
-        ipAddress: ${CONSUL_HOST:localhost}
         instanceId: ${spring.application.name}:${random.value}
+      config:
+        name: collaboration
       host: ${CONSUL_HOST:localhost}
       port: ${CONSUL_PORT:8500}
-

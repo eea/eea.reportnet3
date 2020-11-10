@@ -66,6 +66,10 @@ public class Dataflow {
   @Column(name = "OBLIGATION_ID")
   private Integer obligationId;
 
+  /** The manual acceptance. */
+  @Column(name = "MANUAL_ACCEPTANCE")
+  private boolean manualAcceptance;
+
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private SubmissionAgreement submissionAgreement;

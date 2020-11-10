@@ -60,6 +60,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
@@ -223,6 +224,9 @@ public class DatasetSchemaServiceTest {
 
   @Mock
   private WebFormMapper webFormMapper;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Inits the mocks.
@@ -1027,6 +1031,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void propagateRulesAfterUpdateTypeNullNotRequiredTest() throws EEAException {
+
+    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
 
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(false);

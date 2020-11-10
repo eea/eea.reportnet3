@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
@@ -18,8 +17,8 @@ const useBigButtonList = ({
   dataflowId,
   dataflowState,
   dataProviderId,
-  getDatasetData,
   getDataHistoricReleases,
+  getDatasetData,
   getDeleteSchemaIndex,
   handleExportEuDataset,
   handleRedirect,
@@ -28,6 +27,7 @@ const useBigButtonList = ({
   onCloneDataflow,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
+  onOpenReleaseConfirmDialog,
   onSaveName,
   onShowCopyDataCollectionToEuDatasetModal,
   onShowDataCollectionModal,
@@ -35,7 +35,6 @@ const useBigButtonList = ({
   onShowHistoricReleases,
   onShowManageReportersDialog,
   onShowNewSchemaDialog,
-  onShowSnapshotDialog,
   onShowUpdateDataCollectionModal,
   setErrorDialogData
 }) => {
@@ -417,34 +416,18 @@ const useBigButtonList = ({
   };
 
   const onBuildReleaseButton = () => {
-    const { datasets } = dataflowState.data;
-
-    const properties = [
+    return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: 'released',
-        buttonIconClass: 'released',
+        buttonIcon: isActiveButton ? 'released' : 'spinner',
+        buttonIconClass: isActiveButton ? 'released' : 'spinner',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect:
-          datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId, datasets[0].name),
+        handleRedirect: () => onOpenReleaseConfirmDialog(),
         helpClassName: 'dataflow-big-buttons-release-help-step',
-        layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
+        layout: 'defaultBigButton',
         visibility: buttonsVisibility.release
       }
     ];
-
-    if (datasets.length > 1) {
-      properties[0].model = datasets.map(dataset => {
-        return {
-          label: dataset.name,
-          icon: 'cloudUpload',
-          command: () => onShowSnapshotDialog(dataset.datasetId, dataset.name),
-          disabled: false
-        };
-      });
-    }
-
-    return properties;
   };
 
   const copyDataCollectionToEuDatasetBigButton = [
