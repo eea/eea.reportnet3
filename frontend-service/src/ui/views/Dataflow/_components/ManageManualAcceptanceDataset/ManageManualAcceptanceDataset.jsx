@@ -90,7 +90,7 @@ export const ManageManualAcceptanceDataset = ({
           className="p-button-primary p-button-animated-blink"
           disabled={
             isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
-            isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)
+            manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus
           }
           icon={'check'}
           label={resources.messages['update']}
@@ -104,7 +104,7 @@ export const ManageManualAcceptanceDataset = ({
         onClick={() => manageDialogs(false)}
       />
       {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
-        isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus)) && (
+        manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus) && (
         <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
           <span>{resources.messages['fcSubmitButtonDisabled']}</span>
         </ReactTooltip>
