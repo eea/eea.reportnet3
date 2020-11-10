@@ -19,7 +19,7 @@
     "LEN": ["NUMBER_INTEGER"],
     "string": ["EMAIL", "TEXT", "TEXTAREA", "PHONE", "URL", "CODELIST", "LINK"],
     "stringMatch": ["TEXT", "TEXTAREA"],
-    "numberMatch": ["TEXT"],
+    "numberMatch": ["TEXT", "TEXTAREA"],
     "date": ["DATE"],
     "month": ["DATE", "NUMBER_INTEGER"],
     "year": ["DATE", "NUMBER_INTEGER"],
