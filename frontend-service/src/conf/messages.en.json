@@ -930,6 +930,7 @@
     "manualTechnicalAcceptanceTitle": "Do you wish to add a technical acceptance step for the reporter submissions? ",
     "manualTechnicalAcceptanceBigButton": "Manual technical acceptance",
     "webformTableCreation": "Create table",
-    "webformTableEdit": "Edit table"
+    "webformTableEdit": "Edit table",
+    "reportingDatasetsStatus": "Reporting datasets status"
   }
 }
