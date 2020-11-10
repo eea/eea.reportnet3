@@ -912,9 +912,9 @@
     "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>dataset</a>",
     "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs.",
     "feedbackDataProvider": "Data provider: ",
+    "feedbackHelp": "Dataflow feedback help",    
     "noMessagesScroll": "Scroll up to the top to load read messages.",
     "webformTableCreation": "Create table",
-    "webformTableEdit": "Edit table",
-    "feedbackHelp": "Dataflow feedback help"
+    "webformTableEdit": "Edit table"
   }
 }

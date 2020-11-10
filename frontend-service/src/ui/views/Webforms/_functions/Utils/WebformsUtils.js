@@ -52,8 +52,6 @@ const parseNewTableRecord = (table, pamNumber) => {
     const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
 
     obj.datasetPartitionId = null;
-    // if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
     return obj;
   }
 };

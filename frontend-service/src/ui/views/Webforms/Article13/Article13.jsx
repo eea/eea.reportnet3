@@ -71,7 +71,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
-
     const recordIds = parsePamsRecords(pamsRecords)
       .map(record => parseInt(record.Id))
       .filter(id => !Number.isNaN(id));
@@ -80,7 +79,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const getParamFieldSchemaId = (param, table) => {
-    return table.elements.filter(element => element.name === param).map(table => table.fieldSchema)[0];
+    return table.elements
+      .filter(element => element.name.toUpperCase() === param.toUpperCase())
+      .map(table => table.fieldSchema)[0];
   };
 
   const onAddRecord = async type => {
@@ -142,36 +143,35 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onLoadPamsData = async () => {
-    const tableSchemaId = article13State.data.map(table => table.tableSchemaId);
-
+    const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
-      const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
-        'CORRECT',
-        'INFO',
-        'WARNING',
-        'ERROR',
-        'BLOCKER'
-      ]);
+      if (!isNil(tableSchemaId[0])) {
+        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
+          'CORRECT',
+          'INFO',
+          'WARNING',
+          'ERROR',
+          'BLOCKER'
+        ]);
+        if (!isNil(parentTableData.records)) {
+          const tableData = {};
 
-      if (!isNil(parentTableData.records)) {
-        const tableData = {};
+          const records = onParseWebformRecords(
+            parentTableData.records,
+            article13State.data[0],
+            tableData,
+            parentTableData.totalRecords
+          );
+          const list = getTypeList(records);
 
-        const records = onParseWebformRecords(
-          parentTableData.records,
-          article13State.data[0],
-          tableData,
-          parentTableData.totalRecords
-        );
-
-        const list = getTypeList(records);
-
-        article13Dispatch({
-          type: 'ON_LOAD_PAMS_DATA',
-          payload: { records, group: list['group'], single: list['single'] }
-        });
+          article13Dispatch({
+            type: 'ON_LOAD_PAMS_DATA',
+            payload: { records, group: list['group'], single: list['single'] }
+          });
+        }
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       setIsLoading(false);
     }
@@ -179,8 +179,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const pamSchemaId = article13State.data
-      .filter(table => table.name === 'PaMs')[0]
-      .records[0].fields.filter(field => field.name === 'Id')[0].fieldId;
+      .filter(table => table.name.toUpperCase() === 'PAMS')[0]
+      .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0].fieldId;
     let recordId = '';
     pamsRecords.forEach(pamsRecord => {
       pamsRecord.fields.forEach(field => {

@@ -26,7 +26,6 @@ const DataForm = ({
   const resources = useContext(ResourcesContext);
 
   const [fieldsWithError, setFieldsWithError] = useState([]);
-
   useEffect(() => {
     onShowCoordinateError(fieldsWithError.length);
   }, [fieldsWithError]);
