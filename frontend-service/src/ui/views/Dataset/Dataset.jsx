@@ -65,7 +65,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
-  // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -503,6 +502,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
+      setIsTableView(isNil(datasetSchema.webform));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -693,7 +693,6 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetName
       }
     });
-    //setIsTableDeleted(false);
   };
 
   const getImportExtensions = externalOperationsList.import
@@ -704,15 +703,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getImportExtensions.split(', ')
   ).join(', ')}`;
-
-  const renderCustomFileUploadFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsImportDatasetDialogVisible(false)}
-    />
-  );
 
   const renderDashboardFooter = (
     <Button
