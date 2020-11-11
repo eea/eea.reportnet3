@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
 import chunk from 'lodash/chunk';
 import chain from 'lodash/chain';
@@ -234,6 +235,21 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   return datasetsDashboardsData;
 };
 
+const datasetsFinalFeedback = async dataflowId => {
+  const datasetsFinalFeedbackDTO = await apiDataflow.datasetsFinalFeedback(dataflowId);
+  const datasetsFeedback = datasetsFinalFeedbackDTO.map(dataset => {
+    return {
+      dataProviderName: dataset.dataSetName,
+      datasetName: dataset.nameDatasetSchema,
+      datasetId: dataset.id,
+      isReleased: dataset.isReleased,
+      feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
+    };
+  });
+
+  return datasetsFeedback;
+};
+
 const datasetsReleasedStatus = async dataflowId => {
   const datasetsReleasedStatusDTO = await apiDataflow.datasetsReleasedStatus(dataflowId);
   datasetsReleasedStatusDTO.sort((a, b) => {
@@ -382,8 +398,10 @@ const parseDataflowDTO = dataflowDTO =>
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
+    manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
+    reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     status: dataflowDTO.status,
@@ -583,6 +601,7 @@ export const ApiDataflowRepository = {
   completed,
   create,
   dataflowDetails,
+  datasetsFinalFeedback,
   datasetsReleasedStatus,
   datasetsValidationStatistics,
   deleteById,
