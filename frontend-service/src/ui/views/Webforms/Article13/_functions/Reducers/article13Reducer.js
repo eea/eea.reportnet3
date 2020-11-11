@@ -4,7 +4,7 @@ export const article13Reducer = (state, { type, payload }) => {
       return { ...state, ...payload };
 
     case 'ON_TOGGLE_VIEW':
-      return { ...state, isWebformView: payload.view };
+      return { ...state, view: payload.view };
 
     case 'ON_LOAD_PAMS_DATA':
       return {
