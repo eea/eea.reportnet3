@@ -303,7 +303,7 @@ export const TableManagement = ({
         <Button
           className={'p-button-secondary'}
           disabled={!hasTable || isSaving}
-          icon={isSaving ? 'spinnerAnimate' : hasRecord ? 'edit' : 'add'}
+          icon={hasRecord ? 'edit' : 'add'}
           label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
           onClick={async () => {
             if (hasRecord) {
