@@ -119,6 +119,14 @@
     }
   }
 
+  .manualTechnicalAcceptance {
+    background-color: var(--c-black-rose-100);
+
+    span:hover {
+      background-color: var(--c-black-rose-200);
+    }
+  }
+
   .caption {
     box-sizing: content-box;
     color: var(--main-font-color);

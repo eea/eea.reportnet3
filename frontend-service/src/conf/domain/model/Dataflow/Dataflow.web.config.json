@@ -5,6 +5,7 @@
   "createDataflow": "/dataflow",
   "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
   "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",
+  "datasetsFinalFeedback": "/datasetmetabase/dataflow/{:dataflowId}",
   "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
   "deleteDataflow": "/dataflow/{:dataflowId}",
   "generateApiKey": "/user/createApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}",
