@@ -434,7 +434,8 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              <label>{`${element.required ? '*' : ''}${element.title}`}</label>
+              {element.required || (element.title && <label>{`${element.required ? '*' : ''}${element.title}`}</label>)}
+
               {element.tooltip && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
@@ -463,8 +464,8 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           <Fragment>
-            {element.level === 2 && <h2 className={styles[`LABEL_${element.level}`]}>{element.title}</h2>}
-            {element.level === 3 && <h3 className={styles[`LABEL_${element.level}`]}>{element.title}</h3>}
+            {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+            {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
           </Fragment>
         );
       } else {
