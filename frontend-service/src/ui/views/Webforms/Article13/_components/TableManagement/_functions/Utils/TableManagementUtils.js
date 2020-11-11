@@ -1,5 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import remove from 'lodash/remove';
 
 import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
 
@@ -17,12 +18,16 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
 const parseListOfSinglePams = (columns = [], records = []) => {
   const options = records
     .filter(record => record.IsGroup === 'Single')
-    .map(singleRecord => `#${singleRecord.Id} - ${singleRecord.Title}`);
+    .map(singleRecord => {
+      if (singleRecord.Id && singleRecord.Title) {
+        return `#${singleRecord.Id} - ${singleRecord.Title}`;
+      }
+    });
 
   return columns.map(column => {
     if (column.header === 'ListOfSinglePams') {
       column.type = 'MULTISELECT_CODELIST';
-      column.codelistItems = options;
+      column.codelistItems = remove(options, undefined || null);
     }
 
     return column;

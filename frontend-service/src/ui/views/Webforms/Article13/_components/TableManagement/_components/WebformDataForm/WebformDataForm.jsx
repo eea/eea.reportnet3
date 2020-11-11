@@ -1,5 +1,7 @@
-import { isEmpty, isNil } from 'lodash';
 import React, { Fragment } from 'react';
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { WebformDataFormFieldEditor } from './_components/WebformDataFormFieldEditor';
 

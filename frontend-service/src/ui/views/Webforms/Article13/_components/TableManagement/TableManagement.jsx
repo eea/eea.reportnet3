@@ -210,7 +210,7 @@ export const TableManagement = ({
     let updatedRecord = RecordUtils.changeRecordValue(
       { ...selectedRecord },
       getFieldSchemaColumnIdByHeader(tableSchemaColumns, property),
-      property === 'ListOfSinglePams' && isArray(value) ? value.join() : value
+      property === 'ListOfSinglePams' && isArray(value) ? value.join(', ') : value
     );
 
     tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: updatedRecord });
