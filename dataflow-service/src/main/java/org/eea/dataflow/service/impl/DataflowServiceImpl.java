@@ -1,6 +1,5 @@
 package org.eea.dataflow.service.impl;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -20,6 +19,7 @@ import org.eea.dataflow.persistence.domain.Message;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.MessageRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
@@ -198,7 +198,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getDataflows(String userId) throws EEAException {
 
-    List<DataFlowVO> dataflowVOs = new ArrayList<DataFlowVO>();
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
@@ -210,7 +210,9 @@ public class DataflowServiceImpl implements DataflowService {
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
-          setReportingDatasetStatus(map, dataflowVO);
+          if (!map.isEmpty()) {
+            setReportingDatasetStatus(map, dataflowVO);
+          }
           dataflowVOs.add(dataflowVO);
         });
 
@@ -227,51 +229,50 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private void setReportingDatasetStatus(Map<Long, List<DataflowStatusDataset>> map,
       DataFlowVO dataflowVO) {
-    if (!map.isEmpty()) {
-      boolean containsPending = false;
-      int releasedCount = 0;
-      int techAcceptedCount = 0;
-      boolean containsCorrectionR = false;
-      boolean containsFinalFeedback = false;
-      List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-      if (datasetsStatusList != null) {
-        for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
-          switch (datasetsStatusList.get(i).getStatus()) {
-            case PENDING:
-              containsPending = true;
-              break;
-            case RELEASED:
-              releasedCount++;
-              break;
-            case CORRECTION_REQUESTED:
-              containsCorrectionR = true;
-              break;
-            case TECHNICALLY_ACCEPTED:
-              techAcceptedCount++;
-              break;
-            case FINAL_FEEDBACK:
-              containsFinalFeedback = true;
-              break;
-            default:
-              containsPending = true;
-              break;
-          }
+    boolean containsPending = false;
+    int releasedCount = 0;
+    int techAcceptedCount = 0;
+    boolean containsCorrectionR = false;
+    boolean containsFinalFeedback = false;
+    List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+    if (datasetsStatusList != null) {
+      for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+        switch (datasetsStatusList.get(i).getStatus()) {
+          case PENDING:
+            containsPending = true;
+            break;
+          case RELEASED:
+            releasedCount++;
+            break;
+          case CORRECTION_REQUESTED:
+            containsCorrectionR = true;
+            break;
+          case TECHNICALLY_ACCEPTED:
+            techAcceptedCount++;
+            break;
+          case FINAL_FEEDBACK:
+            containsFinalFeedback = true;
+            break;
+          default:
+            containsPending = true;
+            break;
         }
-        if (containsPending) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
-        } else {
-          if (releasedCount == datasetsStatusList.size()) {
-            dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
-          } else if (techAcceptedCount == datasetsStatusList.size()) {
-            dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
-          } else if (containsCorrectionR) {
-            dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
-          } else if (containsFinalFeedback) {
-            dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
-          }
+      }
+      if (containsPending) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
+      } else {
+        if (releasedCount == datasetsStatusList.size()) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
+        } else if (techAcceptedCount == datasetsStatusList.size()) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+        } else if (containsCorrectionR) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
+        } else if (containsFinalFeedback) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
         }
       }
     }
+
   }
 
 
@@ -286,15 +287,13 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> listDatasets =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (listDatasets != null && !listDatasets.isEmpty()) {
-      List<Object[]> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
-      for (Object[] object : queryResult) {
+    if (!listDatasets.isEmpty()) {
+      List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
+      for (IDatasetStatus object : queryResult) {
         List<DataflowStatusDataset> list2 = new ArrayList<>();
         DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
-        dataflowStatusDataset
-            .setId(object[0] instanceof BigInteger ? ((BigInteger) object[0]).longValue() : null);
-        dataflowStatusDataset.setStatus(
-            object[1] instanceof String ? DatasetStatusEnum.valueOf((String) object[1]) : null);
+        dataflowStatusDataset.setId(object.getId());
+        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
         list2.add(dataflowStatusDataset);
         if (map.get(dataflowStatusDataset.getId()) != null) {
           map.get(dataflowStatusDataset.getId()).addAll(list2);
