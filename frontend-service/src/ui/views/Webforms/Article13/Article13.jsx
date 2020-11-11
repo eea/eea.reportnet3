@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -84,8 +85,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       .map(table => table.fieldSchema)[0];
   };
 
-  const onAddRecord = async type => {
-    const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
+  const onAddPamsRecord = async type => {
+    // const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
+    const table = article13State.data.filter(table => table.name.toLowerCase() === 'pams')[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 
     const data = [];
@@ -213,7 +215,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
       <ul className={styles.tableList}>
         {Object.keys(tableList).map(list => (
           <li className={styles.tableListItem}>
-            <span className={styles.tableListTitle}>{list}</span>:
+            <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
             {tableList[list].map(items => (
               <span
                 className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
@@ -228,7 +230,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
               className={styles.addButton}
               label={resources.messages['add']}
               icon={'add'}
-              onClick={() => onAddRecord(capitalize(list))}
+              onClick={() => onAddPamsRecord(capitalize(list))}
             />
           </li>
         ))}
@@ -242,14 +244,24 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
             onToggleView(false);
             onSelectRecord(null, null);
           }}>
-          <p className={styles.tabLabel}>Overview</p>
+          <p className={styles.tabLabel}>{resources.messages['overview']}</p>
         </div>
         <div
-          className={`${styles.tabItem} ${isWebformView ? styles.selected : null}`}
-          onClick={() => onToggleView(true)}>
-          <p className={styles.tabLabel}>Details</p>
+          className={`${styles.tabItem} ${isWebformView ? styles.selected : null} ${
+            isEmpty(pamsRecords) ? styles.disabled : null
+          }`}
+          data-for="emptyTableTooltip"
+          data-tip
+          onClick={() => (isEmpty(pamsRecords) ? {} : onToggleView(true))}>
+          <p className={styles.tabLabel}>{resources.messages['details']}</p>
         </div>
       </div>
+
+      {isEmpty(pamsRecords) && (
+        <ReactTooltip effect="solid" id="emptyTableTooltip" place="right">
+          {resources.messages['overviewEmptyTableTooltip']}
+        </ReactTooltip>
+      )}
 
       {isWebformView ? (
         <WebformView
@@ -266,7 +278,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           dataflowId={dataflowId}
           datasetId={datasetId}
           loading={isLoading}
-          onAddRecord={onAddRecord}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
           onSelectEditTable={onSelectEditTable}

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 // import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
@@ -10,7 +10,7 @@ import isUndefined from 'lodash/isUndefined';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
-// import { MultiSelect } from 'ui/views/_components/MultiSelect';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -78,9 +78,7 @@ const WebformDataFormFieldEditor = ({
       <Dropdown
         appendTo={document.body}
         disabled={column.readOnly}
-        onChange={e => {
-          onChangeForm(field, e.target.value.value);
-        }}
+        onChange={e => onChangeForm(field, e.target.value.value)}
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
@@ -88,11 +86,23 @@ const WebformDataFormFieldEditor = ({
     );
   };
 
+  const renderMultiselectCodelist = (field, fieldValue) => {
+    return (
+      <MultiSelect
+        appendTo={document.body}
+        onChange={e => onChangeForm(field, e.value)}
+        optionLabel="itemType"
+        options={column.codelistItems.sort().map(codelistItem => ({ itemType: codelistItem, value: codelistItem }))}
+        style={{ height: '34px' }}
+        value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+      />
+    );
+  };
+
   const renderFieldEditor = () =>
-    // : type === 'MULTISELECT_CODELIST' ? (
-    //   renderMultiselectCodelist(field, fieldValue)
-    // )
-    type === 'CODELIST' ? (
+    type === 'MULTISELECT_CODELIST' ? (
+      renderMultiselectCodelist(field, fieldValue)
+    ) : type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
     ) : type === 'TEXTAREA' ? (
       renderTextarea(field, fieldValue)
@@ -123,7 +133,7 @@ const WebformDataFormFieldEditor = ({
     />
   );
 
-  return <React.Fragment>{renderFieldEditor()}</React.Fragment>;
+  return <Fragment>{renderFieldEditor()}</Fragment>;
 };
 
 export { WebformDataFormFieldEditor };

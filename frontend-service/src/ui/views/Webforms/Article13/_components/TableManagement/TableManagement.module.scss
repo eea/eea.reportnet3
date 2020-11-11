@@ -1,21 +1,17 @@
-.addButtons {
-  display: flex;
-  justify-content: space-around;
-  margin: 2rem;
-}
-.fieldInfoDialogWrapper {
-  max-width: 80vw;
-  max-height: 80vh;
-  width: 35vw !important;
-}
-.iconTooltipWrapper {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-.iconTooltipLevelError {
-  width: 1.5em;
-}
-.invisibleHeader {
-  display: none;
+.table {
+  margin-bottom: 2rem;
+
+  .iconTooltipLevelError {
+    width: 1.5em;
+  }
+
+  .iconTooltipWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .invisibleHeader {
+    display: none;
+  }
 }

@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
@@ -14,7 +14,20 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
   }
 };
 
-const parseTableSchemaColumns = schemaTables => {
+const parseListOfSinglePams = (columns = [], records = []) => {
+  const options = records.filter(record => record.IsGroup === 'Single').map(singleRecord => singleRecord.Title);
+
+  return columns.map(column => {
+    if (column.header === 'ListOfSinglePams') {
+      column.type = 'MULTISELECT_CODELIST';
+      column.codelistItems = options;
+    }
+
+    return column;
+  });
+};
+
+const parseTableSchemaColumns = (schemaTables, records) => {
   const columns = [];
   schemaTables
     .filter(schemaTable => !isNil(schemaTable.tableSchemaName) && schemaTable.tableSchemaName.toUpperCase() === 'PAMS')
@@ -39,7 +52,8 @@ const parseTableSchemaColumns = schemaTables => {
         });
       }
     });
-  return columns;
+
+  return parseListOfSinglePams(columns, records);
 };
 
 const parsePamsRecords = records =>

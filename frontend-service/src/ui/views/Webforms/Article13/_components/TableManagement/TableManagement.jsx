@@ -33,7 +33,6 @@ export const TableManagement = ({
   dataflowId,
   datasetId,
   loading,
-  onAddRecord,
   onAddTableRecord,
   onRefresh,
   onSelectEditTable,
@@ -43,6 +42,7 @@ export const TableManagement = ({
 }) => {
   const {
     getFieldSchemaColumnIdByHeader,
+    parsePamsRecords,
     parsePamsRecordsWithParentData,
     parseTableSchemaColumns
   } = TableManagementUtils;
@@ -87,6 +87,7 @@ export const TableManagement = ({
     inmRecords[recordIndex] = initialSelectedRecord;
     tableManagementDispatch({ type: 'RESET_SELECTED_RECORD', payload: { records: inmRecords } });
   };
+
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -114,7 +115,7 @@ export const TableManagement = ({
   const initialLoad = () => {
     if (!isEmpty(records)) {
       const parsedTables = DataViewerUtils.parseData(parentTablesWithData[0].data);
-      const tableSchemaColumns = parseTableSchemaColumns(schemaTables);
+      const tableSchemaColumns = parseTableSchemaColumns(schemaTables, parsePamsRecords(records));
       const parsedRecordsWithValidations = parsePamsRecordsWithParentData(
         parsedTables,
         parentTablesWithData,
@@ -342,24 +343,14 @@ export const TableManagement = ({
         const message = DataViewerUtils.formatValidations(validations);
         const levelError = DataViewerUtils.getLevelError(validations);
         return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+          <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
             {field.fieldData[column.fieldSchemaId]}
             <IconTooltip levelError={levelError} message={message} />
           </div>
         );
       } else {
         return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+          <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
             {field.fieldData[column.fieldSchemaId]}
           </div>
         );
@@ -397,6 +388,7 @@ export const TableManagement = ({
       onEditClick={() => manageDialogs('manageRows', true)}
     />
   );
+
   const validationsTemplate = recordData => {
     const validationsGroup = DataViewerUtils.groupValidations(
       recordData,
@@ -437,9 +429,18 @@ export const TableManagement = ({
     return data;
   };
 
+  const renderEmptyTable = () => (
+    <DataTable className={styles.table} value={[{ emptyContent: resources.messages['overviewEmptyTableContent'] }]}>
+      <Column field={'emptyContent'} header={resources.messages['overviewEmptyTableHeader']} />
+    </DataTable>
+  );
+
+  if (isEmpty(records)) return renderEmptyTable();
+
   return (
     <Fragment>
       <DataTable
+        className={styles.table}
         autoLayout={true}
         loading={loading}
         onRowClick={event =>
@@ -448,11 +449,6 @@ export const TableManagement = ({
         value={tableManagementState.records}>
         {renderTableColumns()}
       </DataTable>
-
-      <div className={styles.addButtons}>
-        <Button label={'Add Single'} icon={'add'} onClick={() => onAddRecord('Single')} />
-        <Button label={'Add Group'} icon={'add'} onClick={() => onAddRecord('Group')} />
-      </div>
 
       {isDialogVisible.delete && (
         <ConfirmDialog

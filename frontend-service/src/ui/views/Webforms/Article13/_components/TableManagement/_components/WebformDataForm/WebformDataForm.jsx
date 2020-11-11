@@ -23,10 +23,7 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
 
           <div
             className="p-col-8"
-            style={{
-              padding: '.5em',
-              width: column.type === 'CODELIST' || column.type === 'LINK' ? '30%' : ''
-            }}>
+            style={{ padding: '.5em', width: column.type === 'CODELIST' || column.type === 'LINK' ? '30%' : '' }}>
             <WebformDataFormFieldEditor
               // autoFocus={i === 0}
               column={column}
