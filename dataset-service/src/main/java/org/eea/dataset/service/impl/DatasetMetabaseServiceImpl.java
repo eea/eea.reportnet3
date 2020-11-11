@@ -264,10 +264,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     message.setProviderId(datasetMetabase.getDataProviderId());
 
     // Send message to provider
+    Optional<DataSetMetabase> designDataset =
+        dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(
+            datasetMetabase.getDatasetSchema(), datasetMetabase.getDataProviderId());
     collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message);
     collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
         datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
-        datasetMetabase.getDataSetName(), EventType.UPDATED_DATASET_STATUS.toString());
+        designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
+        EventType.UPDATED_DATASET_STATUS.toString());
   }
 
 
