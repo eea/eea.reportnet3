@@ -11,8 +11,6 @@ import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DataSetMetabaseRepository.
- *
- *
  */
 public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Long> {
 
@@ -67,11 +65,41 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   /**
    * Find first by dataset schema and data provider id.
    *
-   * @param idDatasetSchemaReferenced the id dataset schema referenced
+   * @param datasetSchema the dataset schema
    * @param dataProviderId the data provider id
    * @return the data set metabase
    */
   Optional<DataSetMetabase> findFirstByDatasetSchemaAndDataProviderId(
       @Param("datasetSchema") String datasetSchema, @Param("dataProviderId") Long dataProviderId);
+
+
+  /**
+   * Count by data set name ignore case and dataflow id.
+   *
+   * @param datasetName the dataset name
+   * @param dataflowId the dataflow id
+   * @return the long
+   */
+  Long countByDataSetNameIgnoreCaseAndDataflowId(String datasetName, Long dataflowId);
+
+  /**
+   * Gets the dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset ids by dataflow id and data provider id
+   */
+  @Query("SELECT d.id FROM DataSetMetabase d WHERE d.dataflowId = :dataflowId AND d.dataProviderId = :providerId")
+  List<Long> getDatasetIdsByDataflowIdAndDataProviderId(@Param("dataflowId") Long dataflowId,
+      @Param("providerId") Long dataProviderId);
+
+  /**
+   * Find by dataflow id and provider id not null.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Query("SELECT d FROM DataSetMetabase d WHERE d.dataflowId = :dataflowId AND d.dataProviderId is not null")
+  List<DataSetMetabase> findByDataflowIdAndProviderIdNotNull(@Param("dataflowId") Long dataflowId);
 
 }

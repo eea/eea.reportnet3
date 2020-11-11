@@ -65,6 +65,7 @@ export const FieldDesigner = ({
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
+    { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
@@ -147,7 +148,7 @@ export const FieldDesigner = ({
     dropDowns.forEach(dropDown => {
       const dropDownDisplay = dropDown.style.display;
       if (dropDownDisplay) {
-        if (headerInitialHeight === 70 || headerInitialHeight === 180) {
+        if (headerInitialHeight === 64 || headerInitialHeight === 180) {
           dropDown.style.marginTop = `${headerHeight - headerInitialHeight}px`;
         }
       }
@@ -165,7 +166,7 @@ export const FieldDesigner = ({
 
   useEffect(() => {
     if (!isNil(totalFields)) {
-      if (totalFields === 0 && !isUndefined(tableSchemaId) && !isUndefined(inputRef.current)) {
+      if (totalFields === 0 && !isUndefined(tableSchemaId) && tableSchemaId !== '' && !isUndefined(inputRef.current)) {
         if (index === '-1') {
           inputRef.current.element.focus();
         }
@@ -199,7 +200,7 @@ export const FieldDesigner = ({
           }
         }
       } else {
-        if (type !== '' && type !== fieldDesignerState.fieldValue) {          
+        if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
             pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,

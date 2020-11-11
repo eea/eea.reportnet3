@@ -11,7 +11,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -19,18 +21,20 @@ import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -48,15 +52,21 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
@@ -69,6 +79,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -88,6 +101,10 @@ public class DatasetSnapshotServiceTest {
   /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The user management controller zull. */
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
 
   /** The lock service. */
   @Mock
@@ -193,6 +210,24 @@ public class DatasetSnapshotServiceTest {
   /** The snapshots. */
   private List<Snapshot> snapshots;
 
+  /** The reporting dataset repository. */
+  @Mock
+  private ReportingDatasetRepository reportingDatasetRepository;
+
+  /** The validation controller zuul. */
+  @Mock
+  private ValidationControllerZuul validationControllerZuul;
+
+  /**
+   * The security context.
+   */
+  private SecurityContext securityContext;
+
+  /**
+   * The authentication.
+   */
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
@@ -212,6 +247,12 @@ public class DatasetSnapshotServiceTest {
     snapshot2.setDcReleased(false);
     snapshots.add(snapshot2);
     snapshots.add(snapshot);
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
     MockitoAnnotations.initMocks(this);
   }
 
@@ -239,16 +280,13 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest1() throws EEAException {
-    List<Validation> validations = new ArrayList<>();
-    validations.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER))
-        .thenReturn(validations);
+
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false, null);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -259,15 +297,12 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest2() throws EEAException {
-    List<Validation> validations = new ArrayList<>();
-    validations.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER))
-        .thenReturn(validations);
+
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false, 1L);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -278,16 +313,13 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest3() throws EEAException {
-    List<Validation> validations = new ArrayList<>();
-    validations.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(ErrorTypeEnum.BLOCKER))
-        .thenReturn(validations);
+
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", true, 1L);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -298,9 +330,30 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void testDeleteSnapshots() throws Exception {
-
+    Snapshot snap = new Snapshot();
+    Mockito.when(snapshotRepository.findById(1L)).thenReturn(Optional.of(snap));
     datasetSnapshotService.removeSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).deleteById(Mockito.anyLong());
+
+
+  }
+
+  /**
+   * Test delete snapshots fail.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = EEAException.class)
+  public void testDeleteSnapshotsFail() throws Exception {
+    Snapshot snap = new Snapshot();
+    snap.setAutomatic(Boolean.TRUE);
+    Mockito.when(snapshotRepository.findById(1L)).thenReturn(Optional.of(snap));
+    try {
+      datasetSnapshotService.removeSnapshot(1L, 1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.ERROR_DELETING_SNAPSHOT, e.getMessage());
+      throw e;
+    }
 
 
   }
@@ -388,9 +441,14 @@ public class DatasetSnapshotServiceTest {
     representatives.add(rep);
     dataCollection.setId(1L);
     metabase.setDataProviderId(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setManualAcceptance(false);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     Mockito.when(snapshotRepository.findById(Mockito.any()))
@@ -426,7 +484,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(5)).removeLockByCriteria(Mockito.any());
   }
 
 
@@ -443,23 +501,36 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(5)).removeLockByCriteria(Mockito.any());
   }
 
   /**
-   * Release snapshot.
+   * Release snapshot status.
    *
    * @throws Exception the exception
    */
   @Test
-  public void releaseSnapshotwithBlockers() throws Exception {
-    List<Validation> isBlocked = new ArrayList<>();
-    isBlocked.add(new Validation());
-    Mockito.when(validationRepository.findByLevelError(Mockito.any())).thenReturn(isBlocked);
+  public void releaseSnapshotStatus() throws Exception {
+    DataSetMetabaseVO metabase = new DataSetMetabaseVO();
+    DataCollection dataCollection = new DataCollection();
+    dataCollection.setId(1L);
+    metabase.setDataProviderId(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setManualAcceptance(true);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
+    Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(dataCollection));
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(2)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
-
 
   /**
    * Test get schema snapshots.
@@ -656,22 +727,6 @@ public class DatasetSnapshotServiceTest {
         .findByDesignDatasetIdOrderByCreationDateDesc(Mockito.any());
   }
 
-  /**
-   * Test delete all snapshots.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testDeleteAllSnapshots() throws Exception {
-
-    SnapshotVO snap = new SnapshotVO();
-    snap.setId(1L);
-    List<SnapshotVO> snapshots = new ArrayList<>();
-    snapshots.add(snap);
-    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(snapshots);
-    datasetSnapshotService.deleteAllSnapshots(1L);
-    Mockito.verify(snapshotMapper, times(1)).entityListToClass(Mockito.any());
-  }
 
   /**
    * After tests.
@@ -686,12 +741,20 @@ public class DatasetSnapshotServiceTest {
    * Creates the recepit PDF.
    */
   @Test
-  public void createRecepitPDF() {
+  public void createRecepitPDFTest() {
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    SecurityContextHolder.setContext(securityContext);
     ReportingDatasetVO dataset = new ReportingDatasetVO();
     RepresentativeVO representative = new RepresentativeVO();
     List<ReportingDatasetVO> datasets = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     DataFlowVO dataflowVO = new DataFlowVO();
+    ObligationVO obligationVO = new ObligationVO();
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("userName");
+    userRepresentationVO.setFirstName("First Name");
+    userRepresentationVO.setLastName("Last Name");
     dataset.setIsReleased(true);
     dataset.setDataProviderId(1L);
     dataset.setDataSetName("datsetName");
@@ -701,11 +764,18 @@ public class DatasetSnapshotServiceTest {
     representative.setReceiptOutdated(true);
     datasets.add(dataset);
     representatives.add(representative);
+    obligationVO.setObligationId(1);
+    obligationVO.setOblTitle("Obligation title");
     dataflowVO.setName("name");
     dataflowVO.setReportingDatasets(datasets);
+    dataflowVO.setObligation(obligationVO);
     Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.when(userManagementControllerZull.getUserByUserId(Mockito.any()))
+        .thenReturn(userRepresentationVO);
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
     Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
   }
@@ -909,6 +979,76 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(snapshots);
     when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     assertEquals("not equals", datasetSnapshotService.getReleases(1L), new ArrayList<>());
+  }
+
+
+  @Test
+  public void createReleaseSnapshotTest() throws EEAException {
+    ReportingDataset dataset = new ReportingDataset();
+    dataset.setId(1L);
+    dataset.setDataProviderId(1L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito
+        .when(reportingDatasetRepository
+            .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(dataset);
+    Mockito.doNothing().when(validationControllerZuul).validateDataSetData(Mockito.any(),
+        Mockito.anyBoolean());
+
+    Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(dataset));
+    RepresentativeVO representative = new RepresentativeVO();
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    representative.setDataProviderId(1L);
+    representative.setProviderAccount("providerAccount");
+    representative.setReceiptDownloaded(true);
+    representative.setReceiptOutdated(true);
+    representatives.add(representative);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(representatives);
+
+
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    TableSchemaVO table = new TableSchemaVO();
+    table.setIdTableSchema("5ce524fad31fc52540abae73");
+    schema.setTableSchemas(Arrays.asList(table));
+    Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
+        .thenReturn(schema);
+
+    datasetSnapshotService.createReleaseSnapshots(1L, 1L);
+    Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
+        Mockito.anyBoolean());
+  }
+
+  @Test
+  public void releaseLocksRelatedToReleaseTest() throws EEAException {
+
+    ReportingDataset dataset = new ReportingDataset();
+    dataset.setId(1L);
+    dataset.setDataProviderId(1L);
+    Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(dataset));
+    RepresentativeVO representative = new RepresentativeVO();
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    representative.setDataProviderId(1L);
+    representative.setProviderAccount("providerAccount");
+    representative.setReceiptDownloaded(true);
+    representative.setReceiptOutdated(true);
+    representatives.add(representative);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(representatives);
+
+
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    TableSchemaVO table = new TableSchemaVO();
+    table.setIdTableSchema("5ce524fad31fc52540abae73");
+    schema.setTableSchemas(Arrays.asList(table));
+    Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
+        .thenReturn(schema);
+
+    datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
+    Mockito.verify(lockService, times(10)).removeLockByCriteria(Mockito.any());
   }
 
 }

@@ -1,0 +1,6 @@
+{
+  "create":"/dataflow/{:dataflowId}/createMessage",
+  "loadMessagesByFlag": "/dataflow/{:dataflowId}/findMessages?page={:page}&read={:read}&providerId={:providerId}",  
+  "loadMessages": "/dataflow/{:dataflowId}/findMessages?page={:page}&providerId={:providerId}",
+  "markAsRead": "/dataflow/{:dataflowId}/updateMessageReadStatus"
+}

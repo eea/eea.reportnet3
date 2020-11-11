@@ -82,6 +82,23 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteAutomaticRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Document pullCriteria = new Document(REFERENCE_ID, referenceId).append("automatic", true);
+    Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
+
+
   /**
    * Delete rule required.
    *
@@ -303,6 +320,61 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return result.isEmpty() ? null : result.get(0);
   }
 
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the all disabled rules
+   */
+  @Override
+  @CheckForNull
+  public RulesSchema getAllDisabledRules(ObjectId datasetSchemaId) {
+    List<RulesSchema> result;
+
+    Document enabled = new Document("$eq", Arrays.asList("$$rule.enabled", false));
+    Document filterExpression = new Document();
+    filterExpression.append(INPUT, RULES);
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond", new Document("$and", Arrays.asList(enabled)));
+    Document filter = new Document(FILTER, filterExpression);
+    result = mongoTemplate.aggregate(Aggregation.newAggregation(
+        Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
+        Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
+            .and(aggregationOperationContext -> filter).as(LiteralConstants.RULES)),
+        RulesSchema.class, RulesSchema.class).getMappedResults();
+
+    return result.isEmpty() ? null : result.get(0);
+  }
+
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the all unchecked rules
+   */
+  @Override
+  @CheckForNull
+  public RulesSchema getAllUncheckedRules(ObjectId datasetSchemaId) {
+    List<RulesSchema> result;
+
+    Document verified = new Document("$eq", Arrays.asList("$$rule.verified", false));
+    Document filterExpression = new Document();
+    filterExpression.append(INPUT, RULES);
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond", new Document("$and", Arrays.asList(verified)));
+    Document filter = new Document(FILTER, filterExpression);
+    result = mongoTemplate.aggregate(Aggregation.newAggregation(
+        Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
+        Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
+            .and(aggregationOperationContext -> filter).as(LiteralConstants.RULES)),
+        RulesSchema.class, RulesSchema.class).getMappedResults();
+
+    return result.isEmpty() ? null : result.get(0);
+  }
+
+
   /**
    * Delete by unique constraint id.
    *
@@ -358,18 +430,19 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public List<Rule> findSqlRules(ObjectId datasetSchemaId) {
+
+    Document exist = new Document("$ne", Arrays.asList("$$rule.sqlSentence", "$exist"));
+    Document vacio = new Document("$ne", Arrays.asList("$$rule.sqlSentence", ""));
     Document filterExpression = new Document();
     filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
-
-    filterExpression.append("cond", new Document("$ne", Arrays.asList("$$rule.sqlSentence", "")));
+    filterExpression.append("cond", new Document("$and", Arrays.asList(exist, vacio)));
     Document filter = new Document(FILTER, filterExpression);
     RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
         Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
         Aggregation.project().and(aggregationOperationContext -> filter)
             .as(LiteralConstants.RULES)),
         RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
-
     return rulesSchema.getRules();
   }
 }

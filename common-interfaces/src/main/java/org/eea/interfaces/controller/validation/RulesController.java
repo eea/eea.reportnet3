@@ -5,6 +5,7 @@ package org.eea.interfaces.controller.validation;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -278,7 +279,67 @@ public interface RulesController {
    * @param ruleVO the rule VO
    */
   @PostMapping("/private/validateSqlRuleDataCollection")
-  void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+  boolean validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO);
+
+
+  /**
+   * Validate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @PostMapping("/validateSqlRule")
+  void validateSqlRule(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO);
+
+
+
+  /**
+   * Validate sql rules.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @PostMapping("/validateSqlRules")
+  public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  @PostMapping("/private/getAllDisabledRules")
+  Integer getAllDisabledRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs);
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  @PostMapping("/private/getAllUncheckedRules")
+  Integer getAllUncheckedRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs);
+
+
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
+  void deleteAutomaticRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId);
 
 }

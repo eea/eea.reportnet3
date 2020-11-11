@@ -735,7 +735,6 @@ export class Dropdown extends Component {
 
   getOptionKey(option) {
     return this.props.dataKey ? ObjectUtils.resolveFieldData(option, this.props.dataKey) : this.getOptionLabel(option);
-    // return uuid.v4(); Unique Id Error, consult with Kiko
   }
 
   checkValidity() {

@@ -1,4 +1,5 @@
 import camelCase from 'lodash/camelCase';
+import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
@@ -16,6 +17,10 @@ const removeAll = async () => {};
 const readById = async () => {};
 const readAll = async () => {};
 const parse = ({ config, content = {}, message, onClick, routes, type }) => {
+  if (type === 'UPDATED_DATASET_STATUS') {
+    getUpdatedDatasetStatusNotificationContent(content);
+  }
+
   const notificationDTO = {};
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
@@ -72,6 +77,9 @@ const parseHidden = ({ type, content = {}, config }) => {
 
   return new Notification(notificationDTO);
 };
+
+const getUpdatedDatasetStatusNotificationContent = content =>
+  (content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' ')));
 
 const getSectionValidationRedirectionUrl = sectionDTO => {
   if (!isNil(sectionDTO)) {

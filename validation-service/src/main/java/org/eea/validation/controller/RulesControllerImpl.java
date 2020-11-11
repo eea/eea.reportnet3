@@ -5,12 +5,14 @@ import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.slf4j.Logger;
@@ -53,6 +55,8 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  @Autowired
+  private RuleMapper ruleMapper;
 
 
   /**
@@ -464,9 +468,91 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @PostMapping("/private/validateSqlRuleDataCollection")
-  public void validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
+  public boolean validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
-    sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
+    return sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
+  }
+
+
+  /**
+   * Validate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/validateSqlRule")
+  public void validateSqlRule(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId, @RequestBody RuleVO ruleVO) {
+
+    sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, ruleMapper.classToEntity(ruleVO));
+  }
+
+
+
+  /**
+   * Validate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/validateSqlRules")
+  public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    sqlRulesService.validateSQLRules(datasetId, datasetSchemaId);
+  }
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  @Override
+  @PostMapping("/private/getAllDisabledRules")
+  public Integer getAllDisabledRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs) {
+    return rulesService.getAllDisabledRules(dataflowId, designs);
+  }
+
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  @Override
+  @PostMapping("/private/getAllUncheckedRules")
+  public Integer getAllUncheckedRules(@RequestParam("dataflowId") Long dataflowId,
+      @RequestBody List<DesignDatasetVO> designs) {
+    return rulesService.getAllUncheckedRules(dataflowId, designs);
+  }
+
+
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
+  public void deleteAutomaticRuleByReferenceId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("referenceId") String referenceId) {
+    rulesService.deleteAutomaticRuleByReferenceId(datasetSchemaId, referenceId);
+    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
+        datasetSchemaId);
   }
 
 

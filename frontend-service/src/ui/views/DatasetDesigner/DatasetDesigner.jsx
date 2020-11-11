@@ -15,15 +15,15 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { routes } from 'ui/routes';
 import WebformsConfig from 'conf/webforms.config.json';
 
-import { Article15 } from 'ui/views/Webform/Article15';
+import { Webforms } from 'ui/views/Webforms';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
@@ -71,9 +71,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
+  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
+    invalidRules: 0,
+    disabledRules: 0
+  });
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -165,7 +170,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       // setIsLoading(true);
-      const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
+      const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
         config.permissions.EDITOR_WRITE
@@ -754,6 +759,38 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const validateQcRules = async () => {    
+    setSqlValidationRunning(true);
+    try {
+      const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    const response = notificationContext.toShow.find(
+      notification => notification.key === 'VALIDATE_RULES_COMPLETED_EVENT'
+    );
+    if (response) {
+      setSqlValidationRunning(false);
+    }
+  }, [notificationContext]);
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(
+      notification => notification.key === 'DISABLE_SQL_RULES_ERROR_EVENT'
+    );
+    if (response) {
+      const {
+        content: { invalidRules, disabledRules }
+      } = response;
+      setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
+      setIsQCsNotValidWarningVisible(true);
+      setSqlValidationRunning(false);
+    }
+  }, [notificationContext]);
+
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
@@ -778,6 +815,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         style={{ float: 'left' }}
       />
 
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
+        label={resources.messages['validateSqlRulesBtn']}
+        onClick={() => {
+          validateQcRules();
+        }}
+        tooltip={resources.messages['validateRulesBtnTootip']}
+        tooltipOptions={{ position: 'top' }}
+      />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
@@ -811,6 +858,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => cleanImportOtherSystemsDialog()}
       />
     </Fragment>
+  );
+
+  const sqlQCsNotValidWarningFooter = (
+    <Button
+      className="p-button-secondary"
+      icon="cancel"
+      label={resources.messages['close']}
+      onClick={() => setIsQCsNotValidWarningVisible(false)}
+    />
   );
 
   const renderValidationsFooter = (
@@ -1131,8 +1187,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         </div>
         {renderSwitchView()}
         {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
-          // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
-          <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+          <Webforms
+            dataflowId={dataflowId}
+            datasetId={datasetId}
+            state={designerState}
+            webformType={designerState.webform.value}
+          />
         ) : (
           <TabsDesigner
             changeMode={changeMode}
@@ -1315,6 +1375,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 </a>
               </label>
             </div>
+          </Dialog>
+        )}
+
+        {isQCsNotValidWarningVisible && (
+          <Dialog
+            header={resources.messages['notValidQCWarningTitle']}
+            footer={sqlQCsNotValidWarningFooter}
+            onHide={() => setIsQCsNotValidWarningVisible(false)}
+            visible={isQCsNotValidWarningVisible}>
+            {TextUtils.parseText(resources.messages['notValidSqlQCWarningBody'], {
+              disabled: invalidAndDisabledRulesAmount.disabledRules,
+              invalid: invalidAndDisabledRulesAmount.invalidRules
+            })}
           </Dialog>
         )}
       </div>

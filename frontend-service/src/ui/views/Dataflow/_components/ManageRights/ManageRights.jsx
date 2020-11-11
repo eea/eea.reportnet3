@@ -46,11 +46,12 @@ const ManageRights = ({ dataflowState, dataflowId, dataProviderId, isActiveManag
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
+    debugger;
     getInitialData(formDispatcher, dataflowId, dataProviderId);
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRightsDialog === false && !isEmpty(formState.contributorsHaveError)) {
+    if (!isActiveManageRightsDialog && !isEmpty(formState.contributorsHaveError)) {
       formDispatcher({
         type: 'REFRESH'
       });

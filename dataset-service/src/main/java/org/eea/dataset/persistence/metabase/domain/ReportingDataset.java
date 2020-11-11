@@ -31,7 +31,6 @@ public class ReportingDataset extends DataSetMetabase {
   private List<Snapshot> snapshots;
 
 
-
   /**
    * Equals.
    *

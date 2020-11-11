@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -241,10 +242,10 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
-
   const dataset = new Dataset({
     datasetSchemaName: datasetTableDataDTO.dataSetName,
-    datasetSchemaId: datasetTableDataDTO.datasetSchema
+    datasetSchemaId: datasetTableDataDTO.datasetSchema,
+    datasetFeedbackStatus: capitalize(datasetTableDataDTO.status.split('_').join(' '))
   });
   return dataset;
 };
@@ -545,6 +546,15 @@ const updateRecordsById = async (datasetId, record) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
 };
 
+const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {
+  return await apiDataset.updateDatasetFeedbackStatus(
+    dataflowId,
+    datasetId,
+    message,
+    feedbackStatus.toUpperCase().split(' ').join('_')
+  );
+};
+
 const updateDatasetSchemaDesign = async (datasetId, datasetSchema) => {
   return await apiDataset.updateDatasetSchemaById(datasetId, datasetSchema);
 };
@@ -581,6 +591,10 @@ const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) 
 const validateDataById = async datasetId => {
   const dataValidation = await apiDataset.validateById(datasetId);
   return dataValidation;
+};
+
+const validateSqlRules = async (datasetId, datasetSchemaId) => {
+  return await apiDataset.validateSqlRules(datasetId, datasetSchemaId);
 };
 
 // const getPercentage = valArr => {
@@ -620,11 +634,13 @@ export const ApiDatasetRepository = {
   schemaById,
   tableDataById,
   updateDatasetSchemaDesign,
+  updateDatasetFeedbackStatus,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
-  validateDataById
+  validateDataById,
+  validateSqlRules
 };

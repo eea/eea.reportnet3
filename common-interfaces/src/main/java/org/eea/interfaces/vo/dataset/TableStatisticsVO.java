@@ -12,24 +12,6 @@ import lombok.ToString;
  */
 @Setter
 @Getter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class TableStatisticsVO implements Serializable {
 

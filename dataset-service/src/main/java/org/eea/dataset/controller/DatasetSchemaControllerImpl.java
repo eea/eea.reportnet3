@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -109,6 +110,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+  /** The data set metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+
   /**
    * Creates the empty dataset schema.
    *
@@ -122,6 +128,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
+    if (0 != datasetMetabaseService.countDatasetNameByDataflowId(dataflowId, datasetSchemaName)) {
+      LOG.error("Error creating duplicated dataset : {}", datasetSchemaName);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_NAME_DUPLICATED);
+    }
     try {
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
@@ -295,6 +306,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       tableSchemaVO = dataschemaService.createTableSchema(
           dataschemaService.getDatasetSchemaId(datasetId), tableSchemaVO, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
       return tableSchemaVO;
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -314,8 +326,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/tableSchema")
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     try {
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
@@ -365,6 +382,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
       datasetService.deleteTableValue(datasetId, tableSchemaId);
 
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
@@ -441,6 +459,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Add UniqueConstraint if needed
       dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
 
+      // Create query view
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -460,6 +480,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/fieldSchema")
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
     try {
       final String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
       // Update the fieldSchema from the datasetSchema
@@ -492,6 +516,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
         }
       }
+      // Create query view
+      recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);
@@ -538,6 +564,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
         // Delete the foreign relation between idDatasets in metabase, if needed
         dataschemaService.deleteForeignRelation(datasetId, fieldVO);
+
+        // Create query view
+        recordStoreControllerZuul.createUpdateQueryView(datasetId);
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
@@ -582,13 +611,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/datasetSchema")
-  public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
-      @RequestBody(required = false) DataSetSchemaVO datasetSchemaVO) {
+  public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (Boolean.FALSE.equals(dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
-          datasetSchemaVO.getDescription()))) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
+      if (null != datasetSchemaVO.getDescription())
+        dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
+            datasetSchemaVO.getDescription());
+      if (null != datasetSchemaVO.getWebform()) {
+        dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
       }
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
@@ -835,4 +866,5 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
+
 }

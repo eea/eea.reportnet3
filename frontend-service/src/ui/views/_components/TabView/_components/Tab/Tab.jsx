@@ -75,14 +75,14 @@ const Tab = ({
         label: resources.messages['delete'],
         icon: config.icons['trash'],
         command: () => {
-          if (!isUndefined(onTabDeleteClick) && !addTab) {
+          if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
             onTabDeleteClick(tableSchemaId);
           }
         },
         disabled: hasPKReferenced
       }
     ]);
-  }, [tableSchemaId]);
+  }, [tableSchemaId, hasPKReferenced]);
 
   useEffect(() => {
     if (!editingHeader) {

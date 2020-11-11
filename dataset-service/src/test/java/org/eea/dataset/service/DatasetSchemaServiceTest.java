@@ -19,6 +19,7 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.SimpleDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
+import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -30,6 +31,7 @@ import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -55,8 +57,10 @@ import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
@@ -217,6 +221,12 @@ public class DatasetSchemaServiceTest {
 
   @Mock
   private SimpleDataSchemaMapper simpleDataSchemaMapper;
+
+  @Mock
+  private WebFormMapper webFormMapper;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Inits the mocks.
@@ -927,9 +937,9 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateDatasetSchemaDescriptionTest1() {
-    Mockito.when(schemasRepository.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertTrue(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
+    dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description");
+    Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -937,9 +947,9 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateDatasetSchemaDescriptionTest2() {
-    Mockito.when(schemasRepository.updateDatasetSchemaDescription(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertFalse(dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description"));
+    dataSchemaServiceImpl.updateDatasetSchemaDescription("<id>", "description");
+    Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaDescription(Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -1021,6 +1031,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void propagateRulesAfterUpdateTypeNullNotRequiredTest() throws EEAException {
+
+    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
 
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(false);
@@ -1891,4 +1903,13 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
     Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
   }
+
+  @Test
+  public void updateWebform() {
+    when(webFormMapper.classToEntity(Mockito.any())).thenReturn(new Webform());
+    dataSchemaServiceImpl.updateWebform(Mockito.anyString(), new WebformVO());
+    Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaWebForm(Mockito.any(),
+        Mockito.any());
+  }
+
 }

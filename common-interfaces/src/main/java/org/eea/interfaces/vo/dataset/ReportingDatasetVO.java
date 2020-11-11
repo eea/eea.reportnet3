@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
 import java.util.Date;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -41,5 +42,8 @@ public class ReportingDatasetVO implements Serializable {
 
   /** The name dataset schema. */
   private String nameDatasetSchema;
+
+  /** The status. */
+  private DatasetStatusEnum status;
 
 }

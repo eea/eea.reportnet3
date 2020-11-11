@@ -354,6 +354,14 @@ export const apiDataset = {
 
     return response.data;
   },
+  updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {
+    const response = await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDatasetFeedbackStatus),
+      data: { dataflowId, datasetId, message, status: feedbackStatus }
+    });
+
+    return response;
+  },
   updateFieldById: async (datasetId, datasetTableRecords) => {
     try {
       const response = await HTTPRequester.update({
@@ -480,6 +488,20 @@ export const apiDataset = {
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
       console.error(`Error calling dataset data validation: ${error}`);
+      return false;
+    }
+  },
+  validateSqlRules: async (datasetId, datasetSchemaId) => {
+    try {
+      const response = await HTTPRequester.post({
+        url: getUrl(DatasetConfig.validateSql, {
+          datasetId,
+          datasetSchemaId
+        })
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error calling sql rules validation: ${error}`);
       return false;
     }
   }

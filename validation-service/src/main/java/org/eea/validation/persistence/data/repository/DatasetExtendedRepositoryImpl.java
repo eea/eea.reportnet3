@@ -21,6 +21,7 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
 
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
+
 
 
   @Override
@@ -57,17 +62,19 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   @Override
   @Transactional
   public TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
-      Long datasetId, Long idTable) throws SQLException {
+      Long datasetId, Long idTable) {
     Session session = (Session) entityManager.getDelegate();
     return session.doReturningWork(new ReturningWork<TableValue>() {
       @Override
       public TableValue execute(Connection conn) throws SQLException {
         conn.setSchema("dataset_" + datasetId);
-        try (PreparedStatement stmt = conn.prepareStatement(query.toLowerCase())) {
-          LOG.info("Query: " + query);
-          ResultSet rs = stmt.executeQuery();
-          TableValue tableValue = new TableValue();
+        TableValue tableValue;
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
+          LOG.info("Query executed: {}", query);
+          tableValue = new TableValue();
           List<RecordValue> records = new ArrayList<>();
+
           while (rs.next()) {
             RecordValue record = new RecordValue();
             tableValue.setId(idTable);
@@ -88,14 +95,19 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
                 records.add(record);
                 tableValue.setRecords(records);
                 break;
+              case TABLE:
+                break;
+              case DATASET:
+                break;
             }
-
           }
-          return tableValue;
+        } catch (PSQLException | RuntimeException e) {
+          LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
+          tableValue = null;
         }
+        return tableValue;
       }
     });
-
   }
 
 
@@ -125,8 +137,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     return session.doReturningWork(new ReturningWork<List<RecordValidation>>() {
       @Override
       public List<RecordValidation> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();) {
           List<RecordValidation> recordValidations = new ArrayList<>();
           while (rs.next()) {
             RecordValidation recordValidation = new RecordValidation();
@@ -137,18 +149,20 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setIdRule(rs.getString(6));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
-            validation.setOriginName(rs.getString(9));
-            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(10)));
-            validation.setValidationDate(rs.getString(11));
+            validation.setTableName(rs.getString(9));
+            validation.setFieldName(rs.getString(10));
+            validation.setShortCode(rs.getString(11));
+            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
+            validation.setValidationDate(rs.getString(13));
 
             RecordValue record = new RecordValue();
             record.setId(rs.getString(3));
-            record.setDataProviderCode(rs.getString(12));
-            record.setDatasetPartitionId(Long.parseLong(rs.getString(13)));
-            record.setIdRecordSchema(rs.getString(14));
+            record.setDataProviderCode(rs.getString(14));
+            record.setDatasetPartitionId(Long.parseLong(rs.getString(15)));
+            record.setIdRecordSchema(rs.getString(16));
 
             TableValue table = new TableValue();
-            table.setId(Long.parseLong(rs.getString(15)));
+            table.setId(Long.parseLong(rs.getString(17)));
 
             record.setTableValue(table);
 
@@ -176,8 +190,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     return session.doReturningWork(new ReturningWork<List<FieldValidation>>() {
       @Override
       public List<FieldValidation> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();) {
 
           List<FieldValidation> fieldValidations = new ArrayList<>();
           while (rs.next()) {
@@ -189,19 +203,21 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setIdRule(rs.getString(6));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString(7)));
             validation.setMessage(rs.getString(8));
-            validation.setOriginName(rs.getString(9));
-            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(10)));
-            validation.setValidationDate(rs.getString(11));
+            validation.setTableName(rs.getString(9));
+            validation.setFieldName(rs.getString(10));
+            validation.setShortCode(rs.getString(11));
+            validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
+            validation.setValidationDate(rs.getString(13));
 
 
             FieldValue field = new FieldValue();
             field.setId(rs.getString(3));
-            field.setIdFieldSchema(rs.getString(12));
-            field.setType(rs.getString(14));
-            field.setValue(rs.getString(15));
+            field.setIdFieldSchema(rs.getString(14));
+            field.setType(rs.getString(16));
+            field.setValue(rs.getString(17));
 
             RecordValue record = new RecordValue();
-            record.setId(rs.getString(13));
+            record.setId(rs.getString(15));
 
             field.setRecord(record);
 

@@ -61,4 +61,10 @@ public class NotificationVO implements Serializable {
 
   /** The provider id. */
   private Long providerId;
+
+  /** The invalid rules. */
+  private Integer invalidRules;
+
+  /** The disabled rules. */
+  private Integer disabledRules;
 }

@@ -1,7 +1,10 @@
 package org.eea.dataflow.service.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,12 +12,15 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.MessageMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
-import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
+import org.eea.dataflow.persistence.domain.Message;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.MessageRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
@@ -30,10 +36,12 @@ import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -42,11 +50,18 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -59,33 +74,16 @@ public class DataflowServiceImpl implements DataflowService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
-  /** The representative repository. */
-  @Autowired
-  private RepresentativeRepository representativeRepository;
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The dataflow repository. */
-  @Autowired
-  private DataflowRepository dataflowRepository;
-
-  /** The user request repository. */
-  @Autowired
-  private UserRequestRepository userRequestRepository;
-
-  /** The contributor repository. */
-  @Autowired
-  private ContributorRepository contributorRepository;
-
-  /** The dataflow mapper. */
-  @Autowired
-  private DataflowMapper dataflowMapper;
-
-  /** The dataflow no content mapper. */
-  @Autowired
-  private DataflowNoContentMapper dataflowNoContentMapper;
+  /** The max message length. */
+  @Value("${spring.health.db.check.frequency}")
+  private int maxMessageLength;
 
   /** The dataset metabase controller. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /** The user management controller zull. */
   @Autowired
@@ -107,10 +105,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /** The representative service. */
-  @Autowired
-  private RepresentativeService representativeService;
-
   /** The obligation controller. */
   @Autowired
   private ObligationController obligationController;
@@ -119,13 +113,47 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
 
+  /** The representative repository. */
+  @Autowired
+  private RepresentativeRepository representativeRepository;
+
+  /** The dataflow repository. */
+  @Autowired
+  private DataflowRepository dataflowRepository;
+
+  /** The user request repository. */
+  @Autowired
+  private UserRequestRepository userRequestRepository;
+
+  /** The contributor repository. */
+  @Autowired
+  private ContributorRepository contributorRepository;
+
+  /** The message repository. */
+  @Autowired
+  private MessageRepository messageRepository;
+
+  /** The dataflow mapper. */
+  @Autowired
+  private DataflowMapper dataflowMapper;
+
+  /** The dataflow no content mapper. */
+  @Autowired
+  private DataflowNoContentMapper dataflowNoContentMapper;
+
+  /** The message mapper. */
+  @Autowired
+  private MessageMapper messageMapper;
+
+  /** The representative service. */
+  @Autowired
+  private RepresentativeService representativeService;
+
   /**
    * Gets the by id.
    *
    * @param id the id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -135,12 +163,10 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Get the dataflow by its id filtering representatives by the user email.
+   * Gets the by id with representatives filtered by user email.
    *
    * @param id the id
-   *
-   * @return the by id no representatives
-   *
+   * @return the by id with representatives filtered by user email
    * @throws EEAException the EEA exception
    */
   @Override
@@ -150,125 +176,41 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the by id.
-   *
-   * @param id the id
-   * @param includeAllRepresentatives the include representatives
-   *
-   * @return the by id
-   *
-   * @throws EEAException the EEA exception
-   */
-  private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
-      throws EEAException {
-
-    if (id == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    Dataflow result = dataflowRepository.findById(id).orElse(null);
-    // filter datasets showed to the user depending on permissions
-    List<ResourceAccessVO> datasets =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
-    // add to the filter the design datasets (data schemas) too
-    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
-    // also, add to the filter the data collection
-    datasets
-        .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
-    // and the eu datasets
-    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
-    List<Long> datasetsIds =
-        datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-    DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-    dataflowVO.setReportingDatasets(
-        datasetMetabaseController.findReportingDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-    // Add the design datasets
-    dataflowVO
-        .setDesignDatasets(datasetMetabaseController.findDesignDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-    // Add the data collections
-    dataflowVO.setDataCollections(
-        dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-    // Add the EU datasets
-    dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
-        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-    // Add the representatives
-    if (includeAllRepresentatives) {
-      dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
-    } else {
-      String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
-          .getDetails()).get(AuthenticationDetails.USER_ID);
-      UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
-      dataflowVO.setRepresentatives(
-          representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
-    }
-
-    getObligation(dataflowVO);
-
-    LOG.info("Get the dataflow information with id {}", id);
-
-    return dataflowVO;
-  }
-
-  /**
    * Gets the by status.
    *
    * @param status the status
-   *
    * @return the by status
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   public List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException {
-
     List<Dataflow> dataflows = dataflowRepository.findByStatus(status);
     return dataflowMapper.entityListToClass(dataflows);
   }
 
-
   /**
-   * Gets the pending accepted.
+   * Gets the dataflows.
    *
    * @param userId the user id
-   *
-   * @return the pending accepted
-   *
+   * @return the dataflows
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingAccepted(String userId) throws EEAException {
+  public List<DataFlowVO> getDataflows(String userId) throws EEAException {
 
-    // get pending
-    List<DataflowWithRequestType> dataflows = dataflowRepository.findPending(userId);
-    List<Dataflow> dfs = new ArrayList<>();
-    LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
-    for (DataflowWithRequestType df : dataflows) {
-      dfs.add(df.getDataflow());
-    }
-    List<DataFlowVO> dataflowVOs = dataflowNoContentMapper.entityListToClass(dfs);
+    List<DataFlowVO> dataflowVOs = new ArrayList<DataFlowVO>();
 
-    // Adding the user request type to the VO (pending/accepted/rejected)
-    for (DataflowWithRequestType df : dataflows) {
-      for (int i = 0; i < dataflowVOs.size(); i++) {
-        if (df.getDataflow().getId().equals(dataflowVOs.get(i).getId())) {
-          dataflowVOs.get(i).setUserRequestStatus(df.getTypeRequestEnum());
-          dataflowVOs.get(i).setRequestId(df.getRequestId());
-        }
-      }
-    }
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
 
-    // Get user's dataflows
-    dataflowRepository
-        .findAllById(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()))
+    // Get user's dataflows sorted by status and creation date
+    dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList()))
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
+          setReportingDatasetStatus(map, dataflowVO);
           dataflowVOs.add(dataflowVO);
         });
 
@@ -278,56 +220,92 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the opened obligations.
+   * Sets the reporting dataset status.
    *
-   * @param dataflowVOs the dataflow V os
-   *
-   * @return the opened obligations
+   * @param map the map
+   * @param dataflowVO the dataflow VO
    */
-  private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
-
-    // Get all opened obligations from ROD
-    List<ObligationVO> obligations =
-        obligationController.findOpenedObligations(null, null, null, null, null);
-
-    Map<Integer, ObligationVO> obligationMap = obligations.stream()
-        .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
-
-    for (DataFlowVO dataFlowVO : dataflowVOs) {
-      if (dataFlowVO.getObligation() != null
-          && dataFlowVO.getObligation().getObligationId() != null) {
-        dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+  private void setReportingDatasetStatus(Map<Long, List<DataflowStatusDataset>> map,
+      DataFlowVO dataflowVO) {
+    boolean containsPending = false;
+    int releasedCount = 0;
+    int techAcceptedCount = 0;
+    boolean containsCorrectionR = false;
+    boolean containsFinalFeedback = false;
+    List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+    if (datasetsStatusList != null) {
+      for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+        switch (datasetsStatusList.get(i).getStatus()) {
+          case PENDING:
+            containsPending = true;
+            break;
+          case RELEASED:
+            releasedCount++;
+            break;
+          case CORRECTION_REQUESTED:
+            containsCorrectionR = true;
+            break;
+          case TECHNICALLY_ACCEPTED:
+            techAcceptedCount++;
+            break;
+          case FINAL_FEEDBACK:
+            containsFinalFeedback = true;
+            break;
+          default:
+            containsPending = true;
+            break;
+        }
+      }
+      if (containsPending) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
+      } else {
+        if (releasedCount == datasetsStatusList.size()) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
+        } else if (techAcceptedCount == datasetsStatusList.size()) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+        } else if (containsCorrectionR) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
+        } else if (containsFinalFeedback) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
+        }
       }
     }
   }
 
 
   /**
-   * Gets the obligation.
+   * Gets the datasets status.
    *
-   * @param dataflow the dataflow
-   *
-   * @return the obligation
+   * @return the datasets status
    */
-  private void getObligation(DataFlowVO dataflow) {
-    // Get the obligationVO from ROD and Set in dataflow VO
-    // We check that the field is not empty to avoid the call to rod due to maintain backward
-    // compatibility concerns
-    if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
-      dataflow.setObligation(
-          obligationController.findObligationById(dataflow.getObligation().getObligationId()));
+  private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus() {
+    Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
+    List<Object[]> queryResult = dataflowRepository
+        .getDataflows(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET)
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()));
+    for (Object[] object : queryResult) {
+      List<DataflowStatusDataset> list2 = new ArrayList<>();
+      DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
+      dataflowStatusDataset
+          .setId(object[0] instanceof BigInteger ? ((BigInteger) object[0]).longValue() : null);
+      dataflowStatusDataset.setStatus(
+          object[1] instanceof String ? DatasetStatusEnum.valueOf((String) object[1]) : null);
+      list2.add(dataflowStatusDataset);
+      if (map.get(dataflowStatusDataset.getId()) != null) {
+        map.get(dataflowStatusDataset.getId()).addAll(list2);
+      } else {
+        map.put(dataflowStatusDataset.getId(), list2);
+      }
     }
+    return map;
   }
-
 
   /**
    * Gets the completed.
    *
    * @param userId the user id
    * @param pageable the pageable
-   *
    * @return the completed
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -349,19 +327,15 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userId the user id
    * @param type the type
-   *
    * @return the pending by user
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
       throws EEAException {
-
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
     return dataflowNoContentMapper.entityListToClass(dataflows);
-
   }
 
   /**
@@ -369,7 +343,6 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userRequestId the user request id
    * @param type the type
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -399,7 +372,6 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -418,23 +390,18 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   public void removeContributorFromDataflow(Long idDataflow, String idContributor)
       throws EEAException {
-
     contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
-
   }
-
 
   /**
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -468,12 +435,10 @@ public class DataflowServiceImpl implements DataflowService {
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
 
-
   /**
    * Update data flow.
    *
    * @param dataflowVO the dataflow VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -497,29 +462,10 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Creates the group.
-   *
-   * @param datasetId the dataset id
-   * @param type the type
-   * @param role the role
-   *
-   * @return the resource info VO
-   */
-  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    resourceInfoVO.setResourceId(datasetId);
-    resourceInfoVO.setResourceTypeEnum(type);
-    resourceInfoVO.setSecurityRoleEnum(role);
-    return resourceInfoVO;
-  }
-
-  /**
-   * Gets the datasets id.
+   * Gets the reporting datasets id.
    *
    * @param dataschemaId the dataschema id
-   *
-   * @return the datasets id
-   *
+   * @return the reporting datasets id
    * @throws EEAException the EEA exception
    */
   @Override
@@ -531,20 +477,17 @@ public class DataflowServiceImpl implements DataflowService {
     }
 
     DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO
-        .setReportingDatasets(datasetMetabaseController.getReportingsIdBySchemaId(dataschemaId));
+    dataflowVO.setReportingDatasets(
+        datasetMetabaseControllerZuul.getReportingsIdBySchemaId(dataschemaId));
 
     return dataflowVO;
   }
-
 
   /**
    * Gets the metabase by id.
    *
    * @param id the id
-   *
    * @return the metabase by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -566,7 +509,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
-   *
    * @throws Exception the exception
    */
   @Override
@@ -613,7 +555,6 @@ public class DataflowServiceImpl implements DataflowService {
       LOG.error("Error deleting resources in keycloack, group with the id: {}", idDataflow, e);
       throw new EEAException("Error deleting resource in keycloack ", e);
     }
-
   }
 
   /**
@@ -622,7 +563,6 @@ public class DataflowServiceImpl implements DataflowService {
    * @param id the id
    * @param status the status
    * @param deadlineDate the deadline date
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -641,11 +581,133 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Creates the message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param content the content
+   * @return the message VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Deprecated
+  @Transactional
+  public MessageVO createMessage(Long dataflowId, Long providerId, String content)
+      throws EEAException {
+
+    boolean direction = verifyMessagingPermissionsAndGetDirection(dataflowId, providerId);
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    if (content.length() > maxMessageLength) {
+      content = content.substring(0, maxMessageLength);
+    }
+
+    Message message = new Message();
+    message.setContent(content);
+    message.setDataflowId(dataflowId);
+    message.setProviderId(providerId);
+    message.setDate(new Date());
+    message.setRead(false);
+    message.setUserName(userName);
+    message.setDirection(direction);
+    message = messageRepository.save(message);
+
+    LOG.info("Message created: message={}", message);
+    return messageMapper.entityToClass(message);
+  }
+
+  /**
+   * Find messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param read the read
+   * @param page the offset
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Deprecated
+  public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+      throws EEAException {
+
+    Page<Message> pageResponse;
+    PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
+    verifyMessagingPermissionsAndGetDirection(dataflowId, providerId);
+
+    if (null != read) {
+      pageResponse = messageRepository.findByDataflowIdAndProviderIdAndRead(dataflowId, providerId,
+          read, pageRequest);
+    } else {
+      pageResponse =
+          messageRepository.findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest);
+    }
+
+    return messageMapper.entityListToClass(pageResponse.getContent());
+  }
+
+  /**
+   * Update message read status.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVOs the message V os
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Deprecated
+  @Transactional
+  public void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs)
+      throws EEAException {
+
+    Map<Long, Boolean> map = new HashMap<>();
+    messageVOs.forEach(messageVO -> map.put(messageVO.getId(), messageVO.isRead()));
+
+    List<Message> messages = messageRepository.findByDataflowIdAndIdIn(dataflowId, map.keySet());
+    int previousSize = messages.size();
+
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+    // Case: DATAFLOW_STEWARD or DATAFLOW_CUSTODIAN
+    if (authorities.contains(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
+
+      // Allowed messages to update: direction=TRUE and providerId=ANY
+      messages = messages.stream().filter(Message::isDirection).collect(Collectors.toList());
+    }
+
+    // Case: DATAFLOW_LEAD_REPORTER, DATAFLOW_REPORTER_READ, DATAFLOW_REPOTER_WRITE
+    else {
+      List<Long> providerIds =
+          datasetMetabaseControllerZuul.getUserProviderIdsByDataflowId(dataflowId);
+
+      // Allowed messages to update: direction=FALSE and providerId=USER_DEPENDANT
+      messages = messages.stream()
+          .filter(
+              message -> !message.isDirection() && providerIds.contains(message.getProviderId()))
+          .collect(Collectors.toList());
+    }
+
+    if (messages.size() != previousSize) {
+      LOG_ERROR.error("Messaging authorization failed: unable to update all messages");
+      throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
+    }
+
+    messages = messages.stream().map(message -> {
+      message.setRead(map.get(message.getId()));
+      return message;
+    }).collect(Collectors.toList());
+
+    messageRepository.saveAll(messages);
+  }
+
+  /**
    * Delete documents.
    *
    * @param idDataflow the id dataflow
    * @param dataflowVO the dataflow VO
-   *
    * @throws Exception the exception
    */
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
@@ -666,7 +728,6 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param dataflowVO the dataflow VO
-   *
    * @throws EEAException the EEA exception
    */
   private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
@@ -687,7 +748,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete representatives.
    *
    * @param dataflowVO the dataflow VO
-   *
    * @throws EEAException the EEA exception
    */
   private void deleteRepresentatives(DataFlowVO dataflowVO) throws EEAException {
@@ -702,4 +762,170 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+    return resourceInfoVO;
+  }
+
+  /**
+   * Gets the obligation.
+   *
+   * @param dataflow the dataflow
+   * @return the obligation
+   */
+  private void getObligation(DataFlowVO dataflow) {
+    // Get the obligationVO from ROD and Set in dataflow VO
+    // We check that the field is not empty to avoid the call to rod due to maintain backward
+    // compatibility concerns
+    if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
+      dataflow.setObligation(
+          obligationController.findObligationById(dataflow.getObligation().getObligationId()));
+    }
+  }
+
+  /**
+   * Gets the by id with condition.
+   *
+   * @param id the id
+   * @param includeAllRepresentatives the include all representatives
+   * @return the by id with condition
+   * @throws EEAException the EEA exception
+   */
+  private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
+      throws EEAException {
+
+    if (id == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Dataflow result = dataflowRepository.findById(id).orElse(null);
+    // filter datasets showed to the user depending on permissions
+    List<ResourceAccessVO> datasets =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
+    // add to the filter the design datasets (data schemas) too
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
+    // also, add to the filter the data collection
+    datasets
+        .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
+    // and the eu datasets
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
+    List<Long> datasetsIds =
+        datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+    DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
+    dataflowVO.setReportingDatasets(
+        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    // Add the design datasets
+    dataflowVO.setDesignDatasets(
+        datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the data collections
+    dataflowVO.setDataCollections(
+        dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the EU datasets
+    dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the representatives
+    if (includeAllRepresentatives) {
+      dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+    } else {
+      String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
+          .getDetails()).get(AuthenticationDetails.USER_ID);
+      UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
+      dataflowVO.setRepresentatives(
+          representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
+    }
+
+    getObligation(dataflowVO);
+
+    LOG.info("Get the dataflow information with id {}", id);
+
+    return dataflowVO;
+  }
+
+  /**
+   * Gets the opened obligations.
+   *
+   * @param dataflowVOs the dataflow V os
+   * @return the opened obligations
+   */
+  private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
+
+    // Get all opened obligations from ROD
+    List<ObligationVO> obligations =
+        obligationController.findOpenedObligations(null, null, null, null, null);
+
+    Map<Integer, ObligationVO> obligationMap = obligations.stream()
+        .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
+
+    for (DataFlowVO dataFlowVO : dataflowVOs) {
+      if (dataFlowVO.getObligation() != null
+          && dataFlowVO.getObligation().getObligationId() != null) {
+        dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+      }
+    }
+  }
+
+  /**
+   * Verify messaging permissions and get direction.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return true if sender (reporter) or false if receiver (custodian)
+   * @throws EEAException the EEA exception
+   */
+  @Deprecated
+  private boolean verifyMessagingPermissionsAndGetDirection(Long dataflowId, Long providerId)
+      throws EEAException {
+
+    List<Long> datasetIds = datasetMetabaseControllerZuul
+        .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providerId);
+
+    if (null != datasetIds && !datasetIds.isEmpty()) {
+      Collection<? extends GrantedAuthority> authorities =
+          SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+      boolean direction = authorities
+          .contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(dataflowId)));
+
+      boolean authorizedSender = false;
+      if (direction) {
+        authorizedSender = datasetIds.stream()
+            .anyMatch(datasetId -> authorities
+                .contains(new SimpleGrantedAuthority(
+                    ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(datasetId)))
+                || authorities.contains(new SimpleGrantedAuthority(
+                    ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(datasetId)))
+                || authorities.contains(new SimpleGrantedAuthority(
+                    ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(datasetId))));
+      }
+
+      if (!direction || authorizedSender) {
+        return direction;
+      }
+    }
+
+    LOG_ERROR.error("Messaging authorization failed: dataflowId={}, providerId={}", dataflowId,
+        providerId);
+    throw new EEAException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
+  }
 }

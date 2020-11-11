@@ -13,13 +13,13 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -38,7 +38,6 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
-import org.eea.validation.util.SQLValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,17 +86,9 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
-  /** The sql valitaion utils. */
-  @Autowired
-  private SQLValidationUtils sqlValidationUtils;
-
   /** The sql rules service. */
   @Autowired
   private SqlRulesService sqlRulesService;
-
-  /** The kafka sender utils. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The record store controller. */
   @Autowired
@@ -226,6 +217,19 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void deleteRuleByReferenceId(String datasetSchemaId, String referenceId) {
     rulesRepository.deleteRuleByReferenceId(new ObjectId(datasetSchemaId),
+        new ObjectId(referenceId));
+  }
+
+
+  /**
+   * Delete automatic rule by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   */
+  @Override
+  public void deleteAutomaticRuleByReferenceId(String datasetSchemaId, String referenceId) {
+    rulesRepository.deleteAutomaticRuleByReferenceId(new ObjectId(datasetSchemaId),
         new ObjectId(referenceId));
   }
 
@@ -365,8 +369,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setWhenCondition("isTableEmpty(this)");
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
-          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
+          .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
@@ -657,8 +661,8 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(").append(datasetId)
-          .append(",'").append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
+          .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
@@ -943,6 +947,7 @@ public class RulesServiceImpl implements RulesService {
     // them as new rules. The data needed is inside the auxiliary CopySchemaVO
     List<String> listDatasetSchemaIdToCopy = rules.getOriginDatasetSchemaIds();
     Map<String, String> dictionaryOriginTargetObjectId = rules.getDictionaryOriginTargetObjectId();
+    Map<Long, Long> dictionaryOriginTargetDatasetsId = rules.getDictionaryOriginTargetDatasetsId();
     for (String originDatasetSchemaId : listDatasetSchemaIdToCopy) {
       String newDatasetSchemaId = dictionaryOriginTargetObjectId.get(originDatasetSchemaId);
       RulesSchema originRules =
@@ -952,8 +957,8 @@ public class RulesServiceImpl implements RulesService {
         // We copy only the rules that are not of type Link, because these one are created
         // automatically in the process when we update the fieldSchema in previous calls of the copy
         // process
-        dictionaryOriginTargetObjectId = copyData(dictionaryOriginTargetObjectId,
-            originDatasetSchemaId, newDatasetSchemaId, rule);
+        copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
+            dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule);
       }
     }
     return dictionaryOriginTargetObjectId;
@@ -971,24 +976,27 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.deleteNotEmptyRule(new ObjectId(tableSchemaId), new ObjectId(datasetSchemaId));
   }
 
+
   /**
    * Copy data.
    *
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param originDatasetSchemaId the origin dataset schema id
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
    * @param newDatasetSchemaId the new dataset schema id
    * @param rule the rule
    * @return the map
    * @throws EEAException the EEA exception
    */
   private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
-      String originDatasetSchemaId, String newDatasetSchemaId, Rule rule) throws EEAException {
+      String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
+      String newDatasetSchemaId, Rule rule) throws EEAException {
     if (StringUtils.isNotBlank(rule.getWhenCondition())
         && !rule.getWhenCondition().contains("isfieldFK")) {
 
       LOG.info("A new rule is going to be created in the copy schema process");
       // Here we change the fields of the rule involved with the help of the dictionary
-      dictionaryOriginTargetObjectId = fillRuleCopied(rule, dictionaryOriginTargetObjectId);
+      fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
 
       // If the rule is a Dataset type, we need to do the same process with the
       // IntegritySchema
@@ -996,18 +1004,9 @@ public class RulesServiceImpl implements RulesService {
         copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
       }
 
-      // Validate the rule if it's not automatic
-      if (!rule.isAutomatic()) {
-        validateRule(rule);
-      }
       // Create the new rule
       if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
         throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-      }
-
-      // Check if rule is valid
-      if (!rule.isAutomatic()) {
-        kieBaseManager.validateRule(newDatasetSchemaId, rule);
       }
 
       // add the rules sequence
@@ -1016,15 +1015,18 @@ public class RulesServiceImpl implements RulesService {
     return dictionaryOriginTargetObjectId;
   }
 
+
   /**
    * Fill rule copied.
    *
    * @param rule the rule
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
    * @return the map
    */
   private Map<String, String> fillRuleCopied(Rule rule,
-      Map<String, String> dictionaryOriginTargetObjectId) {
+      Map<String, String> dictionaryOriginTargetObjectId,
+      Map<Long, Long> dictionaryOriginTargetDatasetsId) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -1059,10 +1061,40 @@ public class RulesServiceImpl implements RulesService {
     if (StringUtils.isNotBlank(rule.getWhenCondition())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
         if (rule.getWhenCondition().contains(oldObjectId)) {
-          String newWhenCondition = rule.getWhenCondition().replace(oldObjectId, newObjectId);
+          String newWhenCondition = rule.getWhenCondition();
+          newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
           rule.setWhenCondition(newWhenCondition);
         }
       });
+      // Special case for SQL Sentences
+      if (rule.getWhenCondition().contains("isSQLSentence")) {
+        dictionaryOriginTargetDatasetsId.forEach((Long oldDatasetId, Long newDatasetId) -> {
+          // Change the datasetId in "isSQLSentence(xxx,...."
+          if (rule.getWhenCondition().contains("(" + oldDatasetId.toString())) {
+            String newWhenCondition = rule.getWhenCondition();
+            newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
+                "(" + newDatasetId.toString());
+            rule.setWhenCondition(newWhenCondition);
+          }
+          // Change the dataset_X in the sentence itself if necessary, like
+          // select * from table_one t1 inner join dataset_256.table_two....
+          if (rule.getWhenCondition().contains("dataset_")) {
+            String newWhenCondition = rule.getWhenCondition();
+            newWhenCondition = newWhenCondition.replace("dataset_" + oldDatasetId.toString(),
+                "dataset_" + newDatasetId.toString());
+            rule.setWhenCondition(newWhenCondition);
+          }
+          // Do the same in the property SqlSentence
+          if (StringUtils.isNotBlank(rule.getSqlSentence())
+              && rule.getSqlSentence().contains("dataset_")) {
+            String newSqlSentence = rule.getSqlSentence();
+            newSqlSentence = newSqlSentence.replace("dataset_" + oldDatasetId.toString(),
+                "dataset_" + newDatasetId.toString());
+            rule.setSqlSentence(newSqlSentence);
+          }
+
+        });
+      }
     }
     return dictionaryOriginTargetObjectId;
   }
@@ -1128,5 +1160,49 @@ public class RulesServiceImpl implements RulesService {
   public List<RuleVO> findSqlSentencesByDatasetSchemaId(String datasetSchemaId) {
     List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
     return ruleMapper.entityListToClass(rules);
+
+  }
+
+  /**
+   * Gets the all disabled rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all disabled rules
+   */
+  @Override
+  public Integer getAllDisabledRules(Long dataflowId, List<DesignDatasetVO> designs) {
+    int disabledRules = 0;
+
+    for (DesignDatasetVO schema : designs) {
+      RulesSchema scheamaAux =
+          rulesRepository.getAllDisabledRules(new ObjectId(schema.getDatasetSchema()));
+      if (null != scheamaAux.getRules()) {
+        disabledRules += scheamaAux.getRules().size();
+      }
+    }
+    return disabledRules;
+  }
+
+  /**
+   * Gets the all unchecked rules.
+   *
+   * @param dataflowId the dataflow id
+   * @param designs the designs
+   * @return the all unchecked rules
+   */
+  @Override
+  public Integer getAllUncheckedRules(Long dataflowId, List<DesignDatasetVO> designs) {
+    int uncheckedRules = 0;
+
+    for (DesignDatasetVO schema : designs) {
+      RulesSchema scheamaAux =
+          rulesRepository.getAllUncheckedRules(new ObjectId(schema.getDatasetSchema()));
+      if (null != scheamaAux.getRules()) {
+        uncheckedRules += scheamaAux.getRules().size();
+      }
+    }
+
+    return uncheckedRules;
   }
 }

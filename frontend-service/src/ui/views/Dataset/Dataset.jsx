@@ -14,7 +14,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
-import { Article15 } from 'ui/views/Webform/Article15';
+import { Article15 } from 'ui/views/Webforms/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -62,6 +62,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
@@ -191,7 +192,7 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     callSetMetaData();
     getDataflowName();
-    getDatasetSchemaId();
+    getDatasetData();
     onLoadDataflow();
   }, []);
 
@@ -275,10 +276,11 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getDatasetSchemaId = async () => {
+  const getDatasetData = async () => {
     try {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
+      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
@@ -655,9 +657,14 @@ export const Dataset = withRouter(({ match, history }) => {
       tableSchemaId: table.tableSchemaId
     });
 
-  const datasetTitle = () => {
-    let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
+  const datasetInsideTitle = () => {
+    if (!isEmpty(datasetFeedbackStatus)) {
+      return `${datasetFeedbackStatus} `;
+    } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
+      return `${resources.messages['released'].toString()}`;
+    } else {
+      return '';
+    }
   };
 
   const validationListFooter = (
@@ -741,7 +748,8 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) && hasWritePermissions && (
+    !isNil(webformData) &&
+    hasWritePermissions && (
       <div className={styles.switch}>
         <div className={`${styles.wrap}`}>
           <span className={styles.text}>{resources.messages['tabularData']}</span>
@@ -771,7 +779,8 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={`${datasetTitle()}`}
+        title={datasetSchemaName}
+        insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
