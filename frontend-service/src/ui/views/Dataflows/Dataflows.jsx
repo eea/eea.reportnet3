@@ -176,6 +176,7 @@ const Dataflows = withRouter(({ match, history }) => {
               content={dataflowsState.accepted}
               dataFetch={dataFetch}
               // description={resources.messages['acceptedDataflowText']}
+              isCustodian={dataflowsState.isCustodian}
               // title={resources.messages['acceptedDataflowTitle']}
               type="accepted"
             />

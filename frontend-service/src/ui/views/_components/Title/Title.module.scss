@@ -15,6 +15,13 @@
   color: var(--title-color);
   margin: 0px;
   font-weight: bold;
+
+  span {
+    font-size: 1.3rem;
+    font-style: italic;
+    margin-left: 1rem;
+    // color: var(--subtitle-color);
+  }
 }
 
 .subtitle {

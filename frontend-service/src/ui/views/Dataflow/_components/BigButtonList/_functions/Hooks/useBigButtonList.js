@@ -34,6 +34,7 @@ const useBigButtonList = ({
   onShowExportEuDatasetModal,
   onShowHistoricReleases,
   onShowManageReportersDialog,
+  onShowManualTechnicalAcceptanceDialog,
   onShowNewSchemaDialog,
   onShowUpdateDataCollectionModal,
   setErrorDialogData
@@ -62,6 +63,7 @@ const useBigButtonList = ({
       ]);
     const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
     const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
+    const isManualAcceptance = dataflowState.data.manualAcceptance;
 
     return {
       createDataCollection: isLeadDesigner && isDesignStatus,
@@ -82,7 +84,8 @@ const useBigButtonList = ({
       newSchema: isDesigner && isDesignStatus,
       updateReporters: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry,
-      release: isLeadReporterOfCountry
+      release: isLeadReporterOfCountry,
+      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
     };
   };
 
@@ -422,7 +425,7 @@ const useBigButtonList = ({
         buttonIcon: isActiveButton ? 'released' : 'spinner',
         buttonIconClass: isActiveButton ? 'released' : 'spinner',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: () => onOpenReleaseConfirmDialog(),
+        handleRedirect: isActiveButton ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         visibility: buttonsVisibility.release
@@ -477,6 +480,17 @@ const useBigButtonList = ({
     }
   ];
 
+  const manualTechnicalAcceptanceBigButton = [
+    {
+      buttonClass: 'manualTechnicalAcceptance',
+      buttonIcon: 'reply',
+      caption: resources.messages['manualTechnicalAcceptanceBigButton'],
+      handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
+      layout: 'defaultBigButton',
+      visibility: buttonsVisibility.manualTechnicalAcceptance
+    }
+  ];
+
   const receiptBigButton = onBuildReceiptButton();
 
   const releaseBigButton = onBuildReleaseButton();
@@ -491,6 +505,7 @@ const useBigButtonList = ({
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
     ...designDatasetModels,
+    ...manualTechnicalAcceptanceBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,

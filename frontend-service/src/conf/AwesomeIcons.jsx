@@ -68,6 +68,7 @@ import {
   faPlus,
   faPowerOff,
   faQuestion,
+  faReply,
   faShareAlt,
   faSitemap,
   faSortAlphaDown,
@@ -324,6 +325,8 @@ export const AwesomeIcons = icon => {
       return faFileArchive;
     case 'released':
       return faCloudUploadAlt;
+    case 'reply':
+      return faReply;
     case 'representative':
       return faCoins;
     case 'settings':
