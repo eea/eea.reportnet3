@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -209,13 +210,10 @@ export const TableManagement = ({
     let updatedRecord = RecordUtils.changeRecordValue(
       { ...selectedRecord },
       getFieldSchemaColumnIdByHeader(tableSchemaColumns, property),
-      value
+      property === 'ListOfSinglePams' && isArray(value) ? value.join() : value
     );
 
-    tableManagementDispatch({
-      type: 'EDIT_SELECTED_RECORD',
-      payload: updatedRecord
-    });
+    tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: updatedRecord });
   };
 
   const onLoadParentTablesData = () => {

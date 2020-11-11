@@ -15,7 +15,9 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
 };
 
 const parseListOfSinglePams = (columns = [], records = []) => {
-  const options = records.filter(record => record.IsGroup === 'Single').map(singleRecord => singleRecord.Title);
+  const options = records
+    .filter(record => record.IsGroup === 'Single')
+    .map(singleRecord => `#${singleRecord.Id} - ${singleRecord.Title}`);
 
   return columns.map(column => {
     if (column.header === 'ListOfSinglePams') {
