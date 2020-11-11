@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Button } from 'ui/views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -42,23 +43,15 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     data: [],
     isDataUpdated: false,
     isLoading: true,
-    isWebformView: false,
     pamsRecords: [],
     selectedId: null,
     selectedTable: { tableName: null, recordId: null, pamsId: null },
     selectedTableName: null,
-    tableList: { group: [], single: [] }
+    tableList: { group: [], single: [] },
+    view: resources.messages['overview']
   });
 
-  const {
-    isDataUpdated,
-    isLoading,
-    isWebformView,
-    pamsRecords,
-    selectedId,
-    selectedTableName,
-    tableList
-  } = article13State;
+  const { isDataUpdated, isLoading, pamsRecords, selectedId, selectedTableName, tableList, view } = article13State;
 
   useEffect(() => initialLoad(), []);
 
@@ -236,7 +229,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         ))}
       </ul>
 
-      <div className={styles.tabBar}>
+      {/* <div className={styles.tabBar}>
         <div className={styles.indicator} style={{ left: isWebformView ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
         <div
           className={`${styles.tabItem} ${!isWebformView ? styles.selected : null}`}
@@ -255,7 +248,15 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           onClick={() => (isEmpty(pamsRecords) ? {} : onToggleView(true))}>
           <p className={styles.tabLabel}>{resources.messages['details']}</p>
         </div>
-      </div>
+      </div> */}
+
+      <TabularSwitch
+        elements={[resources.messages['overview'], resources.messages['details']]}
+        onChange={switchView => {
+          onToggleView(switchView);
+          onSelectRecord(null, null);
+        }}
+        value={view}></TabularSwitch>
 
       {isEmpty(pamsRecords) && (
         <ReactTooltip effect="solid" id="emptyTableTooltip" place="right">
@@ -263,7 +264,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         </ReactTooltip>
       )}
 
-      {isWebformView ? (
+      {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
           dataflowId={dataflowId}

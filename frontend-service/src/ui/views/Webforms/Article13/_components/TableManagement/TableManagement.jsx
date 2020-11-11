@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -136,7 +137,12 @@ export const TableManagement = ({
             {
               field: 'Title',
               fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Title'),
-              header: 'Name of policy or measure'
+              header: 'Name of PaM or group of PaMs'
+            },
+            {
+              field: 'TitleNational',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'TitleNational'),
+              header: 'Name of PaM or group of PaMs in national language'
             },
             {
               field: 'IsGroup',
@@ -209,13 +215,10 @@ export const TableManagement = ({
     let updatedRecord = RecordUtils.changeRecordValue(
       { ...selectedRecord },
       getFieldSchemaColumnIdByHeader(tableSchemaColumns, property),
-      value
+      property === 'ListOfSinglePams' && isArray(value) ? value.join(', ') : value
     );
 
-    tableManagementDispatch({
-      type: 'EDIT_SELECTED_RECORD',
-      payload: updatedRecord
-    });
+    tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: updatedRecord });
   };
 
   const onLoadParentTablesData = () => {
@@ -303,7 +306,7 @@ export const TableManagement = ({
         <Button
           className={'p-button-secondary'}
           disabled={!hasTable || isSaving}
-          icon={isSaving ? 'spinnerAnimate' : hasRecord ? 'edit' : 'add'}
+          icon={hasRecord ? 'edit' : 'add'}
           label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
           onClick={async () => {
             if (hasRecord) {
@@ -480,6 +483,7 @@ export const TableManagement = ({
               onChangeForm={onEditFormInput}
               selectedRecord={selectedRecord}
               records={tableManagementState.records}
+              tableColumns={tableColumns}
             />
           </div>
         </Dialog>

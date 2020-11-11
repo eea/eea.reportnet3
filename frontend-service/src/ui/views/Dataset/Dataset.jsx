@@ -62,10 +62,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
-  // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -191,7 +191,7 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     callSetMetaData();
     getDataflowName();
-    getDatasetSchemaId();
+    getDatasetData();
     onLoadDataflow();
   }, []);
 
@@ -275,10 +275,11 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getDatasetSchemaId = async () => {
+  const getDatasetData = async () => {
     try {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
+      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
@@ -503,6 +504,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
+      setIsTableView(isNil(datasetSchema.webform));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -655,9 +657,14 @@ export const Dataset = withRouter(({ match, history }) => {
       tableSchemaId: table.tableSchemaId
     });
 
-  const datasetTitle = () => {
-    let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
+  const datasetInsideTitle = () => {
+    if (!isEmpty(datasetFeedbackStatus)) {
+      return `${datasetFeedbackStatus} `;
+    } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
+      return `${resources.messages['released'].toString()}`;
+    } else {
+      return '';
+    }
   };
 
   const validationListFooter = (
@@ -693,7 +700,6 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetName
       }
     });
-    //setIsTableDeleted(false);
   };
 
   const getImportExtensions = externalOperationsList.import
@@ -704,15 +710,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getImportExtensions.split(', ')
   ).join(', ')}`;
-
-  const renderCustomFileUploadFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsImportDatasetDialogVisible(false)}
-    />
-  );
 
   const renderDashboardFooter = (
     <Button
@@ -772,7 +769,8 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={`${datasetTitle()}`}
+        title={datasetSchemaName}
+        insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"

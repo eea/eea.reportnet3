@@ -575,7 +575,12 @@ export const WebformRecord = ({
     const errorMessages = [];
 
     if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
-
+    if (hasFields) {
+      errorMessages.push(resources.messages['emptyWebformTable']);
+    }
+    if (content.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+    }
     return errorMessages;
   };
 

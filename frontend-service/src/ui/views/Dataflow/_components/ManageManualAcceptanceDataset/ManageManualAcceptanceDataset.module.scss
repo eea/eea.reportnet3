@@ -1,0 +1,39 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 1rem 0;
+  user-select: none;
+
+  .group {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 1.5rem;
+
+    .radioButtonWrapper {
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-left: 2rem;
+      margin-top: 1px;
+
+      &:hover {
+        background: var(--gray-5);
+      }
+
+      .radioButton {
+        padding-right: 1.8rem;
+      }
+
+      .label {
+        cursor: pointer;
+      }
+    }
+
+    .datasetMessage {
+      width: 48.3vw;
+      margin-top: 0.5rem;
+    }
+  }
+}
