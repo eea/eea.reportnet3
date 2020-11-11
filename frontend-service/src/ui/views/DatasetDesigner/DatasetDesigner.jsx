@@ -1286,7 +1286,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             footer={renderConfigureWebformFooter}
             header={resources.messages['configureWebform']}
             onHide={() => onCloseConfigureWebformModal()}
-            style={{ width: '70%' }}
+            style={{ width: '30%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
             <div className={styles.titleWrapper}>
               <span>{resources.messages['configureWebformMessage']}</span>
