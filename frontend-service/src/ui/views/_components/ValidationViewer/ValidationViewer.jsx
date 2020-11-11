@@ -66,10 +66,6 @@ const ValidationViewer = React.memo(
 
     const { totalErrors, totalFilteredGroupedRecords, totalFilteredRecords, totalRecords } = validationState;
 
-    let dropdownLevelErrorsFilterRef = useRef();
-    let dropdownTypeEntitiesFilterRef = useRef();
-    let dropdownOriginsFilterRef = useRef();
-
     useEffect(() => {
       const headers = [
         {
@@ -291,56 +287,6 @@ const ValidationViewer = React.memo(
       }
     };
 
-    const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
-      levelErrorsDeselected = levelErrorsDeselected.map(filter => filter.toString().toUpperCase());
-
-      removeSelectAllFromList(levelErrorsDeselected);
-
-      setLevelErrorsFilter(levelErrorsDeselected);
-
-      setIsFilteredLevelErrors(levelErrorsDeselected.length > 0);
-
-      if (levelErrorsDeselected.length <= 0) {
-        checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
-      } else {
-        setAreActiveFilters(true);
-      }
-
-      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsDeselected, typeEntitiesFilter, originsFilter);
-
-      setFirstRow(0);
-    };
-
-    const onLoadErrorsWithEntityFilter = typeEntitiesDeselected => {
-      typeEntitiesDeselected = typeEntitiesDeselected.map(filter => filter.toString().toUpperCase());
-
-      removeSelectAllFromList(typeEntitiesDeselected);
-
-      if (typeEntitiesDeselected.length <= 0) {
-        checkActiveFilters(isFilteredOrigins, isFilteredLevelErrors, false);
-      } else {
-        setAreActiveFilters(true);
-      }
-
-      setTypeEntitiesFilter(typeEntitiesDeselected);
-      setIsFilteredTypeEntities(typeEntitiesDeselected.length > 0);
-      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
-      setFirstRow(0);
-    };
-
-    const onLoadErrorsWithOriginsFilter = originsDeselected => {
-      setOriginsFilter(originsDeselected);
-
-      if (originsDeselected.length <= 0) {
-        checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
-      } else {
-        setAreActiveFilters(true);
-      }
-      setIsFilteredOrigins(originsDeselected.length > 0);
-      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsDeselected);
-      setFirstRow(0);
-    };
-
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
       setIsLoading(true);
       const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
@@ -372,24 +318,6 @@ const ValidationViewer = React.memo(
       originsFilter
     ) => {
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
-    };
-
-    const checkActiveFilters = (originsFilter, levelErrorsFilter, typeEntitiesFilter) => {
-      if (originsFilter || levelErrorsFilter || typeEntitiesFilter) {
-        setAreActiveFilters(true);
-      } else {
-        setAreActiveFilters(false);
-      }
-    };
-
-    const getExportButtonPosition = e => {
-      const exportButton = e.currentTarget;
-      const left = `${exportButton.offsetLeft}px`;
-      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
-      const top = `${topValue}px `;
-      const menu = exportButton.nextElementSibling;
-      menu.style.top = top;
-      menu.style.left = left;
     };
 
     const onRowSelect = async event => {
@@ -480,97 +408,15 @@ const ValidationViewer = React.memo(
         </div>
       );
     }
+
     return (
       <div className={styles.validationWrapper}>
         {!isUndefined(buttonsList) ? (
           buttonsList
         ) : (
           <Toolbar className={styles.validationToolbar}>
-            {/* <div className="p-toolbar-group-left">
-              <Button
-                className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['table']}
-                onClick={event => {
-                  dropdownOriginsFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredOrigins ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allOriginsFilter}
-                popup={true}
-                ref={dropdownOriginsFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithOriginsFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
-              />
-
-              <Button
-                className={`${styles.level} p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['levelError']}
-                onClick={event => {
-                  dropdownLevelErrorsFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredLevelErrors ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allLevelErrorsFilter}
-                popup={true}
-                ref={dropdownLevelErrorsFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithErrorLevelFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
-                showLevelErrorIcons={true}
-              />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['entity']}
-                onClick={event => {
-                  dropdownTypeEntitiesFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allTypeEntitiesFilter}
-                popup={true}
-                ref={dropdownTypeEntitiesFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
-              />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
-                disabled={!areActiveFilters}
-                icon={'cross'}
-                label={resources.messages['cleanFilters']}
-                onClick={() => {
-                  resetFilters();
-                  fetchData('', sortOrder, 0, numberRows, [], [], []);
-                  setFirstRow(0);
-                  setAreActiveFilters(false);
-                }}
-              />
-            </div> */}
-
             <div>
               <Filters
-                className="filter-lines"
                 data={fetchedData}
                 getFilteredData={onLoadFilteredData}
                 getFilteredSearched={getFilteredState}
@@ -607,7 +453,6 @@ const ValidationViewer = React.memo(
           {!isEmpty(filteredData) ? (
             <DataTable
               autoLayout={true}
-              // className={styles.validations}
               first={firstRow}
               lazy={true}
               loading={isLoading}
