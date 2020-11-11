@@ -24,6 +24,7 @@ const WebformDataFormFieldEditor = ({
   datasetId,
   field,
   fieldValue = '',
+  hasSingle = false,
   onChangeForm,
   type
 }) => {
@@ -90,6 +91,7 @@ const WebformDataFormFieldEditor = ({
     return (
       <MultiSelect
         appendTo={document.body}
+        disabled={field.toLowerCase() === 'listofsinglepams' && hasSingle}
         onChange={e => onChangeForm(field, e.value)}
         optionLabel="itemType"
         options={column.codelistItems.sort().map(codelistItem => ({ itemType: codelistItem, value: codelistItem }))}

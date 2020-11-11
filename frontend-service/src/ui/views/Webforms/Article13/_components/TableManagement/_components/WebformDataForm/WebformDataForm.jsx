@@ -32,8 +32,18 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
               datasetId={datasetId}
               field={column.header}
               fieldValue={field.fieldData[column.field]}
-              // hasWritePermissions={hasWritePermissions}
-              // isVisible={editDialogVisible}
+              hasSingle={
+                selectedRecord.dataRow
+                  .map(
+                    field =>
+                      field.fieldData.type === 'CODELIST' &&
+                      Object.values(field.fieldData).includes('Single') &&
+                      colsSchema.filter(
+                        col => col.header.toUpperCase() === 'ISGROUP' && col.field === field.fieldData.fieldSchemaId
+                      ).length > 0
+                  )
+                  .filter(result => result).length > 0
+              }
               onChangeForm={onChangeForm}
               type={column.type}
             />

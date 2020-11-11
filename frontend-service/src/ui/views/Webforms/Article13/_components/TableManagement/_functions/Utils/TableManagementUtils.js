@@ -19,11 +19,16 @@ const parseListOfSinglePams = (columns = [], records = []) => {
   const options = records
     .filter(record => record.IsGroup === 'Single')
     .map(singleRecord => {
-      if (singleRecord.Id && singleRecord.Title) {
-        return `#${singleRecord.Id} - ${singleRecord.Title}`;
+      if (
+        Object.keys(singleRecord)
+          .map(key => key.toUpperCase())
+          .includes('ID', 'TITLE')
+      ) {
+        return `#${singleRecord[Object.keys(singleRecord).find(key => key.toUpperCase() === 'ID')]} - ${
+          singleRecord[Object.keys(singleRecord).find(key => key.toUpperCase() === 'TITLE')]
+        }`;
       }
     });
-
   return columns.map(column => {
     if (column.header === 'ListOfSinglePams') {
       column.type = 'MULTISELECT_CODELIST';
