@@ -137,7 +137,12 @@ export const TableManagement = ({
             {
               field: 'Title',
               fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Title'),
-              header: 'Name of policy or measure'
+              header: 'Name of PaM or group of PaMs'
+            },
+            {
+              field: 'TitleNational',
+              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'TitleNational'),
+              header: 'Name of PaM or group of PaMs in national language'
             },
             {
               field: 'IsGroup',
@@ -478,6 +483,7 @@ export const TableManagement = ({
               onChangeForm={onEditFormInput}
               selectedRecord={selectedRecord}
               records={tableManagementState.records}
+              tableColumns={tableColumns}
             />
           </div>
         </Dialog>

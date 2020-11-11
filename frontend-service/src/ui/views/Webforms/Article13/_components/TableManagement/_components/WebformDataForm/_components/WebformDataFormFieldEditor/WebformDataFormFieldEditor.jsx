@@ -1,18 +1,11 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-// import isEmpty from 'lodash/isEmpty';
-import cloneDeep from 'lodash/cloneDeep';
-import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
-
-// import styles from './WebformDataFormFieldEditor.module.scss';
+import isEmpty from 'lodash/isEmpty';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
-
-import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -21,7 +14,6 @@ import { RecordUtils } from 'ui/views/_functions/Utils';
 const WebformDataFormFieldEditor = ({
   autoFocus = false,
   column,
-  datasetId,
   field,
   fieldValue = '',
   hasSingle = false,
@@ -88,6 +80,9 @@ const WebformDataFormFieldEditor = ({
   };
 
   const renderMultiselectCodelist = (field, fieldValue) => {
+    if (field.toLowerCase() === 'listofsinglepams' && hasSingle && !isEmpty(fieldValue)) {
+      onChangeForm(field, []);
+    }
     return (
       <MultiSelect
         appendTo={document.body}

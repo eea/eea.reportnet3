@@ -5,14 +5,17 @@ import isNil from 'lodash/isNil';
 
 import { WebformDataFormFieldEditor } from './_components/WebformDataFormFieldEditor';
 
-export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, selectedRecord }) => {
+export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, selectedRecord, tableColumns }) => {
   const editWebformRecordForm = colsSchema.map((column, i) => {
     if (!isNil(selectedRecord) && !isEmpty(selectedRecord)) {
       const field = selectedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+      const fieldTitle = tableColumns.filter(tableColumn => tableColumn.field === column.header)[0];
       return (
         <Fragment key={column.field}>
           <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.field}>{column.header}</label>
+            <label htmlFor={column.field}>
+              {!isNil(fieldTitle) && !isEmpty(fieldTitle) ? fieldTitle.header : column.header}
+            </label>
             {/* <Button
             className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
             icon="infoCircle"
