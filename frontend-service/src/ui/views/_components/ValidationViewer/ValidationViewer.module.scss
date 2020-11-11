@@ -73,3 +73,17 @@
   font-size: 1.2rem;
   font-weight: bold;
 }
+
+.spinner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  min-height: 70vh !important;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
