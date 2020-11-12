@@ -14,6 +14,7 @@ import proj4 from 'proj4';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
 import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
+import { EditControl } from 'react-leaflet-draw';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -338,6 +339,20 @@ export const Map = ({
             <TileLayer url="" />
           </BaseLayer>
         </LayersControl> */}
+          <EditControl
+            position="topright"
+            // onEdited={this._onEdited}
+            // onCreated={this._onCreated}
+            // onDeleted={this._onDeleted}
+            // onMounted={this._onMounted}
+            // onEditStart={this._onEditStart}
+            // onEditStop={this._onEditStop}
+            // onDeleteStart={this._onDeleteStart}
+            // onDeleteStop={this._onDeleteStop}
+            draw={{
+              rectangle: false
+            }}
+          />
           {MapUtils.checkValidJSONCoordinates(geoJson) && (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}
