@@ -1186,6 +1186,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + datasetId + QUERY_FILTER_BY_ID_RECORD).append(schemaId).append(AS).append("\"")
               .append(columns.get(i).getName()).append("\" ");
           break;
+        case POSITION:
+        case POINT:
+        case LINESTRING:
+        case MULTILINESTRING:
+        case MULTIPOINT:
+        case POLYGON:
+        case GEOMETRYCOLLECTION:
+          stringQuery
+              .append("(select fv.geometry from dataset_" + datasetId + QUERY_FILTER_BY_ID_RECORD)
+              .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
+              .append("\" ");
+          break;
         default:
           stringQuery
               .append("(select case when fv.value = '' then null else fv.value end from dataset_"

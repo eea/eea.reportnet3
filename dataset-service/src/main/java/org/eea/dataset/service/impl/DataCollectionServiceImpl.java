@@ -328,6 +328,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       LOG.info("Validate SQL Rules in Dataflow {},Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
+        recordStoreControllerZuul.createUpdateQueryView(dataset.getId());
         List<RuleVO> rulesSql =
             rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
         if (null != rulesSql && !rulesSql.isEmpty()) {

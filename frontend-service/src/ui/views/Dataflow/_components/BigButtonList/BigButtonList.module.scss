@@ -51,6 +51,32 @@
 .calendar {
   display: flex !important;
 }
+
+.radioButtonDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-top: 1rem;
+  /* flex-direction: row-reverse; */
+
+  .radioButton {
+    border-radius: 10px;
+    padding: 0.5rem;
+
+    &:hover {
+      background: var(--gray-5);
+    }
+
+    .button {
+      margin-right: 0.5rem;
+    }
+
+    .label {
+      cursor: pointer;
+    }
+  }
+}
+
 :global body .p-datepicker .p-datepicker-header .p-datepicker-title select {
   display: initial;
   width: auto;

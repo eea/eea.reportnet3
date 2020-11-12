@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef } from 'react';
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -14,6 +14,7 @@ export const ListMessages = ({
   className = '',
   emptyMessage = '',
   isCustodian,
+  isLoading,
   lazyLoading = true,
   messages = [],
   newMessageAdded,
@@ -25,6 +26,8 @@ export const ListMessages = ({
     isLoadingNewMessages: false,
     separatorIndex: -1
   });
+
+  const [listContent, setListContent] = useState();
 
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
@@ -41,6 +44,10 @@ export const ListMessages = ({
   useEffect(() => {
     dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
   }, [messages]);
+
+  useEffect(() => {
+    setListContent(renderMessageList());
+  }, [isLoading, isLoadingNewMessages, messages]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -67,29 +74,41 @@ export const ListMessages = ({
     }
   };
 
-  return (
-    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
-      {isLoadingNewMessages && (
+  const renderMessageList = () => {
+    if (isLoading) {
+      return <Spinner className={styles.spinnerLoadingMessages} />;
+    }
+    if (isLoadingNewMessages) {
+      return (
         <div className={styles.lazyLoadingWrapper}>
           <Spinner className={styles.lazyLoadingSpinner} />
         </div>
-      )}
-      {isEmpty(messages) ? (
+      );
+    }
+    if (isEmpty(messages)) {
+      return (
         <div className={styles.emptyMessageWrapper}>
           <span>{emptyMessage}</span>
         </div>
-      ) : (
-        <div className={styles.scrollMessagesWrapper}>
-          {messages.map((message, i) => (
-            <Message
-              message={message}
-              hasSeparator={
-                i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
-              }
-            />
-          ))}
-        </div>
-      )}
+      );
+    }
+    return (
+      <div className={styles.scrollMessagesWrapper}>
+        {messages.map((message, i) => (
+          <Message
+            message={message}
+            hasSeparator={
+              i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
+            }
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
+      {listContent}
     </div>
   );
 };

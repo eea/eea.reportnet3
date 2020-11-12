@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +25,7 @@ import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.MessageRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -283,13 +283,31 @@ public class DataFlowServiceImplTest {
     resources.add(resource);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resources);
-    Object[] object = {BigInteger.ONE, DatasetStatusEnum.CORRECTION_REQUESTED.toString()};
-    Object[] object1 = {BigInteger.ONE, DatasetStatusEnum.FINAL_FEEDBACK.toString()};
-    Object[] object2 = {BigInteger.ONE, DatasetStatusEnum.PENDING.toString()};
-    Object[] object3 = {BigInteger.ONE, DatasetStatusEnum.TECHNICALLY_ACCEPTED.toString()};
-    Object[] object4 = {BigInteger.ONE, DatasetStatusEnum.RELEASED.toString()};
-    List<Object[]> listObject =
-        new ArrayList<>(Arrays.asList(object, object1, object2, object3, object4));
+    IDatasetStatus ida1 = new IDatasetStatus() {
+
+      @Override
+      public String getStatus() {
+        return DatasetStatusEnum.CORRECTION_REQUESTED.toString();
+      }
+
+      @Override
+      public Long getId() {
+        return 1L;
+      }
+    };
+    IDatasetStatus ida2 = new IDatasetStatus() {
+
+      @Override
+      public String getStatus() {
+        return DatasetStatusEnum.PENDING.toString();
+      }
+
+      @Override
+      public Long getId() {
+        return 2L;
+      }
+    };
+    List<IDatasetStatus> listObject = Arrays.asList(ida1, ida2);
     when(dataflowRepository.getDatasetsStatus(Mockito.any())).thenReturn(listObject);
 
     dataflowServiceImpl.getDataflows(Mockito.any());

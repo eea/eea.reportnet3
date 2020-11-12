@@ -73,15 +73,6 @@ public class FieldValue {
   private Geometry<G2D> geometry;
 
   /**
-   * The rsid.
-   * 
-   * WARNING! This property should not be used. Its function is to retrieve the Geometry type stored
-   * in the DB, but updates must be done within "value" property following the GeoJSON standard.
-   */
-  @Column(name = "RSID")
-  private Integer rsid;
-
-  /**
    * The record.
    */
   @ManyToOne

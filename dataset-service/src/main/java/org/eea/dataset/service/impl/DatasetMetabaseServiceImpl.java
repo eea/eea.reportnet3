@@ -259,17 +259,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    Long dataflowId = datasetStatusMessageVO.getDataflowId();
-    Long providerId = datasetMetabase.getDataProviderId();
-    EventType eventType = EventType.UPDATED_DATASET_STATUS;
-
     MessageVO message = new MessageVO();
     message.setContent(datasetStatusMessageVO.getMessage());
-    message.setProviderId(providerId);
+    message.setProviderId(datasetMetabase.getDataProviderId());
 
     // Send message to provider
-    collaborationControllerZuul.createMessage(dataflowId, message);
-    collaborationControllerZuul.notifyNewMessages(dataflowId, providerId, eventType.toString());
+    Optional<DataSetMetabase> designDataset =
+        dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(
+            datasetMetabase.getDatasetSchema(), datasetMetabase.getDataProviderId());
+    collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message);
+    collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
+        datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
+        designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
+        EventType.UPDATED_DATASET_STATUS.toString());
   }
 
 
