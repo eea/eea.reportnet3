@@ -222,7 +222,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
                   onSelectRecord(items.recordId, items.id);
                   onToggleView(resources.messages['details']);
                 }}>
-                {items.id || '?'}
+                {items.id || '-'}
               </span>
             ))}
             <Button
