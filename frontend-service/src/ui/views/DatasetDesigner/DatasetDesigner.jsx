@@ -766,7 +766,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
-      console.error(error);
+      console.error('error', error);
     }
   };
 
