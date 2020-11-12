@@ -10,12 +10,13 @@ import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { WebformDataForm } from './_components/WebformDataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
-import { MultiSelect } from 'ui/views/_components/MultiSelect';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
+import { Spinner } from 'ui/views/_components/Spinner';
+import { WebformDataForm } from './_components/WebformDataForm';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -33,6 +34,7 @@ import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 export const TableManagement = ({
   dataflowId,
   datasetId,
+  isReporting,
   loading,
   onAddTableRecord,
   onRefresh,
@@ -54,6 +56,7 @@ export const TableManagement = ({
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
     isDialogVisible: { delete: false, manageRows: false },
+    isLoading: true,
     isSaving: false,
     parentTablesWithData: [],
     records: [],
@@ -65,6 +68,7 @@ export const TableManagement = ({
   const {
     initialSelectedRecord,
     isDialogVisible,
+    isLoading,
     isSaving,
     parentTablesWithData,
     selectedRecord,
@@ -189,6 +193,8 @@ export const TableManagement = ({
   const manageDialogs = (dialog, value) =>
     tableManagementDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
 
+  const setIsLoading = value => tableManagementDispatch({ type: 'IS_LOADING', payload: { value } });
+
   const onDeleteRow = async () => {
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
@@ -245,9 +251,11 @@ export const TableManagement = ({
         ])
       };
     });
-    Promise.all(parentTablesDataPromises).then(parentTableData => {
-      tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
-    });
+    Promise.all(parentTablesDataPromises)
+      .then(parentTableData => {
+        tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const onSaveRecord = async record => {
@@ -438,20 +446,24 @@ export const TableManagement = ({
     </DataTable>
   );
 
-  if (isEmpty(records)) return renderEmptyTable();
+  if (isLoading) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
 
   return (
     <Fragment>
-      <DataTable
-        className={styles.table}
-        autoLayout={true}
-        loading={loading}
-        onRowClick={event =>
-          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
-        }
-        value={tableManagementState.records}>
-        {renderTableColumns()}
-      </DataTable>
+      {isEmpty(records) ? (
+        renderEmptyTable()
+      ) : (
+        <DataTable
+          className={styles.table}
+          autoLayout={true}
+          loading={loading}
+          onRowClick={event =>
+            tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
+          }
+          value={tableManagementState.records}>
+          {renderTableColumns()}
+        </DataTable>
+      )}
 
       {isDialogVisible.delete && (
         <ConfirmDialog

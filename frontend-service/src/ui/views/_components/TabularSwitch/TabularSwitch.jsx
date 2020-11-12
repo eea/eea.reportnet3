@@ -1,44 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useReducer } from 'react';
 
 import styles from './TabularSwitch.module.scss';
 
-const TabularSwitch = ({ elements, className = '', id, onChange, value }) => {
-  const [selected, setSelected] = useState(value);
+import { tabularSwitchReducer } from './_functions/Reducers/tabularSwitchReducer';
 
-  console.log({ selected, value });
-  useEffect(() => {
-    onChange(selected);
-  }, [selected]);
+import { TabularSwitchUtils } from './_functions/Utils/TabularSwitchUtils';
+
+const TabularSwitch = ({ className = '', elements = [], id, onChange, value = '' }) => {
+  const { onSwitchAnimate, parseViews } = TabularSwitchUtils;
+
+  const [tabularSwitchState, tabularSwitchDispatch] = useReducer(tabularSwitchReducer, {
+    views: parseViews(elements, value)
+  });
+
+  const { views } = tabularSwitchState;
+
+  const onSwitchView = element => {
+    const viewType = { ...views };
+    Object.keys(viewType).forEach(view => {
+      viewType[view] = false;
+      viewType[element] = true;
+    });
+
+    onChange(element);
+    tabularSwitchDispatch({ type: 'ON_CHANGE_VIEW', payload: { viewType } });
+  };
 
   return (
     <div className={`${className} ${styles.tabBar}`} id={id}>
-      <div className={styles.indicator} style={{ left: selected === value ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
-      {elements.map(element => (
+      <div className={styles.indicator} style={{ left: `calc(${onSwitchAnimate(views) * 150}px + 1.5rem)` }} />
+      {elements.map((element, i) => (
         <div
-          className={`${styles.tabItem} ${value === element ? styles.selected : null}`}
-          onClick={() => {
-            setSelected(element);
-          }}>
+          className={`${styles.tabItem} ${views[element] ? styles.selected : null}`}
+          key={i}
+          onClick={() => onSwitchView(element)}>
           <p className={styles.tabLabel}>{element}</p>
         </div>
       ))}
-      {/* <div
-        className={`${styles.tabItem} ${!isWebformView ? styles.selected : null}`}
-        onClick={() => {
-          onToggleView(false);
-          onSelectRecord(null, null);
-        }}>
-      </div> */}
-      {/* <div
-        className={`${styles.tabItem} ${isWebformView ? styles.selected : null} ${
-          isEmpty(pamsRecords) ? styles.disabled : null
-        }`}
-        data-for="emptyTableTooltip"
-        data-tip
-        onClick={() => (isEmpty(pamsRecords) ? {} : onToggleView(true))}>
-        <p className={styles.tabLabel}>{resources.messages['details']}</p>
-      </div> */}
     </div>
   );
 };
+
 export { TabularSwitch };

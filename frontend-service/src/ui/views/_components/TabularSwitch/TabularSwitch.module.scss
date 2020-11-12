@@ -3,12 +3,12 @@
   background-color: #f1f4f7;
   border-radius: 8px;
   display: flex;
-  left: 50%;
+  // left: 50%;
   margin-bottom: 2rem;
   padding: 0 1rem;
   position: relative;
-  transform: translateX(-50%);
-  width: calc(300px + 2rem);
+  // transform: translateX(-50%);
+  // width: calc(300px + 2rem);
 
   .tabItem {
     align-items: center;
@@ -19,7 +19,7 @@
     padding: 0 0.5rem;
     position: relative;
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    width: 150px;
+    min-width: 150px;
 
     .tabLabel {
       margin: 0;
