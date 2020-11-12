@@ -199,6 +199,8 @@ const FieldEditor = ({
           <InputTextarea
             collapsedHeight={75}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            maxLength={textCharacters}
+            moveCaretToEnd={true}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
@@ -206,7 +208,6 @@ const FieldEditor = ({
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record, false, '', type)}
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={textCharacters}
           />
         );
       case 'RICH_TEXT':
