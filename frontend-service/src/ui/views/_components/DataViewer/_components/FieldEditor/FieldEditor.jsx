@@ -46,7 +46,7 @@ const FieldEditor = ({
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
 
-  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
@@ -56,7 +56,7 @@ const FieldEditor = ({
     RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
         ? crs.filter(
-            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.rsid
+            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
           )[0]
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
@@ -132,7 +132,7 @@ const FieldEditor = ({
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
-        geoJson.properties.rsid = crs.value;
+        geoJson.properties.srid = crs.value;
         setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates));
         return JSON.stringify(geoJson);
       } else {
