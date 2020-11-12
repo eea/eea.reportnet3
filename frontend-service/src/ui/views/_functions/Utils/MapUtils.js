@@ -2,7 +2,7 @@ import { isEmpty } from 'lodash';
 import isNil from 'lodash/isNil';
 
 const changeIncorrectCoordinates = record => {
-  const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"rsid": "EPSG:4326"}}`;
+  const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"srid": "EPSG:4326"}}`;
   record.dataRow.forEach(row => {
     if (row.fieldData.type === 'POINT') {
       const parsedJSON = JSON.parse(
@@ -12,7 +12,7 @@ const changeIncorrectCoordinates = record => {
         ? row.fieldData[Object.keys(row.fieldData)[0]]
         : ',';
       if (!checkValidJSONCoordinates(value)) parsedJSON.geometry.coordinates = [''];
-      if (!checkRSID(parsedJSON.properties.rsid)) parsedJSON.properties.rsid = '4326';
+      if (!checkSRID(parsedJSON.properties.srid)) parsedJSON.properties.srid = '4326';
 
       row.fieldData[Object.keys(row.fieldData)[0]] = JSON.stringify(parsedJSON);
     }
@@ -20,12 +20,12 @@ const changeIncorrectCoordinates = record => {
   return record;
 };
 
-const checkRSID = rsid => {
-  switch (rsid.split(':')[1].trim()) {
+const checkSRID = srid => {
+  switch (srid.split(':')[1].trim()) {
     case '4326':
     case '4258':
     case '3035':
-      return rsid;
+      return srid;
     default:
       return 'EPSG:4326';
   }
@@ -84,7 +84,7 @@ const parseCoordinates = (coordinates = [], parseToFloat = true) =>
   parseToFloat ? [parseFloat(coordinates[0]), parseFloat(coordinates[1])] : coordinates;
 
 const parseGeometryData = records => {
-  const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+  const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
   records.forEach(record =>
     record.dataRow.forEach(row => {
       if (row.fieldData.type === 'POINT') {
@@ -100,7 +100,7 @@ const parseGeometryData = records => {
             splittedValue.length === 0
               ? [value.replace(', ', ',').split(',')[0], value.replace(', ', ',').split(',')[1]]
               : [splittedValue[0].replace(', ', ',').split(',')[0], splittedValue[0].replace(', ', ',').split(',')[1]];
-          parsedJSON.properties.rsid = splittedValue.length === 0 ? '4326' : checkRSID(splittedValue[1]);
+          parsedJSON.properties.srid = splittedValue.length === 0 ? '4326' : checkSRID(splittedValue[1]);
         }
 
         row.fieldData[Object.keys(row.fieldData)[0]] = JSON.stringify(parsedJSON);

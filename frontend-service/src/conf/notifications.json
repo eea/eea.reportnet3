@@ -538,7 +538,11 @@
           }
         },
         {
-          "key": "RELEASE_COMPLETED_EVENT"
+          "key": "RELEASE_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key": "UPLOAD_DOCUMENT_COMPLETED_EVENT",
