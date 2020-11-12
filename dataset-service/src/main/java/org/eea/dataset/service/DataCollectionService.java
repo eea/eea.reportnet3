@@ -32,15 +32,17 @@ public interface DataCollectionService {
    * @param dataflowId the dataflow id
    * @param isBoolean the is boolean
    */
-  void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId, boolean isBoolean);
+  void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId, boolean isCreation);
 
   /**
    * Creates the empty data collection.
    *
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck enable the manual check for the custodian approval
    */
-  void createEmptyDataCollection(Long dataflowId, Date dueDate);
+  void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean stopAndNotifySQLErrors, boolean manualCheck);
 
   /**
    * Adds the foreign relations from new reportings.

@@ -50,7 +50,7 @@ const ManageRights = ({ dataflowState, dataflowId, dataProviderId, isActiveManag
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRightsDialog === false && !isEmpty(formState.contributorsHaveError)) {
+    if (!isActiveManageRightsDialog && !isEmpty(formState.contributorsHaveError)) {
       formDispatcher({
         type: 'REFRESH'
       });

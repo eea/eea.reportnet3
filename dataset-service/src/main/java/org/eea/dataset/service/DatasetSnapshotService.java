@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -50,8 +51,7 @@ public interface DatasetSnapshotService {
    * @param released the released
    * @param partitionIdDestination the partition id destination
    */
-  void addSnapshot(Long idDataset, String description, Boolean released,
-      Long partitionIdDestination);
+  void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination);
 
   /**
    * Removes the snapshot.
@@ -147,13 +147,6 @@ public interface DatasetSnapshotService {
    */
   void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException;
 
-  /**
-   * Delete all snapshots.
-   *
-   * @param idDataset the id dataset
-   * @throws EEAException the EEA exception
-   */
-  void deleteAllSnapshots(Long idDataset) throws EEAException;
 
   /**
    * Creates the receipt PDF.
@@ -169,7 +162,6 @@ public interface DatasetSnapshotService {
    *
    * @param datasetId the dataset id
    * @return the snapshots released by id dataset
-   * @throws EEAException the EEA exception
    */
   List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId);
 
@@ -178,7 +170,6 @@ public interface DatasetSnapshotService {
    *
    * @param dataCollectionId the data collection id
    * @return the snapshots released by id data collection
-   * @throws EEAException the EEA exception
    */
   List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId);
 
@@ -195,7 +186,6 @@ public interface DatasetSnapshotService {
    * Update snapshot EU release.
    *
    * @param datasetId the dataset id
-   * @throws EEAException the EEA exception
    */
   void updateSnapshotEURelease(Long datasetId);
 
@@ -204,6 +194,27 @@ public interface DatasetSnapshotService {
    *
    * @param datasetId the dataset id
    * @return the releases
+   * @throws EEAException the EEA exception
    */
   List<ReleaseVO> getReleases(Long datasetId) throws EEAException;
+
+
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  void createReleaseSnapshots(Long dataflowId, Long dataProviderId) throws EEAException;
+
+
+  /**
+   * Release locks related to release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId) throws EEAException;
 }

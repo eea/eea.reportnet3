@@ -55,6 +55,14 @@
     }
   }
 
+  .dataflowFeedback {
+    background-color: var(--success-color);
+
+    span:hover {
+      background-color: var(--success-color-dark);
+    }
+  }
+
   .dataflowHelp {
     background-color: var(--c-orange-200);
 
@@ -108,6 +116,14 @@
 
     span:hover {
       background-color: var(--c-pink);
+    }
+  }
+
+  .manualTechnicalAcceptance {
+    background-color: var(--c-black-rose-100);
+
+    span:hover {
+      background-color: var(--c-black-rose-200);
     }
   }
 

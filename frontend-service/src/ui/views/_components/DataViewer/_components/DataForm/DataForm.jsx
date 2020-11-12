@@ -18,7 +18,7 @@ const DataForm = ({
   getTooltipMessage,
   hasWritePermissions,
   onChangeForm,
-  onShowCoordinateError,
+  onShowCoordinateError = () => {},
   records,
   reporting,
   onShowFieldInfo
@@ -26,7 +26,6 @@ const DataForm = ({
   const resources = useContext(ResourcesContext);
 
   const [fieldsWithError, setFieldsWithError] = useState([]);
-
   useEffect(() => {
     onShowCoordinateError(fieldsWithError.length);
   }, [fieldsWithError]);
@@ -93,7 +92,7 @@ const DataForm = ({
                   fieldValue={
                     isNil(field.fieldData[column.field])
                       ? column.type === 'POINT'
-                        ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+                        ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
                         : ''
                       : field.fieldData[column.field]
                   }

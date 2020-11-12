@@ -28,11 +28,13 @@
   "orderTableSchemaDesign": "/dataschema/{:datasetId}/tableSchema/order",
   "referencedFieldValues": "/dataset/{:datasetId}/getFieldsValuesReferenced?idFieldSchema={:fieldSchemaId}&searchValue={:searchToken}",
   "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
+  "updateDatasetFeedbackStatus": "/datasetmetabase/updateDatasetStatus",
   "updateDatasetSchemaDesign": "/dataschema/{:datasetId}/datasetSchema",
   "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
   "updateTableDataField": "/dataset/{:datasetId}/updateField",
   "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
   "updateTableDesign": "/dataschema/{:datasetId}/tableSchema",
   "validateDataset": "/validation/dataset/{:datasetId}",
-  "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}"
+  "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
+  "validateSql": "/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}"
 }

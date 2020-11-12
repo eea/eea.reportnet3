@@ -1,7 +1,11 @@
+/*
+ * 
+ */
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -79,6 +84,14 @@ public interface DatasetMetabaseController {
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
+
+  /**
+   * Update dataset status and send message.
+   *
+   * @param statusMessageVO the status message VO
+   */
+  @PutMapping(value = "/updateDatasetStatus")
+  void updateDatasetStatus(@RequestBody DatasetStatusMessageVO statusMessageVO);
 
   /**
    * Gets the statistics by id.
@@ -191,5 +204,36 @@ public interface DatasetMetabaseController {
    */
   @GetMapping("/private/getType/{datasetId}")
   DatasetTypeEnum getType(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Gets the dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset ids by dataflow id and data provider id
+   */
+  @GetMapping("/private/getDatasetIdsByDataflowIdAndDataProviderId")
+  List<Long> getDatasetIdsByDataflowIdAndDataProviderId(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProviderId") Long dataProviderId);
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  @GetMapping("/private/getUserProviderIdsByDataflowId")
+  List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId);
+
+
+  /**
+   * Gets the last dataset validation for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
+   */
+  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId);
 
 }

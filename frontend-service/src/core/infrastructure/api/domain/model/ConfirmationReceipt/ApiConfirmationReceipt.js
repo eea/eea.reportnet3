@@ -5,7 +5,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const apiConfirmationReceipt = {
   download: async (dataflowId, dataProviderId) => {
     const response = await HTTPRequester.download({
-      url: getUrl(ConfirmationReceiptConfig.get, {
+      url: getUrl(ConfirmationReceiptConfig.download, {
         dataflowId,
         dataProviderId
       })

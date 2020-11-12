@@ -15,9 +15,9 @@ const changeCellValue = (tableData, rowIndex, field, value) => {
   return tableData;
 };
 
-const changeRecordValue = (recordData, field, value) => {
+const changeRecordValue = (recordData, field, value, isPaste = false) => {
   //Delete \r and \n values for tabular paste
-  if (!isUndefined(value) && !isNull(value) && isString(value)) {
+  if (isPaste && !isUndefined(value) && !isNull(value) && isString(value)) {
     value = value.replace(`\r`, '').replace(`\n`, '');
   }
   recordData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
@@ -97,7 +97,6 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
   copiedClipboardRecords.forEach(row => {
     let emptyRecord = RecordUtils.createEmptyObject(colsSchema, fetchedDataFirstRow);
     const copiedCols = row.split('\t');
-    // emptyRecord.dataRow.forEach((record, i) => {}
 
     emptyRecord.dataRow.forEach((record, i) => {
       emptyRecord = RecordUtils.changeRecordValue(
@@ -105,7 +104,8 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
         record.fieldData.fieldSchemaId,
         (readOnlyFieldsIndex.indexOf(i) > -1 && reporting) || record.fieldData.type === 'ATTACHMENT'
           ? ''
-          : copiedCols[i]
+          : copiedCols[i],
+        true
       );
     });
 
@@ -139,6 +139,18 @@ const getCodelistItemsInSingleColumn = column => {
     : [];
 };
 
+const getCodelistItemsWithEmptyOption = (column, noneText) => {
+  const codelistItems = column.codelistItems.sort().map(codelistItem => {
+    return { itemType: codelistItem, value: codelistItem };
+  });
+
+  codelistItems.unshift({
+    itemType: noneText,
+    value: ''
+  });
+  return codelistItems;
+};
+
 const getCodelistValue = (codelistItemsOptions, value) => {
   if (!isUndefined(value)) {
     return codelistItemsOptions.filter(item => item.value === value)[0];
@@ -151,7 +163,8 @@ const getFieldTypeValue = fieldType => {
     { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
     { fieldType: 'Date', value: 'Date' },
     { fieldType: 'Text', value: 'Text' },
-    { fieldType: 'Rich_Text', value: 'Rich text' },
+    // { fieldType: 'Rich_Text', value: 'Rich text' },
+    { fieldType: 'Textarea', value: 'Multiline text' },
     { fieldType: 'Email', value: 'Email' },
     { fieldType: 'URL', value: 'URL' },
     { fieldType: 'Phone', value: 'Phone number' },
@@ -183,6 +196,7 @@ const getFilter = type => {
       return 'date';
     case 'TEXT':
     case 'RICH_TEXT':
+    case 'TEXTAREA':
       return 'any';
     case 'EMAIL':
       return 'email';
@@ -296,6 +310,7 @@ export const RecordUtils = {
   getClipboardData,
   getCodelistItems,
   getCodelistItemsInSingleColumn,
+  getCodelistItemsWithEmptyOption,
   getCodelistValue,
   getFieldTypeValue,
   getFilter,

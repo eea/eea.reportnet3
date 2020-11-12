@@ -69,8 +69,6 @@ const Notifications = () => {
                 })
               }}></div>
           ));
-      console.log('notification.message', notification.message);
-      console.log('message', message);
 
       growlRef.current.show({
         severity: notification.type,
@@ -93,7 +91,7 @@ const Notifications = () => {
       });
     }
 
-    if (headerHeight === 70) {
+    if (headerHeight === 64) {
       setPosition({
         marginTop: `${-5}px`
       });

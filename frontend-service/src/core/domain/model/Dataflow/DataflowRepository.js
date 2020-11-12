@@ -7,6 +7,7 @@ export const DataflowRepository = {
   cloneDatasetSchemas: () => Promise.reject('[DataflowRepository#cloneDatasetSchemas] must be implemented'),
   completed: () => Promise.reject('[DataflowRepository#completed] must be implemented'),
   create: () => Promise.reject('[DataflowRepository#create] must be implemented'),
+  datasetsFinalFeedback: () => Promise.reject('[DataflowRepository#datasetsFinalFeedback] must be implemented'),
   datasetsReleasedStatus: () => Promise.reject('[DataflowRepository#datasetsReleasedStatus] must be implemented'),
   datasetsValidationStatistics: () =>
     Promise.reject('[DataflowRepository#datasetsValidationStatistics] must be implemented'),

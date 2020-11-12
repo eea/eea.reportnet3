@@ -1,0 +1,88 @@
+.title {
+  color: var(--main-font-color);
+}
+
+.switch {
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem;
+
+  .option {
+  }
+}
+
+.tabBar {
+  left: 50%;
+  position: relative;
+  transform: translateX(-50%);
+  width: calc(150px + 2rem);
+
+  // align-items: center;
+  // display: flex;
+  height: 55px;
+
+  margin: 1rem 0 1rem 0;
+  opacity: 1;
+  transition: all 0.1s ease 0.05s;
+
+  &.hide {
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+}
+
+.tableList {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 0;
+
+  .tableListItem {
+    align-items: center;
+    background-color: var(--tabview-bg);
+    border-radius: 6px;
+    display: flex;
+    list-style: none;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    color: var(--main-font-color);
+
+    .tableListTitle {
+      border-radius: 6px;
+      padding: 0.5rem;
+      text-transform: capitalize;
+    }
+
+    .tableListId {
+      align-items: center;
+      border-radius: 50%;
+      box-shadow: var(--card-item-box-shadow);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      margin: 0.5rem 1rem;
+      min-height: 40px;
+      min-width: 40px;
+      padding: 0.5rem;
+
+      &:hover {
+        box-shadow: var(--card-item-box-shadow-hover);
+        transform: scale(1.02, 1.02);
+        transition: transform 0.1s ease;
+      }
+    }
+
+    .selected {
+      background-color: var(--c-corporate-blue-lighter);
+      color: var(--white);
+    }
+
+    .addButton {
+      position: absolute;
+      right: 0;
+      transform: translateX(-50%);
+    }
+  }
+}

@@ -12,6 +12,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -54,14 +55,10 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Dataflows : Dataflows Manager")
 public class DataFlowControllerImpl implements DataFlowController {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The dataflow service.
-   */
+  /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
 
@@ -69,7 +66,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find by id.
    *
    * @param dataflowId the dataflow id
-   *
    * @return the data flow VO
    */
   @Override
@@ -103,7 +99,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find by status.
    *
    * @param status the status
-   *
    * @return the list
    */
   @Override
@@ -124,25 +119,26 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+
   /**
-   * Find pending accepted.
+   * Find dataflows.
    *
    * @return the list
    */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find Dataflows in Pending or Accepted Status for the logged User",
+  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List")
-  public List<DataFlowVO> findPendingAccepted() {
+  public List<DataFlowVO> findDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getPendingAccepted(userId);
+      dataflows = dataflowService.getDataflows(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -154,7 +150,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    *
    * @param pageNum the page num
    * @param pageSize the page size
-   *
    * @return the list
    */
   @Override
@@ -186,7 +181,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find user dataflows by status.
    *
    * @param type the type
-   *
    * @return the list
    */
   @Override
@@ -467,6 +461,73 @@ public class DataFlowControllerImpl implements DataFlowController {
       dataflowService.updateDataFlowStatus(dataflowId, status, deadlineDate);
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Creates the message.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVO the message VO
+   * @return the message VO
+   */
+  @Override
+  @Deprecated
+  @PostMapping("/{dataflowId}/createMessage")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody MessageVO messageVO) {
+    try {
+      return dataflowService.createMessage(dataflowId, messageVO.getProviderId(),
+          messageVO.getContent());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Find messages.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param read the read
+   * @param page the offset
+   * @return the list
+   */
+  @Override
+  @Deprecated
+  @GetMapping("/{dataflowId}/findMessages")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId,
+      @RequestParam(value = "read", required = false) Boolean read,
+      @RequestParam("page") int page) {
+    try {
+      return dataflowService.findMessages(dataflowId, providerId, read, page);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Update message read status.
+   *
+   * @param dataflowId the dataflow id
+   * @param messageVOs the message V os
+   */
+  @Override
+  @Deprecated
+  @PutMapping("/{dataflowId}/updateMessageReadStatus")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody List<MessageVO> messageVOs) {
+    try {
+      dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
   }
 

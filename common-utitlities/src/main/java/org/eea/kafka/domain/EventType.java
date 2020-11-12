@@ -14,6 +14,10 @@ public enum EventType {
   /** The validation finished event. */
   VALIDATION_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_finished_key", true),
 
+  /** The validation release finished event. */
+  VALIDATION_RELEASE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validation_release_finished_key", true),
+
   /** The import reporting completed event. */
   IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_completed_event", true),
@@ -232,13 +236,21 @@ public enum EventType {
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC,
       "execute_new_field_propagation", false),
 
-  /** The release dataset snapshot completed event. */
-  RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "dataset_snapshot_released_completed_key", true),
 
-  /** The release dataset snapshot failed event. */
-  RELEASE_DATASET_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "dataset_snapshot_released_failed_key", true),
+  /** The release snapshot completed event. */
+  RELEASE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_completed_key",
+      true),
+
+  /** The release snapshot onebyone completed event. */
+  RELEASE_ONEBYONE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataset_onebyone_released_completed_key", true),
+
+  /** The release snapshot failed event. */
+  RELEASE_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_failed_key", true),
+
+  /** The release snapshot blocked failed event. */
+  RELEASE_BLOCKERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataset_released_blockers_failed_key", true),
 
   /** The command new design field propagation. */
   COMMAND_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC, "new_field_propagation",
@@ -274,6 +286,14 @@ public enum EventType {
   /** The validated qc rule event. */
   VALIDATED_QC_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validated_qc_rule_event", true),
 
+  /** The disable sql rules event. */
+  DISABLE_SQL_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "disable_sql_rules_error_event", true),
+
+  /** The validate rules finish event. */
+  VALIDATE_RULES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_rules_completed_event", true),
+
   /** The copy dataset schema completed event. */
   COPY_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_completed_event", true),
@@ -294,8 +314,22 @@ public enum EventType {
   CREATED_QUERY_VIEWS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "created_query_views_event",
       true),
 
+  /** The validate manual qc event. */
+  VALIDATE_MANUAL_QC_COMMAND(LiteralConstants.DATA_REPORTING_TOPIC, "validate_manual_qc_command",
+      true),
+
+  /** The disable rules error event. */
+  DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
+      true),
+
   /** The create update rule event. */
-  CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true);
+  CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true),
+
+  /** The received message. */
+  RECEIVED_MESSAGE(LiteralConstants.DATA_REPORTING_TOPIC, "received_message", true),
+
+  /** The updated dataset status. */
+  UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true);
 
   /** The topic. */
   private String topic;

@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -15,16 +16,17 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { routes } from 'ui/routes';
 import WebformsConfig from 'conf/webforms.config.json';
 
-import { Article15 } from 'ui/views/Webform/Article15';
+import { Webforms } from 'ui/views/Webforms';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -71,9 +73,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
+  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
+    invalidRules: 0,
+    disabledRules: 0
+  });
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -165,7 +172,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       // setIsLoading(true);
-      const accessPermission = userContext.hasContextAccessPermission('DATASCHEMA', datasetId, [
+      const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
         config.permissions.EDITOR_WRITE
@@ -754,6 +761,38 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const validateQcRules = async () => {
+    setSqlValidationRunning(true);
+    try {
+      const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
+    } catch (error) {
+      console.error('error', error);
+    }
+  };
+
+  useEffect(() => {
+    const response = notificationContext.toShow.find(
+      notification => notification.key === 'VALIDATE_RULES_COMPLETED_EVENT'
+    );
+    if (response) {
+      setSqlValidationRunning(false);
+    }
+  }, [notificationContext]);
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(
+      notification => notification.key === 'DISABLE_SQL_RULES_ERROR_EVENT'
+    );
+    if (response) {
+      const {
+        content: { invalidRules, disabledRules }
+      } = response;
+      setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
+      setIsQCsNotValidWarningVisible(true);
+      setSqlValidationRunning(false);
+    }
+  }, [notificationContext]);
+
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
@@ -778,6 +817,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         style={{ float: 'left' }}
       />
 
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
+        label={resources.messages['validateSqlRulesBtn']}
+        onClick={() => {
+          validateQcRules();
+        }}
+        tooltip={resources.messages['validateRulesBtnTootip']}
+        tooltipOptions={{ position: 'top' }}
+      />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
@@ -813,6 +862,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </Fragment>
   );
 
+  const sqlQCsNotValidWarningFooter = (
+    <Button
+      className="p-button-secondary"
+      icon="cancel"
+      label={resources.messages['close']}
+      onClick={() => setIsQCsNotValidWarningVisible(false)}
+    />
+  );
+
   const renderValidationsFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -822,39 +880,67 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
-  const renderRadioButtons = () =>
-    Object.keys(designerState.viewType).map((view, index) => (
-      <div className={styles.radioButton} key={index}>
-        <RadioButton
-          className={styles.button}
-          checked={designerState.viewType[view]}
-          inputId={view}
-          onChange={event => {
-            onChangeView(event.target.value);
-            changeMode(view);
-          }}
-          value={view}
-        />
-        <label className={styles.label} htmlFor={view}>
-          {resources.messages[`${view}View`]}
-        </label>
-      </div>
-    ));
+  const renderRadioButtons = () => {
+    return (
+      <TabularSwitch
+        elements={Object.keys(designerState.viewType).map(view => resources.messages[`${view}View`])}
+        onChange={switchView => {
+          const views = { design: 'design', tabularData: 'table', webform: 'webform' };
+          onChangeView(views[camelCase(switchView)]);
+          changeMode(views[camelCase(switchView)]);
+        }}
+        value={
+          QuerystringUtils.getUrlParamValue('view') !== ''
+            ? resources.messages[QuerystringUtils.getUrlParamValue('view')]
+            : resources.messages['design']
+        }
+      />
+    );
+
+    // return Object.keys(designerState.viewType).map((view, index) => (
+    //   <div className={styles.radioButton} key={index}>
+    //     <RadioButton
+    //       className={styles.button}
+    //       checked={designerState.viewType[view]}
+    //       inputId={view}
+    //       onChange={event => {
+    //         onChangeView(event.target.value);
+    //         changeMode(view);
+    //       }}
+    //       value={view}
+    //     />
+    //     <label className={styles.label} htmlFor={view}>
+    //       {resources.messages[`${view}View`]}
+    //     </label>
+    //   </div>
+    // ));
+  };
 
   const renderSwitchView = () => {
     const switchView = (
-      <Fragment>
-        <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-        <InputSwitch
-          checked={designerState.viewType['table']}
-          // disabled={true}
-          // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-          onChange={event =>
-            designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
-          }
-        />
-        <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
-      </Fragment>
+      // <Fragment>
+      //   <span className={styles.switchTextInput}>{resources.messages['design']}</span>
+      //   <InputSwitch
+      //     checked={designerState.viewType['table']}
+      //     // disabled={true}
+      //     // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
+      //     onChange={event =>
+      //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
+      //     }
+      //   />
+      //   <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
+      // </Fragment>
+      <TabularSwitch
+        elements={[resources.messages['design'], resources.messages['tabularData']]}
+        onChange={switchView =>
+          designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: switchView === 'Design' ? 'design' : 'table' } })
+        }
+        value={
+          QuerystringUtils.getUrlParamValue('view') !== ''
+            ? resources.messages[QuerystringUtils.getUrlParamValue('view')]
+            : resources.messages['design']
+        }
+      />
     );
 
     return (
@@ -1131,8 +1217,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         </div>
         {renderSwitchView()}
         {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
-          // <Webform dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
-          <Article15 dataflowId={dataflowId} datasetId={datasetId} state={designerState} />
+          <Webforms
+            dataflowId={dataflowId}
+            datasetId={datasetId}
+            state={designerState}
+            webformType={designerState.webform.value}
+          />
         ) : (
           <TabsDesigner
             changeMode={changeMode}
@@ -1226,7 +1316,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             footer={renderConfigureWebformFooter}
             header={resources.messages['configureWebform']}
             onHide={() => onCloseConfigureWebformModal()}
-            style={{ width: '70%' }}
+            style={{ width: '30%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
             <div className={styles.titleWrapper}>
               <span>{resources.messages['configureWebformMessage']}</span>
@@ -1315,6 +1405,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 </a>
               </label>
             </div>
+          </Dialog>
+        )}
+
+        {isQCsNotValidWarningVisible && (
+          <Dialog
+            header={resources.messages['notValidQCWarningTitle']}
+            footer={sqlQCsNotValidWarningFooter}
+            onHide={() => setIsQCsNotValidWarningVisible(false)}
+            visible={isQCsNotValidWarningVisible}>
+            {TextUtils.parseText(resources.messages['notValidSqlQCWarningBody'], {
+              disabled: invalidAndDisabledRulesAmount.disabledRules,
+              invalid: invalidAndDisabledRulesAmount.invalidRules
+            })}
           </Dialog>
         )}
       </div>
