@@ -407,7 +407,7 @@
     "released": "Released",
     "releaseDashboard": "Release status dashboard",
     "releaseDataCollection": "Release to data collection",
-    "releaseCompletedEvent": "{:dataflowName} released successfully",
+    "releaseCompletedEvent": "<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> released successfully",
     "releaseFailedEvent": "Failed releasing the dataflow",
     "rename": "Rename",
     "reportingError": "Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
