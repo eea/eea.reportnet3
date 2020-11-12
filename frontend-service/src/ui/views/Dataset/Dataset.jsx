@@ -749,11 +749,16 @@ export const Dataset = withRouter(({ match, history }) => {
       //     <span className={styles.text}>{resources.messages['webform']}</span>
       //   </div>
       // </div>
-      <TabularSwitch
-        elements={[resources.messages['tabularData'], resources.messages['webform']]}
-        onChange={switchView => setIsTableView(!isTableView)}
-        value={resources.messages['webform']}
-      />
+      <div className={styles.switchDivInput}>
+        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+          <TabularSwitch
+            className={styles.tabularSwitch}
+            elements={[resources.messages['tabularData'], resources.messages['webform']]}
+            onChange={switchView => setIsTableView(!isTableView)}
+            value={resources.messages['webform']}
+          />
+        </div>
+      </div>
     );
 
   const renderValidationsFooter = (
