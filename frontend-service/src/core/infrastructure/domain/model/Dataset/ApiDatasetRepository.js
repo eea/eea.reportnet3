@@ -245,7 +245,8 @@ const getMetaData = async datasetId => {
   const dataset = new Dataset({
     datasetSchemaName: datasetTableDataDTO.dataSetName,
     datasetSchemaId: datasetTableDataDTO.datasetSchema,
-    datasetFeedbackStatus: capitalize(datasetTableDataDTO.status.split('_').join(' '))
+    datasetFeedbackStatus:
+      !isNil(datasetTableDataDTO.status) && capitalize(datasetTableDataDTO.status.split('_').join(' '))
   });
   return dataset;
 };
