@@ -67,7 +67,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
     const recordIds = parsePamsRecords(pamsRecords)
-      .map(record => parseInt(record.Id))
+      .map(record => parseInt(record.Id) || parseInt(record.id))
       .filter(id => !Number.isNaN(id));
 
     return Math.max(...recordIds) + 1;

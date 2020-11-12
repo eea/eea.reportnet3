@@ -100,12 +100,18 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
     );
 
     const filteredSchemaTables = schemaTables
-      .filter(filteredSchemaTable => filteredparentTablesNames.includes(filteredSchemaTable.header))
+      .filter(
+        filteredSchemaTable =>
+          filteredparentTablesNames.includes(filteredSchemaTable.tableSchemaName) ||
+          filteredparentTablesNames.includes(filteredSchemaTable.header)
+      )
       .map(table => {
         return {
           tableSchemaId: table.tableSchemaId,
           tableSchemaName: table.tableSchemaName,
-          pamField: table.records[0].fields.filter(field => field.name.toUpperCase() === 'FK_PAMS')[0]
+          pamField: table.records[0].fields.filter(
+            field => !isNil(field.name) && field.name.toUpperCase() === 'FK_PAMS'
+          )[0]
         };
       });
     return { filteredParentTablesWithData, filteredSchemaTables };
@@ -123,10 +129,16 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
         filteredSchemaTable => filteredSchemaTable.tableSchemaId === table.tableSchemaId
       );
       if (!isNil(filteredSchemaTablesPams) && !isEmpty(filteredSchemaTablesPams)) {
-        const fkPamId = filteredSchemaTablesPams[0].pamField.fieldSchema;
+        const fkPamId =
+          filteredSchemaTablesPams[0].pamField.fieldSchema || filteredSchemaTablesPams[0].pamField.fieldId;
         const pamSchemaId = schemaTables
-          .filter(table => table.header.toUpperCase() === 'PAMS')[0]
-          .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0];
+          .filter(
+            table =>
+              (!isNil(table.tableSchemaName) && table.tableSchemaName.toUpperCase() === 'PAMS') ||
+              (!isNil(table.header) && table.header.toUpperCase() === 'PAMS')
+          )[0]
+          .records[0].fields.filter(field => !isNil(field.name) && field.name.toUpperCase() === 'ID')[0];
+
         if (!isNil(pamSchemaId) && !isEmpty(pamSchemaId)) {
           const pamValue = RecordUtils.getCellValue({ rowData: record }, pamSchemaId.fieldId);
           let hasRecord = false;

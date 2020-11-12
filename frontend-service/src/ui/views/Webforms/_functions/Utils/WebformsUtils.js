@@ -49,9 +49,9 @@ const parseNewTableRecord = (table, pamNumber) => {
       fields = table.records[0].fields.map(field => {
         return {
           fieldData: {
-            [field.fieldSchema]: field.name.toUpperCase() === 'FK_PAMS' ? pamNumber : null,
+            [field.fieldSchema || field.fieldId]: field.name.toUpperCase() === 'FK_PAMS' ? pamNumber : null,
             type: field.type,
-            fieldSchemaId: field.fieldSchema
+            fieldSchemaId: field.fieldSchema || field.fieldId
           }
         };
       });

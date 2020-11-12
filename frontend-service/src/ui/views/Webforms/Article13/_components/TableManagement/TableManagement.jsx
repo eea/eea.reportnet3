@@ -236,7 +236,11 @@ export const TableManagement = ({
       )
     );
     const parentTables = schemaTables.filter(schemaTable => {
-      return configParentTables.includes(schemaTable[isReporting ? 'tableSchemaName' : 'header'].toUpperCase());
+      return (
+        configParentTables.includes(
+          !isNil(schemaTable['tableSchemaName']) && schemaTable['tableSchemaName'].toUpperCase()
+        ) || configParentTables.includes(!isNil(schemaTable['header']) && schemaTable['header'].toUpperCase())
+      );
     });
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       return {

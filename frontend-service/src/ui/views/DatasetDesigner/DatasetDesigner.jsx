@@ -889,7 +889,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onChangeView(views[camelCase(switchView)]);
           changeMode(views[camelCase(switchView)]);
         }}
-        value={resources.messages['design']}
+        value={
+          QuerystringUtils.getUrlParamValue('view') !== ''
+            ? resources.messages[QuerystringUtils.getUrlParamValue('view')]
+            : resources.messages['design']
+        }
       />
     );
 
@@ -931,7 +935,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onChange={switchView =>
           designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: switchView === 'Design' ? 'design' : 'table' } })
         }
-        value={resources.messages['design']}
+        value={
+          QuerystringUtils.getUrlParamValue('view') !== ''
+            ? resources.messages[QuerystringUtils.getUrlParamValue('view')]
+            : resources.messages['design']
+        }
       />
     );
 
