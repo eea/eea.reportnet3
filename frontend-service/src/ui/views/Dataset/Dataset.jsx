@@ -23,6 +23,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -34,6 +35,7 @@ import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
+import { Webforms } from 'ui/views/Webforms';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -740,13 +742,18 @@ export const Dataset = withRouter(({ match, history }) => {
   const renderSwitchView = () =>
     !isNil(webformData) &&
     hasWritePermissions && (
-      <div className={styles.switch}>
-        <div className={`${styles.wrap}`}>
-          <span className={styles.text}>{resources.messages['tabularData']}</span>
-          <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
-          <span className={styles.text}>{resources.messages['webform']}</span>
-        </div>
-      </div>
+      // <div className={styles.switch}>
+      //   <div className={`${styles.wrap}`}>
+      //     <span className={styles.text}>{resources.messages['tabularData']}</span>
+      //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
+      //     <span className={styles.text}>{resources.messages['webform']}</span>
+      //   </div>
+      // </div>
+      <TabularSwitch
+        elements={[resources.messages['tabularData'], resources.messages['webform']]}
+        onChange={switchView => setIsTableView(!isTableView)}
+        value={resources.messages['webform']}
+      />
     );
 
   const renderValidationsFooter = (
@@ -932,11 +939,12 @@ export const Dataset = withRouter(({ match, history }) => {
           tableSchemaColumns={tableSchemaColumns}
         />
       ) : (
-        <Article15
+        <Webforms
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReporting
           state={{ datasetSchema: { tables: datasetSchemaAllTables }, schemaTables }}
+          webformType={webformData}
         />
       )}
 
