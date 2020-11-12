@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -25,6 +26,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -878,39 +880,59 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
-  const renderRadioButtons = () =>
-    Object.keys(designerState.viewType).map((view, index) => (
-      <div className={styles.radioButton} key={index}>
-        <RadioButton
-          className={styles.button}
-          checked={designerState.viewType[view]}
-          inputId={view}
-          onChange={event => {
-            onChangeView(event.target.value);
-            changeMode(view);
-          }}
-          value={view}
-        />
-        <label className={styles.label} htmlFor={view}>
-          {resources.messages[`${view}View`]}
-        </label>
-      </div>
-    ));
+  const renderRadioButtons = () => {
+    return (
+      <TabularSwitch
+        elements={Object.keys(designerState.viewType).map(view => resources.messages[`${view}View`])}
+        onChange={switchView => {
+          const views = { design: 'design', tabularData: 'table', webform: 'webform' };
+          onChangeView(views[camelCase(switchView)]);
+          changeMode(views[camelCase(switchView)]);
+        }}
+        value={resources.messages['design']}
+      />
+    );
+
+    // return Object.keys(designerState.viewType).map((view, index) => (
+    //   <div className={styles.radioButton} key={index}>
+    //     <RadioButton
+    //       className={styles.button}
+    //       checked={designerState.viewType[view]}
+    //       inputId={view}
+    //       onChange={event => {
+    //         onChangeView(event.target.value);
+    //         changeMode(view);
+    //       }}
+    //       value={view}
+    //     />
+    //     <label className={styles.label} htmlFor={view}>
+    //       {resources.messages[`${view}View`]}
+    //     </label>
+    //   </div>
+    // ));
+  };
 
   const renderSwitchView = () => {
     const switchView = (
-      <Fragment>
-        <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-        <InputSwitch
-          checked={designerState.viewType['table']}
-          // disabled={true}
-          // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-          onChange={event =>
-            designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
-          }
-        />
-        <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
-      </Fragment>
+      // <Fragment>
+      //   <span className={styles.switchTextInput}>{resources.messages['design']}</span>
+      //   <InputSwitch
+      //     checked={designerState.viewType['table']}
+      //     // disabled={true}
+      //     // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
+      //     onChange={event =>
+      //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
+      //     }
+      //   />
+      //   <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
+      // </Fragment>
+      <TabularSwitch
+        elements={[resources.messages['design'], resources.messages['tabularData']]}
+        onChange={switchView =>
+          designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: switchView === 'Design' ? 'design' : 'table' } })
+        }
+        value={resources.messages['design']}
+      />
     );
 
     return (

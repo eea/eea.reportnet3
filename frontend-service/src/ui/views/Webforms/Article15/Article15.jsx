@@ -20,7 +20,7 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
-export const Article15 = ({ dataflowId, datasetId, isReporting = false, state }) => {
+export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
   const { getWebformTabs } = Article15Utils;
   const { onParseWebformData } = WebformsUtils;

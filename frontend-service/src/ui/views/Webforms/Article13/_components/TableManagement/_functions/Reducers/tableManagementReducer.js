@@ -30,6 +30,10 @@ export const tableManagementReducer = (state, { type, payload }) => {
         initialSelectedRecord: cloneDeep(payload.selectedRecord),
         selectedRecord: payload.selectedRecord
       };
+
+    case 'IS_LOADING':
+      return { ...state, isLoading: payload.value };
+
     default:
       return state;
   }

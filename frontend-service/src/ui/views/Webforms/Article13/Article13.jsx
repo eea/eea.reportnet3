@@ -30,7 +30,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 
 import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
 
-export const Article13 = ({ dataflowId, datasetId, isReporting = false, state }) => {
+export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
   const { getTypeList } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
@@ -41,6 +41,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
+    isAddingRecord: false,
     isDataUpdated: false,
     isLoading: true,
     pamsRecords: [],
@@ -79,7 +80,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onAddPamsRecord = async type => {
-    // const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
+    setIsAddingRecord(true);
+
     const table = article13State.data.filter(table => table.name.toLowerCase() === 'pams')[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 
@@ -110,6 +112,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         type: 'ADD_RECORDS_BY_ID_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
       });
+    } finally {
+      setIsAddingRecord(false);
     }
   };
 
@@ -186,7 +190,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     });
     onSelectRecord(recordId);
     onSelectTableName(tableName);
-    onToggleView(true);
+    onToggleView(resources.messages['details']);
   };
 
   const onSelectRecord = (recordId, pamsId) => {
@@ -198,6 +202,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   const onToggleView = view => article13Dispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
   const onUpdateData = () => article13Dispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+
+  const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECIRD', payload: { value } });
 
   return (
     <Fragment>
@@ -214,61 +220,38 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
                 className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
                 onClick={() => {
                   onSelectRecord(items.recordId, items.id);
-                  onToggleView(true);
+                  onToggleView(resources.messages['details']);
                 }}>
-                {items.id}
+                {items.id || '?'}
               </span>
             ))}
             <Button
               className={styles.addButton}
-              label={resources.messages['add']}
+              disabled={article13State.isAddingRecord}
               icon={'add'}
+              label={resources.messages['add']}
               onClick={() => onAddPamsRecord(capitalize(list))}
             />
           </li>
         ))}
       </ul>
 
-      {/* <div className={styles.tabBar}>
-        <div className={styles.indicator} style={{ left: isWebformView ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
-        <div
-          className={`${styles.tabItem} ${!isWebformView ? styles.selected : null}`}
-          onClick={() => {
-            onToggleView(false);
-            onSelectRecord(null, null);
-          }}>
-          <p className={styles.tabLabel}>{resources.messages['overview']}</p>
-        </div>
-        <div
-          className={`${styles.tabItem} ${isWebformView ? styles.selected : null} ${
-            isEmpty(pamsRecords) ? styles.disabled : null
-          }`}
-          data-for="emptyTableTooltip"
-          data-tip
-          onClick={() => (isEmpty(pamsRecords) ? {} : onToggleView(true))}>
-          <p className={styles.tabLabel}>{resources.messages['details']}</p>
-        </div>
-      </div> */}
-
       <TabularSwitch
-        elements={[resources.messages['overview'], resources.messages['details']]}
+        className={`${styles.tabBar} ${view === resources.messages['details'] ? undefined : styles.hide}`}
+        elements={[resources.messages['overview']]}
         onChange={switchView => {
           onToggleView(switchView);
           onSelectRecord(null, null);
         }}
-        value={view}></TabularSwitch>
-
-      {isEmpty(pamsRecords) && (
-        <ReactTooltip effect="solid" id="emptyTableTooltip" place="right">
-          {resources.messages['overviewEmptyTableTooltip']}
-        </ReactTooltip>
-      )}
+        value={view}
+      />
 
       {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isReporting={isReporting}
           selectedId={selectedId}
           selectedTableName={selectedTableName}
           state={state}
@@ -279,6 +262,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           dataflowId={dataflowId}
           datasetId={datasetId}
           loading={isLoading}
+          isReporting={isReporting}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
           onSelectEditTable={onSelectEditTable}
