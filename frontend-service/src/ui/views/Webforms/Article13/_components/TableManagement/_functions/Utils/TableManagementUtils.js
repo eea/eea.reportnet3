@@ -1,37 +1,98 @@
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import remove from 'lodash/remove';
 
-const parseTableSchemaColumns = schemaTables => {
-  schemaTables.map(table => {
-    if (!isNil(table.records)) {
-      return table.records[0].fields.map(field => {
-        return {
-          codelistItems: field['codelistItems'],
-          description: field['description'],
-          field: field['fieldId'],
-          header: field['name'],
-          pk: field['pk'],
-          maxSize: field['maxSize'],
-          pkHasMultipleValues: field['pkHasMultipleValues'],
-          readOnly: field['readOnly'],
-          recordId: field['recordId'],
-          referencedField: field['referencedField'],
-          table: table['tableSchemaName'],
-          type: field['type'],
-          validExtensions: field['validExtensions']
-        };
-      });
+import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
+
+const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
+  const filteredSchemaColumn = tableSchemaColumns.filter(
+    tableSchemaColumn => tableSchemaColumn.header.toUpperCase() === header.toUpperCase()
+  );
+  if (!isNil(filteredSchemaColumn) && !isEmpty(filteredSchemaColumn)) {
+    return filteredSchemaColumn[0].field;
+  } else {
+    return '';
+  }
+};
+
+const parseListOfSinglePams = (columns = [], records = []) => {
+  const options = records
+    .filter(record => record.IsGroup === 'Single')
+    .map(singleRecord => {
+      if (
+        Object.keys(singleRecord)
+          .map(key => key.toUpperCase())
+          .includes('ID', 'TITLE')
+      ) {
+        return `#${singleRecord[Object.keys(singleRecord).find(key => key.toUpperCase() === 'ID')]} - ${
+          singleRecord[Object.keys(singleRecord).find(key => key.toUpperCase() === 'TITLE')]
+        }`;
+      }
+    });
+  return columns.map(column => {
+    if (column.header === 'ListOfSinglePams') {
+      column.type = 'MULTISELECT_CODELIST';
+      column.codelistItems = remove(options, undefined || null);
     }
+
+    return column;
   });
 };
 
-const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {
+const parseTableSchemaColumns = (schemaTables, records) => {
+  const columns = [];
+  schemaTables
+    .filter(schemaTable => !isNil(schemaTable.tableSchemaName) && schemaTable.tableSchemaName.toUpperCase() === 'PAMS')
+    .forEach(table => {
+      if (!isNil(table.records)) {
+        return table.records[0].fields.forEach(field => {
+          columns.push({
+            codelistItems: field['codelistItems'],
+            description: field['description'],
+            field: field['fieldId'],
+            header: field['name'],
+            pk: field['pk'],
+            maxSize: field['maxSize'],
+            pkHasMultipleValues: field['pkHasMultipleValues'],
+            readOnly: field['readOnly'],
+            recordId: field['recordId'],
+            referencedField: field['referencedField'],
+            table: table['tableSchemaName'],
+            type: field['type'],
+            validExtensions: field['validExtensions']
+          });
+        });
+      }
+    });
+
+  return parseListOfSinglePams(columns, records);
+};
+
+const parsePamsRecords = records =>
+  records.map(record => {
+    const { recordId, recordSchemaId } = record;
+    let data = {};
+
+    record.elements.forEach(
+      element =>
+        (data = {
+          ...data,
+          [element.name]: element.value,
+          recordId: recordId,
+          recordSchemaId: recordSchemaId
+        })
+    );
+
+    return data;
+  });
+
+const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTables) => {
   const getFilteredData = () => {
     if (isNil(parentTablesWithData) || isNil(schemaTables)) {
       return '';
     }
     const filteredParentTablesWithData = parentTablesWithData.filter(
-      parentTableWithData => parentTableWithData.tableSchemaName !== 'PaMs'
+      parentTableWithData => parentTableWithData.tableSchemaName.toUpperCase() !== 'PAMS'
     );
 
     const filteredparentTablesNames = filteredParentTablesWithData.map(
@@ -39,12 +100,18 @@ const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {
     );
 
     const filteredSchemaTables = schemaTables
-      .filter(filteredSchemaTable => filteredparentTablesNames.includes(filteredSchemaTable.header))
+      .filter(
+        filteredSchemaTable =>
+          filteredparentTablesNames.includes(filteredSchemaTable.tableSchemaName) ||
+          filteredparentTablesNames.includes(filteredSchemaTable.header)
+      )
       .map(table => {
         return {
           tableSchemaId: table.tableSchemaId,
           tableSchemaName: table.tableSchemaName,
-          pamField: table.records[0].fields.filter(field => field.name === 'Fk_PaMs')[0]
+          pamField: table.records[0].fields.filter(
+            field => !isNil(field.name) && field.name.toUpperCase() === 'FK_PAMS'
+          )[0]
         };
       });
     return { filteredParentTablesWithData, filteredSchemaTables };
@@ -58,21 +125,39 @@ const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {
     }
 
     const getHasRecordByPaMId = table => {
-      const fkPamId = filteredSchemaTables.filter(
+      const filteredSchemaTablesPams = filteredSchemaTables.filter(
         filteredSchemaTable => filteredSchemaTable.tableSchemaId === table.tableSchemaId
-      )[0].pamField.fieldSchema;
-      const pamValue = record.elements.filter(element => element.name === 'Id')[0].value;
-      let hasRecord = false;
-      table.data.records.forEach(record => {
-        if (!isEmpty(record.fields)) {
-          record.fields.forEach(field => {
-            if (field.fieldSchemaId === fkPamId && parseInt(field.value) === parseInt(pamValue)) {
-              hasRecord = true;
+      );
+      if (!isNil(filteredSchemaTablesPams) && !isEmpty(filteredSchemaTablesPams)) {
+        const fkPamId =
+          filteredSchemaTablesPams[0].pamField.fieldSchema || filteredSchemaTablesPams[0].pamField.fieldId;
+        const pamSchemaId = schemaTables
+          .filter(
+            table =>
+              (!isNil(table.tableSchemaName) && table.tableSchemaName.toUpperCase() === 'PAMS') ||
+              (!isNil(table.header) && table.header.toUpperCase() === 'PAMS')
+          )[0]
+          .records[0].fields.filter(field => !isNil(field.name) && field.name.toUpperCase() === 'ID')[0];
+
+        if (!isNil(pamSchemaId) && !isEmpty(pamSchemaId)) {
+          const pamValue = RecordUtils.getCellValue({ rowData: record }, pamSchemaId.fieldId);
+          let hasRecord = false;
+          table.data.records.forEach(record => {
+            if (!isEmpty(record.fields)) {
+              record.fields.forEach(field => {
+                if (field.fieldSchemaId === fkPamId && parseInt(field.value) === parseInt(pamValue)) {
+                  hasRecord = true;
+                }
+              });
             }
           });
+          return hasRecord;
+        } else {
+          return false;
         }
-      });
-      return hasRecord;
+      } else {
+        return false;
+      }
     };
 
     const parentTablesIds = filteredParentTablesWithData.map(table => {
@@ -86,23 +171,25 @@ const parsePamsRecords = (records, parentTablesWithData, schemaTables) => {
   };
 
   return records.map(record => {
-    const { recordId, recordSchemaId } = record;
     const additionalInfo = getAdditionalInfo(record);
-    let data = {};
-
-    record.elements.forEach(
-      element =>
-        (data = {
-          ...data,
-          [element.name]: element.value,
-          recordId: recordId,
-          recordSchemaId: recordSchemaId,
-          tableSchemas: additionalInfo.tableSchemas
-        })
-    );
-
-    return data;
+    return {
+      ...record,
+      dataRow: record.dataRow.map(element => {
+        return {
+          ...element,
+          fieldData: {
+            ...element.fieldData,
+            tableSchemas: additionalInfo.tableSchemas
+          }
+        };
+      })
+    };
   });
 };
 
-export const TableManagementUtils = { parsePamsRecords, parseTableSchemaColumns };
+export const TableManagementUtils = {
+  getFieldSchemaColumnIdByHeader,
+  parsePamsRecordsWithParentData,
+  parsePamsRecords,
+  parseTableSchemaColumns
+};

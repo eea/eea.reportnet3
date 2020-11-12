@@ -2,7 +2,6 @@
   "tables": [
     {
       "name": "PaMs",
-      "type": "TABLE",
       "label": "PaMs",
       "title": "Overview Table",
       "multipleRecords": false,
@@ -18,7 +17,7 @@
           "type": "FIELD",
           "name": "Title",
           "title": "Name of PaM or group of PaMs",
-          "tooltip": "A group of PaMs consists of other single PaMs",
+          "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
           "isPrimary": false
         },
         {
@@ -48,7 +47,6 @@
       ]
     },
     {
-      "type": "TABLE",
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
@@ -94,8 +92,8 @@
             },
             {
               "type": "FIELD",
-              "name": "Other",
-              "title": "Other sector",
+              "name": "OtherSectors",
+              "title": "Other Sector(s)",
               "isPrimary": false
             }
           ]
@@ -109,7 +107,7 @@
             {
               "type": "FIELD",
               "name": "Other",
-              "title": "Other Objective(s)",
+              "title": "Other Objective",
               "isPrimary": false
             }
           ]
@@ -140,6 +138,26 @@
           "isPrimary": false
         },
         {
+          "type": "TABLE",
+          "name": "ReferenceAssessments",
+          "title": "Reference to assessments or underpinning",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Reference",
+              "title": "Reference",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "URL",
+              "title": "URL",
+              "isPrimary": false
+            }
+          ]
+        },
+        {
           "type": "FIELD",
           "name": "TypePolicyInstrumen",
           "title": "Type of policy Instrument",
@@ -166,7 +184,7 @@
         {
           "type": "FIELD",
           "name": "UnionPolicyList",
-          "title": "",
+          "title": "Select Union Policy/ies",
           "isPrimary": false
         },
         {
@@ -333,8 +351,8 @@
         },
         {
           "type": "TABLE",
-          "name": " Reference",
-          "title": " Reference",
+          "name": "Reference",
+          "title": "Reference",
           "multipleRecords": true,
           "elements": [
             {
@@ -360,7 +378,6 @@
       ]
     },
     {
-      "type": "TABLE",
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
@@ -662,7 +679,6 @@
       ]
     },
     {
-      "type": "TABLE",
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",

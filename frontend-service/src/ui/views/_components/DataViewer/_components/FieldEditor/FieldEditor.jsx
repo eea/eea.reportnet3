@@ -198,6 +198,7 @@ const FieldEditor = ({
         return (
           <InputTextarea
             collapsedHeight={75}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();

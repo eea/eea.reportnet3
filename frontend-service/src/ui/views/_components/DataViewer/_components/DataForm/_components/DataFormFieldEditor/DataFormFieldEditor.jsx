@@ -172,18 +172,6 @@ const DataFormFieldEditor = ({
     return linkItems;
   };
 
-  const getCodelistItemsWithEmptyOption = () => {
-    const codelistItems = column.codelistItems.sort().map(codelistItem => {
-      return { itemType: codelistItem, value: codelistItem };
-    });
-
-    codelistItems.unshift({
-      itemType: resources.messages['noneCodelist'],
-      value: ''
-    });
-    return codelistItems;
-  };
-
   const projectCoordinates = (coordinates, newCRS) => {
     return proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates);
   };
@@ -197,7 +185,7 @@ const DataFormFieldEditor = ({
           onChangeForm(field, e.target.value.value);
         }}
         optionLabel="itemType"
-        options={getCodelistItemsWithEmptyOption()}
+        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
       />
     );

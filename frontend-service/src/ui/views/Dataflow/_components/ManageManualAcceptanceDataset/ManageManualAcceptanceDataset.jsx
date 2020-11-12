@@ -143,7 +143,7 @@ export const ManageManualAcceptanceDataset = ({
           })
         }
         onKeyDown={e => onKeyChange(e)}
-        placeholder={resources.messages['message']}
+        placeholder={resources.messages['feedbackMessagePlaceholder']}
       />
     </span>
   );
@@ -173,7 +173,7 @@ export const ManageManualAcceptanceDataset = ({
           <div>{resources.messages['feedbackStatus']}</div>
           {renderRadioButtons()}
         </div>
-        <div className={styles.group}>{renderInputTextLayout('message')}</div>
+        <div className={styles.group}>{renderInputTextLayout('feedbackMessage')}</div>
       </div>
     </Fragment>
   );

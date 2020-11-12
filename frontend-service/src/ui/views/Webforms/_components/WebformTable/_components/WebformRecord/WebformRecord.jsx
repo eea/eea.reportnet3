@@ -313,7 +313,6 @@ export const WebformRecord = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            className={field.required ? styles.required : undefined}
             id={field.fieldId}
             // keyfilter={getInputType[type]}
             maxLength={getInputMaxLength[type]}
@@ -425,7 +424,7 @@ export const WebformRecord = ({
     }
   };
 
-  const renderElements = elements => {
+  const renderElements = (elements = []) => {
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
@@ -434,7 +433,8 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              <label>{`${element.required ? '*' : ''}${element.title}`}</label>
+              {(element.required || element.title) && <label>{`${element.required ? '*' : ''}${element.title}`}</label>}
+
               {element.tooltip && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
@@ -461,7 +461,12 @@ export const WebformRecord = ({
           )
         );
       } else if (element.type === 'LABEL') {
-        return <h2 className={styles[element.level]}>{element.title}</h2>;
+        return (
+          <Fragment>
+            {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+            {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+          </Fragment>
+        );
       } else {
         return (
           !isSubTableVisible && (
@@ -557,9 +562,25 @@ export const WebformRecord = ({
       case 'ARTICLE_15':
         return renderArticle15ErrorMessages(content);
 
+      case 'ARTICLE_13':
+        return renderArticle13ErrorMessages(content);
+
       default:
         return [];
     }
+  };
+
+  const renderArticle13ErrorMessages = content => {
+    const errorMessages = [];
+
+    if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
+    if (hasFields) {
+      errorMessages.push(resources.messages['emptyWebformTable']);
+    }
+    if (content.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+    }
+    return errorMessages;
   };
 
   const renderArticle15ErrorMessages = content => {
