@@ -313,7 +313,6 @@ export const WebformRecord = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            className={field.required ? styles.required : undefined}
             id={field.fieldId}
             // keyfilter={getInputType[type]}
             maxLength={getInputMaxLength[type]}
@@ -434,7 +433,7 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.field}>
-              {element.required || (element.title && <label>{`${element.required ? '*' : ''}${element.title}`}</label>)}
+              {(element.required || element.title) && <label>{`${element.required ? '*' : ''}${element.title}`}</label>}
 
               {element.tooltip && (
                 <Button

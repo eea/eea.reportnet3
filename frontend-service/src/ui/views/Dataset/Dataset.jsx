@@ -754,7 +754,7 @@ export const Dataset = withRouter(({ match, history }) => {
           <TabularSwitch
             className={styles.tabularSwitch}
             elements={[resources.messages['tabularData'], resources.messages['webform']]}
-            onChange={switchView => setIsTableView(!isTableView)}
+            onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
             value={resources.messages['webform']}
           />
         </div>
