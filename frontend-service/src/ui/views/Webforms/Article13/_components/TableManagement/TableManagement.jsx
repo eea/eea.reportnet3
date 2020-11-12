@@ -441,7 +441,7 @@ export const TableManagement = ({
   };
 
   const renderEmptyTable = () => (
-    <DataTable className={styles.table} value={[{ emptyContent: resources.messages['overviewEmptyTableContent'] }]}>
+    <DataTable className={styles.table} value={[{ emptyContent: resources.messages['noDataInDataTable'] }]}>
       <Column field={'emptyContent'} header={resources.messages['overviewEmptyTableHeader']} />
     </DataTable>
   );
