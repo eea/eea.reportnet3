@@ -443,7 +443,7 @@ export const WebformRecord = ({
                   tooltipOptions={{ position: 'top' }}
                 />
               )}
-              <div>
+              <div className={styles.fieldWrapper}>
                 <div className={styles.template}>
                   {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
                 </div>
