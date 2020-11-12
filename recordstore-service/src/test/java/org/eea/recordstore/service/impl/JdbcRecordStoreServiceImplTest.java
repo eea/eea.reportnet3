@@ -213,7 +213,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetMetabase);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
-    Mockito.verify(kafkaSender, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+    Mockito.verify(kafkaSender, Mockito.times(2)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
