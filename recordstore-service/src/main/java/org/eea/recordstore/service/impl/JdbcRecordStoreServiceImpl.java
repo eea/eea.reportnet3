@@ -837,6 +837,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(
             dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId(),
             datasetId);
+        releaseNotificableKafkaEvent(failEventType, value, datasetId,
+            "Error restoring the snapshot data");
       }
     } finally {
       // Release the lock manually
@@ -1038,11 +1040,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         byte[] buf = new String(cbuf, 0, len).getBytes();
         cp.writeToCopy(buf, 0, buf.length);
       }
-    } catch (SQLException e) {
-      LOG_ERROR.error(
-          "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
-          query, e);
-    } finally {
       cp.endCopy();
       if (cp.isActive()) {
         cp.cancelCopy();
