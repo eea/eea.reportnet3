@@ -605,9 +605,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
         if (Boolean.TRUE.equals(snapshot.getRelease())) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot);
+        } else {
+          releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
+              idDataset, null);
         }
-        releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
-            idDataset, null);
         break;
       case COLLECTION:
         Map<String, Object> valueEU = new HashMap<>();
