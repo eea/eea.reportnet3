@@ -368,7 +368,7 @@ export const BigButtonList = ({
 
   const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
-  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(false);
+  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
   const getDate = () => {
     return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000;
