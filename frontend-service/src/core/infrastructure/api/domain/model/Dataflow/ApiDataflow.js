@@ -51,6 +51,12 @@ export const apiDataflow = {
     });
     return response;
   },
+  datasetsFinalFeedback: async dataflowId => {
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.datasetsFinalFeedback, { dataflowId: dataflowId })
+    });
+    return response.data;
+  },
   datasetsValidationStatistics: async datasetSchemaId => {
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId })
