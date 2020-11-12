@@ -7,7 +7,6 @@ const getTypeList = (records = []) => {
     record.elements.forEach(
       element => (data = { ...data, [lowerFirst(element.name)]: element.value, recordId: record.recordId })
     );
-
     return data;
   });
 

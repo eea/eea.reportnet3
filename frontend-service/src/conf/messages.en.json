@@ -918,7 +918,6 @@
     "dataflowFeedback": "Feedback",
     "send": "Send",
     "writeMessagePlaceholder": "Write your message",
-    "noMessagesScroll": "Scroll up to the top to load read messages.",
     "updateDatasetFeedbackStatusError": "Error updating dataset feedback status",
     "noMessages": "You have no messages",
     "noMessagesCustodian": "Please select a data provider",
@@ -927,11 +926,20 @@
     "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs.",
     "feedbackDataProvider": "Data provider: ",
     "feedbackHelp": "Dataflow feedback help",
-    "manualTechnicalAcceptanceTitle": "Do you wish to add a technical acceptance step for the reporter submissions? ",
-    "manualTechnicalAcceptanceBigButton": "Manual technical acceptance",
+    "noMessagesScroll": "Scroll up to the top to load read messages.",
     "webformTableCreation": "Create table",
     "webformTableEdit": "Edit table",
+    "overviewEmptyTableHeader": "Empty table",
+    "overviewEmptyTableContent": "Empty content",
+    "overviewEmptyTableTooltip": "Please create a record to view the details",
+    "single": "Single",
+    "overview": "Overview",
+    "details": "Details",
+    "manualTechnicalAcceptanceTitle": "Do you wish to add a technical acceptance step for the reporter submissions? ",
+    "manualTechnicalAcceptanceBigButton": "Manual technical acceptance",
     "reportingDatasetsStatus": "Reporting datasets status",
-    "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}"
+    "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
+    "feedbackMessage": "Feedback message",
+    "feedbackMessagePlaceholder": "Please provide information on the status change"
   }
 }
