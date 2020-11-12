@@ -93,7 +93,7 @@ const DataForm = ({
                   fieldValue={
                     isNil(field.fieldData[column.field])
                       ? column.type === 'POINT'
-                        ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+                        ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
                         : ''
                       : field.fieldData[column.field]
                   }
