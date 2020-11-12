@@ -53,7 +53,8 @@ export const Feedback = withRouter(({ match, history }) => {
     messages: [],
     messageToSend: '',
     newMessageAdded: false,
-    selectedDataProvider: {}
+    selectedDataProvider: {},
+    messageFirstLoad: false
   });
 
   const {
@@ -129,10 +130,17 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
+  const onFirstLoadMessages = loadState => {
+    dispatchFeedback({ type: 'ON_UPDATE_MESSAGE_FIRST_LOAD', payload: loadState });
+  };
+
   const onChangeDataProvider = value => {
     if (isNil(value)) {
       dispatchFeedback({ type: 'RESET_MESSAGES', payload: {} });
+    } else {
+      onFirstLoadMessages(true);
     }
+
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
 
@@ -278,6 +286,8 @@ export const Feedback = withRouter(({ match, history }) => {
             messages={messages}
             newMessageAdded={newMessageAdded}
             onLazyLoad={onGetMoreMessages}
+            messageFirstLoad={feedbackState.messageFirstLoad}
+            onFirstLoadMessages={onFirstLoadMessages}
           />
           <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
             <InputTextarea

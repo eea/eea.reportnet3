@@ -17,8 +17,10 @@ export const ListMessages = ({
   isCustodian,
   isLoading,
   lazyLoading = true,
+  messageFirstLoad,
   messages = [],
   newMessageAdded,
+  onFirstLoadMessages,
   onLazyLoad
 }) => {
   const messagesWrapperRef = useRef();
@@ -60,11 +62,12 @@ export const ListMessages = ({
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
-    if (newMessageAdded) {
+    if (newMessageAdded || messageFirstLoad) {
       const messages = document.querySelectorAll('.rep-feedback-message');
       if (!isEmpty(messages)) {
         const lastMessage = last(messages);
         messagesWrapperRef.current.scrollTop = lastMessage.offsetTop;
+        onFirstLoadMessages(false);
       }
     }
   }, [messages, listContent]);
