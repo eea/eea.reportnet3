@@ -81,7 +81,7 @@
     }
 
     .template {
-      width: 75%;
+      width: 90%;
 
       .nonExistField {
         color: var(--errors);
@@ -187,4 +187,8 @@
     margin-bottom: 0.5rem;
     padding-bottom: 0;
   }
+}
+
+.fieldWrapper {
+  display: flex;
 }

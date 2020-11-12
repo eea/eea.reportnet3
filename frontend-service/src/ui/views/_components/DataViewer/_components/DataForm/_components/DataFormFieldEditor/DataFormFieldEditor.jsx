@@ -50,13 +50,13 @@ const DataFormFieldEditor = ({
 
   const inputRef = useRef(null);
 
-  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
-        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
+        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid)[0]
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     isMapDisabled: false,
     isMapOpen: false,
@@ -115,7 +115,7 @@ const DataFormFieldEditor = ({
       const inmMapGeoJson = cloneDeep(fieldValue !== '' ? fieldValue : fieldEmptyPointValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
-      parsedInmMapGeoJson.properties.rsid = crs.value;
+      parsedInmMapGeoJson.properties.srid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
     dispatchMap({ type: 'SAVE_MAP_COORDINATES', payload: { crs } });
@@ -132,7 +132,7 @@ const DataFormFieldEditor = ({
       if (withCRS) {
         coords = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = coords;
-        geoJson.properties.rsid = crs.value;
+        geoJson.properties.srid = crs.value;
       } else {
         geoJson.geometry.coordinates = MapUtils.parseCoordinates(
           coordinates.replace(', ', ',').split(','),

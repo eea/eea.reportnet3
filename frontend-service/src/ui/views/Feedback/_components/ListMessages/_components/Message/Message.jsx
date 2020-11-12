@@ -31,7 +31,7 @@ export const Message = ({ hasSeparator, message }) => {
 
   const renderMessage = () => {
     return (
-      <div key={message.id} className={`${styles.message} ${getStyles()}`}>
+      <div key={message.id} className={`${styles.message} rep-feedback-message ${getStyles()}`}>
         <div className={styles.messageTextWrapper}>
           <span
             className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}
