@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'reac
 
 import isNil from 'lodash/isNil';
 
-import styles from '../BigButtonList/BigButtonList.module.css';
+import styles from '../BigButtonList/BigButtonList.module.scss';
 
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';

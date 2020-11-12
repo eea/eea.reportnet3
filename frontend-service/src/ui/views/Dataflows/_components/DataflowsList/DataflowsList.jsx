@@ -13,7 +13,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
 
-const DataflowsList = ({ className, content = [], dataFetch, description, title, type }) => {
+const DataflowsList = ({ className, content = [], dataFetch, description, isCustodian, title, type }) => {
   const resources = useContext(ResourcesContext);
 
   const [dataToFilter, setDataToFilter] = useState(content);
@@ -46,7 +46,13 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map(dataflow => (
-            <DataflowsItem dataFetch={dataFetch} itemContent={dataflow} key={dataflow.id} type={type} />
+            <DataflowsItem
+              dataFetch={dataFetch}
+              isCustodian={isCustodian}
+              itemContent={dataflow}
+              key={dataflow.id}
+              type={type}
+            />
           ))
         ) : (
           <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
