@@ -33,6 +33,25 @@
       margin-right: 0.5rem;
     }
   }
+  .label2 {
+    font-size: 1.75rem;
+    margin: 2.5rem 0 1.25rem 0;
+  }
+  .label3 {
+    font-size: 1.25rem;
+    margin: 0 0 1rem;
+  }
+  .field + h3 {
+    margin-top: 3rem;
+  }
+  h3 + .subTable {
+    margin-top: 0;
+  }
+
+  h2 + .field {
+    margin-top: 1rem;
+  }
+
   .field {
     margin-bottom: 2rem;
     :global .p-multiselect {
@@ -49,6 +68,12 @@
       display: inline-block;
       max-width: 75%;
       margin-bottom: 0.5rem;
+    }
+    .label2 {
+      margin-top: 4rem 0 0 0;
+    }
+    .label3 {
+      margin: 2px 0 0 0;
     }
 
     .content {
@@ -88,10 +113,6 @@
           box-shadow: none !important;
         }
       }
-    }
-
-    .required {
-      border: 0.1rem solid var(--yellow-100);
     }
 
     :global .webform-validationErrors {
@@ -141,7 +162,7 @@
   // padding: 1rem;
   border-radius: 10px;
   height: 100%;
-  margin: 4rem 0 2rem 0;
+  margin: 2rem 0 2rem 0;
   width: 100%;
   border: 1px solid var(--gray-25);
   padding: 1rem;

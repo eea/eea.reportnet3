@@ -139,6 +139,18 @@ const getCodelistItemsInSingleColumn = column => {
     : [];
 };
 
+const getCodelistItemsWithEmptyOption = (column, noneText) => {
+  const codelistItems = column.codelistItems.sort().map(codelistItem => {
+    return { itemType: codelistItem, value: codelistItem };
+  });
+
+  codelistItems.unshift({
+    itemType: noneText,
+    value: ''
+  });
+  return codelistItems;
+};
+
 const getCodelistValue = (codelistItemsOptions, value) => {
   if (!isUndefined(value)) {
     return codelistItemsOptions.filter(item => item.value === value)[0];
@@ -296,6 +308,7 @@ export const RecordUtils = {
   getClipboardData,
   getCodelistItems,
   getCodelistItemsInSingleColumn,
+  getCodelistItemsWithEmptyOption,
   getCodelistValue,
   getFieldTypeValue,
   getFilter,
