@@ -82,7 +82,7 @@ const useBigButtonList = ({
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
       newSchema: isDesigner && isDesignStatus,
-      updateReporters: isLeadDesigner && isDraftStatus,
+      updateReporters: isDraftStatus,
       receipt: isLeadReporterOfCountry,
       release: isLeadReporterOfCountry,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance

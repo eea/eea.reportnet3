@@ -5,7 +5,15 @@ import isUndefined from 'lodash/isUndefined';
 const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
   const result = [];
   for (let i = 0; i < array1.length; i++) {
-    result.push({ ...array1[i], ...array2.find(element => element[array2Key] === array1[i][array1Key]) });
+    result.push({
+      ...array1[i],
+      ...array2.find(
+        element =>
+          !isNil(element[array2Key]) &&
+          !isNil(array1[i][array1Key]) &&
+          element[array2Key].toUpperCase() === array1[i][array1Key].toUpperCase()
+      )
+    });
   }
   return result;
 };
@@ -41,9 +49,9 @@ const parseNewTableRecord = (table, pamNumber) => {
       fields = table.records[0].fields.map(field => {
         return {
           fieldData: {
-            [field.fieldSchema]: field.name === 'Fk_PaMs' ? pamNumber : null,
+            [field.fieldSchema || field.fieldId]: field.name.toUpperCase() === 'FK_PAMS' ? pamNumber : null,
             type: field.type,
-            fieldSchemaId: field.fieldSchema
+            fieldSchemaId: field.fieldSchema || field.fieldId
           }
         };
       });
@@ -52,8 +60,6 @@ const parseNewTableRecord = (table, pamNumber) => {
     const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
 
     obj.datasetPartitionId = null;
-    // if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
     return obj;
   }
 };
@@ -125,11 +131,21 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
         if (elements[index].type === 'FIELD') {
           result.push({
             ...elements[index],
-            ...records[0].fields.find(element => element['name'] === elements[index]['name']),
+            ...records[0].fields.find(
+              element =>
+                !isNil(element['name']) &&
+                !isNil(elements[index]['name']) &&
+                element['name'].toUpperCase() === elements[index]['name'].toUpperCase()
+            ),
             type: elements[index].type
           });
         } else if (elements[index].type === 'TABLE') {
-          const filteredTable = datasetSchema.tables.filter(table => table.tableSchemaName === elements[index].name);
+          const filteredTable = datasetSchema.tables.filter(
+            table =>
+              !isNil(table.tableSchemaName) &&
+              !isNil(elements[index].name) &&
+              table.tableSchemaName.toUpperCase() === elements[index].name.toUpperCase()
+          );
           const parsedTable = onParseWebformData(datasetSchema, [elements[index]], filteredTable);
 
           result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });

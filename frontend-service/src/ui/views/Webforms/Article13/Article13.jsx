@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -13,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Button } from 'ui/views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -28,7 +30,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 
 import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
 
-export const Article13 = ({ dataflowId, datasetId, isReporting = false, state }) => {
+export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
   const { getTypeList } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
@@ -39,24 +41,18 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
+    isAddingRecord: false,
     isDataUpdated: false,
     isLoading: true,
-    isWebformView: false,
     pamsRecords: [],
     selectedId: null,
+    selectedTable: { tableName: null, recordId: null, pamsId: null },
     selectedTableName: null,
-    tableList: { group: [], single: [] }
+    tableList: { group: [], single: [] },
+    view: resources.messages['overview']
   });
 
-  const {
-    isDataUpdated,
-    isLoading,
-    isWebformView,
-    pamsRecords,
-    selectedId,
-    selectedTableName,
-    tableList
-  } = article13State;
+  const { isDataUpdated, isLoading, pamsRecords, selectedId, selectedTableName, tableList, view } = article13State;
 
   useEffect(() => initialLoad(), []);
 
@@ -70,20 +66,23 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
-
     const recordIds = parsePamsRecords(pamsRecords)
-      .map(record => parseInt(record.Id))
+      .map(record => parseInt(record.Id) || parseInt(record.id))
       .filter(id => !Number.isNaN(id));
 
     return Math.max(...recordIds) + 1;
   };
 
   const getParamFieldSchemaId = (param, table) => {
-    return table.elements.filter(element => element.name === param).map(table => table.fieldSchema)[0];
+    return table.elements
+      .filter(element => element.name.toUpperCase() === param.toUpperCase())
+      .map(table => table.fieldSchema)[0];
   };
 
-  const onAddRecord = async type => {
-    const table = article13State.data.filter(table => table.recordSchemaId === pamsRecords[0].recordSchemaId)[0];
+  const onAddPamsRecord = async type => {
+    setIsAddingRecord(true);
+
+    const table = article13State.data.filter(table => table.name.toLowerCase() === 'pams')[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 
     const data = [];
@@ -113,6 +112,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
         type: 'ADD_RECORDS_BY_ID_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
       });
+    } finally {
+      setIsAddingRecord(false);
     }
   };
 
@@ -141,36 +142,35 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
   };
 
   const onLoadPamsData = async () => {
-    const tableSchemaId = article13State.data.map(table => table.tableSchemaId);
-
+    const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
-      const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
-        'CORRECT',
-        'INFO',
-        'WARNING',
-        'ERROR',
-        'BLOCKER'
-      ]);
+      if (!isNil(tableSchemaId[0])) {
+        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
+          'CORRECT',
+          'INFO',
+          'WARNING',
+          'ERROR',
+          'BLOCKER'
+        ]);
+        if (!isNil(parentTableData.records)) {
+          const tableData = {};
 
-      if (!isNil(parentTableData.records)) {
-        const tableData = {};
+          const records = onParseWebformRecords(
+            parentTableData.records,
+            article13State.data[0],
+            tableData,
+            parentTableData.totalRecords
+          );
+          const list = getTypeList(records);
 
-        const records = onParseWebformRecords(
-          parentTableData.records,
-          article13State.data[0],
-          tableData,
-          parentTableData.totalRecords
-        );
-
-        const list = getTypeList(records);
-
-        article13Dispatch({
-          type: 'ON_LOAD_PAMS_DATA',
-          payload: { records, group: list['group'], single: list['single'] }
-        });
+          article13Dispatch({
+            type: 'ON_LOAD_PAMS_DATA',
+            payload: { records, group: list['group'], single: list['single'] }
+          });
+        }
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       setIsLoading(false);
     }
@@ -178,8 +178,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const pamSchemaId = article13State.data
-      .filter(table => table.name === 'PaMs')[0]
-      .records[0].fields.filter(field => field.name === 'Id')[0].fieldId;
+      .filter(table => table.name.toUpperCase() === 'PAMS')[0]
+      .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0].fieldId;
     let recordId = '';
     pamsRecords.forEach(pamsRecord => {
       pamsRecord.fields.forEach(field => {
@@ -190,10 +190,12 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
     });
     onSelectRecord(recordId);
     onSelectTableName(tableName);
-    onToggleView(true);
+    onToggleView(resources.messages['details']);
   };
 
-  const onSelectRecord = record => article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { record } });
+  const onSelectRecord = (recordId, pamsId) => {
+    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
+  };
 
   const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
 
@@ -201,58 +203,55 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
 
   const onUpdateData = () => article13Dispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
 
+  const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECIRD', payload: { value } });
+
   return (
     <Fragment>
       <h3 className={styles.title}>
         Questionnaire for reporting on Policies and Measures under the Monitoring Mechanism Regulation
       </h3>
 
-      <div className={styles.tabBar}>
-        <div className={styles.indicator} style={{ left: isWebformView ? 'calc(150px + 1.5rem)' : '1.5rem' }} />
-        <div
-          className={`${styles.tabItem} ${!isWebformView ? styles.selected : null}`}
-          onClick={() => {
-            onToggleView(false);
-            onSelectRecord(null);
-          }}>
-          <p className={styles.tabLabel}>Overview</p>
-        </div>
-        <div
-          className={`${styles.tabItem} ${isWebformView ? styles.selected : null}`}
-          onClick={() => onToggleView(true)}>
-          <p className={styles.tabLabel}>Webform</p>
-        </div>
-      </div>
-
       <ul className={styles.tableList}>
         {Object.keys(tableList).map(list => (
           <li className={styles.tableListItem}>
-            <div className={styles.tableListTitleWrapper}>
-              <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('add')} />
-              <span className={styles.tableListTitle}>{list}</span>:
-            </div>
-            <div className={styles.tableListIds}>
-              {tableList[list].map(items => (
-                <span
-                  className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
-                  onClick={() => {
-                    onSelectRecord(items.recordId);
-                    onToggleView(true);
-                  }}>
-                  {items.id}
-                </span>
-              ))}
-            </div>
-            <Button label={'add'} icon={'add'} onClick={() => onAddRecord(capitalize(list))} />
+            <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
+            {tableList[list].map(items => (
+              <span
+                className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
+                onClick={() => {
+                  onSelectRecord(items.recordId, items.id);
+                  onToggleView(resources.messages['details']);
+                }}>
+                {items.id || '-'}
+              </span>
+            ))}
+            <Button
+              className={styles.addButton}
+              disabled={article13State.isAddingRecord}
+              icon={'add'}
+              label={resources.messages['add']}
+              onClick={() => onAddPamsRecord(capitalize(list))}
+            />
           </li>
         ))}
       </ul>
 
-      {isWebformView ? (
+      <TabularSwitch
+        className={`${styles.tabBar} ${view === resources.messages['details'] ? undefined : styles.hide}`}
+        elements={[resources.messages['overview']]}
+        onChange={switchView => {
+          onToggleView(switchView);
+          onSelectRecord(null, null);
+        }}
+        value={view}
+      />
+
+      {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isReporting={isReporting}
           selectedId={selectedId}
           selectedTableName={selectedTableName}
           state={state}
@@ -263,7 +262,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting = false, state })
           dataflowId={dataflowId}
           datasetId={datasetId}
           loading={isLoading}
-          onAddRecord={onAddRecord}
+          isReporting={isReporting}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
           onSelectEditTable={onSelectEditTable}
