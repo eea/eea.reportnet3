@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class ReleaseFinishEvent implements NotificableEventHandler {
 
 
+  /** The dataset service. */
   @Autowired
   private DatasetService datasetService;
 
@@ -45,6 +46,7 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
+    notification.put("dataflowName", notificationVO.getDataflowName());
     notification.put("providerId", notificationVO.getProviderId());
     return notification;
   }

@@ -383,6 +383,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       datasetService.deleteTableValue(datasetId, tableSchemaId);
 
       recordStoreControllerZuul.createUpdateQueryView(datasetId);
+      LOG.info("A table has been deleted in the datasetId {}", datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
