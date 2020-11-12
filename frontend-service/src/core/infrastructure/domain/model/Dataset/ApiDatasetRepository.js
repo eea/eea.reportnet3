@@ -349,9 +349,9 @@ const parseValue = (type, value, feToBe = false) => {
     const inmValue = JSON.parse(cloneDeep(value));
     inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
     if (!feToBe) {
-      inmValue.properties.rsid = `EPSG:${inmValue.properties.rsid}`;
+      inmValue.properties.srid = `EPSG:${inmValue.properties.srid}`;
     } else {
-      inmValue.properties.rsid = inmValue.properties.rsid.split(':')[1];
+      inmValue.properties.srid = inmValue.properties.srid.split(':')[1];
     }
     return JSON.stringify(inmValue);
   }

@@ -155,7 +155,7 @@ export const useSetColumns = (
     if (value !== '' && MapUtils.checkValidJSONCoordinates(value)) {
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
-        return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+        return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`;
       } else {
         return '';
       }
