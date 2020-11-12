@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eea.dataset.mapper.EUDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
@@ -165,12 +166,14 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   private void addLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings, Long dataflowId)
       throws EEAException {
 
-    for (ReportingDatasetVO reporting : reportings) {
+    List<Long> providersId = reportings.stream().map(ReportingDatasetVO::getDataProviderId)
+        .distinct().collect(Collectors.toList());
+    for (Long providerId : providersId) {
       // Locks to avoid a provider can release a snapshot
       Map<String, Object> mapCriteria = new HashMap<>();
       mapCriteria.put(SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
       mapCriteria.put("dataflowId", dataflowId);
-      mapCriteria.put("dataProviderId", reporting.getDataProviderId());
+      mapCriteria.put("dataProviderId", providerId);
       lockService.createLock(new Timestamp(System.currentTimeMillis()),
           SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
           mapCriteria);
@@ -208,12 +211,15 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     criteriaExport.add(dataflowId);
     lockService.removeLockByCriteria(criteriaExport);
 
-    for (ReportingDatasetVO reporting : reportings) {
+    List<Long> providersId = reportings.stream().map(ReportingDatasetVO::getDataProviderId)
+        .distinct().collect(Collectors.toList());
+    providersId.stream().distinct().collect(Collectors.toList());
+    for (Long providerId : providersId) {
       // Release locks to avoid a provider can release a snapshot
       List<Object> criteriaReporting = new ArrayList<>();
       criteriaReporting.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
       criteriaReporting.add(dataflowId);
-      criteriaReporting.add(reporting.getDataProviderId());
+      criteriaReporting.add(providerId);
       lockService.removeLockByCriteria(criteriaReporting);
     }
     return result;

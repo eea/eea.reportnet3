@@ -211,12 +211,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
+  @PutMapping(value = "/private/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
-  @LockMethod(removeWhenFinish = false)
-  public void releaseSnapshot(
-      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
+  public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
     // Set the user name on the thread
