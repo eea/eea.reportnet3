@@ -213,7 +213,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             isSQLCorrect = Boolean.FALSE;
           }
         } catch (PSQLException | SQLGrammarException e) {
-          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
       } else {
