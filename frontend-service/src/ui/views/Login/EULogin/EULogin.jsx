@@ -24,7 +24,7 @@ const EULogin = ({ location, history }) => {
       if (code && !userContext.isLoggedOut) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);
-        const rnLocalStorage = userStorage.getLocalStorage();
+        const rnLocalStorage = userStorage.getSessionStorage();
         if (!isNil(rnLocalStorage?.redirectUrl)) {
           userStorage.removeSessionStorageProperty('redirectUrl');
           window.location.href = rnLocalStorage.redirectUrl;
