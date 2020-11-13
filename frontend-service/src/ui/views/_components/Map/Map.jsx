@@ -5,15 +5,16 @@ import cloneDeep from 'lodash/cloneDeep';
 import styles from './Map.module.scss';
 import 'leaflet/dist/leaflet.css';
 import 'esri-leaflet-geocoder/dist/esri-leaflet-geocoder.css';
-
-import { Dropdown } from 'ui/views/_components/Dropdown';
+import 'leaflet-draw/dist/leaflet.draw.css';
 
 import 'proj4leaflet';
 import L from 'leaflet';
 import proj4 from 'proj4';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
-import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
+
+import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Map as MapComponent, FeatureGroup, GeoJSON, Marker, Popup } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -50,6 +51,15 @@ let NewMarkerIcon = L.icon({
   iconAnchor: [12, 36]
 });
 export const Map = ({
+  enabledDrawElements = {
+    circle: false,
+    circlemarker: false,
+    polyline: false,
+    marker: false,
+    point: false,
+    polygon: false,
+    rectangle: false
+  },
   geoJson = '',
   hasLegend = false,
   onSelectPoint,
@@ -67,7 +77,6 @@ export const Map = ({
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-
   // const { BaseLayer, Overlay } = LayersControl;
 
   const crs = [
@@ -247,8 +256,17 @@ export const Map = ({
     );
   };
 
+  const onFeatureGroupReady = reactFGref => {
+    reactFGref.leafletElement.eachLayer(layer => {
+      console.log('eachLayer ', layer.options.someRandomParameter);
+      // if (layer.options.someRandomParameter) {
+      //   featureLayerObject[layer.options.someRandomParameter.id] = layer;
+      // }
+    });
+  };
+
   return (
-    <>
+    <layer>
       {/* <label className={styles.mapSelectMessage}>{resources.messages['mapSelectPointMessage']}</label> */}
       {hasLegend && (
         <div className={styles.pointLegendWrapper}>
@@ -339,20 +357,26 @@ export const Map = ({
             <TileLayer url="" />
           </BaseLayer>
         </LayersControl> */}
-          <EditControl
-            position="topright"
-            // onEdited={this._onEdited}
-            // onCreated={this._onCreated}
-            // onDeleted={this._onDeleted}
-            // onMounted={this._onMounted}
-            // onEditStart={this._onEditStart}
-            // onEditStop={this._onEditStop}
-            // onDeleteStart={this._onDeleteStart}
-            // onDeleteStop={this._onDeleteStop}
-            draw={{
-              rectangle: false
-            }}
-          />
+          {Object.values(enabledDrawElements).filter(enabledDrawElement => enabledDrawElement).length > 0 && (
+            <FeatureGroup ref={featureGroupRef => onFeatureGroupReady(featureGroupRef)}>
+              <EditControl
+                position="topright"
+                onEdited={e => console.log(e)}
+                onCreated={e => {
+                  // e.layers.eachLayer(a => {
+                  //   console.log(a.toGeoJSON());
+                  // });
+                }}
+                onDeleted={e => console.log(e)}
+                onMounted={e => console.log(e)}
+                onEditStart={e => console.log(e)}
+                onEditStop={e => console.log(e)}
+                onDeleteStart={e => console.log(e)}
+                onDeleteStop={e => console.log(e)}
+                draw={enabledDrawElements}
+              />
+            </FeatureGroup>
+          )}
           {MapUtils.checkValidJSONCoordinates(geoJson) && (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}
@@ -376,6 +400,6 @@ export const Map = ({
           )}
         </MapComponent>
       </div>
-    </>
+    </layer>
   );
 };

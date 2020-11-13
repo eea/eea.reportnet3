@@ -122,6 +122,15 @@ const DataViewer = withRouter(
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       crs: 'EPSG:4326',
+      drawElements: {
+        circle: false,
+        circlemarker: false,
+        polyline: false,
+        marker: false,
+        point: false,
+        polygon: false,
+        rectangle: false
+      },
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
@@ -289,7 +298,11 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      if (records.isMapOpen) datatableRef.current.closeEditingCell();
+      if (records.isMapOpen) {
+        datatableRef.current.closeEditingCell();
+      } else {
+        dispatchRecords({ type: 'RESET_DRAW_ELEMENTS' });
+      }
     }, [records.isMapOpen]);
 
     useEffect(() => {
@@ -687,8 +700,8 @@ const DataViewer = withRouter(
       }
     };
 
-    const onMapOpen = (coordinates, mapCells) =>
-      dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, mapCells } });
+    const onMapOpen = (coordinates, mapCells, fieldType) =>
+      dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells } });
 
     const onPaste = event => {
       if (event) {
@@ -971,7 +984,12 @@ const DataViewer = withRouter(
     };
 
     const mapRender = () => (
-      <Map hasLegend={true} geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
+      <Map
+        enabledDrawElements={records.drawElements}
+        hasLegend={true}
+        geoJson={records.mapGeoJson}
+        onSelectPoint={onSelectPoint}
+        selectedCRS={records.crs}></Map>
     );
 
     const rowClassName = rowData => {

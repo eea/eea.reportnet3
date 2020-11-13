@@ -411,7 +411,7 @@ const FieldEditor = ({
                 icon="marker"
                 onClick={e => {
                   if (!isNil(onMapOpen)) {
-                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
                   }
                 }}
                 style={{ width: '35%' }}
@@ -422,6 +422,7 @@ const FieldEditor = ({
           </div>
         );
       case 'LINE':
+      case 'POLYGON':
         return (
           <div className={styles.pointWrapper}>
             <InputText
@@ -550,7 +551,7 @@ const FieldEditor = ({
                 icon="marker"
                 onClick={e => {
                   if (!isNil(onMapOpen)) {
-                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
                   }
                 }}
                 style={{ width: '35%' }}
