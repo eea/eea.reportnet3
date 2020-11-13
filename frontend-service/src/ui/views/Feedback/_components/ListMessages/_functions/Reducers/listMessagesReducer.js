@@ -10,6 +10,16 @@ export const listMessagesReducer = (state, { type, payload }) => {
         ...state,
         separatorIndex: payload
       };
+    case 'SET_LIST_CONTENT':
+      return {
+        ...state,
+        listContent: payload
+      };
+    case 'UPDATE_SCROLL_STATES':
+      return {
+        ...state,
+        resetScrollStates: payload
+      };
     default:
       return state;
   }
