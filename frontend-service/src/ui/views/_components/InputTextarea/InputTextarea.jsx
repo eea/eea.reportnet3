@@ -101,6 +101,7 @@ export class InputTextarea extends Component {
     if (this.props.moveCaretToEnd) {
       this.element.selectionStart = this.props.value.length;
       this.element.selectionEnd = this.props.value.length;
+      this.element.scrollTop = this.element.scrollHeight;
     }
   }
 
