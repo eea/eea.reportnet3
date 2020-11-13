@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 
 import styles from './EULogin.module.css';
 import logo from 'assets/images/logo-spinner.gif';
