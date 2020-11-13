@@ -65,8 +65,10 @@ export const ListMessages = ({
   };
 
   useEffect(() => {
-    dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
     if (newMessageAdded || messageFirstLoad) {
+      if (messageFirstLoad) {
+        dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
+      }
       const messages = document.querySelectorAll('.rep-feedback-message');
       if (!isEmpty(messages)) {
         const lastMessage = last(messages);
@@ -77,6 +79,9 @@ export const ListMessages = ({
         });
       }
     }
+    setTimeout(() => {
+      dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
+    }, 500);
   }, [messages, listMessagesState.listContent]);
 
   useEffect(() => {
@@ -95,7 +100,7 @@ export const ListMessages = ({
       if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
         dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
         onLazyLoad();
-        messagesWrapperRef.current.scrollTop = 1;
+        messagesWrapperRef.current.scrollTop = 5;
       }
     }
   };
@@ -103,13 +108,6 @@ export const ListMessages = ({
   const renderMessageList = () => {
     if (isLoading) {
       return <Spinner className={styles.spinnerLoadingMessages} />;
-    }
-    if (isLoadingNewMessages) {
-      return (
-        <div className={styles.lazyLoadingWrapper}>
-          <Spinner className={styles.lazyLoadingSpinner} />
-        </div>
-      );
     }
     if (isEmpty(messages)) {
       return (
@@ -120,6 +118,11 @@ export const ListMessages = ({
     }
     return (
       <div className={styles.scrollMessagesWrapper}>
+        {isLoadingNewMessages && (
+          <div className={styles.lazyLoadingWrapper}>
+            <Spinner className={styles.lazyLoadingSpinner} />
+          </div>
+        )}
         {messages.map((message, i) => (
           <Message
             key={i}

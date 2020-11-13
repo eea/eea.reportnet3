@@ -1,9 +1,13 @@
 .lazyLoadingWrapper {
+  position: absolute;
+  left: 45%;
+  top: 45%;
   display: block;
+  .lazyLoadingSpinner {
+    top: 0 !important;
+  }
 }
-.lazyLoadingSpinner {
-  top: 0 !important;
-}
+
 .messagesWrapper {
   border: var(--inputtext-border);
   height: 40vh;
