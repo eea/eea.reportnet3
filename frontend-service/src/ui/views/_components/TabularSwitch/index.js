@@ -1,0 +1,1 @@
+export { TabularSwitch } from './TabularSwitch';

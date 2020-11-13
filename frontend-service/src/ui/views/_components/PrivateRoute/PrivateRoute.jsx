@@ -17,11 +17,11 @@ export const PrivateRoute = ({ component: Component, path }) => {
 
   if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
-      userStorage.removeLocalProperty('redirectUrl');
+      userStorage.removeSessionStorageProperty('redirectUrl');
       return <Route path={path} render={() => <Component />} />;
     } else {
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
-        userStorage.setPropertyToLocalStorage({ redirectUrl: window.location.href });
+        userStorage.setPropertyToSessionStorage({ redirectUrl: window.location.href });
       }
       if (userContext.isLoggedOut) {
         return (

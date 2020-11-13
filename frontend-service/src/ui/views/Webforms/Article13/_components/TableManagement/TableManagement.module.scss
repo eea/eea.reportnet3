@@ -1,0 +1,17 @@
+.table {
+  margin-bottom: 2rem;
+
+  .iconTooltipLevelError {
+    width: 1.5em;
+  }
+
+  .iconTooltipWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .invisibleHeader {
+    display: none;
+  }
+}

@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const printExpression = (expression, field) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
@@ -10,7 +10,7 @@ const printExpression = (expression, field) => {
     }
 
     if (expression.operatorType === 'date') {
-      return `( ${field} ${expression.operatorValue} ${moment(expression.expressionValue).format('YYYY-MM-DD')} )`;
+      return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format('YYYY-MM-DD')} )`;
     }
 
     if (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL') {

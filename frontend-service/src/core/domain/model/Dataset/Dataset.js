@@ -1,6 +1,7 @@
 export class Dataset {
   constructor({
     dataProviderId,
+    datasetFeedbackStatus,
     datasetId,
     datasetSchemaDescription,
     datasetSchemaId,
@@ -20,6 +21,7 @@ export class Dataset {
     webform
   } = {}) {
     this.dataProviderId = dataProviderId;
+    this.datasetFeedbackStatus = datasetFeedbackStatus;
     this.datasetId = datasetId;
     this.datasetSchemaDescription = datasetSchemaDescription;
     this.datasetSchemaId = datasetSchemaId;

@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,13 +34,17 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -50,6 +56,7 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -59,6 +66,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -72,6 +82,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The data flow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The collaboration controller zuul. */
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The data set metabase mapper. */
   @Autowired
@@ -221,6 +239,38 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Update dataset status.
+   *
+   * @param datasetStatusMessageVO the dataset status message VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO)
+      throws EEAException {
+    DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetStatusMessageVO.getDatasetId()).orElse(null);
+    if (datasetMetabase != null) {
+      datasetMetabase.setStatus(datasetStatusMessageVO.getStatus());
+      dataSetMetabaseRepository.save(datasetMetabase);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    MessageVO message = new MessageVO();
+    message.setContent(datasetStatusMessageVO.getMessage());
+    message.setProviderId(datasetMetabase.getDataProviderId());
+
+    // Send message to provider
+    Optional<DesignDataset> designDataset =
+        designDatasetRepository.findFirstByDatasetSchema(datasetMetabase.getDatasetSchema());
+    collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message);
+    collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
+        datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
+        designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
+        EventType.UPDATED_DATASET_STATUS.toString());
   }
 
 
@@ -813,4 +863,69 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         dataflowId);
   }
 
+  /**
+   * Gets the dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the dataset ids by dataflow id and data provider id
+   */
+  @Override
+  public List<Long> getDatasetIdsByDataflowIdAndDataProviderId(Long dataflowId,
+      Long dataProviderId) {
+    return dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
+  }
+
+  /**
+   * Gets the user provider ids by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user provider ids by dataflow id
+   */
+  @Override
+  public List<Long> getUserProviderIdsByDataflowId(Long dataflowId) {
+
+    List<Long> providerIds = new ArrayList<>();
+    Collection<? extends GrantedAuthority> authorities =
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+    for (DataSetMetabase dataset : dataSetMetabaseRepository
+        .findByDataflowIdAndProviderIdNotNull(dataflowId)) {
+      if (authorities
+          .contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(dataset.getId())))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(dataset.getId())))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(dataset.getId())))) {
+        providerIds.add(dataset.getDataProviderId());
+      }
+    }
+
+    return providerIds;
+  }
+
+
+
+  /**
+   * Gets the last dataset validation for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset validation for release
+   */
+  @Override
+  public Long getLastDatasetValidationForRelease(Long datasetId) {
+    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
+
+  }
 }

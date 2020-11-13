@@ -14,7 +14,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
-import { Article15 } from 'ui/views/Webform/Article15';
+import { Article15 } from 'ui/views/Webforms/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -23,6 +23,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -34,6 +35,7 @@ import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
+import { Webforms } from 'ui/views/Webforms';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -62,10 +64,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
-  // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -191,7 +193,7 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     callSetMetaData();
     getDataflowName();
-    getDatasetSchemaId();
+    getDatasetData();
     onLoadDataflow();
   }, []);
 
@@ -275,10 +277,11 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const getDatasetSchemaId = async () => {
+  const getDatasetData = async () => {
     try {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
+      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
@@ -503,6 +506,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
+      setIsTableView(isNil(datasetSchema.webform));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -655,9 +659,14 @@ export const Dataset = withRouter(({ match, history }) => {
       tableSchemaId: table.tableSchemaId
     });
 
-  const datasetTitle = () => {
-    let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
+  const datasetInsideTitle = () => {
+    if (!isEmpty(datasetFeedbackStatus)) {
+      return `${datasetFeedbackStatus} `;
+    } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
+      return `${resources.messages['released'].toString()}`;
+    } else {
+      return '';
+    }
   };
 
   const validationListFooter = (
@@ -693,7 +702,6 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetName
       }
     });
-    //setIsTableDeleted(false);
   };
 
   const getImportExtensions = externalOperationsList.import
@@ -704,15 +712,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getImportExtensions.split(', ')
   ).join(', ')}`;
-
-  const renderCustomFileUploadFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsImportDatasetDialogVisible(false)}
-    />
-  );
 
   const renderDashboardFooter = (
     <Button
@@ -741,12 +740,23 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) && hasWritePermissions && (
-      <div className={styles.switch}>
-        <div className={`${styles.wrap}`}>
-          <span className={styles.text}>{resources.messages['tabularData']}</span>
-          <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
-          <span className={styles.text}>{resources.messages['webform']}</span>
+    !isNil(webformData) &&
+    hasWritePermissions && (
+      // <div className={styles.switch}>
+      //   <div className={`${styles.wrap}`}>
+      //     <span className={styles.text}>{resources.messages['tabularData']}</span>
+      //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
+      //     <span className={styles.text}>{resources.messages['webform']}</span>
+      //   </div>
+      // </div>
+      <div className={styles.switchDivInput}>
+        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+          <TabularSwitch
+            className={styles.tabularSwitch}
+            elements={[resources.messages['tabularData'], resources.messages['webform']]}
+            onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
+            value={resources.messages['webform']}
+          />
         </div>
       </div>
     );
@@ -771,7 +781,8 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={`${datasetTitle()}`}
+        title={datasetSchemaName}
+        insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
@@ -933,11 +944,12 @@ export const Dataset = withRouter(({ match, history }) => {
           tableSchemaColumns={tableSchemaColumns}
         />
       ) : (
-        <Article15
+        <Webforms
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReporting
           state={{ datasetSchema: { tables: datasetSchemaAllTables }, schemaTables }}
+          webformType={webformData}
         />
       )}
 

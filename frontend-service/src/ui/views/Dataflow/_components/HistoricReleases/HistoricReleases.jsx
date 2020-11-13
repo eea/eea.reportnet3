@@ -1,15 +1,14 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import isEmpty from 'lodash/isEmpty';
 import uniq from 'lodash/uniq';
 
 import styles from './HistoricReleases.module.scss';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -90,7 +89,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   const releasedDateTemplate = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
-        {moment(rowData.releasedDate).format(
+        {dayjs(rowData.releasedDate).format(
           `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
             userContext.userProps.amPm24h ? '' : ' A'
           }`

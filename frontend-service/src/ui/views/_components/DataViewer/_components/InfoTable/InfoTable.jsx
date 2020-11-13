@@ -73,6 +73,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       case 'DATE':
         return dateCharacters;
       case 'TEXT':
+      case 'TEXTAREA':
         return textCharacters;
       case 'RICH_TEXT':
       case 'LINK':
@@ -108,7 +109,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       if (field.fieldData.type === 'POINT') {
         if (MapUtils.isValidJSON(value)) {
           const parsedGeoJson = JSON.parse(value);
-          value = `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.rsid}`;
+          value = `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`;
         }
       }
       return <div className={styles.infoTableCellCorrect}>{field ? value : null}</div>;

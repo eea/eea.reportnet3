@@ -91,7 +91,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
-      "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
+      "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
 
   /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
@@ -114,7 +114,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
-      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id, status) values ('%s', %d, '%s', '%s', %d, 'PENDING') returning id";
 
   /** The Constant INSERT_RD_INTO_REPORTING_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_REPORTING_DATASET =
@@ -287,7 +287,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false);
+    manageDataCollection(dataflowId, null, false, false, false);
   }
 
   /**
@@ -295,11 +295,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck enable the manual check for the custodian approval
    */
   @Override
   @Async
-  public void createEmptyDataCollection(Long dataflowId, Date dueDate) {
-    manageDataCollection(dataflowId, dueDate, true);
+  public void createEmptyDataCollection(Long dataflowId, Date dueDate,
+      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
   }
 
   /**
@@ -308,132 +311,161 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    * @param isCreation the is creation
+   * @param stopAndNotifySQLErrors the stop and notify SQL errors
+   * @param manualCheck enable the manual check for the custodian approval
    */
-  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation) {
+  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
+      boolean stopAndNotifySQLErrors, boolean manualCheck) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
+
+    boolean rulesOk = true;
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
-    designs.stream().forEach(dataset -> {
-      List<RuleVO> rulesSql =
-          rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
-      if (null != rulesSql && !rulesSql.isEmpty()) {
-        rulesSql.stream().forEach(ruleVO -> {
-          rulesControllerZuul.validateSqlRuleDataCollection(dataset.getId(),
-              dataset.getDatasetSchema(), ruleVO);
-        });
+    if (isCreation) {
+      LOG.info("Validate SQL Rules in Dataflow {},Data Collection creation proccess.", dataflowId);
+      List<Boolean> rulesWithError = new ArrayList<>();
+      designs.stream().forEach(dataset -> {
+        recordStoreControllerZuul.createUpdateQueryView(dataset.getId());
+        List<RuleVO> rulesSql =
+            rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
+        if (null != rulesSql && !rulesSql.isEmpty()) {
+          rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
+              .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
+        }
+      });
+      LOG.info("Data Collection contains SQL rules contains: {} errors", rulesWithError.size());
+      if (stopAndNotifySQLErrors) {
+        long errorsCount = rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE).count();
+        int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
+        if (errorsCount > 0 || disabledRules > 0) {
+          NotificationVO notificationVO = NotificationVO.builder()
+              .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
+              .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
+              .disabledRules(disabledRules).build();
+          LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+          // remove lock
+          String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
+          List<Object> criteria = new ArrayList<>();
+          criteria.add(methodSignature);
+          criteria.add(dataflowId);
+          lockService.removeLockByCriteria(criteria);
+          // release notification
+          rulesOk = false;
+          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+        }
       }
-    });
-
-    // 2. Get the representatives who are going to provide data
-    List<RepresentativeVO> representatives = representativeControllerZuul
-        .findRepresentativesByIdDataFlow(dataflowId).stream()
-        .filter(representative -> !representative.getHasDatasets()).collect(Collectors.toList());
-
-    if (representatives.isEmpty()) {
-      releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation);
-      return;
     }
+    if (rulesOk) {
+      // 2. Get the representatives who are going to provide data
+      List<RepresentativeVO> representatives = representativeControllerZuul
+          .findRepresentativesByIdDataFlow(dataflowId).stream()
+          .filter(representative -> !representative.getHasDatasets()).collect(Collectors.toList());
 
-    // 3. Get the providers associated with representatives
-    List<DataProviderVO> dataProviders =
-        representativeControllerZuul.findDataProvidersByIds(representatives.stream()
-            .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      if (representatives.isEmpty()) {
+        releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation);
+        return;
+      }
 
-    // 4. Map representatives to providers
-    Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
+      // 3. Get the providers associated with representatives
+      List<DataProviderVO> dataProviders =
+          representativeControllerZuul.findDataProvidersByIds(representatives.stream()
+              .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
 
-    List<Long> dataCollectionIds = new ArrayList<>();
-    Map<Long, String> datasetIdsEmails = new HashMap<>();
-    Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
-    Map<Long, String> datasetIdsAndSchemaIdsFromDC = new HashMap<>();
-    Map<Long, String> datasetIdsAndSchemaIdsFromEU = new HashMap<>();
-    List<Long> euDatasetIds = new ArrayList<>();
+      // 4. Map representatives to providers
+      Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
 
-    try (Connection connection = metabaseDataSource.getConnection();
-        Statement statement = connection.createStatement()) {
+      List<Long> dataCollectionIds = new ArrayList<>();
+      Map<Long, String> datasetIdsEmails = new HashMap<>();
+      Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
+      Map<Long, String> datasetIdsAndSchemaIdsFromDC = new HashMap<>();
+      Map<Long, String> datasetIdsAndSchemaIdsFromEU = new HashMap<>();
+      List<Long> euDatasetIds = new ArrayList<>();
 
-      try {
-        connection.setAutoCommit(false);
+      try (Connection connection = metabaseDataSource.getConnection();
+          Statement statement = connection.createStatement()) {
 
-        if (isCreation) {
-          // 5. Set dataflow to DRAFT
-          statement.addBatch(
-              String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, dueDate, dataflowId));
-        }
+        try {
+          connection.setAutoCommit(false);
 
-        for (RepresentativeVO representative : representatives) {
-          statement.addBatch(
-              String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
-        }
-
-        List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
-        List<FKDataCollection> newDCsRegistry = new ArrayList<>();
-        List<FKDataCollection> newEUsRegistry = new ArrayList<>();
-        List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
-        for (DesignDatasetVO design : designs) {
-          RulesSchemaVO rulesSchemaVO =
-              rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema());
-          List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           if (isCreation) {
-            // 6. Create DataCollection in metabase
-            Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
-            dataCollectionIds.add(dataCollectionId);
-            datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
-            datasetIdsAndSchemaIdsFromDC.put(dataCollectionId, design.getDatasetSchema());
-
-            // 6b. Create the EU Dataset
-            Long euDatasetId = persistEU(statement, design, time, dataflowId);
-            euDatasetIds.add(euDatasetId);
-            datasetIdsAndSchemaIds.put(euDatasetId, design.getDatasetSchema());
-            datasetIdsAndSchemaIdsFromEU.put(euDatasetId, design.getDatasetSchema());
-
-            prepareFKAndIntegrityForEUandDC(dataCollectionId, newDCsRegistry,
-                lIntegrityDataCollections, design, integritieVOs);
-            prepareFKAndIntegrityForEUandDC(euDatasetId, newEUsRegistry, lIntegrityDataCollections,
-                design, integritieVOs);
+            // 5. Set dataflow to DRAFT
+            statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+                manualCheck, dueDate, dataflowId));
           }
 
-          // 7. Create Reporting Dataset in metabase
+          for (RepresentativeVO representative : representatives) {
+            statement.addBatch(
+                String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
+          }
 
-          createReportingDatasetInMetabase(dataflowId, time, representatives, map, datasetIdsEmails,
-              datasetIdsAndSchemaIds, statement, newReportingDatasetsRegistry,
-              lIntegrityDataCollections, design, integritieVOs);
+          List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
+          List<FKDataCollection> newDCsRegistry = new ArrayList<>();
+          List<FKDataCollection> newEUsRegistry = new ArrayList<>();
+          List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
+          for (DesignDatasetVO design : designs) {
+            RulesSchemaVO rulesSchemaVO =
+                rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema());
+            List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
+            if (isCreation) {
+              // 6. Create DataCollection in metabase
+              Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
+              dataCollectionIds.add(dataCollectionId);
+              datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
+              datasetIdsAndSchemaIdsFromDC.put(dataCollectionId, design.getDatasetSchema());
+
+              // 6b. Create the EU Dataset
+              Long euDatasetId = persistEU(statement, design, time, dataflowId);
+              euDatasetIds.add(euDatasetId);
+              datasetIdsAndSchemaIds.put(euDatasetId, design.getDatasetSchema());
+              datasetIdsAndSchemaIdsFromEU.put(euDatasetId, design.getDatasetSchema());
+
+              prepareFKAndIntegrityForEUandDC(dataCollectionId, newDCsRegistry,
+                  lIntegrityDataCollections, design, integritieVOs);
+              prepareFKAndIntegrityForEUandDC(euDatasetId, newEUsRegistry,
+                  lIntegrityDataCollections, design, integritieVOs);
+            }
+
+            // 7. Create Reporting Dataset in metabase
+            createReportingDatasetInMetabase(dataflowId, time, representatives, map,
+                datasetIdsEmails, datasetIdsAndSchemaIds, statement, newReportingDatasetsRegistry,
+                lIntegrityDataCollections, design, integritieVOs);
+          }
+
+          statement.executeBatch();
+          // 8. Create permissions
+          createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId);
+          // 9. Delete editors
+          removePermissionEditors(dataflowId);
+
+          connection.commit();
+          // Add into the foreign_relations table from metabase the dataset origin-destination
+          // relation, if applies
+          addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
+          addForeignRelationsFromNewDCandEUs(newDCsRegistry);
+          addForeignRelationsFromNewDCandEUs(newEUsRegistry);
+          if (lIntegrityDataCollections != null) {
+            addDatasetForeignRelations(lIntegrityDataCollections);
+          }
+          LOG.info("Metabase changes completed on DataCollection creation");
+
+          // 10. Create schemas for each dataset
+          // This method will release the lock
+          recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
+        } catch (SQLException e) {
+          LOG_ERROR.error("Error persisting changes. Rolling back...", e);
+          releaseLockAndRollback(connection, dataflowId, isCreation);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error creating permissions. Rolling back...", e);
+          releaseLockAndRollback(connection, dataflowId, isCreation);
+        } finally {
+          connection.setAutoCommit(true);
         }
-
-        statement.executeBatch();
-        // 8. Create permissions
-        createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId);
-        // 9. Delete editors
-        removePermissionEditors(dataflowId);
-
-        connection.commit();
-        // Add into the foreign_relations table from metabase the dataset origin-destination
-        // relation, if applies
-        addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
-        addForeignRelationsFromNewDCandEUs(newDCsRegistry);
-        addForeignRelationsFromNewDCandEUs(newEUsRegistry);
-        if (lIntegrityDataCollections != null) {
-          addDatasetForeignRelations(lIntegrityDataCollections);
-        }
-        LOG.info("Metabase changes completed on DataCollection creation");
-
-        // 10. Create schemas for each dataset
-        // This method will release the lock
-        recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
       } catch (SQLException e) {
-        LOG_ERROR.error("Error persisting changes. Rolling back...", e);
-        releaseLockAndRollback(connection, dataflowId, isCreation);
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error creating permissions. Rolling back...", e);
-        releaseLockAndRollback(connection, dataflowId, isCreation);
-      } finally {
-        connection.setAutoCommit(true);
+        LOG_ERROR.error("Error rolling back: ", e);
       }
-    } catch (SQLException e) {
-      LOG_ERROR.error("Error rolling back: ", e);
     }
   }
 
@@ -482,6 +514,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
       List<IntegrityVO> integritieVOs) throws SQLException {
     for (RepresentativeVO representative : representatives) {
+      // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
       datasetIdsEmails.put(datasetId, representative.getProviderAccount());
@@ -989,6 +1022,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // Save all the FK relations between dc and eus into the metabase
     if (!foreignRelations.isEmpty()) {
       foreignRelationsRepository.saveAll(foreignRelations);
+    }
+  }
+
+
+  /**
+   * Release notification.
+   *
+   * @param eventType the event type
+   * @param notificationVO the notification VO
+   */
+  private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
   }
 

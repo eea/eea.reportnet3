@@ -1,0 +1,38 @@
+.titleWrap {
+  align-content: center;
+  align-items: center;
+  display: flex;
+  margin: 2rem 0rem 2rem 0rem;
+}
+
+.iconWrap {
+  align-content: center;
+}
+
+.title {
+  display: table-cell;
+  font-size: 2.25rem;
+  color: var(--title-color);
+  margin: 0px;
+  font-weight: bold;
+
+  span {
+    font-size: 1.3rem;
+    font-style: italic;
+    margin-left: 1rem;
+    // color: var(--subtitle-color);
+  }
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  color: var(--subtitle-color);
+  margin: 0px;
+  font-weight: 400;
+}
+
+.icon {
+  color: var(--title-icon-color);
+  opacity: 0.6;
+  margin-right: 0.5rem !important;
+}

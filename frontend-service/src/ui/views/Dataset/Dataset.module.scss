@@ -87,3 +87,17 @@
     }
   }
 }
+
+.switchDivInput {
+  display: flex;
+  align-items: center;
+  justify-items: flex-end;
+  flex-direction: row;
+  margin-bottom: 1rem;
+
+  .switchDiv {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  }
+}

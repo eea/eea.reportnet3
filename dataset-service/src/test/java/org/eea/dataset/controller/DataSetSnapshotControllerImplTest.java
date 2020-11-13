@@ -113,7 +113,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.createSnapshot(1L, new CreateSnapshotVO());
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**
@@ -416,5 +416,45 @@ public class DataSetSnapshotControllerImplTest {
   public void updateSnapshotEUReleaseSuccessTest() throws Exception {
     dataSetSnapshotControllerImpl.updateSnapshotEURelease(Mockito.anyLong());
     Mockito.verify(datasetSnapshotService, times(1)).updateSnapshotEURelease(Mockito.anyLong());
+  }
+
+  @Test
+  public void createReleaseSnapshots() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).createReleaseSnapshots(1L, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createReleaseSnapshotsThrow() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L);
+    try {
+      dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testReleasingSnapshotsLock() throws Exception {
+    dataSetSnapshotControllerImpl.releaseLocksFromReleaseDatasets(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).releaseLocksRelatedToRelease(1L, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testReleasingSnapshotsLockException() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService).releaseLocksRelatedToRelease(1L, 1L);
+    try {
+      dataSetSnapshotControllerImpl.releaseLocksFromReleaseDatasets(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
   }
 }

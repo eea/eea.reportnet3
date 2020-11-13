@@ -13,7 +13,9 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -71,6 +73,9 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Mock
   private DataSetControllerZuul datasetControllerZuul;
+
+  @Mock
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   @Before
   public void initMocks() {
@@ -202,8 +207,13 @@ public class JdbcRecordStoreServiceImplTest {
     SnapshotVO snap = new SnapshotVO();
     snap.setDatasetId(1L);
     Mockito.when(dataSetSnapshotControllerZuul.getById(Mockito.any())).thenReturn(snap);
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDataflowId(1L);
+    datasetMetabase.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(datasetMetabase);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
-    Mockito.verify(kafkaSender, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+    Mockito.verify(kafkaSender, Mockito.times(2)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 

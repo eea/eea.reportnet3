@@ -1,5 +1,6 @@
 import React, { useContext, useReducer } from 'react';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -43,10 +44,15 @@ export const UserProvider = ({ children }) => {
         },
 
         hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
+          if (isNil(userState.contextRoles)) {
+            return false;
+          }
           let hasPermissions = false;
           allowedPermissions.forEach(allowedPermission => {
-            const permission = `${entity}-${entityID}-${allowedPermission}`;
-            if (userState.contextRoles.includes(permission)) hasPermissions = true;
+            const permission = `${entity}${entityID}-${allowedPermission}`;
+            if (userState.contextRoles.includes(permission)) {
+              hasPermissions = true;
+            }
           });
           return hasPermissions;
         },

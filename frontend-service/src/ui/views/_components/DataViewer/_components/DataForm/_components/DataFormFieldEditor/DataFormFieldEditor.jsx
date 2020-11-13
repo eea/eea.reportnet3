@@ -15,6 +15,7 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Map } from 'ui/views/_components/Map';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
@@ -49,13 +50,13 @@ const DataFormFieldEditor = ({
 
   const inputRef = useRef(null);
 
-  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`;
+  const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
-        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.rsid)[0]
+        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid)[0]
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     isMapDisabled: false,
     isMapOpen: false,
@@ -114,7 +115,7 @@ const DataFormFieldEditor = ({
       const inmMapGeoJson = cloneDeep(fieldValue !== '' ? fieldValue : fieldEmptyPointValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
-      parsedInmMapGeoJson.properties.rsid = crs.value;
+      parsedInmMapGeoJson.properties.srid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
     dispatchMap({ type: 'SAVE_MAP_COORDINATES', payload: { crs } });
@@ -131,7 +132,7 @@ const DataFormFieldEditor = ({
       if (withCRS) {
         coords = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = coords;
-        geoJson.properties.rsid = crs.value;
+        geoJson.properties.srid = crs.value;
       } else {
         geoJson.geometry.coordinates = MapUtils.parseCoordinates(
           coordinates.replace(', ', ',').split(','),
@@ -171,18 +172,6 @@ const DataFormFieldEditor = ({
     return linkItems;
   };
 
-  const getCodelistItemsWithEmptyOption = () => {
-    const codelistItems = column.codelistItems.sort().map(codelistItem => {
-      return { itemType: codelistItem, value: codelistItem };
-    });
-
-    codelistItems.unshift({
-      itemType: resources.messages['noneCodelist'],
-      value: ''
-    });
-    return codelistItems;
-  };
-
   const projectCoordinates = (coordinates, newCRS) => {
     return proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates);
   };
@@ -196,7 +185,7 @@ const DataFormFieldEditor = ({
           onChangeForm(field, e.target.value.value);
         }}
         optionLabel="itemType"
-        options={getCodelistItemsWithEmptyOption()}
+        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
       />
     );
@@ -239,6 +228,7 @@ const DataFormFieldEditor = ({
       case 'DATE':
         return dateCharacters;
       case 'TEXT':
+      case 'TEXTAREA':
         return textCharacters;
       case 'RICH_TEXT':
         return richTextCharacters;
@@ -266,6 +256,8 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
+    ) : type === 'TEXTAREA' ? (
+      renderTextarea(field, fieldValue)
     ) : (
       <InputText
         disabled={column.readOnly && reporting}
@@ -416,6 +408,19 @@ const DataFormFieldEditor = ({
         />
       </div>
     </div>
+  );
+
+  const renderTextarea = (field, fieldValue) => (
+    <InputTextarea
+      collapsedHeight={75}
+      disabled={column.readOnly && reporting}
+      id={field}
+      keyfilter={RecordUtils.getFilter(type)}
+      maxLength={getMaxCharactersByType(type)}
+      onChange={e => onChangeForm(field, e.target.value)}
+      style={{ width: '60%' }}
+      value={fieldValue}
+    />
   );
 
   const saveMapCoordinatesDialogFooter = (

@@ -6,7 +6,7 @@ import uuid from 'uuid';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import styles from './DataflowsItem.module.scss';
 
@@ -22,7 +22,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const DataflowsItem = ({ dataFetch, itemContent, type }) => {
+const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -95,7 +95,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
             <span className={`${styles.dateBlock}`}>
               {itemContent.expirationDate == '-'
                 ? resources.messages['pending']
-                : moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
             </span>
           </>
         </p>
@@ -114,6 +114,12 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
 
       <div className={`${styles.status}  dataflowList-status-help-step`}>
+        {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'DRAFT' && (
+          <p>
+            <span>{`${resources.messages['reportingDatasetsStatus']}:`}</span>{' '}
+            {itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
+          </p>
+        )}
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
         </p>
