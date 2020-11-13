@@ -26,6 +26,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -118,6 +119,9 @@ public class DesignDatasetServiceTest {
 
   @Mock
   private ContributorControllerZuul contributorControllerZuul;
+
+  @Mock
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   @Mock
   private WebFormMapper webformMapper;
@@ -219,6 +223,7 @@ public class DesignDatasetServiceTest {
         .thenReturn(field);
     // when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(Arrays.asList(dataset));
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(Arrays.asList(dataset));
+    Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any());
 
     designDatasetService.copyDesignDatasets(1L, 2L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
