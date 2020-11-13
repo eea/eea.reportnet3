@@ -109,13 +109,6 @@ export const ListMessages = ({
     if (isLoading) {
       return <Spinner className={styles.spinnerLoadingMessages} />;
     }
-    // if (isLoadingNewMessages) {
-    //   return (
-    //     <div className={styles.lazyLoadingWrapper}>
-    //       <Spinner className={styles.lazyLoadingSpinner} />
-    //     </div>
-    //   );
-    // }
     if (isEmpty(messages)) {
       return (
         <div className={styles.emptyMessageWrapper}>
