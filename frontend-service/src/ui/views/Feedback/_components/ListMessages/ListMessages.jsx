@@ -21,16 +21,17 @@ export const ListMessages = ({
   messages = [],
   newMessageAdded,
   onFirstLoadMessages,
-  onLazyLoad
+  onLazyLoad,
+  onUpdateNewMessageAdded
 }) => {
   const messagesWrapperRef = useRef();
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
     isLoadingNewMessages: false,
-    separatorIndex: -1
+    separatorIndex: -1,
+    listContent: null,
+    resetScrollStates: null
   });
-
-  const [listContent, setListContent] = useState();
 
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
@@ -49,7 +50,10 @@ export const ListMessages = ({
   }, [messages]);
 
   useEffect(() => {
-    setListContent(renderMessageList());
+    dispatchListMessages({
+      type: 'SET_LIST_CONTENT',
+      payload: renderMessageList()
+    });
   }, [isLoading, isLoadingNewMessages, messages]);
 
   const getIndexByHeader = messagesArray => {
@@ -67,10 +71,24 @@ export const ListMessages = ({
       if (!isEmpty(messages)) {
         const lastMessage = last(messages);
         messagesWrapperRef.current.scrollTop = lastMessage.offsetTop;
-        onFirstLoadMessages(false);
+        dispatchListMessages({
+          type: 'UPDATE_SCROLL_STATES',
+          payload: true
+        });
       }
     }
-  }, [messages, listContent]);
+  }, [messages, listMessagesState.listContent]);
+
+  useEffect(() => {
+    if (listMessagesState.resetScrollStates) {
+      onFirstLoadMessages(false);
+      onUpdateNewMessageAdded(false);
+      dispatchListMessages({
+        type: 'UPDATE_SCROLL_STATES',
+        payload: false
+      });
+    }
+  }, [listMessagesState.resetScrollStates]);
 
   const onScroll = e => {
     if (!isNil(e)) {
@@ -117,7 +135,7 @@ export const ListMessages = ({
 
   return (
     <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
-      {listContent}
+      {listMessagesState.listContent}
     </div>
   );
 };

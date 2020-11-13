@@ -76,12 +76,6 @@ export const Feedback = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (isCustodian) {
-      if (isEmpty(messages)) {
-      } else {
-      }
-    } else {
-    }
     leftSideBarContext.addHelpSteps(
       isCustodian ? FeedbackRequesterHelpConfig : FeedbackReporterHelpConfig,
       'feedbackHelp'
@@ -239,6 +233,10 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
+  const onUpdateNewMessageAdded = payload => {
+    dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -283,11 +281,12 @@ export const Feedback = withRouter(({ match, history }) => {
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
+            messageFirstLoad={feedbackState.messageFirstLoad}
             messages={messages}
             newMessageAdded={newMessageAdded}
-            onLazyLoad={onGetMoreMessages}
-            messageFirstLoad={feedbackState.messageFirstLoad}
             onFirstLoadMessages={onFirstLoadMessages}
+            onLazyLoad={onGetMoreMessages}
+            onUpdateNewMessageAdded={onUpdateNewMessageAdded}
           />
           <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
             <InputTextarea
