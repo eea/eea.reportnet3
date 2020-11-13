@@ -135,6 +135,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       rule.setEnabled(false);
       LOG.info("Rule validation not passed: {}", rule);
     }
+    rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
+        .append(rule.getRuleId().toString()).append("')").toString());
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     releaseNotification(notificationEventType, notificationVO);
@@ -211,7 +213,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             isSQLCorrect = Boolean.FALSE;
           }
         } catch (PSQLException | SQLGrammarException e) {
-          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
       } else {
@@ -705,6 +707,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           rule.setEnabled(false);
           errorRulesList.add(rule);
         }
+        rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
+            .append(rule.getRuleId().toString()).append("')").toString());
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }
