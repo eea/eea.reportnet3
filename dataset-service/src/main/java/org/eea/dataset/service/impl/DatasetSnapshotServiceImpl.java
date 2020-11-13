@@ -16,7 +16,6 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -132,10 +131,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The validation repository. */
-  @Autowired
-  private ValidationRepository validationRepository;
 
+  /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
@@ -467,9 +464,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Delete data of the same provider
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
 
-    removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
-
-
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
@@ -524,14 +518,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       } catch (EEAException e) {
         LOG_ERROR.error("Error in release snapshot with the message {},", e.getMessage(), e);
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage());
-        removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
     } else {
       LOG_ERROR.error("Error in release snapshot");
       releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot");
-      removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
     }

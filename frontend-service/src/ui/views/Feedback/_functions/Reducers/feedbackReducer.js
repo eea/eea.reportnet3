@@ -70,6 +70,16 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         messageToSend: payload.value
       };
+    case 'ON_UPDATE_MESSAGE_FIRST_LOAD':
+      return {
+        ...state,
+        messageFirstLoad: payload
+      };
+    case 'ON_UPDATE_NEW_MESSAGE_ADDED':
+      return {
+        ...state,
+        newMessageAdded: payload
+      };
     default:
       return state;
   }

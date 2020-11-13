@@ -4,7 +4,7 @@ export const article13Reducer = (state, { type, payload }) => {
       return { ...state, ...payload };
 
     case 'ON_TOGGLE_VIEW':
-      return { ...state, isWebformView: payload.view };
+      return { ...state, view: payload.view };
 
     case 'ON_LOAD_PAMS_DATA':
       return {
@@ -17,13 +17,25 @@ export const article13Reducer = (state, { type, payload }) => {
       return { ...state, isDataUpdated: payload.value };
 
     case 'ON_SELECT_RECORD':
-      return { ...state, selectedId: payload.record, selectedTableName: null };
+      return {
+        ...state,
+        selectedId: payload.recordId,
+        selectedTableName: null,
+        selectedTable: { ...state.selectedTable, tableName: null, recordId: payload.recordId, pamsId: payload.pamsId }
+      };
 
     case 'ON_SELECT_TABLE':
-      return { ...state, selectedTableName: payload.name };
+      return {
+        ...state,
+        selectedTableName: payload.name,
+        selectedTable: { ...state.selectedTable, tableName: payload.name }
+      };
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
+
+    case 'SET_IS_ADDING_RECIRD':
+      return { ...state, isAddingRecord: payload.value };
 
     default:
       return state;

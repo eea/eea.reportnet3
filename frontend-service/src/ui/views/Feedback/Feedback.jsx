@@ -53,7 +53,8 @@ export const Feedback = withRouter(({ match, history }) => {
     messages: [],
     messageToSend: '',
     newMessageAdded: false,
-    selectedDataProvider: {}
+    selectedDataProvider: {},
+    messageFirstLoad: false
   });
 
   const {
@@ -75,12 +76,6 @@ export const Feedback = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (isCustodian) {
-      if (isEmpty(messages)) {
-      } else {
-      }
-    } else {
-    }
     leftSideBarContext.addHelpSteps(
       isCustodian ? FeedbackRequesterHelpConfig : FeedbackReporterHelpConfig,
       'feedbackHelp'
@@ -129,10 +124,17 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
+  const onFirstLoadMessages = loadState => {
+    dispatchFeedback({ type: 'ON_UPDATE_MESSAGE_FIRST_LOAD', payload: loadState });
+  };
+
   const onChangeDataProvider = value => {
     if (isNil(value)) {
       dispatchFeedback({ type: 'RESET_MESSAGES', payload: {} });
+    } else {
+      onFirstLoadMessages(true);
     }
+
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
 
@@ -231,6 +233,10 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
+  const onUpdateNewMessageAdded = payload => {
+    dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -275,9 +281,12 @@ export const Feedback = withRouter(({ match, history }) => {
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
+            messageFirstLoad={feedbackState.messageFirstLoad}
             messages={messages}
             newMessageAdded={newMessageAdded}
+            onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
+            onUpdateNewMessageAdded={onUpdateNewMessageAdded}
           />
           <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
             <InputTextarea

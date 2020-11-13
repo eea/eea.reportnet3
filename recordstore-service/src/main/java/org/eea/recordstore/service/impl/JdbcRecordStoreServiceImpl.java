@@ -50,7 +50,6 @@ import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.copy.CopyOut;
 import org.postgresql.core.BaseConnection;
-import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -605,9 +604,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
         if (Boolean.TRUE.equals(snapshot.getRelease())) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot);
+        } else {
+          releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
+              idDataset, null);
         }
-        releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
-            idDataset, null);
         break;
       case COLLECTION:
         Map<String, Object> valueEU = new HashMap<>();
@@ -656,9 +656,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
             : EventType.RELEASE_FAILED_EVENT;
 
-    // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
-    // The main difference
-    // between both methods is this one releases a notification
     restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
         deleteData, successEventType, failEventType, true);
 
@@ -805,7 +802,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
       copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
 
-      if (Boolean.TRUE.equals(launchEvent) && !DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+      if (Boolean.TRUE.equals(launchEvent) && !DatasetTypeEnum.EUDATASET.equals(datasetType)
+          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT)) {
         // Send kafka event to launch Validation
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
@@ -836,6 +834,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG_ERROR.error(
             "Release datasets operation failed during the restoring snapshot with the message: {}",
             e.getMessage(), e);
+        dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId(),
+            datasetId);
+        releaseNotificableKafkaEvent(failEventType, value, datasetId,
+            "Error restoring the snapshot data");
       }
     } finally {
       // Release the lock manually
@@ -1037,11 +1040,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         byte[] buf = new String(cbuf, 0, len).getBytes();
         cp.writeToCopy(buf, 0, buf.length);
       }
-    } catch (PSQLException e) {
-      LOG_ERROR.error(
-          "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
-          query, e);
-    } finally {
       cp.endCopy();
       if (cp.isActive()) {
         cp.cancelCopy();
