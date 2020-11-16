@@ -381,10 +381,23 @@ export const Map = ({
               />
             </FeatureGroup>
           )}
-          {console.log(JSON.parse(mapGeoJson), geoJson)}
-          {MapUtils.checkValidJSONCoordinates(geoJson) && (
+          {console.log(JSON.parse(mapGeoJson), geoJson, JSON.parse(mapGeoJson).geometry.type)}
+          {console.log(
+            !isNil(JSON.parse(geoJson).geometry.type) &&
+              ['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
+              MapUtils.checkValidJSONMultipleCoordinates(geoJson),
+            !isNil(JSON.parse(geoJson).geometry.type) &&
+              JSON.parse(geoJson).geometry.type.toUpperCase() === 'POINT' &&
+              MapUtils.checkValidJSONCoordinates(geoJson)
+          )}
+          {((!isNil(JSON.parse(geoJson).geometry.type) &&
+            ['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
+            MapUtils.checkValidJSONMultipleCoordinates(geoJson)) ||
+            (!isNil(JSON.parse(geoJson).geometry.type) &&
+              JSON.parse(geoJson).geometry.type.toUpperCase() === 'POINT' &&
+              MapUtils.checkValidJSONCoordinates(geoJson))) && (
             <GeoJSON
-              data={JSON.parse(mapGeoJson)}
+              data={JSON.parse(geoJson)}
               onEachFeature={onEachFeature}
               coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
             />

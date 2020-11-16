@@ -81,6 +81,19 @@ const checkValidJSONCoordinates = json => {
   }
 };
 
+const checkValidJSONMultipleCoordinates = json => {
+  if (isValidJSON(json)) {
+    const parsedJSON = JSON.parse(json);
+    debugger;
+    return (
+      parsedJSON.geometry.coordinates.map(coordinates => checkValidCoordinates(coordinates)).filter(check => !check)
+        .length === 0
+    );
+  } else {
+    return false;
+  }
+};
+
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
     ? [coordinates[0], coordinates[1]]
@@ -152,6 +165,7 @@ export const MapUtils = {
   changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,
+  checkValidJSONMultipleCoordinates,
   checkValidLine,
   isValidJSON,
   latLngToLngLat,

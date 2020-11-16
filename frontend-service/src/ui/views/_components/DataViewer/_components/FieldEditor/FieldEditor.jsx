@@ -54,9 +54,7 @@ const FieldEditor = ({
 
   console.log(RecordUtils.getCellInfo(colsSchema, cells.field).type, RecordUtils.getCellValue(cells, cells.field));
   const [currentCRS, setCurrentCRS] = useState(
-    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT' ||
-      RecordUtils.getCellInfo(colsSchema, cells.field).type === 'LINESTRING' ||
-      RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POLYGON'
+    ['POINT', 'LINESTRING', 'POLYGON'].includes(RecordUtils.getCellInfo(colsSchema, cells.field).type)
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
         ? crs.filter(crsItem => {
             console.log(crsItem.value, JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid);
@@ -85,7 +83,7 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
-    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
+    if (['POINT', 'LINESTRING', 'POLYGON'].includes(RecordUtils.getCellInfo(colsSchema, cells.field).type)) {
       onChangePointCRS(currentCRS.value);
     }
   }, []);
@@ -134,7 +132,6 @@ const FieldEditor = ({
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
       if (withCRS) {
-        console.log('CHANGE POINT');
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
         geoJson.properties.srid = crs.value;

@@ -197,7 +197,9 @@ export const FieldDesigner = ({
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
-              pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue
+              pk: ['POINT', 'LINESTRING', 'POLYGON'].includes(type.fieldType.toUpperCase())
+                ? false
+                : fieldDesignerState.fieldPKValue
             });
           }
         }
@@ -205,7 +207,9 @@ export const FieldDesigner = ({
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
-            pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
+            pk: ['POINT', 'LINESTRING', 'POLYGON'].includes(type.fieldType.toUpperCase())
+              ? false
+              : fieldDesignerState.fieldPKValue,
             type: parseGeospatialTypes(type.fieldType),
             isLinkChange: fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'LINK'
           });
@@ -220,7 +224,8 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
       dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
-      if (type.fieldType.toLowerCase() === 'point') dispatchFieldDesigner({ type: 'SET_PK', payload: false });
+      if (['POINT', 'LINESTRING', 'POLYGON'].includes(type.fieldType.toUpperCase()))
+        dispatchFieldDesigner({ type: 'SET_PK', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -733,7 +738,7 @@ export const FieldDesigner = ({
         disabled={
           (!isNil(fieldDesignerState.fieldTypeValue) &&
             !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
-            fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'POINT') ||
+            ['POINT', 'LINESTRING', 'POLYGON'].includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))
         }
         id={`${fieldId}_check_pk`}
