@@ -5,57 +5,57 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * The enum Security role enum.
+ * The Enum SecurityRoleEnum.
  */
 public enum SecurityRoleEnum {
-  /**
-   * Data custodian security role enum.
-   */
-  DATA_CUSTODIAN("DATA_CUSTODIAN"),
-  /**
-   * The editor with edit access.
-   */
-  EDITOR_WRITE("EDITOR_WRITE"),
-  /**
-   * The editor read-only access.
-   */
-  EDITOR_READ("EDITOR_READ"),
-  /**
-   * The lead reporter.
-   */
-  LEAD_REPORTER("LEAD_REPORTER"),
-  /**
-   * Data requester security role enum.
-   */
-  DATA_REQUESTER("DATA_REQUESTER"),
-  /**
-   * Data steward security role enum.
-   */
+
+  /** The data steward. */
   DATA_STEWARD("DATA_STEWARD"),
-  /**
-   * The reporter with edit access.
-   */
+
+  /** The data custodian. */
+  DATA_CUSTODIAN("DATA_CUSTODIAN"),
+
+  /** The data requester. */
+  DATA_REQUESTER("DATA_REQUESTER"),
+
+  /** The lead reporter. */
+  LEAD_REPORTER("LEAD_REPORTER"),
+
+  /** The reporter read. */
+  REPORTER_READ("REPORTER_READ"),
+
+  /** The reporter write. */
   REPORTER_WRITE("REPORTER_WRITE"),
 
-  /**
-   * The reporter read-only access.
-   */
-  REPORTER_READ("REPORTER_READ"),
-  /**
-   * The reporter partitioned.
-   */
+  /** The editor read. */
+  EDITOR_READ("EDITOR_READ"),
+
+  /** The editor write. */
+  EDITOR_WRITE("EDITOR_WRITE"),
+
+  /** The reporter partitioned. */
   REPORTER_PARTITIONED("REPORTER_PARTITIONED"),
-  /**
-   * The national coordinator.
-   */
+
+  /** The national coordinator. */
   NATIONAL_COORDINATOR("NATIONAL_COORDINATOR");
 
+  /** The role. */
   private final String role;
 
+  /**
+   * Instantiates a new security role enum.
+   *
+   * @param role the role
+   */
   private SecurityRoleEnum(String role) {
     this.role = role;
   }
 
+  /**
+   * To string.
+   *
+   * @return the string
+   */
   @Override
   @JsonValue
   public String toString() {
@@ -63,10 +63,9 @@ public enum SecurityRoleEnum {
   }
 
   /**
-   * From value security role enum.
+   * From value.
    *
    * @param value the value
-   *
    * @return the security role enum
    */
   @JsonCreator

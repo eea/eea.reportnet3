@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
@@ -81,6 +82,12 @@ public class DataFlowVO implements Serializable {
 
   /** The obligation. */
   private ObligationVO obligation;
+
+  /** The manual acceptance. */
+  private boolean manualAcceptance;
+
+  /** The reporting status. */
+  private DatasetStatusEnum reportingStatus;
 
   /**
    * Equals.

@@ -5,6 +5,7 @@ import styles from './App.module.css';
 
 import { routes } from 'ui/routes';
 
+import { Feedback } from 'ui/views/Feedback';
 import { DataCollection } from 'ui/views/DataCollection';
 import { Dataflow } from 'ui/views/Dataflow';
 import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
@@ -49,6 +50,8 @@ const App = () => {
                             <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
                             <Route exact path={routes.LOGIN} component={ReportnetLogin} />
                             <Route exact path={routes.EULOGIN} component={EULogin} />
+                            <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK} component={Feedback} />
+                            <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} component={Feedback} />
                             <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
                             <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
                             <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />

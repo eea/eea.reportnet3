@@ -1,8 +1,9 @@
 package org.eea.recordstore.service.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -163,22 +163,19 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       throws RecordStoreAccessException {
     final Container container = dockerInterfaceService.getContainer(containerName);
 
-    final ClassLoader classLoader = this.getClass().getClassLoader();
-    final File fileInitCommands =
-        new File(classLoader.getResource("datasetInitCommands.txt").getFile());
-
     final List<String> commands = new ArrayList<>();
-    // read file into stream, try-with-resources
-    try (Stream<String> stream = Files.lines(fileInitCommands.toPath())) {
-
-      stream.forEach(commands::add);
-
-    } catch (final IOException e) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+        getClass().getClassLoader().getResourceAsStream("datasetInitCommands.txt")))) {
+      while (reader.ready()) {
+        commands.add(reader.readLine());
+      }
+    } catch (IOException e) {
       LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
       throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
     }
+
     for (String command : commands) {
       command = command.replace("%dataset_name%", datasetName);
       try {

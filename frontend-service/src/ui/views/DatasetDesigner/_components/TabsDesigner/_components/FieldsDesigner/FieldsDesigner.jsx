@@ -27,7 +27,6 @@ export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
   datasetSchemas,
-  isPreviewModeOn,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -43,7 +42,8 @@ export const FieldsDesigner = ({
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
-  table
+  table,
+  viewType
 }) => {
   const validationContext = useContext(ValidationContext);
   const resources = useContext(ResourcesContext);
@@ -177,6 +177,7 @@ export const FieldsDesigner = ({
     if (fieldIndex > -1) {
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].fieldType = type;
       inmFields[fieldIndex].maxSize = maxSize;
       inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;
@@ -329,7 +330,6 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           hasWritePermissions={true}
-          isPreviewModeOn={isPreviewModeOn}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
@@ -338,7 +338,6 @@ export const FieldsDesigner = ({
           levelErrorTypes={table.levelErrorTypes}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
-          recordPositionId={-1}
           recordPositionId={recordPositionId}
           reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
@@ -351,6 +350,7 @@ export const FieldsDesigner = ({
           tableName={table.tableSchemaName}
           tableReadOnly={false}
           tableSchemaColumns={tableSchemaColumns}
+          viewType={viewType}
         />
       );
     }
@@ -378,8 +378,8 @@ export const FieldsDesigner = ({
     } else {
       return (
         <>
-          {isPreviewModeOn ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!isPreviewModeOn && renderNewField()}
+          {viewType['table'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+          {!viewType['table'] && renderNewField()}
         </>
       );
     }
@@ -418,8 +418,7 @@ export const FieldsDesigner = ({
           fieldRequired={false}
           fieldType=""
           fieldValue=""
-          hasPK={!isNil(fields) && fields.filter(field => field.pk === true).length > 0}
-          // hasPK={true}
+          hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
           isCodelistOrLink={isCodelistOrLink}
@@ -458,7 +457,7 @@ export const FieldsDesigner = ({
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
-                hasPK={fields.filter(field => field.pk === true).length > 0}
+                hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
                 isCodelistOrLink={isCodelistOrLink}
@@ -497,6 +496,7 @@ export const FieldsDesigner = ({
       );
       if (fieldOrdered) {
         setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+        onChangeFields(inmFields, false, table.tableSchemaId);
       }
     } catch (error) {
       console.error(`There has been an error during the field reorder: ${error}`);
@@ -631,7 +631,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      {!isPreviewModeOn && (
+      {!viewType['table'] && (
         <div className={styles.fieldsHeader}>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>

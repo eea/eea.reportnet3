@@ -116,7 +116,7 @@ import org.springframework.transaction.annotation.Propagation;
 public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant ROOT: {@value}. */
-  private static final String ROOT = "root";
+  private static final String USER = "root";
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -271,7 +271,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     try {
       // Get the partition for the partiton id
-      final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+      final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
 
       // Get the dataFlowId from the metabase
       final Long dataflowId = getDataFlowIdById(datasetId);
@@ -676,53 +676,52 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Creates the records.
+   * Insert records.
    *
    * @param datasetId the dataset id
-   * @param records the records
-   * @param idTableSchema the id table schema
+   * @param recordVOs the record V os
+   * @param tableSchemaId the table schema id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void createRecords(final Long datasetId, final List<RecordVO> records,
-      final String idTableSchema) throws EEAException {
-    Long tableId = throwsMethods(datasetId, records, idTableSchema);
-    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
-    DatasetValue dataset = new DatasetValue();
-    dataset.setId(datasetId);
-    TableValue table = new TableValue();
-    table.setId(tableId);
+  public void insertRecords(Long datasetId, List<RecordVO> recordVOs, String tableSchemaId)
+      throws EEAException {
 
-    // obtain the provider code (ie ES, FR, IT, etc)
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
+    if (recordVOs == null || recordVOs.isEmpty()) {
+      throw new EEAException(EEAErrorMessage.RECORD_REQUIRED);
     }
-    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-    // Set the provider code to create Hash
-    recordValue.parallelStream().forEach(record -> {
-      if (record.getDatasetPartitionId() == null) {
-        try {
-          record.setDatasetPartitionId(this.obtainPartition(datasetId, "root").getId());
-        } catch (EEAException e) {
-          LOG_ERROR.error(e.getMessage());
-        }
-      }
-      table.setDatasetId(dataset);
-      record.setTableValue(table);
-      record.setDataProviderCode(provider.getCode());
-      for (FieldValue field : record.getFields()) {
-        forFieldFilled(metabase, field);
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    TableSchema tableSchema =
+        datasetSchemaService.getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
+
+    if (null == tableSchema) {
+      throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
+    String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
+        ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
+            .getCode()
+        : null;
+
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
+
+      // Deny insert if the table is marked as read only. Not applies for DESIGN.
+      if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+        throw new EEAException(EEAErrorMessage.TABLE_READ_ONLY);
       }
 
-    });
-    recordRepository.saveAll(recordValue);
+      // Deny insert if the table is marked as fixed number of record. Not applies for DESIGN.
+      if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        throw new EEAException(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS);
+      }
+    }
+
+    recordRepository
+        .saveAll(createRecords(datasetId, dataProviderCode, recordVOs, datasetType, tableSchema));
   }
-
-
 
   /**
    * Delete record.
@@ -1203,7 +1202,7 @@ public class DatasetServiceImpl implements DatasetService {
         providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
 
     // Get the partition for the partiton id
-    final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+    final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
 
     // Construct Maps to relate ids
     Map<String, TableSchema> tableMap = new HashMap<>();
@@ -2231,52 +2230,6 @@ public class DatasetServiceImpl implements DatasetService {
     return tableId;
   }
 
-
-  /**
-   * For field filled.
-   *
-   * @param metabase the metabase
-   * @param field the field
-   */
-  private void forFieldFilled(DataSetMetabaseVO metabase, FieldValue field) {
-    if (null == field.getValue()) {
-      field.setValue("");
-    } else {
-      if (field.getValue().length() >= fieldMaxLength) {
-        field.setValue(field.getValue().substring(0, fieldMaxLength));
-      }
-    }
-
-    Document fieldSchema =
-        schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
-
-    // if the type is link multiselect we check if is multiple
-    boolean isLinkMultiselect = false;
-
-    if (DataType.LINK.equals(field.getType())) {
-      isLinkMultiselect =
-          Boolean.TRUE.equals(fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES));
-    }
-    // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
-    // order
-    if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
-        && null != field.getValue()) {
-      List<String> values = new ArrayList<>();
-      Arrays.asList(field.getValue().split(",")).stream()
-          .forEach(value -> values.add(value.trim()));
-      Collections.sort(values);
-      field.setValue(values.toString().substring(1, values.toString().length() - 1));
-    }
-
-    // If the field is readOnly and is not a design dataset the value is empty
-    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-        && (boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
-        && !DatasetTypeEnum.DESIGN.equals(getDatasetType(metabase.getId()))) {
-      field.setValue("");
-    }
-
-  }
-
   /**
    * Etl build entity.
    *
@@ -2575,6 +2528,106 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return recordDesignValuesList;
+  }
+
+  /**
+   * Creates the records.
+   *
+   * @param datasetId the dataset id
+   * @param recordVOs the record V os
+   * @param tableSchemaId the table schema id
+   * @param datasetType the dataset type
+   * @return the list
+   */
+  private List<RecordValue> createRecords(Long datasetId, String dataProviderCode,
+      List<RecordVO> recordVOs, DatasetTypeEnum datasetType, TableSchema tableSchema) {
+
+    String tableSchemaId = tableSchema.getIdTableSchema().toString();
+    Long datasetPartitionId =
+        partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(datasetId, USER)
+            .orElse(new PartitionDataSetMetabase()).getId();
+
+    DatasetValue dataset = new DatasetValue();
+    dataset.setId(datasetId);
+
+    TableValue tableValue = new TableValue();
+    tableValue.setId(tableRepository.findIdByIdTableSchema(tableSchemaId));
+    tableValue.setDatasetId(dataset);
+
+    List<RecordValue> recordValues = new ArrayList<>();
+
+    // Rebuild each record to ensure it contains proper fields
+    for (RecordVO recordVO : recordVOs) {
+      List<FieldVO> fieldVOs = recordVO.getFields();
+      List<FieldValue> fieldValues = new ArrayList<>();
+
+      RecordValue recordValue = new RecordValue();
+      recordValue.setDataProviderCode(dataProviderCode);
+      recordValue.setDatasetPartitionId(datasetPartitionId);
+      recordValue.setTableValue(tableValue);
+      recordValue.setFields(fieldValues);
+      recordValue.setIdRecordSchema(tableSchema.getRecordSchema().getIdRecordSchema().toString());
+      recordValues.add(recordValue);
+
+      for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+        FieldValue fieldValue = new FieldValue();
+        fieldValue.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+        fieldValue.setType(fieldSchema.getType());
+        fieldValue.setValue(filterFieldValue(fieldSchema, datasetType, fieldVOs));
+        fieldValue.setRecord(recordValue);
+        fieldValues.add(fieldValue);
+      }
+    }
+
+    return recordValues;
+  }
+
+  /**
+   * Filter field value.
+   *
+   * @param fieldSchema the field schema
+   * @param datasetType the dataset type
+   * @param fieldVOs the field V os
+   * @return the string
+   */
+  private String filterFieldValue(FieldSchema fieldSchema, DatasetTypeEnum datasetType,
+      List<FieldVO> fieldVOs) {
+
+    String value = "";
+    String fieldSchemaId = fieldSchema.getIdFieldSchema().toString();
+    DataType dataType = fieldSchema.getType();
+
+    // Skip if write is not allowed
+    if (Boolean.TRUE.equals(fieldSchema.getReadOnly())
+        && DatasetTypeEnum.DESIGN.equals(datasetType)) {
+      return value;
+    }
+
+    // Find the fieldVO with the fieldSchemaId if exists
+    for (FieldVO fieldVO : fieldVOs) {
+      if (fieldSchemaId.equals(fieldVO.getIdFieldSchema())) {
+        if (null != fieldVO.getValue()) {
+          value = fieldVO.getValue();
+
+          // Sort values if there are multiple
+          if (DataType.MULTISELECT_CODELIST.equals(dataType) || (DataType.LINK.equals(dataType)
+              && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
+            String[] values = value.trim().split("\\s*,\\s*");
+            Arrays.sort(values);
+            value = Arrays.stream(values).collect(Collectors.joining(", "));
+          }
+        }
+        fieldVOs.remove(fieldVO);
+        break;
+      }
+    }
+
+    // Cut string value to maximum length
+    if (value.length() > fieldMaxLength) {
+      value = value.substring(0, fieldMaxLength);
+    }
+
+    return value;
   }
 
   /**

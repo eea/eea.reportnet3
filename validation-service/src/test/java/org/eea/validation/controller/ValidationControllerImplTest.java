@@ -91,7 +91,7 @@ public class ValidationControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      validationController.validateDataSetData(null);
+      validationController.validateDataSetData(null, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
@@ -107,8 +107,9 @@ public class ValidationControllerImplTest {
   public void validateDataSetDataTest2() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    validationController.validateDataSetData(1L);
-    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());
+    validationController.validateDataSetData(1L, false);
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
   }
 
   /**
@@ -121,7 +122,7 @@ public class ValidationControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      validationController.validateDataSetData(1L);
+      validationController.validateDataSetData(1L, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.LOCKED, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.METHOD_LOCKED, e.getReason());

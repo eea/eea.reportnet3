@@ -16,12 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
-const SnapshotSlideBar = ({
-  isLoadingSnapshotListData,
-  isReleaseVisible,
-  isSnapshotDialogVisible,
-  snapshotListData
-}) => {
+const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
   const [slideBarStyle, setSlideBarStyle] = useState({});
   const dialogContext = useContext(DialogContext);
   const snapshotContext = useContext(SnapshotContext);
@@ -137,7 +132,7 @@ const SnapshotSlideBar = ({
         {isLoadingSnapshotListData ? (
           <Spinner />
         ) : snapshotListData.length > 0 ? (
-          <SnapshotsList snapshotListData={snapshotListData} isReleaseVisible={isReleaseVisible} />
+          <SnapshotsList snapshotListData={snapshotListData} />
         ) : (
           <h3>{resources.messages.snapshotsDoNotExist}</h3>
         )}

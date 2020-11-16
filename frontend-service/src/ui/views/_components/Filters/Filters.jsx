@@ -3,7 +3,6 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'reac
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import uuid from 'uuid';
 
 import styles from './Filters.module.scss';
@@ -80,14 +79,12 @@ export const Filters = ({
   }, [filterState.matchMode]);
 
   useEffect(() => {
-    if (filterState.filtered) {
-      getFilteredValue();
-    }
-  }, [filterState.filterBy]);
+    getFilteredSearchedStateValue();
+  }, [filterState.filtered, filterState.searched]);
 
   useEffect(() => {
-    getFilteredStateValue(filterState.filteredState);
-  }, [filterState.filtered, filterState.searched]);
+    getFilteredState();
+  }, [filterState.filterBy]);
 
   useEffect(() => {
     getFilteredSearched(filterState.filteredSearched);
@@ -104,19 +101,29 @@ export const Filters = ({
     return isNil(checkBox) ? false : checkBox.isChecked;
   };
 
-  const getFilteredStateValue = () => {
+  const getFilteredSearchedStateValue = () => {
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
   };
 
-  const getFilteredValue = () => {
-    const filteredByValues = Object.values(filterState.filterBy);
-    const filteredByValuesState = filteredByValues.map(filterBy =>
-      isNull(filterBy) ? false : filterBy.length === 0 ? false : true
-    );
-    const filteredValue = filteredByValuesState.includes(true) ? true : false;
+  const getFilteredState = () => {
+    let filteredStateValue = false;
+    if (filterState.checkboxes.length > 0) {
+      const filtersValue = [];
+      Object.values(filterState.filterBy).forEach(value => {
+        !isEmpty(value) && filtersValue.push(!isEmpty(value));
+        if (value.includes(true) && value.includes(false)) {
+          filtersValue.pop();
+        }
+        filteredStateValue = filtersValue.includes(true);
+      });
+    } else {
+      filteredStateValue = Object.values(filterState.filterBy)
+        .map(value => isEmpty(value))
+        .includes(false);
+    }
 
-    filterDispatch({ type: 'FILTERED', payload: { filteredValue } });
+    filterDispatch({ type: 'FILTERED', payload: { filteredStateValue } });
   };
 
   const getInitialState = () => {
@@ -207,7 +214,9 @@ export const Filters = ({
           checkboxOptions
         ),
         searchBy: '',
-        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions)
+        checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
+        filtered: false,
+        filteredSearched: false
       }
     });
   };

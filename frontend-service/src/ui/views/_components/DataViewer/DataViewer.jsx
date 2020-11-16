@@ -256,6 +256,12 @@ const DataViewer = withRouter(
     // }, [levelErrorTypes]);
 
     useEffect(() => {
+      if (isGroupedValidationSelected) {
+        dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+      }
+    }, [isGroupedValidationSelected]);
+
+    useEffect(() => {
       if (!addDialogVisible) setAddAnotherOne(false);
     }, [addDialogVisible]);
 
@@ -271,7 +277,7 @@ const DataViewer = withRouter(
       if (isValidationSelected) {
         setIsFilterValidationsActive(false);
         setLevelErrorValidations(levelErrorTypesWithCorrects);
-        onChangeIsValidationSelected(false);
+        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     }, [isValidationSelected]);
 
@@ -479,6 +485,13 @@ const DataViewer = withRouter(
       return record;
     };
 
+    const hasTextareas = () => {
+      if (!isNil(records) && !isEmpty(records.newRecord) && !isEmpty(records.newRecord.dataRow)) {
+        const filtered = records.newRecord.dataRow.filter(row => row.fieldData.type === 'TEXTAREA');
+        return filtered.length > 0;
+      }
+      return false;
+    };
     const hideValidationFilter = () => setIsValidationShown(false);
 
     const showGroupedValidationFilter = groupedBy => {
@@ -597,21 +610,24 @@ const DataViewer = withRouter(
     const onDeletePastedRecord = recordIndex =>
       dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
 
-    const onEditAddFormInput = (property, value) => {
+    const onEditAddFormInput = (property, value) =>
       dispatchRecords({ type: !isNewRecord ? 'SET_EDITED_RECORD' : 'SET_NEW_RECORD', payload: { property, value } });
-    };
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
-    const onEditorKeyChange = (props, event, record, isGeometry = false, geoJson = '') => {
+    const onEditorKeyChange = (props, event, record, isGeometry = false, geoJson = '', type = '') => {
       if (event.key === 'Escape') {
         let updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
         if (!isGeometry) {
-          onEditorSubmitValue(props, event.target.value, record);
+          if (type.toUpperCase() !== 'TEXTAREA') {
+            datatableRef.current.closeEditingCell();
+            onEditorSubmitValue(props, event.target.value, record);
+          }
         } else {
+          datatableRef.current.closeEditingCell();
           onEditorSubmitValue(props, geoJson, record);
         }
       } else if (event.key === 'Tab') {
@@ -1226,7 +1242,7 @@ const DataViewer = withRouter(
         )}
 
         {addDialogVisible && (
-          <div onKeyPress={onKeyPress}>
+          <div onKeyPress={!hasTextareas() && onKeyPress}>
             <Dialog
               blockScroll={false}
               className={`edit-table calendar-table ${styles.addEditRecordDialog}`}

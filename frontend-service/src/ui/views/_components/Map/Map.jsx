@@ -60,7 +60,7 @@ export const Map = ({
       ? typeof geoJson === 'object'
         ? JSON.stringify(geoJson)
         : geoJson
-      : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"rsid": "EPSG:4326"}}`
+      : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
   },
   selectedCRS = { label: 'WGS84 - 4326', value: 'EPSG:4326' }
 }) => {
@@ -191,7 +191,7 @@ export const Map = ({
 
   useEffect(() => {
     const inmMapGeoJson = JSON.parse(cloneDeep(mapGeoJson));
-    if (inmMapGeoJson.properties.rsid !== 'EPSG:4326') {
+    if (inmMapGeoJson.properties.srid !== 'EPSG:4326') {
       inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
     }
@@ -232,7 +232,7 @@ export const Map = ({
   const projectGeoJsonCoordinates = geoJsonData => {
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
     return proj4(
-      proj4(!isNil(parsedGeoJsonData) ? parsedGeoJsonData.properties.rsid : currentCRS.value),
+      proj4(!isNil(parsedGeoJsonData) ? parsedGeoJsonData.properties.srid : currentCRS.value),
       proj4('EPSG:4326'),
       parsedGeoJsonData.geometry.coordinates
     );

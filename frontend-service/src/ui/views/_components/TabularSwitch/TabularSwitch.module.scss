@@ -1,0 +1,51 @@
+.tabBar {
+  align-items: center;
+  background-color: var(--tabview-bg);
+  border-radius: 8px;
+  display: flex;
+  // left: 50%;
+  margin: 1rem 0;
+  padding: 0 1rem;
+  position: relative;
+  // transform: translateX(-50%);
+  // width: calc(300px + 2rem);
+
+  .tabItem {
+    align-items: center;
+    color: #818997;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: 0 0.5rem;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 150px;
+
+    .tabLabel {
+      margin: 0;
+      padding: 1rem;
+      pointer-events: none;
+      position: relative;
+    }
+  }
+
+  .indicator {
+    background-color: var(--bg);
+    border-radius: 6px;
+    box-shadow: 0px 2px 5px rgba(11, 37, 105, 0.04), 0px 1px 0px rgba(11, 37, 105, 0.04);
+    // box-shadow: inset 2px 2px 2px var(--gray-25);
+    height: 32px;
+    position: absolute;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: calc(150px - 1rem);
+  }
+
+  .selected {
+    color: var(--tabview-highlight-color);
+  }
+
+  .disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+}

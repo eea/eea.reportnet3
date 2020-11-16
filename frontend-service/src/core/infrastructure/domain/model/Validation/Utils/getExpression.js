@@ -1,5 +1,5 @@
+import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
 
 import { config } from 'conf';
 
@@ -50,7 +50,7 @@ export const getExpression = expression => {
     if (operatorType === 'date') {
       return {
         operator: operatorEquivalence,
-        params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
+        params: ['VALUE', dayjs(expressionValue).format('YYYY-MM-DD')]
       };
     }
 

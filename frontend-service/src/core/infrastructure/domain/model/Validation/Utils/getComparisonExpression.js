@@ -1,5 +1,5 @@
+import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
-import moment from 'moment';
 
 import { config } from 'conf';
 
@@ -43,7 +43,7 @@ export const getComparisonExpression = expression => {
     if (operatorType === 'date' && valueTypeSelector === 'value') {
       return {
         operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
-        params: [field1, moment(transField2).format('YYYY-MM-DD')]
+        params: [field1, dayjs(transField2).format('YYYY-MM-DD')]
       };
     }
 

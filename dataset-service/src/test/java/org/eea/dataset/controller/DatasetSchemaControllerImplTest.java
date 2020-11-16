@@ -303,6 +303,20 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetSchemaRepeatTest() throws EEAException {
+    Mockito.when(datasetMetabaseService.countDatasetNameByDataflowId(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals(EEAErrorMessage.DATASET_NAME_DUPLICATED, ex.getReason());
+      throw ex;
+    }
+
+  }
+
   /**
    * Creates the empty data set schema exception.
    *
@@ -451,6 +465,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
@@ -462,6 +479,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
         Mockito.any());
     try {
@@ -614,6 +634,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -622,6 +646,7 @@ public class DatasetSchemaControllerImplTest {
         .thenReturn(DataType.TEXT);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);
+
     dataSchemaControllerImpl.updateFieldSchema(1L, fieldSchemaVO);
   }
 
@@ -632,6 +657,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest2() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(false);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -652,6 +681,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest3() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -672,6 +705,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest4() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -692,6 +729,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest5() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(false);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -712,6 +753,8 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest6() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("datacustodian");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
     try {
       dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());

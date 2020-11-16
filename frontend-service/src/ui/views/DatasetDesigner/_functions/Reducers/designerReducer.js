@@ -1,3 +1,5 @@
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'GET_EXPORT_LIST':
@@ -18,7 +20,17 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaAllTables: payload.tables,
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          tableSchemaId:
+            QuerystringUtils.getUrlParamValue('tab') !== ''
+              ? QuerystringUtils.getUrlParamValue('tab')
+              : payload.tables.length === 0
+              ? ''
+              : payload.tables[0].tableSchemaId
+        },
         levelErrorTypes: payload.levelErrorTypes,
+        previousWebform: payload.previousWebform,
         schemaTables: payload.schemaTables,
         webform: payload.webform
       };
@@ -52,8 +64,16 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_REPLACE_DATA':
       return { ...state, replaceData: payload.value };
 
-    case 'IS_PREVIEW_MODE_ON':
-      return { ...state, isPreviewModeOn: payload.value };
+    case 'SET_VIEW_MODE':
+      const inmViewType = { ...state.viewType };
+      Object.keys(inmViewType).forEach(view => {
+        if (view === payload.value) {
+          inmViewType[view] = true;
+        } else {
+          inmViewType[view] = false;
+        }
+      });
+      return { ...state, viewType: inmViewType };
 
     case 'LOAD_EXTERNAL_OPERATIONS':
       return {
@@ -87,6 +107,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_UPDATE_TABLES':
       return { ...state, datasetSchemaAllTables: payload.tables, areUpdatingTables: true };
 
+    case 'ON_UPDATE_SCHEMA':
+      return { ...state, datasetSchema: { ...state.datasetSchema, tables: payload.schema } };
+
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
 
@@ -103,7 +126,8 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRecordErrorId: -1,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
-          selectedRuleMessage: payload.selectedRuleMessage
+          selectedRuleMessage: payload.selectedRuleMessage,
+          tableSchemaId: payload.tableSchemaId
         },
         isValidationViewerVisible: false
       };
@@ -114,14 +138,15 @@ export const designerReducer = (state, { type, payload }) => {
         dataViewerOptions: {
           ...state.dataViewerOptions,
           activeIndex: payload.activeIndex,
-          isGroupedValidationDeleted: false,
-          isGroupedValidationSelected: false,
+          isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected,
           isValidationSelected: payload.isValidationSelected,
           recordPositionId: payload.recordPositionId,
           selectedRecordErrorId: payload.selectedRecordErrorId,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
-          selectedRuleMessage: payload.selectedRuleMessage
+          selectedRuleMessage: payload.selectedRuleMessage,
+          tableSchemaId: payload.tableSchemaId
         },
         isValidationViewerVisible: false
       };
@@ -134,8 +159,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          isValidationSelected: payload,
-          isGroupedValidationSelected: payload
+          isValidationSelected: payload.isValidationSelected,
+          isGroupedValidationSelected: payload.isGroupedValidationSelected
         }
       };
 
@@ -148,8 +173,14 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_CHANGE_VIEW':
       return { ...state, viewType: payload.viewType };
 
+    case 'UPDATE_PREVIOUS_WEBFORM':
+      return { ...state, webform: state.previousWebform };
+
     case 'UPDATE_WEBFORM':
-      return { ...state, webform: payload };
+      return { ...state, previousWebform: state.webform, webform: payload };
+
+    case 'ON_UPDATE_TABS':
+      return { ...state, schemaTables: payload.data };
 
     default:
       return state;

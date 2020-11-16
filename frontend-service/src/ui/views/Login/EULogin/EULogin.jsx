@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 
 import styles from './EULogin.module.css';
 import logo from 'assets/images/logo-spinner.gif';
@@ -24,9 +23,9 @@ const EULogin = ({ location, history }) => {
       if (code && !userContext.isLoggedOut) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);
-        const rnLocalStorage = userStorage.getLocalStorage();
-        if (!isNil(rnLocalStorage)) {
-          userStorage.removeLocalProperty('redirectUrl');
+        const rnLocalStorage = userStorage.getSessionStorage();
+        if (!isNil(rnLocalStorage?.redirectUrl)) {
+          userStorage.removeSessionStorageProperty('redirectUrl');
           window.location.href = rnLocalStorage.redirectUrl;
         } else {
           history.push(getUrl(routes.DATAFLOWS));

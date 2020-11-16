@@ -1,8 +1,8 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
-import styles from '../BigButtonList/BigButtonList.module.css';
+import styles from '../BigButtonList/BigButtonList.module.scss';
 
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
@@ -20,11 +20,15 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
 export const BigButtonListRepresentative = ({
   dataflowState,
+  dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
+  isReleaseCreating,
   match,
   onCleanUpReceipt,
-  onShowSnapshotDialog,
-  setIsReceiptLoading
+  onOpenReleaseConfirmDialog,
+  setIsReceiptLoading,
+  uniqRepresentatives
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -69,7 +73,7 @@ export const BigButtonListRepresentative = ({
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowState.id, match.params.representativeId);
+      const response = await ConfirmationReceiptService.download(dataflowState.id, match.params.representativeId);
       downloadPdf(response);
       onCleanUpReceipt();
     } catch (error) {
@@ -104,12 +108,16 @@ export const BigButtonListRepresentative = ({
           <div className={styles.datasetItem}>
             {useBigButtonList({
               dataflowState,
+              dataProviderId,
               getDataHistoricReleases,
               handleRedirect,
+              isLeadReporterOfCountry,
+              isReleaseCreating,
               match,
               onLoadReceiptData,
+              onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
-              onShowSnapshotDialog
+              uniqRepresentatives
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
         </div>
@@ -123,7 +131,6 @@ export const BigButtonListRepresentative = ({
           footer={renderDialogFooter}
           header={`${resources.messages['historicReleases']} ${bigButtonListRepresentativeState.historicReleasesDialogHeader}`}
           onHide={() => onCloseHistoricReleasesDialogVisible(false)}
-          // style={{ width: '80%' }}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
             datasetId={bigButtonListRepresentativeState.datasetId}

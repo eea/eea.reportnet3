@@ -97,29 +97,6 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     }
   };
 
-  const onReleaseSnapshot = async () => {
-    try {
-      await SnapshotService.releaseByIdDesigner(datasetId, snapshotState.snapShotId);
-      onLoadSnapshotList();
-    } catch (error) {
-      if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
-        });
-      } else {
-        notificationContext.add({
-          type: 'SNAPSHOT_RELEASE_ERROR',
-          content: {
-            dataflowId,
-            datasetId
-          }
-        });
-      }
-    } finally {
-      setIsSnapshotDialogVisible(false);
-    }
-  };
-
   const onRestoreSnapshot = async () => {
     try {
       await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
@@ -146,8 +123,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     setIsSnapshotDialogVisible,
     onCreateSnapshot,
     onDeleteSnapshot,
-    onRestoreSnapshot,
-    onReleaseSnapshot
+    onRestoreSnapshot
   );
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);

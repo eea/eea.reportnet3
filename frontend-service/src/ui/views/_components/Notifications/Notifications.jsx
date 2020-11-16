@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
-import sanitizeHtml from 'sanitize-html';
+import DOMPurify from 'dompurify';
 
 import styles from './Notifications.module.scss';
 
@@ -63,11 +63,9 @@ const Notifications = () => {
         : (message = (
             <div
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(notification.message, {
-                  allowedTags: ['a', 'strong'],
-                  allowedAttributes: {
-                    a: ['href', 'title']
-                  }
+                __html: DOMPurify.sanitize(notification.message, {
+                  ALLOWED_TAGS: ['a', 'strong'],
+                  ALLOWED_ATTR: ['href', 'title']
                 })
               }}></div>
           ));
@@ -93,7 +91,7 @@ const Notifications = () => {
       });
     }
 
-    if (headerHeight === 70) {
+    if (headerHeight === 64) {
       setPosition({
         marginTop: `${-5}px`
       });

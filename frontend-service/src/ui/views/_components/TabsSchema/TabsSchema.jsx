@@ -1,5 +1,6 @@
 import React from 'react';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsSchema.module.css';
@@ -9,6 +10,9 @@ import { config } from 'conf';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
+
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
+import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
   activeIndex = 0,
@@ -33,13 +37,10 @@ export const TabsSchema = ({
   selectedRuleLevelError,
   selectedRuleMessage,
   showWriteButtons = true,
+  tableSchemaId,
   tables,
   tableSchemaColumns
 }) => {
-  let tableHasErrors = true;
-  if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
-    tableHasErrors = tables[activeIndex].hasErrors;
-  }
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
@@ -64,7 +65,7 @@ export const TabsSchema = ({
                   reporting={reporting}
                   showWriteButtons={showWriteButtons}
                   tableFixedNumber={table.fixedNumber}
-                  tableHasErrors={tableHasErrors}
+                  tableHasErrors={table.hasErrors}
                   tableId={table.id}
                   tableName={table.name}
                   tableReadOnly={table.readOnly}
@@ -75,8 +76,8 @@ export const TabsSchema = ({
                           .filter(f => f.length > 0)[0]
                       : []
                   }
-                  recordPositionId={table.id === activeIndex ? recordPositionId : -1}
-                  selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
+                  recordPositionId={table.id === tableSchemaId ? recordPositionId : -1}
+                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
@@ -97,9 +98,22 @@ export const TabsSchema = ({
 
   return (
     <TabView
-      activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
+      activeIndex={
+        !isNil(tables)
+          ? TabsUtils.getIndexByTableProperty(
+              !isNil(tableSchemaId)
+                ? tableSchemaId
+                : QuerystringUtils.getUrlParamValue('tab') !== ''
+                ? QuerystringUtils.getUrlParamValue('tab')
+                : '',
+              tables,
+              'id'
+            )
+          : 0
+      }
       onTabChange={onTabChange}
-      renderActiveOnly={false}>
+      renderActiveOnly={false}
+      tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>
   );

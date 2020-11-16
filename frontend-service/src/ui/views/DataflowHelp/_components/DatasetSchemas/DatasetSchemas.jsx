@@ -45,6 +45,27 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     }
   }, [extensionsOperationsList, uniqueList, validationList]);
 
+  const onGetReferencedFieldName = referenceId => {
+    const fieldObj = {};
+    if (!isNil(datasetsSchemas) && !isEmpty(datasetsSchemas)) {
+      datasetsSchemas.forEach(dataset => {
+        if (!isUndefined(dataset.tables)) {
+          dataset.tables.forEach(table => {
+            table.records.filter(record => {
+              record.fields.forEach(field => {
+                if (field.fieldId === referenceId) {
+                  fieldObj.tableName = table.tableSchemaName;
+                  fieldObj.fieldName = field.name;
+                }
+              });
+            });
+          });
+        }
+      });
+      return fieldObj;
+    }
+  };
+
   const filterData = (designDataset, data) => {
     if (!isUndefined(data)) {
       const filteredData = data.filter(list => list.datasetSchemaId === designDataset.datasetSchemaId);
@@ -286,10 +307,11 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
           return (
             <DatasetSchema
               designDataset={designDataset}
-              key={i}
+              extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
               index={i}
               isCustodian={isCustodian}
-              extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+              key={i}
+              onGetReferencedFieldName={onGetReferencedFieldName}
               uniqueList={filterData(designDataset, uniqueList)}
               validationList={filterData(designDataset, validationList)}
             />

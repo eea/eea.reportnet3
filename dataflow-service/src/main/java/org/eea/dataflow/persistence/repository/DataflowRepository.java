@@ -87,6 +87,7 @@ public interface DataflowRepository
    *
    * @param idDataflow the id dataflow
    */
+  @Override
   @Transactional
   @Modifying
   @Query("DELETE FROM Dataflow d where d.id = :idDataflow")
@@ -100,5 +101,25 @@ public interface DataflowRepository
    * @return the list
    */
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(List<Long> ids);
+
+  /**
+   * Gets the datasets status.
+   *
+   * @param datasetIds the dataset ids
+   * @return the datasets status
+   */
+  @Query(nativeQuery = true,
+      value = "select  df.id as id ,ds.status as status from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
+  List<IDatasetStatus> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
+
+  /**
+   * The Interface IDatasetStatus.
+   */
+  public interface IDatasetStatus {
+    Long getId();
+
+    String getStatus();
+  }
+
 
 }

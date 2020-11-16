@@ -12,7 +12,7 @@ export const apiDataflow = {
   },
   all: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
 
     return response.data;
@@ -25,7 +25,7 @@ export const apiDataflow = {
   },
   accepted: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
     return response.data;
   },
@@ -40,7 +40,7 @@ export const apiDataflow = {
   },
   completed: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
     return response.data;
   },
@@ -50,6 +50,12 @@ export const apiDataflow = {
       data: { name, description, obligation: { obligationId } }
     });
     return response;
+  },
+  datasetsFinalFeedback: async dataflowId => {
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.datasetsFinalFeedback, { dataflowId: dataflowId })
+    });
+    return response.data;
   },
   datasetsValidationStatistics: async datasetSchemaId => {
     const response = await HTTPRequester.get({
@@ -96,7 +102,7 @@ export const apiDataflow = {
   },
   pending: async () => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)
+      url: getUrl(DataflowConfig.getDataflows)
     });
 
     return response.data;

@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -116,7 +117,7 @@ const errorsById = async (
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
     datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalErrors: datasetErrorsDTO.totalRecords,
+    totalRecords: datasetErrorsDTO.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
   });
 
@@ -125,9 +126,11 @@ const errorsById = async (
       datasetErrorDTO &&
       new DatasetError({
         entityType: datasetErrorDTO.typeEntity,
+        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         objectId: datasetErrorDTO.idObject,
+        shortCode: datasetErrorDTO.shortCode,
         tableSchemaId: datasetErrorDTO.idTableSchema,
         tableSchemaName: datasetErrorDTO.nameTableSchema,
         validationDate: datasetErrorDTO.validationDate,
@@ -239,10 +242,11 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
-
   const dataset = new Dataset({
     datasetSchemaName: datasetTableDataDTO.dataSetName,
-    datasetSchemaId: datasetTableDataDTO.datasetSchema
+    datasetSchemaId: datasetTableDataDTO.datasetSchema,
+    datasetFeedbackStatus:
+      !isNil(datasetTableDataDTO.status) && capitalize(datasetTableDataDTO.status.split('_').join(' '))
   });
   return dataset;
 };
@@ -289,7 +293,8 @@ const groupedErrorsById = async (
     datasetId: datasetErrorsDTO.idDataset,
     datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
     datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalErrors: datasetErrorsDTO.totalRecords,
+    totalErrors: datasetErrorsDTO.totalErrors,
+    totalRecords: datasetErrorsDTO.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
   });
 
@@ -298,13 +303,15 @@ const groupedErrorsById = async (
       datasetErrorDTO &&
       new DatasetError({
         entityType: datasetErrorDTO.typeEntity,
+        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         numberOfRecords: datasetErrorDTO.numberOfRecords,
         objectId: datasetErrorDTO.idObject,
         ruleId: datasetErrorDTO.idRule,
+        shortCode: datasetErrorDTO.shortCode,
         tableSchemaId: datasetErrorDTO.idTableSchema,
-        tableSchemaName: datasetErrorDTO.originName,
+        tableSchemaName: datasetErrorDTO.nameTableSchema,
         validationDate: datasetErrorDTO.validationDate,
         validationId: datasetErrorDTO.idValidation
       })
@@ -343,9 +350,9 @@ const parseValue = (type, value, feToBe = false) => {
     const inmValue = JSON.parse(cloneDeep(value));
     inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
     if (!feToBe) {
-      inmValue.properties.rsid = `EPSG:${inmValue.properties.rsid}`;
+      inmValue.properties.srid = `EPSG:${inmValue.properties.srid}`;
     } else {
-      inmValue.properties.rsid = inmValue.properties.rsid.split(':')[1];
+      inmValue.properties.srid = inmValue.properties.srid.split(':')[1];
     }
     return JSON.stringify(inmValue);
   }
@@ -430,7 +437,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.idTableSchema;
-  table.totalRecords = tableDataDTO.totalRecords;
+  table.totalRecords = ruleId === '' ? tableDataDTO.totalRecords : tableDataDTO.totalFilteredRecords;
   table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
   let field;
@@ -540,6 +547,15 @@ const updateRecordsById = async (datasetId, record) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
 };
 
+const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {
+  return await apiDataset.updateDatasetFeedbackStatus(
+    dataflowId,
+    datasetId,
+    message,
+    feedbackStatus.toUpperCase().split(' ').join('_')
+  );
+};
+
 const updateDatasetSchemaDesign = async (datasetId, datasetSchema) => {
   return await apiDataset.updateDatasetSchemaById(datasetId, datasetSchema);
 };
@@ -576,6 +592,10 @@ const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) 
 const validateDataById = async datasetId => {
   const dataValidation = await apiDataset.validateById(datasetId);
   return dataValidation;
+};
+
+const validateSqlRules = async (datasetId, datasetSchemaId) => {
+  return await apiDataset.validateSqlRules(datasetId, datasetSchemaId);
 };
 
 // const getPercentage = valArr => {
@@ -615,11 +635,13 @@ export const ApiDatasetRepository = {
   schemaById,
   tableDataById,
   updateDatasetSchemaDesign,
+  updateDatasetFeedbackStatus,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
-  validateDataById
+  validateDataById,
+  validateSqlRules
 };

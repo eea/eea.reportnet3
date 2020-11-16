@@ -1,6 +1,7 @@
 export class Dataset {
   constructor({
     dataProviderId,
+    datasetFeedbackStatus,
     datasetId,
     datasetSchemaDescription,
     datasetSchemaId,
@@ -16,9 +17,11 @@ export class Dataset {
     tableStatisticValues,
     totalErrors,
     totalFilteredErrors,
+    totalRecords,
     webform
   } = {}) {
     this.dataProviderId = dataProviderId;
+    this.datasetFeedbackStatus = datasetFeedbackStatus;
     this.datasetId = datasetId;
     this.datasetSchemaDescription = datasetSchemaDescription;
     this.datasetSchemaId = datasetSchemaId;
@@ -34,6 +37,7 @@ export class Dataset {
     this.tableStatisticValues = tableStatisticValues;
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
+    this.totalRecords = totalRecords;
     this.webform = webform;
   }
 }

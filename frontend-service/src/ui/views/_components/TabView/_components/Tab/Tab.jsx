@@ -21,10 +21,10 @@ const Tab = ({
   checkEditingTabs,
   className,
   closeIcon,
+  designMode = false,
   divScrollTabsRef,
   disabled = false,
   editable = false,
-  designMode = false,
   hasPKReferenced = false,
   header,
   headerStyle,
@@ -46,6 +46,7 @@ const Tab = ({
   rightIcon,
   scrollTo,
   selected,
+  tableSchemaId,
   totalTabs
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -74,14 +75,14 @@ const Tab = ({
         label: resources.messages['delete'],
         icon: config.icons['trash'],
         command: () => {
-          if (!isUndefined(onTabDeleteClick) && !addTab) {
-            onTabDeleteClick(index);
+          if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
+            onTabDeleteClick(tableSchemaId);
           }
         },
         disabled: hasPKReferenced
       }
     ]);
-  }, []);
+  }, [tableSchemaId, hasPKReferenced]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -108,7 +109,7 @@ const Tab = ({
       //For firefox
       event.dataTransfer.setData('text/plain', null);
       if (!isUndefined(onTabDragAndDropStart)) {
-        onTabDragAndDropStart(index, selected, header);
+        onTabDragAndDropStart(index, tableSchemaId);
       }
     }
   };
@@ -117,7 +118,7 @@ const Tab = ({
     if (!isUndefined(initialTabIndexDrag)) {
       setIsDragging(false);
       if (!isUndefined(onTabDragAndDropStart)) {
-        onTabDragAndDropStart(index);
+        onTabDragAndDropStart(index, tableSchemaId);
       }
     }
   };
@@ -300,7 +301,7 @@ const Tab = ({
               if (!isUndefined(checkEditingTabs)) {
                 if (!checkEditingTabs()) {
                   if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
-                    onTabDeleteClick(index);
+                    onTabDeleteClick(tableSchemaId);
                   }
                 }
               }
@@ -373,7 +374,7 @@ const Tab = ({
                 if (!isUndefined(checkEditingTabs)) {
                   if (!checkEditingTabs()) {
                     if (!isUndefined(onTabDeleteClick)) {
-                      onTabDeleteClick(index);
+                      onTabDeleteClick(tableSchemaId);
                     }
                   }
                 }

@@ -128,3 +128,8 @@
 .p-listbox-list-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
 }
+.listbox-spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

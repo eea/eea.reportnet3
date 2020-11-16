@@ -180,7 +180,7 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
   public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file,
-      @LockCriteria(name = "idTableSchema") @PathVariable("idTableSchema") String idTableSchema,
+      @LockCriteria(name = "tableSchemaId") @PathVariable("idTableSchema") String idTableSchema,
       @RequestParam(value = "replace", required = false) boolean replace) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -293,7 +293,8 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("{id}/deleteImportData")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void deleteImportData(@LockCriteria(name = "id") @PathVariable("id") Long dataSetId) {
+  public void deleteImportData(
+      @LockCriteria(name = "datasetId") @PathVariable("id") Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -383,8 +384,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateRecord")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateRecords(@PathVariable("id") Long datasetId,
+  public void updateRecords(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestBody List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
@@ -416,8 +418,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @DeleteMapping("/{id}/record/{recordId}")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void deleteRecord(@PathVariable("id") Long datasetId,
+  public void deleteRecord(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @PathVariable("recordId") String recordId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
@@ -449,42 +452,22 @@ public class DataSetControllerImpl implements DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param records the records
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{id}/table/{idTableSchema}/record")
+  @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void insertRecords(@PathVariable("id") Long datasetId,
-      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records) {
-    if (datasetId == null || records == null || records.isEmpty()) {
-      LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    // Not allow insert if the table is marked as read only. This not applies to design datasets
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE.equals(
-            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
-      LOG_ERROR.error("Error inserting records in the datasetId {}. The table is read only",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-    }
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, idTableSchema,
-            EntityTypeEnum.TABLE))) {
-      LOG_ERROR.error(
-          "Error inserting records in the datasetId {}. The table has a fixed number of records",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
-    }
+  public void insertRecords(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records) {
     try {
-      updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
+      updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting records in the datasetId {}. Message {}:", datasetId,
-          e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error("Error inserting records: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -626,8 +609,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field) {
+  public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @RequestBody FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
             EntityTypeEnum.FIELD))) {
@@ -701,8 +686,10 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PostMapping("/{datasetId}/etlImport")
+  @LockMethod
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+  public void etlImportDataset(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId) {
 
