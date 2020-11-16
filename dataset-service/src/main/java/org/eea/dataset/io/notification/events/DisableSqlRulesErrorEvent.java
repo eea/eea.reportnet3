@@ -18,7 +18,7 @@ public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DISABLE_SQL_RULES_ERROR_EVENT;
+    return EventType.DISABLE_RULES_ERROR_EVENT;
   }
 
   /**

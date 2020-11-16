@@ -167,7 +167,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           .invalidRules(rulesUnchecked.getRules().size())
           .disabledRules(rulesdisabled.getRules().size()).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
+      releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
     }
   }
 

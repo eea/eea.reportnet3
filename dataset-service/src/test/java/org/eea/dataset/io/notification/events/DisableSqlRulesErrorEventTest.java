@@ -36,7 +36,7 @@ public class DisableSqlRulesErrorEventTest {
    */
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.DISABLE_SQL_RULES_ERROR_EVENT,
+    Assert.assertEquals(EventType.DISABLE_RULES_ERROR_EVENT,
         disableSqlRulesErrorEvent.getEventType());
   }
 

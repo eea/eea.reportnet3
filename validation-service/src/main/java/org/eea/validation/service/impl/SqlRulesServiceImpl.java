@@ -724,7 +724,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           .invalidRules(rulesUnchecked.getRules().size())
           .disabledRules(rulesdisabled.getRules().size()).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+      releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
     } else {
 
       NotificationVO notificationVO = NotificationVO.builder()
