@@ -171,7 +171,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      // setIsLoading(true);
       const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
@@ -184,23 +183,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       ) {
         history.push(getUrl(routes.DATAFLOWS));
       }
-      // setIsLoading(true);
     }
   }, [userContext.contextRoles, designerState.metaData]);
-
-  useEffect(() => {
-    if (!isUndefined(userContext.contextRoles)) {
-      designerDispatch({
-        type: 'LOAD_PERMISSIONS',
-        payload: {
-          permissions: userContext.hasPermission(
-            [config.permissions.LEAD_REPORTER],
-            `${config.permissions.DATASET}${datasetId}`
-          )
-        }
-      });
-    }
-  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {

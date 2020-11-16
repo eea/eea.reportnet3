@@ -115,6 +115,7 @@ const DataFormFieldEditor = ({
       const inmMapGeoJson = cloneDeep(fieldValue !== '' ? fieldValue : fieldEmptyPointValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
+      console.log('save point');
       parsedInmMapGeoJson.properties.srid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }

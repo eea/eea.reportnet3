@@ -343,7 +343,8 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 };
 
 const parseValue = (type, value, feToBe = false) => {
-  if (type === 'POINT' && value !== '' && !isNil(value)) {
+  if ((type === 'POINT' || type === 'LINESTRING' || type === 'POLYGON') && value !== '' && !isNil(value)) {
+    debugger;
     if (!isValidJSON(value)) {
       return '';
     }

@@ -52,12 +52,16 @@ const FieldEditor = ({
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
 
+  console.log(RecordUtils.getCellInfo(colsSchema, cells.field).type, RecordUtils.getCellValue(cells, cells.field));
   const [currentCRS, setCurrentCRS] = useState(
-    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
+    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT' ||
+      RecordUtils.getCellInfo(colsSchema, cells.field).type === 'LINESTRING' ||
+      RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POLYGON'
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
-        ? crs.filter(
-            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
-          )[0]
+        ? crs.filter(crsItem => {
+            console.log(crsItem.value, JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid);
+            return crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid;
+          })[0]
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
@@ -130,6 +134,7 @@ const FieldEditor = ({
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
       if (withCRS) {
+        console.log('CHANGE POINT');
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
         geoJson.properties.srid = crs.value;
@@ -428,78 +433,6 @@ const FieldEditor = ({
             <InputText
               disabled={true}
               keyfilter={RecordUtils.getFilter(type)}
-              onBlur={e => {
-                onEditorSubmitValue(
-                  cells,
-                  changeLine(
-                    RecordUtils.getCellValue(cells, cells.field) !== ''
-                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                      : JSON.parse(fieldEmptyPointValue),
-                    e.target.value,
-                    currentCRS.value,
-                    false
-                  ),
-                  record
-                );
-                onEditorValueChange(
-                  cells,
-                  changePoint(
-                    RecordUtils.getCellValue(cells, cells.field) !== ''
-                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                      : JSON.parse(fieldEmptyPointValue),
-                    e.target.value,
-                    currentCRS.value,
-                    false
-                  )
-                );
-              }}
-              onChange={e =>
-                onEditorValueChange(
-                  cells,
-                  changePoint(
-                    RecordUtils.getCellValue(cells, cells.field) !== ''
-                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                      : JSON.parse(fieldEmptyPointValue),
-                    e.target.value,
-                    currentCRS.value,
-                    false,
-                    false,
-                    false
-                  )
-                )
-              }
-              onFocus={e => {
-                e.preventDefault();
-                onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field));
-              }}
-              onKeyDown={e => {
-                changePoint(
-                  RecordUtils.getCellValue(cells, cells.field) !== ''
-                    ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                    : JSON.parse(fieldEmptyPointValue),
-                  e.target.value,
-                  currentCRS.value,
-                  false,
-                  true,
-                  false
-                );
-                onEditorKeyChange(
-                  cells,
-                  e,
-                  record,
-                  true,
-                  changePoint(
-                    RecordUtils.getCellValue(cells, cells.field) !== ''
-                      ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                      : JSON.parse(fieldEmptyPointValue),
-                    e.target.value,
-                    currentCRS.value,
-                    false,
-                    true,
-                    false
-                  )
-                );
-              }}
               // style={{ marginRight: '2rem' }}
               type="text"
               value={
@@ -517,32 +450,6 @@ const FieldEditor = ({
                 disabled={isMapDisabled}
                 options={crs}
                 optionLabel="label"
-                onChange={e => {
-                  onEditorSubmitValue(
-                    cells,
-                    changePoint(
-                      RecordUtils.getCellValue(cells, cells.field) !== ''
-                        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                        : JSON.parse(fieldEmptyPointValue),
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
-                      e.target.value,
-                      true
-                    ),
-                    record
-                  );
-                  onEditorValueChange(
-                    cells,
-                    changePoint(
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
-                      e.target.value
-                    ),
-                    e.target.value
-                  );
-
-                  setCurrentCRS(e.target.value);
-                  onChangePointCRS(e.target.value.value);
-                }}
                 placeholder="Select a CRS"
                 value={currentCRS}
               />
