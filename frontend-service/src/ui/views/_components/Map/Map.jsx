@@ -84,7 +84,7 @@ export const Map = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
-
+  console.log({ geoJson });
   const themes = [
     { label: 'Topographic', value: 'Topographic' },
     { label: 'Streets', value: 'Streets' },
@@ -266,7 +266,7 @@ export const Map = ({
   };
 
   return (
-    <layer>
+    <>
       {/* <label className={styles.mapSelectMessage}>{resources.messages['mapSelectPointMessage']}</label> */}
       {hasLegend && (
         <div className={styles.pointLegendWrapper}>
@@ -358,12 +358,15 @@ export const Map = ({
           </BaseLayer>
         </LayersControl> */}
           {Object.values(enabledDrawElements).filter(enabledDrawElement => enabledDrawElement).length > 0 && (
-            <FeatureGroup ref={featureGroupRef => onFeatureGroupReady(featureGroupRef)}>
+            <FeatureGroup>
+              {/* ref={featureGroupRef => onFeatureGroupReady(featureGroupRef)}> */}
               <EditControl
                 position="topright"
                 onEdited={e => console.log(e)}
                 onCreated={e => {
-                  console.log(e.target.getLatLngs());
+                  console.log(e.target, e.layer, e.layer.toGeoJSON());
+                  console.log(JSON.stringify(e.layer.toGeoJSON()));
+                  setMapGeoJson(JSON.stringify(e.layer.toGeoJSON()));
                   // e.layers.eachLayer(a => {
                   //   console.log(a.toGeoJSON());
                   // });
@@ -378,6 +381,7 @@ export const Map = ({
               />
             </FeatureGroup>
           )}
+          {console.log(JSON.parse(mapGeoJson), geoJson)}
           {MapUtils.checkValidJSONCoordinates(geoJson) && (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}
@@ -401,6 +405,6 @@ export const Map = ({
           )}
         </MapComponent>
       </div>
-    </layer>
+    </>
   );
 };

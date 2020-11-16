@@ -98,7 +98,7 @@ export const recordReducer = (state, { type, payload }) => {
     case 'OPEN_MAP':
       const inmDrawElements = { ...state.drawElements };
       switch (payload.fieldType.toLowerCase()) {
-        case 'line':
+        case 'linestring':
           inmDrawElements['polyline'] = true;
           break;
         case 'point':
@@ -131,6 +131,7 @@ export const recordReducer = (state, { type, payload }) => {
 
     case 'SAVE_MAP_COORDINATES':
       const inmMapGeoJson = cloneDeep(state.mapGeoJson);
+      console.log({ inmMapGeoJson });
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(payload.split(','));
       parsedInmMapGeoJson.properties.srid = state.newPointCRS;
