@@ -168,7 +168,7 @@ const getFieldTypeValue = fieldType => {
     { fieldType: 'Email', value: 'Email' },
     { fieldType: 'URL', value: 'URL' },
     { fieldType: 'Phone', value: 'Phone number' },
-    { fieldType: 'Line', value: 'Line' },
+    { fieldType: 'Linestring', value: 'Line' },
     { fieldType: 'Point', value: 'Point' },
     { fieldType: 'Polygon', value: 'Polygon' },
     { fieldType: 'Codelist', value: 'Single select' },

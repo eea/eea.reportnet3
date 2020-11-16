@@ -70,7 +70,7 @@ export const FieldDesigner = ({
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Line', value: 'Line', fieldTypeIcon: 'line' },
+    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },

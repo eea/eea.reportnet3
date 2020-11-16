@@ -421,7 +421,7 @@ const FieldEditor = ({
             </div>
           </div>
         );
-      case 'LINE':
+      case 'LINESTRING':
       case 'POLYGON':
         return (
           <div className={styles.pointWrapper}>

@@ -363,6 +363,7 @@ export const Map = ({
                 position="topright"
                 onEdited={e => console.log(e)}
                 onCreated={e => {
+                  console.log(e.target.getLatLngs());
                   // e.layers.eachLayer(a => {
                   //   console.log(a.toGeoJSON());
                   // });

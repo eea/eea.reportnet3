@@ -69,7 +69,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       case 'CODELIST':
         return codelistTextCharacters;
       case 'POINT':
-      case 'LINE':
+      case 'LINESTRING':
       case 'POLYGON':
         return textCharacters;
       case 'DATE':
