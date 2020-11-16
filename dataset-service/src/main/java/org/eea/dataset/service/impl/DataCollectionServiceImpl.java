@@ -345,7 +345,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
               .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
               .disabledRules(disabledRules).build();
-          LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+          LOG.info("Data Collection creation proccess stopped by SQL rules contains errors");
           // remove lock
           String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
           List<Object> criteria = new ArrayList<>();
