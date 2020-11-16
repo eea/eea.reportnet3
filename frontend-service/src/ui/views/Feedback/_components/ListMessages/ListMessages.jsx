@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import last from 'lodash/last';
 
 import styles from './ListMessages.module.scss';
 
@@ -16,18 +17,21 @@ export const ListMessages = ({
   isCustodian,
   isLoading,
   lazyLoading = true,
+  messageFirstLoad,
   messages = [],
   newMessageAdded,
-  onLazyLoad
+  onFirstLoadMessages,
+  onLazyLoad,
+  onUpdateNewMessageAdded
 }) => {
   const messagesWrapperRef = useRef();
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
     isLoadingNewMessages: false,
-    separatorIndex: -1
+    separatorIndex: -1,
+    listContent: null,
+    resetScrollStates: null
   });
-
-  const [listContent, setListContent] = useState();
 
   const { isLoadingNewMessages, separatorIndex } = listMessagesState;
 
@@ -46,7 +50,10 @@ export const ListMessages = ({
   }, [messages]);
 
   useEffect(() => {
-    setListContent(renderMessageList());
+    dispatchListMessages({
+      type: 'SET_LIST_CONTENT',
+      payload: renderMessageList()
+    });
   }, [isLoading, isLoadingNewMessages, messages]);
 
   const getIndexByHeader = messagesArray => {
@@ -58,18 +65,42 @@ export const ListMessages = ({
   };
 
   useEffect(() => {
-    dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
-    if (newMessageAdded) {
-      messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
+    if (newMessageAdded || messageFirstLoad) {
+      if (messageFirstLoad) {
+        dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
+      }
+      const messages = document.querySelectorAll('.rep-feedback-message');
+      if (!isEmpty(messages)) {
+        const lastMessage = last(messages);
+        messagesWrapperRef.current.scrollTop = lastMessage.offsetTop;
+        dispatchListMessages({
+          type: 'UPDATE_SCROLL_STATES',
+          payload: true
+        });
+      }
     }
-  }, [messages]);
+    setTimeout(() => {
+      dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
+    }, 500);
+  }, [messages, listMessagesState.listContent]);
+
+  useEffect(() => {
+    if (listMessagesState.resetScrollStates) {
+      onFirstLoadMessages(false);
+      onUpdateNewMessageAdded(false);
+      dispatchListMessages({
+        type: 'UPDATE_SCROLL_STATES',
+        payload: false
+      });
+    }
+  }, [listMessagesState.resetScrollStates]);
 
   const onScroll = e => {
     if (!isNil(e)) {
       if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
         dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
         onLazyLoad();
-        messagesWrapperRef.current.scrollTop = 1;
+        messagesWrapperRef.current.scrollTop = 5;
       }
     }
   };
@@ -77,13 +108,6 @@ export const ListMessages = ({
   const renderMessageList = () => {
     if (isLoading) {
       return <Spinner className={styles.spinnerLoadingMessages} />;
-    }
-    if (isLoadingNewMessages) {
-      return (
-        <div className={styles.lazyLoadingWrapper}>
-          <Spinner className={styles.lazyLoadingSpinner} />
-        </div>
-      );
     }
     if (isEmpty(messages)) {
       return (
@@ -94,8 +118,14 @@ export const ListMessages = ({
     }
     return (
       <div className={styles.scrollMessagesWrapper}>
+        {isLoadingNewMessages && (
+          <div className={styles.lazyLoadingWrapper}>
+            <Spinner className={styles.lazyLoadingSpinner} />
+          </div>
+        )}
         {messages.map((message, i) => (
           <Message
+            key={i}
             message={message}
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
@@ -108,7 +138,7 @@ export const ListMessages = ({
 
   return (
     <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
-      {listContent}
+      {listMessagesState.listContent}
     </div>
   );
 };

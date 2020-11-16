@@ -57,6 +57,7 @@ export class InputTextarea extends Component {
     cols: 10,
     displayedHeight: 100,
     expandableOnClick: false,
+    moveCaretToEnd: false,
     onInput: null,
     rows: 1,
     tooltip: null,
@@ -67,6 +68,7 @@ export class InputTextarea extends Component {
   static propTypes = {
     autoResize: PropTypes.bool,
     expandableOnClick: PropTypes.bool,
+    moveCaretToEnd: PropTypes.bool,
     onInput: PropTypes.func,
     cols: PropTypes.number,
     rows: PropTypes.number,
@@ -95,6 +97,11 @@ export class InputTextarea extends Component {
     if (this.props.expandableOnClick) {
       this.element.style.height = `${this.props.displayedHeight}px`;
       this.element.style.boxShadow = 'var(--inputtextarea-box-shadow)';
+    }
+    if (this.props.moveCaretToEnd) {
+      this.element.selectionStart = this.props.value.length;
+      this.element.selectionEnd = this.props.value.length;
+      this.element.scrollTop = this.element.scrollHeight;
     }
   }
 

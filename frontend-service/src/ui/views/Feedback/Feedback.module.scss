@@ -47,8 +47,8 @@
       }
       .sendMessageButton {
         width: 10%;
-        height: 100%;
-        flex: 1 auto;
+        height: 48px;
+        align-self: flex-start;
         @media (max-width: 320px) {
           :global .pi-comment {
             display: none;

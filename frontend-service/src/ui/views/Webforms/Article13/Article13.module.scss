@@ -1,4 +1,5 @@
 .title {
+  color: var(--main-font-color);
 }
 
 .switch {
@@ -12,91 +13,76 @@
 }
 
 .tabBar {
-  align-items: center;
-  background-color: #f1f4f7;
-  border-radius: 8px;
-  display: flex;
-  padding: 0 1rem;
+  left: 50%;
   position: relative;
-  width: calc(300px + 2rem);
+  transform: translateX(-50%);
+  width: calc(150px + 2rem);
 
-  .tabItem {
-    align-items: center;
-    color: #818997;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    padding: 0 0.5rem;
-    position: relative;
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    width: 150px;
+  // align-items: center;
+  // display: flex;
+  height: 55px;
 
-    .tabLabel {
-      margin: 0;
-      padding: 1rem;
-      pointer-events: none;
-      position: relative;
-    }
-  }
+  margin: 1rem 0 1rem 0;
+  opacity: 1;
+  transition: all 0.1s ease 0.05s;
 
-  .indicator {
-    background-color: var(--bg);
-    border-radius: 6px;
-    box-shadow: 0px 2px 5px rgba(11, 37, 105, 0.04), 0px 1px 0px rgba(11, 37, 105, 0.04);
-    height: 32px;
-    position: absolute;
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    width: calc(150px - 1rem);
-  }
-
-  .selected {
-    color: var(--c-corporate-blue);
+  &.hide {
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
   }
 }
 
 .tableList {
+  display: flex;
+  flex-direction: column-reverse;
   padding: 0;
 
   .tableListItem {
     align-items: center;
+    background-color: var(--tabview-bg);
     border-radius: 6px;
-    border: 0.1rem solid #818997;
     display: flex;
-    justify-content: space-between;
     list-style: none;
     margin: 1rem 0;
     padding: 0.5rem;
+    color: var(--main-font-color);
 
-    .tableListTitleWrapper {
-      background: var(--c-corporate-blue-lighter);
+    .tableListTitle {
       border-radius: 6px;
-      color: var(--white);
+      padding: 0.5rem;
+      text-transform: capitalize;
+    }
+
+    .tableListId {
+      align-items: center;
+      border-radius: 50%;
+      box-shadow: var(--card-item-box-shadow);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      margin: 0.5rem 1rem;
+      min-height: 40px;
+      min-width: 40px;
       padding: 0.5rem;
 
-      .icon {
-        color: var(--white);
-      }
-
-      .tableListTitle {
-        text-transform: capitalize;
+      &:hover {
+        box-shadow: var(--card-item-box-shadow-hover);
+        transform: scale(1.02, 1.02);
+        transition: transform 0.1s ease;
       }
     }
 
-    .tableListIds {
-      padding: 0.5rem;
-      width: 75%;
+    .selected {
+      background-color: var(--c-corporate-blue-lighter);
+      color: var(--white);
+    }
 
-      .tableListId {
-        border: 0.1rem solid var(--c-corporate-blue-lighter);
-        cursor: pointer;
-        margin: 0.5rem;
-        padding: 0.5rem;
-      }
-
-      .selected {
-        background-color: var(--c-corporate-blue-lighter);
-        color: var(--white);
-      }
+    .addButton {
+      position: absolute;
+      right: 0;
+      transform: translateX(-50%);
     }
   }
 }

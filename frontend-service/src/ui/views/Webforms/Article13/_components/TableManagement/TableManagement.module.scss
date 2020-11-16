@@ -1,8 +1,17 @@
-.addButtons {
-  display: flex;
-  justify-content: space-around;
-  margin: 2rem;
-}
-.invisibleHeader {
-  display: none;
+.table {
+  margin-bottom: 2rem;
+
+  .iconTooltipLevelError {
+    width: 1.5em;
+  }
+
+  .iconTooltipWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .invisibleHeader {
+    display: none;
+  }
 }

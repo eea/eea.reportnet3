@@ -67,9 +67,9 @@ export const WebformView = ({
       return (
         <Button
           className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
-          icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : null}
+          icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
           iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-          iconPos={'right'}
+          iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
           key={i}
           label={webform.label}
           onClick={() => onChangeWebformTab(webform.name)}

@@ -62,7 +62,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   @Override
   @Transactional
   public TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
-      Long datasetId, Long idTable) {
+      Long datasetId, Long idTable) throws SQLException {
     Session session = (Session) entityManager.getDelegate();
     return session.doReturningWork(new ReturningWork<TableValue>() {
       @Override

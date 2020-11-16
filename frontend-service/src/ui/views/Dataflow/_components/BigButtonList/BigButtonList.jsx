@@ -40,7 +40,6 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { IntegrationsUtils } from 'ui/views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { isUndefined } from 'lodash';
 
 export const BigButtonList = ({
   dataflowState,
@@ -240,9 +239,7 @@ export const BigButtonList = ({
   const onShowManualTechnicalAcceptanceDialog = () => setIsManualTechnicalAcceptanceDialogVisible(true);
 
   useEffect(() => {
-    const response = notificationContext.hidden.find(
-      notification => notification.key === 'DISABLE_SQL_RULES_ERROR_EVENT'
-    );
+    const response = notificationContext.hidden.find(notification => notification.key === 'DISABLE_RULES_ERROR_EVENT');
     if (response) {
       const {
         content: { invalidRules, disabledRules }
@@ -369,7 +366,7 @@ export const BigButtonList = ({
 
   const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
-  const onShowUpdateDataCollectionModal = () => setIsHistoricReleasesDialogVisible(false);
+  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
   const getDate = () => {
     return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000;

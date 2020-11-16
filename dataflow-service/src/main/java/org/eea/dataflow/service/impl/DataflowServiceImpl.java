@@ -1,6 +1,5 @@
 package org.eea.dataflow.service.impl;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -20,6 +19,7 @@ import org.eea.dataflow.persistence.domain.Message;
 import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.MessageRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
@@ -198,7 +198,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getDataflows(String userId) throws EEAException {
 
-    List<DataFlowVO> dataflowVOs = new ArrayList<DataFlowVO>();
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
@@ -210,7 +210,9 @@ public class DataflowServiceImpl implements DataflowService {
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
-          setReportingDatasetStatus(map, dataflowVO);
+          if (!map.isEmpty()) {
+            setReportingDatasetStatus(map, dataflowVO);
+          }
           dataflowVOs.add(dataflowVO);
         });
 
@@ -270,6 +272,7 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     }
+
   }
 
 
@@ -280,21 +283,23 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus() {
     Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
-    List<Object[]> queryResult = dataflowRepository
-        .getDataflows(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()));
-    for (Object[] object : queryResult) {
-      List<DataflowStatusDataset> list2 = new ArrayList<>();
-      DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
-      dataflowStatusDataset
-          .setId(object[0] instanceof BigInteger ? ((BigInteger) object[0]).longValue() : null);
-      dataflowStatusDataset.setStatus(
-          object[1] instanceof String ? DatasetStatusEnum.valueOf((String) object[1]) : null);
-      list2.add(dataflowStatusDataset);
-      if (map.get(dataflowStatusDataset.getId()) != null) {
-        map.get(dataflowStatusDataset.getId()).addAll(list2);
-      } else {
-        map.put(dataflowStatusDataset.getId(), list2);
+
+    List<Long> listDatasets =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (!listDatasets.isEmpty()) {
+      List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
+      for (IDatasetStatus object : queryResult) {
+        List<DataflowStatusDataset> list2 = new ArrayList<>();
+        DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
+        dataflowStatusDataset.setId(object.getId());
+        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+        list2.add(dataflowStatusDataset);
+        if (map.get(dataflowStatusDataset.getId()) != null) {
+          map.get(dataflowStatusDataset.getId()).addAll(list2);
+        } else {
+          map.put(dataflowStatusDataset.getId(), list2);
+        }
       }
     }
     return map;

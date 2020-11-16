@@ -11,6 +11,8 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -47,6 +49,10 @@ public class ReleaseDataSnapshotsCommandTest {
 
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
+
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
@@ -85,6 +91,9 @@ public class ReleaseDataSnapshotsCommandTest {
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
     Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(1L)).thenReturn(null);
 
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setName("dataflowName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflowVO);
     releaseDataSnapshotsCommand.execute(eeaEventVO);
     Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 

@@ -20,7 +20,7 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 import { Article15Utils } from './_functions/Utils/Article15Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
-export const Article15 = ({ dataflowId, datasetId, isReporting = false, state }) => {
+export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
   const { getWebformTabs } = Article15Utils;
   const { onParseWebformData } = WebformsUtils;
@@ -101,11 +101,11 @@ export const Article15 = ({ dataflowId, datasetId, isReporting = false, state })
             className={`${styles.headerButton} ${
               article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
             }`}
-            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : null}
+            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
             iconClasses={
               !article15State.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
             }
-            iconPos={'right'}
+            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}

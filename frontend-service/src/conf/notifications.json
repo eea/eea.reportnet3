@@ -538,7 +538,11 @@
           }
         },
         {
-          "key": "RELEASE_COMPLETED_EVENT"
+          "key": "RELEASE_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key": "UPLOAD_DOCUMENT_COMPLETED_EVENT",
@@ -728,7 +732,8 @@
     "VALIDATED_QC_RULE_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
-    "DISABLE_SQL_RULES_ERROR_EVENT",
+    "DISABLE_NAMES_TYPES_RULES_ERROR_EVENT",
+    "DISABLE_RULES_ERROR_EVENT",
     "RECEIVED_MESSAGE"
   ]
 }
