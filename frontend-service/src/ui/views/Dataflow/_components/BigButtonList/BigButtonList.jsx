@@ -239,9 +239,7 @@ export const BigButtonList = ({
   const onShowManualTechnicalAcceptanceDialog = () => setIsManualTechnicalAcceptanceDialogVisible(true);
 
   useEffect(() => {
-    const response = notificationContext.hidden.find(
-      notification => notification.key === 'DISABLE_SQL_RULES_ERROR_EVENT'
-    );
+    const response = notificationContext.hidden.find(notification => notification.key === 'DISABLE_RULES_ERROR_EVENT');
     if (response) {
       const {
         content: { invalidRules, disabledRules }
