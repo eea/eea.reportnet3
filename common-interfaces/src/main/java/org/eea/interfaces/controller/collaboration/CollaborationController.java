@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.collaboration;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,9 +64,15 @@ public interface CollaborationController {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param modifiedDatasetId the modified dataset id
+   * @param datasetStatus the dataset status
+   * @param datasetName the dataset name
    * @param eventType the event type
    */
   @GetMapping("/private/notifyNewMessages")
   void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId, @RequestParam("eventType") String eventType);
+      @RequestParam("providerId") Long providerId,
+      @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
+      @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
+      @RequestParam("datasetName") String datasetName, @RequestParam("eventType") String eventType);
 }

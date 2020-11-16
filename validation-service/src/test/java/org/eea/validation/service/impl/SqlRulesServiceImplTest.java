@@ -119,7 +119,7 @@ public class SqlRulesServiceImplTest {
     rule.setSqlSentence("SELECT * from dataset_1.table_value");
     rule.setType(EntityTypeEnum.FIELD);
     rule.setReferenceId(new ObjectId());
-
+    rule.setRuleId(new ObjectId());
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
@@ -159,6 +159,8 @@ public class SqlRulesServiceImplTest {
     rule.setSqlSentence("SELECT * from dataset_1.table_value;");
     rule.setType(EntityTypeEnum.RECORD);
     rule.setReferenceId(new ObjectId());
+    rule.setRuleId(new ObjectId());
+
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
@@ -197,6 +199,8 @@ public class SqlRulesServiceImplTest {
     rule.setSqlSentence("SELECT * from dataset_1.table_value;");
     rule.setType(EntityTypeEnum.TABLE);
     rule.setReferenceId(new ObjectId());
+    rule.setRuleId(new ObjectId());
+
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
@@ -219,6 +223,8 @@ public class SqlRulesServiceImplTest {
     rule.setSqlSentence("INSERT * from dataset_1.table_value");
     rule.setType(EntityTypeEnum.FIELD);
     rule.setReferenceId(new ObjectId());
+    rule.setRuleId(new ObjectId());
+
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
@@ -239,6 +245,8 @@ public class SqlRulesServiceImplTest {
     rule.setSqlSentence("SELECT * from dataset_1.table_value;");
     rule.setType(EntityTypeEnum.TABLE);
     rule.setReferenceId(new ObjectId());
+    rule.setRuleId(new ObjectId());
+
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))

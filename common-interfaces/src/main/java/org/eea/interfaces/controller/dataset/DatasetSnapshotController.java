@@ -100,7 +100,7 @@ public interface DatasetSnapshotController {
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    */
-  @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
+  @PutMapping(value = "/private/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
