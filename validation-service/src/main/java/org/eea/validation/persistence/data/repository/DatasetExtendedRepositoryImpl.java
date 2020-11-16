@@ -102,7 +102,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             }
           }
         } catch (PSQLException | RuntimeException e) {
-          LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
+          LOG.info("SQL can't be executed: {}", e.getMessage(), e);
           tableValue = null;
         }
         return tableValue;
