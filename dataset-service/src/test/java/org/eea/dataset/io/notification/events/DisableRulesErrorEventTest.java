@@ -13,12 +13,12 @@ import org.mockito.MockitoAnnotations;
 /**
  * The Class DisableSqlRulesErrorEventTest.
  */
-public class DisableSqlRulesErrorEventTest {
+public class DisableRulesErrorEventTest {
 
 
   /** The disable sql rules error event. */
   @InjectMocks
-  private DisableSqlRulesErrorEvent disableSqlRulesErrorEvent;
+  private DisableRulesErrorEvent disableRulesErrorEvent;
 
 
   /**
@@ -36,8 +36,7 @@ public class DisableSqlRulesErrorEventTest {
    */
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.DISABLE_RULES_ERROR_EVENT,
-        disableSqlRulesErrorEvent.getEventType());
+    Assert.assertEquals(EventType.DISABLE_RULES_ERROR_EVENT, disableRulesErrorEvent.getEventType());
   }
 
   /**
@@ -48,7 +47,7 @@ public class DisableSqlRulesErrorEventTest {
    */
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(5, disableSqlRulesErrorEvent
+    Assert.assertEquals(5, disableRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 
@@ -60,7 +59,7 @@ public class DisableSqlRulesErrorEventTest {
    */
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Assert.assertEquals(5, disableSqlRulesErrorEvent
+    Assert.assertEquals(5, disableRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 }

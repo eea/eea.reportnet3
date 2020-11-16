@@ -9,7 +9,7 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
+public class DisableRulesErrorEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
