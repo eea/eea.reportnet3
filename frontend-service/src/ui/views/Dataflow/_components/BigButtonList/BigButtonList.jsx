@@ -375,7 +375,7 @@ export const BigButtonList = ({
   const onCreateDataCollectionWithNotValids = async () => {
     setIsActiveButton(false);
     try {
-      await DataCollectionService.create(dataflowId, getDate(), false);
+      await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
     } catch (error) {
       console.error(error);
       const {

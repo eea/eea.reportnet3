@@ -167,7 +167,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           .invalidRules(rulesUnchecked.getRules().size())
           .disabledRules(rulesdisabled.getRules().size()).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
+      releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
     }
   }
 
@@ -341,7 +341,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
             isSQLCorrect = Boolean.FALSE;
           }
         } catch (PSQLException | SQLGrammarException e) {
-          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
       } else {
@@ -417,7 +417,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
           idTable);
     } catch (SQLException | SQLGrammarException e) {
-      LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
+      LOG.info("SQL can't be executed: {}", e.getMessage(), e);
       throw new PSQLException(new ServerErrorMessage(e.getMessage()));
     }
     return table;

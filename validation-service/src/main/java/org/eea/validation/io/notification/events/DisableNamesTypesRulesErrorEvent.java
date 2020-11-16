@@ -1,4 +1,4 @@
-package org.eea.dataset.io.notification.events;
+package org.eea.validation.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
+public class DisableNamesTypesRulesErrorEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -18,7 +18,7 @@ public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DISABLE_SQL_RULES_ERROR_EVENT;
+    return EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT;
   }
 
   /**
@@ -30,13 +30,13 @@ public class DisableSqlRulesErrorEvent implements NotificableEventHandler {
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-    Long dataflowId = notificationVO.getDataflowId();
+    Long datasetId = notificationVO.getDatasetId();
     Integer disabledRules = notificationVO.getDisabledRules();
     Integer invalidRules = notificationVO.getInvalidRules();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("dataflowId", dataflowId);
+    notification.put("datasetId", datasetId);
     notification.put("disabledRules", disabledRules);
     notification.put("invalidRules", invalidRules);
     notification.put("error", notificationVO.getError());
