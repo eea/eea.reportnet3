@@ -41,6 +41,7 @@ import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
 import org.hibernate.exception.SQLGrammarException;
 import org.postgresql.util.PSQLException;
+import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,6 +135,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       rule.setEnabled(false);
       LOG.info("Rule validation not passed: {}", rule);
     }
+    rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
+        .append(rule.getRuleId().toString()).append("')").toString());
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     releaseNotification(notificationEventType, notificationVO);
@@ -210,7 +213,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             isSQLCorrect = Boolean.FALSE;
           }
         } catch (PSQLException | SQLGrammarException e) {
-          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
       } else {
@@ -309,8 +312,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       LOG.info("Query to be executed: {}", newQuery);
       table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
           idTable);
-    } catch (SQLGrammarException e) {
+    } catch (SQLException | SQLGrammarException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
+      throw new PSQLException(new ServerErrorMessage(e.getMessage()));
     }
     if (ischeckDC.equals(Boolean.FALSE)) {
       if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
@@ -703,6 +707,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           rule.setEnabled(false);
           errorRulesList.add(rule);
         }
+        rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
+            .append(rule.getRuleId().toString()).append("')").toString());
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }

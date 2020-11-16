@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -43,6 +44,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * The Constant LOG.
@@ -92,7 +96,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           dataset.getDataflowId(), dataset.getDataProviderId());
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId()).build());
+              .dataflowId(dataset.getDataflowId())
+              .dataflowName(
+                  dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getName())
+              .providerId(dataset.getDataProviderId()).build());
     }
 
   }

@@ -26,6 +26,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -114,6 +115,11 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   /** The webform mapper. */
   @Autowired
   private WebFormMapper webformMapper;
+
+  /** The record store controller zuul. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
 
   /** The time to wait before continue copy. */
   @Value("${wait.continue.copy.ms}")
@@ -257,6 +263,12 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
         // Copy the data inside the design datasets, but only the tables that are prefilled
         datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
+
+        // Create the views necessary to the validation in the new datasets created
+        dictionaryOriginTargetDatasetsId
+            .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
+                .createUpdateQueryView(datasetDestination));
+
 
         // Release the notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,

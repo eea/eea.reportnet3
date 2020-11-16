@@ -37,6 +37,9 @@ public class UpdatedDatasetStatusEvent implements NotificableEventHandler {
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", notificationVO.getDataflowId());
     notification.put("providerId", notificationVO.getProviderId());
+    notification.put("datasetId", notificationVO.getDatasetId());
+    notification.put("datasetStatus", notificationVO.getDatasetStatus());
+    notification.put("datasetName", notificationVO.getDatasetName());
     return notification;
   }
 }
