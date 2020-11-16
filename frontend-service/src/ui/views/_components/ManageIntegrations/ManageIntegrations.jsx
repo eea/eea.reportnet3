@@ -76,7 +76,6 @@ export const ManageIntegrations = ({
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
   const {
-    isDuplicatedExtension,
     isDuplicatedIntegrationName,
     isDuplicatedParameter,
     isFormEmpty,
@@ -86,12 +85,6 @@ export const ManageIntegrations = ({
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
-  const isExtensionDuplicated = isDuplicatedExtension(
-    manageIntegrationsState.fileExtension,
-    manageIntegrationsState.operation.value,
-    integrationsList,
-    manageIntegrationsState.id
-  );
   const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
     manageIntegrationsState.name,
     integrationsList,
@@ -314,8 +307,7 @@ export const ManageIntegrations = ({
 
   const renderDialogFooterTooltipContent = () => {
     if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
-    else if (isExtensionDuplicated) return 'duplicatedIntegrationOperation';
-    else return 'fcSubmitButtonDisabled';
+    return 'fcSubmitButtonDisabled';
   };
 
   const renderDialogFooter = (
@@ -323,7 +315,7 @@ export const ManageIntegrations = ({
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isIntegrationNameDuplicated || isExtensionDuplicated}
+          disabled={isIntegrationNameDuplicated}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
@@ -339,7 +331,7 @@ export const ManageIntegrations = ({
         onClick={() => onCloseModal()}
       />
 
-      {(isEmptyForm || isIntegrationNameDuplicated || isExtensionDuplicated) && (
+      {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
           {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
