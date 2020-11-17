@@ -23,7 +23,7 @@ import newMarkerIcon from 'assets/images/newMarker.png';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
+import { MapUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -256,14 +256,14 @@ export const Map = ({
     );
   };
 
-  const onFeatureGroupReady = reactFGref => {
-    reactFGref.leafletElement.eachLayer(layer => {
-      console.log('eachLayer ', layer.options.someRandomParameter);
-      // if (layer.options.someRandomParameter) {
-      //   featureLayerObject[layer.options.someRandomParameter.id] = layer;
-      // }
-    });
-  };
+  // const onFeatureGroupReady = reactFGref => {
+  //   reactFGref.leafletElement.eachLayer(layer => {
+  //     console.log('eachLayer ', layer.options.someRandomParameter);
+  //     // if (layer.options.someRandomParameter) {
+  //     //   featureLayerObject[layer.options.someRandomParameter.id] = layer;
+  //     // }
+  //   });
+  // };
 
   return (
     <>
@@ -383,21 +383,17 @@ export const Map = ({
           )}
           {console.log(JSON.parse(mapGeoJson), geoJson, JSON.parse(mapGeoJson).geometry.type)}
           {console.log(
-            !isNil(JSON.parse(geoJson).geometry.type) &&
-              ['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
+            ['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
               MapUtils.checkValidJSONMultipleCoordinates(geoJson),
-            !isNil(JSON.parse(geoJson).geometry.type) &&
-              JSON.parse(geoJson).geometry.type.toUpperCase() === 'POINT' &&
+            TextUtils.areEquals(JSON.parse(geoJson).geometry.type, 'POINT') &&
               MapUtils.checkValidJSONCoordinates(geoJson)
           )}
-          {((!isNil(JSON.parse(geoJson).geometry.type) &&
-            ['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
+          {((['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
             MapUtils.checkValidJSONMultipleCoordinates(geoJson)) ||
-            (!isNil(JSON.parse(geoJson).geometry.type) &&
-              JSON.parse(geoJson).geometry.type.toUpperCase() === 'POINT' &&
+            (TextUtils.areEquals(JSON.parse(geoJson).geometry.type, 'POINT') &&
               MapUtils.checkValidJSONCoordinates(geoJson))) && (
             <GeoJSON
-              data={JSON.parse(geoJson)}
+              data={TextUtils.areEquals(JSON.parse(JSON.parse(geoJson).geometry.type, 'POINT') ? mapGeoJson : geoJson)}
               onEachFeature={onEachFeature}
               coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
             />

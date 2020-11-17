@@ -84,7 +84,6 @@ const checkValidJSONCoordinates = json => {
 const checkValidJSONMultipleCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    debugger;
     return (
       parsedJSON.geometry.coordinates.map(coordinates => checkValidCoordinates(coordinates)).filter(check => !check)
         .length === 0
