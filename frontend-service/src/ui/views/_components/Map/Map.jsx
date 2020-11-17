@@ -216,7 +216,9 @@ export const Map = ({
       inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
     }
+    console.log({ geoJson });
     if (geoJson !== '') {
+      console.log(JSON.parse(geoJson).geometry.type.toUpperCase());
       setGeometryType(JSON.parse(geoJson).geometry.type.toUpperCase());
     }
   }, [geoJson]);
@@ -232,6 +234,50 @@ export const Map = ({
     // esri.removeLayer();
     esri.basemapLayer(currentTheme.value).addTo(map);
   }, [currentTheme]);
+
+  const getGeoJson = () => {
+    switch (geometryType.toUpperCase()) {
+      case 'POINT':
+        if (MapUtils.checkValidJSONCoordinates(geoJson)) {
+          return (
+            <GeoJSON
+              data={JSON.parse(mapGeoJson)}
+              onEachFeature={onEachFeature}
+              coordsToLatLng={coords => {
+                console.log(coords);
+                return new L.LatLng(coords[0], coords[1], coords[2]);
+              }}
+            />
+          );
+        }
+        break;
+      case 'LINESTRING':
+      case 'MULTILINESTRING':
+      case 'POLYGON':
+      case 'MULTIPOLYGON':
+        if (
+          MapUtils.checkValidJSONMultipleCoordinates(
+            geoJson,
+            ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
+          )
+        ) {
+          console.log('ENTRO');
+          return (
+            <GeoJSON
+              data={JSON.parse(geoJson)}
+              onEachFeature={onEachFeature}
+              coordsToLatLng={coords => {
+                console.log(coords);
+                return new L.LatLng(coords[0], coords[1], coords[2]);
+              }}
+            />
+          );
+        }
+        break;
+      default:
+        break;
+    }
+  };
 
   const onCRSChange = item => {
     const selectedCRS = crs.filter(t => t.value === item.value)[0];
@@ -408,27 +454,15 @@ export const Map = ({
               />
             </FeatureGroup>
           )}
-          {
-            (console.log(TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson)),
+          {console.log(
+            TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson),
+            geometryType.toUpperCase(),
             MapUtils.checkValidJSONMultipleCoordinates(
               geoJson,
               ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
-            ))
-          }
-          {((TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson)) ||
-            MapUtils.checkValidJSONMultipleCoordinates(
-              geoJson,
-              ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
-            )) && (
-            <GeoJSON
-              data={JSON.parse(TextUtils.areEquals(geometryType, 'POINT') ? mapGeoJson : geoJson)}
-              onEachFeature={onEachFeature}
-              coordsToLatLng={coords => {
-                console.log(coords);
-                return new L.LatLng(coords[0], coords[1], coords[2]);
-              }}
-            />
+            )
           )}
+          {getGeoJson()}
           {isNewPositionMarkerVisible && (
             <Marker
               draggable={false}

@@ -35,7 +35,7 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
   if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
-    if (coordinates.indexOf(',') === -1) return false;
+    if (coordinates.toString().indexOf(',') === -1) return false;
   } else {
     if (isEmpty(coordinates)) return false;
   }
@@ -85,7 +85,6 @@ const checkValidJSONCoordinates = json => {
 const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    // debugger;
     if (complexType) {
       return (
         parsedJSON.geometry.coordinates

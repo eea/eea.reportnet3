@@ -351,7 +351,7 @@ const parseValue = (type, value, feToBe = false) => {
     const inmValue = JSON.parse(cloneDeep(value));
     const parsedValue = JSON.parse(value);
     console.log(type, inmValue.geometry.coordinates);
-    debugger;
+
     switch (type.toUpperCase()) {
       case 'POINT':
         inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
