@@ -133,7 +133,7 @@ const TabsValidations = withRouter(
 
     const onUpdateData = () => isDataUpdated(!tabsValidationsState.isDataUpdated);
 
-    useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
+    useCheckNotifications(['INVALIDATED_QC_RULE_EVENT, VALIDATE_RULES_ERROR_EVENT'], onUpdateData);
 
     const automaticTemplate = rowData => (
       <div className={styles.checkedValueColumn}>
