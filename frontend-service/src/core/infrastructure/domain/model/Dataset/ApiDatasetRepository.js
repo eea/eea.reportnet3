@@ -343,7 +343,7 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 };
 
 const parseValue = (type, value, feToBe = false) => {
-  if (type === 'POINT' && value !== '' && !isNil(value)) {
+  if (['POINT', 'LINESTRING', 'POLYGON'].includes(type) && value !== '' && !isNil(value)) {
     if (!isValidJSON(value)) {
       return '';
     }
