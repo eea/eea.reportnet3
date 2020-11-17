@@ -741,7 +741,6 @@
     "deleteFieldLabel": "Delete field",
     "importDataset": "Import dataset data",
     "uploadTable": "Import data in table ",
-    "externalExtensions": "External extensions",
     "errorLoadingRepositories": "Error loading repositories",
     "errorLoadingProcesses": "Error loading processes",
     "validateEuDatasetHeader": "Validate EU dataset",
@@ -940,6 +939,7 @@
     "reportingDatasetsStatus": "Reporting datasets status",
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
-    "feedbackMessagePlaceholder": "Please provide information on the status change"
+    "feedbackMessagePlaceholder": "Please provide information on the status change",
+    "exportExternalIntegrations": "External integrations"
   }
 }

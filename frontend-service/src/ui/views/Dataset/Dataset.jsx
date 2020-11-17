@@ -259,7 +259,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const externalExtensions = [
     {
-      label: resources.messages['externalExtensions'],
+      label: resources.messages['exportExternalIntegrations'],
       items: externalOperationsList.export.map(type => ({
         label: type.name.toUpperCase(),
         icon: config.icons['archive'],

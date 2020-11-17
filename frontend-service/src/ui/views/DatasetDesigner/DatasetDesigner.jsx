@@ -304,7 +304,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const externalExtensions = !isEmpty(externalOperationsList.export)
       ? [
           {
-            label: resources.messages['externalExtensions'],
+            label: resources.messages['exportExternalIntegrations'],
             items: externalOperationsList.export.map(type => ({
               command: () => onExportDataExternalExtension(type.fileExtension),
               icon: config.icons['archive'],
