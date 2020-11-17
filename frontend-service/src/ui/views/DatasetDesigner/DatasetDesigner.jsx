@@ -76,10 +76,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
-  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
-    invalidRules: 0,
-    disabledRules: 0
-  });
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
