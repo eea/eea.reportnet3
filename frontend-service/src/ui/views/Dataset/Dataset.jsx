@@ -158,12 +158,12 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [userContext, isDataLoaded, tableSchemaColumns]);
 
   useEffect(() => {
-    if (isEmpty(externalExportExtensions)) {
+    if (isEmpty(externalOperationsList.export)) {
       setExportButtonsList(internalExtensions);
     } else {
       setExportButtonsList(internalExtensions.concat(externalExtensions));
     }
-  }, [datasetName, externalExportExtensions]);
+  }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
     if (isEmpty(externalOperationsList.import)) {
@@ -225,7 +225,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    const uniqExportExtensions = exportExtensionsOperationsList.map(element => element.name);
     setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
   };
 
@@ -260,10 +260,10 @@ export const Dataset = withRouter(({ match, history }) => {
   const externalExtensions = [
     {
       label: resources.messages['externalExtensions'],
-      items: externalExportExtensions.map(type => ({
-        label: type.text,
+      items: externalOperationsList.export.map(type => ({
+        label: type.name.toUpperCase(),
         icon: config.icons['archive'],
-        command: () => onExportDataExternalExtension(type.code)
+        command: () => onExportDataExternalExtension(type.fileExtension)
       }))
     }
   ];

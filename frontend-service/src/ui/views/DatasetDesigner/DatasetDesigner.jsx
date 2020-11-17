@@ -308,7 +308,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             items: externalOperationsList.export.map(type => ({
               command: () => onExportDataExternalExtension(type.fileExtension),
               icon: config.icons['archive'],
-              label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              label: `${type.name.toUpperCase()}`
             }))
           }
         ]
