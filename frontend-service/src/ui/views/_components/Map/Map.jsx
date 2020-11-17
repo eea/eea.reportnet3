@@ -73,8 +73,13 @@ export const Map = ({
           ? JSON.stringify(geoJson)
           : geoJson
         : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
-      : MapUtils.checkValidJSONMultipleCoordinates(geoJson)
-      ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[${MapUtils.getFirstPointComplexGeometry(
+      : MapUtils.checkValidJSONMultipleCoordinates(
+          geoJson,
+          ['POLYGON', 'MULTIPOLYGON'].includes(MapUtils.getGeometryType(geoJson))
+        )
+      ? `{"type": "Feature", "geometry": {"type":"${MapUtils.getGeometryType(
+          geoJson
+        )}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
           geoJson
         ).toString()}]}, "properties": {"srid": "EPSG:4326"}}`
       : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
@@ -211,7 +216,9 @@ export const Map = ({
       inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
     }
-    setGeometryType(JSON.parse(geoJson).geometry.type.toUpperCase());
+    if (geoJson !== '') {
+      setGeometryType(JSON.parse(geoJson).geometry.type.toUpperCase());
+    }
   }, [geoJson]);
 
   useEffect(() => {
@@ -401,9 +408,18 @@ export const Map = ({
               />
             </FeatureGroup>
           )}
-          {((['LINESTRING', 'POLYGON'].includes(geometryType.toUpperCase()) &&
-            MapUtils.checkValidJSONMultipleCoordinates(geoJson)) ||
-            (TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson))) && (
+          {
+            (console.log(TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson)),
+            MapUtils.checkValidJSONMultipleCoordinates(
+              geoJson,
+              ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
+            ))
+          }
+          {((TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson)) ||
+            MapUtils.checkValidJSONMultipleCoordinates(
+              geoJson,
+              ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
+            )) && (
             <GeoJSON
               data={JSON.parse(TextUtils.areEquals(geometryType, 'POINT') ? mapGeoJson : geoJson)}
               onEachFeature={onEachFeature}

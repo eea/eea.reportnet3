@@ -163,8 +163,10 @@ export const useSetColumns = (
     return '';
   };
 
-  const renderComplexGeometries = (value = '') => {
-    if (value !== '' && MapUtils.checkValidJSONMultipleCoordinates(value)) {
+  const renderComplexGeometries = (value = '', type) => {
+    // debugger;
+    console.log({ value });
+    if (value !== '' && MapUtils.checkValidJSONMultipleCoordinates(value, ['POLYGON', 'MULTIPOLYGON'].includes(type))) {
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
         return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`;
@@ -242,7 +244,7 @@ export const useSetColumns = (
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
               : ['LINESTRING', 'POLYGON'].includes(field.fieldData.type)
-              ? renderComplexGeometries(field.fieldData[column.field])
+              ? renderComplexGeometries(field.fieldData[column.field], field.fieldData.type)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />

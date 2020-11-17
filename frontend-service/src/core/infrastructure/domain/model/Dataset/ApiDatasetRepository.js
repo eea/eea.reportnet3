@@ -349,26 +349,39 @@ const parseValue = (type, value, feToBe = false) => {
       return '';
     }
     const inmValue = JSON.parse(cloneDeep(value));
+    const parsedValue = JSON.parse(value);
+    console.log(type, inmValue.geometry.coordinates);
+    debugger;
     switch (type.toUpperCase()) {
       case 'POINT':
-        inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
+        inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
         break;
       case 'LINESTRING':
-        debugger;
-        inmValue.geometry.coordinates = inmValue.geometry.coordinates.map(coordinate => [coordinate[1], coordinate[0]]);
+        // console.log(
+        //   inmValue.geometry.coordinates,
+        //   inmValue.geometry.coordinates.map(coordinate => [coordinate[1], coordinate[0]])
+        // );
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => [
+          coordinate[1],
+          coordinate[0]
+        ]);
+        break;
       case 'POLYGON':
-        inmValue.geometry.coordinates = inmValue.geometry.coordinates.map(coordinate =>
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
           coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]])
         );
+        break;
       default:
         break;
     }
 
     if (!feToBe) {
-      inmValue.properties.srid = `EPSG:${inmValue.properties.srid}`;
+      inmValue.properties.srid = `EPSG:${parsedValue.properties.srid}`;
     } else {
-      inmValue.properties.srid = inmValue.properties.srid.split(':')[1];
+      inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
     }
+
+    console.log(inmValue.geometry.coordinates);
     return JSON.stringify(inmValue);
   }
   return value;

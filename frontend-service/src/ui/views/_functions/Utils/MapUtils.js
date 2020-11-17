@@ -82,13 +82,22 @@ const checkValidJSONCoordinates = json => {
   }
 };
 
-const checkValidJSONMultipleCoordinates = json => {
+const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    return (
-      parsedJSON.geometry.coordinates.map(coordinates => checkValidCoordinates(coordinates)).filter(check => !check)
-        .length === 0
-    );
+    // debugger;
+    if (complexType) {
+      return (
+        parsedJSON.geometry.coordinates
+          .map(coordinates => coordinates.map(coordinate => checkValidCoordinates(coordinate)))
+          .filter(check => !check).length === 0
+      );
+    } else {
+      return (
+        parsedJSON.geometry.coordinates.map(coordinates => checkValidCoordinates(coordinates)).filter(check => !check)
+          .length === 0
+      );
+    }
   } else {
     return false;
   }
@@ -97,7 +106,8 @@ const checkValidJSONMultipleCoordinates = json => {
 const getFirstPointComplexGeometry = json =>
   !isNil(json) ? first(JSON.parse(json).geometry.coordinates) : [55.6811608, 12.5844761];
 
-const getGeometryType = json => (!isNil(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT');
+const getGeometryType = json =>
+  !isNil(json) && isValidJSON(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT';
 
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
