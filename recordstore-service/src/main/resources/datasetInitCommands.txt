@@ -85,6 +85,6 @@ GRANT EXECUTE ON FUNCTION %dataset_name%.is_double(text) TO %user%;
 ALTER FUNCTION %dataset_name%.is_date OWNER TO %user%;
 GRANT EXECUTE ON FUNCTION %dataset_name%.is_date(varchar) TO %user%;
 
-CREATE TRIGGER insert_geometry_trigger BEFORE INSERT OR UPDATE ON %dataset_name%.field_value FOR EACH ROW WHEN ((NEW.type in ('POSITION','POINT', 'LINESTRING', 'MULTILINESTRING','MULTIPOINT','POLYGON','GEOMETRYCOLLECTION'))) EXECUTE PROCEDURE %dataset_name%.insert_geometry_function();
+CREATE TRIGGER insert_geometry_trigger BEFORE INSERT OR UPDATE ON %dataset_name%.field_value FOR EACH ROW WHEN ((NEW.type in ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'GEOMETRYCOLLECTION'))) EXECUTE PROCEDURE %dataset_name%.insert_geometry_function();
 
 commit;
