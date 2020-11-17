@@ -1,3 +1,5 @@
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export default class ObjectUtils {
   static equals(obj1, obj2, field) {
     if (field) return this.resolveFieldData(obj1, field) === this.resolveFieldData(obj2, field);
@@ -97,11 +99,7 @@ export default class ObjectUtils {
     if (value) {
       for (let item of value) {
         for (let field of fields) {
-          if (
-            String(this.resolveFieldData(item, field))
-              .toLowerCase()
-              .indexOf(filterValue.toLowerCase()) > -1
-          ) {
+          if (String(this.resolveFieldData(item, field)).toLowerCase().indexOf(filterValue.toLowerCase()) > -1) {
             filteredItems.push(item);
             break;
           }
@@ -151,12 +149,7 @@ export default class ObjectUtils {
       }
 
       let filterValue = filter.toLowerCase();
-      return (
-        value
-          .toString()
-          .toLowerCase()
-          .slice(0, filterValue.length) === filterValue
-      );
+      return value.toString().toLowerCase().slice(0, filterValue.length) === filterValue;
     },
 
     contains(value, filter) {
@@ -168,12 +161,7 @@ export default class ObjectUtils {
         return false;
       }
 
-      return (
-        value
-          .toString()
-          .toLowerCase()
-          .indexOf(filter.toLowerCase()) !== -1
-      );
+      return value.toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1;
     },
 
     endsWith(value, filter) {
@@ -203,7 +191,7 @@ export default class ObjectUtils {
         return false;
       }
 
-      return value.toString().toLowerCase() === filter.toString().toLowerCase();
+      return TextUtils.areEquals(value.toString(), filter.toString());
     },
 
     notEquals(value, filter) {
@@ -215,7 +203,7 @@ export default class ObjectUtils {
         return true;
       }
 
-      return value.toString().toLowerCase() !== filter.toString().toLowerCase();
+      return !TextUtils.areEquals(value.toString(), filter.toString());
     },
 
     in(value, filter) {
