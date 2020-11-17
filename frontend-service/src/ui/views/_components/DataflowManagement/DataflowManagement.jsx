@@ -202,7 +202,7 @@ export const DataflowManagement = ({
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          disabledConfirm={state.deleteInput.toLowerCase() !== state.name.toLowerCase()}
+          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
           onConfirm={() => onDeleteDataflow()}
           onHide={() => manageDialogs('isDeleteDialogVisible', false)}
           visible={state.isDeleteDialogVisible}>

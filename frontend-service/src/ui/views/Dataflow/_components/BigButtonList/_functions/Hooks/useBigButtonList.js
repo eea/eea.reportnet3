@@ -159,75 +159,82 @@ const useBigButtonList = ({
     }
   ];
 
-  const designDatasetModels = dataflowState.data.designDatasets.map(newDatasetSchema => ({
-    buttonClass: 'schemaDataset',
-    buttonIcon: 'pencilRuler',
-    canEditName: buttonsVisibility.designDatasetsActions,
-    caption: newDatasetSchema.datasetSchemaName,
-    dataflowStatus: dataflowState.status,
-    datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-    enabled: buttonsVisibility.designDatasetsActions,
-    handleRedirect: buttonsVisibility.designDatasetsActions
-      ? () => {
-          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
-        }
-      : () => {},
-
-    helpClassName: 'dataflow-schema-help-step',
-    index: newDatasetSchema.index,
-    layout: 'defaultBigButton',
-    model: buttonsVisibility.designDatasetsActions
-      ? [
-          {
-            label: resources.messages['openDataset'],
-            icon: 'openFolder',
-            command: () => {
+  const designDatasetModels = isNil(dataflowState.data.designDatasets)
+    ? []
+    : dataflowState.data.designDatasets.map(newDatasetSchema => ({
+        buttonClass: 'schemaDataset',
+        buttonIcon: 'pencilRuler',
+        canEditName: buttonsVisibility.designDatasetsActions,
+        caption: newDatasetSchema.datasetSchemaName,
+        dataflowStatus: dataflowState.status,
+        datasetSchemaInfo: dataflowState.updatedDatasetSchema,
+        enabled: buttonsVisibility.designDatasetsActions,
+        handleRedirect: buttonsVisibility.designDatasetsActions
+          ? () => {
               handleRedirect(
                 getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
               );
             }
-          },
-          {
-            label: resources.messages['rename'],
-            icon: 'pencil',
-            disabled:
-              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] || !buttonsVisibility.designDatasetsActions
-          },
-          {
-            label: resources.messages['delete'],
-            icon: 'trash',
-            disabled:
-              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-              !buttonsVisibility.designDatasetsActions,
-            command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-          }
-          // {
-          //   label: resources.messages['exportDatasetSchema'],
-          //   icon: 'import',
-          //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
-          //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
-          // }
-        ]
-      : [],
-    onSaveName: onSaveName,
-    onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
-    placeholder: resources.messages['datasetSchemaNamePlaceholder'],
-    setErrorDialogData: setErrorDialogData,
-    tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
-    visibility: buttonsVisibility.designDatasets
-  }));
+          : () => {},
+
+        helpClassName: 'dataflow-schema-help-step',
+        index: newDatasetSchema.index,
+        layout: 'defaultBigButton',
+        model: buttonsVisibility.designDatasetsActions
+          ? [
+              {
+                label: resources.messages['openDataset'],
+                icon: 'openFolder',
+                command: () => {
+                  handleRedirect(
+                    getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+                  );
+                }
+              },
+              {
+                label: resources.messages['rename'],
+                icon: 'pencil',
+                disabled:
+                  dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
+                  !buttonsVisibility.designDatasetsActions
+              },
+              {
+                label: resources.messages['delete'],
+                icon: 'trash',
+                disabled:
+                  dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
+                  !buttonsVisibility.designDatasetsActions,
+                command: () => getDeleteSchemaIndex(newDatasetSchema.index)
+              }
+              // {
+              //   label: resources.messages['exportDatasetSchema'],
+              //   icon: 'import',
+              //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
+              //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
+              // }
+            ]
+          : [],
+        onSaveName: onSaveName,
+        onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
+        placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+        setErrorDialogData: setErrorDialogData,
+        tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
+        visibility: buttonsVisibility.designDatasets
+      }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    const allDatasets = datasets.map(dataset => {
-      return {
-        name: dataset.datasetSchemaName,
-        id: dataset.dataProviderId,
-        datasetId: dataset.datasetId,
-        datasetName: dataset.name
-      };
-    });
+    const allDatasets = isNil(datasets)
+      ? []
+      : datasets.map(dataset => {
+          return {
+            name: dataset.datasetSchemaName,
+            id: dataset.dataProviderId,
+            datasetId: dataset.datasetId,
+            datasetName: dataset.name
+          };
+        });
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
@@ -352,52 +359,58 @@ const useBigButtonList = ({
     }
   ];
 
-  const dataCollectionModels = dataflowState.data.dataCollections.map(dataCollection => ({
-    buttonClass: 'dataCollection',
-    buttonIcon: 'dataCollection',
-    caption: dataCollection.dataCollectionName,
-    handleRedirect: () => {
-      handleRedirect(getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true));
-    },
-    helpClassName: 'dataflow-datacollection-help-step',
-    layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['historicReleases'],
-        command: () => {
-          onShowHistoricReleases('dataCollection');
-          getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
-        }
-      }
-    ],
-    visibility: true
-  }));
+  const dataCollectionModels = isNil(dataflowState.data.dataCollections)
+    ? []
+    : dataflowState.data.dataCollections.map(dataCollection => ({
+        buttonClass: 'dataCollection',
+        buttonIcon: 'dataCollection',
+        caption: dataCollection.dataCollectionName,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true)
+          );
+        },
+        helpClassName: 'dataflow-datacollection-help-step',
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resources.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('dataCollection');
+              getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
+            }
+          }
+        ],
+        visibility: true
+      }));
 
-  const euDatasetModels = dataflowState.data.euDatasets.map(euDataset => ({
-    buttonClass: 'euDataset',
-    buttonIcon: 'euDataset',
-    caption: euDataset.euDatasetName,
-    handleRedirect: () => {
-      handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
-    },
-    helpClassName: 'dataflow-eudataset-help-step',
-    layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['historicReleases'],
-        command: () => {
-          onShowHistoricReleases('EUDataset');
-          getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
-        }
-      }
-    ],
-    visibility: true
-  }));
+  const euDatasetModels = isNil(dataflowState.data.euDatasets)
+    ? []
+    : dataflowState.data.euDatasets.map(euDataset => ({
+        buttonClass: 'euDataset',
+        buttonIcon: 'euDataset',
+        caption: euDataset.euDatasetName,
+        handleRedirect: () => {
+          handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
+        },
+        helpClassName: 'dataflow-eudataset-help-step',
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resources.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('EUDataset');
+              getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
+            }
+          }
+        ],
+        visibility: true
+      }));
 
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowState.data;
-    const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
-    const releasedStates = datasets.map(dataset => dataset.isReleased);
+    const representativeNames = isNil(datasets) ? [] : datasets.map(dataset => dataset.datasetSchemaName);
+    const releasedStates = isNil(datasets) ? [] : datasets.map(dataset => dataset.isReleased);
 
     return [
       {

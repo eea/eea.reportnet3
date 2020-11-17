@@ -25,7 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { article13Reducer } from './_functions/Reducers/article13Reducer';
 
 import { Article13Utils } from './_functions/Utils/Article13Utils';
-import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
@@ -75,14 +75,14 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const getParamFieldSchemaId = (param, table) => {
     return table.elements
-      .filter(element => element.name.toUpperCase() === param.toUpperCase())
+      .filter(element => TextUtils.areEquals(element.name, param))
       .map(table => table.fieldSchema)[0];
   };
 
   const onAddPamsRecord = async type => {
     setIsAddingRecord(true);
 
-    const table = article13State.data.filter(table => table.name.toLowerCase() === 'pams')[0];
+    const table = article13State.data.filter(table => TextUtils.areEquals(table.name, 'pams'))[0];
     const newEmptyRecord = parseNewRecord(table.elements);
 
     const data = [];
@@ -178,8 +178,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const pamSchemaId = article13State.data
-      .filter(table => table.name.toUpperCase() === 'PAMS')[0]
-      .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0].fieldId;
+      .filter(table => TextUtils.areEquals(table.name, 'PAMS'))[0]
+      .records[0].fields.filter(field => TextUtils.areEquals(field.name, 'ID'))[0].fieldId;
     let recordId = '';
     pamsRecords.forEach(pamsRecord => {
       pamsRecord.fields.forEach(field => {

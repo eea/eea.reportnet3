@@ -46,8 +46,8 @@ import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { ExtensionUtils, MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import {
   useContextMenu,
   useLoadColsSchemasAndColumnOptions,
@@ -635,7 +635,7 @@ const DataViewer = withRouter(
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
         if (!isGeometry) {
-          if (type.toUpperCase() !== 'TEXTAREA') {
+          if (!TextUtils.areEquals(type, 'TEXTAREA')) {
             datatableRef.current.closeEditingCell();
             onEditorSubmitValue(props, event.target.value, record);
           }
