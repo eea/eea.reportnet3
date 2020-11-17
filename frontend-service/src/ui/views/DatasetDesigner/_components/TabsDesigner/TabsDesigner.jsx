@@ -164,7 +164,7 @@ export const TabsDesigner = withRouter(
         setTabs(inmDatasetSchema.tables);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
-        if (error.response.status === 401 || error.response.status === 403) {
+        if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
           history.push(getUrl(routes.DATAFLOWS, true));
         }
       }

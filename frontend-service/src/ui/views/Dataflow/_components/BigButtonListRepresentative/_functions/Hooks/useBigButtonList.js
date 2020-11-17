@@ -143,7 +143,7 @@ const useBigButtonList = ({
 
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowState.data;
-    const releasedStates = datasets.map(dataset => dataset.isReleased);
+    const releasedStates = isNil(datasets) ? [] : datasets.map(dataset => dataset.isReleased);
 
     return [
       {
