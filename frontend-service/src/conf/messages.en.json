@@ -940,6 +940,7 @@
     "reportingDatasetsStatus": "Reporting datasets status",
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
-    "feedbackMessagePlaceholder": "Please provide information on the status change"
+    "feedbackMessagePlaceholder": "Please provide information on the status change",
+    "geometryCoordinates": "Geometry coordinates"
   }
 }

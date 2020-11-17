@@ -67,10 +67,16 @@ export const Map = ({
     zoom: [15],
     bearing: [0],
     pitch: [0],
-    center: MapUtils.checkValidJSONCoordinates(geoJson)
-      ? typeof geoJson === 'object'
-        ? JSON.stringify(geoJson)
-        : geoJson
+    center: TextUtils.areEquals(MapUtils.getGeometryType(geoJson), 'POINT')
+      ? MapUtils.checkValidJSONCoordinates(geoJson)
+        ? typeof geoJson === 'object'
+          ? JSON.stringify(geoJson)
+          : geoJson
+        : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
+      : MapUtils.checkValidJSONMultipleCoordinates(geoJson)
+      ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[${MapUtils.getFirstPointComplexGeometry(
+          geoJson
+        ).toString()}]}, "properties": {"srid": "EPSG:4326"}}`
       : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
   },
   selectedCRS = { label: 'WGS84 - 4326', value: 'EPSG:4326' }
@@ -108,9 +114,9 @@ export const Map = ({
 
   const [newPositionMarker, setNewPositionMarker] = useState();
   const [mapGeoJson, setMapGeoJson] = useState(options.center);
-
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
+  const [geometryType, setGeometryType] = useState('POINT');
 
   const mapRef = useRef();
 
@@ -205,6 +211,7 @@ export const Map = ({
       inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
     }
+    setGeometryType(JSON.parse(geoJson).geometry.type.toUpperCase());
   }, [geoJson]);
 
   useEffect(() => {
@@ -273,7 +280,12 @@ export const Map = ({
           <div className={styles.pointLegendItem}>
             <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
             <div className={styles.pointLegendItemLabel}>
-              <label>{resources.messages['currentPoint']}: </label>
+              <label>
+                {TextUtils.areEquals(geometryType, 'POINT')
+                  ? resources.messages['currentPoint']
+                  : resources.messages['geometryCoordinates']}
+                :{' '}
+              </label>
               <label>
                 {MapUtils.checkValidJSONCoordinates(geoJson)
                   ? MapUtils.printCoordinates(mapGeoJson)
@@ -281,18 +293,22 @@ export const Map = ({
               </label>
             </div>
           </div>
-          <div className={styles.pointLegendItem}>
-            <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
-            <div className={styles.pointLegendItemLabel}>
-              <label>{resources.messages['newPoint']}: </label>
-              <label>{MapUtils.printCoordinates(newPositionMarker, false)}</label>
-            </div>
-          </div>
-          <div className={styles.pointLegendItem}>
-            <div className={styles.pointLegendItemInfoLabel}>
-              <label>{resources.messages['mapSelectPointMessage']}</label>
-            </div>
-          </div>
+          {TextUtils.areEquals(geometryType, 'POINT') && (
+            <>
+              <div className={styles.pointLegendItem}>
+                <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
+                <div className={styles.pointLegendItemLabel}>
+                  <label>{resources.messages['newPoint']}: </label>
+                  <label>{MapUtils.printCoordinates(newPositionMarker, false)}</label>
+                </div>
+              </div>
+              <div className={styles.pointLegendItem}>
+                <div className={styles.pointLegendItemInfoLabel}>
+                  <label>{resources.messages['mapSelectPointMessage']}</label>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
       <div style={{ display: 'inline-flex', width: '60%' }}>
@@ -337,14 +353,18 @@ export const Map = ({
           center={projectGeoJsonCoordinates(options.center)}
           zoom="4"
           ref={mapRef}
-          onDblclick={e => {
-            setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
-            onSelectPoint(
-              proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
-              currentCRS.value
-            );
-            mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
-          }}>
+          onDblclick={
+            TextUtils.areEquals(geometryType, 'POINT')
+              ? e => {
+                  setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
+                  onSelectPoint(
+                    proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
+                    currentCRS.value
+                  );
+                  mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+                }
+              : null
+          }>
           {/* <LayersControl position="topright">
           <BaseLayer checked name="EEA Countries">
             <TileLayer
@@ -381,21 +401,16 @@ export const Map = ({
               />
             </FeatureGroup>
           )}
-          {console.log(JSON.parse(mapGeoJson), geoJson, JSON.parse(mapGeoJson).geometry.type)}
-          {console.log(
-            ['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
-              MapUtils.checkValidJSONMultipleCoordinates(geoJson),
-            TextUtils.areEquals(JSON.parse(geoJson).geometry.type, 'POINT') &&
-              MapUtils.checkValidJSONCoordinates(geoJson)
-          )}
-          {((['LINESTRING', 'POLYGON'].includes(JSON.parse(geoJson).geometry.type.toUpperCase()) &&
+          {((['LINESTRING', 'POLYGON'].includes(geometryType.toUpperCase()) &&
             MapUtils.checkValidJSONMultipleCoordinates(geoJson)) ||
-            (TextUtils.areEquals(JSON.parse(geoJson).geometry.type, 'POINT') &&
-              MapUtils.checkValidJSONCoordinates(geoJson))) && (
+            (TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson))) && (
             <GeoJSON
-              data={TextUtils.areEquals(JSON.parse(JSON.parse(geoJson).geometry.type, 'POINT') ? mapGeoJson : geoJson)}
+              data={JSON.parse(TextUtils.areEquals(geometryType, 'POINT') ? mapGeoJson : geoJson)}
               onEachFeature={onEachFeature}
-              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
+              coordsToLatLng={coords => {
+                console.log(coords);
+                return new L.LatLng(coords[0], coords[1], coords[2]);
+              }}
             />
           )}
           {isNewPositionMarkerVisible && (

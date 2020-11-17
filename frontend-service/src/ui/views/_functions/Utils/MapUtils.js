@@ -1,4 +1,5 @@
-import { isEmpty } from 'lodash';
+import first from 'lodash/first';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const changeIncorrectCoordinates = record => {
@@ -93,6 +94,11 @@ const checkValidJSONMultipleCoordinates = json => {
   }
 };
 
+const getFirstPointComplexGeometry = json =>
+  !isNil(json) ? first(JSON.parse(json).geometry.coordinates) : [55.6811608, 12.5844761];
+
+const getGeometryType = json => (!isNil(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT');
+
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
     ? [coordinates[0], coordinates[1]]
@@ -166,6 +172,8 @@ export const MapUtils = {
   checkValidJSONCoordinates,
   checkValidJSONMultipleCoordinates,
   checkValidLine,
+  getFirstPointComplexGeometry,
+  getGeometryType,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,

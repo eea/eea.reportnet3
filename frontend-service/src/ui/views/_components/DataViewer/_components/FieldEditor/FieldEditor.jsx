@@ -52,14 +52,12 @@ const FieldEditor = ({
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
 
-  console.log(RecordUtils.getCellInfo(colsSchema, cells.field).type, RecordUtils.getCellValue(cells, cells.field));
   const [currentCRS, setCurrentCRS] = useState(
     ['POINT', 'LINESTRING', 'POLYGON'].includes(RecordUtils.getCellInfo(colsSchema, cells.field).type)
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
-        ? crs.filter(crsItem => {
-            console.log(crsItem.value, JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid);
-            return crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid;
-          })[0]
+        ? crs.filter(
+            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
+          )[0]
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );

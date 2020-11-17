@@ -8,13 +8,14 @@ import isUndefined from 'lodash/isUndefined';
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 
-import { CoreUtils } from 'core/infrastructure/CoreUtils';
 import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
+
+import { CoreUtils } from 'core/infrastructure/CoreUtils';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   const datasetTableFieldDesign = new DatasetTableField({});
@@ -348,7 +349,21 @@ const parseValue = (type, value, feToBe = false) => {
       return '';
     }
     const inmValue = JSON.parse(cloneDeep(value));
-    inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
+    switch (type.toUpperCase()) {
+      case 'POINT':
+        inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
+        break;
+      case 'LINESTRING':
+        debugger;
+        inmValue.geometry.coordinates = inmValue.geometry.coordinates.map(coordinate => [coordinate[1], coordinate[0]]);
+      case 'POLYGON':
+        inmValue.geometry.coordinates = inmValue.geometry.coordinates.map(coordinate =>
+          coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]])
+        );
+      default:
+        break;
+    }
+
     if (!feToBe) {
       inmValue.properties.srid = `EPSG:${inmValue.properties.srid}`;
     } else {
