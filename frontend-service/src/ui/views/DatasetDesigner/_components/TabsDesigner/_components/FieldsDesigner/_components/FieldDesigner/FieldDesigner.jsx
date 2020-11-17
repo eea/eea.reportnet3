@@ -27,6 +27,8 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
@@ -88,7 +90,7 @@ export const FieldDesigner = ({
   ];
 
   const getFieldTypeValue = value => {
-    return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
+    return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
   const initialFieldDesignerState = {
     codelistItems: codelistItems,
@@ -183,11 +185,14 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
+    if (
+      TextUtils.areEquals(type.fieldType, 'codelist') ||
+      TextUtils.areEquals(type.fieldType, 'multiselect_codelist')
+    ) {
       onCodelistDropdownSelected(type);
-    } else if (type.fieldType.toLowerCase() === 'link') {
+    } else if (TextUtils.areEquals(type.fieldType, 'link')) {
       onLinkDropdownSelected(type);
-    } else if (type.fieldType.toLowerCase() === 'attachment') {
+    } else if (TextUtils.areEquals(type.fieldType, 'attachment')) {
       onAttachmentDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
@@ -205,7 +210,7 @@ export const FieldDesigner = ({
             codelistItems: null,
             pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
             type: parseGeospatialTypes(type.fieldType),
-            isLinkChange: fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'LINK'
+            isLinkChange: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'LINK')
           });
         } else {
           if (type !== '') {
@@ -655,12 +660,11 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField:
-          type.toUpperCase() === 'LINK'
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
+        referencedField: TextUtils.areEquals(type, 'LINK')
+          ? !isNil(referencedField)
+            ? parseReferenceField(referencedField)
+            : fieldDesignerState.fieldLinkValue
+          : null,
         required,
         type,
         validExtensions
@@ -682,12 +686,11 @@ export const FieldDesigner = ({
           name,
           readOnly,
           recordId,
-          referencedField:
-            type.toUpperCase() === 'LINK'
-              ? !isNil(referencedField)
-                ? parseReferenceField(referencedField)
-                : fieldDesignerState.fieldLinkValue
-              : null,
+          referencedField: TextUtils.areEquals(type, 'LINK')
+            ? !isNil(referencedField)
+              ? parseReferenceField(referencedField)
+              : fieldDesignerState.fieldLinkValue
+            : null,
           required,
           type,
           validExtensions

@@ -74,7 +74,6 @@ export const apiDataflow = {
       url: getUrl(DataflowConfig.dataflowDetails, { dataflowId: dataflowId })
     });
     return response.data;
-    // return metadataJson;
   },
   deleteById: async dataflowId => {
     const response = await HTTPRequester.delete({
