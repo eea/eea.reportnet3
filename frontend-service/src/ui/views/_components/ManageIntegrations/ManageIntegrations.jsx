@@ -425,7 +425,13 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
-          maxLength={option === 'fileExtension' ? config.MAX_FILE_EXTENSION_LENGTH : 255}
+          maxLength={
+            option === 'fileExtension'
+              ? config.MAX_FILE_EXTENSION_LENGTH
+              : option === 'name'
+              ? config.MAX_INTEGRATION_NAME_LENGTH
+              : 255
+          }
           onChange={event => onFillField(event.target.value, option)}
           onKeyDown={event => onSaveKeyDown(event)}
           placeholder={resources.messages[option]}
