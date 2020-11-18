@@ -1183,7 +1183,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + datasetId + QUERY_FILTER_BY_ID_RECORD).append(schemaId).append(AS).append("\"")
               .append(columns.get(i).getName()).append("\" ");
           break;
-        case POSITION:
+        case MULTIPOLYGON:
         case POINT:
         case LINESTRING:
         case MULTILINESTRING:
