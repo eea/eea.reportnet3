@@ -424,44 +424,34 @@ const FieldEditor = ({
           </div>
         );
       case 'LINESTRING':
+      case 'MULTILINESTRING':
+      case 'MULTIPOLYGON':
       case 'POLYGON':
+        const value = RecordUtils.getCellValue(cells, cells.field);
         return (
           <div className={styles.pointWrapper}>
-            <InputText
-              disabled={true}
-              keyfilter={RecordUtils.getFilter(type)}
-              // style={{ marginRight: '2rem' }}
-              type="text"
-              value={
-                RecordUtils.getCellValue(cells, cells.field) !== ''
-                  ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates
-                  : ''
-              }
-            />
+            <label className={isNil(value) || value === '' ? styles.nonEditableData : ''}>
+              {!isNil(value) && value !== ''
+                ? JSON.parse(value).geometry.coordinates.join(', ')
+                : resources.messages['nonEditableData']}
+            </label>
             <div className={styles.pointEpsgWrapper}>
-              <label className={styles.epsg}>{resources.messages['epsg']}</label>
-              <Dropdown
-                ariaLabel={'crs'}
-                appendTo={document.body}
-                className={styles.epsgSwitcher}
-                disabled={isMapDisabled}
-                options={crs}
-                optionLabel="label"
-                placeholder="Select a CRS"
-                value={currentCRS}
-              />
-              <Button
-                className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                icon="marker"
-                onClick={e => {
-                  if (!isNil(onMapOpen)) {
-                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
-                  }
-                }}
-                style={{ width: '35%' }}
-                tooltip={resources.messages['selectGeographicalDataOnMap']}
-                tooltipOptions={{ position: 'bottom' }}
-              />
+              {!isNil(value) && value !== '' && <label className={styles.epsg}>{resources.messages['epsg']}</label>}
+              {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
+              {!isNil(value) && value !== '' && (
+                <Button
+                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                  icon="marker"
+                  onClick={e => {
+                    if (!isNil(onMapOpen)) {
+                      onMapOpen(value, cells, type);
+                    }
+                  }}
+                  style={{ width: '35%' }}
+                  tooltip={resources.messages['selectGeographicalDataOnMap']}
+                  tooltipOptions={{ position: 'bottom' }}
+                />
+              )}
             </div>
           </div>
         );

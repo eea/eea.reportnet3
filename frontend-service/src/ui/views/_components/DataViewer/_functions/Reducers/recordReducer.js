@@ -132,7 +132,6 @@ export const recordReducer = (state, { type, payload }) => {
 
     case 'SAVE_MAP_COORDINATES':
       const inmMapGeoJson = cloneDeep(state.mapGeoJson);
-      console.log({ inmMapGeoJson });
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(payload.split(','));
       parsedInmMapGeoJson.properties.srid = state.newPointCRS;

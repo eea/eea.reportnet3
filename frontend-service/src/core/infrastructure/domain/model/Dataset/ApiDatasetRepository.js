@@ -350,13 +350,11 @@ const parseValue = (type, value, feToBe = false) => {
     value !== '' &&
     !isNil(value)
   ) {
-    debugger;
     if (!isValidJSON(value)) {
       return '';
     }
     const inmValue = JSON.parse(cloneDeep(value));
     const parsedValue = JSON.parse(value);
-    console.log(type, inmValue.geometry.coordinates);
 
     switch (type.toUpperCase()) {
       case 'POINT':
@@ -387,7 +385,6 @@ const parseValue = (type, value, feToBe = false) => {
       inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
     }
 
-    console.log(inmValue.geometry.coordinates);
     return JSON.stringify(inmValue);
   }
   return value;

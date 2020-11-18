@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import first from 'lodash/first';
 import isNil from 'lodash/isNil';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -16,7 +15,7 @@ import * as esri from 'esri-leaflet';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Map as MapComponent, FeatureGroup, GeoJSON, Marker, Popup } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
+// import { EditControl } from 'react-leaflet-draw';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -68,19 +67,7 @@ export const Map = ({
   options = {
     zoom: [15],
     bearing: [0],
-    pitch: [0],
-    center: TextUtils.areEquals(geometryType, 'POINT')
-      ? MapUtils.checkValidJSONCoordinates(geoJson)
-        ? typeof geoJson === 'object'
-          ? JSON.stringify(geoJson)
-          : geoJson
-        : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
-      : MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))
-      ? `{"type": "Feature", "geometry": {"type":"${geometryType}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
-          geoJson,
-          geometryType
-        ).toString()}]}, "properties": {"srid": "${MapUtils.getSrid(geoJson)}"}}`
-      : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
+    pitch: [0]
   },
   selectedCRS = { label: 'WGS84 - 4326', value: 'EPSG:4326' }
 }) => {
@@ -93,7 +80,7 @@ export const Map = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
-  console.log({ geoJson, geometryType });
+
   const themes = [
     { label: 'Topographic', value: 'Topographic' },
     { label: 'Streets', value: 'Streets' },
@@ -140,7 +127,6 @@ export const Map = ({
 
     // map.addLayer(geojsonLayer);
 
-    // mapRef.current.leafletElement.setView(options.center, 2);
     // esri
     //   .tiledMapLayer({
     //     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer',
@@ -232,19 +218,39 @@ export const Map = ({
     esri.basemapLayer(currentTheme.value).addTo(map);
   }, [currentTheme]);
 
+  const getCenter = () => {
+    const defaultCenter = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
+    if (TextUtils.areEquals(geometryType, 'POINT')) {
+      if (MapUtils.checkValidJSONCoordinates(geoJson)) {
+        if (typeof geoJson === 'object') {
+          return JSON.stringify(geoJson);
+        } else {
+          return geoJson;
+        }
+      } else {
+        return defaultCenter;
+      }
+    } else {
+      if (MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))) {
+        return `{"type": "Feature", "geometry": {"type":"${geometryType}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
+          geoJson,
+          geometryType
+        ).toString()}]}, "properties": {"srid": "${MapUtils.getSrid(geoJson)}"}}`;
+      } else {
+        return defaultCenter;
+      }
+    }
+  };
+
   const getGeoJson = () => {
-    console.log('6', geometryType);
-    switch (geometryType) {
+    switch (geometryType.toUpperCase()) {
       case 'POINT':
         if (MapUtils.checkValidJSONCoordinates(geoJson)) {
           return (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
-              coordsToLatLng={coords => {
-                console.log(coords);
-                return new L.LatLng(coords[0], coords[1], coords[2]);
-              }}
+              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
             />
           );
         }
@@ -254,15 +260,11 @@ export const Map = ({
       case 'POLYGON':
       case 'MULTIPOLYGON':
         if (MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))) {
-          console.log(JSON.parse(mapGeoJson));
           return (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
-              coordsToLatLng={coords => {
-                console.log(coords);
-                return new L.LatLng(coords[0], coords[1], coords[2]);
-              }}
+              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
             />
           );
         }
@@ -293,7 +295,6 @@ export const Map = ({
   };
 
   const projectGeoJsonCoordinates = (geoJsonData, isCenter = false) => {
-    // debugger;
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
     const projectPoint = coordinate => {
       return proj4(
@@ -316,7 +317,6 @@ export const Map = ({
         } else {
           projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(coordinate => projectPoint(coordinate));
         }
-        console.log({ projectedCoordinates });
         return projectedCoordinates;
       }
     }
@@ -341,7 +341,6 @@ export const Map = ({
 
   return (
     <>
-      {/* <label className={styles.mapSelectMessage}>{resources.messages['mapSelectPointMessage']}</label> */}
       {hasLegend && (
         <div className={styles.pointLegendWrapper}>
           <div className={styles.pointLegendItem}>
@@ -354,7 +353,7 @@ export const Map = ({
                 :{' '}
               </label>
               <label>
-                {MapUtils.checkValidJSONCoordinates(geoJson)
+                {MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)
                   ? MapUtils.printCoordinates(mapGeoJson)
                   : `{Latitude: , Longitude: }`}
               </label>
@@ -417,7 +416,7 @@ export const Map = ({
         <MapComponent
           style={{ height: '60vh', marginTop: '6px' }}
           doubleClickZoom={false}
-          center={projectGeoJsonCoordinates(options.center, true)}
+          center={projectGeoJsonCoordinates(getCenter(), true)}
           zoom="4"
           ref={mapRef}
           onDblclick={
@@ -463,14 +462,6 @@ export const Map = ({
                 draw={enabledDrawElements}
               />
             </FeatureGroup>
-          )} */}
-          {/* {console.log(
-            TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson),
-            geometryType.toUpperCase(),
-            MapUtils.checkValidJSONMultipleCoordinates(
-              geoJson,
-              ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
-            )
           )} */}
           {getGeoJson()}
           {isNewPositionMarkerVisible && (

@@ -164,12 +164,13 @@ export const useSetColumns = (
   };
 
   const renderComplexGeometries = (value = '', type) => {
-    // debugger;
-    // console.log({ value });
-    if (value !== '' && MapUtils.checkValidJSONMultipleCoordinates(value, ['POLYGON', 'MULTIPOLYGON'].includes(type))) {
+    if (
+      !isNil(value) &&
+      value !== '' &&
+      MapUtils.checkValidJSONMultipleCoordinates(value, ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(type))
+    ) {
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
-        console.log(parsedGeoJson.geometry.coordinates);
         return (
           <span
             style={{
@@ -236,7 +237,7 @@ export const useSetColumns = (
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
-              !['POINT', 'LINESTRING', 'POLYGON'].includes(field.fieldData.type)
+              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(field.fieldData.type)
               ? field.fieldData[column.field].sort().join(', ')
               : // : Array.isArray(field.fieldData[column.field])
               // ? field.fieldData[column.field].join(', ')

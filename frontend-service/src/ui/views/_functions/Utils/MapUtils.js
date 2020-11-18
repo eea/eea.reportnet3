@@ -84,7 +84,6 @@ const checkValidJSONCoordinates = json => {
 
 const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
   if (isValidJSON(json)) {
-    debugger;
     const parsedJSON = JSON.parse(json);
     if (complexType) {
       return (

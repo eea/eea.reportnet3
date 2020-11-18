@@ -635,7 +635,7 @@
     "3d": "3D",
     "geospatialData": "Geospatial data",
     "selectGeographicalData": "Select point",
-    "selectGeographicalDataOnMap": "Select point on map",
+    "selectGeographicalDataOnMap": "View geometry on map",
     "noWebLinks": "No weblinks added",
     "noDocuments": "No documents uploaded",
     "addUniqueConstraint": "Add unique constraint",
@@ -941,6 +941,7 @@
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
     "feedbackMessagePlaceholder": "Please provide information on the status change",
-    "geometryCoordinates": "Geometry coordinates"
+    "geometryCoordinates": "Geometry coordinates",
+    "nonEditableData": "This field is not editable"
   }
 }

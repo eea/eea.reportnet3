@@ -114,7 +114,6 @@ const DataFormFieldEditor = ({
       const inmMapGeoJson = cloneDeep(fieldValue !== '' ? fieldValue : fieldEmptyPointValue);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(coordinates);
-      console.log('save point');
       parsedInmMapGeoJson.properties.srid = crs.value;
       onChangeForm(field, JSON.stringify(parsedInmMapGeoJson));
     }
@@ -256,6 +255,8 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
+    ) : ['POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(type) ? (
+      renderComplexGeometries(field, fieldValue)
     ) : type === 'TEXTAREA' ? (
       renderTextarea(field, fieldValue)
     ) : (
@@ -292,6 +293,10 @@ const DataFormFieldEditor = ({
         yearRange="2010:2030"
       />
     );
+  };
+
+  const renderComplexGeometries = (field, fieldValue) => {
+    return false;
   };
 
   const renderLinkDropdown = (field, fieldValue) => {
@@ -337,7 +342,12 @@ const DataFormFieldEditor = ({
   };
 
   const renderMap = () => (
-    <Map hasLegend={true} geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
+    <Map
+      hasLegend={true}
+      geoJson={fieldValue}
+      geometryType={'POINT'}
+      onSelectPoint={onSelectPoint}
+      selectedCRS={map.currentCRS.value}></Map>
   );
 
   const renderMapType = (field, fieldValue) => (
