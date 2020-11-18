@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './CodelistEditor.module.scss';
 
@@ -7,7 +7,8 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Dialog } from 'ui/views/_components/Dialog';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { useEffect } from 'react';
+
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist, type }) => {
   const resources = useContext(ResourcesContext);
@@ -64,16 +65,10 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
     return (
       <div onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
-          {/* <span>
-            {type.toUpperCase() === 'SINGLE SELECT'
-              ? resources.messages['codelistEditorItems']
-              : resources.messages['multiselectCodelists']}
-          </span> */}
           <span
             dangerouslySetInnerHTML={{
               __html: resources.messages['codelistEditorItemsMessage']
             }}></span>
-          {/* <span>{resources.messages['codelistEditorItemsMessage']}</span> */}
         </div>
         <Chips
           checkForDuplicates={true}
@@ -85,7 +80,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
           onChange={e => setCodelistItems(e.value)}
           showErrorMessage={true}
           tooltip={
-            type.toUpperCase() === 'SINGLE SELECT'
+            TextUtils.areEquals(type, 'SINGLE SELECT')
               ? resources.messages['codelistEditorMessage']
               : resources.messages['multiselectCodelistEditorMessage']
           }
@@ -103,7 +98,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
         focusOnShow={false}
         footer={codelistDialogFooter}
         header={
-          type.toUpperCase() === 'SINGLE SELECT'
+          TextUtils.areEquals(type, 'SINGLE SELECT')
             ? resources.messages['codelistEditor']
             : resources.messages['multiselectCodelistEditor']
         }

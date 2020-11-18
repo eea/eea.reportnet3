@@ -25,8 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { MapUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
   autoFocus,
@@ -146,7 +145,7 @@ const DataFormFieldEditor = ({
   };
 
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
-    if (isNil(type) || type.toUpperCase() !== 'LINK' || isNil(referencedField)) {
+    if (isNil(type) || !TextUtils.areEquals(type, 'LINK') || isNil(referencedField)) {
       return [];
     }
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(

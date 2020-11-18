@@ -491,7 +491,7 @@ export const Dataset = withRouter(({ match, history }) => {
           datasetName
         }
       });
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
