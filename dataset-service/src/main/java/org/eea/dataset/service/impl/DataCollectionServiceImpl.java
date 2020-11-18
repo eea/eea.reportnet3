@@ -354,7 +354,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           lockService.removeLockByCriteria(criteria);
           // release notification
           rulesOk = false;
-          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+          releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
         }
       }
     }
