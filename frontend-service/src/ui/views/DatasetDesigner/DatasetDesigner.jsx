@@ -306,7 +306,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           {
             label: resources.messages['exportExternalIntegrations'],
             items: externalOperationsList.export.map(type => ({
-              command: () => onExportDataExternalIntegration(type.fileExtension),
+              command: () => onExportDataExternalIntegration(type.id),
               icon: config.icons['archive'],
               label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
             }))
@@ -511,12 +511,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const onExportDataExternalIntegration = async fileExtension => {
+  const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
 
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
