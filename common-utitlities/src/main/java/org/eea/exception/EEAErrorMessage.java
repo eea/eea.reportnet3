@@ -298,6 +298,9 @@ public final class EEAErrorMessage {
   /** The Constant MESSAGING_BAD_REQUEST: {@value}. */
   public static final String MESSAGING_BAD_REQUEST = "Missing required data";
 
+  /** The Constant DUPLICATED_NAME_INTEGRATION: {@value}. */
+  public static final String DUPLICATED_NAME_INTEGRATION = "Duplicated name integration";
+
   /**
    * Instantiates a new EEA error message.
    */

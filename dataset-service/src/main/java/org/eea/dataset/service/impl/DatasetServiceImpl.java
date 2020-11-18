@@ -768,15 +768,14 @@ public class DatasetServiceImpl implements DatasetService {
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
   @Override
-  public void exportFileThroughIntegration(Long datasetId, String fileExtension)
-      throws EEAException {
+  public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
     String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
     IntegrationVO integrationVO =
-        integrationController.findExportIntegration(datasetSchemaId, fileExtension);
+        integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
         IntegrationOperationTypeEnum.EXPORT, null, datasetId, integrationVO);
   }
@@ -2523,9 +2522,10 @@ public class DatasetServiceImpl implements DatasetService {
    * Creates the records.
    *
    * @param datasetId the dataset id
+   * @param dataProviderCode the data provider code
    * @param recordVOs the record V os
-   * @param tableSchemaId the table schema id
    * @param datasetType the dataset type
+   * @param tableSchema the table schema
    * @return the list
    */
   private List<RecordValue> createRecords(Long datasetId, String dataProviderCode,

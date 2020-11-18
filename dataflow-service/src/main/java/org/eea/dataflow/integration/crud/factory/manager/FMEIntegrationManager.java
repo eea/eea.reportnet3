@@ -8,6 +8,7 @@ import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
 import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.persistence.repository.OperationParametersRepository;
 import org.eea.exception.EEAErrorMessage;
@@ -123,6 +124,27 @@ public class FMEIntegrationManager extends AbstractCrudManager {
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
 
+    List<Integration> existingIntegrations =
+        integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
+            integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
+    String integrationSchemaId =
+        integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
+    for (Integration integrationAux : existingIntegrations) {
+      List<InternalOperationParameters> internalParameterAux =
+          integrationAux.getInternalParameters();
+      for (InternalOperationParameters internalParameter : internalParameterAux) {
+        if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
+            && internalParameter.getValue().equals(integrationSchemaId)) {
+          if (integrationAux.getName().equals(integration.getName())) {
+            LOG_ERROR.error("Error creating an integration: Integration name is duplicated ");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                EEAErrorMessage.DUPLICATED_NAME_INTEGRATION);
+          }
+        }
+      }
+    }
+
+
     operationParametersRepository.deleteByIntegration(integration);
     integration = integrationMapper.classToEntity(integrationVO);
 
@@ -149,7 +171,27 @@ public class FMEIntegrationManager extends AbstractCrudManager {
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
 
+    List<Integration> existingIntegrations =
+        integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
+            integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
     Integration integration = integrationMapper.classToEntity(integrationVO);
+    String integrationSchemaId =
+        integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
+    for (Integration integrationAux : existingIntegrations) {
+      List<InternalOperationParameters> internalParameterAux =
+          integrationAux.getInternalParameters();
+      for (InternalOperationParameters internalParameter : internalParameterAux) {
+        if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
+            && internalParameter.getValue().equals(integrationSchemaId)) {
+          if (integrationAux.getName().equals(integration.getName())) {
+            LOG_ERROR.error("Error creating an integration: Integration name is duplicated ");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                EEAErrorMessage.DUPLICATED_NAME_INTEGRATION);
+          }
+        }
+      }
+    }
+
     integrationRepository.save(integration);
     LOG.info("Integration created: {}", integrationVO);
   }
