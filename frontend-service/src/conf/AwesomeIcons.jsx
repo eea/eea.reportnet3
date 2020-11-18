@@ -103,6 +103,7 @@ import {
   faSquare as farSquareRegular,
   faFilePdf as farFilePdf
 } from '@fortawesome/free-regular-svg-icons';
+import { faBuffer, faConnectdevelop } from '@fortawesome/free-brands-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
@@ -272,6 +273,10 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'mpg':
       return faFileVideo;
+    case 'multiLineString':
+      return faConnectdevelop;
+    case 'multiPolygon':
+      return faBuffer;
     case 'multiselect':
       return faTasks;
     case 'notifications':

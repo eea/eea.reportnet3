@@ -92,7 +92,7 @@ const LinkSelector = withRouter(
         const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
         if (hasPK && table.tableSchemaId !== tableSchemaId) {
           const pkField = table.records[0].fields.filter(field => field.pk === true)[0];
-          if (!['POINT', 'LINESTRING', 'POLYGON'].includes(pkField.type)) {
+          if (!['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(pkField.type)) {
             return {
               name: `${table.tableSchemaName} - ${pkField.name}`,
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,

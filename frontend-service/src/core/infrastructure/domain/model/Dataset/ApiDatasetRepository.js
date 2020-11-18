@@ -371,8 +371,14 @@ const parseValue = (type, value, feToBe = false) => {
         ]);
         break;
       case 'POLYGON':
+      case 'MULTILINESTRING':
         inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
           coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]])
+        );
+        break;
+      case 'MULTIPOLYGON':
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
+          polygon.map(coordinate => coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]]))
         );
         break;
       default:

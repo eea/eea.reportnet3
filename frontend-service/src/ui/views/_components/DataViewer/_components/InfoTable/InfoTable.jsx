@@ -69,8 +69,6 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       case 'CODELIST':
         return codelistTextCharacters;
       case 'POINT':
-      case 'LINESTRING':
-      case 'POLYGON':
         return textCharacters;
       case 'DATE':
         return dateCharacters;
@@ -108,7 +106,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       const valueMaxLength = getMaxCharactersValueByFieldType(field.fieldData.type);
       field.fieldData[column.field] = value.substring(0, valueMaxLength);
       value = field.fieldData[column.field];
-      if (['POINT', 'LINESTRING', 'POLYGON'].includes(field.fieldData.type)) {
+      if (['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(field.fieldData.type)) {
         if (MapUtils.isValidJSON(value)) {
           const parsedGeoJson = JSON.parse(value);
           value = `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`;

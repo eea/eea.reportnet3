@@ -105,8 +105,10 @@ const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
 const getFirstPointComplexGeometry = (json, geometryType) =>
   !isNil(json)
     ? first(
-        ['POLYGON', 'MULTIPOLYGON'].includes(geometryType)
+        ['POLYGON', 'MULTILINESTRING'].includes(geometryType)
           ? first(JSON.parse(json).geometry.coordinates)
+          : ['MULTIPOLYGON'].includes(geometryType)
+          ? first(first(JSON.parse(json).geometry.coordinates))
           : JSON.parse(json).geometry.coordinates
       )
     : [55.6811608, 12.5844761];

@@ -231,7 +231,12 @@ export const Map = ({
         return defaultCenter;
       }
     } else {
-      if (MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))) {
+      if (
+        MapUtils.checkValidJSONMultipleCoordinates(
+          geoJson,
+          ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)
+        )
+      ) {
         return `{"type": "Feature", "geometry": {"type":"${geometryType}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
           geoJson,
           geometryType
@@ -310,7 +315,7 @@ export const Map = ({
         return projectPoint(parsedGeoJsonData.geometry.coordinates);
       } else {
         let projectedCoordinates = [];
-        if (['POLYGON', 'MULTIPOLYGON'].includes(geometryType)) {
+        if (['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)) {
           projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(ring =>
             ring.map(coordinate => projectPoint(coordinate))
           );

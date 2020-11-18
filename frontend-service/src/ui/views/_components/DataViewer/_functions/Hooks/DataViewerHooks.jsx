@@ -252,7 +252,7 @@ export const useSetColumns = (
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
-              : ['LINESTRING', 'POLYGON'].includes(field.fieldData.type)
+              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(field.fieldData.type)
               ? renderComplexGeometries(field.fieldData[column.field], field.fieldData.type)
               : field.fieldData[column.field]
             : null}
