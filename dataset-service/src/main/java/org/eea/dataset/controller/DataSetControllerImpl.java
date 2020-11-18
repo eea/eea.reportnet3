@@ -561,20 +561,21 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
   @GetMapping("/exportFileThroughIntegration")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("fileExtension") String fileExtension) {
+      @RequestParam("integrationId") Long integrationId) {
     try {
-      datasetService.exportFileThroughIntegration(datasetId, fileExtension);
+      datasetService.exportFileThroughIntegration(datasetId, integrationId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
