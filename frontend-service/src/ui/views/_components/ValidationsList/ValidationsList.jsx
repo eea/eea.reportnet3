@@ -7,7 +7,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './TabsValidations.module.scss';
+import styles from './ValidationsList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -31,7 +31,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-const TabsValidations = withRouter(
+const ValidationsList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
@@ -438,4 +438,4 @@ const TabsValidations = withRouter(
   }
 );
 
-export { TabsValidations };
+export { ValidationsList };

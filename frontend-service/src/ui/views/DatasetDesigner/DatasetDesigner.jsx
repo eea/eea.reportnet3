@@ -36,7 +36,7 @@ import { RadioButton } from 'ui/views/_components/RadioButton';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { TabsValidations } from 'ui/views/_components/TabsValidations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
@@ -1000,7 +1000,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onHide={() => onHideValidationsDialog()}
           style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
-          <TabsValidations
+          <ValidationsList
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
