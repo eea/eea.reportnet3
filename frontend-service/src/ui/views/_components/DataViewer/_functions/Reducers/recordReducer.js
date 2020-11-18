@@ -111,6 +111,7 @@ export const recordReducer = (state, { type, payload }) => {
       return {
         ...state,
         drawElements: inmDrawElements,
+        geometryType: payload.fieldType.toUpperCase(),
         isMapOpen: true,
         mapGeoJson: payload.coordinates,
         selectedMapCells: payload.mapCells

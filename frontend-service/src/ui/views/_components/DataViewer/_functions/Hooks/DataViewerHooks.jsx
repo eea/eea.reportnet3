@@ -165,11 +165,19 @@ export const useSetColumns = (
 
   const renderComplexGeometries = (value = '', type) => {
     // debugger;
-    console.log({ value });
+    // console.log({ value });
     if (value !== '' && MapUtils.checkValidJSONMultipleCoordinates(value, ['POLYGON', 'MULTIPOLYGON'].includes(type))) {
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
-        return `${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`;
+        console.log(parsedGeoJson.geometry.coordinates);
+        return (
+          <span
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>{`${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`}</span>
+        );
       } else {
         return '';
       }

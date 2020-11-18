@@ -53,7 +53,9 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
 
   const [currentCRS, setCurrentCRS] = useState(
-    ['POINT', 'LINESTRING', 'POLYGON'].includes(RecordUtils.getCellInfo(colsSchema, cells.field).type)
+    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(
+      RecordUtils.getCellInfo(colsSchema, cells.field).type
+    )
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
         ? crs.filter(
             crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid

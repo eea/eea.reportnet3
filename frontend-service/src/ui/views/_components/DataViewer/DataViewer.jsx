@@ -134,6 +134,7 @@ const DataViewer = withRouter(
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
+      geometryType: '',
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
       isMapOpen: false,
@@ -986,6 +987,7 @@ const DataViewer = withRouter(
     const mapRender = () => (
       <Map
         enabledDrawElements={records.drawElements}
+        geometryType={records.geometryType}
         hasLegend={true}
         geoJson={records.mapGeoJson}
         onSelectPoint={onSelectPoint}

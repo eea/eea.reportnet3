@@ -46,9 +46,11 @@ const DataForm = ({
     setFieldsWithError(inmFieldsWithError);
   };
 
-  const allAttachments = () => {
-    const notAttachment = colsSchema.filter(col => !TextUtils.areEquals(col.type, 'ATTACHMENT'));
-    return notAttachment.length === 0;
+  const allAttachmentsOrComplexGeom = () => {
+    const notAttachmentOrComplexGeom = colsSchema.filter(
+      col => !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(col.type)
+    );
+    return notAttachmentOrComplexGeom.length === 0;
   };
 
   const editRecordForm = colsSchema.map((column, i) => {
@@ -59,7 +61,7 @@ const DataForm = ({
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <Fragment key={column.field}>
-              {!TextUtils.areEquals(column.type, 'ATTACHMENT') && (
+              {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(column.type) && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
                     TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
@@ -77,14 +79,12 @@ const DataForm = ({
               <div
                 className="p-col-8"
                 style={{
-                  padding: !TextUtils.areEquals(column.type, 'ATTACHMENT') ? '.5em' : '0',
-                  width:
-                    column.type === 'DATE' ||
-                    column.type === 'CODELIST' ||
-                    column.type === 'MULTISELECT_CODELIST' ||
-                    column.type === 'LINK'
-                      ? '30%'
-                      : ''
+                  padding: !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(
+                    column.type
+                  )
+                    ? '.5em'
+                    : '0',
+                  width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
                 }}>
                 <DataFormFieldEditor
                   autoFocus={i === 0}
@@ -113,7 +113,7 @@ const DataForm = ({
     }
   });
 
-  const newRecordForm = !allAttachments() ? (
+  const newRecordForm = !allAttachmentsOrComplexGeom() ? (
     colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -121,7 +121,7 @@ const DataForm = ({
             const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
             return (
               <Fragment key={column.field}>
-                {!TextUtils.areEquals(column.type, 'ATTACHMENT') && (
+                {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(column.type) && (
                   <div className="p-col-4" style={{ padding: '.75em' }}>
                     <label htmlFor={column.field}>{`${column.header}${
                       TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
@@ -141,11 +141,12 @@ const DataForm = ({
                 <div
                   className="p-col-8"
                   style={{
-                    padding: !TextUtils.areEquals(column.type.toUpperCase(), 'ATTACHMENT') ? '.5em' : '0',
-                    width:
-                      column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
-                        ? '30%'
-                        : ''
+                    padding: !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(
+                      column.type
+                    )
+                      ? '.5em'
+                      : '0',
+                    width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
                   }}>
                   <DataFormFieldEditor
                     autoFocus={i === 0}
@@ -168,7 +169,7 @@ const DataForm = ({
       }
     })
   ) : (
-    <span className={styles.allAttachmentMessage}>{resources.messages['allAttachment']}</span>
+    <span className={styles.allAttachmentMessage}>{resources.messages['allAttachmentOrComplexGeom']}</span>
   );
 
   return formType === 'EDIT' ? editRecordForm : newRecordForm;

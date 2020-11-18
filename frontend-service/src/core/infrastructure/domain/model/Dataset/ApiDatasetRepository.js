@@ -328,6 +328,7 @@ const isValidJSON = value => {
   try {
     JSON.parse(value);
   } catch (e) {
+    console.log(e);
     return false;
   }
   return true;
@@ -344,7 +345,12 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 };
 
 const parseValue = (type, value, feToBe = false) => {
-  if (['POINT', 'LINESTRING', 'POLYGON'].includes(type) && value !== '' && !isNil(value)) {
+  if (
+    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(type) &&
+    value !== '' &&
+    !isNil(value)
+  ) {
+    debugger;
     if (!isValidJSON(value)) {
       return '';
     }

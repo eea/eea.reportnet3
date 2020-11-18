@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
+import first from 'lodash/first';
 import isNil from 'lodash/isNil';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -61,27 +62,24 @@ export const Map = ({
     rectangle: false
   },
   geoJson = '',
+  geometryType = '',
   hasLegend = false,
   onSelectPoint,
   options = {
     zoom: [15],
     bearing: [0],
     pitch: [0],
-    center: TextUtils.areEquals(MapUtils.getGeometryType(geoJson), 'POINT')
+    center: TextUtils.areEquals(geometryType, 'POINT')
       ? MapUtils.checkValidJSONCoordinates(geoJson)
         ? typeof geoJson === 'object'
           ? JSON.stringify(geoJson)
           : geoJson
         : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
-      : MapUtils.checkValidJSONMultipleCoordinates(
+      : MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))
+      ? `{"type": "Feature", "geometry": {"type":"${geometryType}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
           geoJson,
-          ['POLYGON', 'MULTIPOLYGON'].includes(MapUtils.getGeometryType(geoJson))
-        )
-      ? `{"type": "Feature", "geometry": {"type":"${MapUtils.getGeometryType(
-          geoJson
-        )}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
-          geoJson
-        ).toString()}]}, "properties": {"srid": "EPSG:4326"}}`
+          geometryType
+        ).toString()}]}, "properties": {"srid": "${MapUtils.getSrid(geoJson)}"}}`
       : `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
   },
   selectedCRS = { label: 'WGS84 - 4326', value: 'EPSG:4326' }
@@ -95,7 +93,7 @@ export const Map = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
-  console.log({ geoJson });
+  console.log({ geoJson, geometryType });
   const themes = [
     { label: 'Topographic', value: 'Topographic' },
     { label: 'Streets', value: 'Streets' },
@@ -118,10 +116,9 @@ export const Map = ({
   );
 
   const [newPositionMarker, setNewPositionMarker] = useState();
-  const [mapGeoJson, setMapGeoJson] = useState(options.center);
+  const [mapGeoJson, setMapGeoJson] = useState(geoJson);
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
-  const [geometryType, setGeometryType] = useState('POINT');
 
   const mapRef = useRef();
 
@@ -171,12 +168,17 @@ export const Map = ({
 
     searchControl.on('results', function (data) {
       results.clearLayers();
-      for (let i = data.results.length - 1; i >= 0; i--) {
-        setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}, EPSG:4326`);
-        onSelectPoint(
-          proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [data.results[i].latlng.lat, data.results[i].latlng.lng]),
-          currentCRS.value
-        );
+      if (TextUtils.areEquals(geometryType, 'POINT')) {
+        for (let i = data.results.length - 1; i >= 0; i--) {
+          setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}, EPSG:4326`);
+          onSelectPoint(
+            proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [
+              data.results[i].latlng.lat,
+              data.results[i].latlng.lng
+            ]),
+            currentCRS.value
+          );
+        }
       }
     });
 
@@ -216,11 +218,6 @@ export const Map = ({
       inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
     }
-    console.log({ geoJson });
-    if (geoJson !== '') {
-      console.log(JSON.parse(geoJson).geometry.type.toUpperCase());
-      setGeometryType(JSON.parse(geoJson).geometry.type.toUpperCase());
-    }
   }, [geoJson]);
 
   useEffect(() => {
@@ -236,7 +233,8 @@ export const Map = ({
   }, [currentTheme]);
 
   const getGeoJson = () => {
-    switch (geometryType.toUpperCase()) {
+    console.log('6', geometryType);
+    switch (geometryType) {
       case 'POINT':
         if (MapUtils.checkValidJSONCoordinates(geoJson)) {
           return (
@@ -255,16 +253,11 @@ export const Map = ({
       case 'MULTILINESTRING':
       case 'POLYGON':
       case 'MULTIPOLYGON':
-        if (
-          MapUtils.checkValidJSONMultipleCoordinates(
-            geoJson,
-            ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
-          )
-        ) {
-          console.log('ENTRO');
+        if (MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))) {
+          console.log(JSON.parse(mapGeoJson));
           return (
             <GeoJSON
-              data={JSON.parse(geoJson)}
+              data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
               coordsToLatLng={coords => {
                 console.log(coords);
@@ -299,13 +292,34 @@ export const Map = ({
     setCurrentTheme(selectedTheme);
   };
 
-  const projectGeoJsonCoordinates = geoJsonData => {
+  const projectGeoJsonCoordinates = (geoJsonData, isCenter = false) => {
+    // debugger;
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
-    return proj4(
-      proj4(!isNil(parsedGeoJsonData) ? parsedGeoJsonData.properties.srid : currentCRS.value),
-      proj4('EPSG:4326'),
-      parsedGeoJsonData.geometry.coordinates
-    );
+    const projectPoint = coordinate => {
+      return proj4(
+        proj4(!isNil(parsedGeoJsonData) ? parsedGeoJsonData.properties.srid : currentCRS.value),
+        proj4('EPSG:4326'),
+        coordinate
+      );
+    };
+    if (isCenter) {
+      return projectPoint(parsedGeoJsonData.geometry.coordinates);
+    } else {
+      if (TextUtils.areEquals(geometryType, 'POINT')) {
+        return projectPoint(parsedGeoJsonData.geometry.coordinates);
+      } else {
+        let projectedCoordinates = [];
+        if (['POLYGON', 'MULTIPOLYGON'].includes(geometryType)) {
+          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(ring =>
+            ring.map(coordinate => projectPoint(coordinate))
+          );
+        } else {
+          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(coordinate => projectPoint(coordinate));
+        }
+        console.log({ projectedCoordinates });
+        return projectedCoordinates;
+      }
+    }
   };
 
   const projectPointCoordinates = coordinates => {
@@ -403,7 +417,7 @@ export const Map = ({
         <MapComponent
           style={{ height: '60vh', marginTop: '6px' }}
           doubleClickZoom={false}
-          center={projectGeoJsonCoordinates(options.center)}
+          center={projectGeoJsonCoordinates(options.center, true)}
           zoom="4"
           ref={mapRef}
           onDblclick={
@@ -430,9 +444,8 @@ export const Map = ({
             <TileLayer url="" />
           </BaseLayer>
         </LayersControl> */}
-          {Object.values(enabledDrawElements).filter(enabledDrawElement => enabledDrawElement).length > 0 && (
-            <FeatureGroup>
-              {/* ref={featureGroupRef => onFeatureGroupReady(featureGroupRef)}> */}
+          {/* {Object.values(enabledDrawElements).filter(enabledDrawElement => enabledDrawElement).length > 0 && (
+            <FeatureGroup>              
               <EditControl
                 position="topright"
                 onEdited={e => console.log(e)}
@@ -440,9 +453,6 @@ export const Map = ({
                   console.log(e.target, e.layer, e.layer.toGeoJSON());
                   console.log(JSON.stringify(e.layer.toGeoJSON()));
                   setMapGeoJson(JSON.stringify(e.layer.toGeoJSON()));
-                  // e.layers.eachLayer(a => {
-                  //   console.log(a.toGeoJSON());
-                  // });
                 }}
                 onDeleted={e => console.log(e)}
                 onMounted={e => console.log(e)}
@@ -453,15 +463,15 @@ export const Map = ({
                 draw={enabledDrawElements}
               />
             </FeatureGroup>
-          )}
-          {console.log(
+          )} */}
+          {/* {console.log(
             TextUtils.areEquals(geometryType, 'POINT') && MapUtils.checkValidJSONCoordinates(geoJson),
             geometryType.toUpperCase(),
             MapUtils.checkValidJSONMultipleCoordinates(
               geoJson,
               ['POLYGON', 'MULTIPOLYGON'].includes(geometryType.toUpperCase())
             )
-          )}
+          )} */}
           {getGeoJson()}
           {isNewPositionMarkerVisible && (
             <Marker

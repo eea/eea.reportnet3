@@ -84,6 +84,7 @@ const checkValidJSONCoordinates = json => {
 
 const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
   if (isValidJSON(json)) {
+    debugger;
     const parsedJSON = JSON.parse(json);
     if (complexType) {
       return (
@@ -93,7 +94,7 @@ const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
       );
     } else {
       return (
-        parsedJSON.geometry.coordinates.map(coordinates => checkValidCoordinates(coordinates)).filter(check => !check)
+        parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate)).filter(check => !check)
           .length === 0
       );
     }
@@ -102,11 +103,19 @@ const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
   }
 };
 
-const getFirstPointComplexGeometry = json =>
-  !isNil(json) ? first(JSON.parse(json).geometry.coordinates) : [55.6811608, 12.5844761];
+const getFirstPointComplexGeometry = (json, geometryType) =>
+  !isNil(json)
+    ? first(
+        ['POLYGON', 'MULTIPOLYGON'].includes(geometryType)
+          ? first(JSON.parse(json).geometry.coordinates)
+          : JSON.parse(json).geometry.coordinates
+      )
+    : [55.6811608, 12.5844761];
 
 const getGeometryType = json =>
   !isNil(json) && isValidJSON(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT';
+
+const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
@@ -183,6 +192,7 @@ export const MapUtils = {
   checkValidLine,
   getFirstPointComplexGeometry,
   getGeometryType,
+  getSrid,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,
