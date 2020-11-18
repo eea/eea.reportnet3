@@ -301,12 +301,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label: type.text
     }));
 
-    const externalExtensions = !isEmpty(externalOperationsList.export)
+    const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
             label: resources.messages['exportExternalIntegrations'],
             items: externalOperationsList.export.map(type => ({
-              command: () => onExportDataExternalExtension(type.fileExtension),
+              command: () => onExportDataExternalIntegration(type.fileExtension),
               icon: config.icons['archive'],
               label: `${type.name.toUpperCase()}`
             }))
@@ -316,7 +316,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: { exportList: internalExtensionList.concat(externalExtensions) }
+      payload: { exportList: internalExtensionList.concat(externalIntegrationsNames) }
     });
   };
 
@@ -511,7 +511,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileExtension => {
+  const onExportDataExternalIntegration = async fileExtension => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
 

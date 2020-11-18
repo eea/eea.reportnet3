@@ -91,7 +91,6 @@ export const Dataset = withRouter(({ match, history }) => {
     import: [],
     importOtherSystems: []
   });
-  const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
@@ -161,7 +160,7 @@ export const Dataset = withRouter(({ match, history }) => {
     if (isEmpty(externalOperationsList.export)) {
       setExportButtonsList(internalExtensions);
     } else {
-      setExportButtonsList(internalExtensions.concat(externalExtensions));
+      setExportButtonsList(internalExtensions.concat(externalIntegrationsNames));
     }
   }, [datasetName, externalOperationsList.export]);
 
@@ -202,7 +201,7 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
-    getExportExtensions(externalOperationsList.export);
+    getExportIntegrationsNames(externalOperationsList.export);
   }, [externalOperationsList]);
 
   useEffect(() => {
@@ -217,16 +216,15 @@ export const Dataset = withRouter(({ match, history }) => {
     );
   };
 
-  const parseUniqExportExtensions = exportExtensionsOperationsList => {
-    return exportExtensionsOperationsList.map(uniqExportExtension => ({
-      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
-      code: uniqExportExtension.toLowerCase()
+  const parseExportIntegrationsNames = exportNamesOperationsList => {
+    return exportNamesOperationsList.map(exportNameOperation => ({
+      text: `${exportNameOperation.toUpperCase()} (.${exportNameOperation.toLowerCase()})`,
+      code: exportNameOperation.toLowerCase()
     }));
   };
 
-  const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqExportExtensions = exportExtensionsOperationsList.map(element => element.name);
-    setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
+  const getExportIntegrationsNames = exportOperationsList => {
+    parseExportIntegrationsNames(exportOperationsList.map(element => element.name));
   };
 
   const importFromFile = [
@@ -257,13 +255,13 @@ export const Dataset = withRouter(({ match, history }) => {
     command: () => onExportDataInternalExtension(type.code)
   }));
 
-  const externalExtensions = [
+  const externalIntegrationsNames = [
     {
       label: resources.messages['exportExternalIntegrations'],
       items: externalOperationsList.export.map(type => ({
         label: type.name.toUpperCase(),
         icon: config.icons['archive'],
-        command: () => onExportDataExternalExtension(type.fileExtension)
+        command: () => onExportDataExternalIntegration(type.fileExtension)
       }))
     }
   ];
@@ -448,7 +446,7 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileExtension => {
+  const onExportDataExternalIntegration = async fileExtension => {
     setIsLoadingFile(true);
     notificationContext.add({
       type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
