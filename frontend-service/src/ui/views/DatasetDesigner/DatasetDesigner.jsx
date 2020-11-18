@@ -1124,6 +1124,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
+                className={styles.exportSubmenu}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
                 onShow={e => getPosition(e)}

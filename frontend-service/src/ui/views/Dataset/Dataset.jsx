@@ -825,6 +825,7 @@ export const Dataset = withRouter(({ match, history }) => {
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
+              className={styles.exportSubmenu}
               model={exportButtonsList}
               popup={true}
               ref={exportMenuRef}
