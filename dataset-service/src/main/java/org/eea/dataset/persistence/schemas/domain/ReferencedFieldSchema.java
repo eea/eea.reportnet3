@@ -21,16 +21,15 @@ public class ReferencedFieldSchema {
   @Field(value = "idDatasetSchema")
   private ObjectId idDatasetSchema;
 
-
   /** The id pk. */
   @Field(value = "idPk")
   private ObjectId idPk;
 
-  @Field(value = "label")
-  private ObjectId label;
+  @Field(value = "labelId")
+  private ObjectId labelId;
 
-  @Field(value = "conditional")
-  private ObjectId conditional;
+  @Field(value = "conditionalId")
+  private ObjectId conditionalId;
 
 
 

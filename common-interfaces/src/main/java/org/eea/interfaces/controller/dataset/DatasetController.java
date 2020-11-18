@@ -216,7 +216,10 @@ public interface DatasetController {
   @GetMapping("/{id}/getFieldsValuesReferenced")
   List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @RequestParam("idFieldSchema") String idFieldSchema,
-      @RequestParam("searchValue") String searchValue);
+      @RequestParam(value = "labelSchemaId", required = false) String labelSchemaId,
+      @RequestParam(value = "conditionalSchemaId", required = false) String conditionalSchemaId,
+      @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
+      @RequestParam(value = "searchValue", required = false) String searchValue);
 
   /**
    * Gets the referenced dataset id.

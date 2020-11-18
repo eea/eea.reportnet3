@@ -1060,36 +1060,77 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the field values referenced
    */
   @Override
-  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
+  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String labelSchemaId,
+      String conditionalSchemaId, String conditionalValue, String searchValue) {
+
     Long idDatasetDestination =
         datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
+
     idDatasetDestination = 6984L;
+    // labelSchemaId = "5f87177b26a10e1df05aad90";
+
+    // In case there's no label selected, the label will the the same as the Pk
+    if (StringUtils.isBlank(labelSchemaId)) {
+      labelSchemaId = idPk;
+    }
     TenantResolver
         .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
     // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
     // want to show on the screen
-    String labelIdSchema = "5f87177b26a10e1df05aad90";
-    List<FieldValueWithLabel> fieldsAux =
-        fieldRepository.findByIdFieldSchemaAndConditional(idPk, labelIdSchema);
-    List<FieldValue> values = new ArrayList<>();
-    List<FieldValue> labels = new ArrayList<>();
-    for (FieldValueWithLabel fvExtended : fieldsAux) {
-      values.add(fvExtended.getFieldValue());
-      labels.add(fvExtended.getLabel());
-    }
-    List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
-        searchValue, PageRequest.of(0, 15));
+    List<FieldValueWithLabel> fieldsAux = fieldRepository.findByIdFieldSchemaAndConditional(idPk,
+        labelSchemaId, searchValue, PageRequest.of(0, 15));
+
+    List<FieldValueWithLabel> fieldsWithConditional =
+        fieldRepository.findByIdFieldSchemaAndConditional2(idPk, labelSchemaId, conditionalSchemaId,
+            conditionalValue, searchValue, PageRequest.of(0, 15));
+
+    /*
+     * List<FieldValue> values = new ArrayList<>(); List<FieldValue> labels = new ArrayList<>(); for
+     * (FieldValueWithLabel fvExtended : fieldsAux) { values.add(fvExtended.getFieldValue());
+     * labels.add(fvExtended.getLabel()); } List<FieldVO> auxFieldVO =
+     * fieldNoValidationMapper.entityListToClass(values); for (FieldValue field : values) { for
+     * (FieldValue label : labels) { if (label.getRecord().equals(field.getRecord())) { for (FieldVO
+     * fieldVO : auxFieldVO) { if (fieldVO.getId().equals(field.getId())) {
+     * fieldVO.setLabel(label.getValue()); } } } } }
+     */
+
+    List<FieldVO> fieldsVO = new ArrayList<>();
+    fieldsAux.stream().forEach(fExtended -> {
+      FieldVO fieldVO = fieldNoValidationMapper.entityToClass(fExtended.getFieldValue());
+      fieldVO.setLabel(fExtended.getLabel().getValue());
+      fieldsVO.add(fieldVO);
+    });
+
+    List<FieldVO> fieldsVO2 = new ArrayList<>();
+    fieldsWithConditional.stream().forEach(fExtended -> {
+      FieldVO fieldVO = fieldNoValidationMapper.entityToClass(fExtended.getFieldValue());
+      fieldVO.setLabel(fExtended.getLabel().getValue());
+      fieldsVO2.add(fieldVO);
+    });
+
     // Remove the duplicate values
     HashSet<String> seen = new HashSet<>();
-    fields.removeIf(e -> !seen.add(e.getValue()));
-
+    fieldsVO.removeIf(e -> !seen.add(e.getValue()));
     // Sort results
-    List<FieldValue> sortedList = new ArrayList<>();
-    if (!fields.isEmpty()) {
-      sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+    List<FieldVO> sortedList = new ArrayList<>();
+    if (!fieldsVO.isEmpty()) {
+      sortedList = fieldsVO.stream().sorted(Comparator.comparing(FieldVO::getValue))
           .collect(Collectors.toList());
     }
-    return fieldNoValidationMapper.entityListToClass(sortedList);
+    return sortedList;
+
+
+    /*
+     * List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
+     * searchValue, PageRequest.of(0, 15));
+     * 
+     * // Remove the duplicate values HashSet<String> seen = new HashSet<>(); fields.removeIf(e ->
+     * !seen.add(e.getValue())); // Sort results List<FieldValue> sortedList = new ArrayList<>(); if
+     * (!fields.isEmpty()) { sortedList =
+     * fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
+     * .collect(Collectors.toList()); } return
+     * fieldNoValidationMapper.entityListToClass(sortedList);
+     */
   }
 
   /**

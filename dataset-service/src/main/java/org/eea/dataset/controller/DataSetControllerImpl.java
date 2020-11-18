@@ -641,8 +641,12 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping("/{id}/getFieldsValuesReferenced")
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @RequestParam("idFieldSchema") String idFieldSchema,
-      @RequestParam("searchValue") String searchValue) {
-    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
+      @RequestParam(value = "labelSchemaId", required = false) String labelSchemaId,
+      @RequestParam(value = "conditionalSchemaId", required = false) String conditionalSchemaId,
+      @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
+      @RequestParam(value = "searchValue", required = false) String searchValue) {
+    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, labelSchemaId,
+        conditionalSchemaId, conditionalValue, searchValue);
   }
 
   /**
