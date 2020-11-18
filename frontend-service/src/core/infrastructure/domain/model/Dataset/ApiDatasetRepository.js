@@ -324,7 +324,6 @@ const groupedErrorsById = async (
 
 const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
-
   try {
     JSON.parse(value);
   } catch (e) {

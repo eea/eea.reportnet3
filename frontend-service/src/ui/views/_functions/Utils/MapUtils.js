@@ -2,6 +2,8 @@ import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+const calculateCentroid = coordinates => {};
+
 const changeIncorrectCoordinates = record => {
   const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"srid": "EPSG:4326"}}`;
   record.dataRow.forEach(row => {
@@ -186,6 +188,7 @@ const printCoordinates = (data, isGeoJson = true) => {
 };
 
 export const MapUtils = {
+  calculateCentroid,
   changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,

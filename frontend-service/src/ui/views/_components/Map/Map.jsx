@@ -264,7 +264,12 @@ export const Map = ({
       case 'MULTILINESTRING':
       case 'POLYGON':
       case 'MULTIPOLYGON':
-        if (MapUtils.checkValidJSONMultipleCoordinates(geoJson, ['POLYGON', 'MULTIPOLYGON'].includes(geometryType))) {
+        if (
+          MapUtils.checkValidJSONMultipleCoordinates(
+            geoJson,
+            ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)
+          )
+        ) {
           return (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}

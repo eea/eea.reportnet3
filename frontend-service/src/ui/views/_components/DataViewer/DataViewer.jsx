@@ -935,22 +935,30 @@ const DataViewer = withRouter(
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
-          label={resources.messages['save']}
+          label={
+            TextUtils.areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']
+          }
           icon={'check'}
-          onClick={() => onSavePoint(records.newPoint)}
+          onClick={
+            TextUtils.areEquals(records.geometryType, 'POINT')
+              ? () => onSavePoint(records.newPoint)
+              : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
+          }
         />
-        <Button
-          className="p-button-secondary"
-          icon="cancel"
-          label={resources.messages['cancel']}
-          onClick={() => {
-            // dispatchRecords({
-            //   type: 'SET_NEW_RECORD',
-            //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            // });
-            dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
-          }}
-        />
+        {TextUtils.areEquals(records.geometryType, 'POINT') && (
+          <Button
+            className="p-button-secondary"
+            icon="cancel"
+            label={resources.messages['cancel']}
+            onClick={() => {
+              // dispatchRecords({
+              //   type: 'SET_NEW_RECORD',
+              //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+              // });
+              dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
+            }}
+          />
+        )}
       </div>
     );
 
