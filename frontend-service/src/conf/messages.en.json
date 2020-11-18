@@ -937,9 +937,12 @@
     "details": "Details",
     "manualTechnicalAcceptanceTitle": "Do you wish to add a technical acceptance step for the reporter submissions? ",
     "manualTechnicalAcceptanceBigButton": "Manual technical acceptance",
-    "reportingDatasetsStatus": "Reporting datasets status",
+    "deliveryStatus": "Delivery status",
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
-    "feedbackMessagePlaceholder": "Please provide information on the status change"
+    "feedbackMessagePlaceholder": "Please provide information on the status change",
+    "dataflowStatus": "Dataflow status",
+    "open": "open",
+    "draft": "draft"
   }
 }
