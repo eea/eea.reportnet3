@@ -94,6 +94,36 @@ public class FMEIntegrationManager extends AbstractCrudManager {
   }
 
   /**
+   * Checkname.
+   *
+   * @param integration the integration
+   * @param integrationVO the integration VO
+   */
+  private void checkname(Integration integration, IntegrationVO integrationVO) {
+
+    List<Integration> existingIntegrations =
+        integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
+            integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
+    String integrationSchemaId =
+        integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
+    for (Integration integrationAux : existingIntegrations) {
+      List<InternalOperationParameters> internalParameterAux =
+          integrationAux.getInternalParameters();
+      for (InternalOperationParameters internalParameter : internalParameterAux) {
+        if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
+            && internalParameter.getValue().equals(integrationSchemaId)) {
+          if (integrationAux.getName().equals(integration.getName())) {
+            LOG_ERROR.error("Error creating an integration: Integration name is duplicated ");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                EEAErrorMessage.DUPLICATED_INTEGRATION_NAME);
+          }
+        }
+      }
+    }
+
+  }
+
+  /**
    * Update.
    *
    * @param integrationVO the integration VO
@@ -124,26 +154,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
 
-    List<Integration> existingIntegrations =
-        integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
-            integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
-    String integrationSchemaId =
-        integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
-    for (Integration integrationAux : existingIntegrations) {
-      List<InternalOperationParameters> internalParameterAux =
-          integrationAux.getInternalParameters();
-      for (InternalOperationParameters internalParameter : internalParameterAux) {
-        if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
-            && internalParameter.getValue().equals(integrationSchemaId)) {
-          if (integrationAux.getName().equals(integration.getName())) {
-            LOG_ERROR.error("Error creating an integration: Integration name is duplicated ");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                EEAErrorMessage.DUPLICATED_NAME_INTEGRATION);
-          }
-        }
-      }
-    }
-
+    checkname(integration, integrationVO);
 
     operationParametersRepository.deleteByIntegration(integration);
     integration = integrationMapper.classToEntity(integrationVO);
@@ -171,26 +182,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
 
-    List<Integration> existingIntegrations =
-        integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
-            integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
     Integration integration = integrationMapper.classToEntity(integrationVO);
-    String integrationSchemaId =
-        integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
-    for (Integration integrationAux : existingIntegrations) {
-      List<InternalOperationParameters> internalParameterAux =
-          integrationAux.getInternalParameters();
-      for (InternalOperationParameters internalParameter : internalParameterAux) {
-        if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
-            && internalParameter.getValue().equals(integrationSchemaId)) {
-          if (integrationAux.getName().equals(integration.getName())) {
-            LOG_ERROR.error("Error creating an integration: Integration name is duplicated ");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                EEAErrorMessage.DUPLICATED_NAME_INTEGRATION);
-          }
-        }
-      }
-    }
+
+    checkname(integration, integrationVO);
 
     integrationRepository.save(integration);
     LOG.info("Integration created: {}", integrationVO);
