@@ -39,6 +39,7 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.SQLGrammarException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
@@ -212,7 +213,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           if (null == table) {
             isSQLCorrect = Boolean.FALSE;
           }
-        } catch (PSQLException | SQLGrammarException e) {
+        } catch (PSQLException | SQLGrammarException | GenericJDBCException e) {
           LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
@@ -312,7 +313,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       LOG.info("Query to be executed: {}", newQuery);
       table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
           idTable);
-    } catch (SQLException | SQLGrammarException e) {
+    } catch (SQLException | SQLGrammarException | GenericJDBCException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
       throw new PSQLException(new ServerErrorMessage(e.getMessage()));
     }
@@ -694,8 +695,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
-
-
 
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
