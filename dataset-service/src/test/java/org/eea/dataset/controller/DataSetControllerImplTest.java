@@ -1213,7 +1213,7 @@ public class DataSetControllerImplTest {
   public void exportFileThroughIntegrationTest() throws EEAException {
     Mockito.doNothing().when(datasetService).exportFileThroughIntegration(Mockito.anyLong(),
         Mockito.any());
-    dataSetControllerImpl.exportFileThroughIntegration(1L, "csv");
+    dataSetControllerImpl.exportFileThroughIntegration(1L, 1L);
     Mockito.verify(datasetService, times(1)).exportFileThroughIntegration(Mockito.anyLong(),
         Mockito.any());
   }
@@ -1223,7 +1223,7 @@ public class DataSetControllerImplTest {
     Mockito.doThrow(EEAException.class).when(datasetService)
         .exportFileThroughIntegration(Mockito.anyLong(), Mockito.any());
     try {
-      dataSetControllerImpl.exportFileThroughIntegration(1L, "csv");
+      dataSetControllerImpl.exportFileThroughIntegration(1L, 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
