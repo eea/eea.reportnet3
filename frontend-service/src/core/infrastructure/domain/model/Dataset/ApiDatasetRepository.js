@@ -327,7 +327,7 @@ const isValidJSON = value => {
   try {
     JSON.parse(value);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return false;
   }
   return true;
