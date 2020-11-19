@@ -22,6 +22,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 export const FieldsDesigner = ({
   //activeIndex,
@@ -82,12 +83,8 @@ export const FieldsDesigner = ({
   useEffect(() => {
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
-        fields.filter(
-          field =>
-            field.type.toUpperCase() === 'CODELIST' ||
-            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK' ||
-            field.type.toUpperCase() === 'ATTACHMENT'
+        fields.filter(field =>
+          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
         ).length > 0
       );
     }
@@ -97,17 +94,11 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          (field.type.toUpperCase() === 'CODELIST' ||
-            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK' ||
-            field.type.toUpperCase() === 'ATTACHMENT') &&
+          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase()) &&
           field.fieldId !== fieldId
         );
       }).length > 0 ||
-        selectedField.fieldType.toUpperCase() === 'CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'LINK' ||
-        selectedField.fieldType.toUpperCase() === 'ATTACHMENT'
+        ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(selectedField.fieldType.toUpperCase())
     );
   };
 
@@ -144,7 +135,7 @@ export const FieldsDesigner = ({
       type,
       validExtensions
     });
-    onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
+    onChangeFields(inmFields, TextUtils.areEquals(type, 'LINK'), table.tableSchemaId);
     setFields(inmFields);
     // window.scrollTo(0, document.body.scrollHeight);
   };
@@ -257,7 +248,7 @@ export const FieldsDesigner = ({
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, deletedFieldType.toUpperCase() === 'LINK', table.tableSchemaId);
+        onChangeFields(inmFields, TextUtils.areEquals(deletedFieldType, 'LINK'), table.tableSchemaId);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');

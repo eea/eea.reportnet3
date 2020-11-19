@@ -9,6 +9,8 @@ import { DataFormFieldEditor } from './_components/DataFormFieldEditor';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const DataForm = ({
   addDialogVisible,
   colsSchema,
@@ -45,7 +47,7 @@ const DataForm = ({
   };
 
   const allAttachments = () => {
-    const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
+    const notAttachment = colsSchema.filter(col => !TextUtils.areEquals(col.type, 'ATTACHMENT'));
     return notAttachment.length === 0;
   };
 
@@ -57,10 +59,10 @@ const DataForm = ({
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <Fragment key={column.field}>
-              {column.type.toUpperCase() !== 'ATTACHMENT' && (
+              {!TextUtils.areEquals(column.type, 'ATTACHMENT') && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
-                    column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                    TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                   }`}</label>
                   <Button
                     className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
@@ -75,7 +77,7 @@ const DataForm = ({
               <div
                 className="p-col-8"
                 style={{
-                  padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
+                  padding: !TextUtils.areEquals(column.type, 'ATTACHMENT') ? '.5em' : '0',
                   width:
                     column.type === 'DATE' ||
                     column.type === 'CODELIST' ||
@@ -119,10 +121,10 @@ const DataForm = ({
             const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
             return (
               <Fragment key={column.field}>
-                {column.type.toUpperCase() !== 'ATTACHMENT' && (
+                {!TextUtils.areEquals(column.type, 'ATTACHMENT') && (
                   <div className="p-col-4" style={{ padding: '.75em' }}>
                     <label htmlFor={column.field}>{`${column.header}${
-                      column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                      TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                     }`}</label>
                     <Button
                       className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
@@ -139,7 +141,7 @@ const DataForm = ({
                 <div
                   className="p-col-8"
                   style={{
-                    padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
+                    padding: !TextUtils.areEquals(column.type.toUpperCase(), 'ATTACHMENT') ? '.5em' : '0',
                     width:
                       column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
                         ? '30%'
