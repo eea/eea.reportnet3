@@ -27,6 +27,8 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
@@ -71,8 +73,12 @@ export const FieldDesigner = ({
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
+    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
+    { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'MultiPolygon', value: 'Multiple Polygon', fieldTypeIcon: 'multiPolygon' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
@@ -88,7 +94,7 @@ export const FieldDesigner = ({
   ];
 
   const getFieldTypeValue = value => {
-    return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
+    return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
   const initialFieldDesignerState = {
     codelistItems: codelistItems,
@@ -183,11 +189,14 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
+    if (
+      TextUtils.areEquals(type.fieldType, 'codelist') ||
+      TextUtils.areEquals(type.fieldType, 'multiselect_codelist')
+    ) {
       onCodelistDropdownSelected(type);
-    } else if (type.fieldType.toLowerCase() === 'link') {
+    } else if (TextUtils.areEquals(type.fieldType, 'link')) {
       onLinkDropdownSelected(type);
-    } else if (type.fieldType.toLowerCase() === 'attachment') {
+    } else if (TextUtils.areEquals(type.fieldType, 'attachment')) {
       onAttachmentDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
@@ -195,7 +204,11 @@ export const FieldDesigner = ({
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
-              pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue
+              pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+                type.fieldType.toUpperCase()
+              )
+                ? false
+                : fieldDesignerState.fieldPKValue
             });
           }
         }
@@ -203,9 +216,13 @@ export const FieldDesigner = ({
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
-            pk: type.fieldType.toLowerCase() === 'point' ? false : fieldDesignerState.fieldPKValue,
+            pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              type.fieldType.toUpperCase()
+            )
+              ? false
+              : fieldDesignerState.fieldPKValue,
             type: parseGeospatialTypes(type.fieldType),
-            isLinkChange: fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'LINK'
+            isLinkChange: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'LINK')
           });
         } else {
           if (type !== '') {
@@ -218,7 +235,12 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
       dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
-      if (type.fieldType.toLowerCase() === 'point') dispatchFieldDesigner({ type: 'SET_PK', payload: false });
+      if (
+        ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+          type.fieldType.toUpperCase()
+        )
+      )
+        dispatchFieldDesigner({ type: 'SET_PK', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -655,12 +677,11 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField:
-          type.toUpperCase() === 'LINK'
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
+        referencedField: TextUtils.areEquals(type, 'LINK')
+          ? !isNil(referencedField)
+            ? parseReferenceField(referencedField)
+            : fieldDesignerState.fieldLinkValue
+          : null,
         required,
         type,
         validExtensions
@@ -682,12 +703,11 @@ export const FieldDesigner = ({
           name,
           readOnly,
           recordId,
-          referencedField:
-            type.toUpperCase() === 'LINK'
-              ? !isNil(referencedField)
-                ? parseReferenceField(referencedField)
-                : fieldDesignerState.fieldLinkValue
-              : null,
+          referencedField: TextUtils.areEquals(type, 'LINK')
+            ? !isNil(referencedField)
+              ? parseReferenceField(referencedField)
+              : fieldDesignerState.fieldLinkValue
+            : null,
           required,
           type,
           validExtensions
@@ -731,7 +751,9 @@ export const FieldDesigner = ({
         disabled={
           (!isNil(fieldDesignerState.fieldTypeValue) &&
             !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
-            fieldDesignerState.fieldTypeValue.fieldType.toUpperCase() === 'POINT') ||
+            ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              fieldDesignerState.fieldTypeValue.fieldType.toUpperCase()
+            )) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))
         }
         id={`${fieldId}_check_pk`}

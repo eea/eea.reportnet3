@@ -1,5 +1,7 @@
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export default class MultiSelectUtils {
   static filter(value, fields, filterValue, filterMatchMode) {
     let filteredItems = [];
@@ -77,9 +79,9 @@ export default class MultiSelectUtils {
 
     if (value.getTime && filter.getTime) return value.getTime() === filter.getTime();
     else
-      return (
-        ObjectUtils.removeAccents(value.toString()).toLowerCase() ===
-        ObjectUtils.removeAccents(filter.toString()).toLowerCase()
+      return TextUtils.areEquals(
+        ObjectUtils.removeAccents(value.toString()),
+        ObjectUtils.removeAccents(filter.toString())
       );
   }
 
@@ -94,9 +96,9 @@ export default class MultiSelectUtils {
 
     if (value.getTime && filter.getTime) return value.getTime() !== filter.getTime();
     else
-      return (
-        ObjectUtils.removeAccents(value.toString()).toLowerCase() !==
-        ObjectUtils.removeAccents(filter.toString()).toLowerCase()
+      return !TextUtils.areEquals(
+        ObjectUtils.removeAccents(value.toString()),
+        ObjectUtils.removeAccents(filter.toString())
       );
   }
 

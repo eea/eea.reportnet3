@@ -29,6 +29,7 @@ import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 const TabsValidations = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
@@ -169,19 +170,19 @@ const TabsValidations = withRouter(
       const additionalInfo = {};
       datasetSchemaAllTables.forEach(table => {
         if (!isUndefined(table.records)) {
-          if (entityType.toUpperCase() === 'TABLE') {
+          if (TextUtils.areEquals(entityType, 'TABLE')) {
             if (table.tableSchemaId === referenceId) {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             }
-          } else if (entityType.toUpperCase() === 'RECORD') {
+          } else if (TextUtils.areEquals(entityType, 'RECORD')) {
             if (table.recordSchemaId === referenceId) {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             }
-          } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'TABLE') {
+          } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
             table.records.forEach(record =>
               record.fields.forEach(field => {
                 if (!isNil(field)) {
-                  if (entityType.toUpperCase() === 'FIELD') {
+                  if (TextUtils.areEquals(entityType, 'FIELD')) {
                     if (field.fieldId === referenceId) {
                       additionalInfo.tableName = !isUndefined(table.tableSchemaName)
                         ? table.tableSchemaName

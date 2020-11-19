@@ -109,10 +109,10 @@ public interface IntegrationService {
    * Gets the export integration.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    * @return the export integration
    */
-  IntegrationVO getExportIntegration(String datasetSchemaId, String fileExtension);
+  IntegrationVO getExportIntegration(String datasetSchemaId, Long integrationId);
 
   /**
    * Delete schema integrations.

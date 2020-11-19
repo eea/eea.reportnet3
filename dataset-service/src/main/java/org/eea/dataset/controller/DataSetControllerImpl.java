@@ -104,6 +104,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
+   * @param fieldSchemaId the id field schema
+   * @param fieldValue the field value
    * @return the data tables values
    */
   @Override
@@ -116,8 +118,9 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
-      @RequestParam(value = "idRules", required = false) String[] idRules) {
-
+      @RequestParam(value = "idRules", required = false) String[] idRules,
+      @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
+      @RequestParam(value = "fieldValue", required = false) String fieldValue) {
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -133,7 +136,7 @@ public class DataSetControllerImpl implements DatasetController {
     TableVO result = null;
     try {
       result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields,
-          levelError, idRules);
+          levelError, idRules, fieldSchemaId, fieldValue);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -561,20 +564,21 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
   @GetMapping("/exportFileThroughIntegration")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   public void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("fileExtension") String fileExtension) {
+      @RequestParam("integrationId") Long integrationId) {
     try {
-      datasetService.exportFileThroughIntegration(datasetId, fileExtension);
+      datasetService.exportFileThroughIntegration(datasetId, integrationId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

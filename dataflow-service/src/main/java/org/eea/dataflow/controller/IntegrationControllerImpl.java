@@ -291,12 +291,12 @@ public class IntegrationControllerImpl implements IntegrationController {
     integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
   }
 
+
   /**
    * Find export integration.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fileExtension the file extension
-   *
+   * @param integrationId the integration id
    * @return the integration VO
    */
   @Override
@@ -307,9 +307,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   public IntegrationVO findExportIntegration(
       @ApiParam(value = "Dataschema Id",
           example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "File extension",
-          example = "csv") @RequestParam("fileExtension") String fileExtension) {
-    return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
+      @ApiParam(value = "Integration Id",
+          example = "1") @RequestParam("integrationId") Long integrationId) {
+    return integrationService.getExportIntegration(datasetSchemaId, integrationId);
   }
 
   /**

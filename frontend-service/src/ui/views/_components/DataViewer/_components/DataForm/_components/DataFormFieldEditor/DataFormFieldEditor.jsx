@@ -25,8 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { MapUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
   autoFocus,
@@ -146,7 +145,7 @@ const DataFormFieldEditor = ({
   };
 
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
-    if (isNil(type) || type.toUpperCase() !== 'LINK' || isNil(referencedField)) {
+    if (isNil(type) || !TextUtils.areEquals(type, 'LINK') || isNil(referencedField)) {
       return [];
     }
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
@@ -256,6 +255,8 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
+    ) : ['POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) ? (
+      renderComplexGeometries()
     ) : type === 'TEXTAREA' ? (
       renderTextarea(field, fieldValue)
     ) : (
@@ -292,6 +293,10 @@ const DataFormFieldEditor = ({
         yearRange="2010:2030"
       />
     );
+  };
+
+  const renderComplexGeometries = () => {
+    return false;
   };
 
   const renderLinkDropdown = (field, fieldValue) => {
@@ -337,7 +342,12 @@ const DataFormFieldEditor = ({
   };
 
   const renderMap = () => (
-    <Map hasLegend={true} geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
+    <Map
+      hasLegend={true}
+      geoJson={fieldValue}
+      geometryType={'POINT'}
+      onSelectPoint={onSelectPoint}
+      selectedCRS={map.currentCRS.value}></Map>
   );
 
   const renderMapType = (field, fieldValue) => (
