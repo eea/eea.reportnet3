@@ -142,9 +142,11 @@ public class FMEIntegrationManagerTest {
 
   /**
    * Test create exception.
+   * 
+   * @throws EEAException
    */
   @Test(expected = ResponseStatusException.class)
-  public void testCreateException() {
+  public void testCreateException() throws EEAException {
     try {
       IntegrationVO integrationVO = new IntegrationVO();
       integrationManager.create(integrationVO);

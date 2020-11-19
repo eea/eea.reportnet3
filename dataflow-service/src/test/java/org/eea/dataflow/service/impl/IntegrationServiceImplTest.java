@@ -176,7 +176,7 @@ public class IntegrationServiceImplTest {
    * Creates the default integration test.
    */
   @Test
-  public void createDefaultIntegrationTest() {
+  public void createDefaultIntegrationTest() throws EEAException {
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     Mockito.doNothing().when(crudManager).create(Mockito.any());
     integrationService.createDefaultIntegration(1L, "5ce524fad31fc52540abae73");
