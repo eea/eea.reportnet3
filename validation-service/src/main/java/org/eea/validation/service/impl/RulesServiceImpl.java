@@ -479,31 +479,13 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case MULTIPOLYGON:
-          ruleList.add(AutomaticRules.createPositionAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case POINT:
-          ruleList.add(AutomaticRules.createPointAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case MULTIPOINT:
-          ruleList.add(AutomaticRules.createMultipointAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case LINESTRING:
-          ruleList.add(AutomaticRules.createLinestringAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case MULTILINESTRING:
-          ruleList.add(AutomaticRules.createMultilinestringAutomaticRule(referenceId,
-              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case POLYGON:
-          ruleList.add(AutomaticRules.createPolygonAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
-          break;
         case GEOMETRYCOLLECTION:
-          ruleList.add(AutomaticRules.createGeometrycollectionAutomaticRule(referenceId,
+          ruleList.add(AutomaticRules.createGeometryAutomaticRule(typeData, referenceId,
               typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:

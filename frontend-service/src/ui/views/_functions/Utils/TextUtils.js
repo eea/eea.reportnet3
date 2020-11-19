@@ -1,5 +1,12 @@
+import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
-import isUndefined from 'lodash/isUndefined';
+
+const areEquals = (a, b) =>
+  isNil(a) || isNil(b)
+    ? false
+    : typeof a === 'string' && typeof b === 'string'
+    ? a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
+    : a === b;
 
 const parseText = (rawText = '', param = {}) => {
   let text = rawText;
@@ -23,6 +30,7 @@ const ellipsis = (rawText, limit) => {
 };
 
 export const TextUtils = {
+  areEquals,
   parseText,
   ellipsis
 };
