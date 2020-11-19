@@ -25,11 +25,17 @@ public class ReferencedFieldSchema {
   @Field(value = "idPk")
   private ObjectId idPk;
 
+  /** The label id. */
   @Field(value = "labelId")
   private ObjectId labelId;
 
-  @Field(value = "conditionalId")
-  private ObjectId conditionalId;
+  /** The linked conditional field id. */
+  @Field(value = "linkedConditionalFieldId")
+  private ObjectId linkedConditionalFieldId;
+
+  /** The master conditional field id. */
+  @Field(value = "masterConditionalFieldId")
+  private ObjectId masterConditionalFieldId;
 
 
 

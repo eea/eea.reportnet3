@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.json.JsonWriterSettings;
 import org.bson.types.ObjectId;
@@ -716,9 +717,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
           new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
       referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
-      referenced.put("label", new ObjectId(fieldSchemaVO.getReferencedField().getLabel()));
-      referenced.put("conditional",
-          new ObjectId(fieldSchemaVO.getReferencedField().getConditional()));
+      if (StringUtils.isNotBlank(fieldSchemaVO.getReferencedField().getLabelId())) {
+        referenced.put("labelId", new ObjectId(fieldSchemaVO.getReferencedField().getLabelId()));
+      } else {
+        referenced.put("labelId", null);
+      }
+      if (StringUtils
+          .isNotBlank(fieldSchemaVO.getReferencedField().getLinkedConditionalFieldId())) {
+        referenced.put("linkedConditionalFieldId",
+            new ObjectId(fieldSchemaVO.getReferencedField().getLinkedConditionalFieldId()));
+      } else {
+        referenced.put("linkedConditionalFieldId", null);
+      }
+      if (StringUtils
+          .isNotBlank(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId())) {
+        referenced.put("masterConditionalFieldId",
+            new ObjectId(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId()));
+      } else {
+        referenced.put("masterConditionalFieldId", null);
+      }
       fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
       // We need to update the fieldSchema that is referenced, the property isPKreferenced to
       // true

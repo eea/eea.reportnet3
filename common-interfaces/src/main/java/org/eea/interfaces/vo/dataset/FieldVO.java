@@ -43,6 +43,7 @@ public class FieldVO implements Serializable {
    */
   private String idFieldSchema;
 
+  /** The label. */
   private String label;
 
   /**

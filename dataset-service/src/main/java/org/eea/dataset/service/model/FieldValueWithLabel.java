@@ -2,6 +2,9 @@ package org.eea.dataset.service.model;
 
 import org.eea.dataset.persistence.data.domain.FieldValue;
 
+/**
+ * The Interface FieldValueWithLabel.
+ */
 public interface FieldValueWithLabel {
 
   /**

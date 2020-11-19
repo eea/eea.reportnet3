@@ -837,10 +837,10 @@ public class DataSetControllerImplTest {
   public void getFieldValuesReferencedTest() {
     List<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
-    Mockito
-        .when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(fields);
-    assertEquals("error", fields, dataSetControllerImpl.getFieldValuesReferenced(1L, "", ""));
+    Mockito.when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(fields);
+    assertEquals("error", fields,
+        dataSetControllerImpl.getFieldValuesReferenced(1L, "", "", "", ""));
   }
 
   /**

@@ -100,9 +100,12 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @param pageable the pageable
    * @return the list
    */
-  List<FieldValue> findByIdFieldSchemaAndValueContaining(
-      @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
-      Pageable pageable);
+  /*
+   * List<FieldValue> findByIdFieldSchemaAndValueContaining(
+   * 
+   * @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
+   * Pageable pageable);
+   */
 
 
   /**
@@ -125,20 +128,25 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   void clearFieldValue(@Param("fieldSchemaId") String fieldSchemaId);
 
 
-  @Query(
-      value = "SELECT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
-          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id AND (fv.value like %:searchText% or :searchText IS NULL)")
-  List<FieldValueWithLabel> findByIdFieldSchemaAndConditional(
-      @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
-      @Param("searchText") String searchValueText, Pageable pageable);
+  /*
+   * @Query( value =
+   * "SELECT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
+   * +
+   * "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id AND (fv.value like %:searchText% or :searchText IS NULL)"
+   * ) List<FieldValueWithLabel> findByIdFieldSchemaAndConditional(
+   * 
+   * @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
+   * 
+   * @Param("searchText") String searchValueText, Pageable pageable);
+   */
 
 
   @Query(
       value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
           + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
           + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
-          + "AND (fv.value like %:searchText% or :searchText IS NULL)")
-  List<FieldValueWithLabel> findByIdFieldSchemaAndConditional2(
+          + "AND (fv.value like %:searchText% or :searchText IS NULL) " + "ORDER BY fv.value")
+  List<FieldValueWithLabel> findByIdFieldSchemaAndConditionalWithTag(
       @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
       @Param("conditionalId") String conditionalId,
       @Param("conditionalValue") String conditionalValue,

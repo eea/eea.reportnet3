@@ -18,15 +18,17 @@ public class ReferencedFieldSchemaVO {
   /** The id dataset schema. */
   private String idDatasetSchema;
 
-
   /** The id pk. */
   private String idPk;
 
+  /** The label id. */
+  private String labelId;
 
-  private String label;
+  /** The linked conditional field id. */
+  private String linkedConditionalFieldId;
 
-
-  private String conditional;
+  /** The master conditional field id. */
+  private String masterConditionalFieldId;
 
 
 
