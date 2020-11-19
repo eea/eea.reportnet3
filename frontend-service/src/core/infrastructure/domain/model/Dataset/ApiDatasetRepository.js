@@ -231,8 +231,8 @@ const exportDataById = async (datasetId, fileType) => {
   return datasetData;
 };
 
-const exportDatasetDataExternal = async (datasetId, fileExtension) => {
-  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, fileExtension);
+const exportDatasetDataExternal = async (datasetId, integrationId) => {
+  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, integrationId);
   return datasetData;
 };
 
