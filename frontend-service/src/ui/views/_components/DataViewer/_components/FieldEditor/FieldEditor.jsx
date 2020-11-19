@@ -53,7 +53,9 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
 
   const [currentCRS, setCurrentCRS] = useState(
-    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
+    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+      RecordUtils.getCellInfo(colsSchema, cells.field).type
+    )
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
         ? crs.filter(
             crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
@@ -81,7 +83,11 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
-    if (RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') {
+    if (
+      ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+        RecordUtils.getCellInfo(colsSchema, cells.field).type
+      )
+    ) {
       onChangePointCRS(currentCRS.value);
     }
   }, []);
@@ -146,6 +152,33 @@ const FieldEditor = ({
             coordinates.replace(', ', ',').split(','),
             parseToFloat
           );
+        }
+
+        return JSON.stringify(geoJson);
+      }
+    }
+  };
+
+  const changeLine = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
+    if (geoJson !== '') {
+      if (withCRS) {
+        const projectedCoordinates = coordinates.map(coords => projectCoordinates(coords, crs.value));
+        geoJson.geometry.coordinates = projectedCoordinates;
+        geoJson.properties.rsid = crs.value;
+        setIsMapDisabled(!MapUtils.checkValidLine(projectedCoordinates));
+        return JSON.stringify(geoJson);
+      } else {
+        setIsMapDisabled(!MapUtils.checkValidLine(coordinates));
+        if (checkCoordinates) {
+          geoJson.geometry.coordinates = MapUtils.checkValidLine(coordinates)
+            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
+            : [];
+        } else {
+          geoJson.geometry.coordinates = coordinates
+            .replace('[', '')
+            .replace(']', '')
+            .split(',')
+            .map(coord => MapUtils.parseCoordinates(coord.replace(', ', ','), parseToFloat));
         }
 
         return JSON.stringify(geoJson);
@@ -384,13 +417,46 @@ const FieldEditor = ({
                 icon="marker"
                 onClick={e => {
                   if (!isNil(onMapOpen)) {
-                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
                   }
                 }}
                 style={{ width: '35%' }}
                 tooltip={resources.messages['selectGeographicalDataOnMap']}
                 tooltipOptions={{ position: 'bottom' }}
               />
+            </div>
+          </div>
+        );
+      case 'LINESTRING':
+      case 'MULTILINESTRING':
+      case 'MULTIPOINT':
+      case 'MULTIPOLYGON':
+      case 'POLYGON':
+        const value = RecordUtils.getCellValue(cells, cells.field);
+        return (
+          <div className={styles.pointWrapper}>
+            <label className={isNil(value) || value === '' ? styles.nonEditableData : ''}>
+              {!isNil(value) && value !== ''
+                ? JSON.parse(value).geometry.coordinates.join(', ')
+                : resources.messages['nonEditableData']}
+            </label>
+            <div className={styles.pointEpsgWrapper}>
+              {!isNil(value) && value !== '' && <label className={styles.epsg}>{resources.messages['epsg']}</label>}
+              {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
+              {!isNil(value) && value !== '' && (
+                <Button
+                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                  icon="marker"
+                  onClick={e => {
+                    if (!isNil(onMapOpen)) {
+                      onMapOpen(value, cells, type);
+                    }
+                  }}
+                  style={{ width: '35%' }}
+                  tooltip={resources.messages['selectGeographicalDataOnMap']}
+                  tooltipOptions={{ position: 'bottom' }}
+                />
+              )}
             </div>
           </div>
         );

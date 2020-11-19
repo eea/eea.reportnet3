@@ -11,6 +11,8 @@ import styles from './DropdownFilter.module.css';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 class DropdownFilter extends React.Component {
   static defaultProps = {
     showFilters: undefined,
@@ -280,7 +282,7 @@ class DropdownFilter extends React.Component {
                 }}>
                 <FontAwesomeIcon icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')} />
                 {this.props.showLevelErrorIcons ? (
-                  field.label.toUpperCase() !== 'SELECT ALL' && field.label.toUpperCase() !== 'CORRECT' ? (
+                  !TextUtils.areEquals(field.label, 'SELECT ALL') && !TextUtils.areEquals(field.label, 'CORRECT') ? (
                     <IconTooltip
                       className={styles.dropdownFilterIcon}
                       key={field.label.toUpperCase()}

@@ -2,6 +2,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const checkDates = (betweenDates, data) => {
   if (!isEmpty(betweenDates)) {
     const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
@@ -12,7 +14,7 @@ const checkDates = (betweenDates, data) => {
 
 const checkFilters = (filteredKeys = [], dataflow, state) => {
   for (let i = 0; i < filteredKeys.length; i++) {
-    if (state.filterBy[filteredKeys[i]].toLowerCase() !== '') {
+    if (!TextUtils.areEquals(state.filterBy[filteredKeys[i]], '')) {
       if (!dataflow[filteredKeys[i]].toLowerCase().includes(state.filterBy[filteredKeys[i]].toLowerCase())) {
         return false;
       }
