@@ -98,9 +98,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    *
    * @param integration the integration
    * @param integrationVO the integration VO
+   * @throws EEAException
    */
-  private void checkname(Integration integration, IntegrationVO integrationVO) {
-
+  private void checkName(Integration integration, IntegrationVO integrationVO) throws EEAException {
     List<Integration> existingIntegrations =
         integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
             integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
@@ -114,8 +114,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
             && internalParameter.getValue().equals(integrationSchemaId)) {
           if (integrationAux.getName().equals(integration.getName())) {
             LOG_ERROR.error("Error creating an integration: Integration name is duplicated ");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                EEAErrorMessage.DUPLICATED_INTEGRATION_NAME);
+            throw new EEAException();
           }
         }
       }
@@ -154,11 +153,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
 
-    checkname(integration, integrationVO);
-
     operationParametersRepository.deleteByIntegration(integration);
     integration = integrationMapper.classToEntity(integrationVO);
-
+    checkName(integration, integrationVO);
     integrationRepository.save(integration);
     LOG.info("Integration updated: {}", integrationVO);
   }
@@ -169,7 +166,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * @param integrationVO the integration VO
    */
   @Override
-  public void create(IntegrationVO integrationVO) {
+  public void create(IntegrationVO integrationVO) throws EEAException {
 
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
@@ -184,7 +181,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     Integration integration = integrationMapper.classToEntity(integrationVO);
 
-    checkname(integration, integrationVO);
+    checkName(integration, integrationVO);
 
     integrationRepository.save(integration);
     LOG.info("Integration created: {}", integrationVO);

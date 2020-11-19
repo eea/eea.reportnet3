@@ -80,7 +80,7 @@ public interface IntegrationService {
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
    */
-  void createDefaultIntegration(Long dataflowId, String datasetSchemaId);
+  void createDefaultIntegration(Long dataflowId, String datasetSchemaId) throws EEAException;
 
   /**
    * Gets the export EU dataset integration.
