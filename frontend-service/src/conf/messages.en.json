@@ -944,6 +944,9 @@
     "open": "open",
     "draft": "draft",
     "geometryCoordinates": "Geometry coordinates",
-    "nonEditableData": "This field is not editable"
+    "nonEditableData": "This field is not editable",
+    "linkedTableLabel": "Linked table label field",
+    "linkedTableConditional": "Linked table conditional field",
+    "masterTableConditional": "Master table conditional field"
   }
 }

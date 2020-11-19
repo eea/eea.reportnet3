@@ -34,6 +34,7 @@ export const FieldDesigner = ({
   checkDuplicates,
   codelistItems,
   datasetId,
+  datasetSchemaId,
   fieldDescription,
   fieldFileProperties,
   fieldHasMultipleValues,
@@ -66,7 +67,6 @@ export const FieldDesigner = ({
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
@@ -89,7 +89,6 @@ export const FieldDesigner = ({
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
-    // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
@@ -231,10 +230,7 @@ export const FieldDesigner = ({
           }
         }
       }
-      dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
-      dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
-      dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
-      dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
+      dispatchFieldDesigner({ type: 'RESET_FIELD' });
       if (
         ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
           type.fieldType.toUpperCase()
@@ -601,10 +597,33 @@ export const FieldDesigner = ({
     }
   };
 
-  const onSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
-    dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
-    dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
-    dispatchFieldDesigner({ type: 'SET_PK_HAS_MULTIPLE_VALUES', payload: pkHasMultipleValues });
+  const onSaveLink = ({
+    link,
+    linkedTableConditional,
+    linkedTableLabel,
+    masterTableConditional,
+    pkHasMultipleValues,
+    pkMustBeUsed
+  }) => {
+    console.log(
+      link,
+      linkedTableConditional,
+      linkedTableLabel,
+      masterTableConditional,
+      pkHasMultipleValues,
+      pkMustBeUsed
+    );
+    dispatchFieldDesigner({
+      type: 'SET_LINK',
+      payload: {
+        link,
+        pkMustBeUsed,
+        pkHasMultipleValues,
+        linkedTableLabel,
+        linkedTableConditional,
+        masterTableConditional
+      }
+    });
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -1050,6 +1069,7 @@ export const FieldDesigner = ({
       ) : null}
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
+          datasetSchemaId={datasetSchemaId}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}

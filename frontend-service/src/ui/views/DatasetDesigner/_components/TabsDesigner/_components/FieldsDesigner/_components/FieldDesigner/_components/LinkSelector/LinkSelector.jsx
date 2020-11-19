@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -10,6 +10,7 @@ import styles from './LinkSelector.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'primereact/checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -17,8 +18,11 @@ import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
+
 const LinkSelector = withRouter(
   ({
+    datasetSchemaId,
     hasMultipleValues = false,
     isLinkSelectorVisible,
     match,
@@ -29,10 +33,27 @@ const LinkSelector = withRouter(
     tableSchemaId
   }) => {
     const resources = useContext(ResourcesContext);
+    const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
+      link: selectedLink,
+      linkedTableFields: [],
+      linkedTableLabel: {},
+      linkedTableConditional: {},
+      masterTableConditional: {},
+      masterTableFields: []
+    });
+
+    const {
+      link,
+      linkedTableFields,
+      linkedTableLabel,
+      linkedTableConditional,
+      masterTableConditional,
+      masterTableFields
+    } = linkSelectorState;
+
     const [datasetSchemas, setDatasetSchemas] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
-    const [link, setLink] = useState(selectedLink);
     const [pkHasMultipleValues, setPkHasMultipleValues] = useState(hasMultipleValues);
     const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
 
@@ -61,7 +82,14 @@ const LinkSelector = withRouter(
 
     useEffect(() => {
       if (!isVisible && isSaved) {
-        onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+        onSaveLink({
+          link,
+          linkedTableConditional,
+          linkedTableLabel,
+          masterTableConditional,
+          pkHasMultipleValues,
+          pkMustBeUsed
+        });
       }
     }, [isVisible]);
 
@@ -87,6 +115,43 @@ const LinkSelector = withRouter(
       </div>
     );
 
+    const getFields = field => {
+      let linkedFields = [];
+      let masterFields = [];
+      const linkedTable = datasetSchemas
+        .find(datasetSchema => datasetSchema.datasetSchemaId === field.referencedField.datasetSchemaId)
+        .tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
+
+      linkedFields = linkedTable.records[0].fields
+        .filter(
+          field =>
+            !field.pk &&
+            !['ATTACHMENT', 'POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              field.type.toUpperCase()
+            )
+        )
+        .map(field => {
+          return { fieldSchemaId: field.fieldId, name: field.name };
+        });
+
+      const masterTable = datasetSchemas
+        .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
+        .tables.find(table => table.tableSchemaId === tableSchemaId);
+      masterFields = masterTable.records[0].fields
+        .filter(
+          field =>
+            !field.pk &&
+            !['ATTACHMENT', 'POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              field.type.toUpperCase()
+            )
+        )
+        .map(field => {
+          return { fieldSchemaId: field.fieldId, name: field.name };
+        });
+
+      dispatchLinkSelector({ type: 'SET_LINKED_AND_MASTER_FIELDS', payload: { linkedFields, masterFields } });
+    };
+
     const getOptions = datasetSchema =>
       datasetSchema.tables.map(table => {
         const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
@@ -98,7 +163,14 @@ const LinkSelector = withRouter(
             return {
               name: `${table.tableSchemaName} - ${pkField.name}`,
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,
-              referencedField: { fieldSchemaId: pkField.fieldId, datasetSchemaId: datasetSchema.datasetSchemaId },
+              referencedField: {
+                fieldSchemaId: pkField.fieldId,
+                datasetSchemaId: datasetSchema.datasetSchemaId,
+                tableSchemaId: table.tableSchemaId,
+                linkedTableLabel: linkedTableLabel.fieldSchemaId,
+                linkedTableConditional: linkedTableConditional.fieldSchemaId,
+                masterTableConditional: masterTableConditional.fieldSchemaId
+              },
               disabled: false
             };
           } else {
@@ -132,13 +204,16 @@ const LinkSelector = withRouter(
           <div className={styles.schemaWrapper}>
             {!isUndefined(datasetSchemas) &&
               !isEmpty(datasetSchemas) &&
-              datasetSchemas.map(datasetSchema => {
+              datasetSchemas.map((datasetSchema, i) => {
                 return (
                   <ListBox
+                    key={`datasetSchema_${i}`}
                     options={getOptions(datasetSchema)}
                     onChange={e => {
                       if (!isNil(e.value)) {
-                        setLink(e.value);
+                        console.log(e.value);
+                        dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
+                        getFields(e.value);
                       }
                     }}
                     optionLabel="name"
@@ -148,8 +223,51 @@ const LinkSelector = withRouter(
                 );
               })}
           </div>
+          <div className={styles.selectedLinkFieldsWrapper}>
+            <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
+            <Dropdown
+              appendTo={document.body}
+              ariaLabel="linkedTableLabel"
+              inputId="linkedTableLabel"
+              name={resources.messages['linkedTableLabel']}
+              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
+              optionLabel="name"
+              options={linkedTableFields}
+              placeholder={resources.messages['linkedTableLabel']}
+              // scrollHeight="450px"
+              value={linkedTableLabel}
+            />
+            <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
+            <Dropdown
+              appendTo={document.body}
+              ariaLabel="linkedTableConditional"
+              inputId="linkedTableConditional"
+              name={resources.messages['linkedTableConditional']}
+              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
+              optionLabel="name"
+              options={linkedTableFields}
+              placeholder={resources.messages['linkedTableConditional']}
+              // scrollHeight="450px"
+              value={linkedTableConditional}
+            />
+            <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
+            <Dropdown
+              appendTo={document.body}
+              ariaLabel="masterTableConditional"
+              inputId="masterTableConditional"
+              name={resources.messages['masterTableConditional']}
+              onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
+              optionLabel="name"
+              options={masterTableFields}
+              placeholder={resources.messages['masterTableConditional']}
+              // scrollHeight="450px"
+              value={masterTableConditional}
+            />
+          </div>
           <div className={styles.selectedLinkWrapper}>
-            <span className={styles.switchTextInput}>{resources.messages['pkValuesMustBeUsed']}</span>
+            <span className={styles.switchTextInput} htmlFor={'pkMustBeUsed_check'}>
+              {resources.messages['pkValuesMustBeUsed']}
+            </span>
             <Checkbox
               checked={pkMustBeUsed}
               id={'pkMustBeUsed_check'}
@@ -158,10 +276,9 @@ const LinkSelector = withRouter(
               onChange={e => setPkMustBeUsed(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <label htmlFor={'pkMustBeUsed_check'} className="srOnly">
-              {resources.messages['pkValuesMustBeUsed']}
-            </label>
-            <span className={styles.switchTextInput}>{resources.messages['pkHasMultipleValues']}</span>
+            <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
+              {resources.messages['pkHasMultipleValues']}
+            </span>
             <Checkbox
               checked={pkHasMultipleValues}
               id={'pkHasMultipleValues_check'}
@@ -170,9 +287,6 @@ const LinkSelector = withRouter(
               onChange={e => setPkHasMultipleValues(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <label htmlFor={'pkHasMultipleValues_check'} className="srOnly">
-              {resources.messages['pkHasMultipleValues']}
-            </label>
           </div>
           <div className={styles.selectedLinkWrapper}>
             <span>{`${resources.messages['selectedLink']}: `}</span>

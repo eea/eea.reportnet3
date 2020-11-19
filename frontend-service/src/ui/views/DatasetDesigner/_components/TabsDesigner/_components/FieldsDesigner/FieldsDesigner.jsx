@@ -27,6 +27,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
+  datasetSchemaId,
   datasetSchemas,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
@@ -399,6 +400,7 @@ export const FieldsDesigner = ({
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchemaId}
           fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
@@ -435,6 +437,7 @@ export const FieldsDesigner = ({
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
+                datasetSchemaId={datasetSchemaId}
                 fieldDescription={field.description}
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
