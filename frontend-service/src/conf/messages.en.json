@@ -838,7 +838,6 @@
     "externalExportDesignFailedEvent": "Failed exporting <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotActionBlockedError": "Failure in the Manage copy's process. Please wait until the end of the previous operation",
-    "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension.",
     "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
     "historicReleases": "Historic Releases",
     "historicReleasesContextMenu": "Historic Releases for",
