@@ -1,6 +1,5 @@
 package org.eea.validation.util;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -138,7 +138,7 @@ public class SQLValidationUtils {
         }
         tableToEvaluate =
             sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
-      } catch (SQLException e) {
+      } catch (EEAInvalidSQLException e) {
         LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
       }
     }
