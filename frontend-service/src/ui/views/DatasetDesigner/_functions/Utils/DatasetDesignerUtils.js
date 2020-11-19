@@ -1,6 +1,8 @@
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
   let referencedFields = 0;
   datasetSchemas.forEach(schema =>
@@ -10,7 +12,7 @@ const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
           record.fields.forEach(field => {
             if (
               !isNil(field) &&
-              field.type.toUpperCase() === 'LINK' &&
+              TextUtils.areEquals(field.type, 'LINK') &&
               !isNil(field.referencedField) &&
               !isNil(field.referencedField.name)
             ) {
@@ -24,7 +26,7 @@ const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
             } else {
               if (
                 !isNil(field) &&
-                field.type.toUpperCase() === 'LINK' &&
+                TextUtils.areEquals(field.type, 'LINK') &&
                 !isNil(field.referencedField) &&
                 field.referencedField.idPk === fieldPkId
               ) {
