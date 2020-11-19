@@ -256,7 +256,7 @@ const getFieldTypeValue = value => {
     { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
     { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
     { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'MultiPolygon', value: 'Muliple Polygon', fieldTypeIcon: 'multiPolygon' },
+    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
