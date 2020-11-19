@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
@@ -54,7 +53,7 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
-  }, [userContext]);
+  }, [userContext, dataflowState.data.datasets]);
 
   const getButtonsVisibility = () => {
     const isDesigner =
