@@ -1,6 +1,5 @@
 package org.eea.validation.service.impl;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -265,17 +264,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return null;
   }
 
+
+
   /**
-   * Retrieve Table Data.
+   * Retrieve table data.
    *
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
-   * @throws SQLException the SQL exception
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-
   @Override
   public TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
       throws EEAInvalidSQLException {
