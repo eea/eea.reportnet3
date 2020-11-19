@@ -54,7 +54,7 @@ export const ListMessages = ({
       type: 'SET_LIST_CONTENT',
       payload: renderMessageList()
     });
-  }, [isLoading, isLoadingNewMessages, messages]);
+  }, [isLoading, isLoadingNewMessages, messages, separatorIndex]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray

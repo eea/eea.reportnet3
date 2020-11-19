@@ -24,6 +24,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 export const TabsDesigner = withRouter(
   ({
@@ -163,7 +164,7 @@ export const TabsDesigner = withRouter(
         setTabs(inmDatasetSchema.tables);
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
-        if (error.response.status === 401 || error.response.status === 403) {
+        if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
           history.push(getUrl(routes.DATAFLOWS, true));
         }
       }
@@ -289,7 +290,7 @@ export const TabsDesigner = withRouter(
 
     const checkDuplicates = (header, tabIndex) => {
       const inmTabs = [...tabs];
-      const repeatedElements = inmTabs.filter(tab => header.toLowerCase() === tab.header.toLowerCase());
+      const repeatedElements = inmTabs.filter(tab => TextUtils.areEquals(header, tab.header));
       return repeatedElements.length > 0 && tabIndex !== repeatedElements[0].index;
     };
 

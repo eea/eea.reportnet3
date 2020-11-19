@@ -3,10 +3,11 @@ import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
 
 import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
-  const filteredSchemaColumn = tableSchemaColumns.filter(
-    tableSchemaColumn => tableSchemaColumn.header.toUpperCase() === header.toUpperCase()
+  const filteredSchemaColumn = tableSchemaColumns.filter(tableSchemaColumn =>
+    TextUtils.areEquals(tableSchemaColumn.header, header)
   );
   if (!isNil(filteredSchemaColumn) && !isEmpty(filteredSchemaColumn)) {
     return filteredSchemaColumn[0].field;
@@ -24,8 +25,8 @@ const parseListOfSinglePams = (columns = [], records = []) => {
           .map(key => key.toUpperCase())
           .includes('ID', 'TITLE')
       ) {
-        return `#${singleRecord[Object.keys(singleRecord).find(key => key.toUpperCase() === 'ID')]} - ${
-          singleRecord[Object.keys(singleRecord).find(key => key.toUpperCase() === 'TITLE')]
+        return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]} - ${
+          singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))]
         }`;
       }
     });
@@ -42,7 +43,7 @@ const parseListOfSinglePams = (columns = [], records = []) => {
 const parseTableSchemaColumns = (schemaTables, records) => {
   const columns = [];
   schemaTables
-    .filter(schemaTable => !isNil(schemaTable.tableSchemaName) && schemaTable.tableSchemaName.toUpperCase() === 'PAMS')
+    .filter(schemaTable => TextUtils.areEquals(schemaTable.tableSchemaName, 'PAMS'))
     .forEach(table => {
       if (!isNil(table.records)) {
         return table.records[0].fields.forEach(field => {
@@ -92,7 +93,7 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
       return '';
     }
     const filteredParentTablesWithData = parentTablesWithData.filter(
-      parentTableWithData => parentTableWithData.tableSchemaName.toUpperCase() !== 'PAMS'
+      parentTableWithData => !TextUtils.areEquals(parentTableWithData.tableSchemaName, 'PAMS')
     );
 
     const filteredparentTablesNames = filteredParentTablesWithData.map(
@@ -109,9 +110,7 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
         return {
           tableSchemaId: table.tableSchemaId,
           tableSchemaName: table.tableSchemaName,
-          pamField: table.records[0].fields.filter(
-            field => !isNil(field.name) && field.name.toUpperCase() === 'FK_PAMS'
-          )[0]
+          pamField: table.records[0].fields.filter(field => TextUtils.areEquals(field.name, 'FK_PAMS'))[0]
         };
       });
     return { filteredParentTablesWithData, filteredSchemaTables };
@@ -133,11 +132,9 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
           filteredSchemaTablesPams[0].pamField.fieldSchema || filteredSchemaTablesPams[0].pamField.fieldId;
         const pamSchemaId = schemaTables
           .filter(
-            table =>
-              (!isNil(table.tableSchemaName) && table.tableSchemaName.toUpperCase() === 'PAMS') ||
-              (!isNil(table.header) && table.header.toUpperCase() === 'PAMS')
+            table => TextUtils.areEquals(table.tableSchemaName, 'PAMS') || TextUtils.areEquals(table.header, 'PAMS')
           )[0]
-          .records[0].fields.filter(field => !isNil(field.name) && field.name.toUpperCase() === 'ID')[0];
+          .records[0].fields.filter(field => TextUtils.areEquals(field.name, 'ID'))[0];
 
         if (!isNil(pamSchemaId) && !isEmpty(pamSchemaId)) {
           const pamValue = RecordUtils.getCellValue({ rowData: record }, pamSchemaId.fieldId);

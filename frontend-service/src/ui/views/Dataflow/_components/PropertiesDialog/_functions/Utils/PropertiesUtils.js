@@ -21,8 +21,8 @@ const parseObligationsData = (data, format) => {
       {
         label: 'legalInstrument',
         data: {
-          shortName: data.obligations.legalInstruments.alias,
-          legalName: data.obligations.legalInstruments.title
+          shortName: isNil(data.obligations.legalInstruments) ? '' : data.obligations.legalInstruments.alias,
+          legalName: isNil(data.obligations.legalInstruments) ? '' : data.obligations.legalInstruments.title
         }
       }
     ];

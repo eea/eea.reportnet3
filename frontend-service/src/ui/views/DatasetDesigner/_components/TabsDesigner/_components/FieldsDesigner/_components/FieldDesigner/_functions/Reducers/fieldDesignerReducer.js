@@ -1,3 +1,5 @@
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const fieldDesignerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'CANCEL_SELECT_ATTACHMENT':
@@ -64,11 +66,11 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         ...state,
         fieldTypeValue: payload.type,
         codelistItems:
-          payload.type.fieldType.toUpperCase() !== 'MULTISELECT_CODELIST' &&
-          payload.type.fieldType.toUpperCase() !== 'CODELIST'
+          !TextUtils.areEquals(payload.type.fieldType, 'MULTISELECT_CODELIST') &&
+          !TextUtils.areEquals(payload.type.fieldType, 'CODELIST')
             ? []
             : state.codelistItems,
-        validExtensions: payload.type.fieldType.toUpperCase() !== 'ATTACHMENT' ? [] : state.validExtensions,
+        validExtensions: !TextUtils.areEquals(payload.type.fieldType, 'ATTACHMENT') ? [] : state.validExtensions,
         fieldPreviousTypeValue: payload.previousType
       };
     case 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE':

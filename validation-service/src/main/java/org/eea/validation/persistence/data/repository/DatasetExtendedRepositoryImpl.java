@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -209,11 +210,10 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
             validation.setValidationDate(rs.getString(13));
 
-
             FieldValue field = new FieldValue();
             field.setId(rs.getString(3));
             field.setIdFieldSchema(rs.getString(14));
-            field.setType(rs.getString(16));
+            field.setType(DataType.fromValue(rs.getString(16)));
             field.setValue(rs.getString(17));
 
             RecordValue record = new RecordValue();
