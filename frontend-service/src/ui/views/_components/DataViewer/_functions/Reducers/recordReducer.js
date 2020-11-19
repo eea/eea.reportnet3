@@ -51,6 +51,23 @@ export const recordReducer = (state, { type, payload }) => {
     case 'FIRST_FILTERED_RECORD':
       return { ...state, fetchedDataFirstRecord: payload };
 
+    case 'IS_RECORD_DELETED':
+      return { ...state, isRecordDeleted: payload };
+
+    case 'RESET_DRAW_ELEMENTS':
+      return {
+        ...state,
+        drawElements: {
+          circle: false,
+          circlemarker: false,
+          polyline: false,
+          marker: false,
+          point: false,
+          polygon: false,
+          rectangle: false
+        }
+      };
+
     case 'SET_EDITED_RECORD':
       if (!isUndefined(payload.property)) {
         let updatedRecord = RecordUtils.changeRecordValue({ ...state.editedRecord }, payload.property, payload.value);
@@ -78,9 +95,27 @@ export const recordReducer = (state, { type, payload }) => {
         return { ...state, newRecord: payload };
       }
 
-    case 'IS_RECORD_DELETED':
-      return { ...state, isRecordDeleted: payload };
-
+    case 'OPEN_MAP':
+      const inmDrawElements = { ...state.drawElements };
+      switch (payload.fieldType.toLowerCase()) {
+        case 'linestring':
+          inmDrawElements['polyline'] = true;
+          break;
+        case 'point':
+          inmDrawElements['point'] = false;
+          break;
+        default:
+          inmDrawElements[payload.fieldType.toLowerCase()] = true;
+          break;
+      }
+      return {
+        ...state,
+        drawElements: inmDrawElements,
+        geometryType: payload.fieldType.toUpperCase(),
+        isMapOpen: true,
+        mapGeoJson: payload.coordinates,
+        selectedMapCells: payload.mapCells
+      };
     case 'SET_RECORDS_PER_PAGE':
       return { ...state, recordsPerPage: payload };
 
@@ -94,8 +129,7 @@ export const recordReducer = (state, { type, payload }) => {
         selectedValidExtensions: payload.validExtensions,
         selectedMaxSize: payload.maxSize
       };
-    case 'OPEN_MAP':
-      return { ...state, isMapOpen: true, mapGeoJson: payload.coordinates, selectedMapCells: payload.mapCells };
+
     case 'SAVE_MAP_COORDINATES':
       const inmMapGeoJson = cloneDeep(state.mapGeoJson);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);

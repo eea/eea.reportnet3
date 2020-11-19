@@ -91,7 +91,6 @@ export const Dataset = withRouter(({ match, history }) => {
     import: [],
     importOtherSystems: []
   });
-  const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
@@ -158,12 +157,12 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [userContext, isDataLoaded, tableSchemaColumns]);
 
   useEffect(() => {
-    if (isEmpty(externalExportExtensions)) {
+    if (isEmpty(externalOperationsList.export)) {
       setExportButtonsList(internalExtensions);
     } else {
-      setExportButtonsList(internalExtensions.concat(externalExtensions));
+      setExportButtonsList(internalExtensions.concat(externalIntegrationsNames));
     }
-  }, [datasetName, externalExportExtensions]);
+  }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
     if (isEmpty(externalOperationsList.import)) {
@@ -202,7 +201,7 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
-    getExportExtensions(externalOperationsList.export);
+    getExportIntegrationsNames(externalOperationsList.export);
   }, [externalOperationsList]);
 
   useEffect(() => {
@@ -217,16 +216,15 @@ export const Dataset = withRouter(({ match, history }) => {
     );
   };
 
-  const parseUniqExportExtensions = exportExtensionsOperationsList => {
-    return exportExtensionsOperationsList.map(uniqExportExtension => ({
-      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
-      code: uniqExportExtension.toLowerCase()
+  const parseExportIntegrationsNames = exportNamesOperationsList => {
+    return exportNamesOperationsList.map(exportNameOperation => ({
+      text: `${exportNameOperation.toUpperCase()} (.${exportNameOperation.toLowerCase()})`,
+      code: exportNameOperation.toLowerCase()
     }));
   };
 
-  const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
+  const getExportIntegrationsNames = exportOperationsList => {
+    parseExportIntegrationsNames(exportOperationsList.map(element => element.name));
   };
 
   const importFromFile = [
@@ -257,13 +255,13 @@ export const Dataset = withRouter(({ match, history }) => {
     command: () => onExportDataInternalExtension(type.code)
   }));
 
-  const externalExtensions = [
+  const externalIntegrationsNames = [
     {
-      label: resources.messages['externalExtensions'],
-      items: externalExportExtensions.map(type => ({
-        label: type.text,
+      label: resources.messages['exportExternalIntegrations'],
+      items: externalOperationsList.export.map(type => ({
+        label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
         icon: config.icons['archive'],
-        command: () => onExportDataExternalExtension(type.code)
+        command: () => onExportDataExternalIntegration(type.id)
       }))
     }
   ];
@@ -448,13 +446,13 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileExtension => {
+  const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({
       type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
     });
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
@@ -827,6 +825,7 @@ export const Dataset = withRouter(({ match, history }) => {
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
+              className={styles.exportSubmenu}
               model={exportButtonsList}
               popup={true}
               ref={exportMenuRef}

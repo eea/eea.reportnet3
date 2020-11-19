@@ -8,13 +8,14 @@ import isUndefined from 'lodash/isUndefined';
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 
-import { CoreUtils } from 'core/infrastructure/CoreUtils';
 import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
+
+import { CoreUtils } from 'core/infrastructure/CoreUtils';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   const datasetTableFieldDesign = new DatasetTableField({});
@@ -230,8 +231,8 @@ const exportDataById = async (datasetId, fileType) => {
   return datasetData;
 };
 
-const exportDatasetDataExternal = async (datasetId, fileExtension) => {
-  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, fileExtension);
+const exportDatasetDataExternal = async (datasetId, integrationId) => {
+  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, integrationId);
   return datasetData;
 };
 
@@ -323,10 +324,10 @@ const groupedErrorsById = async (
 
 const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
-
   try {
     JSON.parse(value);
   } catch (e) {
+    console.error(e);
     return false;
   }
   return true;
@@ -343,17 +344,49 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 };
 
 const parseValue = (type, value, feToBe = false) => {
-  if (['POINT', 'LINESTRING', 'POLYGON'].includes(type) && value !== '' && !isNil(value)) {
+  if (
+    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) &&
+    value !== '' &&
+    !isNil(value)
+  ) {
     if (!isValidJSON(value)) {
       return '';
     }
     const inmValue = JSON.parse(cloneDeep(value));
-    inmValue.geometry.coordinates = [inmValue.geometry.coordinates[1], inmValue.geometry.coordinates[0]];
-    if (!feToBe) {
-      inmValue.properties.srid = `EPSG:${inmValue.properties.srid}`;
-    } else {
-      inmValue.properties.srid = inmValue.properties.srid.split(':')[1];
+    const parsedValue = JSON.parse(value);
+
+    switch (type.toUpperCase()) {
+      case 'POINT':
+        inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
+        break;
+      case 'MULTIPOINT':
+      case 'LINESTRING':
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => [
+          coordinate[1],
+          coordinate[0]
+        ]);
+        break;
+      case 'POLYGON':
+      case 'MULTILINESTRING':
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
+          coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]])
+        );
+        break;
+      case 'MULTIPOLYGON':
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
+          polygon.map(coordinate => coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]]))
+        );
+        break;
+      default:
+        break;
     }
+
+    if (!feToBe) {
+      inmValue.properties.srid = `EPSG:${parsedValue.properties.srid}`;
+    } else {
+      inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
+    }
+
     return JSON.stringify(inmValue);
   }
   return value;

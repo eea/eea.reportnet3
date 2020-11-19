@@ -635,7 +635,7 @@
     "3d": "3D",
     "geospatialData": "Geospatial data",
     "selectGeographicalData": "Select point",
-    "selectGeographicalDataOnMap": "Select point on map",
+    "selectGeographicalDataOnMap": "View geometry on map",
     "noWebLinks": "No weblinks added",
     "noDocuments": "No documents uploaded",
     "addUniqueConstraint": "Add unique constraint",
@@ -741,7 +741,6 @@
     "deleteFieldLabel": "Delete field",
     "importDataset": "Import dataset data",
     "uploadTable": "Import data in table ",
-    "externalExtensions": "External extensions",
     "errorLoadingRepositories": "Error loading repositories",
     "errorLoadingProcesses": "Error loading processes",
     "validateEuDatasetHeader": "Validate EU dataset",
@@ -800,7 +799,7 @@
     "fixedNumber": "Fixed number of records",
     "readOnly": "Read only",
     "supportedFileAttachmentsMaxSizeTooltip": "Maximum file size: ",
-    "allAttachment": "There are only Attachment field types. Press 'Save' to add a record with empty attachments. You can upload them afterwards.",
+    "allAttachmentOrComplexGeom": "There are only Attachment or Complex geometries field types. Press 'Save' to add a record with empty values. You can upload attachments afterwards.",
     "createQCDisabled": "Can't create field QC on Attachment field",
     "createQC": "Create a QC over this field",
     "attachmentPaste": "Attachment fields will not be pasted",
@@ -839,7 +838,6 @@
     "externalExportDesignFailedEvent": "Failed exporting <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotActionBlockedError": "Failure in the Manage copy's process. Please wait until the end of the previous operation",
-    "duplicatedIntegrationOperation": "There is already an external integration with the same operation type and file extension.",
     "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
     "historicReleases": "Historic Releases",
     "historicReleasesContextMenu": "Historic Releases for",
@@ -941,8 +939,11 @@
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
     "feedbackMessagePlaceholder": "Please provide information on the status change",
+    "exportExternalIntegrations": "External integrations",
     "dataflowStatus": "Dataflow status",
     "open": "open",
-    "draft": "draft"
+    "draft": "draft",
+    "geometryCoordinates": "Geometry coordinates",
+    "nonEditableData": "This field is not editable"
   }
 }
