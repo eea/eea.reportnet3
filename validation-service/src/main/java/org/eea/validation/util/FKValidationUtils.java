@@ -25,7 +25,13 @@ import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.geolatte.geom.GeometryCollection;
+import org.geolatte.geom.LineString;
+import org.geolatte.geom.MultiLineString;
+import org.geolatte.geom.MultiPoint;
+import org.geolatte.geom.MultiPolygon;
 import org.geolatte.geom.Point;
+import org.geolatte.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -181,79 +187,41 @@ public class FKValidationUtils {
   }
 
   /**
-   * Checks if is position.
+   * Checks if is geometry.
    *
    * @param fieldValue the field value
-   * @return true, if is position
+   * @return true, if is geometry
    */
-  public static boolean isPosition(FieldValue fieldValue) {
-    // TODO. Modify instanceof to support Position
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
-  }
-
-  /**
-   * Checks if is point.
-   *
-   * @param fieldValue the field value
-   * @return true, if is point
-   */
-  public static boolean isPoint(FieldValue fieldValue) {
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
-  }
-
-  /**
-   * Checks if is multipoint.
-   *
-   * @param fieldValue the field value
-   * @return true, if is multipoint
-   */
-  public static boolean isMultipoint(FieldValue fieldValue) {
-    // TODO. Modify instanceof to support Multipoint
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
-  }
-
-  /**
-   * Checks if is linestring.
-   *
-   * @param fieldValue the field value
-   * @return true, if is linestring
-   */
-  public static boolean isLinestring(FieldValue fieldValue) {
-    // TODO. Modify instanceof to support Linestring
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
-  }
-
-  /**
-   * Checks if is multilinestring.
-   *
-   * @param fieldValue the field value
-   * @return true, if is multilinestring
-   */
-  public static boolean isMultilinestring(FieldValue fieldValue) {
-    // TODO. Modify instanceof to support Multilinestring
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
-  }
-
-  /**
-   * Checks if is polygon.
-   *
-   * @param fieldValue the field value
-   * @return true, if is polygon
-   */
-  public static boolean isPolygon(FieldValue fieldValue) {
-    // TODO. Modify instanceof to support Polygon
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
-  }
-
-  /**
-   * Checks if is geometrycollection.
-   *
-   * @param fieldValue the field value
-   * @return true, if is geometrycollection
-   */
-  public static boolean isGeometrycollection(FieldValue fieldValue) {
-    // TODO. Modify instanceof to support Geometrycollection
-    return fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+  public static boolean isGeometry(FieldValue fieldValue) {
+    boolean rtn;
+    switch (fieldValue.getType()) {
+      case POINT:
+        rtn = fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Point;
+        break;
+      case LINESTRING:
+        rtn = fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof LineString;
+        break;
+      case POLYGON:
+        rtn = fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof Polygon;
+        break;
+      case MULTIPOINT:
+        rtn = fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof MultiPoint;
+        break;
+      case MULTILINESTRING:
+        rtn =
+            fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof MultiLineString;
+        break;
+      case MULTIPOLYGON:
+        rtn = fieldValue.getValue().isEmpty() || fieldValue.getGeometry() instanceof MultiPolygon;
+        break;
+      case GEOMETRYCOLLECTION:
+        rtn = fieldValue.getValue().isEmpty()
+            || fieldValue.getGeometry() instanceof GeometryCollection;
+        break;
+      default:
+        rtn = false;
+    }
+    return rtn;
   }
 
   /**
@@ -330,6 +298,7 @@ public class FKValidationUtils {
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
    * @param tableName the tableName
+   * @param fkFieldSchema the fk field schema
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
