@@ -26,7 +26,7 @@
     },
     {
       "content": "The dataflow feedback",
-      "target": ".dataflow-big-buttons-dataflowFeedback-help-step"
+      "target": ".dataflow-big-buttons-technicalFeedback-help-step"
     },
     {
       "content": "By clicking on ‘New schema’, you can create a new dataset schema or clone and existing one (explained in 3.3)",
