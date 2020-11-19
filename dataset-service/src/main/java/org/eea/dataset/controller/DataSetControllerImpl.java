@@ -104,6 +104,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
+   * @param idFieldSchema the id field schema
+   * @param fieldValue the field value
    * @return the data tables values
    */
   @Override
@@ -116,8 +118,9 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
-      @RequestParam(value = "idRules", required = false) String[] idRules) {
-
+      @RequestParam(value = "idRules", required = false) String[] idRules,
+      @RequestParam(value = "idFieldSchema", required = false) String idFieldSchema,
+      @RequestParam(value = "fieldValue", required = false) String fieldValue) {
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -133,7 +136,7 @@ public class DataSetControllerImpl implements DatasetController {
     TableVO result = null;
     try {
       result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields,
-          levelError, idRules);
+          levelError, idRules, idFieldSchema, fieldValue);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
