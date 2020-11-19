@@ -31,6 +31,8 @@ public enum ResourceGroupEnum {
   /** The dataflow editor write. */
   DATAFLOW_EDITOR_WRITE("Dataflow-%s-EDITOR_WRITE"),
 
+  /** The dataflow national coordinator. */
+  DATAFLOW_NATIONAL_COORDINATOR("Dataflow-%s-NATIONAL_COORDINATOR"),
   // Dataset
 
   /** The dataset steward. */
@@ -51,6 +53,8 @@ public enum ResourceGroupEnum {
   /** The dataset reporter write. */
   DATASET_REPORTER_WRITE("Dataset-%s-REPORTER_WRITE"),
 
+  /** The dataset national coordinator. */
+  DATASET_NATIONAL_COORDINATOR("Dataset-%s-NATIONAL_COORDINATOR"),
   // DatasetSchema
 
   /** The dataschema custodian. */
@@ -65,6 +69,8 @@ public enum ResourceGroupEnum {
   /** The dataschema reporter read. */
   DATASCHEMA_REPORTER_READ("Dataschema-%s-REPORTER_READ"),
 
+  /** The dataschema national coordinator. */
+  DATASCHEMA_NATIONAL_COORDINATOR("Dataschema-%s-NATIONAL_COORDINATOR"),
   /** The dataschema editor read. */
   DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ"),
 
@@ -79,6 +85,9 @@ public enum ResourceGroupEnum {
   /** The datacollection lead reporter. */
   DATACOLLECTION_LEAD_REPORTER("DataCollection-%s-DATA_LEAD_REPORTER"),
 
+
+  // DATAPROVIDER-%-NATIONAL_COORDINATOR
+  PROVIDER_NATIONAL_COORDINATOR("Provider-%s-NATIONAL_COORDINATOR"),
   // EUDataset
 
   /** The eudataset custodian. */
