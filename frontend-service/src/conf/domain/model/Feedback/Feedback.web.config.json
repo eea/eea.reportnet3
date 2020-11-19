@@ -1,6 +1,6 @@
 {
-  "create":"/dataflow/{:dataflowId}/createMessage",
-  "loadMessagesByFlag": "/dataflow/{:dataflowId}/findMessages?page={:page}&read={:read}&providerId={:providerId}",  
-  "loadMessages": "/dataflow/{:dataflowId}/findMessages?page={:page}&providerId={:providerId}",
-  "markAsRead": "/dataflow/{:dataflowId}/updateMessageReadStatus"
+  "create": "/collaboration/createMessage/dataflow/{:dataflowId}",
+  "loadMessagesByFlag": "/collaboration/findMessages/dataflow/{:dataflowId}?page={:page}&read={:read}&providerId={:providerId}",
+  "loadMessages": "/collaboration/findMessages/dataflow/{:dataflowId}?page={:page}&providerId={:providerId}",
+  "markAsRead": "/collaboration/updateMessageReadStatus/dataflow/{:dataflowId}"
 }
