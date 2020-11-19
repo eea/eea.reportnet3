@@ -335,6 +335,7 @@ public enum EventType {
   /** The updated dataset status. */
   UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true),
 
+  /** The datacollection national coordinator event. */
   DATACOLLECTION_NATIONAL_COORDINATOR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "datacollection_national_coordinator_event", true);
 
