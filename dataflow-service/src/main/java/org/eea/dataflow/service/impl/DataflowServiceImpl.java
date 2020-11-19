@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
-import org.eea.dataflow.mapper.MessageMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
@@ -18,7 +17,6 @@ import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
-import org.eea.dataflow.persistence.repository.MessageRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
@@ -117,10 +115,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /** The message repository. */
-  @Autowired
-  private MessageRepository messageRepository;
-
   /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
@@ -128,10 +122,6 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
-
-  /** The message mapper. */
-  @Autowired
-  private MessageMapper messageMapper;
 
   /** The representative service. */
   @Autowired

@@ -14,7 +14,6 @@ import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
-import org.eea.dataflow.mapper.MessageMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
@@ -25,7 +24,6 @@ import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
-import org.eea.dataflow.persistence.repository.MessageRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.RepresentativeService;
@@ -149,14 +147,6 @@ public class DataFlowServiceImplTest {
   /** The eu dataset controller zuul. */
   @Mock
   private EUDatasetControllerZuul euDatasetControllerZuul;
-
-  /** The message repository. */
-  @Mock
-  private MessageRepository messageRepository;
-
-  /** The message mapper. */
-  @Mock
-  private MessageMapper messageMapper;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
