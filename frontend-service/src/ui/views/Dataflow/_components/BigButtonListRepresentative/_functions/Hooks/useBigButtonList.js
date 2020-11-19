@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 
@@ -31,7 +30,7 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
-  }, [userContext]);
+  }, [userContext, dataflowState.data.datasets]);
 
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
