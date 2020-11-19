@@ -3,6 +3,7 @@ package org.eea.validation.util;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -279,122 +280,11 @@ public class AutomaticRules {
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
-  /**
-   * Creates the position automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createPositionAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isPosition(this)",
-        "The value does not follow the expected syntax for a valid position ",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-  /**
-   * Creates the point automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createPointAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isPoint(this)",
-        "The value does not follow the expected syntax for a valid point ",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-  /**
-   * Creates the multipoint automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createMultipointAutomaticRule(String referenceId,
+  public static Rule createGeometryAutomaticRule(DataType typeData, String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isMultipoint(this)",
-        "The value does not follow the expected syntax for a valid multipoint ",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-  /**
-   * Creates the linestring automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createLinestringAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isLinestring(this)",
-        "The value does not follow the expected syntax for a valid linestring ",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-  /**
-   * Creates the multilinestring automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createMultilinestringAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isMultilinestring(this)",
-        "The value does not follow the expected syntax for a valid multilinestring ",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-  /**
-   * Creates the polygon automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createPolygonAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isPolygon(this)",
-        "The value does not follow the expected syntax for a valid polygon ",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-  /**
-   * Creates the geometrycollection automatic rule.
-   *
-   * @param referenceId the reference id
-   * @param typeEntityEnum the type entity enum
-   * @param nameRule the name rule
-   * @param shortCode the short code
-   * @param description the description
-   * @return the rule
-   */
-  public static Rule createGeometrycollectionAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isGeometrycollection(this)",
-        "The value does not follow the expected syntax for a valid geometrycollection ",
+    String error = "The value does not follow the expected syntax for a valid phone number "
+        + typeData.toString().toLowerCase();
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
