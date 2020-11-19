@@ -51,11 +51,20 @@ const getUserRoles = userRoles => {
     }
   }
 
-  const permissionsArr = values(config.dataflowPermissions);
+  const dataflowPermissions = [
+    config.dataflowPermissions.DATA_CUSTODIAN,
+    config.dataflowPermissions.EDITOR_WRITE,
+    config.dataflowPermissions.EDITOR_READ,
+    config.dataflowPermissions.LEAD_REPORTER,
+    config.dataflowPermissions.NATIONAL_COORDINATOR,
+    config.dataflowPermissions.REPORTER_WRITE,
+    config.dataflowPermissions.REPORTER_READ
+  ];
+
   dataflowDuplicatedRoles.forEach(dataflowRoles => {
     let rol = null;
 
-    permissionsArr.forEach(permission => {
+    dataflowPermissions.forEach(permission => {
       dataflowRoles.forEach(dataflowRol => {
         if (isNil(rol) && dataflowRol.userRole === permission) {
           rol = dataflowRol;
