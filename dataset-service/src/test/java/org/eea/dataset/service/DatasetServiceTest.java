@@ -2201,11 +2201,11 @@ public class DatasetServiceTest {
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
     Mockito
-        .when(integrationController.findExportIntegration(Mockito.anyString(), Mockito.anyString()))
+        .when(integrationController.findExportIntegration(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(new IntegrationVO());
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new ExecutionResultVO());
-    datasetService.exportFileThroughIntegration(1L, "csv");
+    datasetService.exportFileThroughIntegration(1L, 1L);
     Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }

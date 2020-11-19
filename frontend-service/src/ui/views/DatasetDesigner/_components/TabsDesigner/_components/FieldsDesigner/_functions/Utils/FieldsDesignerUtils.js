@@ -1,5 +1,7 @@
 import isNil from 'lodash/isNil';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const arrayShift = (arr, initialIdx, endIdx) => {
   const element = arr[initialIdx];
   if (endIdx === -1) {
@@ -33,7 +35,7 @@ const arrayShift = (arr, initialIdx, endIdx) => {
 const checkDuplicates = (fields, name, fieldId) => {
   if (!isNil(fields)) {
     const inmFields = [...fields];
-    const repeteadElements = inmFields.filter(field => name.toLowerCase() === field.name.toLowerCase());
+    const repeteadElements = inmFields.filter(field => TextUtils.areEquals(name, field.name));
     return repeteadElements.length > 0 && fieldId !== repeteadElements[0].fieldId;
   } else {
     return false;

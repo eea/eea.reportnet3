@@ -288,6 +288,7 @@ public class IntegrationServiceImplTest {
     parameter.setParameter(IntegrationParams.FILE_EXTENSION);
     parameter.setValue("csv");
     Integration integration = new Integration();
+    integration.setId(1L);
     integration.setInternalParameters(Arrays.asList(parameter));
     List<Integration> integrations = new ArrayList<>();
     integrations.add(integration);
@@ -296,7 +297,7 @@ public class IntegrationServiceImplTest {
         Mockito.any(), Mockito.any())).thenReturn(integrations);
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
     Assert.assertEquals(integrationVO,
-        integrationService.getExportIntegration("5ce524fad31fc52540abae73", "csv"));
+        integrationService.getExportIntegration("5ce524fad31fc52540abae73", 1L));
   }
 
   /**
@@ -308,7 +309,7 @@ public class IntegrationServiceImplTest {
   public void getExportIntegrationNullTest() {
     Mockito.when(integrationRepository.findByOperationAndParameterAndValue(Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(null);
-    Assert.assertNull(integrationService.getExportIntegration("5ce524fad31fc52540abae73", "csv"));
+    Assert.assertNull(integrationService.getExportIntegration("5ce524fad31fc52540abae73", 1L));
   }
 
   /**

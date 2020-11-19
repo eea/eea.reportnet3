@@ -16,7 +16,7 @@ import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
+import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -41,7 +41,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
       .test('', resources.messages['duplicateSchemaError'], value => {
         if (!isNil(value) && !isEmpty(datasetSchemaInfo)) {
           const schemas = [...datasetSchemaInfo];
-          const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
+          const isRepeat = schemas.filter(title => !TextUtils.areEquals(title.schemaName, value));
           return isRepeat.length === schemas.length;
         } else {
           return true;

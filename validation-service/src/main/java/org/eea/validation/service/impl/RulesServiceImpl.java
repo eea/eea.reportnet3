@@ -478,7 +478,7 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
-        case POSITION:
+        case MULTIPOLYGON:
           ruleList.add(AutomaticRules.createPositionAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;

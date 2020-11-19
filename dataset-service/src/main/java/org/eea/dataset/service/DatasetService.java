@@ -464,14 +464,15 @@ public interface DatasetService {
   void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
       throws EEAException;
 
+
   /**
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
-  void exportFileThroughIntegration(Long datasetId, String fileExtension) throws EEAException;
+  void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException;
 
   /**
    * Gets the table fixed number of records.
