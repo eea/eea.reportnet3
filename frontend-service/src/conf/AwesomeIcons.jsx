@@ -84,7 +84,8 @@ import {
   faUsersCog,
   faUserShield,
   faVectorSquare,
-  faGripLines
+  faGripLines,
+  faBraille
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -275,6 +276,8 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'multiLineString':
       return faConnectdevelop;
+    case 'multiPoint':
+      return faBraille;
     case 'multiPolygon':
       return faBuffer;
     case 'multiselect':

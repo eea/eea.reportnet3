@@ -16,6 +16,7 @@ import * as esri from 'esri-leaflet';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Map as MapComponent, FeatureGroup, GeoJSON, Marker, Popup } from 'react-leaflet';
 // import { EditControl } from 'react-leaflet-draw';
+// import ReactTooltip from 'react-tooltip';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -231,12 +232,7 @@ export const Map = ({
         return defaultCenter;
       }
     } else {
-      if (
-        MapUtils.checkValidJSONMultipleCoordinates(
-          geoJson,
-          ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)
-        )
-      ) {
+      if (MapUtils.checkValidJSONMultipleCoordinates(geoJson)) {
         return `{"type": "Feature", "geometry": {"type":"${geometryType}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
           geoJson,
           geometryType
@@ -262,14 +258,10 @@ export const Map = ({
         break;
       case 'LINESTRING':
       case 'MULTILINESTRING':
+      case 'MULTIPOINT':
       case 'POLYGON':
       case 'MULTIPOLYGON':
-        if (
-          MapUtils.checkValidJSONMultipleCoordinates(
-            geoJson,
-            ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)
-          )
-        ) {
+        if (MapUtils.checkValidJSONMultipleCoordinates(geoJson)) {
           return (
             <GeoJSON
               data={JSON.parse(mapGeoJson)}
@@ -291,10 +283,10 @@ export const Map = ({
 
   const onEachFeature = (feature, layer) => {
     layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
-    layer.on({
-      click: () =>
-        mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
-    });
+    // layer.on({
+    //   click: () =>
+    //     mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
+    // });
   };
 
   const onPrintCoordinates = coordinates => `{Lat: ${coordinates.split(', ')[0]}, Lng: ${coordinates.split(', ')[1]}}`;
@@ -362,11 +354,21 @@ export const Map = ({
                   : resources.messages['geometryCoordinates']}
                 :{' '}
               </label>
-              <label>
+              <label data-tip data-for="coordinatesTooltip">
                 {MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)
-                  ? MapUtils.printCoordinates(mapGeoJson)
+                  ? MapUtils.printCoordinates(mapGeoJson, true, geometryType)
                   : `{Latitude: , Longitude: }`}
               </label>
+              {/* {(MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)) && (
+                <ReactTooltip
+                  className={styles.tooltip}
+                  effect="float"
+                  id="coordinatesTooltip"
+                  multiline={true}
+                  place="top">
+                  {MapUtils.printCoordinates(mapGeoJson, true, geometryType)}
+                </ReactTooltip>
+              )} */}
             </div>
           </div>
           {TextUtils.areEquals(geometryType, 'POINT') && (
@@ -375,7 +377,7 @@ export const Map = ({
                 <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
                 <div className={styles.pointLegendItemLabel}>
                   <label>{resources.messages['newPoint']}: </label>
-                  <label>{MapUtils.printCoordinates(newPositionMarker, false)}</label>
+                  <label>{MapUtils.printCoordinates(newPositionMarker, false, geometryType)}</label>
                 </div>
               </div>
               <div className={styles.pointLegendItem}>
@@ -387,7 +389,7 @@ export const Map = ({
           )}
         </div>
       )}
-      <div style={{ display: 'inline-flex', width: '60%' }}>
+      <div style={{ display: 'inline-flex', width: '80%' }}>
         <Dropdown
           ariaLabel={'themes'}
           className={styles.themeSwitcherSplitButton}
@@ -459,8 +461,6 @@ export const Map = ({
                 position="topright"
                 onEdited={e => console.log(e)}
                 onCreated={e => {
-                  console.log(e.target, e.layer, e.layer.toGeoJSON());
-                  console.log(JSON.stringify(e.layer.toGeoJSON()));
                   setMapGeoJson(JSON.stringify(e.layer.toGeoJSON()));
                 }}
                 onDeleted={e => console.log(e)}

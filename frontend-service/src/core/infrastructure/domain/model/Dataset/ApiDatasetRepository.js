@@ -345,7 +345,7 @@ const orderTableSchema = async (datasetId, position, tableSchemaId) => {
 
 const parseValue = (type, value, feToBe = false) => {
   if (
-    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(type) &&
+    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) &&
     value !== '' &&
     !isNil(value)
   ) {
@@ -359,11 +359,8 @@ const parseValue = (type, value, feToBe = false) => {
       case 'POINT':
         inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
         break;
+      case 'MULTIPOINT':
       case 'LINESTRING':
-        // console.log(
-        //   inmValue.geometry.coordinates,
-        //   inmValue.geometry.coordinates.map(coordinate => [coordinate[1], coordinate[0]])
-        // );
         inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => [
           coordinate[1],
           coordinate[0]

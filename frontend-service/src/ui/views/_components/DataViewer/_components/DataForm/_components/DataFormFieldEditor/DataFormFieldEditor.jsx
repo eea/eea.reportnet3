@@ -255,8 +255,8 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
-    ) : ['POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(type) ? (
-      renderComplexGeometries(field, fieldValue)
+    ) : ['POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) ? (
+      renderComplexGeometries()
     ) : type === 'TEXTAREA' ? (
       renderTextarea(field, fieldValue)
     ) : (
@@ -295,7 +295,7 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const renderComplexGeometries = (field, fieldValue) => {
+  const renderComplexGeometries = () => {
     return false;
   };
 

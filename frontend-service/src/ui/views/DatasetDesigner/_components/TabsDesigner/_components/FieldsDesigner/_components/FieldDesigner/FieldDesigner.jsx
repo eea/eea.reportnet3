@@ -73,10 +73,11 @@ export const FieldDesigner = ({
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
     { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
     { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
     { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'MultiPolygon', value: 'Muliple Polygon', fieldTypeIcon: 'multiPolygon' },
+    { fieldType: 'MultiPolygon', value: 'Multiple Polygon', fieldTypeIcon: 'multiPolygon' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
@@ -203,7 +204,9 @@ export const FieldDesigner = ({
           if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
-              pk: ['POINT', 'LINESTRING', 'POLYGON'].includes(type.fieldType.toUpperCase())
+              pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+                type.fieldType.toUpperCase()
+              )
                 ? false
                 : fieldDesignerState.fieldPKValue
             });
@@ -213,7 +216,9 @@ export const FieldDesigner = ({
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
-            pk: ['POINT', 'LINESTRING', 'POLYGON'].includes(type.fieldType.toUpperCase())
+            pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              type.fieldType.toUpperCase()
+            )
               ? false
               : fieldDesignerState.fieldPKValue,
             type: parseGeospatialTypes(type.fieldType),
@@ -230,7 +235,11 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
       dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
-      if (['POINT', 'LINESTRING', 'POLYGON'].includes(type.fieldType.toUpperCase()))
+      if (
+        ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+          type.fieldType.toUpperCase()
+        )
+      )
         dispatchFieldDesigner({ type: 'SET_PK', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
@@ -742,7 +751,9 @@ export const FieldDesigner = ({
         disabled={
           (!isNil(fieldDesignerState.fieldTypeValue) &&
             !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
-            ['POINT', 'LINESTRING', 'POLYGON'].includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())) ||
+            ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              fieldDesignerState.fieldTypeValue.fieldType.toUpperCase()
+            )) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))
         }
         id={`${fieldId}_check_pk`}

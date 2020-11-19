@@ -84,9 +84,10 @@ const checkValidJSONCoordinates = json => {
   }
 };
 
-const checkValidJSONMultipleCoordinates = (json, complexType = false) => {
+const checkValidJSONMultipleCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
+    const complexType = ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(parsedJSON.geometry.type.toUpperCase());
     if (complexType) {
       return (
         parsedJSON.geometry.coordinates
@@ -160,13 +161,25 @@ const parseGeometryData = records => {
   return records;
 };
 
-const printCoordinates = (data, isGeoJson = true) => {
+const printCoordinates = (data, isGeoJson = true, geometryType) => {
   if (isGeoJson) {
+    let parsedJSON = data;
+    if (typeof parsedJSON === 'string') {
+      parsedJSON = JSON.parse(data);
+    }
+
+    switch (geometryType.toUpperCase()) {
+      case 'MULTIPOINT':
+      case 'LINESTRING':
+      case 'POLYGON':
+      case 'MULTILINESTRING':
+      case 'MULTIPOLYGON':
+        return JSON.stringify(parsedJSON.geometry.coordinates);
+      default:
+        break;
+    }
+
     if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
-      let parsedJSON = data;
-      if (typeof parsedJSON === 'string') {
-        parsedJSON = JSON.parse(data);
-      }
       return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
     } else {
       if (Array.isArray(data)) {

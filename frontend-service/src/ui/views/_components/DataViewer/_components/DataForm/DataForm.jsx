@@ -48,7 +48,8 @@ const DataForm = ({
 
   const allAttachmentsOrComplexGeom = () => {
     const notAttachmentOrComplexGeom = colsSchema.filter(
-      col => !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(col.type)
+      col =>
+        !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(col.type)
     );
     return notAttachmentOrComplexGeom.length === 0;
   };
@@ -61,7 +62,9 @@ const DataForm = ({
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <Fragment key={column.field}>
-              {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(column.type) && (
+              {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                column.type
+              ) && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
                     TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
@@ -79,9 +82,14 @@ const DataForm = ({
               <div
                 className="p-col-8"
                 style={{
-                  padding: !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(
-                    column.type
-                  )
+                  padding: ![
+                    'ATTACHMENT',
+                    'POLYGON',
+                    'LINESTRING',
+                    'MULTIPOLYGON',
+                    'MULTILINESTRING',
+                    'MULTIPOINT'
+                  ].includes(column.type)
                     ? '.5em'
                     : '0',
                   width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
@@ -121,7 +129,9 @@ const DataForm = ({
             const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
             return (
               <Fragment key={column.field}>
-                {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(column.type) && (
+                {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  column.type
+                ) && (
                   <div className="p-col-4" style={{ padding: '.75em' }}>
                     <label htmlFor={column.field}>{`${column.header}${
                       TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
@@ -141,9 +151,14 @@ const DataForm = ({
                 <div
                   className="p-col-8"
                   style={{
-                    padding: !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(
-                      column.type
-                    )
+                    padding: ![
+                      'ATTACHMENT',
+                      'POLYGON',
+                      'LINESTRING',
+                      'MULTIPOLYGON',
+                      'MULTILINESTRING',
+                      'MULTIPOINT'
+                    ].includes(column.type)
                       ? '.5em'
                       : '0',
                     width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''

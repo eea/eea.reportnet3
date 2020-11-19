@@ -301,9 +301,10 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (records.isMapOpen) {
         datatableRef.current.closeEditingCell();
-      } else {
-        dispatchRecords({ type: 'RESET_DRAW_ELEMENTS' });
       }
+      // else {
+      //   dispatchRecords({ type: 'RESET_DRAW_ELEMENTS' });
+      // }
     }, [records.isMapOpen]);
 
     useEffect(() => {
@@ -321,7 +322,7 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
-      if (records.mapGeoJson !== '') {
+      if (records.mapGeoJson !== '' && TextUtils.areEquals(records.geometryType, 'POINT')) {
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);

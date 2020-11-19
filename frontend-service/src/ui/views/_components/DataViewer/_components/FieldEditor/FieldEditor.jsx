@@ -53,7 +53,7 @@ const FieldEditor = ({
   const [codelistItemValue, setCodelistItemValue] = useState();
 
   const [currentCRS, setCurrentCRS] = useState(
-    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON'].includes(
+    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
       RecordUtils.getCellInfo(colsSchema, cells.field).type
     )
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
@@ -83,7 +83,11 @@ const FieldEditor = ({
 
   useEffect(() => {
     onFilter(RecordUtils.getCellValue(cells, cells.field));
-    if (['POINT', 'LINESTRING', 'POLYGON'].includes(RecordUtils.getCellInfo(colsSchema, cells.field).type)) {
+    if (
+      ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+        RecordUtils.getCellInfo(colsSchema, cells.field).type
+      )
+    ) {
       onChangePointCRS(currentCRS.value);
     }
   }, []);
@@ -425,6 +429,7 @@ const FieldEditor = ({
         );
       case 'LINESTRING':
       case 'MULTILINESTRING':
+      case 'MULTIPOINT':
       case 'MULTIPOLYGON':
       case 'POLYGON':
         const value = RecordUtils.getCellValue(cells, cells.field);
