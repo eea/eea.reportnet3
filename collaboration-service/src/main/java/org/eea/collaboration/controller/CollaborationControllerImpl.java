@@ -50,7 +50,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    */
   @Override
   @PostMapping("/createMessage/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody MessageVO messageVO) {
     try {
@@ -72,7 +72,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    */
   @Override
   @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs) {
     try {
@@ -97,7 +97,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    */
   @Override
   @GetMapping("/findMessages/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read,

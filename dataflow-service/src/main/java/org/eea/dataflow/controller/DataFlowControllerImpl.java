@@ -70,7 +70,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Dataflow by its Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class)
@@ -398,7 +398,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
@@ -474,7 +474,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @Deprecated
   @PostMapping("/{dataflowId}/createMessage")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody MessageVO messageVO) {
     try {
@@ -498,7 +498,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @Deprecated
   @GetMapping("/{dataflowId}/findMessages")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read,
@@ -520,7 +520,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @Deprecated
   @PutMapping("/{dataflowId}/updateMessageReadStatus")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs) {
     try {
