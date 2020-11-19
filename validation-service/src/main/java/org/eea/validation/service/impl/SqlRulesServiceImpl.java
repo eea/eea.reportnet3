@@ -29,6 +29,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.RecordValidation;
@@ -39,10 +40,6 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.hibernate.exception.GenericJDBCException;
-import org.hibernate.exception.SQLGrammarException;
-import org.postgresql.util.PSQLException;
-import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -209,11 +206,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           } else {
             preparedquery = query + " limit 5";
           }
-          TableValue table = retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
-          if (null == table) {
-            isSQLCorrect = Boolean.FALSE;
-          }
-        } catch (PSQLException | SQLGrammarException | GenericJDBCException e) {
+          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
+        } catch (EEAInvalidSQLException e) {
           LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
@@ -284,7 +278,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Override
   public TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws PSQLException {
+      throws EEAInvalidSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
     Long idTable = null;
@@ -309,14 +303,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         break;
     }
     TableValue table = new TableValue();
-    try {
-      LOG.info("Query to be executed: {}", newQuery);
-      table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-          idTable);
-    } catch (SQLException | SQLGrammarException | GenericJDBCException e) {
-      LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
-      throw new PSQLException(new ServerErrorMessage(e.getMessage()));
-    }
+    LOG.info("Query to be executed: {}", newQuery);
+    table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
+        idTable);
     if (ischeckDC.equals(Boolean.FALSE)) {
       if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
         retrieveValidations(table.getRecords(), datasetId);
