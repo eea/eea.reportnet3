@@ -65,6 +65,13 @@
           "isPrimary": false
         },
         {
+          "type": "FIELD",
+          "name": "GHGAffected",
+          "title": "Greenhouse gas(es) affected",
+          "tooltip": "More than one GHG can be selected",
+          "isPrimary": false
+        },
+        {
           "type": "LABEL",
           "level": 2,
           "title": "Sector(s) and objective(s) affected",
@@ -114,33 +121,21 @@
         },
         {
           "type": "FIELD",
-          "name": "GHGAffected",
-          "title": "Greenhouse gas(es) affected",
-          "tooltip": "More than one GHG can be selected",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
           "name": "QuantifiedObjective",
           "title": "Quantified Objective",
           "tooltip": "Include the figure(s) if the objectives(s) is (are) quantified",
           "isPrimary": false
         },
         {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Assessment of the contribution of the policy or Measure to the achievement of the long-term strategy referred to in Article 15 Regulation (EU) 2018/1999 "
-        },
-        {
           "type": "FIELD",
           "name": "AssessmentContribution",
-          "title": "Assessment of the contribution",
+          "title": "Assessment of the contribution of the policy or measure to the achievement of the long-term strategy referred to in Article 15 Regulation (EU) 2018/1999",
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "ReferenceAssessments",
-          "title": "Reference to assessments or underpinning",
+          "title": "Reference to assessments or underpinning technical reports",
           "multipleRecords": true,
           "elements": [
             {
@@ -178,13 +173,13 @@
         {
           "type": "FIELD",
           "name": "UnionPolicy",
-          "title": "",
+          "title": "Related / Not related",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "UnionPolicyList",
-          "title": "Select Union Policy/ies",
+          "title": "Select Union policy/policies",
           "isPrimary": false
         },
         {
@@ -204,7 +199,7 @@
         {
           "type": "FIELD",
           "name": "PaMRelateAirQuality",
-          "title": "Does the PaM relate to Air Quality policy?",
+          "title": "Does the PaM relate to Air Pollution policy?",
           "tooltip": ":'Yes' shall be selected if the PaM has been reported under Directive (EU) 2016/2284",
           "isPrimary": false
         },
@@ -236,7 +231,7 @@
           "type": "FIELD",
           "name": "ImplementationPeriodComment",
           "title": "Comment on Implementation Period",
-          "tooltip": "Provide any remark on Implementation Period of thePaM",
+          "tooltip": "Provide any remark on Implementation Period of the PaM",
           "isPrimary": false
         },
         {
@@ -296,50 +291,50 @@
             },
             {
               "type": "FIELD",
-              "name": "Year #1",
-              "title": "Year1",
+              "name": "Year1",
+              "title": "Year #1",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Year #2",
-              "title": "Year2",
+              "name": "Year2",
+              "title": "Year #2",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Year #3",
-              "title": "Year3",
+              "name": "Year3",
+              "title": "Year #3",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Year #4",
-              "title": "Year4",
+              "name": "Year4",
+              "title": "Year #4",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Value #1",
-              "title": "Value1",
+              "name": "Value1",
+              "title": "Value #1",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Value #2",
-              "title": "Value2",
+              "name": "Value2",
+              "title": "Value #2",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Value #3",
-              "title": "Value3",
+              "name": "Value3",
+              "title": "Value #3",
               "isPrimary": false
             },
             {
               "type": "FIELD",
-              "name": "Value #4",
-              "title": "Value4",
+              "name": "Value4",
+              "title": "Value #4",
               "isPrimary": false
             }
           ]
@@ -399,7 +394,7 @@
         {
           "type": "LABEL",
           "level": 3,
-          "title": "GHG emissions reductions for year 2020 (kt CO2-equivalent per year)",
+          "title": "GHG emissions reductions for year 2025 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
         {
@@ -431,7 +426,7 @@
         {
           "type": "LABEL",
           "level": 3,
-          "title": "GHG emissions reductions for year 2025 (kt CO2-equivalent per year)",
+          "title": "GHG emissions reductions for year 2030 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
         {
@@ -463,7 +458,7 @@
         {
           "type": "LABEL",
           "level": 3,
-          "title": "GHG emissions reductions for year 2030 (kt CO2-equivalent per year)",
+          "title": "GHG emissions reductions for year 2035 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
         {
@@ -495,7 +490,7 @@
         {
           "type": "LABEL",
           "level": 3,
-          "title": "GHG emissions reductions for year 2035 (kt CO2-equivalent per year)",
+          "title": "GHG emissions reductions for year 2040 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
         {
@@ -557,7 +552,7 @@
         {
           "type": "TABLE",
           "name": "Documentation_AnteAssessment",
-          "title": "",
+          "title": "Documentation of ex-ante assessment",
           "multipleRecords": true,
           "elements": [
             {
@@ -569,7 +564,7 @@
             {
               "type": "FIELD",
               "name": "WebLink",
-              "title": "WebLink",
+              "title": "URL",
               "isPrimary": false
             }
           ]
@@ -590,7 +585,7 @@
         {
           "type": "TABLE",
           "name": "GHG_emissions",
-          "title": "",
+          "title": "Ex-post GHG emissions reductions",
           "multipleRecords": true,
           "elements": [
             {
@@ -602,7 +597,7 @@
             {
               "type": "FIELD",
               "name": "Value_EU_ETS",
-              "title": "Eu ETS",
+              "title": "EU ETS",
               "isPrimary": false
             },
             {
@@ -659,7 +654,7 @@
         {
           "type": "TABLE",
           "name": "Documentation_PostAssessment",
-          "title": "",
+          "title": "Documentation of ex-post assessment",
           "multipleRecords": true,
           "elements": [
             {
@@ -671,7 +666,7 @@
             {
               "type": "FIELD",
               "name": "WebLink",
-              "title": "WebLink",
+              "title": "URL",
               "isPrimary": false
             }
           ]
@@ -688,6 +683,13 @@
           "type": "LABEL",
           "level": 2,
           "title": "Projected costs and benefits",
+          "isPrimary": false
+        },
+        {
+          "type": "FIELD",
+          "name": "ProjectedYear",
+          "title": "Year(s) for which cost has been calculated",
+          "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
           "isPrimary": false
         },
         {
@@ -719,12 +721,14 @@
           "type": "FIELD",
           "name": "ProjectedBenefit",
           "title": "Benefits in EUR per tonne CO2eq reduced/ sequestered",
+          "tooltip": "A benefit shall be indicated in the template as a negative cost.",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "ProjectedAbsoluteBenefit",
           "title": "Absolute benefit per year in EUR",
+          "tooltip": "A benefit shall be indicated in the template as a negative cost.",
           "isPrimary": false
         },
         {
@@ -743,13 +747,6 @@
           "type": "FIELD",
           "name": "ProjectedAbsoluteNetCost",
           "title": "Absolute net cost per year in EUR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "ProjectedYear",
-          "title": "Year(s) for which cost has been calculated",
-          "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
           "isPrimary": false
         },
         {
@@ -780,7 +777,7 @@
         {
           "type": "TABLE",
           "name": "DocumentationCostEstimation_1",
-          "title": "",
+          "title": "Documentation of projected cost and benefit estimates",
           "multipleRecords": true,
           "elements": [
             {
@@ -813,6 +810,13 @@
           "type": "LABEL",
           "level": 2,
           "title": "Realised costs and benefits",
+          "isPrimary": false
+        },
+        {
+          "type": "FIELD",
+          "name": "RealizedYear",
+          "title": "Year(s) for which cost has been calculated",
+          "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
           "isPrimary": false
         },
         {
@@ -872,13 +876,6 @@
         },
         {
           "type": "FIELD",
-          "name": "RealizedYear",
-          "title": "Year(s) for which cost has been calculated",
-          "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
           "name": "RealizedReferenceYear",
           "title": "Price reference year",
           "isPrimary": false
@@ -892,7 +889,7 @@
         },
         {
           "type": "FIELD",
-          "name": "RealizedDescriptionCost ",
+          "name": "RealizedDescriptionCost",
           "title": "",
           "isPrimary": false
         },
@@ -905,7 +902,7 @@
         {
           "type": "TABLE",
           "name": "DocumentationCostEstimation_2",
-          "title": "",
+          "title": "Documentation of realised cost and benefit estimates",
           "multipleRecords": true,
           "elements": [
             {

@@ -68,11 +68,14 @@ public interface DatasetService {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
+   * @param fieldSchema the field schema
+   * @param fieldValue the field value
    * @return the table values by id
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-      String fields, ErrorTypeEnum[] levelError, String[] idRules) throws EEAException;
+      String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
+      String fieldValue) throws EEAException;
 
   /**
    * Gets the position from any object id.
@@ -461,14 +464,15 @@ public interface DatasetService {
   void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
       throws EEAException;
 
+
   /**
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
-  void exportFileThroughIntegration(Long datasetId, String fileExtension) throws EEAException;
+  void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException;
 
   /**
    * Gets the table fixed number of records.

@@ -3,6 +3,7 @@ package org.eea.validation.persistence.data.repository;
 import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -24,7 +25,7 @@ public interface DatasetExtendedRepository {
    * @throws SQLException the SQL exception
    */
   TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
-      Long datasetId, Long idTable) throws SQLException;
+      Long datasetId, Long idTable) throws EEAInvalidSQLException;
 
   /**
    * Query record validation execution.

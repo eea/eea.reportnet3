@@ -305,8 +305,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Release events to initialize databases content
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
 
-      // Release the lock and the notification
-      releaseLockAndNotification(dataflowId, isCreation);
+      // Release the lock
+      String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+          : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+      removeLockByCriteria(methodSignature, dataflowId);
+
+      // command to assign national coordinators and end the dataCollectionProcess.
+      Map<String, Object> result = new HashMap<>();
+      result.put("dataflowId", dataflowId);
+      result.put("isCreation", isCreation);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT,
+          result);
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
@@ -885,22 +894,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void releaseLockAndNotification(Long dataflowId, boolean isCreation) {
 
-    String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
-        : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-    EventType successEvent = isCreation ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
 
-    // Release the lock
-    removeLockByCriteria(methodSignature, dataflowId);
-
-    // Release the notification
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", successEvent, e);
-    }
   }
 
   /**
@@ -1183,7 +1177,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + datasetId + QUERY_FILTER_BY_ID_RECORD).append(schemaId).append(AS).append("\"")
               .append(columns.get(i).getName()).append("\" ");
           break;
-        case POSITION:
+        case MULTIPOLYGON:
         case POINT:
         case LINESTRING:
         case MULTILINESTRING:

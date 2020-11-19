@@ -12,7 +12,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -70,7 +69,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Dataflow by its Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class)
@@ -398,7 +397,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
@@ -461,73 +460,6 @@ public class DataFlowControllerImpl implements DataFlowController {
       dataflowService.updateDataFlowStatus(dataflowId, status, deadlineDate);
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Creates the message.
-   *
-   * @param dataflowId the dataflow id
-   * @param messageVO the message VO
-   * @return the message VO
-   */
-  @Override
-  @Deprecated
-  @PostMapping("/{dataflowId}/createMessage")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody MessageVO messageVO) {
-    try {
-      return dataflowService.createMessage(dataflowId, messageVO.getProviderId(),
-          messageVO.getContent());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Find messages.
-   *
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param read the read
-   * @param page the offset
-   * @return the list
-   */
-  @Override
-  @Deprecated
-  @GetMapping("/{dataflowId}/findMessages")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId,
-      @RequestParam(value = "read", required = false) Boolean read,
-      @RequestParam("page") int page) {
-    try {
-      return dataflowService.findMessages(dataflowId, providerId, read, page);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Update message read status.
-   *
-   * @param dataflowId the dataflow id
-   * @param messageVOs the message V os
-   */
-  @Override
-  @Deprecated
-  @PutMapping("/{dataflowId}/updateMessageReadStatus")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody List<MessageVO> messageVOs) {
-    try {
-      dataflowService.updateMessageReadStatus(dataflowId, messageVOs);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
   }
 

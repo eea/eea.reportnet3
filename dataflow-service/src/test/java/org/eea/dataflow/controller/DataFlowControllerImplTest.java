@@ -1,7 +1,6 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -16,7 +15,6 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -676,99 +674,6 @@ public class DataFlowControllerImplTest {
       dataFlowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
-      throw e;
-    }
-  }
-
-  /**
-   * Creates the message test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createMessageTest() throws EEAException {
-    MessageVO messageVO = new MessageVO();
-    messageVO.setProviderId(1L);
-    messageVO.setContent("content");
-    Mockito.when(dataflowService.createMessage(Mockito.anyLong(), Mockito.anyLong(), Mockito.any()))
-        .thenReturn(new MessageVO());
-    assertNotNull(dataFlowControllerImpl.createMessage(1L, messageVO));
-  }
-
-  /**
-   * Creates the message exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createMessageExceptionTest() throws EEAException {
-    MessageVO messageVO = new MessageVO();
-    messageVO.setProviderId(1L);
-    messageVO.setContent("content");
-    Mockito.when(dataflowService.createMessage(Mockito.anyLong(), Mockito.anyLong(), Mockito.any()))
-        .thenThrow(EEAException.class);
-    try {
-      dataFlowControllerImpl.createMessage(1L, messageVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-      throw e;
-    }
-  }
-
-  /**
-   * Find messages test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void findMessagesTest() throws EEAException {
-    Mockito.when(dataflowService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(new ArrayList<MessageVO>());
-    assertNotNull(dataFlowControllerImpl.findMessages(1L, 1L, true, 1));
-  }
-
-  /**
-   * Find messages exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void findMessagesExceptionTest() throws EEAException {
-    Mockito.when(dataflowService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyInt())).thenThrow(EEAException.class);
-    try {
-      dataFlowControllerImpl.findMessages(1L, 1L, true, 1);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-      throw e;
-    }
-  }
-
-  /**
-   * Update message read status test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateMessageReadStatusTest() throws EEAException {
-    dataFlowControllerImpl.updateMessageReadStatus(1L, new ArrayList<MessageVO>());
-    Mockito.verify(dataflowService, times(1)).updateMessageReadStatus(Mockito.anyLong(),
-        Mockito.any());
-  }
-
-  /**
-   * Update message read status exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateMessageReadStatusExceptionTest() throws EEAException {
-    Mockito.doThrow(EEAException.class).when(dataflowService)
-        .updateMessageReadStatus(Mockito.anyLong(), Mockito.any());
-    try {
-      dataFlowControllerImpl.updateMessageReadStatus(1L, new ArrayList<MessageVO>());
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
   }
