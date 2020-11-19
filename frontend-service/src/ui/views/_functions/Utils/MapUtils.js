@@ -1,5 +1,8 @@
-import { isEmpty } from 'lodash';
+import first from 'lodash/first';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
+const calculateCentroid = coordinates => {};
 
 const changeIncorrectCoordinates = record => {
   const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"srid": "EPSG:4326"}}`;
@@ -34,7 +37,7 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
   if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
   if (!Array.isArray(coordinates)) {
-    if (coordinates.indexOf(',') === -1) return false;
+    if (coordinates.toString().indexOf(',') === -1) return false;
   } else {
     if (isEmpty(coordinates)) return false;
   }
@@ -48,6 +51,17 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
         isValid = false;
     });
   }
+  return isValid;
+};
+
+const checkValidLine = (coordinates, emptyIsValid = false) => {
+  if (coordinates.length < 2) return false;
+  let isValid = true;
+  coordinates.forEach(coordinate => {
+    if (!checkValidCoordinates(coordinate, emptyIsValid)) {
+      isValid = false;
+    }
+  });
   return isValid;
 };
 
@@ -69,6 +83,43 @@ const checkValidJSONCoordinates = json => {
     return false;
   }
 };
+
+const checkValidJSONMultipleCoordinates = json => {
+  if (isValidJSON(json)) {
+    const parsedJSON = JSON.parse(json);
+    const complexType = ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(parsedJSON.geometry.type.toUpperCase());
+    if (complexType) {
+      return (
+        parsedJSON.geometry.coordinates
+          .map(coordinates => coordinates.map(coordinate => checkValidCoordinates(coordinate)))
+          .filter(check => !check).length === 0
+      );
+    } else {
+      return (
+        parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate)).filter(check => !check)
+          .length === 0
+      );
+    }
+  } else {
+    return false;
+  }
+};
+
+const getFirstPointComplexGeometry = (json, geometryType) =>
+  !isNil(json)
+    ? first(
+        ['POLYGON', 'MULTILINESTRING'].includes(geometryType)
+          ? first(JSON.parse(json).geometry.coordinates)
+          : ['MULTIPOLYGON'].includes(geometryType)
+          ? first(first(JSON.parse(json).geometry.coordinates))
+          : JSON.parse(json).geometry.coordinates
+      )
+    : [55.6811608, 12.5844761];
+
+const getGeometryType = json =>
+  !isNil(json) && isValidJSON(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT';
+
+const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
@@ -110,13 +161,25 @@ const parseGeometryData = records => {
   return records;
 };
 
-const printCoordinates = (data, isGeoJson = true) => {
+const printCoordinates = (data, isGeoJson = true, geometryType) => {
   if (isGeoJson) {
+    let parsedJSON = data;
+    if (typeof parsedJSON === 'string') {
+      parsedJSON = JSON.parse(data);
+    }
+
+    switch (geometryType.toUpperCase()) {
+      case 'MULTIPOINT':
+      case 'LINESTRING':
+      case 'POLYGON':
+      case 'MULTILINESTRING':
+      case 'MULTIPOLYGON':
+        return JSON.stringify(parsedJSON.geometry.coordinates);
+      default:
+        break;
+    }
+
     if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
-      let parsedJSON = data;
-      if (typeof parsedJSON === 'string') {
-        parsedJSON = JSON.parse(data);
-      }
       return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
     } else {
       if (Array.isArray(data)) {
@@ -138,9 +201,15 @@ const printCoordinates = (data, isGeoJson = true) => {
 };
 
 export const MapUtils = {
+  calculateCentroid,
   changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,
+  checkValidJSONMultipleCoordinates,
+  checkValidLine,
+  getFirstPointComplexGeometry,
+  getGeometryType,
+  getSrid,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,
