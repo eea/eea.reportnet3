@@ -288,7 +288,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
-            label: resources.messages['exportExternalIntegrations'],
+            label: resources.messages['customExports'],
             items: externalOperationsList.export.map(type => ({
               command: () => onExportDataExternalIntegration(type.id),
               icon: config.icons['archive'],

@@ -1,16 +1,14 @@
+.validationWrapper {
+  min-height: 70vh !important;
+}
+
 .invisibleHeader {
   display: none;
 }
 
 .validationToolbar {
-  border-top: 1px solid var(--c-custom-gray) !important;
-  border-left: 1px solid var(--c-custom-gray) !important;
-  border-right: 1px solid var(--c-custom-gray) !important;
-  border-bottom: 0px !important;
-  border-top-left-radius: 3px !important;
-  border-top-right-radius: 3px !important;
-  border-bottom-left-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
+  border: none !important;
+  margin-bottom: 16px;
 }
 
 .filterActive {
@@ -64,4 +62,26 @@
 
 .validationWrapper {
   min-height: 200px;
+}
+
+.emptyFilteredData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.spinner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  min-height: 70vh !important;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
 }
