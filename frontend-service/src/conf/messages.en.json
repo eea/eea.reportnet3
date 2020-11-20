@@ -889,6 +889,7 @@
     "designView": "Design",
     "tableView": "Tabular data",
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
+    "noValidationsWithSelectedParameters": "There are no validations with the selected parameters",
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "manualTechnicalAcceptanceHeader": "Datasets with manual technical acceptance for dataflow",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
@@ -944,6 +945,7 @@
     "draft": "draft",
     "geometryCoordinates": "Geometry coordinates",
     "nonEditableData": "This field is not editable",
-    "customExports": "Custom exports"
+    "customExports": "Custom exports",
+    "fieldSchemaName": "Field"
   }
 }
