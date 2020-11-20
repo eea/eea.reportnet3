@@ -944,6 +944,7 @@
     "draft": "draft",
     "geometryCoordinates": "Geometry coordinates",
     "nonEditableData": "This field is not editable",
-    "customExports": "Custom exports"
+    "customExports": "Custom exports",
+    "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check."
   }
 }
