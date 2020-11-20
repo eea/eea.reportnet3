@@ -233,11 +233,11 @@ export const apiDataset = {
     return response.data;
   },
 
-  exportDatasetDataExternal: async (datasetId, fileExtension) => {
+  exportDatasetDataExternal: async (datasetId, integrationId) => {
     const response = await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetDataExternal, {
-        datasetId: datasetId,
-        fileExtension: fileExtension
+        datasetId,
+        integrationId
       }),
       headers: {
         'Content-Type': 'application/octet-stream'

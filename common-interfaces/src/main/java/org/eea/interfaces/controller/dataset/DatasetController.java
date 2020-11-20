@@ -45,6 +45,8 @@ public interface DatasetController {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
+   * @param fieldSchemaId the field schema id
+   * @param fieldValue the field value
    * @return the data tables values
    */
   @GetMapping("TableValueDataset/{id}")
@@ -54,7 +56,9 @@ public interface DatasetController {
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
-      @RequestParam(value = "idRules", required = false) String[] idRules);
+      @RequestParam(value = "idRules", required = false) String[] idRules,
+      @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
+      @RequestParam(value = "fieldValue", required = false) String fieldValue);
 
   /**
    * Update dataset.
@@ -70,6 +74,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    * @param idTableSchema the id table schema
+   * @param replace the replace
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
@@ -81,6 +86,7 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param replace the replace
    */
   @PostMapping("{id}/loadDatasetData")
   void loadDatasetData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
@@ -180,11 +186,11 @@ public interface DatasetController {
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    */
   @GetMapping("/exportFileThroughIntegration")
   void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("fileExtension") String fileExtension);
+      @RequestParam("integrationId") Long integrationId);
 
   /**
    * Insert id data schema.

@@ -171,7 +171,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      // setIsLoading(true);
       const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
@@ -184,23 +183,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       ) {
         history.push(getUrl(routes.DATAFLOWS));
       }
-      // setIsLoading(true);
     }
   }, [userContext.contextRoles, designerState.metaData]);
-
-  useEffect(() => {
-    if (!isUndefined(userContext.contextRoles)) {
-      designerDispatch({
-        type: 'LOAD_PERMISSIONS',
-        payload: {
-          permissions: userContext.hasPermission(
-            [config.permissions.LEAD_REPORTER],
-            `${config.permissions.DATASET}${datasetId}`
-          )
-        }
-      });
-    }
-  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -301,14 +285,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label: type.text
     }));
 
-    const externalExtensions = !isEmpty(externalOperationsList.export)
+    const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
-            label: resources.messages['externalExtensions'],
+            label: resources.messages['exportExternalIntegrations'],
             items: externalOperationsList.export.map(type => ({
-              command: () => onExportDataExternalExtension(type.fileExtension),
+              command: () => onExportDataExternalIntegration(type.id),
               icon: config.icons['archive'],
-              label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
             }))
           }
         ]
@@ -316,7 +300,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: { exportList: internalExtensionList.concat(externalExtensions) }
+      payload: { exportList: internalExtensionList.concat(externalIntegrationsNames) }
     });
   };
 
@@ -511,12 +495,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileExtension => {
+  const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
 
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
@@ -1124,6 +1108,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
+                className={styles.exportSubmenu}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
                 onShow={e => getPosition(e)}

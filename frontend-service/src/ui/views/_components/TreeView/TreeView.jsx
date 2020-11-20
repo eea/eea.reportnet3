@@ -17,6 +17,8 @@ import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const TreeView = ({ className = '', columnOptions = {}, property, propertyName, rootProperty }) => {
   const dataTableRef = useRef();
   const initialTreeViewState = {
@@ -156,7 +158,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
         }
         sortable={true}
         style={{
-          width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%',
+          width: TextUtils.areEquals(field, 'DESCRIPTION') ? '60%' : '20%',
           display:
             !isUndefined(columnOptions[propertyName]) &&
             !isUndefined(columnOptions[propertyName]['invisible']) &&
@@ -251,14 +253,18 @@ const getFieldTypeValue = value => {
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
+    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
+    { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
     { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
-  return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
+  return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
 };
 
 const itemTemplate = (rowData, key) => {

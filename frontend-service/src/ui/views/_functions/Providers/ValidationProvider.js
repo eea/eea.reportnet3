@@ -11,7 +11,7 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         isVisible: false,
         referenceId: null,
-        reOpenOpener: !isNil(state.opener) ? true : false,
+        reOpenOpener: !isNil(state.opener),
         ruleEdit: false,
         ruleToEdit: {},
         tableSchemaId: null
@@ -90,7 +90,7 @@ export const ValidationProvider = ({ children }) => {
           dispatch({ type: 'ON_CLOSE_QC_CREATION_MODAL' });
         },
 
-        onOpenModal: level => {
+        onOpenModal: () => {
           dispatch({ type: 'ON_OPEN_QC_CREATION_MODAL' });
         },
 

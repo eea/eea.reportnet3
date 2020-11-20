@@ -1,6 +1,5 @@
 package org.eea.validation.kafka.command;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +24,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -36,7 +36,6 @@ import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
-import org.hibernate.exception.SQLGrammarException;
 import org.kie.api.KieServices;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
@@ -44,7 +43,6 @@ import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
 import org.postgresql.util.PSQLException;
-import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +165,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           .invalidRules(rulesUnchecked.getRules().size())
           .disabledRules(rulesdisabled.getRules().size()).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
+      releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
     }
   }
 
@@ -336,12 +334,9 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           } else {
             preparedquery = query + " limit 5";
           }
-          TableValue table = retrieveTableData(preparedquery, datasetId, rule);
-          if (null == table) {
-            isSQLCorrect = Boolean.FALSE;
-          }
-        } catch (PSQLException | SQLGrammarException e) {
-          LOG_ERROR.error("SQL is not correct: {}, {}", e.getMessage(), e);
+          retrieveTableData(preparedquery, datasetId, rule);
+        } catch (EEAInvalidSQLException e) {
+          LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
       } else {
@@ -385,9 +380,10 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @param ischeckDC the ischeck DC
    * @return the table value
    * @throws PSQLException the PSQL exception
+   * @throws EEAInvalidSQLException
    */
   private TableValue retrieveTableData(String query, Long datasetId, Rule rule)
-      throws PSQLException {
+      throws EEAInvalidSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
     Long idTable = null;
@@ -412,14 +408,11 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
         break;
     }
     TableValue table = new TableValue();
-    try {
-      LOG.info("Query to be executed: {}", newQuery);
-      table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-          idTable);
-    } catch (SQLException | SQLGrammarException e) {
-      LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
-      throw new PSQLException(new ServerErrorMessage(e.getMessage()));
-    }
+
+    LOG.info("Query to be executed: {}", newQuery);
+    table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
+        idTable);
+
     return table;
   }
 

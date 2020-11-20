@@ -297,7 +297,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
       await ValidationService.update(datasetId, candidateRule);
       onHide();
 
-      
       if (!isNil(candidateRule) && candidateRule.automatic)
         notificationContext.hide({
           type: 'VALIDATED_QC_RULE_EVENT'

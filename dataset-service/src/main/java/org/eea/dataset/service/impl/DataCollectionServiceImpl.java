@@ -325,7 +325,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
-      LOG.info("Validate SQL Rules in Dataflow {},Data Collection creation proccess.", dataflowId);
+      LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         recordStoreControllerZuul.createUpdateQueryView(dataset.getId());
@@ -336,7 +336,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
         }
       });
-      LOG.info("Data Collection contains SQL rules contains: {} errors", rulesWithError.size());
+      LOG.info(
+          "Data Collection creation proccess stopped: there are SQL rules containing: {} errors",
+          rulesWithError.size());
       if (stopAndNotifySQLErrors) {
         long errorsCount = rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE).count();
         int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
@@ -345,7 +347,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
               .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
               .disabledRules(disabledRules).build();
-          LOG.info("Data Collection creation proccess stoped by SQL rules contains errors");
+          LOG.info(
+              "Data Collection creation proccess stopped: there are SQL rules containing errors");
           // remove lock
           String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
           List<Object> criteria = new ArrayList<>();
@@ -354,7 +357,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           lockService.removeLockByCriteria(criteria);
           // release notification
           rulesOk = false;
-          releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+          releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
         }
       }
     }

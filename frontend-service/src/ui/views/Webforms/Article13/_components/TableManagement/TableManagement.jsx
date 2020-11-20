@@ -27,8 +27,7 @@ import { tableManagementReducer } from './_functions/Reducers/tableManagementRed
 
 import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
-import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils/RecordUtils';
+import { MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 
 export const TableManagement = ({
@@ -336,9 +335,7 @@ export const TableManagement = ({
                 schemaTables.filter(
                   schemaTable =>
                     configParentTables.includes(colData.field) &&
-                    !isNil(schemaTable.tableSchemaName) &&
-                    !isNil(colData.field) &&
-                    schemaTable.tableSchemaName.toUpperCase() === colData.field.toUpperCase()
+                    TextUtils.areEquals(schemaTable.tableSchemaName, colData.field)
                 )[0],
                 pamsFieldSchemaValue
               );

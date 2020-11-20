@@ -9,7 +9,7 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const WebformDataFormFieldEditor = ({
   autoFocus = false,
@@ -80,13 +80,13 @@ const WebformDataFormFieldEditor = ({
   };
 
   const renderMultiselectCodelist = (field, fieldValue) => {
-    if (field.toLowerCase() === 'listofsinglepams' && hasSingle && !isEmpty(fieldValue)) {
+    if (TextUtils.areEquals(field, 'listofsinglepams') && hasSingle && !isEmpty(fieldValue)) {
       onChangeForm(field, []);
     }
     return (
       <MultiSelect
         appendTo={document.body}
-        disabled={field.toLowerCase() === 'listofsinglepams' && hasSingle}
+        disabled={TextUtils.areEquals(field, 'listofsinglepams') && hasSingle}
         onChange={e => onChangeForm(field, e.value)}
         optionLabel="itemType"
         options={column.codelistItems.sort().map(codelistItem => ({ itemType: codelistItem, value: codelistItem }))}

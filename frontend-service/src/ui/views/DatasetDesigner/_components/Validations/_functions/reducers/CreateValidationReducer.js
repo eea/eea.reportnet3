@@ -2,7 +2,7 @@ import isNil from 'lodash/isNil';
 
 export const createValidationReducerInitState = {
   candidateRule: {
-    active: true,
+    active: false,
     allExpressions: [],
     allExpressionsIf: [],
     allExpressionsThen: [],
