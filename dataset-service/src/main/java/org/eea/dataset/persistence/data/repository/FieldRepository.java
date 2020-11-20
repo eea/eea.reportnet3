@@ -93,22 +93,6 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
 
 
   /**
-   * Find by id field schema and value containing.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param searchValueText the search value text
-   * @param pageable the pageable
-   * @return the list
-   */
-  /*
-   * List<FieldValue> findByIdFieldSchemaAndValueContaining(
-   * 
-   * @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
-   * Pageable pageable);
-   */
-
-
-  /**
    * Find by id.
    *
    * @param fieldId the field id
@@ -128,19 +112,18 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   void clearFieldValue(@Param("fieldSchemaId") String fieldSchemaId);
 
 
-  /*
-   * @Query( value =
-   * "SELECT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
-   * +
-   * "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id AND (fv.value like %:searchText% or :searchText IS NULL)"
-   * ) List<FieldValueWithLabel> findByIdFieldSchemaAndConditional(
-   * 
-   * @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
-   * 
-   * @Param("searchText") String searchValueText, Pageable pageable);
+
+  /**
+   * Find by id field schema and conditional with tag.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param labelId the label id
+   * @param conditionalId the conditional id
+   * @param conditionalValue the conditional value
+   * @param searchValueText the search value text
+   * @param pageable the pageable
+   * @return the list
    */
-
-
   @Query(
       value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
           + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "

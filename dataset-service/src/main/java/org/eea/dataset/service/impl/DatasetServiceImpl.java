@@ -1086,38 +1086,14 @@ public class DatasetServiceImpl implements DatasetService {
       Long idDatasetDestination =
           datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
 
-      // idDatasetDestination = 6984L;
-      // labelSchemaId = "5f87177b26a10e1df05aad90";
 
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
       // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
       // want to show on the screen
-      /*
-       * List<FieldValueWithLabel> fieldsAux =
-       * fieldRepository.findByIdFieldSchemaAndConditional(idPk, labelSchemaId, searchValue,
-       * PageRequest.of(0, 15));
-       */
-
       List<FieldValueWithLabel> fields =
           fieldRepository.findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId,
               conditionalSchemaId, conditionalValue, searchValue, PageRequest.of(0, 15));
-
-      /*
-       * List<FieldValue> values = new ArrayList<>(); List<FieldValue> labels = new ArrayList<>();
-       * for (FieldValueWithLabel fvExtended : fieldsAux) { values.add(fvExtended.getFieldValue());
-       * labels.add(fvExtended.getLabel()); } List<FieldVO> auxFieldVO =
-       * fieldNoValidationMapper.entityListToClass(values); for (FieldValue field : values) { for
-       * (FieldValue label : labels) { if (label.getRecord().equals(field.getRecord())) { for
-       * (FieldVO fieldVO : auxFieldVO) { if (fieldVO.getId().equals(field.getId())) {
-       * fieldVO.setLabel(label.getValue()); } } } } }
-       */
-
-      /*
-       * List<FieldVO> fieldsVO = new ArrayList<>(); fieldsAux.stream().forEach(fExtended -> {
-       * FieldVO fieldVO = fieldNoValidationMapper.entityToClass(fExtended.getFieldValue());
-       * fieldVO.setLabel(fExtended.getLabel().getValue()); fieldsVO.add(fieldVO); });
-       */
 
       fields.stream().forEach(fExtended -> {
         if (fExtended != null) {
@@ -1130,12 +1106,7 @@ public class DatasetServiceImpl implements DatasetService {
       // Remove the duplicate values
       HashSet<String> seen = new HashSet<>();
       fieldsVO.removeIf(e -> !seen.add(e.getValue()));
-      // Sort results
-      // List<FieldVO> sortedList = new ArrayList<>();
-      // if (!fieldsVO.isEmpty()) {
-      // sortedList = fieldsVO.stream().sorted(Comparator.comparing(FieldVO::getValue))
-      // .collect(Collectors.toList());
-      // }
+
     }
 
     return fieldsVO;
