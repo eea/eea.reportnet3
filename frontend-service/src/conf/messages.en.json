@@ -939,11 +939,11 @@
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
     "feedbackMessagePlaceholder": "Please provide information on the status change",
-    "exportExternalIntegrations": "External integrations",
     "dataflowStatus": "Dataflow status",
     "open": "open",
     "draft": "draft",
     "geometryCoordinates": "Geometry coordinates",
-    "nonEditableData": "This field is not editable"
+    "nonEditableData": "This field is not editable",
+    "customExports": "Custom exports"
   }
 }

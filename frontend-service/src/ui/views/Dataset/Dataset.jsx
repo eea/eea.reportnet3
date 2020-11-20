@@ -257,7 +257,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const externalIntegrationsNames = [
     {
-      label: resources.messages['exportExternalIntegrations'],
+      label: resources.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
         label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
         icon: config.icons['archive'],
