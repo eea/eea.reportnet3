@@ -114,10 +114,11 @@ public class FMEIntegrationManager extends AbstractCrudManager {
             && internalParameter.getValue().equals(integrationSchemaId)) {
           if (integrationAux.getName().trim().equalsIgnoreCase(integration.getName().trim())) {
             LOG_ERROR.error(
-                "Error creating an integration: Integration {} name is duplicated in Dataflow: {}",
-                integration.getId(), integration.getDataflow());
-            throw new EEAException("Integration " + integration.getId()
-                + " name is duplicated in Dataflow: " + integration.getDataflow());
+                "Error creating an integration: Integration {} with name {} is duplicated in Dataflow: {}",
+                integration.getId(), integration.getName(), integration.getDataflow());
+            throw new EEAException(
+                String.format("Integration %s with name %s is duplicated in Dataflow: %s",
+                    integration.getId(), integration.getName(), integration.getDataflow()));
           }
         }
       }
