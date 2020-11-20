@@ -18,6 +18,8 @@ import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const BigButton = ({
   buttonClass,
   buttonIcon,
@@ -59,7 +61,7 @@ export const BigButton = ({
 
   const checkDuplicates = (header, idx) => {
     const schemas = [...datasetSchemaInfo];
-    const repeat = schemas.filter(title => title.schemaName.toLowerCase() === header.toLowerCase());
+    const repeat = schemas.filter(title => TextUtils.areEquals(title.schemaName, header));
     return repeat.length > 0 && idx !== repeat[0].schemaIndex;
   };
 

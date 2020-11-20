@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 
 import { WebformDataFormFieldEditor } from './_components/WebformDataFormFieldEditor';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, selectedRecord, tableColumns }) => {
   const editWebformRecordForm = colsSchema.map((column, i) => {
     if (!isNil(selectedRecord) && !isEmpty(selectedRecord)) {
@@ -28,7 +30,7 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
 
           <div
             className="p-col-8"
-            style={{ padding: '.5em', width: column.type === 'CODELIST' || column.type === 'LINK' ? '30%' : '' }}>
+            style={{ padding: '.5em', width: ['CODELIST', 'LINK'].includes(column.type) ? '30%' : '' }}>
             <WebformDataFormFieldEditor
               // autoFocus={i === 0}
               column={column}
@@ -39,10 +41,10 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
                 selectedRecord.dataRow
                   .map(
                     field =>
-                      field.fieldData.type === 'CODELIST' &&
+                      TextUtils.areEquals(field.fieldData.type, 'CODELIST') &&
                       Object.values(field.fieldData).includes('Single') &&
                       colsSchema.filter(
-                        col => col.header.toUpperCase() === 'ISGROUP' && col.field === field.fieldData.fieldSchemaId
+                        col => TextUtils.areEquals(col.header, 'ISGROUP') && col.field === field.fieldData.fieldSchemaId
                       ).length > 0
                   )
                   .filter(result => result).length > 0

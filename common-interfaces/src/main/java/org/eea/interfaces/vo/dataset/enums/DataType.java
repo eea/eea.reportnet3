@@ -60,12 +60,12 @@ public enum DataType {
   BOOLEAN("BOOLEAN", JavaType.BOOLEAN),
 
   /**
-   * The position.
+   * The point.
    * 
-   * A String representing a GeoJSON Position object. ObjectMapper.readTree(...) should be used to
+   * A String representing a GeoJSON Point object. ObjectMapper.readTree(...) should be used to
    * transform into JSON.
    */
-  POSITION("POSITION", JavaType.JSON),
+  POINT("POINT", JavaType.JSON),
 
   /**
    * The linestring.
@@ -76,20 +76,12 @@ public enum DataType {
   LINESTRING("LINESTRING", JavaType.JSON),
 
   /**
-   * The multilinestring.
+   * The polygon.
    * 
-   * A String representing a GeoJSON MultiLineString object. ObjectMapper.readTree(...) should be
-   * used to transform into JSON.
-   */
-  MULTILINESTRING("MULTILINESTRING", JavaType.JSON),
-
-  /**
-   * The point.
-   * 
-   * A String representing a GeoJSON Point object. ObjectMapper.readTree(...) should be used to
+   * A String representing a GeoJSON Polygon object. ObjectMapper.readTree(...) should be used to
    * transform into JSON.
    */
-  POINT("POINT", JavaType.JSON),
+  POLYGON("POLYGON", JavaType.JSON),
 
   /**
    * The MultiPoint.
@@ -100,12 +92,20 @@ public enum DataType {
   MULTIPOINT("MULTIPOINT", JavaType.JSON),
 
   /**
-   * The polygon.
+   * The multilinestring.
    * 
-   * A String representing a GeoJSON Polygon object. ObjectMapper.readTree(...) should be used to
-   * transform into JSON.
+   * A String representing a GeoJSON MultiLineString object. ObjectMapper.readTree(...) should be
+   * used to transform into JSON.
    */
-  POLYGON("POLYGON", JavaType.JSON),
+  MULTILINESTRING("MULTILINESTRING", JavaType.JSON),
+
+  /**
+   * The multipolygon.
+   * 
+   * A String representing a GeoJSON GeometryCollection object. ObjectMapper.readTree(...) should be
+   * used to transform into JSON.
+   */
+  MULTIPOLYGON("MULTIPOLYGON", JavaType.JSON),
 
   /**
    * The geometrycollection.

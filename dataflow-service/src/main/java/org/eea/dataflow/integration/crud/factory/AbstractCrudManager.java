@@ -45,7 +45,7 @@ public abstract class AbstractCrudManager implements CrudManager {
    * @throws EEAException the EEA exception
    */
   @Override
-  public abstract void create(IntegrationVO integration);
+  public abstract void create(IntegrationVO integration) throws EEAException;
 
   /**
    * Delete.

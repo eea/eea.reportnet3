@@ -1,6 +1,5 @@
 package org.eea.validation.service.impl;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +28,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.RecordValidation;
@@ -39,9 +39,6 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.hibernate.exception.SQLGrammarException;
-import org.postgresql.util.PSQLException;
-import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,11 +205,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           } else {
             preparedquery = query + " limit 5";
           }
-          TableValue table = retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
-          if (null == table) {
-            isSQLCorrect = Boolean.FALSE;
-          }
-        } catch (PSQLException | SQLGrammarException e) {
+          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
+        } catch (EEAInvalidSQLException e) {
           LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = Boolean.FALSE;
         }
@@ -270,20 +264,21 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return null;
   }
 
+
+
   /**
-   * Retrieve Table Data.
+   * Retrieve table data.
    *
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
-   * @throws SQLException the SQL exception
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-
   @Override
   public TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws PSQLException {
+      throws EEAInvalidSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
     Long idTable = null;
@@ -308,14 +303,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         break;
     }
     TableValue table = new TableValue();
-    try {
-      LOG.info("Query to be executed: {}", newQuery);
-      table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-          idTable);
-    } catch (SQLException | SQLGrammarException e) {
-      LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
-      throw new PSQLException(new ServerErrorMessage(e.getMessage()));
-    }
+    LOG.info("Query to be executed: {}", newQuery);
+    table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
+        idTable);
     if (ischeckDC.equals(Boolean.FALSE)) {
       if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
         retrieveValidations(table.getRecords(), datasetId);
@@ -695,8 +685,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
 
-
-
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
         Rule rule = ruleMapper.classToEntity(ruleVO);
@@ -724,7 +712,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           .invalidRules(rulesUnchecked.getRules().size())
           .disabledRules(rulesdisabled.getRules().size()).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.DISABLE_SQL_RULES_ERROR_EVENT, notificationVO);
+      releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
     } else {
 
       NotificationVO notificationVO = NotificationVO.builder()

@@ -1,3 +1,2 @@
-export const ExportDatasetDataExternal = ({ datasetRepository }) => async (datasetId, fileExtension) =>
-  datasetRepository.exportDatasetDataExternal(datasetId, fileExtension);
-  
+export const ExportDatasetDataExternal = ({ datasetRepository }) => async (datasetId, integrationId) =>
+  datasetRepository.exportDatasetDataExternal(datasetId, integrationId);

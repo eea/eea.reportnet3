@@ -76,7 +76,6 @@ export const ManageIntegrations = ({
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
   const {
-    isDuplicatedExtension,
     isDuplicatedIntegrationName,
     isDuplicatedParameter,
     isFormEmpty,
@@ -86,12 +85,6 @@ export const ManageIntegrations = ({
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
-  const isExtensionDuplicated = isDuplicatedExtension(
-    manageIntegrationsState.fileExtension,
-    manageIntegrationsState.operation.value,
-    integrationsList,
-    manageIntegrationsState.id
-  );
   const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
     manageIntegrationsState.name,
     integrationsList,
@@ -182,6 +175,7 @@ export const ManageIntegrations = ({
 
   const onCreateIntegration = async () => {
     try {
+      manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.create(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         onCloseModal();
@@ -284,6 +278,7 @@ export const ManageIntegrations = ({
 
   const onUpdateIntegration = async () => {
     try {
+      manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.update(manageIntegrationsState);
 
       if (response.status >= 200 && response.status <= 299) {
@@ -314,8 +309,7 @@ export const ManageIntegrations = ({
 
   const renderDialogFooterTooltipContent = () => {
     if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
-    else if (isExtensionDuplicated) return 'duplicatedIntegrationOperation';
-    else return 'fcSubmitButtonDisabled';
+    return 'fcSubmitButtonDisabled';
   };
 
   const renderDialogFooter = (
@@ -323,7 +317,7 @@ export const ManageIntegrations = ({
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isIntegrationNameDuplicated || isExtensionDuplicated}
+          disabled={isIntegrationNameDuplicated}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
@@ -339,7 +333,7 @@ export const ManageIntegrations = ({
         onClick={() => onCloseModal()}
       />
 
-      {(isEmptyForm || isIntegrationNameDuplicated || isExtensionDuplicated) && (
+      {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
           {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
@@ -433,7 +427,13 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
-          maxLength={option === 'fileExtension' ? config.MAX_FILE_EXTENSION_LENGTH : 255}
+          maxLength={
+            option === 'fileExtension'
+              ? config.MAX_FILE_EXTENSION_LENGTH
+              : option === 'name'
+              ? config.MAX_INTEGRATION_NAME_LENGTH
+              : 255
+          }
           onChange={event => onFillField(event.target.value, option)}
           onKeyDown={event => onSaveKeyDown(event)}
           placeholder={resources.messages[option]}

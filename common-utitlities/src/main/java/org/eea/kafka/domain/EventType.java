@@ -286,10 +286,6 @@ public enum EventType {
   /** The validated qc rule event. */
   VALIDATED_QC_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validated_qc_rule_event", true),
 
-  /** The disable sql rules event. */
-  DISABLE_SQL_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "disable_sql_rules_error_event", true),
-
   /** The validate rules finish event. */
   VALIDATE_RULES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "validate_rules_completed_event", true),
@@ -318,9 +314,17 @@ public enum EventType {
   VALIDATE_MANUAL_QC_COMMAND(LiteralConstants.DATA_REPORTING_TOPIC, "validate_manual_qc_command",
       true),
 
-  /** The disable rules error event. */
+  /** The disable sql rules event. */
   DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
       true),
+
+  /** The validate rules error event. */
+  VALIDATE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validate_rules_error_event",
+      true),
+
+  /** The disable rules error event. */
+  DISABLE_NAMES_TYPES_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "disable_names_types_rules_error_event", true),
 
   /** The create update rule event. */
   CREATE_UPDATE_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_rule_event", true),
@@ -329,7 +333,11 @@ public enum EventType {
   RECEIVED_MESSAGE(LiteralConstants.DATA_REPORTING_TOPIC, "received_message", true),
 
   /** The updated dataset status. */
-  UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true);
+  UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true),
+
+  /** The datacollection national coordinator event. */
+  DATACOLLECTION_NATIONAL_COORDINATOR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "datacollection_national_coordinator_event", true);
 
   /** The topic. */
   private String topic;
