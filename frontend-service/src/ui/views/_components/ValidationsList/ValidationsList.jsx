@@ -56,10 +56,11 @@ const ValidationsList = withRouter(
     }, [tabsValidationsState.isDataUpdated]);
 
     useEffect(() => {
-      const response = notificationContext.hidden.find(notification => notification.key === 'VALIDATED_QC_RULE_EVENT');
-
-      if (response) onUpdateData();
-    }, [notificationContext]);
+      if (validationContext.isAutomaticRuleUpdated) {
+        onUpdateData();
+        validationContext.onAutomaticRuleIsUpdated(false);
+      }
+    }, [validationContext.isAutomaticRuleUpdated]);
 
     const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
@@ -131,9 +132,15 @@ const ValidationsList = withRouter(
 
     const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-    const onUpdateData = () => isDataUpdated(!tabsValidationsState.isDataUpdated);
+    const onUpdateData = () => {
+      isDataUpdated(!tabsValidationsState.isDataUpdated);
+    };
 
-    useCheckNotifications(['INVALIDATED_QC_RULE_EVENT, VALIDATE_RULES_ERROR_EVENT'], onUpdateData);
+    useCheckNotifications(
+      ['INVALIDATED_QC_RULE_EVENT', 'VALIDATED_QC_RULE_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+      onUpdateData,
+      true
+    );
 
     const automaticTemplate = rowData => (
       <div className={styles.checkedValueColumn}>

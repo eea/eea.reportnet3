@@ -372,9 +372,6 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
 
       await ValidationService.createDatasetRule(datasetId, candidateRule);
       onHide();
-      notificationContext.hide({
-        type: 'VALIDATED_QC_RULE_EVENT'
-      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
@@ -398,10 +395,10 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
       await ValidationService.updateDatasetRule(datasetId, candidateRule);
+      if (!isNil(candidateRule) && candidateRule.automatic) {
+        validationContext.onAutomaticRuleIsUpdated(true);
+      }
       onHide();
-      notificationContext.hide({
-        type: 'VALIDATED_QC_RULE_EVENT'
-      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
