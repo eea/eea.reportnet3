@@ -6,44 +6,38 @@ export const linkSelectorReducer = (state, { type, payload }) => {
       console.log(payload);
       return {
         ...state,
+        linkedTableLabel: {},
+        masterTableConditional: {},
+        linkedTableConditional: {},
         linkedTableFields: payload.linkedFields,
-        masterTableFields: payload.masterFields,
-        link: {
-          ...state.link,
-          referencedField: {
-            ...state.link.referencedField,
-            linkedTableConditional: '',
-            linkedTableLabel: '',
-            masterTableConditional: ''
-          }
-        }
+        masterTableFields: payload.masterFields
       };
     case 'SET_LINKED_TABLE_LABEL':
       return {
         ...state,
-        linkedTableLabel: payload,
-        link: {
-          ...state.link,
-          referencedField: { ...state.link.referencedField, linkedTableLabel: payload.fieldSchemaId }
-        }
+        linkedTableLabel: payload
+        // link: {
+        //   ...state.link,
+        //   referencedField: { ...state.link.referencedField, linkedTableLabel: payload.fieldSchemaId }
+        // }
       };
     case 'SET_LINKED_TABLE_CONDITIONAL':
       return {
         ...state,
-        linkedTableConditional: payload,
-        link: {
-          ...state.link,
-          referencedField: { ...state.link.referencedField, linkedTableConditional: payload.fieldSchemaId }
-        }
+        linkedTableConditional: payload
+        // link: {
+        //   ...state.link,
+        //   referencedField: { ...state.link.referencedField, linkedTableConditional: payload.fieldSchemaId }
+        // }
       };
     case 'SET_MASTER_TABLE_CONDITIONAL':
       return {
         ...state,
-        masterTableConditional: payload,
-        link: {
-          ...state.link,
-          referencedField: { ...state.link.referencedField, masterTableConditional: payload.fieldSchemaId }
-        }
+        masterTableConditional: payload
+        // link: {
+        //   ...state.link,
+        //   referencedField: { ...state.link.referencedField, masterTableConditional: payload.fieldSchemaId }
+        // }
       };
     default:
       return state;

@@ -266,10 +266,18 @@ export const apiDataset = {
     });
     return response.data;
   },
-  getReferencedFieldValues: async (datasetId, fieldSchemaId, searchToken) => {
+  getReferencedFieldValues: async (
+    datasetId,
+    fieldSchemaId,
+    searchToken,
+    conditionalValue = '',
+    datasetSchemaId = ''
+  ) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.referencedFieldValues, {
+        conditionalValue,
         datasetId,
+        datasetSchemaId,
         fieldSchemaId,
         searchToken
       })

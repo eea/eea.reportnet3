@@ -84,9 +84,9 @@ const LinkSelector = withRouter(
       if (!isVisible && isSaved) {
         onSaveLink({
           link,
-          linkedTableConditional,
-          linkedTableLabel,
-          masterTableConditional,
+          linkedTableConditional: linkedTableConditional.fieldSchemaId,
+          linkedTableLabel: linkedTableLabel.fieldSchemaId,
+          masterTableConditional: masterTableConditional.fieldSchemaId,
           pkHasMultipleValues,
           pkMustBeUsed
         });
@@ -166,10 +166,7 @@ const LinkSelector = withRouter(
               referencedField: {
                 fieldSchemaId: pkField.fieldId,
                 datasetSchemaId: datasetSchema.datasetSchemaId,
-                tableSchemaId: table.tableSchemaId,
-                linkedTableLabel: linkedTableLabel.fieldSchemaId,
-                linkedTableConditional: linkedTableConditional.fieldSchemaId,
-                masterTableConditional: masterTableConditional.fieldSchemaId
+                tableSchemaId: table.tableSchemaId
               },
               disabled: false
             };
@@ -305,7 +302,14 @@ const LinkSelector = withRouter(
           header={resources.messages['linkSelector']}
           modal={true}
           onHide={() => {
-            onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+            onCancelSaveLink({
+              link,
+              pkMustBeUsed,
+              pkHasMultipleValues,
+              linkedTableLabel: linkedTableLabel.fieldSchemaId,
+              linkedTableConditional: linkedTableConditional.fieldSchemaId,
+              masterTableConditional: masterTableConditional.fieldSchemaId
+            });
             setIsVisible(false);
           }}
           style={{ minWidth: '55%' }}

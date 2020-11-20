@@ -25,12 +25,13 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { MapUtils, MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
   autoFocus,
   column,
   datasetId,
+  datasetSchemaId,
   field,
   fieldValue = '',
   isVisible,
@@ -148,10 +149,19 @@ const DataFormFieldEditor = ({
     if (isNil(type) || !TextUtils.areEquals(type, 'LINK') || isNil(referencedField)) {
       return [];
     }
+
+    if (isNil(datasetSchemaId)) {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      datasetSchemaId = metadata.datasetSchemaId;
+    }
+
+    console.log({ referencedField, datasetSchemaId });
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
-      hasMultipleValues ? '' : filter
+      hasMultipleValues ? '' : filter,
+      '',
+      datasetSchemaId
     );
     const linkItems = referencedFieldValues
       .map(referencedField => {

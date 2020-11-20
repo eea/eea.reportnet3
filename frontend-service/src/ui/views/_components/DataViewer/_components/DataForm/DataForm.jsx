@@ -15,6 +15,7 @@ const DataForm = ({
   addDialogVisible,
   colsSchema,
   datasetId,
+  datasetSchemaId,
   editDialogVisible,
   formType,
   getTooltipMessage,
@@ -98,6 +99,7 @@ const DataForm = ({
                   autoFocus={i === 0}
                   column={column}
                   datasetId={datasetId}
+                  datasetSchemaId={datasetSchemaId}
                   field={column.field}
                   fieldValue={
                     isNil(field.fieldData[column.field])
@@ -167,6 +169,7 @@ const DataForm = ({
                     autoFocus={i === 0}
                     column={column}
                     datasetId={datasetId}
+                    datasetSchemaId={datasetSchemaId}
                     field={column.field}
                     fieldValue={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                     hasWritePermissions={hasWritePermissions}

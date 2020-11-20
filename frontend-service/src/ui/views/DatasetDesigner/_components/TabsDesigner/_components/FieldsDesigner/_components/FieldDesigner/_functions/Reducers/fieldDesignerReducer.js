@@ -55,6 +55,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_NAME':
       return { ...state, fieldValue: payload };
     case 'SET_LINK':
+      console.log(payload.link);
       return {
         ...state,
         fieldLinkValue: payload.link,

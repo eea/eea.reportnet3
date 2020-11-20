@@ -18,7 +18,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 proj4.defs([
@@ -31,6 +31,7 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
+  datasetSchemaId,
   onChangePointCRS,
   onEditorKeyChange,
   onEditorSubmitValue,
@@ -105,14 +106,21 @@ const FieldEditor = ({
       return;
     }
 
-    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    if (isNil(datasetSchemaId)) {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      datasetSchemaId = metadata.datasetSchemaId;
+    }
 
+    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    console.log(colSchema.referencedField, datasetSchemaId);
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(colSchema.referencedField.name)
         ? colSchema.referencedField.idPk
         : colSchema.referencedField.referencedField.fieldSchemaId,
-      hasMultipleValues ? '' : filter
+      hasMultipleValues ? '' : filter,
+      '',
+      datasetSchemaId
     );
 
     const linkItems = referencedFieldValues
