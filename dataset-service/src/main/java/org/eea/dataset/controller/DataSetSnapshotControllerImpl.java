@@ -105,7 +105,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR') OR (hasRole('DATA_CUSTODIAN'))")
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
@@ -385,7 +385,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("(secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))) OR (checkApiKey(#dataflowId,0L) AND secondLevelAuthorize(#datasetId,'EUDATASET_CUSTODIAN'))")
+  @PreAuthorize("(secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR') OR (hasRole('DATA_CUSTODIAN'))) OR (checkApiKey(#dataflowId,0L) AND secondLevelAuthorize(#datasetId,'EUDATASET_CUSTODIAN'))")
   public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     List<ReleaseVO> releases;
@@ -412,7 +412,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/historicReleasesRepresentative",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE') OR (hasRole('DATA_CUSTODIAN'))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE') OR (hasRole('DATA_CUSTODIAN','DATAFLOW_NATIONAL_COORDINATOR'))")
   public List<ReleaseVO> historicReleasesByRepresentative(
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("representativeId") Long representativeId) {

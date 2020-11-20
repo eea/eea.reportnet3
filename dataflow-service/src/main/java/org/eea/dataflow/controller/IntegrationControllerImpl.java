@@ -288,15 +288,20 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Dataset Schema id",
           example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
+    try {
+      integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
+
 
   /**
    * Find export integration.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fileExtension the file extension
-   *
+   * @param integrationId the integration id
    * @return the integration VO
    */
   @Override
@@ -307,9 +312,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   public IntegrationVO findExportIntegration(
       @ApiParam(value = "Dataschema Id",
           example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "File extension",
-          example = "csv") @RequestParam("fileExtension") String fileExtension) {
-    return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
+      @ApiParam(value = "Integration Id",
+          example = "1") @RequestParam("integrationId") Long integrationId) {
+    return integrationService.getExportIntegration(datasetSchemaId, integrationId);
   }
 
   /**

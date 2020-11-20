@@ -318,6 +318,10 @@ public enum EventType {
   DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
       true),
 
+  /** The validate rules error event. */
+  VALIDATE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validate_rules_error_event",
+      true),
+
   /** The disable rules error event. */
   DISABLE_NAMES_TYPES_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "disable_names_types_rules_error_event", true),
@@ -329,7 +333,11 @@ public enum EventType {
   RECEIVED_MESSAGE(LiteralConstants.DATA_REPORTING_TOPIC, "received_message", true),
 
   /** The updated dataset status. */
-  UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true);
+  UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true),
+
+  /** The datacollection national coordinator event. */
+  DATACOLLECTION_NATIONAL_COORDINATOR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "datacollection_national_coordinator_event", true);
 
   /** The topic. */
   private String topic;
