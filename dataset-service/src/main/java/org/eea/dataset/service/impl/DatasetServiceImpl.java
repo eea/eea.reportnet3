@@ -62,7 +62,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
-import org.eea.dataset.service.model.FieldValueWithLabel;
+import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -105,6 +105,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -1091,9 +1092,9 @@ public class DatasetServiceImpl implements DatasetService {
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
       // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
       // want to show on the screen
-      List<FieldValueWithLabel> fields =
-          fieldRepository.findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId,
-              conditionalSchemaId, conditionalValue, searchValue, PageRequest.of(0, 15));
+      List<FieldValueWithLabelProjection> fields = fieldRepository
+          .findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId, conditionalSchemaId,
+              conditionalValue, searchValue, PageRequest.of(0, 15, Sort.by("value")));
 
       fields.stream().forEach(fExtended -> {
         if (fExtended != null) {

@@ -64,7 +64,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
-import org.eea.dataset.service.model.FieldValueWithLabel;
+import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -322,7 +322,7 @@ public class DatasetServiceTest {
   /** The field. */
   private FieldValue field;
 
-  public FieldValueWithLabel fieldWithLabel;
+  public FieldValueWithLabelProjection fieldWithLabel;
 
   /**
    * Inits the mocks.

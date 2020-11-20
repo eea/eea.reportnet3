@@ -4,7 +4,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.service.model.FieldValueWithLabel;
+import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -128,8 +128,8 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
           + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
           + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
-          + "AND (fv.value like %:searchText% or :searchText IS NULL) " + "ORDER BY fv.value")
-  List<FieldValueWithLabel> findByIdFieldSchemaAndConditionalWithTag(
+          + "AND (fv.value like %:searchText% or :searchText IS NULL) ")
+  List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(
       @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
       @Param("conditionalId") String conditionalId,
       @Param("conditionalValue") String conditionalValue,
