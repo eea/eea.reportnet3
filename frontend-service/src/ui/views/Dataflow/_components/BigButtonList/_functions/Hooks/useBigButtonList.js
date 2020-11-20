@@ -53,7 +53,7 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
-  }, [userContext]);
+  }, [userContext, dataflowState.data.datasets]);
 
   const getButtonsVisibility = () => {
     const isDesigner =
@@ -64,6 +64,8 @@ const useBigButtonList = ({
     const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
     const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
     const isManualAcceptance = dataflowState.data.manualAcceptance;
+    const isReleased =
+      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
 
     return {
       createDataCollection: isLeadDesigner && isDesignStatus,
@@ -78,12 +80,14 @@ const useBigButtonList = ({
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
-      feedback: (isLeadDesigner && isDraftStatus) || isLeadReporterOfCountry,
+      feedback:
+        (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
+        (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
       newSchema: isDesigner && isDesignStatus,
       updateReporters: isDraftStatus,
-      receipt: isLeadReporterOfCountry,
+      receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
     };
@@ -103,16 +107,16 @@ const useBigButtonList = ({
 
   const feedbackBigButton = [
     {
-      buttonClass: 'dataflowFeedback',
+      buttonClass: 'technicalFeedback',
       buttonIcon: 'comments',
-      caption: resources.messages['dataflowFeedback'],
+      caption: resources.messages['technicalFeedback'],
       handleRedirect: () =>
         handleRedirect(
           !isLeadDesigner
             ? getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId, representativeId: dataProviderId }, true)
             : getUrl(routes.DATAFLOW_FEEDBACK_CUSTODIAN, { dataflowId }, true)
         ),
-      helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
+      helpClassName: 'dataflow-big-buttons-technicalFeedback-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),
       visibility: buttonsVisibility.feedback
@@ -408,10 +412,6 @@ const useBigButtonList = ({
       }));
 
   const onBuildReceiptButton = () => {
-    const { datasets } = dataflowState.data;
-    const representativeNames = isNil(datasets) ? [] : datasets.map(dataset => dataset.datasetSchemaName);
-    const releasedStates = isNil(datasets) ? [] : datasets.map(dataset => dataset.isReleased);
-
     return [
       {
         buttonClass: 'schemaDataset',
@@ -422,11 +422,7 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
-        visibility:
-          buttonsVisibility.receipt &&
-          uniq(representativeNames).length === 1 &&
-          !releasedStates.includes(false) &&
-          !releasedStates.includes(null)
+        visibility: buttonsVisibility.receipt
       }
     ];
   };
@@ -514,11 +510,11 @@ const useBigButtonList = ({
     ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
+    ...manualTechnicalAcceptanceBigButton,
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
     ...designDatasetModels,
-    ...manualTechnicalAcceptanceBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,

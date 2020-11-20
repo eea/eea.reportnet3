@@ -468,7 +468,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        DataType.POSITION, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+        DataType.MULTIPOLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 

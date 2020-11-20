@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 
@@ -32,19 +30,25 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
-  }, [userContext]);
+  }, [userContext, dataflowState.data.datasets]);
 
-  const getButtonsVisibility = () => ({
-    feedback: isLeadReporterOfCountry,
-    receipt: isLeadReporterOfCountry,
-    release: isLeadReporterOfCountry
-  });
+  const getButtonsVisibility = () => {
+    const isManualAcceptance = dataflowState.data.manualAcceptance;
+    const isReleased =
+      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
+
+    return {
+      feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
+      receipt: isLeadReporterOfCountry && isReleased,
+      release: isLeadReporterOfCountry
+    };
+  };
 
   const feedbackButton = {
     layout: 'defaultBigButton',
-    buttonClass: 'dataflowFeedback',
+    buttonClass: 'technicalFeedback',
     buttonIcon: 'comments',
-    caption: resources.messages['dataflowFeedback'],
+    caption: resources.messages['technicalFeedback'],
     handleRedirect: () =>
       handleRedirect(
         getUrl(
@@ -154,11 +158,7 @@ const useBigButtonList = ({
         handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
-        visibility:
-          buttonsVisibility.receipt &&
-          !isUndefined(releasedStates) &&
-          !releasedStates.includes(false) &&
-          !releasedStates.includes(null)
+        visibility: buttonsVisibility.receipt
       }
     ];
   };

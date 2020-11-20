@@ -1,8 +1,8 @@
 package org.eea.validation.service;
 
-import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
@@ -48,10 +48,10 @@ public interface SqlRulesService {
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
-   * @throws SQLException the SQL exception
+   * @throws EEAInvalidSQLException
    */
   TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws SQLException;
+      throws EEAInvalidSQLException;
 
 
   /**

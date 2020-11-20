@@ -2,7 +2,10 @@
   margin-right: 1rem;
   width: 2.357em;
 }
-
+.nonEditableData {
+  font-style: italic;
+  font-weight: bold;
+}
 .pointEpsgWrapper {
   align-items: center;
   display: flex;

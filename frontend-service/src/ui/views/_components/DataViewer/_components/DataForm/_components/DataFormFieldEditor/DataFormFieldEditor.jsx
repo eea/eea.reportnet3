@@ -255,6 +255,8 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
+    ) : ['POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) ? (
+      renderComplexGeometries()
     ) : type === 'TEXTAREA' ? (
       renderTextarea(field, fieldValue)
     ) : (
@@ -291,6 +293,10 @@ const DataFormFieldEditor = ({
         yearRange="2010:2030"
       />
     );
+  };
+
+  const renderComplexGeometries = () => {
+    return false;
   };
 
   const renderLinkDropdown = (field, fieldValue) => {
@@ -336,7 +342,12 @@ const DataFormFieldEditor = ({
   };
 
   const renderMap = () => (
-    <Map hasLegend={true} geoJson={fieldValue} onSelectPoint={onSelectPoint} selectedCRS={map.currentCRS.value}></Map>
+    <Map
+      hasLegend={true}
+      geoJson={fieldValue}
+      geometryType={'POINT'}
+      onSelectPoint={onSelectPoint}
+      selectedCRS={map.currentCRS.value}></Map>
   );
 
   const renderMapType = (field, fieldValue) => (

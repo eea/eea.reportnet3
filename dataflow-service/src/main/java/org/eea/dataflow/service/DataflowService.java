@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.data.domain.Pageable;
@@ -164,40 +163,4 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadline) throws EEAException;
-
-  /**
-   * Creates the message.
-   *
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param content the content
-   * @return the message VO
-   * @throws EEAException the EEA exception
-   */
-  @Deprecated
-  MessageVO createMessage(Long dataflowId, Long providerId, String content) throws EEAException;
-
-  /**
-   * Find messages.
-   *
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param read the read
-   * @param page the page
-   * @return the list
-   * @throws EEAException the EEA exception
-   */
-  @Deprecated
-  List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
-      throws EEAException;
-
-  /**
-   * Update message read status.
-   *
-   * @param dataflowId the dataflow id
-   * @param messageVOs the message V os
-   * @throws EEAException the EEA exception
-   */
-  @Deprecated
-  void updateMessageReadStatus(Long dataflowId, List<MessageVO> messageVOs) throws EEAException;
 }
