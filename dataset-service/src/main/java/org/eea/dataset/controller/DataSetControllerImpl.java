@@ -637,16 +637,21 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the field values referenced.
    *
    * @param datasetIdOrigin the dataset id origin
-   * @param idFieldSchema the id field schema
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @param conditionalValue the conditional value
    * @param searchValue the search value
    * @return the field values referenced
    */
   @Override
-  @GetMapping("/{id}/getFieldsValuesReferenced")
+  @GetMapping("/{id}/datasetSchemaId/{datasetSchemaId}/fieldSchemaId/{fieldSchemaId}/getFieldsValuesReferenced")
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
-      @RequestParam("idFieldSchema") String idFieldSchema,
-      @RequestParam("searchValue") String searchValue) {
-    return datasetService.getFieldValuesReferenced(datasetIdOrigin, idFieldSchema, searchValue);
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("fieldSchemaId") String fieldSchemaId,
+      @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
+      @RequestParam(value = "searchValue", required = false) String searchValue) {
+    return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId, fieldSchemaId,
+        conditionalValue, searchValue);
   }
 
   /**
