@@ -945,6 +945,7 @@
     "draft": "draft",
     "geometryCoordinates": "Geometry coordinates",
     "nonEditableData": "This field is not editable",
-    "customExports": "Custom exports"
+    "customExports": "Custom exports",
+    "fieldSchemaName": "Field"
   }
 }

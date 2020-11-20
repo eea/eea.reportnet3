@@ -420,7 +420,7 @@ const ValidationViewer = React.memo(
                 data={fetchedData}
                 getFilteredData={onLoadFilteredData}
                 getFilteredSearched={getFilteredState}
-                selectOptions={['entityType', 'tableSchemaName', 'field', 'levelError']}
+                selectOptions={['entityType', 'tableSchemaName', 'fieldSchemaName', 'levelError']}
               />
             </div>
 
