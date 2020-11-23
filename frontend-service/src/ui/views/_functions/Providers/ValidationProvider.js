@@ -65,6 +65,11 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         reOpenOpener: false
       };
+    case 'ON_AUTOMATIC_RULE_IS_UPDATED':
+      return {
+        ...state,
+        isAutomaticRuleUpdated: payload
+      };
     default:
       return state;
   }
@@ -115,6 +120,10 @@ export const ValidationProvider = ({ children }) => {
 
         onResetOpener: () => {
           dispatch({ type: 'ON_OPENER_RESET' });
+        },
+
+        onAutomaticRuleIsUpdated: isUpdated => {
+          dispatch({ type: 'ON_AUTOMATIC_RULE_IS_UPDATED', payload: isUpdated });
         },
 
         resetReOpenOpener: () => {
