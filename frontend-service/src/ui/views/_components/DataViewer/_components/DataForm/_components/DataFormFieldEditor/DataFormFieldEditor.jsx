@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useReducer, useRef, useState } from 'reac
 
 // import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
+import first from 'lodash/first';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
@@ -32,11 +33,13 @@ const DataFormFieldEditor = ({
   column,
   datasetId,
   datasetSchemaId,
+  editing = false,
   field,
   fieldValue = '',
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
+  records,
   reporting,
   type
 }) => {
@@ -96,6 +99,7 @@ const DataFormFieldEditor = ({
 
   const onLoadColsSchema = async filter => {
     const inmColumn = { ...column };
+    console.log({ column, field });
     const linkItems = await getLinkItemsWithEmptyOption(
       filter,
       type,
@@ -155,12 +159,20 @@ const DataFormFieldEditor = ({
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
-    console.log({ referencedField, datasetSchemaId });
+    const conditionalField = editing
+      ? records.editedRecord.dataRow.find(
+          r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
+        )
+      : records.newRecord.dataRow.find(
+          r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
+        );
+    console.log({ referencedField, datasetSchemaId, field, conditionalField });
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
-      isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
+      field,
+      // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       hasMultipleValues ? '' : filter,
-      '',
+      conditionalField.value,
       datasetSchemaId
     );
     const linkItems = referencedFieldValues

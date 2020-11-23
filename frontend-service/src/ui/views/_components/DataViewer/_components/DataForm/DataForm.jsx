@@ -100,6 +100,7 @@ const DataForm = ({
                   column={column}
                   datasetId={datasetId}
                   datasetSchemaId={datasetSchemaId}
+                  editing={true}
                   field={column.field}
                   fieldValue={
                     isNil(field.fieldData[column.field])
@@ -112,6 +113,7 @@ const DataForm = ({
                   isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
                   onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
+                  records={records}
                   reporting={reporting}
                   type={column.type}
                 />
@@ -176,6 +178,7 @@ const DataForm = ({
                     isVisible={addDialogVisible}
                     onChangeForm={onChangeForm}
                     onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
+                    records={records}
                     reporting={reporting}
                     type={column.type}
                   />

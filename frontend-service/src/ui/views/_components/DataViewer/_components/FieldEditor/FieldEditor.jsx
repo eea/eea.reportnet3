@@ -112,14 +112,20 @@ const FieldEditor = ({
     }
 
     const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
-    console.log(colSchema.referencedField, datasetSchemaId);
+    console.log(
+      colSchema.referencedField,
+      datasetSchemaId,
+      colSchema,
+      RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId)
+    );
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
-      isUndefined(colSchema.referencedField.name)
-        ? colSchema.referencedField.idPk
-        : colSchema.referencedField.referencedField.fieldSchemaId,
+      colSchema.field,
+      // isUndefined(colSchema.referencedField.name)
+      //   ? colSchema.referencedField.idPk
+      //   : colSchema.referencedField.referencedField.fieldSchemaId,
       hasMultipleValues ? '' : filter,
-      '',
+      RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
       datasetSchemaId
     );
 
