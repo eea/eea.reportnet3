@@ -940,7 +940,7 @@
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
     "feedbackMessagePlaceholder": "Please provide information on the status change",
-    "validateRulesErrorEvent": "You have {:invalid} invalid and {:disabled} disabled SQL QCs in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
+    "validateRulesErrorEvent": "You have {:invalidRules} invalid and {:disabledRules} disabled SQL QCs in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
     "disableNamesTypesRulesErrorEvent": "Some QCs are now invalid due to the field type changed.",
     "validatedQcRuleEvent": "QC validated succesfully",
     "dataflowStatus": "Dataflow status",
