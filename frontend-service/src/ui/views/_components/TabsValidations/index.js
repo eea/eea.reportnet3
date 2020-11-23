@@ -1,1 +1,0 @@
-export { TabsValidations } from './TabsValidations';
