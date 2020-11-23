@@ -2,6 +2,8 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
+import isNil from 'lodash/isNil';
+
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
     try {
@@ -279,7 +281,7 @@ export const apiDataset = {
         datasetId,
         datasetSchemaId,
         fieldSchemaId,
-        searchToken
+        searchToken: searchToken !== '' ? searchToken : undefined
       })
     });
     return response.data;

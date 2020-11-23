@@ -36,6 +36,7 @@ const DataFormFieldEditor = ({
   editing = false,
   field,
   fieldValue = '',
+  isConditional = false,
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
@@ -48,6 +49,7 @@ const DataFormFieldEditor = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
+  console.log({ isConditional });
 
   const resources = useContext(ResourcesContext);
 
@@ -84,6 +86,12 @@ const DataFormFieldEditor = ({
   }, []);
 
   useEffect(() => {
+    if (isConditional) {
+      onLoadColsSchema('');
+    }
+  }, [records.editedRecord]);
+
+  useEffect(() => {
     if (inputRef.current && isVisible && autoFocus) {
       inputRef.current.element.focus();
     }
@@ -106,6 +114,7 @@ const DataFormFieldEditor = ({
       column.referencedField,
       inmColumn.pkHasMultipleValues
     );
+    console.log({ linkItems });
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
   };
@@ -166,24 +175,30 @@ const DataFormFieldEditor = ({
       : records.newRecord.dataRow.find(
           r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
         );
-    console.log({ referencedField, datasetSchemaId, field, conditionalField });
+    const conditionalFieldValue = !isNil(conditionalField)
+      ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
+      : '';
+    console.log({ conditionalField, conditionalFieldValue });
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       field,
       // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       hasMultipleValues ? '' : filter,
-      !isNil(conditionalField) ? conditionalField.value : '',
+      conditionalFieldValue,
       datasetSchemaId
     );
+    console.log({ referencedFieldValues });
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
-          itemType: referencedField.value,
+          itemType: `${referencedField.value}${
+            !isNil(referencedField.label) && referencedField.label !== '' ? ` - ${referencedField.label}` : ''
+          }`,
           value: referencedField.value
         };
       })
       .sort((a, b) => a.value - b.value);
-
+    console.log({ linkItems });
     if (!hasMultipleValues) {
       linkItems.unshift({
         itemType: resources.messages['noneCodelist'],

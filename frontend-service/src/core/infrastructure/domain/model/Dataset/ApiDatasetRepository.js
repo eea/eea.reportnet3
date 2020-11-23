@@ -265,6 +265,7 @@ const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken, c
       new DatasetTableField({
         fieldId: referencedFieldDTO.id,
         fieldSchemaId: referencedFieldDTO.idFieldSchema,
+        label: referencedFieldDTO.label,
         type: referencedFieldDTO.type,
         value: referencedFieldDTO.value
       })

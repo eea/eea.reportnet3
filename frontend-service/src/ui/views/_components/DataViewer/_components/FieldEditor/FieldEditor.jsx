@@ -128,16 +128,19 @@ const FieldEditor = ({
       RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
       datasetSchemaId
     );
+    console.log({ referencedFieldValues });
 
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
-          itemType: referencedField.value,
+          itemType: `${referencedField.value}${
+            !isNil(referencedField.label) && referencedField.label !== '' ? ` - ${referencedField.label}` : ''
+          }`,
           value: referencedField.value
         };
       })
       .sort((a, b) => a.value - b.value);
-
+    console.log({ linkItems });
     if (!hasMultipleValues) {
       linkItems.unshift({
         itemType: resources.messages['noneCodelist'],

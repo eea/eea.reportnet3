@@ -57,6 +57,7 @@ const DataForm = ({
 
   const editRecordForm = colsSchema.map((column, i) => {
     //Avoid row id Field and dataSetPartitionId
+    console.log({ colsSchema });
     if (editDialogVisible) {
       if (i < colsSchema.length - 2) {
         if (!isUndefined(records.editedRecord.dataRow)) {
@@ -110,6 +111,13 @@ const DataForm = ({
                       : field.fieldData[column.field]
                   }
                   hasWritePermissions={hasWritePermissions}
+                  isConditional={
+                    colsSchema.filter(
+                      column =>
+                        !isNil(column.referencedField) &&
+                        column.referencedField.masterConditionalFieldId === column.field
+                    ).length > 0
+                  }
                   isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
                   onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
