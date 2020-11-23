@@ -277,6 +277,7 @@ export const FieldsDesigner = ({
       return referencedField;
     }
     const link = {};
+    let tableSchema = '';
     datasetSchemas.forEach(schema =>
       schema.tables.forEach(table => {
         if (!table.addTab) {
@@ -286,13 +287,18 @@ export const FieldsDesigner = ({
                 link.name = `${table.tableSchemaName} - ${field.name}`;
                 link.value = `${table.tableSchemaName} - ${field.fieldId}`;
                 link.disabled = false;
+                tableSchema = table.tableSchemaId;
               }
             })
           );
         }
       })
     );
-    link.referencedField = { fieldSchemaId: referencedField.idPk, datasetSchemaId: referencedField.idDatasetSchema };
+    link.referencedField = {
+      fieldSchemaId: referencedField.idPk,
+      datasetSchemaId: referencedField.idDatasetSchema,
+      tableSchemaId: tableSchema
+    };
     return link;
   };
 
@@ -442,9 +448,16 @@ export const FieldsDesigner = ({
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
-                fieldName={field.name}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
+                fieldLinkedTableConditional={
+                  !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
+                }
+                fieldLinkedTableLabel={!isNil(field.referencedField) ? field.referencedField.labelId : ''}
+                fieldMasterTableConditional={
+                  !isNil(field.referencedField) ? field.referencedField.masterConditionalFieldId : ''
+                }
                 fieldMustBeUsed={field.pkMustBeUsed}
+                fieldName={field.name}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}

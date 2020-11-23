@@ -40,6 +40,9 @@ export const FieldDesigner = ({
   fieldHasMultipleValues,
   fieldId,
   fieldLink,
+  fieldLinkedTableConditional = '',
+  fieldLinkedTableLabel = '',
+  fieldMasterTableConditional = '',
   fieldMustBeUsed,
   fieldName,
   fieldPK,
@@ -1098,6 +1101,9 @@ export const FieldDesigner = ({
           datasetSchemaId={datasetSchemaId}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          linkedTableConditional={fieldLinkedTableConditional}
+          linkedTableLabel={fieldLinkedTableLabel}
+          masterTableConditional={fieldMasterTableConditional}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}
