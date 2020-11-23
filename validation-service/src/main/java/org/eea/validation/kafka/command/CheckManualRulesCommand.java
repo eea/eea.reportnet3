@@ -129,6 +129,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
 
     RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
     List<Rule> rulesSQLSchema = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+
     if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
       rulesSchema.getRules().stream().forEach(rule -> {
         if (checkNoSQL && rule.isAutomatic() == Boolean.FALSE && null == rule.getSqlSentence()) {
@@ -141,7 +142,8 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           }
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
         }
-        if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()) {
+        if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()
+            && rule.isAutomatic() == Boolean.FALSE) {
           if (validateSQLRule(rule.getSqlSentence(), datasetId, rule)) {
             rule.setVerified(true);
           } else {
@@ -153,6 +155,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
         }
       });
     }
+
 
     if (!errorRulesList.isEmpty()) {
       RulesSchema rulesdisabled =
