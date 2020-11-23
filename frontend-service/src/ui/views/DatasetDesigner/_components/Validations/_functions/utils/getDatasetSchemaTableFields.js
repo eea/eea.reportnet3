@@ -8,7 +8,7 @@ export const getDatasetSchemaTableFields = (candidateTable, tables) => {
 
   if (!isNil(selectedTable) && !isEmpty(selectedTable) && !isNil(selectedTable.records)) {
     return selectedTable.records[0].fields
-      .filter(field => !config.validations.bannedFields.includes(field.type.toLowerCase()))
+      .filter(field => !config.validations.bannedTypes.includes(field.type.toLowerCase()))
       .map(field => ({
         label: field.name,
         code: field.fieldId
