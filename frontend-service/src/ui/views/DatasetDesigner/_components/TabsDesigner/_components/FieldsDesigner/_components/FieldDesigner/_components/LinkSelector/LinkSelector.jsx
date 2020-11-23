@@ -82,6 +82,7 @@ const LinkSelector = withRouter(
 
     useEffect(() => {
       if (!isVisible && isSaved) {
+        console.log(link);
         onSaveLink({
           link,
           linkedTableConditional: linkedTableConditional.fieldSchemaId,
@@ -208,7 +209,6 @@ const LinkSelector = withRouter(
                     options={getOptions(datasetSchema)}
                     onChange={e => {
                       if (!isNil(e.value)) {
-                        console.log(e.value);
                         dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
                         getFields(e.value);
                       }

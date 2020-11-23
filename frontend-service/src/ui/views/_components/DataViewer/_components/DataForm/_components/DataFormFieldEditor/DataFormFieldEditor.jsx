@@ -37,6 +37,7 @@ const DataFormFieldEditor = ({
   field,
   fieldValue = '',
   isConditional = false,
+  isConditionalChanged = false,
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
@@ -49,11 +50,11 @@ const DataFormFieldEditor = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
-  console.log({ isConditional });
 
   const resources = useContext(ResourcesContext);
 
   const inputRef = useRef(null);
+  const linkDropdownRef = useRef(null);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
@@ -86,10 +87,13 @@ const DataFormFieldEditor = ({
   }, []);
 
   useEffect(() => {
-    if (isConditional) {
+    if (isConditionalChanged) {
       onLoadColsSchema('');
+      if (!isNil(linkDropdownRef.current)) {
+        linkDropdownRef.current.clearFilter();
+      }
     }
-  }, [records.editedRecord]);
+  }, [records.editedRecord, isConditionalChanged]);
 
   useEffect(() => {
     if (inputRef.current && isVisible && autoFocus) {
@@ -107,14 +111,12 @@ const DataFormFieldEditor = ({
 
   const onLoadColsSchema = async filter => {
     const inmColumn = { ...column };
-    console.log({ column, field });
     const linkItems = await getLinkItemsWithEmptyOption(
       filter,
       type,
       column.referencedField,
       inmColumn.pkHasMultipleValues
     );
-    console.log({ linkItems });
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
   };
@@ -178,7 +180,6 @@ const DataFormFieldEditor = ({
     const conditionalFieldValue = !isNil(conditionalField)
       ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
       : '';
-    console.log({ conditionalField, conditionalFieldValue });
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       field,
@@ -187,7 +188,6 @@ const DataFormFieldEditor = ({
       conditionalFieldValue,
       datasetSchemaId
     );
-    console.log({ referencedFieldValues });
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
@@ -198,7 +198,7 @@ const DataFormFieldEditor = ({
         };
       })
       .sort((a, b) => a.value - b.value);
-    console.log({ linkItems });
+
     if (!hasMultipleValues) {
       linkItems.unshift({
         itemType: resources.messages['noneCodelist'],
@@ -302,7 +302,7 @@ const DataFormFieldEditor = ({
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
-        onChange={e => onChangeForm(field, e.target.value)}
+        onChange={e => onChangeForm(field, e.target.value, isConditional)}
         placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
         ref={inputRef}
         style={{ width: '35%' }}
@@ -350,6 +350,7 @@ const DataFormFieldEditor = ({
           onFilterInputChangeBackend={onFilter}
           options={columnWithLinks.linkItems}
           optionLabel="itemType"
+          ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
             !Array.isArray(fieldValue) ? fieldValue.split(', ').join(',') : fieldValue
@@ -371,6 +372,7 @@ const DataFormFieldEditor = ({
           onFilterInputChangeBackend={onFilter}
           optionLabel="itemType"
           options={columnWithLinks.linkItems}
+          ref={linkDropdownRef}
           showFilterClear={true}
           value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
         />

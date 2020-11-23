@@ -3,7 +3,6 @@ export const linkSelectorReducer = (state, { type, payload }) => {
     case 'SET_LINK':
       return { ...state, link: payload };
     case 'SET_LINKED_AND_MASTER_FIELDS':
-      console.log(payload);
       return {
         ...state,
         linkedTableLabel: {},

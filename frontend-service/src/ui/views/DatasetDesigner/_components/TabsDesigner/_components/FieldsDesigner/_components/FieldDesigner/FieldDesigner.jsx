@@ -620,14 +620,6 @@ export const FieldDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed
   }) => {
-    console.log(
-      link,
-      linkedTableConditional,
-      linkedTableLabel,
-      masterTableConditional,
-      pkHasMultipleValues,
-      pkMustBeUsed
-    );
     dispatchFieldDesigner({
       type: 'SET_LINK',
       payload: {

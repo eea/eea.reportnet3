@@ -29,6 +29,7 @@ const DataForm = ({
   const resources = useContext(ResourcesContext);
 
   const [fieldsWithError, setFieldsWithError] = useState([]);
+  const [isConditionalChanged, setIsConditionalChanged] = useState(false);
   useEffect(() => {
     onShowCoordinateError(fieldsWithError.length);
   }, [fieldsWithError]);
@@ -57,7 +58,6 @@ const DataForm = ({
 
   const editRecordForm = colsSchema.map((column, i) => {
     //Avoid row id Field and dataSetPartitionId
-    console.log({ colsSchema });
     if (editDialogVisible) {
       if (i < colsSchema.length - 2) {
         if (!isUndefined(records.editedRecord.dataRow)) {
@@ -113,13 +113,18 @@ const DataForm = ({
                   hasWritePermissions={hasWritePermissions}
                   isConditional={
                     colsSchema.filter(
-                      column =>
-                        !isNil(column.referencedField) &&
-                        column.referencedField.masterConditionalFieldId === column.field
+                      col =>
+                        !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === column.field
                     ).length > 0
                   }
+                  isConditionalChanged={isConditionalChanged}
                   isVisible={editDialogVisible}
-                  onChangeForm={onChangeForm}
+                  onChangeForm={(property, value, conditionalChanged = false) => {
+                    if (isConditionalChanged !== conditionalChanged) {
+                      setIsConditionalChanged(conditionalChanged);
+                    }
+                    onChangeForm(property, value);
+                  }}
                   onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
                   records={records}
                   reporting={reporting}
@@ -183,8 +188,20 @@ const DataForm = ({
                     field={column.field}
                     fieldValue={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                     hasWritePermissions={hasWritePermissions}
+                    isConditional={
+                      colsSchema.filter(
+                        col =>
+                          !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === column.field
+                      ).length > 0
+                    }
+                    isConditionalChanged={isConditionalChanged}
                     isVisible={addDialogVisible}
-                    onChangeForm={onChangeForm}
+                    onChangeForm={(property, value, conditionalChanged = false) => {
+                      if (isConditionalChanged !== conditionalChanged) {
+                        setIsConditionalChanged(conditionalChanged);
+                      }
+                      onChangeForm(property, value);
+                    }}
                     onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
                     records={records}
                     reporting={reporting}

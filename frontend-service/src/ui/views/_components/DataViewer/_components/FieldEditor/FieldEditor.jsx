@@ -112,12 +112,6 @@ const FieldEditor = ({
     }
 
     const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
-    console.log(
-      colSchema.referencedField,
-      datasetSchemaId,
-      colSchema,
-      RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId)
-    );
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       colSchema.field,
@@ -128,7 +122,6 @@ const FieldEditor = ({
       RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
       datasetSchemaId
     );
-    console.log({ referencedFieldValues });
 
     const linkItems = referencedFieldValues
       .map(referencedField => {
@@ -140,7 +133,7 @@ const FieldEditor = ({
         };
       })
       .sort((a, b) => a.value - b.value);
-    console.log({ linkItems });
+
     if (!hasMultipleValues) {
       linkItems.unshift({
         itemType: resources.messages['noneCodelist'],
