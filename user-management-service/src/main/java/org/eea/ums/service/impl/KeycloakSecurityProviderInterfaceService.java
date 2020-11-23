@@ -92,8 +92,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   private JwtTokenProvider jwtTokenProvider;
 
 
+  /** The users. */
   private List<UserRepresentation> users;
 
+  /**
+   * Inits the.
+   */
   @PostConstruct
   private void init() {
     users = new ArrayList<>(Arrays.asList(keycloakConnectorService.getUsers()));
@@ -359,8 +363,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param userId the user userId
    * @param groupName the group name
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void removeUserFromUserGroup(String userId, String groupName) throws EEAException {
@@ -388,16 +391,20 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         if (!StringUtils.isBlank(group.getName())) {
           String name = group.getName();
           String[] splittedName = name.split("-");
-          ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
-          resourceAccessVO.setResource(ResourceTypeEnum.fromValue(splittedName[0]));
-          resourceAccessVO.setId(Long.valueOf(splittedName[1]));
-          resourceAccessVO.setRole(SecurityRoleEnum.fromValue(splittedName[2]));
-          result.add(resourceAccessVO);
+          // we check if the 2 value of array is a number, if not , we dont asing
+          if (isNumeric(splittedName[1])) {
+            ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+            resourceAccessVO.setResource(ResourceTypeEnum.fromValue(splittedName[0]));
+            resourceAccessVO.setId(Long.valueOf(splittedName[1]));
+            resourceAccessVO.setRole(SecurityRoleEnum.fromValue(splittedName[2]));
+            result.add(resourceAccessVO);
+          }
         }
       }
     }
     return result;
   }
+
 
   /**
    * Gets the groups by id resource type.
@@ -691,6 +698,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Authenticate email.
+   *
+   * @param email the email
+   * @return the token VO
+   */
   @Override
   public TokenVO authenticateEmail(String email) {
     List<UserRepresentation> userRepresentations = new ArrayList<>();
@@ -910,5 +923,23 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     String key = UUID.randomUUID().toString();
     securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
     return key;
+  }
+
+  /**
+   * Checks if is numeric.
+   *
+   * @param cadena the cadena
+   * @return true, if is numeric
+   */
+  private static boolean isNumeric(String cadena) {
+    boolean resultado;
+    try {
+      Integer.parseInt(cadena);
+      resultado = true;
+    } catch (NumberFormatException excepcion) {
+      resultado = false;
+    }
+
+    return resultado;
   }
 }
