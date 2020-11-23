@@ -6,8 +6,8 @@ export const GetData = ({ datasetRepository }) => async (
   fields = undefined,
   levelError = null,
   ruleId = '',
-  fieldSchemaId = '',
-  value = ''
+  fieldSchemaId = null,
+  value = null
 ) =>
   datasetRepository.tableDataById(
     datasetId,

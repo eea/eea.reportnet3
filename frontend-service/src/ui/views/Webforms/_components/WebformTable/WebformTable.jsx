@@ -111,10 +111,10 @@ export const WebformTable = ({
         '',
         100,
         undefined,
-        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-        null,
-        selectedTable.fieldSchemaId,
-        selectedTable.pamsId
+        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        // null
+        // selectedTable.fieldSchemaId,
+        // selectedTable.pamsId
       );
       if (!isNil(parentTableData.records)) {
         const tableSchemaIds = webform.elements
