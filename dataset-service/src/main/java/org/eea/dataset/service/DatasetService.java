@@ -321,12 +321,14 @@ public interface DatasetService {
    * Gets the field values referenced.
    *
    * @param datasetId the dataset id
-   * @param idPk the id pk
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @param conditionalValue the conditional value
    * @param searchValue the search value
-   *
    * @return the field values referenced
    */
-  List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
+  List<FieldVO> getFieldValuesReferenced(Long datasetId, String datasetSchemaId,
+      String fieldSchemaId, String conditionalValue, String searchValue);
 
   /**
    * Gets the referenced dataset id.
