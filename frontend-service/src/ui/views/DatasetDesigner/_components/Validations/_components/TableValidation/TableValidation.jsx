@@ -5,7 +5,7 @@ import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
-import styles from './DatasetValidation.module.scss';
+import styles from './TableValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -39,7 +39,7 @@ import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_co
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
 import { setValidationRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationRelation';
 
-export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs }) => {
+export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -372,9 +372,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
       await ValidationService.createDatasetRule(datasetId, candidateRule);
       onHide();
-      notificationContext.hide({
-        type: 'VALIDATED_QC_RULE_EVENT'
-      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
@@ -398,10 +395,10 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
       await ValidationService.updateDatasetRule(datasetId, candidateRule);
+      if (!isNil(candidateRule) && candidateRule.automatic) {
+        validationContext.onAutomaticRuleIsUpdated(true);
+      }
       onHide();
-      notificationContext.hide({
-        type: 'VALIDATED_QC_RULE_EVENT'
-      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'

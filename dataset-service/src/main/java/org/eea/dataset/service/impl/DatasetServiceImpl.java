@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +62,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -105,6 +105,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -1055,32 +1056,61 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Gets the field values referenced.
    *
-   * @param datasetId the dataset id
-   * @param idPk the id pk
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @param conditionalValue the conditional value
    * @param searchValue the search value
    * @return the field values referenced
    */
   @Override
-  public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
-    Long idDatasetDestination =
-        datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
-    TenantResolver
-        .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
-    // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
-    // want to show on the screen
-    List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
-        searchValue, PageRequest.of(0, 15));
-    // Remove the duplicate values
-    HashSet<String> seen = new HashSet<>();
-    fields.removeIf(e -> !seen.add(e.getValue()));
+  public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
+      String fieldSchemaId, String conditionalValue, String searchValue) {
 
-    // Sort results
-    List<FieldValue> sortedList = new ArrayList<>();
-    if (!fields.isEmpty()) {
-      sortedList = fields.stream().sorted(Comparator.comparing(FieldValue::getValue))
-          .collect(Collectors.toList());
+    List<FieldVO> fieldsVO = new ArrayList<>();
+    Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
+    Document referenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
+    if (referenced != null) {
+      String idPk = referenced.get("idPk").toString();
+      String labelSchemaId = null;
+      String conditionalSchemaId = null;
+      if (referenced.get("labelId") != null) {
+        labelSchemaId = referenced.get("labelId").toString();
+      } else {
+        // In case there's no label selected, the label will the the same as the Pk
+        labelSchemaId = idPk;
+      }
+      if (referenced.get("linkedConditionalFieldId") != null) {
+        conditionalSchemaId = referenced.get("linkedConditionalFieldId").toString();
+      }
+
+      Long idDatasetDestination =
+          datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
+
+
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
+      // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
+      // want to show on the screen
+      List<FieldValueWithLabelProjection> fields = fieldRepository
+          .findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId, conditionalSchemaId,
+              conditionalValue, searchValue, PageRequest.of(0, 15, Sort.by("value")));
+
+      fields.stream().forEach(fExtended -> {
+        if (fExtended != null) {
+          FieldVO fieldVO = fieldNoValidationMapper.entityToClass(fExtended.getFieldValue());
+          fieldVO.setLabel(fExtended.getLabel().getValue());
+          fieldsVO.add(fieldVO);
+        }
+      });
+
+      // Remove the duplicate values
+      HashSet<String> seen = new HashSet<>();
+      fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+
     }
-    return fieldNoValidationMapper.entityListToClass(sortedList);
+
+    return fieldsVO;
   }
 
   /**
@@ -1890,7 +1920,8 @@ public class DatasetServiceImpl implements DatasetService {
       Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
       TableVO result, String[] idRules, String fieldSchema, String fieldValue) {
     List<RecordValue> records;
-    if (null == fields && (null == levelError || levelError.length == 5) && idRules == null) {
+    if (null == fields && (null == levelError || levelError.length == 5) && idRules == null
+        && fieldSchema == null && fieldValue == null) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       result.setTotalFilteredRecords(0L);

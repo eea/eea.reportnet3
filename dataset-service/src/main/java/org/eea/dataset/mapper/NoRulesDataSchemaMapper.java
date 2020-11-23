@@ -39,7 +39,11 @@ public interface NoRulesDataSchemaMapper extends IMapper<DataSetSchema, DataSetS
    * @return the string
    */
   default String map(ObjectId value) {
-    return value.toString();
+    if (value != null) {
+      return value.toString();
+    } else {
+      return null;
+    }
   }
 
   /**

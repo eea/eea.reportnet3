@@ -36,7 +36,7 @@ import { RadioButton } from 'ui/views/_components/RadioButton';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { TabsValidations } from 'ui/views/_components/TabsValidations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
@@ -76,11 +76,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
-  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
-  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
-    invalidRules: 0,
-    disabledRules: 0
-  });
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -171,7 +166,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      // setIsLoading(true);
       const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
@@ -184,23 +178,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       ) {
         history.push(getUrl(routes.DATAFLOWS));
       }
-      // setIsLoading(true);
     }
   }, [userContext.contextRoles, designerState.metaData]);
-
-  useEffect(() => {
-    if (!isUndefined(userContext.contextRoles)) {
-      designerDispatch({
-        type: 'LOAD_PERMISSIONS',
-        payload: {
-          permissions: userContext.hasPermission(
-            [config.permissions.LEAD_REPORTER],
-            `${config.permissions.DATASET}${datasetId}`
-          )
-        }
-      });
-    }
-  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -301,14 +280,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label: type.text
     }));
 
-    const externalExtensions = !isEmpty(externalOperationsList.export)
+    const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
-            label: resources.messages['externalExtensions'],
+            label: resources.messages['customExports'],
             items: externalOperationsList.export.map(type => ({
-              command: () => onExportDataExternalExtension(type.fileExtension),
+              command: () => onExportDataExternalIntegration(type.id),
               icon: config.icons['archive'],
-              label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
             }))
           }
         ]
@@ -316,7 +295,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: { exportList: internalExtensionList.concat(externalExtensions) }
+      payload: { exportList: internalExtensionList.concat(externalIntegrationsNames) }
     });
   };
 
@@ -511,12 +490,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileExtension => {
+  const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
 
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
@@ -542,6 +521,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useCheckNotifications(
     ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
     setIsLoadingFile,
+    false
+  );
+  useCheckNotifications(
+    ['VALIDATE_RULES_COMPLETED_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+    setSqlValidationRunning,
     false
   );
 
@@ -770,27 +754,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  useEffect(() => {
-    const response = notificationContext.toShow.find(
-      notification => notification.key === 'VALIDATE_RULES_COMPLETED_EVENT'
-    );
-    if (response) {
-      setSqlValidationRunning(false);
-    }
-  }, [notificationContext]);
-
-  useEffect(() => {
-    const response = notificationContext.hidden.find(notification => notification.key === 'DISABLE_RULES_ERROR_EVENT');
-    if (response) {
-      const {
-        content: { invalidRules, disabledRules }
-      } = response;
-      setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
-      setIsQCsNotValidWarningVisible(true);
-      setSqlValidationRunning(false);
-    }
-  }, [notificationContext]);
-
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
@@ -858,15 +821,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => cleanImportOtherSystemsDialog()}
       />
     </Fragment>
-  );
-
-  const sqlQCsNotValidWarningFooter = (
-    <Button
-      className="p-button-secondary"
-      icon="cancel"
-      label={resources.messages['close']}
-      onClick={() => setIsQCsNotValidWarningVisible(false)}
-    />
   );
 
   const renderValidationsFooter = (
@@ -1030,7 +984,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onHide={() => onHideValidationsDialog()}
           style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
-          <TabsValidations
+          <ValidationsList
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
@@ -1124,6 +1078,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
+                className={styles.exportSubmenu}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
                 onShow={e => getPosition(e)}
@@ -1403,19 +1358,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 </a>
               </label>
             </div>
-          </Dialog>
-        )}
-
-        {isQCsNotValidWarningVisible && (
-          <Dialog
-            header={resources.messages['notValidQCWarningTitle']}
-            footer={sqlQCsNotValidWarningFooter}
-            onHide={() => setIsQCsNotValidWarningVisible(false)}
-            visible={isQCsNotValidWarningVisible}>
-            {TextUtils.parseText(resources.messages['notValidSqlQCWarningBody'], {
-              disabled: invalidAndDisabledRulesAmount.disabledRules,
-              invalid: invalidAndDisabledRulesAmount.invalidRules
-            })}
           </Dialog>
         )}
       </div>

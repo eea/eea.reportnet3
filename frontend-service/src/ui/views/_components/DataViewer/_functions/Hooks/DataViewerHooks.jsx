@@ -163,6 +163,25 @@ export const useSetColumns = (
     return '';
   };
 
+  const renderComplexGeometries = (value = '') => {
+    if (!isNil(value) && value !== '' && MapUtils.checkValidJSONMultipleCoordinates(value)) {
+      const parsedGeoJson = JSON.parse(value);
+      if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
+        return (
+          <span
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>{`${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`}</span>
+        );
+      } else {
+        return '';
+      }
+    }
+    return '';
+  };
+
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
@@ -213,7 +232,10 @@ export const useSetColumns = (
             justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) &&
+              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                field.fieldData.type
+              )
               ? field.fieldData[column.field].sort().join(', ')
               : // : Array.isArray(field.fieldData[column.field])
               // ? field.fieldData[column.field].join(', ')
@@ -228,6 +250,10 @@ export const useSetColumns = (
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
+              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  field.fieldData.type
+                )
+              ? renderComplexGeometries(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
