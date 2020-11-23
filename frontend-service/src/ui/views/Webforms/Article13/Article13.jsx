@@ -101,10 +101,27 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     newEmptyRecord.dataRow = data;
 
     try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
-      if (response) {
-        onUpdateData();
+      /* const arrPromises = datasetSchema.tables
+        .filter(table => table.notEmpty && table.tableSchemaName !== 'PAMs')
+        .map(async table => {
+          await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+        }); */
+
+      // const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+
+      // const response = await Promise.all(arrPromises);
+
+      // if (response) {
+      //   onUpdateData();
+      // }
+
+      const filteredTables = datasetSchema.tables.filter(table => table.notEmpty && table.tableSchemaName !== 'PAMs');
+
+      for (let index = 0; index < filteredTables.length; index++) {
+        await DatasetService.addRecordsById(datasetId, filteredTables[index].tableSchemaId, [newEmptyRecord]);
       }
+      onUpdateData();
+      
     } catch (error) {
       console.error('error', error);
       const {
