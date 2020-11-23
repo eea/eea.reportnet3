@@ -64,6 +64,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -320,6 +321,8 @@ public class DatasetServiceTest {
 
   /** The field. */
   private FieldValue field;
+
+  public FieldValueWithLabelProjection fieldWithLabel;
 
   /**
    * Inits the mocks.
@@ -1423,57 +1426,31 @@ public class DatasetServiceTest {
    * Gets the field values referenced test number.
    *
    * @return the field values referenced test number
+   * @throws SecurityException the security exception
    */
   @Test
-  public void getFieldValuesReferencedTestNumber() {
-    field.setType(DataType.NUMBER_DECIMAL);
+  public void getFieldValuesReferencedTest() {
 
+    Document doc = new Document();
+    doc.put("typeData", DataType.LINK.getValue());
+    Document referencedDoc = new Document();
+    referencedDoc.put("idDatasetSchema", "5ce524fad31fc52540abae73");
+    referencedDoc.put("idPk", "5ce524fad31fc52540ab" + "ae73");
+    doc.put("referencedField", referencedDoc);
+    List<FieldVO> fieldsVO = new ArrayList<>();
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
-    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(fieldList);
+    Mockito
+        .when(fieldRepository.findByIdFieldSchemaAndConditionalWithTag(Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(fieldWithLabel));
 
-    datasetService.getFieldValuesReferenced(1L, "", "");
-    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
+    Assert.assertEquals(fieldsVO, datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
   }
 
-  /**
-   * Gets the field values referenced test date.
-   *
-   * @return the field values referenced test date
-   */
-  @Test
-  public void getFieldValuesReferencedTestDate() {
-    field.setType(DataType.DATE);
-    Mockito.when(
-        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
-        .thenReturn(1L);
-    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(fieldList);
 
-    datasetService.getFieldValuesReferenced(1L, "", "");
-    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
-  }
-
-  /**
-   * Gets the field values referenced test string.
-   *
-   * @return the field values referenced test string
-   */
-  @Test
-  public void getFieldValuesReferencedTestString() {
-    field.setType(DataType.TEXT);
-
-    Mockito.when(
-        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
-        .thenReturn(1L);
-    Mockito.when(fieldRepository.findByIdFieldSchemaAndValueContaining(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(fieldList);
-
-    datasetService.getFieldValuesReferenced(1L, "", "");
-    Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
-  }
 
   /**
    * Gets the referenced dataset id test.

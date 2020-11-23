@@ -58,14 +58,28 @@ public enum ResourceTypeEnum {
   /**
    * Validation result resource enum.
    */
-  VALIDATION_RESULT("ValidationResult");
+  VALIDATION_RESULT("ValidationResult"),
 
+  /** The provider. */
+  PROVIDER("Provider");
+
+  /** The resource. */
   private final String resource;
 
+  /**
+   * Instantiates a new resource type enum.
+   *
+   * @param resource the resource
+   */
   private ResourceTypeEnum(String resource) {
     this.resource = resource;
   }
 
+  /**
+   * To string.
+   *
+   * @return the string
+   */
   @Override
   @JsonValue
   public String toString() {

@@ -88,6 +88,7 @@ public class FieldSchema {
   @Field(value = "readOnly")
   private Boolean readOnly;
 
+
   /**
    * Hash code.
    *
