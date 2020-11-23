@@ -889,6 +889,7 @@
     "designView": "Design",
     "tableView": "Tabular data",
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
+    "noValidationsWithSelectedParameters": "There are no validations with the selected parameters",
     "sqlSentenceHelpDialogTitle": "SQL Help",
     "manualTechnicalAcceptanceHeader": "Datasets with manual technical acceptance for dataflow",
     "webformTableWithMoreRecords": "This table should have only one record, please check it.",
@@ -920,7 +921,7 @@
     "noMessages": "You have no messages",
     "noMessagesCustodian": "Please select a data provider",
     "unreadMessageSeparator": "Unread messages",
-    "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>dataset</a>",
+    "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
     "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs.",
     "feedbackDataProvider": "Data provider: ",
     "feedbackHelp": "Dataflow feedback help",
@@ -939,11 +940,16 @@
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
     "feedbackMessagePlaceholder": "Please provide information on the status change",
-    "exportExternalIntegrations": "External integrations",
+    "validateRulesErrorEvent": "You have {:invalid} invalid and {:disabled} disabled SQL QCs in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
+    "disableNamesTypesRulesErrorEvent": "Some QC rules have been disabled due to the change of the field type",
+    "validatedQcRuleEvent": "QC validated succesfully",
     "dataflowStatus": "Dataflow status",
     "open": "open",
     "draft": "draft",
     "geometryCoordinates": "Geometry coordinates",
-    "nonEditableData": "This field is not editable"
+    "nonEditableData": "This field is not editable",
+    "customExports": "Custom exports",
+    "fieldSchemaName": "Field",
+    "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check."
   }
 }

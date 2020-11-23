@@ -26,7 +26,7 @@ const isDuplicatedIntegrationName = (currentName, integrationsList = [], id) => 
   const names = integrationsList
     .filter(integration => integration.integrationId !== id)
     .map(integration => integration.integrationName.toLowerCase());
-  return names.includes(currentName.toLowerCase());
+  return names.includes(currentName.toLowerCase().trim());
 };
 
 const isDuplicatedParameter = (id, parameters, value) => {
