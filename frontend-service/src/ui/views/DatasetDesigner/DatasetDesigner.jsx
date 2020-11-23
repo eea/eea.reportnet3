@@ -36,7 +36,7 @@ import { RadioButton } from 'ui/views/_components/RadioButton';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { TabsValidations } from 'ui/views/_components/TabsValidations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
@@ -76,11 +76,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
-  const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
-  const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
-    invalidRules: 0,
-    disabledRules: 0
-  });
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -288,7 +283,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
-            label: resources.messages['exportExternalIntegrations'],
+            label: resources.messages['customExports'],
             items: externalOperationsList.export.map(type => ({
               command: () => onExportDataExternalIntegration(type.id),
               icon: config.icons['archive'],
@@ -528,6 +523,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     setIsLoadingFile,
     false
   );
+  useCheckNotifications(
+    ['VALIDATE_RULES_COMPLETED_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+    setSqlValidationRunning,
+    false
+  );
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -754,27 +754,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  useEffect(() => {
-    const response = notificationContext.toShow.find(
-      notification => notification.key === 'VALIDATE_RULES_COMPLETED_EVENT'
-    );
-    if (response) {
-      setSqlValidationRunning(false);
-    }
-  }, [notificationContext]);
-
-  useEffect(() => {
-    const response = notificationContext.hidden.find(notification => notification.key === 'DISABLE_RULES_ERROR_EVENT');
-    if (response) {
-      const {
-        content: { invalidRules, disabledRules }
-      } = response;
-      setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
-      setIsQCsNotValidWarningVisible(true);
-      setSqlValidationRunning(false);
-    }
-  }, [notificationContext]);
-
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
@@ -842,15 +821,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => cleanImportOtherSystemsDialog()}
       />
     </Fragment>
-  );
-
-  const sqlQCsNotValidWarningFooter = (
-    <Button
-      className="p-button-secondary"
-      icon="cancel"
-      label={resources.messages['close']}
-      onClick={() => setIsQCsNotValidWarningVisible(false)}
-    />
   );
 
   const renderValidationsFooter = (
@@ -1014,7 +984,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onHide={() => onHideValidationsDialog()}
           style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
-          <TabsValidations
+          <ValidationsList
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
@@ -1388,19 +1358,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 </a>
               </label>
             </div>
-          </Dialog>
-        )}
-
-        {isQCsNotValidWarningVisible && (
-          <Dialog
-            header={resources.messages['notValidQCWarningTitle']}
-            footer={sqlQCsNotValidWarningFooter}
-            onHide={() => setIsQCsNotValidWarningVisible(false)}
-            visible={isQCsNotValidWarningVisible}>
-            {TextUtils.parseText(resources.messages['notValidSqlQCWarningBody'], {
-              disabled: invalidAndDisabledRulesAmount.disabledRules,
-              invalid: invalidAndDisabledRulesAmount.invalidRules
-            })}
           </Dialog>
         )}
       </div>
