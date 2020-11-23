@@ -31,7 +31,7 @@ import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
-import { TabsValidations } from 'ui/views/_components/TabsValidations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
@@ -257,7 +257,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const externalIntegrationsNames = [
     {
-      label: resources.messages['exportExternalIntegrations'],
+      label: resources.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
         label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
         icon: config.icons['archive'],
@@ -979,7 +979,7 @@ export const Dataset = withRouter(({ match, history }) => {
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
           style={{ width: '90%' }}
           visible={validationListDialogVisible}>
-          <TabsValidations
+          <ValidationsList
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}

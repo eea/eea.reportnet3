@@ -288,7 +288,12 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Dataset Schema id",
           example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
+    try {
+      integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
 

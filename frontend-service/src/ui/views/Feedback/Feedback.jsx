@@ -287,6 +287,9 @@ export const Feedback = withRouter(({ match, history }) => {
             onLazyLoad={onGetMoreMessages}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
           />
+          {!isCustodian && (
+            <label className={styles.helpdeskMessage}>{resources.messages['feedbackHelpdeskMessage']}</label>
+          )}
           {isCustodian && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
               <InputTextarea

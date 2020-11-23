@@ -7,7 +7,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './TabsValidations.module.scss';
+import styles from './ValidationsList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -31,7 +31,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-const TabsValidations = withRouter(
+const ValidationsList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
@@ -56,10 +56,11 @@ const TabsValidations = withRouter(
     }, [tabsValidationsState.isDataUpdated]);
 
     useEffect(() => {
-      const response = notificationContext.hidden.find(notification => notification.key === 'VALIDATED_QC_RULE_EVENT');
-
-      if (response) onUpdateData();
-    }, [notificationContext]);
+      if (validationContext.isAutomaticRuleUpdated) {
+        onUpdateData();
+        validationContext.onAutomaticRuleIsUpdated(false);
+      }
+    }, [validationContext.isAutomaticRuleUpdated]);
 
     const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
@@ -131,9 +132,15 @@ const TabsValidations = withRouter(
 
     const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-    const onUpdateData = () => isDataUpdated(!tabsValidationsState.isDataUpdated);
+    const onUpdateData = () => {
+      isDataUpdated(!tabsValidationsState.isDataUpdated);
+    };
 
-    useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
+    useCheckNotifications(
+      ['INVALIDATED_QC_RULE_EVENT', 'VALIDATED_QC_RULE_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+      onUpdateData,
+      true
+    );
 
     const automaticTemplate = rowData => (
       <div className={styles.checkedValueColumn}>
@@ -438,4 +445,4 @@ const TabsValidations = withRouter(
   }
 );
 
-export { TabsValidations };
+export { ValidationsList };
