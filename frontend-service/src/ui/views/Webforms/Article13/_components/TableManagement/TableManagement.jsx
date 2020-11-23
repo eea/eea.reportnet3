@@ -255,9 +255,7 @@ export const TableManagement = ({
       };
     });
     Promise.all(parentTablesDataPromises)
-      .then(parentTableData => {
-        tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
-      })
+      .then(parentTableData => tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData }))
       .finally(() => setIsLoading(false));
   };
 
