@@ -5,7 +5,13 @@ const getTypeList = (records = []) => {
     let data = {};
 
     record.elements.forEach(
-      element => (data = { ...data, [lowerFirst(element.name)]: element.value, recordId: record.recordId })
+      element =>
+        (data = {
+          ...data,
+          [lowerFirst(element.name)]: element.value,
+          recordId: record.recordId,
+          fieldSchemaId: element.fieldSchemaId
+        })
     );
     return data;
   });

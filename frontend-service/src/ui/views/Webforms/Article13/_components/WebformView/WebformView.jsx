@@ -20,6 +20,8 @@ export const WebformView = ({
   datasetId,
   isReporting,
   selectedId,
+  selectedTable,
+  isRefresh,
   selectedTableName,
   state,
   tables
@@ -88,8 +90,10 @@ export const WebformView = ({
         dataflowId={dataflowId}
         datasetId={datasetId}
         isReporting={isReporting}
+        isRefresh={isRefresh}
         onTabChange={isVisible}
         selectedId={selectedId}
+        selectedTable={selectedTable}
         webform={visibleContent}
         webformType={'ARTICLE_13'}
       />

@@ -21,7 +21,13 @@ export const article13Reducer = (state, { type, payload }) => {
         ...state,
         selectedId: payload.recordId,
         selectedTableName: null,
-        selectedTable: { ...state.selectedTable, tableName: null, recordId: payload.recordId, pamsId: payload.pamsId }
+        selectedTable: {
+          ...state.selectedTable,
+          fieldSchemaId: payload.fieldSchemaId,
+          pamsId: payload.pamsId,
+          recordId: payload.recordId,
+          tableName: null
+        }
       };
 
     case 'ON_SELECT_TABLE':
@@ -36,6 +42,9 @@ export const article13Reducer = (state, { type, payload }) => {
 
     case 'SET_IS_ADDING_RECIRD':
       return { ...state, isAddingRecord: payload.value };
+
+    case 'ON_REFRESH':
+      return { ...state, isRefresh: payload.value };
 
     default:
       return state;

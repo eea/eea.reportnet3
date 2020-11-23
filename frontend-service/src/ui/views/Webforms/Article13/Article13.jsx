@@ -44,15 +44,18 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     isAddingRecord: false,
     isDataUpdated: false,
     isLoading: true,
+    isRefresh: false,
     pamsRecords: [],
     selectedId: null,
-    selectedTable: { tableName: null, recordId: null, pamsId: null },
+    selectedTable: { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
     selectedTableName: null,
     tableList: { group: [], single: [] },
     view: resources.messages['overview']
   });
 
   const { isDataUpdated, isLoading, pamsRecords, selectedId, selectedTableName, tableList, view } = article13State;
+
+  // console.log('article13State.selectedTable', article13State.selectedTable);
 
   useEffect(() => initialLoad(), []);
 
@@ -193,8 +196,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     onToggleView(resources.messages['details']);
   };
 
-  const onSelectRecord = (recordId, pamsId) => {
-    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
+  const onSelectRecord = (recordId, pamsId, fieldSchemaId) => {
+    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId, fieldSchemaId } });
   };
 
   const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
@@ -219,8 +222,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
               <span
                 className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
                 onClick={() => {
-                  onSelectRecord(items.recordId, items.id);
+                  onSelectRecord(items.recordId, items.id, items.fieldSchemaId);
                   onToggleView(resources.messages['details']);
+                  article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                 }}>
                 {items.id || '-'}
               </span>
@@ -241,7 +245,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         elements={[resources.messages['overview']]}
         onChange={switchView => {
           onToggleView(switchView);
-          onSelectRecord(null, null);
+          onSelectRecord(null, null, null);
         }}
         value={view}
       />
@@ -251,8 +255,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           data={article13State.data}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isRefresh={article13State.isRefresh}
           isReporting={isReporting}
           selectedId={selectedId}
+          selectedTable={article13State.selectedTable}
           selectedTableName={selectedTableName}
           state={state}
           tables={tables}

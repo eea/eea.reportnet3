@@ -22,7 +22,17 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
-export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, selectedId, webform, webformType }) => {
+export const WebformTable = ({
+  dataflowId,
+  datasetId,
+  isReporting,
+  onTabChange,
+  selectedId,
+  selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
+  isRefresh,
+  webform,
+  webformType
+}) => {
   const { onParseWebformRecords, parseNewRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
@@ -55,7 +65,7 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
     if (!isNil(webform) && webform.tableSchemaId) {
       onLoadTableData();
     }
-  }, [isDataUpdated, webform]);
+  }, [isDataUpdated, webform, isRefresh]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -95,13 +105,17 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
 
   const onLoadTableData = async () => {
     try {
-      const parentTableData = await DatasetService.tableDataById(datasetId, webform.tableSchemaId, '', 100, undefined, [
-        'CORRECT',
-        'INFO',
-        'WARNING',
-        'ERROR',
-        'BLOCKER'
-      ]);
+      const parentTableData = await DatasetService.tableDataById(
+        datasetId,
+        webform.tableSchemaId,
+        '',
+        100,
+        undefined,
+        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+        null,
+        selectedTable.fieldSchemaId,
+        selectedTable.pamsId
+      );
       if (!isNil(parentTableData.records)) {
         const tableSchemaIds = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.tableSchemaId))
@@ -129,6 +143,8 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
           tableData,
           parentTableData.totalRecords
         );
+
+        console.log('records', records);
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
@@ -187,9 +203,16 @@ export const WebformTable = ({ dataflowId, datasetId, isReporting, onTabChange, 
   };
 
   const renderArticle13WebformRecords = () => {
-    const filteredRecord = webformData.elementsRecords.filter(record => record.recordId === selectedId);
-    //TODO: Filter by idPam
-    return renderWebformRecord(!isEmpty(filteredRecord) ? filteredRecord[0] : webformData.elementsRecords[0], null);
+    // const filteredRecord = webformData.elementsRecords.filter(record => {
+    //   // console.log('record', record);
+    //   console.log('selectedId', selectedId);
+    //   return record.recordId === selectedId;
+    // });
+
+    // //TODO: Filter by idPam
+    // return renderWebformRecord(!isEmpty(filteredRecord) ? filteredRecord[0] : webformData.elementsRecords[0], null);
+    console.log('webformData.elementsRecords', webformData.elementsRecords);
+    return renderWebformRecord(webformData.elementsRecords[0], null);
   };
 
   const renderWebform = isMultiple => {
