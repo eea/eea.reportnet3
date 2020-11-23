@@ -480,7 +480,21 @@
         {
           "key": "LOAD_DATASETS_RELEASES_ERROR"
         },
-        { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" }
+        { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" },
+        {
+          "key": "VALIDATE_RULES_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
+        },
+        {
+          "key": "DISABLE_NAMES_TYPES_RULES_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
+        }
       ]
     },
     {
@@ -672,7 +686,7 @@
           "key": "VALIDATE_RULES_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
         },
         {
@@ -681,7 +695,8 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
-        }
+        },
+        { "key": "VALIDATED_QC_RULE_EVENT" }
       ]
     },
     {
@@ -729,10 +744,8 @@
     }
   ],
   "hiddenNotifications": [
-    "VALIDATED_QC_RULE_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
-    "DISABLE_NAMES_TYPES_RULES_ERROR_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
     "RECEIVED_MESSAGE"
   ]
