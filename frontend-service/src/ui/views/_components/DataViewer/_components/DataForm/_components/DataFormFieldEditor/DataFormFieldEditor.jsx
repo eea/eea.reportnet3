@@ -172,7 +172,7 @@ const DataFormFieldEditor = ({
       field,
       // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       hasMultipleValues ? '' : filter,
-      conditionalField.value,
+      !isNil(conditionalField) ? conditionalField.value : '',
       datasetSchemaId
     );
     const linkItems = referencedFieldValues
