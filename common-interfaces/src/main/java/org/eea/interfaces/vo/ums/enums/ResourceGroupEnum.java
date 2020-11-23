@@ -86,6 +86,7 @@ public enum ResourceGroupEnum {
   DATACOLLECTION_LEAD_REPORTER("DataCollection-%s-DATA_LEAD_REPORTER"),
 
 
+  /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR
   PROVIDER_NATIONAL_COORDINATOR("Provider-%s-NATIONAL_COORDINATOR"),
   // EUDataset
@@ -112,6 +113,16 @@ public enum ResourceGroupEnum {
    * @return the group name
    */
   public String getGroupName(Long idEntity) {
+    return String.format(this.expression, idEntity);
+  }
+
+  /**
+   * Gets the group name.
+   *
+   * @param idEntity the id entity
+   * @return the group name
+   */
+  public String getGroupName(String idEntity) {
     return String.format(this.expression, idEntity);
   }
 

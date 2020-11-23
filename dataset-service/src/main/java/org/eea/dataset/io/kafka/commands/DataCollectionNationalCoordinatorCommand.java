@@ -101,8 +101,9 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
       // we find all users who have a national coordinator group, to assing its news dataflow and
       // datasets
       List<ResourceAssignationVO> resourcesForDataProvider = new ArrayList();
-      List<UserRepresentationVO> users = userManagementControllerZull.getUsersByGroup(
-          ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR.getGroupName(providers.getKey()));
+      String resource =
+          ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR.getGroupName(providers.getValue());
+      List<UserRepresentationVO> users = userManagementControllerZull.getUsersByGroup(resource);
       if (null != users) {
         for (UserRepresentationVO userRepresentationVO : users) {
           // we find all datasets for that user with the provider id to assing it
@@ -161,7 +162,7 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
       for (DataProviderVO dataProvider : dataProviders) {
         if (dataProvider.getId().equals(representative.getDataProviderId())) {
           mapRepresentativeProviders.put(representative.getDataProviderId(),
-              dataProvider.getLabel());
+              dataProvider.getCode());
           dataProviders.remove(dataProvider);
           break;
         }
