@@ -175,6 +175,7 @@ export const ManageIntegrations = ({
 
   const onCreateIntegration = async () => {
     try {
+      manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.create(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         onCloseModal();
@@ -277,6 +278,7 @@ export const ManageIntegrations = ({
 
   const onUpdateIntegration = async () => {
     try {
+      manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.update(manageIntegrationsState);
 
       if (response.status >= 200 && response.status <= 299) {
