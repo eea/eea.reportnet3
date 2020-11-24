@@ -391,54 +391,56 @@ const FieldEditor = ({
             />
             <div className={styles.pointEpsgWrapper}>
               <label className={styles.epsg}>{resources.messages['epsg']}</label>
-              <Dropdown
-                ariaLabel={'crs'}
-                appendTo={document.body}
-                className={styles.epsgSwitcher}
-                disabled={isMapDisabled}
-                options={crs}
-                optionLabel="label"
-                onChange={e => {
-                  onEditorSubmitValue(
-                    cells,
-                    changePoint(
-                      RecordUtils.getCellValue(cells, cells.field) !== ''
-                        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                        : JSON.parse(fieldEmptyPointValue),
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
-                      e.target.value,
-                      true
-                    ),
-                    record
-                  );
-                  onEditorValueChange(
-                    cells,
-                    changePoint(
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+              <div>
+                <Dropdown
+                  ariaLabel={'crs'}
+                  appendTo={document.body}
+                  className={styles.epsgSwitcher}
+                  disabled={isMapDisabled}
+                  options={crs}
+                  optionLabel="label"
+                  onChange={e => {
+                    onEditorSubmitValue(
+                      cells,
+                      changePoint(
+                        RecordUtils.getCellValue(cells, cells.field) !== ''
+                          ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                          : JSON.parse(fieldEmptyPointValue),
+                        JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                        e.target.value,
+                        true
+                      ),
+                      record
+                    );
+                    onEditorValueChange(
+                      cells,
+                      changePoint(
+                        JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                        JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                        e.target.value
+                      ),
                       e.target.value
-                    ),
-                    e.target.value
-                  );
+                    );
 
-                  setCurrentCRS(e.target.value);
-                  onChangePointCRS(e.target.value.value);
-                }}
-                placeholder="Select a CRS"
-                value={currentCRS}
-              />
-              <Button
-                className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                icon="marker"
-                onClick={e => {
-                  if (!isNil(onMapOpen)) {
-                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
-                  }
-                }}
-                style={{ width: '35%' }}
-                tooltip={resources.messages['selectGeographicalDataOnMap']}
-                tooltipOptions={{ position: 'bottom' }}
-              />
+                    setCurrentCRS(e.target.value);
+                    onChangePointCRS(e.target.value.value);
+                  }}
+                  placeholder="Select a CRS"
+                  value={currentCRS}
+                />
+                <Button
+                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                  icon="marker"
+                  onClick={e => {
+                    if (!isNil(onMapOpen)) {
+                      onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
+                    }
+                  }}
+                  style={{ width: '35%' }}
+                  tooltip={resources.messages['selectGeographicalDataOnMap']}
+                  tooltipOptions={{ position: 'bottom' }}
+                />
+              </div>
             </div>
           </div>
         );
@@ -457,21 +459,23 @@ const FieldEditor = ({
             </label>
             <div className={styles.pointEpsgWrapper}>
               {!isNil(value) && value !== '' && <label className={styles.epsg}>{resources.messages['epsg']}</label>}
-              {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
-              {!isNil(value) && value !== '' && (
-                <Button
-                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                  icon="marker"
-                  onClick={e => {
-                    if (!isNil(onMapOpen)) {
-                      onMapOpen(value, cells, type);
-                    }
-                  }}
-                  style={{ width: '35%' }}
-                  tooltip={resources.messages['selectGeographicalDataOnMap']}
-                  tooltipOptions={{ position: 'bottom' }}
-                />
-              )}
+              <div>
+                {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
+                {!isNil(value) && value !== '' && (
+                  <Button
+                    className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                    icon="marker"
+                    onClick={e => {
+                      if (!isNil(onMapOpen)) {
+                        onMapOpen(value, cells, type);
+                      }
+                    }}
+                    style={{ width: '35%' }}
+                    tooltip={resources.messages['selectGeographicalDataOnMap']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                )}
+              </div>
             </div>
           </div>
         );
