@@ -522,6 +522,7 @@
     "userRoleType": "type",
     "userRowsInPagination": "Pagination rows",
     "userSelectImage": "Select an user image, or upload one",
+    "userServiceOldLoginError": "Login failed. Network?",
     "userSettings": "User profile details",
     "userSettingsBreadcrumbs": "User settings",
     "userSettingsConfirmSubtitle": "Configure the way to logout with or without a confirmation popup.",
@@ -950,6 +951,9 @@
     "customExports": "Custom exports",
     "fieldSchemaName": "Field",
     "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check.",
-    "isReleasing": "Is releasing"
+    "isReleasing": "Is releasing",
+    "linkedTableLabel": "Linked table label field",
+    "linkedTableConditional": "Linked table conditional field",
+    "masterTableConditional": "Master table conditional field"
   }
 }

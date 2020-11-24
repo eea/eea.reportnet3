@@ -34,11 +34,15 @@ export const FieldDesigner = ({
   checkDuplicates,
   codelistItems,
   datasetId,
+  datasetSchemaId,
   fieldDescription,
   fieldFileProperties,
   fieldHasMultipleValues,
   fieldId,
   fieldLink,
+  fieldLinkedTableConditional = '',
+  fieldLinkedTableLabel = '',
+  fieldMasterTableConditional = '',
   fieldMustBeUsed,
   fieldName,
   fieldPK,
@@ -66,7 +70,6 @@ export const FieldDesigner = ({
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
@@ -89,7 +92,6 @@ export const FieldDesigner = ({
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
-    // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
@@ -231,10 +233,7 @@ export const FieldDesigner = ({
           }
         }
       }
-      dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
-      dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
-      dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
-      dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
+      dispatchFieldDesigner({ type: 'RESET_FIELD' });
       if (
         ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
           type.fieldType.toUpperCase()
@@ -326,7 +325,24 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_ATTACHMENT' });
   };
 
-  const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
+  const onCancelSaveLink = ({
+    link,
+    linkedTableConditional,
+    linkedTableLabel,
+    masterTableConditional,
+    pkHasMultipleValues,
+    pkMustBeUsed
+  }) => {
+    const inmReferencedField = { ...link.referencedField };
+    if (linkedTableConditional !== '') {
+      inmReferencedField.linkedTableConditional = linkedTableConditional;
+    }
+    if (linkedTableLabel !== '') {
+      inmReferencedField.linkedTableLabel = linkedTableLabel;
+    }
+    if (masterTableConditional !== '') {
+      inmReferencedField.masterTableConditional = masterTableConditional;
+    }
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
@@ -334,7 +350,10 @@ export const FieldDesigner = ({
           onFieldAdd({
             codelistItems,
             type: 'LINK',
-            referencedField: link,
+            referencedField: {
+              ...link,
+              referencedField: inmReferencedField
+            },
             pkMustBeUsed,
             pkHasMultipleValues
           });
@@ -601,10 +620,35 @@ export const FieldDesigner = ({
     }
   };
 
-  const onSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
-    dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
-    dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
-    dispatchFieldDesigner({ type: 'SET_PK_HAS_MULTIPLE_VALUES', payload: pkHasMultipleValues });
+  const onSaveLink = ({
+    link,
+    linkedTableConditional,
+    linkedTableLabel,
+    masterTableConditional,
+    pkHasMultipleValues,
+    pkMustBeUsed
+  }) => {
+    const inmReferencedField = { ...link.referencedField };
+    if (linkedTableConditional !== '') {
+      inmReferencedField.linkedTableConditional = linkedTableConditional;
+    }
+    if (linkedTableLabel !== '') {
+      inmReferencedField.linkedTableLabel = linkedTableLabel;
+    }
+    if (masterTableConditional !== '') {
+      inmReferencedField.masterTableConditional = masterTableConditional;
+    }
+    dispatchFieldDesigner({
+      type: 'SET_LINK',
+      payload: {
+        link: {
+          ...link,
+          referencedField: inmReferencedField
+        },
+        pkMustBeUsed,
+        pkHasMultipleValues
+      }
+    });
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
@@ -614,7 +658,10 @@ export const FieldDesigner = ({
           onFieldAdd({
             codelistItems,
             type: 'LINK',
-            referencedField: link,
+            referencedField: {
+              ...link,
+              referencedField: inmReferencedField
+            },
             pkMustBeUsed,
             pkHasMultipleValues
           });
@@ -623,7 +670,10 @@ export const FieldDesigner = ({
             codelistItems,
             isLinkChange: true,
             type: 'LINK',
-            referencedField: link,
+            referencedField: {
+              ...link,
+              referencedField: inmReferencedField
+            },
             pkMustBeUsed,
             pkHasMultipleValues
           });
@@ -720,8 +770,11 @@ export const FieldDesigner = ({
 
   const parseReferenceField = completeReferencedField => {
     return {
+      idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId,
       idPk: completeReferencedField.referencedField.fieldSchemaId,
-      idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId
+      linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
+      labelId: completeReferencedField.referencedField.linkedTableLabel,
+      masterConditionalFieldId: completeReferencedField.referencedField.masterTableConditional
     };
   };
 
@@ -1050,8 +1103,12 @@ export const FieldDesigner = ({
       ) : null}
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
+          datasetSchemaId={datasetSchemaId}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          linkedTableConditional={fieldLinkedTableConditional}
+          linkedTableLabel={fieldLinkedTableLabel}
+          masterTableConditional={fieldMasterTableConditional}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}

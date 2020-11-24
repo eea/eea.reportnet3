@@ -13,6 +13,7 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 export const PrivateRoute = ({ component: Component, path }) => {
   const userContext = useContext(UserContext);
 
+  if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
       userStorage.removeSessionStorageProperty('redirectUrl');
       return <Route path={path} render={() => <Component />} />;
@@ -37,4 +38,23 @@ export const PrivateRoute = ({ component: Component, path }) => {
       }
       window.location.href = AccessPointWebConfig.euloginUrl;
     }
+  } else {
+    return (
+      <Route
+        path={path}
+        render={props =>
+          userStorage.hasToken() || !isUndefined(userContext.id) ? (
+            <Component />
+          ) : (
+            <Redirect
+              to={{
+                pathname: routes.ACCESS_POINT,
+                state: { from: props.location }
+              }}
+            />
+          )
+        }
+      />
+    );
+  }
 };
