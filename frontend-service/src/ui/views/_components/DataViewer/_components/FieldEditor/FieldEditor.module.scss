@@ -7,19 +7,23 @@
   font-weight: bold;
 }
 .pointEpsgWrapper {
-  align-items: center;
   display: flex;
-  margin-top: 0.5rem;
+  flex-direction: column;
+  margin-top: 1rem;
   width: 100%;
   label:first-child {
     width: 80px;
     color: var(--main-font-color);
     font-size: 0.9em;
     font-weight: bold;
-    padding: 5px;
   }
-  button {
-    width: 35%;
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .epsgSwitcher {
+      width: 100%;
+    }
   }
 }
 
@@ -27,8 +31,4 @@
   align-items: center;
   display: flex;
   flex-direction: column;
-}
-
-.epsgSwitcher {
-  margin-right: 1rem;
 }

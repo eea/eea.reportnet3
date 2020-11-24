@@ -354,9 +354,7 @@ export const useSetColumns = (
           key={column.field}
           sortable={sort}
           style={{
-            width: !invisibleColumn
-              ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
-              : '0.01px'
+            width: invisibleColumn && '0.01px'
           }}
         />
       );
@@ -374,14 +372,7 @@ export const useSetColumns = (
     );
 
     let editCol = (
-      <Column
-        body={row => actionTemplate(row)}
-        className={styles.validationCol}
-        header={resources.messages['actions']}
-        key="actions"
-        sortable={false}
-        style={{ width: '100px' }}
-      />
+      <Column body={row => actionTemplate(row)} header={resources.messages['actions']} key="actions" sortable={false} />
     );
 
     let validationCol = (
@@ -391,7 +382,6 @@ export const useSetColumns = (
         field="validations"
         key="recordValidation"
         sortable={false}
-        style={{ width: '100px' }}
       />
     );
 

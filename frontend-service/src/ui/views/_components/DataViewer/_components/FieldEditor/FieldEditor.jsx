@@ -18,7 +18,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 proj4.defs([
@@ -31,6 +31,7 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
+  datasetSchemaId,
   onChangePointCRS,
   onEditorKeyChange,
   onEditorSubmitValue,
@@ -82,7 +83,8 @@ const FieldEditor = ({
   }, []);
 
   useEffect(() => {
-    onFilter(RecordUtils.getCellValue(cells, cells.field));
+    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    onFilter(hasMultipleValues ? '' : RecordUtils.getCellValue(cells, cells.field));
     if (
       ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
         RecordUtils.getCellInfo(colsSchema, cells.field).type
@@ -105,20 +107,33 @@ const FieldEditor = ({
       return;
     }
 
-    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    if (isNil(datasetSchemaId)) {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      datasetSchemaId = metadata.datasetSchemaId;
+    }
 
+    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
-      isUndefined(colSchema.referencedField.name)
-        ? colSchema.referencedField.idPk
-        : colSchema.referencedField.referencedField.fieldSchemaId,
-      hasMultipleValues ? '' : filter
+      colSchema.field,
+      // isUndefined(colSchema.referencedField.name)
+      //   ? colSchema.referencedField.idPk
+      //   : colSchema.referencedField.referencedField.fieldSchemaId,
+      filter,
+      RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
+      datasetSchemaId
     );
 
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
-          itemType: referencedField.value,
+          itemType: `${referencedField.value}${
+            !isNil(referencedField.label) &&
+            referencedField.label !== '' &&
+            referencedField.label !== referencedField.value
+              ? ` - ${referencedField.label}`
+              : ''
+          }`,
           value: referencedField.value
         };
       })
@@ -376,54 +391,56 @@ const FieldEditor = ({
             />
             <div className={styles.pointEpsgWrapper}>
               <label className={styles.epsg}>{resources.messages['epsg']}</label>
-              <Dropdown
-                ariaLabel={'crs'}
-                appendTo={document.body}
-                className={styles.epsgSwitcher}
-                disabled={isMapDisabled}
-                options={crs}
-                optionLabel="label"
-                onChange={e => {
-                  onEditorSubmitValue(
-                    cells,
-                    changePoint(
-                      RecordUtils.getCellValue(cells, cells.field) !== ''
-                        ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
-                        : JSON.parse(fieldEmptyPointValue),
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
-                      e.target.value,
-                      true
-                    ),
-                    record
-                  );
-                  onEditorValueChange(
-                    cells,
-                    changePoint(
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
-                      JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+              <div>
+                <Dropdown
+                  ariaLabel={'crs'}
+                  appendTo={document.body}
+                  className={styles.epsgSwitcher}
+                  disabled={isMapDisabled}
+                  options={crs}
+                  optionLabel="label"
+                  onChange={e => {
+                    onEditorSubmitValue(
+                      cells,
+                      changePoint(
+                        RecordUtils.getCellValue(cells, cells.field) !== ''
+                          ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+                          : JSON.parse(fieldEmptyPointValue),
+                        JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                        e.target.value,
+                        true
+                      ),
+                      record
+                    );
+                    onEditorValueChange(
+                      cells,
+                      changePoint(
+                        JSON.parse(RecordUtils.getCellValue(cells, cells.field)),
+                        JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates,
+                        e.target.value
+                      ),
                       e.target.value
-                    ),
-                    e.target.value
-                  );
+                    );
 
-                  setCurrentCRS(e.target.value);
-                  onChangePointCRS(e.target.value.value);
-                }}
-                placeholder="Select a CRS"
-                value={currentCRS}
-              />
-              <Button
-                className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                icon="marker"
-                onClick={e => {
-                  if (!isNil(onMapOpen)) {
-                    onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
-                  }
-                }}
-                style={{ width: '35%' }}
-                tooltip={resources.messages['selectGeographicalDataOnMap']}
-                tooltipOptions={{ position: 'bottom' }}
-              />
+                    setCurrentCRS(e.target.value);
+                    onChangePointCRS(e.target.value.value);
+                  }}
+                  placeholder="Select a CRS"
+                  value={currentCRS}
+                />
+                <Button
+                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                  icon="marker"
+                  onClick={e => {
+                    if (!isNil(onMapOpen)) {
+                      onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
+                    }
+                  }}
+                  style={{ width: '35%' }}
+                  tooltip={resources.messages['selectGeographicalDataOnMap']}
+                  tooltipOptions={{ position: 'bottom' }}
+                />
+              </div>
             </div>
           </div>
         );
@@ -442,21 +459,23 @@ const FieldEditor = ({
             </label>
             <div className={styles.pointEpsgWrapper}>
               {!isNil(value) && value !== '' && <label className={styles.epsg}>{resources.messages['epsg']}</label>}
-              {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
-              {!isNil(value) && value !== '' && (
-                <Button
-                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                  icon="marker"
-                  onClick={e => {
-                    if (!isNil(onMapOpen)) {
-                      onMapOpen(value, cells, type);
-                    }
-                  }}
-                  style={{ width: '35%' }}
-                  tooltip={resources.messages['selectGeographicalDataOnMap']}
-                  tooltipOptions={{ position: 'bottom' }}
-                />
-              )}
+              <div>
+                {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
+                {!isNil(value) && value !== '' && (
+                  <Button
+                    className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                    icon="marker"
+                    onClick={e => {
+                      if (!isNil(onMapOpen)) {
+                        onMapOpen(value, cells, type);
+                      }
+                    }}
+                    style={{ width: '35%' }}
+                    tooltip={resources.messages['selectGeographicalDataOnMap']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                )}
+              </div>
             </div>
           </div>
         );
