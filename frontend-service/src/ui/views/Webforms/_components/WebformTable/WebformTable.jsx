@@ -2,7 +2,6 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebformTable.module.scss';
 
@@ -25,15 +24,14 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 export const WebformTable = ({
   dataflowId,
   datasetId,
+  isRefresh,
   isReporting,
   onTabChange,
-  selectedId,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
-  isRefresh,
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewRecord } = WebformsUtils;
+  const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -76,9 +74,10 @@ export const WebformTable = ({
     });
 
     if (!isEmpty(webformData.elementsRecords)) {
-      const newEmptyRecord = parseNewRecord(
-        webformData.elementsRecords[0].elements.filter(element => element.tableSchemaId === tableSchemaId)[0].elements
-      );
+      const filteredTable = webformData.elementsRecords[0].elements.filter(
+        element => element.tableSchemaId === tableSchemaId
+      )[0];
+      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId);
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
@@ -143,8 +142,6 @@ export const WebformTable = ({
           tableData,
           parentTableData.totalRecords
         );
-
-        console.log('records', records);
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
@@ -211,7 +208,6 @@ export const WebformTable = ({
 
     // //TODO: Filter by idPam
     // return renderWebformRecord(!isEmpty(filteredRecord) ? filteredRecord[0] : webformData.elementsRecords[0], null);
-    console.log('webformData.elementsRecords', webformData.elementsRecords);
     return renderWebformRecord(webformData.elementsRecords[0], null);
   };
 

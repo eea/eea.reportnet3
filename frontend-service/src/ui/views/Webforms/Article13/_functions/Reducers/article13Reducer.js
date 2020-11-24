@@ -19,7 +19,6 @@ export const article13Reducer = (state, { type, payload }) => {
     case 'ON_SELECT_RECORD':
       return {
         ...state,
-        selectedId: payload.recordId,
         selectedTableName: null,
         selectedTable: {
           ...state.selectedTable,

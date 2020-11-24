@@ -1,5 +1,4 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
-import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -8,9 +7,6 @@ import capitalize from 'lodash/capitalize';
 import styles from './Article13.module.scss';
 
 import { tables } from './article13.webform.json';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Button } from 'ui/views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
@@ -46,16 +42,13 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     isLoading: true,
     isRefresh: false,
     pamsRecords: [],
-    selectedId: null,
     selectedTable: { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
     selectedTableName: null,
     tableList: { group: [], single: [] },
     view: resources.messages['overview']
   });
 
-  const { isDataUpdated, isLoading, pamsRecords, selectedId, selectedTableName, tableList, view } = article13State;
-
-  // console.log('article13State.selectedTable', article13State.selectedTable);
+  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
 
   useEffect(() => initialLoad(), []);
 
@@ -215,16 +208,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       </h3>
 
       <ul className={styles.tableList}>
-        {Object.keys(tableList).map(list => (
-          <li className={styles.tableListItem}>
+        {Object.keys(tableList).map((list, i) => (
+          <li className={styles.tableListItem} key={i}>
             <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
-            {tableList[list].map(items => (
+            {tableList[list].map((items, i) => (
               <span
-                className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
+                className={`${styles.tableListId} ${
+                  items.recordId === selectedTable.recordId ? styles.selected : null
+                }`}
+                key={i}
                 onClick={() => {
+                  article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                   onSelectRecord(items.recordId, items.id, items.fieldSchemaPamId);
                   onToggleView(resources.messages['details']);
-                  article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                 }}>
                 {items.id || '-'}
               </span>
@@ -257,8 +253,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           datasetId={datasetId}
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
-          selectedId={selectedId}
-          selectedTable={article13State.selectedTable}
+          selectedTable={selectedTable}
           selectedTableName={selectedTableName}
           state={state}
           tables={tables}
