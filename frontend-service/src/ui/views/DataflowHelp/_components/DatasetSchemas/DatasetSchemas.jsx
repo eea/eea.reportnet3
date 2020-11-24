@@ -57,7 +57,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                 if (field.fieldId === referenceField.idPk) {
                   fieldObj.tableName = table.tableSchemaName;
                   fieldObj.fieldName = field.name;
-                  console.log({ field });
                 }
                 if (field.fieldId === referenceField.labelId) {
                   fieldObj.linkedTableLabel = field.name;

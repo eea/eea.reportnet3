@@ -197,7 +197,6 @@ const DatasetSchema = ({
             const field = {};
             let referencedField = {};
             if (!isNil(fieldDTO.referencedField)) {
-              console.log(fieldDTO.referencedField);
               referencedField = onGetReferencedFieldName(fieldDTO.referencedField);
             }
 
