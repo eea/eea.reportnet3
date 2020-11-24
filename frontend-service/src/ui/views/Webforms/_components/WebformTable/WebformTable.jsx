@@ -112,7 +112,7 @@ export const WebformTable = ({
         100,
         undefined,
         ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-        null,
+        undefined,
         selectedTable.fieldSchemaId,
         selectedTable.pamsId
       );

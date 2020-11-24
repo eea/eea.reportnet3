@@ -43,10 +43,12 @@ public class FieldVO implements Serializable {
    */
   private String idFieldSchema;
 
+  /** The label. */
+  private String label;
+
   /**
    * The validations.
    */
-
   private List<FieldValidationVO> fieldValidations;
 
   /** The level error. */
