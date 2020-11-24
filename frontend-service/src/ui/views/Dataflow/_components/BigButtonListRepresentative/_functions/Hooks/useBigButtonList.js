@@ -15,7 +15,6 @@ const useBigButtonList = ({
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
-  isReleaseCreating,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
