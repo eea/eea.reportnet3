@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useReducer, useRef, useState } from 'reac
 
 // import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
+import first from 'lodash/first';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
@@ -25,17 +26,22 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { MapUtils, MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
   autoFocus,
   column,
   datasetId,
+  datasetSchemaId,
+  editing = false,
   field,
   fieldValue = '',
+  isConditional = false,
+  isConditionalChanged = false,
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
+  records,
   reporting,
   type
 }) => {
@@ -48,6 +54,7 @@ const DataFormFieldEditor = ({
   const resources = useContext(ResourcesContext);
 
   const inputRef = useRef(null);
+  const linkDropdownRef = useRef(null);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
@@ -67,7 +74,7 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
-      if (type === 'LINK') onLoadColsSchema(fieldValue);
+      if (type === 'LINK') onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
       if (type === 'POINT') {
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',
@@ -80,6 +87,14 @@ const DataFormFieldEditor = ({
   }, []);
 
   useEffect(() => {
+    if (isConditionalChanged) {
+      if (!isNil(linkDropdownRef.current)) {
+        linkDropdownRef.current.clearFilter();
+      }
+    }
+  }, [records.editedRecord, records.newRecord, isConditionalChanged]);
+
+  useEffect(() => {
     if (inputRef.current && isVisible && autoFocus) {
       inputRef.current.element.focus();
     }
@@ -89,9 +104,7 @@ const DataFormFieldEditor = ({
     onCheckCoordinateFieldsError(field, map.showCoordinateError);
   }, [map.showCoordinateError]);
 
-  const onFilter = async filter => {
-    onLoadColsSchema(filter);
-  };
+  const onFilter = async filter => onLoadColsSchema(filter);
 
   const onLoadColsSchema = async filter => {
     const inmColumn = { ...column };
@@ -148,15 +161,40 @@ const DataFormFieldEditor = ({
     if (isNil(type) || !TextUtils.areEquals(type, 'LINK') || isNil(referencedField)) {
       return [];
     }
+
+    if (isNil(datasetSchemaId)) {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      datasetSchemaId = metadata.datasetSchemaId;
+    }
+
+    const conditionalField = editing
+      ? records.editedRecord.dataRow.find(
+          r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
+        )
+      : records.newRecord.dataRow.find(
+          r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
+        );
+    const conditionalFieldValue = !isNil(conditionalField)
+      ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
+      : '';
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
-      isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
-      hasMultipleValues ? '' : filter
+      field,
+      // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
+      filter,
+      conditionalFieldValue,
+      datasetSchemaId
     );
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
-          itemType: referencedField.value,
+          itemType: `${referencedField.value}${
+            !isNil(referencedField.label) &&
+            referencedField.label !== '' &&
+            referencedField.label !== referencedField.value
+              ? ` - ${referencedField.label}`
+              : ''
+          }`,
           value: referencedField.value
         };
       })
@@ -265,7 +303,7 @@ const DataFormFieldEditor = ({
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
-        onChange={e => onChangeForm(field, e.target.value)}
+        onChange={e => onChangeForm(field, e.target.value, isConditional)}
         placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
         ref={inputRef}
         style={{ width: '35%' }}
@@ -313,6 +351,7 @@ const DataFormFieldEditor = ({
           onFilterInputChangeBackend={onFilter}
           options={columnWithLinks.linkItems}
           optionLabel="itemType"
+          ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
             !Array.isArray(fieldValue) ? fieldValue.split(', ').join(',') : fieldValue
@@ -334,6 +373,7 @@ const DataFormFieldEditor = ({
           onFilterInputChangeBackend={onFilter}
           optionLabel="itemType"
           options={columnWithLinks.linkItems}
+          ref={linkDropdownRef}
           showFilterClear={true}
           value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
         />
