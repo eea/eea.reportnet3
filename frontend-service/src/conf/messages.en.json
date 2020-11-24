@@ -522,7 +522,6 @@
     "userRoleType": "type",
     "userRowsInPagination": "Pagination rows",
     "userSelectImage": "Select an user image, or upload one",
-    "userServiceOldLoginError": "Login failed. Network?",
     "userSettings": "User profile details",
     "userSettingsBreadcrumbs": "User settings",
     "userSettingsConfirmSubtitle": "Configure the way to logout with or without a confirmation popup.",
