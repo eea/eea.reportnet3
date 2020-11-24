@@ -133,29 +133,6 @@ const parseConfigurationDTO = userConfigurationDTO => {
 
 const updateAttributes = async attributes => await apiUser.updateAttributes(attributes);
 
-const oldLogin = async (userName, password) => {
-  const userDTO = await apiUser.oldLogin(userName, password);
-
-  const { accessToken, refreshToken } = userDTO;
-  const user = new User({
-    accessRole: userDTO.roles,
-    contextRoles: userDTO.groups,
-    id: userDTO.userId,
-    name: userDTO.preferredUsername,
-    preferredUsername: userDTO.preferredUsername,
-    tokenExpireTime: userDTO.accessTokenExpiration
-  });
-  userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await apiUser.userInfo(userDTO.userId);
-  user.email = userInfoDTO.data.email;
-  user.firstName = userInfoDTO.data.firstName;
-  user.lastName = userInfoDTO.data.lastName;
-  //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - dayjs().unix();
-  timeOut((remain - 10) * 1000);
-  return user;
-};
-
 const refreshToken = async () => {
   try {
     const currentTokens = userStorage.getTokens();
@@ -201,7 +178,6 @@ export const ApiUserRepository = {
   getConfiguration,
   updateAttributes,
   logout,
-  oldLogin,
   refreshToken,
   getToken,
   userRole,

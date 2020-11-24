@@ -59,15 +59,6 @@ export const apiUser = {
     });
     return response;
   },
-  oldLogin: async (userName, password) => {
-    const tokens = await HTTPRequester.post({
-      url: getUrl(UserConfig.oldLogin, {
-        userName,
-        password
-      })
-    });
-    return tokens.data;
-  },
 
   configuration: async () => {
     const response = await HTTPRequester.get({
