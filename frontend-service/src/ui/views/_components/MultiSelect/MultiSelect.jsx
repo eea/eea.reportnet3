@@ -380,6 +380,15 @@ export class MultiSelect extends Component {
     this.panelClick = false;
   }
 
+  clearFilter() {
+    if (this.props.onFilterInputChangeBackend) {
+      this.props.onFilterInputChangeBackend('');
+      this.setState({ filter: '' });
+    } else {
+      this.setState({ filter: '' });
+    }
+  }
+
   hasFilter() {
     return this.state.filter && this.state.filter.trim().length > 0;
   }

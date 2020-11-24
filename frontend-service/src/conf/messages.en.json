@@ -949,6 +949,9 @@
     "nonEditableData": "This field is not editable",
     "customExports": "Custom exports",
     "fieldSchemaName": "Field",
-    "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check."
+    "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check.",
+    "linkedTableLabel": "Linked table label field",
+    "linkedTableConditional": "Linked table conditional field",
+    "masterTableConditional": "Master table conditional field"
   }
 }
