@@ -222,7 +222,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
               <span
                 className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
                 onClick={() => {
-                  onSelectRecord(items.recordId, items.id, items.fieldSchemaId);
+                  onSelectRecord(items.recordId, items.id, items.fieldSchemaPamId);
                   onToggleView(resources.messages['details']);
                   article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                 }}>

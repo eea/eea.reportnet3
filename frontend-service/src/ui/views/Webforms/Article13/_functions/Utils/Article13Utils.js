@@ -1,8 +1,12 @@
+import isEmpty from 'lodash/isEmpty';
 import lowerFirst from 'lodash/lowerFirst';
+
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 const getTypeList = (records = []) => {
   const typeList = records.map(record => {
     let data = {};
+    const pamsSchemaId = record.elements.filter(element => TextUtils.areEquals(element.name, 'id'));
 
     record.elements.forEach(
       element =>
@@ -10,7 +14,7 @@ const getTypeList = (records = []) => {
           ...data,
           [lowerFirst(element.name)]: element.value,
           recordId: record.recordId,
-          fieldSchemaId: element.fieldSchemaId
+          fieldSchemaPamId: !isEmpty(pamsSchemaId) ? pamsSchemaId[0].fieldSchemaId : element.fieldSchemaId
         })
     );
     return data;
