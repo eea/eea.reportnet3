@@ -181,7 +181,6 @@ const ListBox = ({
       }
     } else {
       if (!option.disabled) {
-        console.log(value, optionValue, dataKey, ObjectUtils.equals(value, optionValue, dataKey));
         selected = ObjectUtils.equals(value, optionValue, dataKey);
       } else {
         selected = false;

@@ -74,7 +74,7 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
-      if (type === 'LINK') onLoadColsSchema(fieldValue);
+      if (type === 'LINK') onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
       if (type === 'POINT') {
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',
@@ -88,12 +88,11 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (isConditionalChanged) {
-      onLoadColsSchema('');
       if (!isNil(linkDropdownRef.current)) {
         linkDropdownRef.current.clearFilter();
       }
     }
-  }, [records.editedRecord, isConditionalChanged]);
+  }, [records.editedRecord, records.newRecord, isConditionalChanged]);
 
   useEffect(() => {
     if (inputRef.current && isVisible && autoFocus) {
@@ -105,9 +104,7 @@ const DataFormFieldEditor = ({
     onCheckCoordinateFieldsError(field, map.showCoordinateError);
   }, [map.showCoordinateError]);
 
-  const onFilter = async filter => {
-    onLoadColsSchema(filter);
-  };
+  const onFilter = async filter => onLoadColsSchema(filter);
 
   const onLoadColsSchema = async filter => {
     const inmColumn = { ...column };
@@ -184,7 +181,7 @@ const DataFormFieldEditor = ({
       datasetId,
       field,
       // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
-      hasMultipleValues ? '' : filter,
+      filter,
       conditionalFieldValue,
       datasetSchemaId
     );
@@ -192,7 +189,11 @@ const DataFormFieldEditor = ({
       .map(referencedField => {
         return {
           itemType: `${referencedField.value}${
-            !isNil(referencedField.label) && referencedField.label !== '' ? ` - ${referencedField.label}` : ''
+            !isNil(referencedField.label) &&
+            referencedField.label !== '' &&
+            referencedField.label !== referencedField.value
+              ? ` - ${referencedField.label}`
+              : ''
           }`,
           value: referencedField.value
         };

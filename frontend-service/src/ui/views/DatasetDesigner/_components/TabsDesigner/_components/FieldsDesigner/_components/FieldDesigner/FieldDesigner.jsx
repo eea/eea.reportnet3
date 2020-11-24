@@ -327,12 +327,22 @@ export const FieldDesigner = ({
 
   const onCancelSaveLink = ({
     link,
-    pkMustBeUsed,
-    pkHasMultipleValues,
-    linkedTableLabel,
     linkedTableConditional,
-    masterTableConditional
+    linkedTableLabel,
+    masterTableConditional,
+    pkHasMultipleValues,
+    pkMustBeUsed
   }) => {
+    const inmReferencedField = { ...link.referencedField };
+    if (linkedTableConditional !== '') {
+      inmReferencedField.linkedTableConditional = linkedTableConditional;
+    }
+    if (linkedTableLabel !== '') {
+      inmReferencedField.linkedTableLabel = linkedTableLabel;
+    }
+    if (masterTableConditional !== '') {
+      inmReferencedField.masterTableConditional = masterTableConditional;
+    }
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
@@ -342,12 +352,7 @@ export const FieldDesigner = ({
             type: 'LINK',
             referencedField: {
               ...link,
-              referencedField: {
-                ...link.referencedField,
-                linkedTableConditional,
-                linkedTableLabel,
-                masterTableConditional
-              }
+              referencedField: inmReferencedField
             },
             pkMustBeUsed,
             pkHasMultipleValues
@@ -623,12 +628,22 @@ export const FieldDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed
   }) => {
+    const inmReferencedField = { ...link.referencedField };
+    if (linkedTableConditional !== '') {
+      inmReferencedField.linkedTableConditional = linkedTableConditional;
+    }
+    if (linkedTableLabel !== '') {
+      inmReferencedField.linkedTableLabel = linkedTableLabel;
+    }
+    if (masterTableConditional !== '') {
+      inmReferencedField.masterTableConditional = masterTableConditional;
+    }
     dispatchFieldDesigner({
       type: 'SET_LINK',
       payload: {
         link: {
           ...link,
-          referencedField: { ...link.referencedField, linkedTableConditional, linkedTableLabel, masterTableConditional }
+          referencedField: inmReferencedField
         },
         pkMustBeUsed,
         pkHasMultipleValues
@@ -645,12 +660,7 @@ export const FieldDesigner = ({
             type: 'LINK',
             referencedField: {
               ...link,
-              referencedField: {
-                ...link.referencedField,
-                linkedTableConditional,
-                linkedTableLabel,
-                masterTableConditional
-              }
+              referencedField: inmReferencedField
             },
             pkMustBeUsed,
             pkHasMultipleValues
@@ -662,12 +672,7 @@ export const FieldDesigner = ({
             type: 'LINK',
             referencedField: {
               ...link,
-              referencedField: {
-                ...link.referencedField,
-                linkedTableConditional,
-                linkedTableLabel,
-                masterTableConditional
-              }
+              referencedField: inmReferencedField
             },
             pkMustBeUsed,
             pkHasMultipleValues

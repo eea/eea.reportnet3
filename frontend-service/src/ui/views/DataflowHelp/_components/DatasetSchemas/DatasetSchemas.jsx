@@ -46,7 +46,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     }
   }, [extensionsOperationsList, uniqueList, validationList]);
 
-  const onGetReferencedFieldName = referenceId => {
+  const onGetReferencedFieldName = referenceField => {
     const fieldObj = {};
     if (!isNil(datasetsSchemas) && !isEmpty(datasetsSchemas)) {
       datasetsSchemas.forEach(dataset => {
@@ -54,9 +54,19 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
           dataset.tables.forEach(table => {
             table.records.filter(record => {
               record.fields.forEach(field => {
-                if (field.fieldId === referenceId) {
+                if (field.fieldId === referenceField.idPk) {
                   fieldObj.tableName = table.tableSchemaName;
                   fieldObj.fieldName = field.name;
+                  console.log({ field });
+                }
+                if (field.fieldId === referenceField.labelId) {
+                  fieldObj.linkedTableLabel = field.name;
+                }
+                if (field.fieldId === referenceField.linkedConditionalFieldId) {
+                  fieldObj.linkedTableConditional = field.name;
+                }
+                if (field.fieldId === referenceField.masterConditionalFieldId) {
+                  fieldObj.masterTableConditional = field.name;
                 }
               });
             });

@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: row;
   overflow-x: auto;
-  padding: 1rem 0;
+  padding: 1rem 0 0 0;
   > div {
     min-width: 25%;
     max-width: 50%;
@@ -32,13 +32,23 @@
     overflow: hidden;
   }
 }
+.fieldSelector {
+  margin: 0 1rem;
+}
 .selectedLinkWrapper {
   margin-top: 1rem;
 }
+.selectedLinkLabel {
+  font-weight: bold;
+  font-style: italic;
+}
+.selectedLinkFieldsWrapper {
+  margin-top: 1rem;
+}
 .selectedLinkFieldsWrapper span {
-  margin: 0 0.5rem 0 1rem;
   font-weight: bold;
 }
+
 .switchTextInput {
   font-weight: bold;
 }

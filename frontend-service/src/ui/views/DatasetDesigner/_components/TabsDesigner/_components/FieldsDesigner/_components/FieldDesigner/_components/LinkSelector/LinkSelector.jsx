@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import pick from 'lodash/pick';
 
 import styles from './LinkSelector.module.scss';
 
@@ -37,14 +38,18 @@ const LinkSelector = withRouter(
   }) => {
     const resources = useContext(ResourcesContext);
     const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
-      link: selectedLink,
+      link: {
+        ...selectedLink,
+        referencedField: !isNil(selectedLink)
+          ? pick(selectedLink.referencedField, 'datasetSchemaId', 'fieldSchemaId', 'tableSchemaId')
+          : null
+      },
       linkedTableFields: [],
       pkLinkedTableLabel: {},
       pkLinkedTableConditional: {},
       masterTableConditional: {},
       masterTableFields: []
     });
-    console.log({ linkedTableConditional, linkedTableLabel, masterTableConditional });
 
     const {
       link,
@@ -79,8 +84,7 @@ const LinkSelector = withRouter(
     }, []);
 
     useEffect(() => {
-      console.log(selectedLink);
-      if (!isEmpty(datasetSchemas)) {
+      if (!isEmpty(datasetSchemas) && !isNil(selectedLink)) {
         getFields(selectedLink);
       }
     }, [datasetSchemas]);
@@ -99,11 +103,6 @@ const LinkSelector = withRouter(
 
     useEffect(() => {
       if (!isEmpty(masterTableFields)) {
-        console.log(
-          masterTableFields,
-          masterTableConditional,
-          masterTableFields.find(linkedField => linkedField.fieldSchemaId === masterTableConditional)
-        );
         dispatchLinkSelector({
           type: 'SET_MASTER_TABLE_CONDITIONAL',
           payload: masterTableFields.find(linkedField => linkedField.fieldSchemaId === masterTableConditional)
@@ -119,12 +118,11 @@ const LinkSelector = withRouter(
 
     useEffect(() => {
       if (!isVisible && isSaved) {
-        console.log(link);
         onSaveLink({
           link,
-          linkedTableConditional: pkLinkedTableConditional.fieldSchemaId,
-          linkedTableLabel: pkLinkedTableLabel.fieldSchemaId,
-          masterTableConditional: pkMasterTableConditional.fieldSchemaId,
+          linkedTableConditional: !isNil(pkLinkedTableConditional) ? pkLinkedTableConditional.fieldSchemaId : '',
+          linkedTableLabel: !isNil(pkLinkedTableLabel) ? pkLinkedTableLabel.fieldSchemaId : '',
+          masterTableConditional: !isNil(pkMasterTableConditional) ? pkMasterTableConditional.fieldSchemaId : '',
           pkHasMultipleValues,
           pkMustBeUsed
         });
@@ -146,7 +144,14 @@ const LinkSelector = withRouter(
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+            onCancelSaveLink({
+              link,
+              linkedTableConditional: !isNil(pkLinkedTableConditional) ? pkLinkedTableConditional.fieldSchemaId : '',
+              linkedTableLabel: !isNil(pkLinkedTableLabel) ? pkLinkedTableLabel.fieldSchemaId : '',
+              masterTableConditional: !isNil(pkMasterTableConditional) ? pkMasterTableConditional.fieldSchemaId : '',
+              pkHasMultipleValues,
+              pkMustBeUsed
+            });
             setIsVisible(false);
           }}
         />
@@ -154,7 +159,6 @@ const LinkSelector = withRouter(
     );
 
     const getFields = field => {
-      console.log('llego');
       let linkedFields = [];
       let masterFields = [];
       const linkedTable = datasetSchemas
@@ -173,6 +177,11 @@ const LinkSelector = withRouter(
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
 
+      linkedFields.unshift({
+        name: resources.messages['noneCodelist'],
+        fieldSchemaId: ''
+      });
+
       const masterTable = datasetSchemas
         .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
         .tables.find(table => table.tableSchemaId === tableSchemaId);
@@ -188,7 +197,11 @@ const LinkSelector = withRouter(
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
 
-      console.log({ linkedFields, masterFields });
+      masterFields.unshift({
+        name: resources.messages['noneCodelist'],
+        fieldSchemaId: ''
+      });
+
       dispatchLinkSelector({ type: 'SET_LINKED_AND_MASTER_FIELDS', payload: { linkedFields, masterFields } });
     };
 
@@ -247,7 +260,6 @@ const LinkSelector = withRouter(
                     key={`datasetSchema_${i}`}
                     options={getOptions(datasetSchema)}
                     onChange={e => {
-                      console.log(e.value);
                       if (!isNil(e.value)) {
                         dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
                         getFields(e.value);
@@ -265,6 +277,7 @@ const LinkSelector = withRouter(
             <Dropdown
               appendTo={document.body}
               ariaLabel="linkedTableLabel"
+              className={styles.fieldSelector}
               inputId="linkedTableLabel"
               name={resources.messages['linkedTableLabel']}
               onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
@@ -278,19 +291,22 @@ const LinkSelector = withRouter(
             <Dropdown
               appendTo={document.body}
               ariaLabel="linkedTableConditional"
+              className={styles.fieldSelector}
               inputId="linkedTableConditional"
               name={resources.messages['linkedTableConditional']}
               onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
               optionLabel="name"
               options={linkedTableFields}
               placeholder={resources.messages['linkedTableConditional']}
-              // scrollHeight="450px"
               value={pkLinkedTableConditional}
             />
+          </div>
+          <div className={styles.selectedLinkFieldsWrapper}>
             <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
             <Dropdown
               appendTo={document.body}
               ariaLabel="masterTableConditional"
+              className={styles.fieldSelector}
               inputId="masterTableConditional"
               name={resources.messages['masterTableConditional']}
               onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
@@ -326,7 +342,7 @@ const LinkSelector = withRouter(
             />
           </div>
           <div className={styles.selectedLinkWrapper}>
-            <span>{`${resources.messages['selectedLink']}: `}</span>
+            <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
             <span>{!isNil(link) ? link.name : ''}</span>
           </div>
         </React.Fragment>

@@ -83,7 +83,8 @@ const FieldEditor = ({
   }, []);
 
   useEffect(() => {
-    onFilter(RecordUtils.getCellValue(cells, cells.field));
+    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    onFilter(hasMultipleValues ? '' : RecordUtils.getCellValue(cells, cells.field));
     if (
       ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
         RecordUtils.getCellInfo(colsSchema, cells.field).type
@@ -118,7 +119,7 @@ const FieldEditor = ({
       // isUndefined(colSchema.referencedField.name)
       //   ? colSchema.referencedField.idPk
       //   : colSchema.referencedField.referencedField.fieldSchemaId,
-      hasMultipleValues ? '' : filter,
+      filter,
       RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
       datasetSchemaId
     );
@@ -127,7 +128,11 @@ const FieldEditor = ({
       .map(referencedField => {
         return {
           itemType: `${referencedField.value}${
-            !isNil(referencedField.label) && referencedField.label !== '' ? ` - ${referencedField.label}` : ''
+            !isNil(referencedField.label) &&
+            referencedField.label !== '' &&
+            referencedField.label !== referencedField.value
+              ? ` - ${referencedField.label}`
+              : ''
           }`,
           value: referencedField.value
         };
