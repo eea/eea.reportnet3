@@ -64,6 +64,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [dataset, setDataset] = useState({});
   const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -138,13 +139,17 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [tableSchema]);
 
   useEffect(() => {
-    if (!isUndefined(userContext.contextRoles)) {
-      setHasWritePermissions(
-        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
-          userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
-      );
+    if (!isNil(dataset) && dataset.isReleasing) {
+      setHasWritePermissions(!dataset.isReleasing);
+    } else {
+      if (!isUndefined(userContext.contextRoles)) {
+        setHasWritePermissions(
+          userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
+            userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
+        );
+      }
     }
-  }, [userContext]);
+  }, [userContext, dataset]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -475,6 +480,12 @@ export const Dataset = withRouter(({ match, history }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       const dataset = dataflow.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       setIsDatasetReleased(dataset[0].isReleased);
+
+      const [representativeDataset] = dataflow.representatives.filter(
+        representative => representative.dataProviderId === dataset[0].dataProviderId
+      );
+      dataset[0].isReleasing = representativeDataset.isReleasing;
+      setDataset(dataset[0]);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -497,6 +508,10 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  useCheckNotifications(
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    onLoadDataflow
+  );
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
