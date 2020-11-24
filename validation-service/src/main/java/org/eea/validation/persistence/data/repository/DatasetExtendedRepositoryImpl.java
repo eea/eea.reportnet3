@@ -26,7 +26,6 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.orm.jpa.JpaSystemException;
 
 /**
  * The Class DatasetExtendedRepositoryImpl.
@@ -73,7 +72,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       Session session = (Session) entityManager.getDelegate();
       return session.doReturningWork(
           conn -> executeQuery(conn, entityName, query, entityTypeEnum, datasetId, idTable));
-    } catch (HibernateException | JpaSystemException e) {
+    } catch (HibernateException e) {
       throw new EEAInvalidSQLException("SQL can't be executed: " + query, e);
     }
   }
