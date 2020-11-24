@@ -1083,6 +1083,9 @@ public class DatasetServiceImpl implements DatasetService {
       if (referenced.get("linkedConditionalFieldId") != null) {
         conditionalSchemaId = referenced.get("linkedConditionalFieldId").toString();
       }
+      if (StringUtils.isBlank(searchValue)) {
+        searchValue = "";
+      }
 
       Long idDatasetDestination =
           datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
