@@ -512,6 +512,7 @@ export const Dataset = withRouter(({ match, history }) => {
     ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
     onLoadDataflow
   );
+
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
@@ -673,7 +674,9 @@ export const Dataset = withRouter(({ match, history }) => {
     });
 
   const datasetInsideTitle = () => {
-    if (!isEmpty(datasetFeedbackStatus)) {
+    if (dataset.isReleasing) {
+      return `${resources.messages['isReleasing']} `;
+    } else if (!isEmpty(datasetFeedbackStatus)) {
       return `${datasetFeedbackStatus} `;
     } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
       return `${resources.messages['released'].toString()}`;
