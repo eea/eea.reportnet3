@@ -38,7 +38,7 @@ export const ThemeProvider = ({ children }) => {
       light: themeConfig.light,
       dark: themeConfig.dark
     },
-    headerCollapse: true
+    headerCollapse: false
   });
 
   return (
