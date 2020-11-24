@@ -30,12 +30,17 @@
           "type": "FIELD",
           "name": "IsGroup",
           "title": "Is this a single PaM or a group of PaMs?",
+          "customInput": "RADIO_BUTTON",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "ListOfSinglePams",
           "title": "Which policies or measures does it cover?",
+          "dependency": {
+            "field": "IsGroup",
+            "value": ["Group"]
+          },
           "isPrimary": false
         },
         {
@@ -62,6 +67,7 @@
           "type": "FIELD",
           "name": "IsPolicyMeasureEnvisaged",
           "title": "Is the policy or measure envisaged with a view to limiting GHG emissions beyond the Member State commitments under Regulation (EU) 2018/842 and Regulation (EU) 2018/841",
+          "customInput": "RADIO_BUTTON",
           "isPrimary": false
         },
         {
@@ -74,14 +80,14 @@
         {
           "type": "LABEL",
           "level": 2,
-          "title": "Sector(s) and objective(s) affected",
+          "title": "Sector(s) affected",
           "tooltip": "More than one sector can be selected",
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "SectorObjectives",
-          "title": "Sector(s) and objective(s)",
+          "title": "Sector(s)",
           "multipleRecords": true,
           "elements": [
             {
@@ -92,30 +98,61 @@
             },
             {
               "type": "FIELD",
-              "name": "Objective",
-              "title": "Objective(s)",
-              "tooltip": "More than one objective can be selected, additional objectives could be added and specified under 'other'",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
               "name": "OtherSectors",
               "title": "Other Sector(s)",
+              "dependency": {
+                "field": "SectorAffected",
+                "value": ["Other sectors"]
+              },
               "isPrimary": false
             }
           ]
         },
         {
+          "type": "LABEL",
+          "level": 2,
+          "title": "Objective(s) affected",
+          "tooltip": "More than one objective can be selected, additional objectives could be added and specified under 'other'",
+          "isPrimary": false
+        },
+        {
           "type": "TABLE",
-          "name": "OtherObjectives",
-          "title": "Other Objective(s)",
+          "name": "SectorObjectives",
+          "title": "Objective(s)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
-              "name": "Other",
-              "title": "Other Objective",
+              "name": "Objective",
+              "title": "Select Objective(s)",
               "isPrimary": false
+            },
+            {
+              "type": "TABLE",
+              "name": "OtherObjectives",
+              "title": "Other Objective(s)",
+              "dependency": {
+                "field": "Objective",
+                "value": [
+                  "Other energy supply",
+                  "Other energy consumption",
+                  "Other transport",
+                  "Other industrial processes",
+                  "Other waste",
+                  "Other agriculture",
+                  "Other land use, land-use change and forestry",
+                  "New objective(s)"
+                ]
+              },
+              "multipleRecords": true,
+              "elements": [
+                {
+                  "type": "FIELD",
+                  "name": "Other",
+                  "title": "Other Objective",
+                  "isPrimary": false
+                }
+              ]
             }
           ]
         },
@@ -162,6 +199,10 @@
           "type": "FIELD",
           "name": "OtherPolicyInstrument",
           "title": "Describe the other policy Instrument",
+          "dependency": {
+            "field": "TypePolicyInstrumen",
+            "value": ["Other"]
+          },
           "isPrimary": false
         },
         {
@@ -174,18 +215,27 @@
           "type": "FIELD",
           "name": "UnionPolicy",
           "title": "Related / Not related",
+          "customInput": "RADIO_BUTTON",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "UnionPolicyList",
           "title": "Select Union policy/policies",
+          "dependency": {
+            "field": "UnionPolicy",
+            "value": ["Non related"]
+          },
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "UnionPolicyOther",
           "title": "",
+          "dependency": {
+            "field": "UnionPolicyList",
+            "value": ["Other (Union policy not listed above or additional Union policy)"]
+          },
           "multipleRecords": true,
           "elements": [
             {
