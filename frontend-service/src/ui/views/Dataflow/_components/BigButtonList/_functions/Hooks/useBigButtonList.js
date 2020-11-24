@@ -427,14 +427,21 @@ const useBigButtonList = ({
     ];
   };
 
+  const isReleasing =
+    dataflowState.data.representatives.length !== 0 ? dataflowState.data.representatives[0].isReleasing : false;
+
+  const representativeDataset = dataflowState.data.representatives.filter(
+    representative => representative.dataProviderId === dataProviderId
+  );
+
   const onBuildReleaseButton = () => {
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: isActiveButton ? 'released' : 'spinner',
-        buttonIconClass: isActiveButton ? 'released' : 'spinner',
+        buttonIcon: isReleasing ? 'spinner' : 'released',
+        buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: isActiveButton ? () => onOpenReleaseConfirmDialog() : () => {},
+        handleRedirect: !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         visibility: buttonsVisibility.release
