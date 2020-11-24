@@ -421,22 +421,21 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const setIsReleasing = releasingValue => {
-    !isNil(dataProviderId) &&
-      dataflowState.data.representatives.forEach(representative => {
-        if (representative.dataProviderId === dataProviderId) {
-          representative.isReleasing = releasingValue;
-        }
-      });
+  const setIsReleasingDataProviderId = () => {
+    const [notification] = notificationContext.all.filter(
+      notification =>
+        notification.key === 'RELEASE_FAILED_EVENT' || notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+    );
+
+    const [representativeReleased] = dataflowState.data.representatives.filter(
+      representative => representative.dataProviderId === notification.content.providerId
+    );
+    representativeReleased.isReleasing = false;
   };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
 
-  useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
-    setIsReleasing,
-    false
-  );
+  useCheckNotifications(['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'], setIsReleasingDataProviderId);
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
