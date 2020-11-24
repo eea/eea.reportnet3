@@ -239,7 +239,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
             <Button
               className={styles.addButton}
               disabled={article13State.isAddingRecord}
-              icon={'add'}
+              icon={article13State.isAddingRecord ? 'spinnerAnimate' : 'add'}
               label={resources.messages['add']}
               onClick={() => onAddPamsRecord(capitalize(list))}
             />
