@@ -421,11 +421,20 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const setIsReleasing = releasingValue => {
+    !isNil(dataProviderId) &&
+      dataflowState.data.representatives.forEach(representative => {
+        if (representative.dataProviderId === dataProviderId) {
+          representative.isReleasing = releasingValue;
+        }
+      });
+  };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
     ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    setIsReleasing,
     false
   );
 
@@ -454,6 +463,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRelease = async () => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
+      !isNil(dataProviderId) &&
+        dataflowState.data.representatives.forEach(representative => {
+          if (representative.dataProviderId == dataProviderId) {
+            return (representative.isReleasing = true);
+          }
+        });
     } catch (error) {
       notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
     } finally {
