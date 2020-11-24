@@ -430,10 +430,6 @@ const useBigButtonList = ({
   const isReleasing =
     dataflowState.data.representatives.length !== 0 ? dataflowState.data.representatives[0].isReleasing : false;
 
-  const representativeDataset = dataflowState.data.representatives.filter(
-    representative => representative.dataProviderId === dataProviderId
-  );
-
   const onBuildReleaseButton = () => {
     return [
       {
