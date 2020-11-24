@@ -19,7 +19,6 @@ import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivacyStatement } from 'ui/views/PrivacyStatement';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { PublicFrontpage } from 'ui/views/PublicFrontpage';
-import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
 import { Settings } from 'ui/views/Settings';
 
 import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
@@ -48,7 +47,6 @@ const App = () => {
                         <Router>
                           <Switch>
                             <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
-                            <Route exact path={routes.LOGIN} component={ReportnetLogin} />
                             <Route exact path={routes.EULOGIN} component={EULogin} />
                             <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK} component={Feedback} />
                             <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} component={Feedback} />
