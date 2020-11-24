@@ -282,11 +282,17 @@ export const Map = ({
   };
 
   const onEachFeature = (feature, layer) => {
-    layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
-    // layer.on({
-    //   click: () =>
-    //     mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
-    // });
+    if (TextUtils.areEquals(geometryType, 'POINT')) {
+      layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
+      layer.on({
+        click: () =>
+          mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
+      });
+    } else {
+      var bounds = layer.getBounds();
+      var center = bounds.getCenter();
+      mapRef.current.leafletElement.setView(center, mapRef.current.leafletElement.zoom);
+    }
   };
 
   const onPrintCoordinates = coordinates => `{Lat: ${coordinates.split(', ')[0]}, Lng: ${coordinates.split(', ')[1]}}`;
