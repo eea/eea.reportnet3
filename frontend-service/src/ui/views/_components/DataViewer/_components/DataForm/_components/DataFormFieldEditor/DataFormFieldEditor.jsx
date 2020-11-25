@@ -141,6 +141,7 @@ const DataFormFieldEditor = ({
   const changePoint = (geoJson, coordinates, crs, withCRS = true) => {
     if (geoJson !== '') {
       let coords = coordinates;
+      geoJson.geometry.type = 'Point';
       if (withCRS) {
         coords = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = coords;

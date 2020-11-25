@@ -150,6 +150,7 @@ const FieldEditor = ({
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
+      geoJson.geometry.type = 'Point';
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
