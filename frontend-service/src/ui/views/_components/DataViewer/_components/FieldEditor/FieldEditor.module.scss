@@ -31,4 +31,8 @@
   align-items: center;
   display: flex;
   flex-direction: column;
+  > label {
+    max-height: 100px;
+    overflow-y: scroll;
+  }
 }

@@ -197,7 +197,7 @@ const DatasetSchema = ({
             const field = {};
             let referencedField = {};
             if (!isNil(fieldDTO.referencedField)) {
-              referencedField = onGetReferencedFieldName(fieldDTO.referencedField.idPk);
+              referencedField = onGetReferencedFieldName(fieldDTO.referencedField);
             }
 
             field.pk = fieldDTO.pk;
@@ -216,7 +216,26 @@ const DatasetSchema = ({
             field.format = getFieldFormat(fieldDTO);
             if (containsLinks) {
               if (!isNil(fieldDTO.referencedField)) {
-                field.referencedField = `${referencedField.tableName} - ${referencedField.fieldName}`;
+                field.referencedField = `
+                ${referencedField.tableName} - ${referencedField.fieldName}
+
+                ${
+                  !isNil(referencedField.linkedTableLabel) && referencedField.linkedTableLabel !== ''
+                    ? `Linked label: ${referencedField.linkedTableLabel}`
+                    : ''
+                }
+
+                ${
+                  !isNil(referencedField.linkedTableConditional) && referencedField.linkedTableConditional !== ''
+                    ? `Linked conditional: ${referencedField.linkedTableConditional}`
+                    : ''
+                }
+                
+                ${
+                  !isNil(referencedField.masterTableConditional) && referencedField.masterTableConditional !== ''
+                    ? `Master conditional: ${referencedField.masterTableConditional}`
+                    : ''
+                }`;
               } else {
                 field.referencedField = '';
               }

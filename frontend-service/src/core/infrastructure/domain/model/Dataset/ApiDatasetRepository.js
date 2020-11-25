@@ -252,13 +252,20 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
-const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken) => {
-  const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken);
+const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken, conditionalValue, datasetSchemaId) => {
+  const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(
+    datasetId,
+    fieldSchemaId,
+    searchToken,
+    conditionalValue,
+    datasetSchemaId
+  );
   return referencedFieldValuesDTO.map(
     referencedFieldDTO =>
       new DatasetTableField({
         fieldId: referencedFieldDTO.id,
         fieldSchemaId: referencedFieldDTO.idFieldSchema,
+        label: referencedFieldDTO.label,
         type: referencedFieldDTO.type,
         value: referencedFieldDTO.value
       })
