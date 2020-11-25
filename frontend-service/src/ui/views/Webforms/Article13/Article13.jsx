@@ -79,22 +79,29 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     setIsAddingRecord(true);
 
     const table = article13State.data.filter(table => TextUtils.areEquals(table.name, 'pams'))[0];
-    const newEmptyRecord = parseNewRecord(table.elements);
+    const newEmptyPamRecord = parseNewRecord(table.elements);
 
     const data = [];
-    for (let index = 0; index < newEmptyRecord.dataRow.length; index++) {
-      const row = newEmptyRecord.dataRow[index];
-
+    const pamId = generatePamId();
+    for (let index = 0; index < newEmptyPamRecord.dataRow.length; index++) {
+      const row = newEmptyPamRecord.dataRow[index];
       row.fieldData[getParamFieldSchemaId('IsGroup', table)] = type;
-      row.fieldData[getParamFieldSchemaId('Id', table)] = generatePamId();
+      row.fieldData[getParamFieldSchemaId('Id', table)] = pamId;
 
       data.push({ ...row });
     }
 
-    newEmptyRecord.dataRow = data;
+    newEmptyPamRecord.dataRow = data;
 
     try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
+
+      const filteredTables = datasetSchema.tables.filter(table => table.notEmpty && table.tableSchemaName !== 'PAMs');
+
+      for (let i = 0; i < filteredTables.length; i++) {
+        const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
+        await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
+      }
       if (response) {
         onUpdateData();
       }
@@ -228,7 +235,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
             <Button
               className={styles.addButton}
               disabled={article13State.isAddingRecord}
-              icon={'add'}
+              icon={article13State.isAddingRecord ? 'spinnerAnimate' : 'add'}
               label={resources.messages['add']}
               onClick={() => onAddPamsRecord(capitalize(list))}
             />
