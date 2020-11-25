@@ -112,6 +112,17 @@ public class SQLValidationUtilsTest {
     List<TableValidation> tableValidations = new ArrayList<>();
     table.setTableValidations(tableValidations);
 
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    record.setId("id");
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1L);
+    recordValidations.add(recordValidation);
+    record.setRecordValidations(recordValidations);
+    records.add(record);
+    table.setRecords(records);
+
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
@@ -140,6 +151,17 @@ public class SQLValidationUtilsTest {
     tableValidation.setId(1L);
     tableValidations.add(tableValidation);
     table.setTableValidations(tableValidations);
+
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    record.setId("id");
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1L);
+    recordValidations.add(recordValidation);
+    record.setRecordValidations(recordValidations);
+    records.add(record);
+    table.setRecords(records);
 
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
