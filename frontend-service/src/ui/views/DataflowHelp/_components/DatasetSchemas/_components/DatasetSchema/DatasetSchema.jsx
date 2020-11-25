@@ -219,16 +219,20 @@ const DatasetSchema = ({
                 field.referencedField = `
                 ${referencedField.tableName} - ${referencedField.fieldName}
 
-                ${referencedField.linkedTableLabel !== '' ? `Linked label: ${referencedField.linkedTableLabel}` : ''}
+                ${
+                  !isNil(referencedField.linkedTableLabel) && referencedField.linkedTableLabel !== ''
+                    ? `Linked label: ${referencedField.linkedTableLabel}`
+                    : ''
+                }
 
                 ${
-                  referencedField.linkedTableConditional !== ''
+                  !isNil(referencedField.linkedTableConditional) && referencedField.linkedTableConditional !== ''
                     ? `Linked conditional: ${referencedField.linkedTableConditional}`
                     : ''
                 }
                 
                 ${
-                  referencedField.masterTableConditional !== ''
+                  !isNil(referencedField.masterTableConditional) && referencedField.masterTableConditional !== ''
                     ? `Master conditional: ${referencedField.masterTableConditional}`
                     : ''
                 }`;
