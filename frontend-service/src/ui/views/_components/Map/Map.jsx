@@ -104,7 +104,11 @@ export const Map = ({
   );
 
   const [newPositionMarker, setNewPositionMarker] = useState();
-  const [mapGeoJson, setMapGeoJson] = useState(geoJson);
+  const [mapGeoJson, setMapGeoJson] = useState(
+    geoJson === ''
+      ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
+      : geoJson
+  );
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
 
@@ -282,11 +286,17 @@ export const Map = ({
   };
 
   const onEachFeature = (feature, layer) => {
-    layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
-    // layer.on({
-    //   click: () =>
-    //     mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
-    // });
+    if (TextUtils.areEquals(geometryType, 'POINT')) {
+      layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
+      layer.on({
+        click: () =>
+          mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
+      });
+    } else {
+      var bounds = layer.getBounds();
+      var center = bounds.getCenter();
+      mapRef.current.leafletElement.setView(center, mapRef.current.leafletElement.zoom);
+    }
   };
 
   const onPrintCoordinates = coordinates => `{Lat: ${coordinates.split(', ')[0]}, Lng: ${coordinates.split(', ')[1]}}`;

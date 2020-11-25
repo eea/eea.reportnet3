@@ -36,6 +36,7 @@ const checkSRID = srid => {
 const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
   if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
+  if (isNil(coordinates)) return false;
   if (!Array.isArray(coordinates)) {
     if (coordinates.toString().indexOf(',') === -1) return false;
   } else {
