@@ -51,8 +51,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
 
-  // console.log('new fieldSchemaId ART: ', selectedTable.fieldSchemaId);
-  // console.log('new pamsId ART: ', selectedTable.pamsId);
+  console.log('new fieldSchemaId ART: ', selectedTable.fieldSchemaId);
+  console.log('new pamsId ART: ', selectedTable.pamsId);
 
   useEffect(() => initialLoad(), []);
 

@@ -49,9 +49,6 @@ export const WebformTable = ({
   const { isDataUpdated, webformData } = webformTableState;
 
   useEffect(() => {
-    // console.log('new fieldSchemaId TABLE', selectedTable.fieldSchemaId);
-    // console.log('new pamsId TABLE', selectedTable.pamsId);
-
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
 
@@ -59,7 +56,7 @@ export const WebformTable = ({
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
     if (!isNil(webform) && webform.tableSchemaId) {
-      if (webformType === 'ARTICLE_13' && !isNil(selectedTable.fieldSchemaId) && !isNil(selectedTable.pamsId)) {
+      if (webformType === 'ARTICLE_13' && !isNil(selectedTable.pamsId)) {
         isLoading(true);
         onLoadTableData();
       }
@@ -69,7 +66,7 @@ export const WebformTable = ({
         onLoadTableData();
       }
     }
-  }, [isDataUpdated, isRefresh, onTabChange, selectedTable.fieldSchemaId, selectedTable.pamsId, webform]);
+  }, [isDataUpdated, isRefresh, onTabChange, selectedTable.pamsId, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -110,6 +107,8 @@ export const WebformTable = ({
 
   const onLoadTableData = async () => {
     try {
+      const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
+
       const parentTableData = await DatasetService.tableDataById(
         datasetId,
         webform.tableSchemaId,
@@ -118,7 +117,7 @@ export const WebformTable = ({
         undefined,
         ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
         undefined,
-        selectedTable.fieldSchemaId,
+        fieldSchema || fieldId,
         selectedTable.pamsId
       );
       if (!isNil(parentTableData.records)) {
