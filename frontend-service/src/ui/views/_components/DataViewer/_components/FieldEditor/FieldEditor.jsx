@@ -18,7 +18,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 proj4.defs([
@@ -423,13 +423,18 @@ const FieldEditor = ({
       case 'MULTIPOLYGON':
       case 'POLYGON':
         const value = RecordUtils.getCellValue(cells, cells.field);
-        console.log({ value });
-        const isValidJSON = MapUtils.checkValidJSONCoordinates(value);
+        const isValidJSON = MapUtils.checkValidJSONMultipleCoordinates(value);
+        let differentTypes = false;
+        if (!isNil(value) && value !== '') {
+          differentTypes = !TextUtils.areEquals(JSON.parse(value).geometry.type, type);
+        }
         return (
           <div className={styles.pointWrapper}>
             <label className={isNil(value) || value === '' || !isValidJSON ? styles.nonEditableData : ''}>
-              {!isNil(value) && value !== '' && isValidJSON
+              {!isNil(value) && value !== '' && isValidJSON && !differentTypes
                 ? JSON.parse(value).geometry.coordinates.join(', ')
+                : differentTypes
+                ? resources.messages['nonEditableDataDifferentTypes']
                 : resources.messages['nonEditableData']}
             </label>
             <div className={styles.pointEpsgWrapper}>
