@@ -44,6 +44,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     pamsRecords: [],
     selectedTable: { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
     selectedTableName: null,
+    selectedTableSchemaId: null,
     tableList: { group: [], single: [] },
     view: resources.messages['overview']
   });
@@ -55,6 +56,18 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   useEffect(() => {
     onLoadPamsData();
   }, [article13State.data, isDataUpdated]);
+
+  useEffect(() => {
+    if (!isEmpty(article13State.data)) {
+      const table = article13State.data.filter(table => table.tableSchemaId === article13State.selectedTableSchemaId);
+
+      if (!isEmpty(table)) {
+        const tset = table[0].records[0].fields.filter(field => TextUtils.areEquals(field.name, 'Fk_PaMs'))[0];
+
+        onSelectFieldSchemaId(tset.fieldSchema || tset.fieldId);
+      }
+    }
+  }, [article13State.data, article13State.selectedTableSchemaId]);
 
   const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
 
@@ -73,6 +86,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     return table.elements
       .filter(element => TextUtils.areEquals(element.name, param))
       .map(table => table.fieldSchema)[0];
+  };
+
+  const getTableSchemaId = tableSchemaId => {
+    article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
   const onAddPamsRecord = async type => {
@@ -180,6 +197,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   };
 
   const onSelectEditTable = (pamNumberId, tableName) => {
+    const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
     const pamSchemaId = article13State.data
       .filter(table => TextUtils.areEquals(table.name, 'PAMS'))[0]
       .records[0].fields.filter(field => TextUtils.areEquals(field.name, 'ID'))[0].fieldId;
@@ -191,13 +209,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         }
       });
     });
-    onSelectRecord(recordId);
+
+    getTableSchemaId(filteredTable.tableSchemaId);
+    onSelectRecord(recordId, pamNumberId);
     onSelectTableName(tableName);
     onToggleView(resources.messages['details']);
   };
 
-  const onSelectRecord = (recordId, pamsId, fieldSchemaId) => {
-    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId, fieldSchemaId } });
+  const onSelectFieldSchemaId = fieldSchemaId => {
+    article13Dispatch({ type: 'ON_SELECT_SCHEMA_ID', payload: { fieldSchemaId } });
+  };
+
+  const onSelectRecord = (recordId, pamsId) => {
+    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
   };
 
   const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
@@ -226,7 +250,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
                 key={i}
                 onClick={() => {
                   article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
-                  onSelectRecord(items.recordId, items.id, items.fieldSchemaPamId);
+                  onSelectRecord(items.recordId, items.id);
                   onToggleView(resources.messages['details']);
                 }}>
                 {items.id || '-'}
@@ -248,7 +272,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         elements={[resources.messages['overview']]}
         onChange={switchView => {
           onToggleView(switchView);
-          onSelectRecord(null, null, null);
+          onSelectRecord(null, null);
         }}
         value={view}
       />

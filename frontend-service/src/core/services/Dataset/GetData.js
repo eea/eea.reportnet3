@@ -5,7 +5,7 @@ export const GetData = ({ datasetRepository }) => async (
   pageSize,
   fields = undefined,
   levelError = null,
-  ruleId = '',
+  ruleId = undefined,
   fieldSchemaId = undefined,
   value = undefined
 ) =>

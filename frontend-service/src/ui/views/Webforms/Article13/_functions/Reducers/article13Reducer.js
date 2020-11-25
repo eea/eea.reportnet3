@@ -20,13 +20,7 @@ export const article13Reducer = (state, { type, payload }) => {
       return {
         ...state,
         selectedTableName: null,
-        selectedTable: {
-          ...state.selectedTable,
-          fieldSchemaId: payload.fieldSchemaId,
-          pamsId: payload.pamsId,
-          recordId: payload.recordId,
-          tableName: null
-        }
+        selectedTable: { ...state.selectedTable, pamsId: payload.pamsId, recordId: payload.recordId, tableName: null }
       };
 
     case 'ON_SELECT_TABLE':
@@ -44,6 +38,12 @@ export const article13Reducer = (state, { type, payload }) => {
 
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };
+
+    case 'ON_SELECT_SCHEMA_ID':
+      return { ...state, selectedTable: { ...state.selectedTable, fieldSchemaId: payload.fieldSchemaId } };
+
+    case 'GET_TABLE_SCHEMA_ID':
+      return { ...state, selectedTableSchemaId: payload.tableSchemaId };
 
     default:
       return state;
