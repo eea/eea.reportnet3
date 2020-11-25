@@ -104,7 +104,11 @@ export const Map = ({
   );
 
   const [newPositionMarker, setNewPositionMarker] = useState();
-  const [mapGeoJson, setMapGeoJson] = useState(geoJson);
+  const [mapGeoJson, setMapGeoJson] = useState(
+    geoJson === ''
+      ? `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`
+      : geoJson
+  );
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
 
