@@ -32,14 +32,13 @@ import org.slf4j.LoggerFactory;
  */
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
+  /** The Constant RECORD_ID: {@value}. */
   private static final String RECORD_ID = "record_id";
 
   /** The entity manager. */
