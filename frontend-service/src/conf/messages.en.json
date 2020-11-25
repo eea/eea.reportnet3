@@ -162,7 +162,7 @@
     "descriptionTooShort": "Description must be at least 5 characters",
     "deselectAll": "Deselect All",
     "design": "Design",
-    "designSchemaTabNoFields": "No fields yet",
+    "designSchemaTabNoFields": "No fields to add QC",
     "disclaimerMessage": "The data and illustrated errors are for testing purposes only and do not reflect the actual data delivered by any countries featured",
     "disclaimerTitle": "SPRINT 9 REVIEW DEMO",
     "do": "DO",
@@ -922,7 +922,7 @@
     "noMessagesCustodian": "Please select a data provider",
     "unreadMessageSeparator": "Unread messages",
     "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
-    "notValidSqlQCWarningBody": "You have {:invalid} invalid SQL QCs and {:disabled} disabled SQL QCs.",
+    "notValidSqlQCWarningBody": "You have <strong>{:disabled} disabled </strong> QCs (<strong>{:invalid} invalid</strong>)",
     "feedbackDataProvider": "Data provider: ",
     "feedbackHelp": "Dataflow feedback help",
     "noMessagesScroll": "Scroll up to the top to load read messages.",
@@ -940,8 +940,8 @@
     "updatedDatasetStatus": "<a href='{:navigateTo}'>{:datasetName}</a> changed to {:datasetStatus}",
     "feedbackMessage": "Feedback message",
     "feedbackMessagePlaceholder": "Please provide information on the status change",
-    "validateRulesErrorEvent": "You have {:invalidRules} invalid and {:disabledRules} disabled SQL QCs in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
-    "disableNamesTypesRulesErrorEvent": "Some QCs are now invalid due to the field type changed.",
+    "validateRulesErrorEvent": "You have <strong>{:disabledRules} disabled </strong> QCs (<strong>{:invalidRules} invalid</strong>) in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
+    "disableNamesTypesRulesErrorEvent": "Some QCs are now <strong>invalid</strong> due to the field type changed",
     "validatedQcRuleEvent": "QC validated succesfully",
     "dataflowStatus": "Dataflow status",
     "open": "open",
@@ -950,6 +950,9 @@
     "nonEditableData": "This field is not editable",
     "customExports": "Custom exports",
     "fieldSchemaName": "Field",
-    "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check."
+    "feedbackHelpdeskMessage": "This window is for receiving feedback from the EEA for the results of the manual acceptance check.",
+    "linkedTableLabel": "Linked table label field",
+    "linkedTableConditional": "Linked table conditional field",
+    "masterTableConditional": "Master table conditional field"
   }
 }

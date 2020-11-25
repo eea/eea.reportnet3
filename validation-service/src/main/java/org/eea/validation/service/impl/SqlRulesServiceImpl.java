@@ -302,14 +302,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       case DATASET:
         break;
     }
-    TableValue table = new TableValue();
     LOG.info("Query to be executed: {}", newQuery);
-    table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-        idTable);
-    if (ischeckDC.equals(Boolean.FALSE)) {
-      if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
-        retrieveValidations(table.getRecords(), datasetId);
-      }
+    TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
+        datasetId, idTable);
+    if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
+        && !table.getRecords().isEmpty()) {
+      retrieveValidations(table.getRecords(), datasetId);
     }
     return table;
   }
@@ -678,7 +676,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   @Async
   @Override
-  @Transactional
   public void validateSQLRules(Long datasetId, String datasetSchemaId) {
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));

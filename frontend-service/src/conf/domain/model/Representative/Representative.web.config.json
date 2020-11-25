@@ -6,5 +6,4 @@
     "getProviderTypes": "/representative/dataProvider/types",    
     "updateDataProviderId":"/representative/update",
     "updateProviderAccount":"/representative/update"
-
 }

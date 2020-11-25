@@ -25,22 +25,21 @@ export const CookiesDialog = () => {
   useEffect(() => {
     if (isEuCookie()) {
       setIsVisible(false);
+      themeContext.setHeaderCollapse(true);
     } else {
       setIsVisible(true);
     }
   }, []);
 
-  useEffect(() => {
-    themeContext.setHeaderCollapse(!isVisible);
-  }, [isVisible]);
-
   const onAcceptCookies = () => {
     document.cookie = 'eu_cookie_consent=true;path=/';
     setIsVisible(false);
+    themeContext.setHeaderCollapse(true);
   };
   const onRefuseCookies = () => {
     document.cookie = 'eu_cookie_consent=false;path=/';
     setIsVisible(false);
+    themeContext.setHeaderCollapse(true);
   };
 
   return (

@@ -1923,7 +1923,8 @@ public class DatasetServiceImpl implements DatasetService {
       Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
       TableVO result, String[] idRules, String fieldSchema, String fieldValue) {
     List<RecordValue> records;
-    if (null == fields && (null == levelError || levelError.length == 5) && idRules == null) {
+    if (null == fields && (null == levelError || levelError.length == 5)
+        && (idRules == null || idRules.length == 0) && fieldSchema == null && fieldValue == null) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       result.setTotalFilteredRecords(0L);
