@@ -269,7 +269,10 @@ export const useSetColumns = (
               field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) &&
+              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                field.fieldData.type
+              )
               ? // ? field.fieldData[column.field].sort().join(', ')
                 // : Array.isArray(field.fieldData[column.field])
                 field.fieldData[column.field].join(', ')
@@ -284,6 +287,10 @@ export const useSetColumns = (
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
+              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  field.fieldData.type
+                )
+              ? renderComplexGeometries(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>

@@ -174,33 +174,6 @@ const FieldEditor = ({
     }
   };
 
-  const changeLine = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
-    if (geoJson !== '') {
-      if (withCRS) {
-        const projectedCoordinates = coordinates.map(coords => projectCoordinates(coords, crs.value));
-        geoJson.geometry.coordinates = projectedCoordinates;
-        geoJson.properties.rsid = crs.value;
-        setIsMapDisabled(!MapUtils.checkValidLine(projectedCoordinates));
-        return JSON.stringify(geoJson);
-      } else {
-        setIsMapDisabled(!MapUtils.checkValidLine(coordinates));
-        if (checkCoordinates) {
-          geoJson.geometry.coordinates = MapUtils.checkValidLine(coordinates)
-            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
-            : [];
-        } else {
-          geoJson.geometry.coordinates = coordinates
-            .replace('[', '')
-            .replace(']', '')
-            .split(',')
-            .map(coord => MapUtils.parseCoordinates(coord.replace(', ', ','), parseToFloat));
-        }
-
-        return JSON.stringify(geoJson);
-      }
-    }
-  };
-
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
     codelistsItems.sort();
@@ -450,18 +423,22 @@ const FieldEditor = ({
       case 'MULTIPOLYGON':
       case 'POLYGON':
         const value = RecordUtils.getCellValue(cells, cells.field);
+        console.log({ value });
+        const isValidJSON = MapUtils.checkValidJSONCoordinates(value);
         return (
           <div className={styles.pointWrapper}>
-            <label className={isNil(value) || value === '' ? styles.nonEditableData : ''}>
-              {!isNil(value) && value !== ''
+            <label className={isNil(value) || value === '' || !isValidJSON ? styles.nonEditableData : ''}>
+              {!isNil(value) && value !== '' && isValidJSON
                 ? JSON.parse(value).geometry.coordinates.join(', ')
                 : resources.messages['nonEditableData']}
             </label>
             <div className={styles.pointEpsgWrapper}>
-              {!isNil(value) && value !== '' && <label className={styles.epsg}>{resources.messages['epsg']}</label>}
+              {!isNil(value) && value !== '' && isValidJSON && (
+                <label className={styles.epsg}>{resources.messages['epsg']}</label>
+              )}
               <div>
-                {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
-                {!isNil(value) && value !== '' && (
+                {!isNil(value) && value !== '' && isValidJSON && <span>{currentCRS.label}</span>}
+                {!isNil(value) && value !== '' && isValidJSON && (
                   <Button
                     className={`p-button-secondary-transparent button ${styles.mapButton}`}
                     icon="marker"
