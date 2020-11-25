@@ -4,6 +4,7 @@ export class DatasetTableField {
     description,
     fieldId,
     fieldSchemaId,
+    label,
     maxSize,
     name,
     pk,
@@ -24,6 +25,7 @@ export class DatasetTableField {
     this.description = description;
     this.fieldId = fieldId;
     this.fieldSchemaId = fieldSchemaId;
+    this.label = label;
     this.maxSize = maxSize;
     this.name = name;
     this.pk = pk;
