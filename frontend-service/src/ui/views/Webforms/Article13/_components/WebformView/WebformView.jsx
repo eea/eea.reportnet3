@@ -22,6 +22,7 @@ export const WebformView = ({
   isReporting,
   selectedTable,
   selectedTableName,
+  setTableSchemaId,
   state,
   tables
 }) => {
@@ -37,6 +38,13 @@ export const WebformView = ({
   });
 
   const { isVisible } = webformViewState;
+
+  useEffect(() => {
+    const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
+    const visibleTableId = data.filter(table => table.name === visibleTable)[0].tableSchemaId;
+
+    setTableSchemaId(visibleTableId);
+  }, [webformViewState]);
 
   useEffect(() => {
     if (!isNil(selectedTableName)) {

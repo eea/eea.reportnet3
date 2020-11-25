@@ -17,6 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
+import { Article13Utils } from '../../Article13/_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
@@ -32,6 +33,7 @@ export const WebformTable = ({
   webformType
 }) => {
   const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
+  const { getFieldSchemaId } = Article13Utils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -47,6 +49,9 @@ export const WebformTable = ({
   const { isDataUpdated, webformData } = webformTableState;
 
   useEffect(() => {
+    // console.log('new fieldSchemaId TABLE', selectedTable.fieldSchemaId);
+    // console.log('new pamsId TABLE', selectedTable.pamsId);
+
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
 
@@ -54,17 +59,17 @@ export const WebformTable = ({
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
     if (!isNil(webform) && webform.tableSchemaId) {
-      isLoading(true);
-      onLoadTableData();
-    }
-  }, [isDataUpdated, isRefresh, onTabChange, webform]);
+      if (webformType === 'ARTICLE_13' && !isNil(selectedTable.fieldSchemaId) && !isNil(selectedTable.pamsId)) {
+        isLoading(true);
+        onLoadTableData();
+      }
 
-  // useEffect(() => {
-  //   console.log('hey 2');
-  //   if (!isNil(webform) && webform.tableSchemaId) {
-  //     onLoadTableData();
-  //   }
-  // }, [isDataUpdated, webform, isRefresh]);
+      if (webformType === 'ARTICLE_15') {
+        isLoading(true);
+        onLoadTableData();
+      }
+    }
+  }, [isDataUpdated, isRefresh, onTabChange, selectedTable.fieldSchemaId, selectedTable.pamsId, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -126,6 +131,8 @@ export const WebformTable = ({
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
 
+          const { fieldSchema, fieldId } = getFieldSchemaId(webform.elements, tableSchemaId);
+
           const tableChildData = await DatasetService.tableDataById(
             datasetId,
             tableSchemaId,
@@ -134,7 +141,7 @@ export const WebformTable = ({
             undefined,
             ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
             undefined,
-            selectedTable.fieldSchemaId,
+            fieldSchema || fieldId,
             selectedTable.pamsId
           );
 

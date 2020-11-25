@@ -28,7 +28,7 @@ import { TableManagementUtils } from './_components/TableManagement/_functions/U
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
-  const { getTypeList } = Article13Utils;
+  const { getFieldSchemaId, getTypeList } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
   const { parsePamsRecords } = TableManagementUtils;
 
@@ -51,6 +51,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
 
+  // console.log('new fieldSchemaId ART: ', selectedTable.fieldSchemaId);
+  // console.log('new pamsId ART: ', selectedTable.pamsId);
+
   useEffect(() => initialLoad(), []);
 
   useEffect(() => {
@@ -60,15 +63,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   }, [article13State.data, isDataUpdated]);
 
   useEffect(() => {
-    if (!isEmpty(article13State.data)) {
-      const table = article13State.data.filter(table => table.tableSchemaId === article13State.selectedTableSchemaId);
+    const { fieldSchema, fieldId } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
 
-      if (!isEmpty(table)) {
-        const tset = table[0].records[0].fields.filter(field => TextUtils.areEquals(field.name, 'Fk_PaMs'))[0];
-
-        onSelectFieldSchemaId(tset.fieldSchema || tset.fieldId);
-      }
-    }
+    onSelectFieldSchemaId(fieldSchema || fieldId);
   }, [article13State.data, article13State.selectedTableSchemaId]);
 
   const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
@@ -91,7 +88,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       .map(table => table.fieldSchema)[0];
   };
 
-  const getTableSchemaId = tableSchemaId => {
+  const setTableSchemaId = tableSchemaId => {
     article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
@@ -213,7 +210,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       });
     });
 
-    getTableSchemaId(filteredTable.tableSchemaId);
+    setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, pamNumberId);
     onSelectTableName(tableName);
     onToggleView(resources.messages['details']);
@@ -289,6 +286,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           isReporting={isReporting}
           selectedTable={selectedTable}
           selectedTableName={selectedTableName}
+          setTableSchemaId={setTableSchemaId}
           state={state}
           tables={tables}
         />
