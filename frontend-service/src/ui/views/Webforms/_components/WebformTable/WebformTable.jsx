@@ -29,6 +29,7 @@ export const WebformTable = ({
   isReporting,
   onTabChange,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
+  setIsLoading,
   webform,
   webformType
 }) => {
@@ -106,6 +107,7 @@ export const WebformTable = ({
   };
 
   const onLoadTableData = async () => {
+    setIsLoading(true);
     try {
       const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
 
@@ -169,6 +171,7 @@ export const WebformTable = ({
       });
     } finally {
       isLoading(false);
+      setIsLoading(false);
       webformTableDispatch({
         type: 'SET_IS_ADDING_MULTIPLE',
         payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
@@ -211,14 +214,6 @@ export const WebformTable = ({
   };
 
   const renderArticle13WebformRecords = () => {
-    // const filteredRecord = webformData.elementsRecords.filter(record => {
-    //   // console.log('record', record);
-    //   console.log('selectedId', selectedId);
-    //   return record.recordId === selectedId;
-    // });
-
-    // //TODO: Filter by idPam
-    // return renderWebformRecord(!isEmpty(filteredRecord) ? filteredRecord[0] : webformData.elementsRecords[0], null);
     return renderWebformRecord(webformData.elementsRecords[0], null);
   };
 
