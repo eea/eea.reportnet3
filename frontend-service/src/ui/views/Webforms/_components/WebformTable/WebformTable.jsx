@@ -37,33 +37,34 @@ export const WebformTable = ({
   const resources = useContext(ResourcesContext);
 
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
-    isAddingMultiple: false,
     addingOnTableSchemaId: null,
+    isAddingMultiple: false,
     isDataUpdated: false,
     isLoading: true,
     webformData: {}
   });
 
-  const { webformData, isDataUpdated } = webformTableState;
+  const { isDataUpdated, webformData } = webformTableState;
 
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
 
   useEffect(() => {
+    if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
+
     if (!isNil(webform) && webform.tableSchemaId) {
       isLoading(true);
       onLoadTableData();
-    } else if (!isNil(webform) && isNil(webform.tableSchemaId)) {
-      isLoading(false);
     }
-  }, [onTabChange, webform]);
+  }, [isDataUpdated, isRefresh, onTabChange, webform]);
 
-  useEffect(() => {
-    if (!isNil(webform) && webform.tableSchemaId) {
-      onLoadTableData();
-    }
-  }, [isDataUpdated, webform, isRefresh]);
+  // useEffect(() => {
+  //   console.log('hey 2');
+  //   if (!isNil(webform) && webform.tableSchemaId) {
+  //     onLoadTableData();
+  //   }
+  // }, [isDataUpdated, webform, isRefresh]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -92,11 +93,11 @@ export const WebformTable = ({
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'ADD_RECORDS_BY_ID_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName, tableName: webformData.title }
+          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
         });
         webformTableDispatch({
           type: 'SET_IS_ADDING_MULTIPLE',
-          payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
+          payload: { addingOnTableSchemaId: null, isAddingMultiple: false }
         });
       }
     }
@@ -125,13 +126,17 @@ export const WebformTable = ({
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
 
-          const tableChildData = await DatasetService.tableDataById(datasetId, tableSchemaId, '', '', undefined, [
-            'CORRECT',
-            'INFO',
-            'WARNING',
-            'ERROR',
-            'BLOCKER'
-          ]);
+          const tableChildData = await DatasetService.tableDataById(
+            datasetId,
+            tableSchemaId,
+            '',
+            '',
+            undefined,
+            ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+            undefined,
+            selectedTable.fieldSchemaId,
+            selectedTable.pamsId
+          );
 
           tableData[tableSchemaId] = tableChildData;
         }

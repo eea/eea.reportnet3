@@ -18,9 +18,9 @@ export const WebformView = ({
   data,
   dataflowId,
   datasetId,
+  isRefresh,
   isReporting,
   selectedTable,
-  isRefresh,
   selectedTableName,
   state,
   tables
@@ -31,7 +31,8 @@ export const WebformView = ({
     isVisible: Article15Utils.getWebformTabs(
       tables.map(table => table.name),
       state.schemaTables,
-      tables
+      tables,
+      selectedTableName
     )
   });
 
@@ -88,8 +89,8 @@ export const WebformView = ({
       <WebformTable
         dataflowId={dataflowId}
         datasetId={datasetId}
-        isReporting={isReporting}
         isRefresh={isRefresh}
+        isReporting={isReporting}
         onTabChange={isVisible}
         selectedTable={selectedTable}
         webform={visibleContent}

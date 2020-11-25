@@ -3,7 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 
-const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
+const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selectedValue = '') => {
   const initialValues = {};
 
   let tableIdx = 0;
@@ -27,7 +27,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
       });
     }
   }
-  const value = allTables[tableIdx === -1 ? 0 : tableIdx];
+  const value = allTables[tableIdx === -1 ? (!isEmpty(selectedValue) ? selectedValue : 0) : tableIdx];
 
   compact(allTables).forEach(table => {
     initialValues[table] = false;

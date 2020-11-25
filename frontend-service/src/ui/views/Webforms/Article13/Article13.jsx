@@ -1,8 +1,8 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import capitalize from 'lodash/capitalize';
 
 import styles from './Article13.module.scss';
 
@@ -54,7 +54,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   useEffect(() => initialLoad(), []);
 
   useEffect(() => {
-    onLoadPamsData();
+    if (!isEmpty(article13State.data)) {
+      onLoadPamsData();
+    }
   }, [article13State.data, isDataUpdated]);
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
+
     const recordIds = parsePamsRecords(pamsRecords)
       .map(record => parseInt(record.Id) || parseInt(record.id))
       .filter(id => !Number.isNaN(id));
@@ -130,7 +133,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'ADD_RECORDS_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+        content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
     } finally {
       setIsAddingRecord(false);
