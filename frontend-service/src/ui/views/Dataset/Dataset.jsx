@@ -484,7 +484,11 @@ export const Dataset = withRouter(({ match, history }) => {
       const [representativeDataset] = dataflow.representatives.filter(
         representative => representative.dataProviderId === dataset[0].dataProviderId
       );
-      dataset[0].isReleasing = representativeDataset.isReleasing;
+
+      if (!isNil(representativeDataset)) {
+        dataset[0].isReleasing = representativeDataset.isReleasing;
+      }
+
       setDataset(dataset[0]);
     } catch (error) {
       const {
