@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -52,19 +53,13 @@ import org.springframework.stereotype.Service;
 @Service("SQLRulesService")
 public class SqlRulesServiceImpl implements SqlRulesService {
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SqlRulesServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant KEYWORDS: {@value}.
-   */
+  /** The Constant KEYWORDS: {@value}. */
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
 
   /** The dataset repository. */
@@ -122,7 +117,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     String query = proccessQuery(datasetId, rule.getSqlSentence(), datasetSchemaId);
 
-    if (validateRule(query, datasetId, rule, Boolean.FALSE).equals(Boolean.TRUE)) {
+    if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
@@ -168,87 +163,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Release notification.
-   *
-   * @param eventType the event type
-   * @param notificationVO the notification VO
-   */
-  private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
-    }
-  }
-
-
-  /**
-   * Validate rule.
-   *
-   * @param query the query
-   * @param datasetId the dataset id
-   * @param rule the rule
-   * @param ischeckDC the ischeck DC
-   * @return the boolean
-   */
-
-  private Boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
-    Boolean isSQLCorrect = Boolean.TRUE;
-    // validate query
-    if (!StringUtils.isBlank(query)) {
-      // validate query sintax
-      if (checkQuerySyntax(query)) {
-        try {
-          String preparedquery = "";
-          if (query.contains(";")) {
-            preparedquery = query.replace(";", "") + " limit 5";
-          } else {
-            preparedquery = query + " limit 5";
-          }
-          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
-        } catch (EEAInvalidSQLException e) {
-          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
-          isSQLCorrect = Boolean.FALSE;
-        }
-      } else {
-        isSQLCorrect = Boolean.FALSE;
-      }
-    } else {
-      isSQLCorrect = Boolean.FALSE;
-    }
-    if (isSQLCorrect.equals(Boolean.FALSE)) {
-      LOG.info("Rule validation not passed: {}", rule);
-    } else {
-      LOG.info("Rule validation passed: {}", rule);
-    }
-    return isSQLCorrect;
-  }
-
-  /**
-   * Check query syntax.
-   *
-   * @param query the query
-   *
-   * @return the boolean
-   */
-  private Boolean checkQuerySyntax(String query) {
-    Boolean queryContainsKeyword = Boolean.TRUE;
-    String[] queryKeywords = KEYWORDS.split(",");
-    for (String word : queryKeywords) {
-      if (query.toLowerCase().contains(word.toLowerCase())) {
-        queryContainsKeyword = Boolean.FALSE;
-        break;
-      }
-    }
-    return queryContainsKeyword;
-  }
-
-  /**
    * Gets the rule.
    *
    * @param datasetId the dataset id
    * @param ruleId the rule id
-   *
    * @return the rule
    */
   @Override
@@ -263,8 +181,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     return null;
   }
-
-
 
   /**
    * Retrieve table data.
@@ -306,10 +222,135 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
         datasetId, idTable);
     if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
-        && !table.getRecords().isEmpty()) {
+        && !table.getRecords().isEmpty() && !EntityTypeEnum.TABLE.equals(rule.getType())) {
       retrieveValidations(table.getRecords(), datasetId);
     }
     return table;
+  }
+
+  /**
+   * Validate SQL rules.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Async
+  @Override
+  public void validateSQLRules(Long datasetId, String datasetSchemaId) {
+    List<RuleVO> rulesSql =
+        ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
+    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+
+    if (null != rulesSql && !rulesSql.isEmpty()) {
+      rulesSql.stream().forEach(ruleVO -> {
+        Rule rule = ruleMapper.classToEntity(ruleVO);
+        if (validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.FALSE)) {
+          rule.setVerified(true);
+        } else {
+          rule.setVerified(false);
+          rule.setEnabled(false);
+        }
+        rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
+            .append(rule.getRuleId().toString()).append("')").toString());
+        rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+      });
+    }
+
+    RulesSchema rulesDisabledSchema =
+        rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
+    RulesSchema rulesUncheckedSchema =
+        rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+    int rulesUnchecked = rulesUncheckedSchema.getRules().size();
+    int rulesDisabled = rulesDisabledSchema.getRules().size();
+
+    if (rulesDisabled > 0 || rulesUnchecked > 0) {
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).dataflowId(dataflowId).invalidRules(rulesUnchecked)
+          .disabledRules(rulesDisabled).build();
+      LOG.info("SQL rules contains errors");
+      releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
+    } else {
+
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).dataflowId(dataflowId).build();
+      LOG.info("SQL rules contains 0 errors");
+      releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+    }
+  }
+
+  /**
+   * Release notification.
+   *
+   * @param eventType the event type
+   * @param notificationVO the notification VO
+   */
+  private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+    }
+  }
+
+  /**
+   * Validate rule.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @param rule the rule
+   * @param ischeckDC the ischeck DC
+   * @return the boolean
+   */
+  private Boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
+    Boolean isSQLCorrect = Boolean.TRUE;
+    // validate query
+    if (!StringUtils.isBlank(query)) {
+      // validate query sintax
+      if (checkQuerySyntax(query)) {
+        try {
+          String preparedquery = "";
+          if (query.contains(";")) {
+            preparedquery = query.replace(";", "") + " limit 5";
+          } else {
+            preparedquery = query + " limit 5";
+          }
+          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
+        } catch (EEAInvalidSQLException e) {
+          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
+          isSQLCorrect = Boolean.FALSE;
+        }
+      } else {
+        isSQLCorrect = Boolean.FALSE;
+      }
+    } else {
+      isSQLCorrect = Boolean.FALSE;
+    }
+    if (isSQLCorrect.equals(Boolean.FALSE)) {
+      LOG.info("Rule validation not passed: {}", rule);
+    } else {
+      LOG.info("Rule validation passed: {}", rule);
+    }
+    return isSQLCorrect;
+  }
+
+  /**
+   * Check query syntax.
+   *
+   * @param query the query
+   * @return the boolean
+   */
+  private Boolean checkQuerySyntax(String query) {
+    Boolean queryContainsKeyword = Boolean.TRUE;
+    String[] queryKeywords = KEYWORDS.split(",");
+    for (String word : queryKeywords) {
+      if (query.toLowerCase().contains(word.toLowerCase())) {
+        queryContainsKeyword = Boolean.FALSE;
+        break;
+      }
+    }
+    return queryContainsKeyword;
   }
 
   /**
@@ -355,27 +396,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Retrive first result.
-   *
-   * @param query the query
-   * @param datasetId the dataset id
-   *
-   * @return the list
-   */
-  @Override
-  public List<Object> retriveFirstResult(String query, Long datasetId) {
-
-    List<Object> result = datasetRepository.queryUniqueResultExecution(query);
-
-    return result;
-  }
-
-  /**
    * Retrive table name.
    *
    * @param schema the schema
    * @param idTableSchema the id table schema
-   *
    * @return the string
    */
   private String retriveTableName(DataSetSchemaVO schema, String idTableSchema) {
@@ -388,13 +412,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return tableName;
   }
 
-
   /**
    * Retrive field name.
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
-   *
    * @return the string
    */
   private String retriveFieldName(DataSetSchemaVO schema, String idFieldSchema) {
@@ -449,7 +471,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param recordIds the record ids
    * @param datasetId the dataset id
-   *
    * @return the field validations
    */
   private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds,
@@ -494,7 +515,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param recordIds the record ids
    * @param datasetId the dataset id
-   *
    * @return the record validations
    */
   private Map<String, List<RecordValidation>> getRecordValidations(final List<String> recordIds,
@@ -534,7 +554,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     return result;
   }
-
 
   /**
    * Proccess query.
@@ -641,8 +660,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return processedQuery;
   }
 
-
-
   /**
    * Gets the list of datasets on query.
    *
@@ -665,61 +682,4 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     return datasetSchamasMap;
   }
-
-
-
-  /**
-   * Validate SQL rules.
-   *
-   * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
-   */
-  @Async
-  @Override
-  public void validateSQLRules(Long datasetId, String datasetSchemaId) {
-    List<RuleVO> rulesSql =
-        ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
-    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
-
-    if (null != rulesSql && !rulesSql.isEmpty()) {
-      rulesSql.stream().forEach(ruleVO -> {
-        Rule rule = ruleMapper.classToEntity(ruleVO);
-        if (validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.FALSE)) {
-          rule.setVerified(true);
-        } else {
-          rule.setVerified(false);
-          rule.setEnabled(false);
-        }
-        rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
-            .append(rule.getRuleId().toString()).append("')").toString());
-        rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-      });
-    }
-
-    RulesSchema rulesDisabledSchema =
-        rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
-    RulesSchema rulesUncheckedSchema =
-        rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
-    int rulesUnchecked = rulesUncheckedSchema.getRules().size();
-    int rulesDisabled = rulesDisabledSchema.getRules().size();
-
-    if (rulesDisabled > 0 || rulesUnchecked > 0) {
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).dataflowId(dataflowId).invalidRules(rulesUnchecked)
-          .disabledRules(rulesDisabled).build();
-      LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
-    } else {
-
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).dataflowId(dataflowId).build();
-      LOG.info("SQL rules contains 0 errors");
-      releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
-    }
-  }
-
 }
-
-
