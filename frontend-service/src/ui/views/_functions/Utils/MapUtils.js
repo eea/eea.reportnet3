@@ -1,8 +1,7 @@
 import first from 'lodash/first';
+import flattenDeep from 'lodash/flattenDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-
-const calculateCentroid = coordinates => {};
 
 const changeIncorrectCoordinates = record => {
   const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"srid": "EPSG:4326"}}`;
@@ -48,21 +47,11 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
     isValid = false;
   } else {
     splittedCoordinates.forEach(coordinate => {
-      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim()))
+      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim())) {
         isValid = false;
+      }
     });
   }
-  return isValid;
-};
-
-const checkValidLine = (coordinates, emptyIsValid = false) => {
-  if (coordinates.length < 2) return false;
-  let isValid = true;
-  coordinates.forEach(coordinate => {
-    if (!checkValidCoordinates(coordinate, emptyIsValid)) {
-      isValid = false;
-    }
-  });
   return isValid;
 };
 
@@ -88,18 +77,31 @@ const checkValidJSONCoordinates = json => {
 const checkValidJSONMultipleCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    const complexType = ['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(parsedJSON.geometry.type.toUpperCase());
-    if (complexType) {
-      return (
-        parsedJSON.geometry.coordinates
-          .map(coordinates => coordinates.map(coordinate => checkValidCoordinates(coordinate)))
-          .filter(check => !check).length === 0
-      );
-    } else {
-      return (
-        parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate)).filter(check => !check)
-          .length === 0
-      );
+    switch (parsedJSON.geometry.type.toUpperCase()) {
+      case 'LINESTRING':
+      case 'MULTIPOINT':
+        return (
+          flattenDeep(parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate))).filter(
+            check => !check
+          ).length === 0
+        );
+      case 'MULTILINESTRING':
+      case 'POLYGON':
+        return (
+          flattenDeep(
+            parsedJSON.geometry.coordinates.map(ring => ring.map(coordinate => checkValidCoordinates(coordinate)))
+          ).filter(check => !check).length === 0
+        );
+      case 'MULTIPOLYGON':
+        return (
+          flattenDeep(
+            parsedJSON.geometry.coordinates.map(polygon =>
+              polygon.map(ring => ring.map(coordinate => checkValidCoordinates(coordinate)))
+            )
+          ).filter(check => !check).length === 0
+        );
+      default:
+        break;
     }
   } else {
     return false;
@@ -202,12 +204,10 @@ const printCoordinates = (data, isGeoJson = true, geometryType) => {
 };
 
 export const MapUtils = {
-  calculateCentroid,
   changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,
   checkValidJSONMultipleCoordinates,
-  checkValidLine,
   getFirstPointComplexGeometry,
   getGeometryType,
   getSrid,

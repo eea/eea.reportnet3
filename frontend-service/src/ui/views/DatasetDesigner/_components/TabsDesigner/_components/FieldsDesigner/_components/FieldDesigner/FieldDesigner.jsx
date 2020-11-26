@@ -448,7 +448,7 @@ export const FieldDesigner = ({
     } catch (error) {
       console.error('Error during field Add: ', error);
     } finally {
-      if (!isUndefined(inputRef.current)) {
+      if (!isNil(inputRef.current)) {
         if (index === '-1') {
           inputRef.current.element.focus();
         }
