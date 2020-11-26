@@ -431,35 +431,39 @@ const FieldEditor = ({
         }
         return (
           <div className={styles.pointWrapper}>
-            <label className={isNil(value) || value === '' || !isValidJSON ? styles.nonEditableData : ''}>
+            <label
+              className={isNil(value) || value === '' || !isValidJSON || differentTypes ? styles.nonEditableData : ''}>
               {!isNil(value) && value !== '' && isValidJSON && !differentTypes
                 ? JSON.parse(value).geometry.coordinates.join(', ')
                 : differentTypes
                 ? resources.messages['nonEditableDataDifferentTypes']
                 : resources.messages['nonEditableData']}
             </label>
-            <div className={styles.pointEpsgWrapper}>
-              {!isNil(value) && value !== '' && isValidJSON && (
-                <label className={styles.epsg}>{resources.messages['epsg']}</label>
-              )}
-              <div>
-                {!isNil(value) && value !== '' && isValidJSON && <span>{currentCRS.label}</span>}
+            {!differentTypes && (
+              <div className={styles.pointEpsgWrapper}>
                 {!isNil(value) && value !== '' && isValidJSON && (
-                  <Button
-                    className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                    icon="marker"
-                    onClick={e => {
-                      if (!isNil(onMapOpen)) {
-                        onMapOpen(value, cells, type);
-                      }
-                    }}
-                    style={{ width: '35%' }}
-                    tooltip={resources.messages['selectGeographicalDataOnMap']}
-                    tooltipOptions={{ position: 'bottom' }}
-                  />
+                  <label className={styles.epsg}>{resources.messages['epsg']}</label>
                 )}
+                <div>
+                  {!isNil(value) && value !== '' && isValidJSON && <span>{currentCRS.label}</span>}
+                  {!isNil(value) && value !== '' && isValidJSON && (
+                    <Button
+                      className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                      disabled={differentTypes}
+                      icon="marker"
+                      onClick={e => {
+                        if (!isNil(onMapOpen)) {
+                          onMapOpen(value, cells, type);
+                        }
+                      }}
+                      style={{ width: '35%' }}
+                      tooltip={resources.messages['selectGeographicalDataOnMap']}
+                      tooltipOptions={{ position: 'bottom' }}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         );
       case 'DATE':
