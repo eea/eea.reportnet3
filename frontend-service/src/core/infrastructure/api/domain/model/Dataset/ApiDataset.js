@@ -349,16 +349,28 @@ export const apiDataset = {
     });
     return response.data;
   },
-  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+  tableDataById: async (
+    datasetId,
+    tableSchemaId,
+    pageNum,
+    pageSize,
+    fields,
+    levelError,
+    ruleId,
+    fieldSchemaId,
+    value
+  ) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.dataViewer, {
         datasetId: datasetId,
-        tableSchemaId: tableSchemaId,
+        fields: fields,
+        fieldSchemaId,
+        idRules: ruleId,
+        levelError: levelError,
         pageNum: pageNum,
         pageSize: pageSize,
-        fields: fields,
-        levelError: levelError,
-        idRules: ruleId
+        tableSchemaId: tableSchemaId,
+        value
       })
     });
 

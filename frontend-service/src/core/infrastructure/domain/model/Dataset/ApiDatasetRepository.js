@@ -465,7 +465,17 @@ const schemaById = async datasetId => {
   return dataset;
 };
 
-const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+const tableDataById = async (
+  datasetId,
+  tableSchemaId,
+  pageNum,
+  pageSize,
+  fields,
+  levelError,
+  ruleId,
+  fieldSchemaId,
+  value
+) => {
   const tableDataDTO = await apiDataset.tableDataById(
     datasetId,
     tableSchemaId,
@@ -473,7 +483,9 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
     pageSize,
     fields,
     levelError,
-    ruleId
+    ruleId,
+    fieldSchemaId,
+    value
   );
   const table = new DatasetTable({});
 
