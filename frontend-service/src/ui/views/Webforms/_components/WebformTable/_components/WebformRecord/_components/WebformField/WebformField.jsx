@@ -87,7 +87,7 @@ export const WebformField = ({
     // }
     console.log({ element });
     if (element.fieldType === 'LINK') onFilter(element.pkHasMultipleValues ? '' : element.value, element);
-  }, [record, isConditional]);
+  }, [record]);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
