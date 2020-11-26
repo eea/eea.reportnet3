@@ -2,7 +2,6 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebformTable.module.scss';
 
@@ -18,6 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
+import { Article13Utils } from '../../Article13/_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
@@ -25,47 +25,49 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 export const WebformTable = ({
   dataflowId,
   datasetId,
+  isRefresh,
   isReporting,
   onTabChange,
-  selectedId,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
-  isRefresh,
+  setIsLoading,
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewRecord } = WebformsUtils;
+  const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
+  const { getFieldSchemaId } = Article13Utils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
-    isAddingMultiple: false,
     addingOnTableSchemaId: null,
+    isAddingMultiple: false,
     isDataUpdated: false,
     isLoading: true,
     webformData: {}
   });
 
-  const { webformData, isDataUpdated } = webformTableState;
+  const { isDataUpdated, webformData } = webformTableState;
 
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
 
   useEffect(() => {
-    if (!isNil(webform) && webform.tableSchemaId) {
-      isLoading(true);
-      onLoadTableData();
-    } else if (!isNil(webform) && isNil(webform.tableSchemaId)) {
-      isLoading(false);
-    }
-  }, [onTabChange, webform]);
+    if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
-  useEffect(() => {
     if (!isNil(webform) && webform.tableSchemaId) {
-      onLoadTableData();
+      if (webformType === 'ARTICLE_13' && !isNil(selectedTable.pamsId)) {
+        isLoading(true);
+        onLoadTableData();
+      }
+
+      if (webformType === 'ARTICLE_15') {
+        isLoading(true);
+        onLoadTableData();
+      }
     }
-  }, [isDataUpdated, webform, isRefresh]);
+  }, [isDataUpdated, isRefresh, onTabChange, selectedTable.pamsId, webform]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -76,9 +78,10 @@ export const WebformTable = ({
     });
 
     if (!isEmpty(webformData.elementsRecords)) {
-      const newEmptyRecord = parseNewRecord(
-        webformData.elementsRecords[0].elements.filter(element => element.tableSchemaId === tableSchemaId)[0].elements
-      );
+      const filteredTable = webformData.elementsRecords[0].elements.filter(
+        element => element.tableSchemaId === tableSchemaId
+      )[0];
+      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId);
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
@@ -93,18 +96,21 @@ export const WebformTable = ({
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'ADD_RECORDS_BY_ID_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName, tableName: webformData.title }
+          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
         });
         webformTableDispatch({
           type: 'SET_IS_ADDING_MULTIPLE',
-          payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
+          payload: { addingOnTableSchemaId: null, isAddingMultiple: false }
         });
       }
     }
   };
 
   const onLoadTableData = async () => {
+    setIsLoading(true);
     try {
+      const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
+
       const parentTableData = await DatasetService.tableDataById(
         datasetId,
         webform.tableSchemaId,
@@ -113,7 +119,7 @@ export const WebformTable = ({
         undefined,
         ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
         undefined,
-        selectedTable.fieldSchemaId,
+        fieldSchema || fieldId,
         selectedTable.pamsId
       );
       if (!isNil(parentTableData.records)) {
@@ -126,13 +132,19 @@ export const WebformTable = ({
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
 
-          const tableChildData = await DatasetService.tableDataById(datasetId, tableSchemaId, '', '', undefined, [
-            'CORRECT',
-            'INFO',
-            'WARNING',
-            'ERROR',
-            'BLOCKER'
-          ]);
+          const { fieldSchema, fieldId } = getFieldSchemaId(webform.elements, tableSchemaId);
+
+          const tableChildData = await DatasetService.tableDataById(
+            datasetId,
+            tableSchemaId,
+            '',
+            '',
+            undefined,
+            ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+            undefined,
+            fieldSchema || fieldId,
+            selectedTable.pamsId
+          );
 
           tableData[tableSchemaId] = tableChildData;
         }
@@ -143,8 +155,6 @@ export const WebformTable = ({
           tableData,
           parentTableData.totalRecords
         );
-
-        console.log('records', records);
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
@@ -161,6 +171,7 @@ export const WebformTable = ({
       });
     } finally {
       isLoading(false);
+      setIsLoading(false);
       webformTableDispatch({
         type: 'SET_IS_ADDING_MULTIPLE',
         payload: { isAddingMultiple: false, addingOnTableSchemaId: null }
@@ -203,15 +214,6 @@ export const WebformTable = ({
   };
 
   const renderArticle13WebformRecords = () => {
-    // const filteredRecord = webformData.elementsRecords.filter(record => {
-    //   // console.log('record', record);
-    //   console.log('selectedId', selectedId);
-    //   return record.recordId === selectedId;
-    // });
-
-    // //TODO: Filter by idPam
-    // return renderWebformRecord(!isEmpty(filteredRecord) ? filteredRecord[0] : webformData.elementsRecords[0], null);
-    console.log('webformData.elementsRecords', webformData.elementsRecords);
     return renderWebformRecord(webformData.elementsRecords[0], null);
   };
 

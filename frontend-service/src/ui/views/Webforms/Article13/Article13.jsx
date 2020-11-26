@@ -1,16 +1,12 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
-import ReactTooltip from 'react-tooltip';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import capitalize from 'lodash/capitalize';
 
 import styles from './Article13.module.scss';
 
 import { tables } from './article13.webform.json';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Button } from 'ui/views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
@@ -32,7 +28,7 @@ import { TableManagementUtils } from './_components/TableManagement/_functions/U
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
-  const { getTypeList } = Article13Utils;
+  const { getFieldSchemaId, getTypeList } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
   const { parsePamsRecords } = TableManagementUtils;
 
@@ -46,22 +42,28 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     isLoading: true,
     isRefresh: false,
     pamsRecords: [],
-    selectedId: null,
     selectedTable: { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
     selectedTableName: null,
+    selectedTableSchemaId: null,
     tableList: { group: [], single: [] },
     view: resources.messages['overview']
   });
 
-  const { isDataUpdated, isLoading, pamsRecords, selectedId, selectedTableName, tableList, view } = article13State;
-
-  // console.log('article13State.selectedTable', article13State.selectedTable);
+  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
 
   useEffect(() => initialLoad(), []);
 
   useEffect(() => {
-    onLoadPamsData();
+    if (!isEmpty(article13State.data)) {
+      onLoadPamsData();
+    }
   }, [article13State.data, isDataUpdated]);
+
+  useEffect(() => {
+    const { fieldSchema, fieldId } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
+
+    onSelectFieldSchemaId(fieldSchema || fieldId);
+  }, [article13State.data, article13State.selectedTableSchemaId]);
 
   const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
 
@@ -69,6 +71,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
+
     const recordIds = parsePamsRecords(pamsRecords)
       .map(record => parseInt(record.Id) || parseInt(record.id))
       .filter(id => !Number.isNaN(id));
@@ -80,6 +83,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     return table.elements
       .filter(element => TextUtils.areEquals(element.name, param))
       .map(table => table.fieldSchema)[0];
+  };
+
+  const setTableSchemaId = tableSchemaId => {
+    article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
   const onAddPamsRecord = async type => {
@@ -120,7 +127,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'ADD_RECORDS_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+        content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
     } finally {
       setIsAddingRecord(false);
@@ -187,6 +194,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   };
 
   const onSelectEditTable = (pamNumberId, tableName) => {
+    const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
     const pamSchemaId = article13State.data
       .filter(table => TextUtils.areEquals(table.name, 'PAMS'))[0]
       .records[0].fields.filter(field => TextUtils.areEquals(field.name, 'ID'))[0].fieldId;
@@ -198,13 +206,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         }
       });
     });
-    onSelectRecord(recordId);
+
+    setTableSchemaId(filteredTable.tableSchemaId);
+    onSelectRecord(recordId, pamNumberId);
     onSelectTableName(tableName);
     onToggleView(resources.messages['details']);
   };
 
-  const onSelectRecord = (recordId, pamsId, fieldSchemaId) => {
-    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId, fieldSchemaId } });
+  const onSelectFieldSchemaId = fieldSchemaId => {
+    article13Dispatch({ type: 'ON_SELECT_SCHEMA_ID', payload: { fieldSchemaId } });
+  };
+
+  const onSelectRecord = (recordId, pamsId) => {
+    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
   };
 
   const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
@@ -222,16 +236,19 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       </h3>
 
       <ul className={styles.tableList}>
-        {Object.keys(tableList).map(list => (
-          <li className={styles.tableListItem}>
+        {Object.keys(tableList).map((list, i) => (
+          <li className={styles.tableListItem} key={i}>
             <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
-            {tableList[list].map(items => (
+            {tableList[list].map((items, i) => (
               <span
-                className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
+                className={`${styles.tableListId} ${
+                  items.recordId === selectedTable.recordId ? styles.selected : null
+                }`}
+                key={i}
                 onClick={() => {
-                  onSelectRecord(items.recordId, items.id, items.fieldSchemaPamId);
-                  onToggleView(resources.messages['details']);
                   article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
+                  onSelectRecord(items.recordId, items.id);
+                  onToggleView(resources.messages['details']);
                 }}>
                 {items.id || '-'}
               </span>
@@ -252,7 +269,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         elements={[resources.messages['overview']]}
         onChange={switchView => {
           onToggleView(switchView);
-          onSelectRecord(null, null, null);
+          onSelectRecord(null, null);
         }}
         value={view}
       />
@@ -264,9 +281,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           datasetId={datasetId}
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
-          selectedId={selectedId}
-          selectedTable={article13State.selectedTable}
+          selectedTable={selectedTable}
           selectedTableName={selectedTableName}
+          setTableSchemaId={setTableSchemaId}
           state={state}
           tables={tables}
         />

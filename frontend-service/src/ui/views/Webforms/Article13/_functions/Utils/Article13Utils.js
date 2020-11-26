@@ -3,19 +3,32 @@ import lowerFirst from 'lodash/lowerFirst';
 
 import { TextUtils } from 'ui/views/_functions/Utils';
 
+const getFieldSchemaId = (data = [], selectedTableSchemaId) => {
+  if (!isEmpty(data)) {
+    const table = data.filter(table => table.tableSchemaId === selectedTableSchemaId);
+
+    if (!isEmpty(table)) {
+      const { fieldSchema, fieldId } = table[0].records[0].fields.filter(field => {
+        let fieldName = 'Fk_PaMs';
+
+        if (TextUtils.areEquals(table[0].name, 'pams')) fieldName = 'Id';
+
+        return TextUtils.areEquals(field.name, fieldName);
+      })[0];
+
+      return { fieldSchema, fieldId };
+    }
+  }
+
+  return { fieldSchema: null, fieldId: null };
+};
+
 const getTypeList = (records = []) => {
   const typeList = records.map(record => {
     let data = {};
-    const pamsSchemaId = record.elements.filter(element => TextUtils.areEquals(element.name, 'id'));
 
     record.elements.forEach(
-      element =>
-        (data = {
-          ...data,
-          [lowerFirst(element.name)]: element.value,
-          recordId: record.recordId,
-          fieldSchemaPamId: !isEmpty(pamsSchemaId) ? pamsSchemaId[0].fieldSchemaId : element.fieldSchemaId
-        })
+      element => (data = { ...data, [lowerFirst(element.name)]: element.value, recordId: record.recordId })
     );
     return data;
   });
@@ -26,4 +39,4 @@ const getTypeList = (records = []) => {
   };
 };
 
-export const Article13Utils = { getTypeList };
+export const Article13Utils = { getFieldSchemaId, getTypeList };
