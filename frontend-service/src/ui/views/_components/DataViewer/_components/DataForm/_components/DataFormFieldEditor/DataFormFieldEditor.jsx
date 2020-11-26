@@ -41,6 +41,7 @@ const DataFormFieldEditor = ({
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
+  onConditionalChange,
   records,
   reporting,
   type
@@ -88,6 +89,9 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (isConditionalChanged) {
+      if (isConditional) {
+        onConditionalChange(field);
+      }
       if (!isNil(linkDropdownRef.current)) {
         linkDropdownRef.current.clearFilter();
       }
