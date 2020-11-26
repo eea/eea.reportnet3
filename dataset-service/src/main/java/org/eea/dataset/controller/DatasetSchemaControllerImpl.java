@@ -701,7 +701,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the unique constraints
    */
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<UniqueConstraintVO> getUniqueConstraints(

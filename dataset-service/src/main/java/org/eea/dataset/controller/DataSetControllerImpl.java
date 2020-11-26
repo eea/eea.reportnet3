@@ -644,6 +644,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the field values referenced
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/{id}/datasetSchemaId/{datasetSchemaId}/fieldSchemaId/{fieldSchemaId}/getFieldsValuesReferenced")
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @PathVariable("datasetSchemaId") String datasetSchemaId,
