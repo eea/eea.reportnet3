@@ -12,12 +12,10 @@ const parseText = (rawText = '', param = {}) => {
   let text = rawText;
   if (isObject(param)) {
     Object.keys(param).forEach(key => {
-      if (!isNil(param[key])) {
-        text = text.replace(
-          new RegExp(`{:${key}}`.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'), 'g'),
-          !isNil(param[key]) ? param[key] : ''
-        );
-      }
+      text = text.replace(
+        new RegExp(`{:${key}}`.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'), 'g'),
+        !isNil(param[key]) ? param[key] : ''
+      );
     });
   }
   return text;
