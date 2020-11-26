@@ -153,7 +153,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         onUpdateData();
       }
     } catch (error) {
-      console.error('error', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
