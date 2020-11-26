@@ -56,17 +56,14 @@ export const recordReducer = (state, { type, payload }) => {
 
     case 'RESET_CONDITIONAL_FIELDS':
       const inmRecord = payload.isNewRecord ? { ...state.newRecord } : { ...state.editedRecord };
-      console.log({ inmRecord }, payload.referencedFields);
       let recordChanged = false;
       payload.referencedFields.forEach(referencedField => {
         const recordField = inmRecord.dataRow.find(r => Object.keys(r.fieldData)[0] === referencedField.field);
-        console.log({ recordField });
         if (recordField.fieldData[referencedField.field] !== '') {
           RecordUtils.changeRecordValue(inmRecord, referencedField.field, '');
           recordChanged = true;
         }
       });
-      console.log(inmRecord);
       if (recordChanged) {
         return {
           ...state,
