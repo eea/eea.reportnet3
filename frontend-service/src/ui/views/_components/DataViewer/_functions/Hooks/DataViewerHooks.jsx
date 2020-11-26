@@ -229,7 +229,9 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+            justifyContent:
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
@@ -266,10 +268,14 @@ export const useSetColumns = (
             display: 'flex',
             alignItems: 'center',
             justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) &&
+              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                field.fieldData.type
+              )
               ? // ? field.fieldData[column.field].sort().join(', ')
                 // : Array.isArray(field.fieldData[column.field])
                 field.fieldData[column.field].join(', ')
@@ -284,6 +290,10 @@ export const useSetColumns = (
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
+              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  field.fieldData.type
+                )
+              ? renderComplexGeometries(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>

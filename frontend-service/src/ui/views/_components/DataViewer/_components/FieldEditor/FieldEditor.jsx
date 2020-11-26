@@ -18,7 +18,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 proj4.defs([
@@ -150,6 +150,7 @@ const FieldEditor = ({
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
+      geoJson.geometry.type = 'Point';
       if (withCRS) {
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
@@ -167,33 +168,6 @@ const FieldEditor = ({
             coordinates.replace(', ', ',').split(','),
             parseToFloat
           );
-        }
-
-        return JSON.stringify(geoJson);
-      }
-    }
-  };
-
-  const changeLine = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
-    if (geoJson !== '') {
-      if (withCRS) {
-        const projectedCoordinates = coordinates.map(coords => projectCoordinates(coords, crs.value));
-        geoJson.geometry.coordinates = projectedCoordinates;
-        geoJson.properties.rsid = crs.value;
-        setIsMapDisabled(!MapUtils.checkValidLine(projectedCoordinates));
-        return JSON.stringify(geoJson);
-      } else {
-        setIsMapDisabled(!MapUtils.checkValidLine(coordinates));
-        if (checkCoordinates) {
-          geoJson.geometry.coordinates = MapUtils.checkValidLine(coordinates)
-            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
-            : [];
-        } else {
-          geoJson.geometry.coordinates = coordinates
-            .replace('[', '')
-            .replace(']', '')
-            .split(',')
-            .map(coord => MapUtils.parseCoordinates(coord.replace(', ', ','), parseToFloat));
         }
 
         return JSON.stringify(geoJson);
@@ -450,18 +424,27 @@ const FieldEditor = ({
       case 'MULTIPOLYGON':
       case 'POLYGON':
         const value = RecordUtils.getCellValue(cells, cells.field);
+        const isValidJSON = MapUtils.checkValidJSONMultipleCoordinates(value);
+        let differentTypes = false;
+        if (!isNil(value) && value !== '') {
+          differentTypes = !TextUtils.areEquals(JSON.parse(value).geometry.type, type);
+        }
         return (
           <div className={styles.pointWrapper}>
-            <label className={isNil(value) || value === '' ? styles.nonEditableData : ''}>
-              {!isNil(value) && value !== ''
+            <label className={isNil(value) || value === '' || !isValidJSON ? styles.nonEditableData : ''}>
+              {!isNil(value) && value !== '' && isValidJSON && !differentTypes
                 ? JSON.parse(value).geometry.coordinates.join(', ')
+                : differentTypes
+                ? resources.messages['nonEditableDataDifferentTypes']
                 : resources.messages['nonEditableData']}
             </label>
             <div className={styles.pointEpsgWrapper}>
-              {!isNil(value) && value !== '' && <label className={styles.epsg}>{resources.messages['epsg']}</label>}
+              {!isNil(value) && value !== '' && isValidJSON && (
+                <label className={styles.epsg}>{resources.messages['epsg']}</label>
+              )}
               <div>
-                {!isNil(value) && value !== '' && <span>{currentCRS.label}</span>}
-                {!isNil(value) && value !== '' && (
+                {!isNil(value) && value !== '' && isValidJSON && <span>{currentCRS.label}</span>}
+                {!isNil(value) && value !== '' && isValidJSON && (
                   <Button
                     className={`p-button-secondary-transparent button ${styles.mapButton}`}
                     icon="marker"
