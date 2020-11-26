@@ -273,12 +273,12 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         }}
         value={view}
       />
-
       {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchema.datasetSchemaId}
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
           selectedTable={selectedTable}

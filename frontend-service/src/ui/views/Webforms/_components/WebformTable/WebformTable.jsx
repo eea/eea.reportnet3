@@ -25,6 +25,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 export const WebformTable = ({
   dataflowId,
   datasetId,
+  datasetSchemaId,
   isRefresh,
   isReporting,
   onTabChange,
@@ -189,6 +190,7 @@ export const WebformTable = ({
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
       datasetId={datasetId}
+      datasetSchemaId={datasetSchemaId}
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
       isAddingMultiple={webformTableState.isAddingMultiple}
       isFixedNumber={webformData.fixedNumber || null}

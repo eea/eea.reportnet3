@@ -86,7 +86,12 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
           isDisabled: isNil(element.fieldSchema),
           maxSize: element.maxSize,
           name: element.name,
+          pk: element.pk,
+          pkHasMultipleValues: element.pkHasMultipleValues,
+          pkMustBeUsed: element.pkMustBeUsed,
+          pkReferenced: element.pkReferenced,
           recordId: record.recordId,
+          referencedField: element.referencedField,
           required: element.required,
           type: element.type,
           validExtensions: element.validExtensions

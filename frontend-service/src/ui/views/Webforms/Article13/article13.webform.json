@@ -76,25 +76,26 @@
           "title": "Greenhouse gas(es) affected",
           "tooltip": "More than one GHG can be selected",
           "isPrimary": false
-        },
+        },    
         {
           "type": "LABEL",
           "level": 2,
-          "title": "Sector(s) affected",
-          "tooltip": "More than one sector can be selected",
+          "title": "Sector and Objective(s) affected",
+          "tooltip": "A sector can be selected. More than one objective can be selected, additional objectives could be added and specified under 'other'",
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "SectorObjectives",
-          "title": "Sector(s)",
+          "title": "Sector and Objective(s)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "SectorAffected",
               "title": "Sector(s) affected",
-              "isPrimary": false
+              "isPrimary": false,
+              "readOnly": true
             },
             {
               "type": "FIELD",
@@ -105,22 +106,7 @@
                 "value": ["Other sectors"]
               },
               "isPrimary": false
-            }
-          ]
-        },
-        {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Objective(s) affected",
-          "tooltip": "More than one objective can be selected, additional objectives could be added and specified under 'other'",
-          "isPrimary": false
-        },
-        {
-          "type": "TABLE",
-          "name": "SectorObjectives",
-          "title": "Objective(s)",
-          "multipleRecords": true,
-          "elements": [
+            },
             {
               "type": "FIELD",
               "name": "Objective",

@@ -29,7 +29,7 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { PaMsUtils } from './_functions/Utils/PaMsUtils';
-import { TextUtils } from 'ui/views/_functions/Utils';
+import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
@@ -37,6 +37,7 @@ export const WebformRecord = ({
   columnsSchema,
   dataflowId,
   datasetId,
+  datasetSchemaId,
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
@@ -59,6 +60,7 @@ export const WebformRecord = ({
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
+    linkItemsOptions: [],
     newRecord: {},
     record,
     sectorAffectedValue: null,
@@ -74,6 +76,7 @@ export const WebformRecord = ({
     isDeleteAttachmentVisible,
     isDialogVisible,
     isFileDialogVisible,
+    linkItemsOptions,
     sectorAffectedValue,
     selectedField,
     selectedFieldId,
@@ -147,6 +150,57 @@ export const WebformRecord = ({
     const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
 
     DownloadFile(fileContent, fileName);
+  };
+
+  const onFilter = async (filter, field) => {
+    console.log(filter, field);
+    if (isNil(field.referencedField)) {
+      return;
+    }
+
+    const conditionalField = webformRecordState.record.elements.find(
+      element => element.fieldSchemaId === field.referencedField.masterConditionalFieldId
+    );
+    console.log({ conditionalField });
+    // const conditionalFieldValue = !isNil(conditionalField)
+    //   ?conditionalField[conditionalField.fieldData.fieldSchemaId]
+    //   : '';
+
+    if (datasetSchemaId === '' || isNil(datasetSchemaId)) {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      datasetSchemaId = metadata.datasetSchemaId;
+    }
+
+    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+      datasetId,
+      field.fieldSchemaId,
+      filter,
+      !isNil(conditionalField) ? conditionalField.value : field.value,
+      datasetSchemaId
+    );
+
+    const linkItems = referencedFieldValues
+      .map(referencedField => {
+        return {
+          itemType: `${referencedField.value}${
+            !isNil(referencedField.label) &&
+            referencedField.label !== '' &&
+            referencedField.label !== referencedField.value
+              ? ` - ${referencedField.label}`
+              : ''
+          }`,
+          value: referencedField.value
+        };
+      })
+      .sort((a, b) => a.value - b.value);
+
+    if (!field.pkHasMultipleValues) {
+      linkItems.unshift({
+        itemType: resources.messages['noneCodelist'],
+        value: ''
+      });
+    }
+    webformRecordDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
   };
 
   const onEditorKeyChange = (event, field, option) => {
@@ -232,36 +286,31 @@ export const WebformRecord = ({
         );
 
       case 'LINK':
+        // console.log({ field });
         if (field.pkHasMultipleValues) {
+          console.log({ field });
           return (
             <MultiSelect
-              // onChange={e => onChangeForm(field, e.value)}
               appendTo={document.body}
               clearButton={false}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               maxSelectedLabels={10}
-              onChange={e => {
-                // try {
-                //   setLinkItemsValue(e.value);
-                //   onEditorValueChange(cells, e.value);
-                //   onEditorSubmitValue(cells, e.value, record);
-                // } catch (error) {
-                //   console.error(error);
-                // }
+              onChange={event => {
+                onFillField(field, option, event.target.value);
+                if (isNil(field.recordId)) onSaveField(option, event.target.value);
+                else onEditorSubmitValue(field, option, event.target.value);
               }}
-              // onFilterInputChangeBackend={onFilter}
+              onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onFocus={e => {
-                e.preventDefault();
+                // e.preventDefault();
                 // if (!isUndefined(codelistItemValue)) {
                 //   onEditorValueFocus(cells, codelistItemValue);
                 // }
               }}
-              // options={linkItemsOptions}
-              options={[]}
+              options={linkItemsOptions}
               optionLabel="itemType"
-              // value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
-              value={field.value}
+              value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
             />
           );
         } else {
@@ -273,21 +322,25 @@ export const WebformRecord = ({
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
-              onChange={e => {
-                // setLinkItemsValue(e.target.value.value);
-                // onEditorValueChange(cells, e.target.value.value);
-                // onEditorSubmitValue(cells, e.target.value.value, record);
+              onChange={event => {
+                console.log(event.target.value);
+                const value =
+                  typeof event.target.value === 'object' && !Array.isArray(event.target.value)
+                    ? event.target.value.value
+                    : event.target.value;
+                onFillField(field, option, value);
+                webformRecordDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+                if (isNil(field.recordId)) onSaveField(option, value);
+                else onEditorSubmitValue(field, option, value);
               }}
-              // onFilterInputChangeBackend={onFilter}
+              onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onMouseDown={e => {
                 // onEditorValueFocus(cells, e.target.value);
               }}
               optionLabel="itemType"
-              // options={linkItemsOptions}
-              options={[]}
+              options={linkItemsOptions}
               showFilterClear={true}
-              // value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
-              value={field.value}
+              value={RecordUtils.getLinkValue(linkItemsOptions, field.value)}
             />
           );
         }
@@ -562,6 +615,7 @@ export const WebformRecord = ({
                   <WebformRecord
                     dataflowId={dataflowId}
                     datasetId={datasetId}
+                    datasetSchemaId={datasetSchemaId}
                     key={i}
                     multipleRecords={element.multipleRecords}
                     onAddMultipleWebform={onAddMultipleWebform}
