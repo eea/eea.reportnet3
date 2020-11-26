@@ -43,7 +43,7 @@ export const WebformTable = ({
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
     addingOnTableSchemaId: null,
     isAddingMultiple: false,
-    isDataUpdated: false,
+    isDataUpdated: 0,
     isLoading: true,
     webformData: {}
   });
@@ -68,7 +68,13 @@ export const WebformTable = ({
         onLoadTableData();
       }
     }
-  }, [isDataUpdated, isRefresh, onTabChange, selectedTable.pamsId, webform]);
+  }, [isRefresh, onTabChange, selectedTable.pamsId, webform]);
+
+  useEffect(() => {
+    if (isDataUpdated !== 0) {
+      onLoadTableData();
+    }
+  }, [isDataUpdated]);
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -181,7 +187,7 @@ export const WebformTable = ({
   };
 
   const onUpdateData = () => {
-    webformTableDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !webformTableState.isDataUpdated } });
+    webformTableDispatch({ type: 'ON_UPDATE_DATA', payload: { value: isDataUpdated + 1 } });
   };
 
   const renderWebformRecord = (record, index) => (

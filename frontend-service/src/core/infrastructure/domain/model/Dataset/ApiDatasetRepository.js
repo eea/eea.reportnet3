@@ -374,13 +374,11 @@ const parseValue = (type, value, feToBe = false) => {
         break;
       case 'POLYGON':
       case 'MULTILINESTRING':
-        console.log(parsedValue.geometry.coordinates);
         inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
           coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
         );
         break;
       case 'MULTIPOLYGON':
-        console.log(parsedValue.geometry.coordinates);
         inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
           polygon.map(coordinate =>
             coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))

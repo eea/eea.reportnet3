@@ -110,11 +110,22 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
 
+      if (!response) {
+        throw new Error(403);
+      }
+
       const filteredTables = datasetSchema.tables.filter(table => table.notEmpty && table.tableSchemaName !== 'PAMs');
 
       for (let i = 0; i < filteredTables.length; i++) {
         const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
-        await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
+        const res = await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
+
+        if (!res) {
+          if (response) {
+            onUpdateData();
+          }
+          throw new Error(403);
+        }
       }
       if (response) {
         onUpdateData();
@@ -142,7 +153,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         onUpdateData();
       }
     } catch (error) {
-      console.error('error', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

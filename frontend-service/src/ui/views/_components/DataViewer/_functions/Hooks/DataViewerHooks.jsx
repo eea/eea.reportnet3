@@ -229,7 +229,9 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+            justifyContent:
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
@@ -266,7 +268,8 @@ export const useSetColumns = (
             display: 'flex',
             alignItems: 'center',
             justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
