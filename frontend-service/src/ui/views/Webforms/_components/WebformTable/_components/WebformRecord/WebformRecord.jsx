@@ -101,6 +101,7 @@ export const WebformRecord = ({
       type: 'INITIAL_LOAD',
       payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
     });
+    console.log('RENDER');
   }, [record, onTabChange]);
 
   const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
@@ -303,6 +304,8 @@ export const WebformRecord = ({
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onFocus={e => {
+                console.log('OPEN');
+                onFilter('', field);
                 // e.preventDefault();
                 // if (!isUndefined(codelistItemValue)) {
                 //   onEditorValueFocus(cells, codelistItemValue);
@@ -335,6 +338,7 @@ export const WebformRecord = ({
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onMouseDown={e => {
+                console.log('OPEN');
                 // onEditorValueFocus(cells, e.target.value);
               }}
               optionLabel="itemType"
