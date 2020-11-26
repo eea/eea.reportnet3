@@ -428,7 +428,15 @@ export const WebformRecord = ({
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
-
+      if (element.type === 'BLOCK') {
+        return (
+          !isFieldVisible && (
+            <div key={i} className={styles.fieldsBlock}>
+              {renderElements(element.elements)}
+            </div>
+          )
+        );
+      }
       if (element.type === 'FIELD') {
         return (
           !isFieldVisible && (

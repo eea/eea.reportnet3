@@ -136,14 +136,18 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
             ...records[0].fields.find(element => TextUtils.areEquals(element['name'], elements[index]['name'])),
             type: elements[index].type
           });
-        } else if (elements[index].type === 'TABLE') {
+        }
+
+        if (elements[index].type === 'TABLE') {
           const filteredTable = datasetSchema.tables.filter(table =>
             TextUtils.areEquals(table.tableSchemaName, elements[index].name)
           );
           const parsedTable = onParseWebformData(datasetSchema, [elements[index]], filteredTable);
 
           result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
-        } else if (TextUtils.areEquals(elements[index].type, 'LABEL')) {
+        }
+
+        if (TextUtils.areEquals(elements[index].type, 'LABEL') || TextUtils.areEquals(elements[index].type, 'BLOCK')) {
           result.push({ ...elements[index] });
         }
       }

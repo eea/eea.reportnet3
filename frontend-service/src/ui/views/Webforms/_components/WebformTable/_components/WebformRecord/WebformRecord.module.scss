@@ -52,6 +52,10 @@
     margin-top: 1rem;
   }
 
+  .fieldsBlock {
+    display: flex;
+  }
+
   .field {
     margin-bottom: 2rem;
     :global .p-multiselect {
