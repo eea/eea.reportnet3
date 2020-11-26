@@ -1,9 +1,10 @@
 import compact from 'lodash/compact';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 
-const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
+const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selectedValue) => {
   const initialValues = {};
 
   let tableIdx = 0;
@@ -31,7 +32,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
 
   compact(allTables).forEach(table => {
     initialValues[table] = false;
-    initialValues[value] = true;
+    initialValues[selectedValue ? selectedValue : value] = true;
   });
 
   return initialValues;
