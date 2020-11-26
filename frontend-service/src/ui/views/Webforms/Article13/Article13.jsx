@@ -111,7 +111,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
 
       if (!response) {
-        throw new Error('Error adding record to dataset data');
+        throw new Error(403);
       }
 
       const filteredTables = datasetSchema.tables.filter(table => table.notEmpty && table.tableSchemaName !== 'PAMs');
@@ -124,7 +124,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           if (response) {
             onUpdateData();
           }
-          throw new Error('Error adding record to dataset data');
+          throw new Error(403);
         }
       }
       if (response) {
