@@ -18,29 +18,42 @@ export const WebformView = ({
   data,
   dataflowId,
   datasetId,
+  isRefresh,
   isReporting,
-  selectedId,
+  selectedTable,
   selectedTableName,
+  setTableSchemaId,
   state,
   tables
 }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
+    isLoading: false,
     isVisible: Article15Utils.getWebformTabs(
       tables.map(table => table.name),
       state.schemaTables,
-      tables
+      tables,
+      selectedTableName
     )
   });
 
-  const { isVisible } = webformViewState;
+  const { isLoading, isVisible } = webformViewState;
+
+  useEffect(() => {
+    const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
+    const visibleTableId = data.filter(table => table.name === visibleTable)[0].tableSchemaId;
+
+    setTableSchemaId(visibleTableId);
+  }, [webformViewState.isVisible]);
 
   useEffect(() => {
     if (!isNil(selectedTableName)) {
       onChangeWebformTab(selectedTableName);
     }
   }, [selectedTableName]);
+
+  const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {
@@ -67,6 +80,7 @@ export const WebformView = ({
       return (
         <Button
           className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
+          disabled={isLoading}
           icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
           iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
           iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
@@ -87,9 +101,11 @@ export const WebformView = ({
       <WebformTable
         dataflowId={dataflowId}
         datasetId={datasetId}
+        isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
-        selectedId={selectedId}
+        selectedTable={selectedTable}
+        setIsLoading={setIsLoading}
         webform={visibleContent}
         webformType={'ARTICLE_13'}
       />

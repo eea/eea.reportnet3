@@ -954,6 +954,7 @@
     "isReleasing": "Is releasing",
     "linkedTableLabel": "Linked table label field",
     "linkedTableConditional": "Linked table conditional field",
-    "masterTableConditional": "Master table conditional field"
+    "masterTableConditional": "Master table conditional field",
+    "nonEditableDataDifferentTypes": "This field is not editable and the imported and designed types are not the same"
   }
 }
