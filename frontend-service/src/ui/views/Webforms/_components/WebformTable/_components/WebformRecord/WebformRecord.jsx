@@ -232,23 +232,83 @@ export const WebformRecord = ({
         );
 
       case 'LINK':
-        return (
-          <InputText
-            // keyfilter={getFilter(type)}
-            // maxLength={urlCharacters}
-            className={'p-disabled'}
-            disabled={field.isDisabled}
-            id={field.fieldId}
-            onBlur={event => {}}
-            onChange={event => {}}
-            onFocus={event => {
-              event.preventDefault();
-              // onEditorValueFocus(cells, event.target.value);
-            }}
-            onKeyDown={event => {}}
-            value={field.value}
-          />
-        );
+        if (field.pkHasMultipleValues) {
+          return (
+            <MultiSelect
+              // onChange={e => onChangeForm(field, e.value)}
+              appendTo={document.body}
+              clearButton={false}
+              filter={true}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              maxSelectedLabels={10}
+              onChange={e => {
+                // try {
+                //   setLinkItemsValue(e.value);
+                //   onEditorValueChange(cells, e.value);
+                //   onEditorSubmitValue(cells, e.value, record);
+                // } catch (error) {
+                //   console.error(error);
+                // }
+              }}
+              // onFilterInputChangeBackend={onFilter}
+              onFocus={e => {
+                e.preventDefault();
+                // if (!isUndefined(codelistItemValue)) {
+                //   onEditorValueFocus(cells, codelistItemValue);
+                // }
+              }}
+              // options={linkItemsOptions}
+              options={[]}
+              optionLabel="itemType"
+              // value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
+              value={field.value}
+            />
+          );
+        } else {
+          return (
+            <Dropdown
+              appendTo={document.body}
+              // currentValue={RecordUtils.getCellValue(cells, cells.field)}
+              currentValue={field.value}
+              filter={true}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              filterBy="itemType,value"
+              onChange={e => {
+                // setLinkItemsValue(e.target.value.value);
+                // onEditorValueChange(cells, e.target.value.value);
+                // onEditorSubmitValue(cells, e.target.value.value, record);
+              }}
+              // onFilterInputChangeBackend={onFilter}
+              onMouseDown={e => {
+                // onEditorValueFocus(cells, e.target.value);
+              }}
+              optionLabel="itemType"
+              // options={linkItemsOptions}
+              options={[]}
+              showFilterClear={true}
+              // value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
+              value={field.value}
+            />
+          );
+        }
+      // return (
+
+      //   // <InputText
+      //   //   // keyfilter={getFilter(type)}
+      //   //   // maxLength={urlCharacters}
+      //   //   className={'p-disabled'}
+      //   //   disabled={field.isDisabled}
+      //   //   id={field.fieldId}
+      //   //   onBlur={event => {}}
+      //   //   onChange={event => {}}
+      //   //   onFocus={event => {
+      //   //     event.preventDefault();
+      //   //     // onEditorValueFocus(cells, event.target.value);
+      //   //   }}
+      //   //   onKeyDown={event => {}}
+      //   //   value={field.value}
+      //   // />
+      // );
 
       case 'MULTISELECT_CODELIST':
         return (
