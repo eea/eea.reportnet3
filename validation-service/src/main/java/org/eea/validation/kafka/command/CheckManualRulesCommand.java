@@ -133,29 +133,40 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
     if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
       rulesSchema.getRules().stream().forEach(rule -> {
         if (checkNoSQL && rule.isAutomatic() == Boolean.FALSE && null == rule.getSqlSentence()) {
-          if (validateRule(datasetSchemaId, rule)) {
+          boolean valid = validateRule(datasetSchemaId, rule);
+          if (valid) {
             rule.setVerified(true);
           } else {
-            rule.setVerified(false);
-            rule.setEnabled(false);
-            errorRulesList.add(rule);
+            if (rule.getVerified().equals(Boolean.FALSE) && valid == Boolean.FALSE) {
+              rule.setVerified(false);
+              rule.setEnabled(false);
+            } else {
+              rule.setVerified(false);
+              rule.setEnabled(false);
+              errorRulesList.add(rule);
+            }
           }
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
         }
         if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()
             && rule.isAutomatic() == Boolean.FALSE) {
-          if (validateSQLRule(rule.getSqlSentence(), datasetId, rule)) {
+          boolean valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
+          if (valid) {
             rule.setVerified(true);
           } else {
-            rule.setVerified(false);
-            rule.setEnabled(false);
-            errorRulesList.add(rule);
+            if (rule.getVerified().equals(Boolean.FALSE) && valid == Boolean.FALSE) {
+              rule.setVerified(false);
+              rule.setEnabled(false);
+            } else {
+              rule.setVerified(false);
+              rule.setEnabled(false);
+              errorRulesList.add(rule);
+            }
           }
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
         }
       });
     }
-
 
     if (!errorRulesList.isEmpty()) {
       RulesSchema rulesdisabled =
