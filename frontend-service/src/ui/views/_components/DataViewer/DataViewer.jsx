@@ -557,6 +557,19 @@ const DataViewer = withRouter(
       onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
     };
 
+    const onConditionalChange = field => {
+      dispatchRecords({
+        type: 'RESET_CONDITIONAL_FIELDS',
+        payload: {
+          field,
+          isNewRecord,
+          referencedFields: colsSchema.filter(
+            col => !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === field
+          )
+        }
+      });
+    };
+
     const onConfirmDeleteTable = async () => {
       try {
         await DatasetService.deleteTableDataById(datasetId, tableId);
@@ -1292,6 +1305,7 @@ const DataViewer = withRouter(
                   getTooltipMessage={getTooltipMessage}
                   hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
+                  onConditionalChange={onConditionalChange}
                   onShowFieldInfo={onShowFieldInfo}
                   onShowCoordinateError={onShowCoordinateError}
                   records={records}
@@ -1322,6 +1336,7 @@ const DataViewer = withRouter(
                 getTooltipMessage={getTooltipMessage}
                 hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
+                onConditionalChange={onConditionalChange}
                 onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}

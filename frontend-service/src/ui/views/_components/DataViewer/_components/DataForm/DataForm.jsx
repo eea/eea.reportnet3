@@ -21,6 +21,7 @@ const DataForm = ({
   getTooltipMessage,
   hasWritePermissions,
   onChangeForm,
+  onConditionalChange,
   onShowCoordinateError = () => {},
   records,
   reporting,
@@ -126,6 +127,7 @@ const DataForm = ({
                     onChangeForm(property, value);
                   }}
                   onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
+                  onConditionalChange={onConditionalChange}
                   records={records}
                   reporting={reporting}
                   type={column.type}
@@ -203,6 +205,7 @@ const DataForm = ({
                       onChangeForm(property, value);
                     }}
                     onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
+                    onConditionalChange={onConditionalChange}
                     records={records}
                     reporting={reporting}
                     type={column.type}
