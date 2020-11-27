@@ -105,6 +105,10 @@ export const WebformRecord = ({
     .flat()
     .join(', ');
 
+  const handleDialogs = (dialog, value) => {
+    webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  };
+
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
     onToggleDialogVisible(false);
@@ -206,8 +210,14 @@ export const WebformRecord = ({
 
   const onToggleDialogVisible = value => webformRecordDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
-  const handleDialogs = (dialog, value) => {
-    webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  const onToggleFieldVisibility = (dependency, fields = []) => {
+    if (isNil(dependency)) return true;
+
+    const filteredDependency = fields
+      .filter(field => TextUtils.areEquals(field.name, dependency.field))
+      .map(filtered => filtered.value);
+
+    return filteredDependency.map(field => dependency.value.includes(field)).includes(true);
   };
 
   const renderTemplate = (field, option, type) => {
@@ -431,7 +441,8 @@ export const WebformRecord = ({
 
       if (element.type === 'FIELD') {
         return (
-          !isFieldVisible && (
+          !isFieldVisible &&
+          onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
               {(element.required || element.title) && <label>{`${element.required ? '*' : ''}${element.title}`}</label>}
 
