@@ -54,6 +54,14 @@
 
   .fieldsBlock {
     display: flex;
+    justify-content: space-between;
+    max-width: 90%;
+    .field {
+      width: 20%;
+      .template {
+        width: 100%;
+      }
+    }
   }
 
   .field {
