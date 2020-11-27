@@ -94,6 +94,7 @@ export const WebformRecord = ({
   const { getObjectiveOptions } = PaMsUtils;
 
   useEffect(() => {
+    // console.log('parseNewRecordData', parseNewRecordData(record.elements, undefined));
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
       payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
@@ -123,10 +124,8 @@ export const WebformRecord = ({
   };
 
   const onDeleteMultipleWebform = async () => {
-    webformRecordDispatch({
-      type: 'SET_IS_DELETING',
-      payload: { isDeleting: true }
-    });
+    webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
+
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
       if (isDataDeleted) {
@@ -190,7 +189,15 @@ export const WebformRecord = ({
       option
     ] = value;
 
-    webformRecordState.record.elements.filter(field => field.fieldSchemaId === option)[0].value = value;
+    const filteredRecord = webformRecordState.record.elements.filter(field => {
+      if (field.type === 'BLOCK') {
+        field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === option)[0].value = value;
+      }
+
+      return field.fieldSchemaId === option;
+    });
+
+    if (!isEmpty(filteredRecord)) filteredRecord[0].value = value;
 
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
   };
@@ -442,7 +449,7 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.fieldsBlock}>
-              {renderElements(element.elements)}
+              {renderElements(element.elementsRecords[0].elements)}
             </div>
           )
         );
