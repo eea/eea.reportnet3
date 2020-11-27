@@ -421,21 +421,26 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const setIsReleasingDataProviderId = () => {
+  const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
     const [notification] = notificationContext.all.filter(
       notification =>
         notification.key === 'RELEASE_FAILED_EVENT' || notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
     );
 
-    const [representativeReleased] = dataflowState.data.representatives.filter(
-      representative => representative.dataProviderId === notification.content.providerId
-    );
-    representativeReleased.isReleasing = false;
+    dataflowState.data.datasets.forEach(dataset => {
+      if (dataset.dataProviderId === notification.content.providerId) {
+        dataset.isReleasing = isReleasingDatasetValue;
+      }
+    });
   };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
 
-  useCheckNotifications(['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'], setIsReleasingDataProviderId);
+  useCheckNotifications(
+    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    setIsReleasingDatasetsProviderId,
+    false
+  );
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
@@ -462,12 +467,13 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRelease = async () => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
-      !isNil(dataProviderId) &&
-        dataflowState.data.representatives.forEach(representative => {
-          if (representative.dataProviderId == dataProviderId) {
-            return (representative.isReleasing = true);
-          }
-        });
+      if (typeof dataProviderId === 'string') {
+        dataflowState.data.datasets
+          .filter(dataset => dataset.dataProviderId.toString() === dataProviderId)
+          .forEach(dataset => (dataset.isReleasing = true));
+      } else {
+        dataflowState.data.datasets.forEach(dataset => (dataset.isReleasing = true));
+      }
     } catch (error) {
       notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
     } finally {

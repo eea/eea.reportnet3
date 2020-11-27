@@ -165,10 +165,11 @@ const useBigButtonList = ({
   const receiptBigButton = onBuildReceiptButton();
 
   const getIsReleasing = () => {
-    const [representativeReleasing] = dataflowState.data.representatives.filter(
-      representative => representative.dataProviderId.toString() === dataProviderId
+    const datasetsProviderId = dataflowState.data.datasets.filter(
+      dataset => dataset.dataProviderId.toString() === dataProviderId
     );
-    return !isNil(representativeReleasing) ? representativeReleasing.isReleasing : false;
+
+    return datasetsProviderId[0].isReleasing;
   };
 
   const onBuildReleaseButton = () => {
