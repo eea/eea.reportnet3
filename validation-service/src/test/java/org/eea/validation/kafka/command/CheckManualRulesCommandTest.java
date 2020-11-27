@@ -92,7 +92,7 @@ public class CheckManualRulesCommandTest {
     rule1.setSqlSentence(null);
     rule1.setType(EntityTypeEnum.FIELD);
     rule1.setReferenceId(new ObjectId());
-    rule1.setVerified(Boolean.FALSE);
+    rule1.setVerified(Boolean.TRUE);
     rule1.setEnabled(Boolean.FALSE);
     rules.add(rule1);
     ruleSchema.setRules(rules);
@@ -114,8 +114,6 @@ public class CheckManualRulesCommandTest {
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    // Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
-    // Mockito.any())).thenReturn(Boolean.TRUE);
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
