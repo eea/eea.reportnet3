@@ -1,7 +1,9 @@
 package org.eea.dataset.service.impl;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -12,8 +14,11 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -36,6 +41,12 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
+
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -131,6 +142,56 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
     return datasetsVO;
   }
+
+
+  /**
+   * Update reporting dataset metabase.
+   *
+   * @param reportingVO the reporting VO
+   */
+  @Override
+  @Transactional
+  public void updateReportingDatasetMetabase(ReportingDatasetVO reportingVO) {
+    ReportingDataset reporting =
+        reportingDatasetRepository.findById(reportingVO.getId()).orElse(null);
+    if (reporting != null) {
+      // Map the VO fields that are informed into the entity
+      setEntityProperty(reportingVO, reporting);
+      reportingDatasetRepository.save(reporting);
+    }
+  }
+
+
+  /**
+   * Sets the entity property.
+   *
+   * @param objectOrigin the object origin
+   * @param objectTarget the object target
+   */
+  private void setEntityProperty(Object objectOrigin, Object objectTarget) {
+    Class<?> clazzOrigin = objectOrigin.getClass();
+    Class<?> clazzTarget = objectTarget.getClass();
+
+    List<Field> fieldsOrigin = FieldUtils.getAllFieldsList(clazzOrigin);
+    List<Field> fieldsTarget = FieldUtils.getAllFieldsList(clazzTarget);
+    fieldsTarget.stream().forEach(f -> {
+      Field matched = fieldsOrigin.stream().filter(d -> d.getName().equals(f.getName())).findFirst()
+          .orElse(null);
+      if (matched != null) {
+        matched.setAccessible(true);
+        try {
+          if (matched != null && matched.get(objectOrigin) != null) {
+            f.setAccessible(true);
+            f.set(objectTarget, matched.get(objectOrigin));
+          }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+          LOG_ERROR.error("Error mapping the entity {} from the VO {}", clazzTarget.getName(),
+              clazzOrigin.getName(), e);
+        }
+      }
+    });
+  }
+
 
 
 }
