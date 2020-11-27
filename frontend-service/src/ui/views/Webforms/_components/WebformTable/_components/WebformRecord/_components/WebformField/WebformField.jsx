@@ -34,9 +34,11 @@ export const WebformField = ({
   datasetSchemaId,
   element,
   isConditional,
+  isConditionalChanged,
+  newRecord,
   onFillField,
-  record,
-  tableId
+  onSaveField,
+  record
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -47,7 +49,6 @@ export const WebformField = ({
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     linkItemsOptions: [],
-    newRecord: {},
     record,
     sectorAffectedValue: null,
     selectedFieldId: '',
@@ -58,36 +59,21 @@ export const WebformField = ({
 
   const {
     isDeleteAttachmentVisible,
-    isDialogVisible,
     isFileDialogVisible,
     linkItemsOptions,
     sectorAffectedValue,
     selectedFieldId,
     selectedFieldSchemaId,
     selectedValidExtensions
-  } = webformFieldReducer;
+  } = webformFieldState;
 
-  const {
-    formatDate,
-    getInputMaxLength,
-    getInputType,
-    getMultiselectValues,
-    parseMultiselect,
-    parseNewRecordData
-  } = WebformRecordUtils;
+  const { formatDate, getInputMaxLength, getMultiselectValues } = WebformRecordUtils;
 
   const { getObjectiveOptions } = PaMsUtils;
 
   useEffect(() => {
-    // if (isConditional) {
-    //   onConditionalChange(field);
-    // }
-    // if (!isNil(linkDropdownRef.current)) {
-    //   linkDropdownRef.current.clearFilter();
-    // }
-    console.log({ element });
-    if (element.fieldType === 'LINK') onFilter(element.pkHasMultipleValues ? '' : element.value, element);
-  }, [record]);
+    if (element.fieldType === 'LINK') onFilter('', element);
+  }, [newRecord, isConditionalChanged]);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
@@ -108,18 +94,12 @@ export const WebformField = ({
   };
 
   const onFilter = async (filter, field) => {
-    console.log(filter, field);
     if (isNil(field) || isNil(field.referencedField)) {
       return;
     }
-
     const conditionalField = webformFieldState.record.elements.find(
       element => element.fieldSchemaId === field.referencedField.masterConditionalFieldId
     );
-    console.log({ conditionalField });
-    // const conditionalFieldValue = !isNil(conditionalField)
-    //   ?conditionalField[conditionalField.fieldData.fieldSchemaId]
-    //   : '';
 
     if (datasetSchemaId === '' || isNil(datasetSchemaId)) {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
@@ -190,15 +170,7 @@ export const WebformField = ({
     });
   };
 
-  const onSaveField = async (option, value, recordId) => {
-    try {
-      await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformFieldState.newRecord)]);
-    } catch (error) {
-      console.error('error', error);
-    }
-  };
-
-  const onSelectField = field => webformFieldDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
+  // const onSelectField = field => webformFieldDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
 
   const onToggleDeleteAttachmentDialogVisible = value =>
     webformFieldDispatch({ type: 'ON_TOGGLE_DELETE_DIALOG', payload: { value } });
@@ -224,7 +196,6 @@ export const WebformField = ({
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
-            onFocus={event => {}}
             value={new Date(field.value)}
             yearNavigator={true}
             yearRange="2010:2030"
@@ -232,61 +203,49 @@ export const WebformField = ({
         );
 
       case 'LINK':
-        // console.log({ field });
         if (field.pkHasMultipleValues) {
-          console.log({ field });
           return (
             <MultiSelect
               appendTo={document.body}
               clearButton={false}
+              currentValue={field.value}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               maxSelectedLabels={10}
               onChange={event => {
-                onFillField(field, option, event.target.value);
+                onFillField(field, option, event.target.value, isConditional);
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
-              onFocus={e => {
-                console.log('OPEN');
-                onFilter('', field);
-                // e.preventDefault();
-                // if (!isUndefined(codelistItemValue)) {
-                //   onEditorValueFocus(cells, codelistItemValue);
-                // }
-              }}
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
             />
           );
         } else {
-          console.log({ linkItemsOptions });
+          const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
           return (
             <Dropdown
               appendTo={document.body}
-              // currentValue={RecordUtils.getCellValue(cells, cells.field)}
-              currentValue={field.value}
+              currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
               onChange={event => {
-                console.log(event.target.value);
                 const value =
                   typeof event.target.value === 'object' && !Array.isArray(event.target.value)
                     ? event.target.value.value
                     : event.target.value;
-                onFillField(field, option, value);
+                onFillField(field, option, value, isConditional);
                 webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
                 else onEditorSubmitValue(field, option, value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
-              onMouseDown={e => {
-                console.log('OPEN');
-                // onEditorValueFocus(cells, e.target.value);
-              }}
+              // onFocus={() => {
+              //   onFilter('', field);
+              // }}
               optionLabel="itemType"
               options={linkItemsOptions}
               showFilterClear={true}
@@ -294,24 +253,6 @@ export const WebformField = ({
             />
           );
         }
-      // return (
-
-      //   // <InputText
-      //   //   // keyfilter={getFilter(type)}
-      //   //   // maxLength={urlCharacters}
-      //   //   className={'p-disabled'}
-      //   //   disabled={field.isDisabled}
-      //   //   id={field.fieldId}
-      //   //   onBlur={event => {}}
-      //   //   onChange={event => {}}
-      //   //   onFocus={event => {
-      //   //     event.preventDefault();
-      //   //     // onEditorValueFocus(cells, event.target.value);
-      //   //   }}
-      //   //   onKeyDown={event => {}}
-      //   //   value={field.value}
-      //   // />
-      // );
 
       case 'MULTISELECT_CODELIST':
         return (

@@ -44,7 +44,7 @@ const parseNewRecord = (columnsSchema, data) => {
 };
 
 const parseNewTableRecord = (table, pamNumber) => {
-  if (!isNil(table.records) && !isEmpty(table.records)) {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
 
     if (!isUndefined(table)) {

@@ -46,6 +46,7 @@ export const WebformRecord = ({
   const resources = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
+    isConditionalChanged: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -53,9 +54,9 @@ export const WebformRecord = ({
     selectedRecordId: null
   });
 
-  const { isDialogVisible, selectedRecordId } = webformRecordState;
+  const { isConditionalChanged, isDialogVisible, selectedRecordId } = webformRecordState;
 
-  const { parseNewRecordData } = WebformRecordUtils;
+  const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
 
   useEffect(() => {
     webformRecordDispatch({
@@ -89,14 +90,16 @@ export const WebformRecord = ({
     }
   };
 
-  const onFillField = (field, option, value) => {
-    webformRecordState.newRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === option)[0].fieldData[
-      option
-    ] = value;
+  const onFillField = (field, option, value, conditional) => {
+    webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value, conditional } });
+  };
 
-    webformRecordState.record.elements.filter(field => field.fieldSchemaId === option)[0].value = value;
-
-    webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
+  const onSaveField = async (option, value, recordId) => {
+    try {
+      await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const handleDialogs = (dialog, value) => {
@@ -137,9 +140,10 @@ export const WebformRecord = ({
                           col.referencedField.masterConditionalFieldId === element.fieldSchemaId
                       ).length > 0
                     }
+                    isConditionalChanged={isConditionalChanged}
                     onFillField={onFillField}
+                    onSaveField={onSaveField}
                     record={record}
-                    tableId={tableId}
                   />
                   {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
@@ -205,6 +209,7 @@ export const WebformRecord = ({
                     onAddMultipleWebform={onAddMultipleWebform}
                     onRefresh={onRefresh}
                     onTabChange={onTabChange}
+                    newRecord={webformRecordState.newRecord}
                     record={record}
                     tableId={tableId}
                     tableName={element.title}
