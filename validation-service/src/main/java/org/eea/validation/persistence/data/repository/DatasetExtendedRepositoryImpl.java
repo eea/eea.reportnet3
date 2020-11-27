@@ -32,11 +32,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
-
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant RECORD_ID: {@value}. */
+  private static final String RECORD_ID = "record_id";
 
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
@@ -44,6 +47,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
 
 
 
+  /**
+   * Gets the table id.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the table id
+   */
   @Override
   public Long getTableId(String idTableSchema, Long datasetId) {
     String stringQuery = "select id from dataset_" + datasetId
@@ -208,7 +218,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    * @param datasetId the dataset id
    * @param idTable the id table
    * @return the table value
-   * @throws SQLException
+   * @throws SQLException the SQL exception
    */
   private TableValue executeQuery(Connection conn, String entityName, String query,
       EntityTypeEnum entityTypeEnum, Long datasetId, Long idTable) throws SQLException {
@@ -225,13 +235,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         List<FieldValue> fields = new ArrayList<>();
         switch (entityTypeEnum) {
           case RECORD:
-            record.setId(rs.getString("record_id"));
+            record.setId(rs.getString(RECORD_ID));
             record.setFields(fields);
             records.add(record);
             tableValue.setRecords(records);
             break;
           case FIELD:
-            record.setId(rs.getString("record_id"));
+            record.setId(rs.getString(RECORD_ID));
             FieldValue field = new FieldValue();
             field.setId(rs.getString(entityName + "_id"));
             fields.add(field);
@@ -240,6 +250,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             tableValue.setRecords(records);
             break;
           case TABLE:
+            int size = 0;
+            rs.last();
+            size = rs.getRow();
+            if (size > 0) {
+              records.add(record);
+              tableValue.setRecords(records);
+            }
             break;
           case DATASET:
             break;

@@ -186,22 +186,24 @@ public class SQLValidationUtils {
           saveDataset(dataset);
           break;
         case TABLE:
-          if (table.getTableValidations().isEmpty()) {
-            TableValidation tableValidation = new TableValidation();
-            tableValidation.setTableValue(tableToEvaluate);
-            tableValidation.setValidation(createValidation(rule, tableName, null));
-            List<TableValidation> tableValidations = new ArrayList<>();
-            tableValidations.add(tableValidation);
-            tableToEvaluate.setTableValidations(tableValidations);
-          } else {
-            List<TableValidation> tableValidations = tableToEvaluate.getTableValidations();
-            TableValidation tablevalidation = new TableValidation();
-            tablevalidation.setTableValue(tableToEvaluate);
-            tablevalidation.setValidation(createValidation(rule, tableName, null));
-            tableValidations.add(tablevalidation);
-            tableToEvaluate.setTableValidations(tableValidations);
+          if (!tableToEvaluate.getRecords().isEmpty()) {
+            if (table.getTableValidations().isEmpty()) {
+              TableValidation tableValidation = new TableValidation();
+              tableValidation.setTableValue(tableToEvaluate);
+              tableValidation.setValidation(createValidation(rule, tableName, null));
+              List<TableValidation> tableValidations = new ArrayList<>();
+              tableValidations.add(tableValidation);
+              tableToEvaluate.setTableValidations(tableValidations);
+            } else {
+              List<TableValidation> tableValidations = tableToEvaluate.getTableValidations();
+              TableValidation tablevalidation = new TableValidation();
+              tablevalidation.setTableValue(tableToEvaluate);
+              tablevalidation.setValidation(createValidation(rule, tableName, null));
+              tableValidations.add(tablevalidation);
+              tableToEvaluate.setTableValidations(tableValidations);
+            }
+            saveTable(table);
           }
-          saveTable(table);
           break;
         case RECORD:
           List<String> recordsToEvauate = new ArrayList<>();
