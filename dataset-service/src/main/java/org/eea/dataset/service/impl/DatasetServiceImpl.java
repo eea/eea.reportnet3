@@ -2384,13 +2384,13 @@ public class DatasetServiceImpl implements DatasetService {
         recordValue.setIdRecordSchema(idRecordSchema);
         recordValue.setTableValue(table);
         List<FieldValue> fieldValues = new ArrayList<>();
-        List<String> idSchema = new ArrayList<>();
+        List<String> idFieldSchemas = new ArrayList<>();
         etlFieldBuildFor(fieldMap, dataset, tableSchema, etlRecord, recordValue, fieldValues,
-            idSchema, datasetType);
+            idFieldSchemas, datasetType);
         // set the fields if not declared in the records
         setMissingField(
             tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema().getFieldSchema(),
-            fieldValues, idSchema, recordValue);
+            fieldValues, idFieldSchemas, recordValue);
         recordValue.setFields(fieldValues);
         recordValue.setDatasetPartitionId(partition.getId());
         recordValue.setDataProviderCode(provider != null ? provider.getCode() : null);
@@ -2411,12 +2411,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param etlRecord the etl record
    * @param recordValue the record value
    * @param fieldValues the field values
-   * @param idSchema the id schema
+   * @param idFieldSchemas the id field schema
    * @param datasetType the dataset type
    */
   private void etlFieldBuildFor(Map<String, FieldSchema> fieldMap, DatasetValue dataset,
       TableSchema tableSchema, ETLRecordVO etlRecord, RecordValue recordValue,
-      List<FieldValue> fieldValues, List<String> idSchema,
+      List<FieldValue> fieldValues, List<String> idFieldSchemas,
       DatasetTypeEnum datasetType) {
     for (ETLFieldVO etlField : etlRecord.getFields()) {
       FieldValue field = new FieldValue();
@@ -2431,7 +2431,7 @@ public class DatasetServiceImpl implements DatasetService {
         field.setValue(etlField.getValue());
         field.setRecord(recordValue);
         fieldValues.add(field);
-        idSchema.add(field.getIdFieldSchema());
+        idFieldSchemas.add(field.getIdFieldSchema());
       }
     }
   }
