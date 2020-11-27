@@ -1,9 +1,12 @@
 package org.eea.dataset.service.impl;
 
-import java.lang.reflect.Field;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -16,6 +19,8 @@ import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -144,6 +149,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   }
 
 
+
   /**
    * Update reporting dataset metabase.
    *
@@ -155,41 +161,42 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     ReportingDataset reporting =
         reportingDatasetRepository.findById(reportingVO.getId()).orElse(null);
     if (reporting != null) {
-      // Map the VO fields that are informed into the entity
-      setEntityProperty(reportingVO, reporting);
+      // Map the VO fields that are informed into the entity. The null values from the vo are
+      // ignored
+      try {
+        BeanUtils.copyProperties(reportingVO, reporting, getNullProperties(reportingVO));
+      } catch (BeansException | IntrospectionException | IllegalAccessException
+          | InvocationTargetException e) {
+        LOG_ERROR.error("Error mapping the entity {} from the VO {}",
+            reporting.getClass().getName(), reportingVO.getClass().getName(), e);
+      }
       reportingDatasetRepository.save(reporting);
     }
   }
 
 
-  /**
-   * Sets the entity property.
-   *
-   * @param objectOrigin the object origin
-   * @param objectTarget the object target
-   */
-  private void setEntityProperty(Object objectOrigin, Object objectTarget) {
-    Class<?> clazzOrigin = objectOrigin.getClass();
-    Class<?> clazzTarget = objectTarget.getClass();
 
-    List<Field> fieldsOrigin = FieldUtils.getAllFieldsList(clazzOrigin);
-    List<Field> fieldsTarget = FieldUtils.getAllFieldsList(clazzTarget);
-    fieldsTarget.stream().forEach(f -> {
-      Field matched = fieldsOrigin.stream().filter(d -> d.getName().equals(f.getName())).findFirst()
-          .orElse(null);
-      if (matched != null) {
-        matched.setAccessible(true);
-        try {
-          if (matched != null && matched.get(objectOrigin) != null) {
-            f.setAccessible(true);
-            f.set(objectTarget, matched.get(objectOrigin));
-          }
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-          LOG_ERROR.error("Error mapping the entity {} from the VO {}", clazzTarget.getName(),
-              clazzOrigin.getName(), e);
-        }
+  /**
+   * Gets the null properties.
+   *
+   * @param object the object
+   * @return the null properties
+   * @throws IntrospectionException the introspection exception
+   * @throws IllegalAccessException the illegal access exception
+   * @throws InvocationTargetException the invocation target exception
+   */
+  private String[] getNullProperties(Object object)
+      throws IntrospectionException, IllegalAccessException, InvocationTargetException {
+    java.beans.PropertyDescriptor[] pds =
+        Introspector.getBeanInfo(object.getClass()).getPropertyDescriptors();
+    Set<String> emptyNames = new HashSet<>();
+    for (java.beans.PropertyDescriptor pd : pds) {
+      if (null == pd.getReadMethod().invoke(object)) {
+        emptyNames.add(pd.getName());
       }
-    });
+    }
+    String[] result = new String[emptyNames.size()];
+    return emptyNames.toArray(result);
   }
 
 
