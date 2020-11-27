@@ -1300,6 +1300,8 @@ public class DatasetServiceImpl implements DatasetService {
       for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
         fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
         if (DataType.ATTACHMENT.equals(field.getType())) {
+          LOG.warn("Table with id schema {} contains attachment field, processing",
+              tableSchema.getIdTableSchema());
           tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
         }
       }
@@ -1313,9 +1315,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Loops to build the entity
     dataset.setId(datasetId);
-
+    DatasetTypeEnum datasetType = getDatasetType(dataset.getId());
     etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-        readOnlyTables, fixedNumberTables);
+        readOnlyTables, fixedNumberTables, datasetType);
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
 
@@ -1348,6 +1350,8 @@ public class DatasetServiceImpl implements DatasetService {
           && !fixedNumberTables.contains(tableValue.getIdTableSchema())) {
         // Put an empty value to the field if it's an attachment type  if and only if table has fields of this type
         if (tableWithAttachmentFieldSet.contains(tableValue.getIdTableSchema())) {
+          LOG.warn("Table {} and id schema {} contains attachment field, processing",
+              tableValue.getId(), tableValue.getIdTableSchema());
           tableValue.getRecords().stream().forEach(r -> {
             r.getFields().stream().forEach(f -> {
               if (DataType.ATTACHMENT.equals(f.getType())) {
@@ -1376,13 +1380,16 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tables the tables
    * @param readOnlyTables the read only tables
    * @param fixedNumberTables the fixed number tables
+   * @param datasetType the dataset type
    */
   private void etlTableFor(ETLDatasetVO etlDatasetVO, DataProviderVO provider,
       final PartitionDataSetMetabase partition, Map<String, TableSchema> tableMap,
       Map<String, FieldSchema> fieldMap, DatasetValue dataset, List<TableValue> tables,
-      List<String> readOnlyTables, List<String> fixedNumberTables) {
+      List<String> readOnlyTables, List<String> fixedNumberTables, DatasetTypeEnum datasetType) {
+
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
-      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
+      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable,
+          datasetType);
       // Check if table is read Only and save into a list
       TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
@@ -2358,25 +2365,28 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataset the dataset
    * @param tables the tables
    * @param etlTable the etl table
+   * @param datasetType the dataset type
    */
   private void etlBuildEntity(DataProviderVO provider, final PartitionDataSetMetabase partition,
       Map<String, TableSchema> tableMap, Map<String, FieldSchema> fieldMap, DatasetValue dataset,
-      List<TableValue> tables, ETLTableVO etlTable) {
+      List<TableValue> tables, ETLTableVO etlTable, DatasetTypeEnum datasetType) {
 
     TableValue table = new TableValue();
     TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
+    String idRecordSchema = tableMap.get(etlTable.getTableName().toLowerCase())
+        .getRecordSchema().getIdRecordSchema().toString();
     if (tableSchema != null) {
       table.setIdTableSchema(tableSchema.getIdTableSchema().toString());
       List<RecordValue> records = new ArrayList<>();
+
       for (ETLRecordVO etlRecord : etlTable.getRecords()) {
         RecordValue recordValue = new RecordValue();
-        recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName().toLowerCase())
-            .getRecordSchema().getIdRecordSchema().toString());
+        recordValue.setIdRecordSchema(idRecordSchema);
         recordValue.setTableValue(table);
         List<FieldValue> fieldValues = new ArrayList<>();
         List<String> idSchema = new ArrayList<>();
         etlFieldBuildFor(fieldMap, dataset, tableSchema, etlRecord, recordValue, fieldValues,
-            idSchema);
+            idSchema, datasetType);
         // set the fields if not declared in the records
         setMissingField(
             tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema().getFieldSchema(),
@@ -2402,17 +2412,19 @@ public class DatasetServiceImpl implements DatasetService {
    * @param recordValue the record value
    * @param fieldValues the field values
    * @param idSchema the id schema
+   * @param datasetType the dataset type
    */
   private void etlFieldBuildFor(Map<String, FieldSchema> fieldMap, DatasetValue dataset,
       TableSchema tableSchema, ETLRecordVO etlRecord, RecordValue recordValue,
-      List<FieldValue> fieldValues, List<String> idSchema) {
+      List<FieldValue> fieldValues, List<String> idSchema,
+      DatasetTypeEnum datasetType) {
     for (ETLFieldVO etlField : etlRecord.getFields()) {
       FieldValue field = new FieldValue();
       FieldSchema fieldSchema =
           fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
       if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
-          && !DatasetTypeEnum.DESIGN.equals(getDatasetType(dataset.getId()))
-          || fieldSchema != null && DatasetTypeEnum.DESIGN.equals(getDatasetType(dataset.getId()))
+          && !DatasetTypeEnum.DESIGN.equals(datasetType)
+          || fieldSchema != null && DatasetTypeEnum.DESIGN.equals(datasetType)
           || fieldSchema != null && fieldSchema.getReadOnly() == null) {
         field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
         field.setType(fieldSchema.getType());
