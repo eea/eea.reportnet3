@@ -96,7 +96,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptDownloaded(false);
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
-    representative.setReleasing(false);
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
@@ -143,8 +142,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
             : representative.getUserMail(),
         representative.getDataflow().getId())
-        && !changesInReceiptStatus(representative, representativeVO)
-        && !changesInReleasingStatus(representative, representativeVO)) {
+        && !changesInReceiptStatus(representative, representativeVO)) {
       LOG_ERROR.error("Duplicated representative relationship");
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
     } else {
@@ -163,9 +161,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       if (representativeVO.getReceiptOutdated() != null) {
         representative.setReceiptOutdated(representativeVO.getReceiptOutdated());
       }
-      if (representativeVO.getReleasing() != null) {
-        representative.setReleasing(representativeVO.getReleasing());
-      }
+
       // save changes
       return representativeRepository.save(representative).getId();
     }
@@ -299,21 +295,5 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return changes;
   }
 
-  /**
-   * Changes in releasing status.
-   *
-   * @param representative the representative
-   * @param representativeVO the representative VO
-   * @return true, if successful
-   */
-  private boolean changesInReleasingStatus(Representative representative,
-      RepresentativeVO representativeVO) {
-
-    Boolean changes = true;
-    if (representative.getReleasing().equals(representativeVO.getReleasing())) {
-      changes = false;
-    }
-    return changes;
-  }
 
 }
