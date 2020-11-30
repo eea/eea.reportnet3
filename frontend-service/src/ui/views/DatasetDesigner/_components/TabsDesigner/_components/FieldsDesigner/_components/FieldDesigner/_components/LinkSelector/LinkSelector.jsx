@@ -132,7 +132,7 @@ const LinkSelector = withRouter(
     const linkSelectorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          disabled={isUndefined(link) || isEmpty(link)}
+          disabled={isUndefined(link) || isEmpty(link) || (!isNil(link) && isNil(link.referencedField))}
           icon="check"
           label={resources.messages['save']}
           onClick={() => {
@@ -144,14 +144,16 @@ const LinkSelector = withRouter(
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            onCancelSaveLink({
-              link,
-              linkedTableConditional: !isNil(pkLinkedTableConditional) ? pkLinkedTableConditional.fieldSchemaId : '',
-              linkedTableLabel: !isNil(pkLinkedTableLabel) ? pkLinkedTableLabel.fieldSchemaId : '',
-              masterTableConditional: !isNil(pkMasterTableConditional) ? pkMasterTableConditional.fieldSchemaId : '',
-              pkHasMultipleValues,
-              pkMustBeUsed
-            });
+            if (!isNil(link) && !isNil(link.referencedField)) {
+              onCancelSaveLink({
+                link,
+                linkedTableConditional: !isNil(pkLinkedTableConditional) ? pkLinkedTableConditional.fieldSchemaId : '',
+                linkedTableLabel: !isNil(pkLinkedTableLabel) ? pkLinkedTableLabel.fieldSchemaId : '',
+                masterTableConditional: !isNil(pkMasterTableConditional) ? pkMasterTableConditional.fieldSchemaId : '',
+                pkHasMultipleValues,
+                pkMustBeUsed
+              });
+            }
             setIsVisible(false);
           }}
         />

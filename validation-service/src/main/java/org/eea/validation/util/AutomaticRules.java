@@ -280,9 +280,21 @@ public class AutomaticRules {
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
+
+  /**
+   * Creates the geometry automatic rule.
+   *
+   * @param typeData the type data
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
   public static Rule createGeometryAutomaticRule(DataType typeData, String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
-    String error = "The value does not follow the expected syntax for a valid phone number "
+    String error = "The value does not follow the expected syntax for a valid "
         + typeData.toString().toLowerCase();
     return composeRule(referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
