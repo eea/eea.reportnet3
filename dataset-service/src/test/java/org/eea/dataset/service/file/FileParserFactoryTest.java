@@ -2,10 +2,17 @@ package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -15,10 +22,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FileParserFactoryTest {
 
-  /** The file parser factory. */
+  /**
+   * The file parser factory.
+   */
   @InjectMocks
   private FileParserFactory fileParserFactory;
 
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+  @Mock
+  private RepresentativeController representativeControllerZuul;
 
   /**
    * Inits the mocks.
@@ -33,6 +46,13 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextCsv() {
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    DataProviderVO provider = new DataProviderVO();
+    provider.setCode("Test");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
     assertNotNull("is null", fileParserFactory.createContext("csv", 1L));
   }
 
@@ -41,6 +61,13 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXls() {
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    DataProviderVO provider = new DataProviderVO();
+    provider.setCode("Test");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
     assertNotNull("is null", fileParserFactory.createContext("xls", 1L));
   }
 
@@ -49,6 +76,13 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXlsx() {
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    DataProviderVO provider = new DataProviderVO();
+    provider.setCode("Test");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
     assertNotNull("is null", fileParserFactory.createContext("xlsx", 1L));
   }
 
@@ -57,6 +91,13 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXml() {
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    DataProviderVO provider = new DataProviderVO();
+    provider.setCode("Test");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
     assertNull("is null", fileParserFactory.createContext("xml", 1L));
   }
 
@@ -65,6 +106,13 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContext() {
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    DataProviderVO provider = new DataProviderVO();
+    provider.setCode("Test");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
     assertNull("is null", fileParserFactory.createContext("xx", 1L));
   }
 

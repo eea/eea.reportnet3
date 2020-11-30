@@ -701,9 +701,11 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testdeleteRecordSuccess() throws Exception {
-    doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.deleteRecord(1L, recordId);
-    Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
+    doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
+    dataSetControllerImpl.deleteRecord(1L, recordId, false);
+    Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
   }
 
   /**
@@ -719,7 +721,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
 
-      dataSetControllerImpl.deleteRecord(1L, recordId);
+      dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -734,7 +736,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      dataSetControllerImpl.deleteRecord(1L, recordId);
+      dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
           datasetService.findRecordSchemaIdById(1L, recordId)), e.getReason());
@@ -750,8 +752,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.deleteRecord(1L, recordId);
+        Mockito.any(), Mockito.anyBoolean());
+    dataSetControllerImpl.deleteRecord(1L, recordId, false);
   }
 
   /**

@@ -20,6 +20,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -32,17 +33,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExcelReaderStrategy implements ReaderStrategy {
 
-  /** The file common. */
+  /**
+   * The file common.
+   */
   private FileCommonUtils fileCommon;
 
-  /** The dataset id. */
+  /**
+   * The dataset id.
+   */
   private Long datasetId;
 
-  /** The field max length. */
+  /**
+   * The field max length.
+   */
   private int fieldMaxLength;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
+
+  /**
+   * the provider Code
+   */
+  private String providerCode;
 
   /**
    * Instantiates a new excel reader strategy.
@@ -55,6 +69,15 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     this.fileCommon = fileCommon;
     this.datasetId = datasetId;
     this.fieldMaxLength = fieldMaxLength;
+    this.providerCode = "";
+  }
+
+  public ExcelReaderStrategy(FileCommonUtils fileCommon, Long datasetId, int fieldMaxLength,
+      String providerCode) {
+    this.fileCommon = fileCommon;
+    this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
+    this.providerCode = providerCode;
   }
 
   /**
@@ -64,7 +87,9 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   *
    * @return the data set VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -105,6 +130,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
    * @param partitionId the partition id
+   *
    * @return the table VO
    */
   private TableVO createTable(Sheet sheet, String idTableSchema, DataSetSchemaVO dataSetSchema,
@@ -128,6 +154,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param headersRow the headers row
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
+   *
    * @return the list
    */
   private List<FieldSchemaVO> readHeaders(Row headersRow, String idTableSchema,
@@ -160,6 +187,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
+   *
    * @return the list
    */
   private List<RecordVO> readRecords(Iterator<Row> rows, List<FieldSchemaVO> headers,
@@ -183,10 +211,11 @@ public class ExcelReaderStrategy implements ReaderStrategy {
         if (value.length() >= fieldMaxLength) {
           value = value.substring(0, fieldMaxLength);
         }
+        FieldSchemaVO fieldSchemaVO = headers.get(i);
         FieldVO field = new FieldVO();
-        field.setIdFieldSchema(headers.get(i).getId());
-        field.setType(headers.get(i).getType());
-        field.setValue(value);
+        field.setIdFieldSchema(fieldSchemaVO.getId());
+        field.setType(fieldSchemaVO.getType());
+        field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
         if (field.getIdFieldSchema() != null) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
@@ -198,6 +227,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       record.setFields(fields);
       record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
       record.setDatasetPartitionId(partitionId);
+      record.setDataProviderCode(providerCode);
       records.add(record);
     }
 
@@ -229,6 +259,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @param dataSetSchema the data set schema
    * @param tables the tables
+   *
    * @return the data set VO
    */
   private DataSetVO createDataSetVO(DataSetSchemaVO dataSetSchema, List<TableVO> tables) {

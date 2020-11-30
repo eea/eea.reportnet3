@@ -68,6 +68,10 @@ public class DataSetMetabase {
   @Column(name = "DATA_PROVIDER_ID")
   private Long dataProviderId;
 
+  /** The releasing. */
+  @Column(name = "RELEASING")
+  private Boolean releasing;
+
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;

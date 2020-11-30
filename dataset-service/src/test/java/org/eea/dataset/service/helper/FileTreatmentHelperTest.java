@@ -1,7 +1,7 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,20 +14,15 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.notification.event.NotificableEventHandler;
 import org.eea.notification.factory.NotificableEventFactory;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Before;
@@ -78,14 +73,6 @@ public class FileTreatmentHelperTest {
   @Mock
   private Stream<TableValue> tableValueStream;
 
-  @Mock
-  private NotificableEventHandler notificableEventHandler;
-
-  @Mock
-  private DatasetMetabaseService datasetMetabaseService;
-
-  @Mock
-  private RepresentativeControllerZuul representativeControllerZuul;
 
   @Mock
   private DatasetSchemaService datasetSchemaService;
@@ -128,12 +115,12 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(tableValueStream).forEach(Mockito.any());
     Mockito.when(listRecordValue.size()).thenReturn(2000);
     Mockito.when(listRecordValue.subList(Mockito.anyInt(), Mockito.anyInt()))
-        .thenReturn(new ArrayList<RecordValue>());
+        .thenReturn(new ArrayList<>());
     Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
-    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
-    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
-        .thenReturn(new DataProviderVO());
+//    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+//        .thenReturn(new DataSetMetabaseVO());
+//    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+//        .thenReturn(new DataProviderVO());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
@@ -165,16 +152,16 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(datasetService).saveTable(Mockito.any(), Mockito.any());
     Mockito.when(listRecordValue.size()).thenReturn(1);
     Mockito.when(listRecordValue.subList(Mockito.anyInt(), Mockito.anyInt()))
-        .thenReturn(new ArrayList<RecordValue>());
+        .thenReturn(new ArrayList<>());
     Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
-    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
-        .thenReturn(new DataProviderVO());
+//    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+//        .thenReturn(new DataSetMetabaseVO());
+//    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+//        .thenReturn(new DataProviderVO());
     Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("xls");
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("123456");
     Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
@@ -209,7 +196,7 @@ public class FileTreatmentHelperTest {
   public void exectueFileProcessETLTest() throws EEAException {
     List<IntegrationVO> integrations = new ArrayList<>();
     IntegrationVO integration = new IntegrationVO();
-    Map<String, String> internalParameters = new HashMap<String, String>();
+    Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put("fileExtension", "csv");
     integration.setInternalParameters(internalParameters);
     integration.setOperation(IntegrationOperationTypeEnum.IMPORT);

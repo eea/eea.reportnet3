@@ -44,7 +44,7 @@ const parseNewRecord = (columnsSchema, data) => {
 };
 
 const parseNewTableRecord = (table, pamNumber) => {
-  if (!isNil(table.records) && !isEmpty(table.records)) {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
 
     if (!isUndefined(table)) {
@@ -86,10 +86,20 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
           isDisabled: isNil(element.fieldSchema),
           maxSize: element.maxSize,
           name: element.name,
+          pk: element.pk,
+          pkHasMultipleValues: element.pkHasMultipleValues,
+          pkMustBeUsed: element.pkMustBeUsed,
+          pkReferenced: element.pkReferenced,
           recordId: record.recordId,
+          referencedField: element.referencedField,
           required: element.required,
           type: element.type,
           validExtensions: element.validExtensions
+        });
+      } else if (element.type === 'BLOCK') {
+        result.push({
+          ...element,
+          elementsRecords: onParseWebformRecords(records, { elements: element.elements }, tableData, totalRecords)
         });
       } else {
         if (tableData[element.tableSchemaId]) {
@@ -136,15 +146,33 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
             ...records[0].fields.find(element => TextUtils.areEquals(element['name'], elements[index]['name'])),
             type: elements[index].type
           });
-        } else if (elements[index].type === 'TABLE') {
+        }
+
+        if (elements[index].type === 'TABLE') {
           const filteredTable = datasetSchema.tables.filter(table =>
             TextUtils.areEquals(table.tableSchemaName, elements[index].name)
           );
           const parsedTable = onParseWebformData(datasetSchema, [elements[index]], filteredTable);
 
           result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
-        } else if (TextUtils.areEquals(elements[index].type, 'LABEL')) {
+        }
+
+        if (TextUtils.areEquals(elements[index].type, 'LABEL')) {
           result.push({ ...elements[index] });
+        }
+
+        if (TextUtils.areEquals(elements[index].type, 'BLOCK')) {
+          const blockedElements = [];
+
+          for (const field of elements[index].elements) {
+            blockedElements.push({
+              ...field,
+              ...records[0].fields.find(element => TextUtils.areEquals(element['name'], field['name'])),
+              type: field.type
+            });
+          }
+
+          result.push({ ...elements[index], elements: blockedElements, records, type: elements[index].type });
         }
       }
 

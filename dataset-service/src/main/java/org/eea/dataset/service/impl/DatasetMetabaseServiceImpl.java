@@ -35,7 +35,6 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -83,9 +82,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The data flow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The collaboration controller zuul. */
   @Autowired
@@ -928,4 +924,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return nextIdValidation;
 
   }
+
+
 }

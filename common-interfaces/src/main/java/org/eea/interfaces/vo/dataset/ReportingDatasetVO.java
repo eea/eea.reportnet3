@@ -9,7 +9,7 @@ import lombok.ToString;
 
 
 /**
- * The Class DataSetMetabaseVO.
+ * The Class ReportingDatasetVO.
  */
 @Getter
 @Setter
@@ -45,5 +45,8 @@ public class ReportingDatasetVO implements Serializable {
 
   /** The status. */
   private DatasetStatusEnum status;
+
+  /** The releasing. */
+  private Boolean releasing;
 
 }

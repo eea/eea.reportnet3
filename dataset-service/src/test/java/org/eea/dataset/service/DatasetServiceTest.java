@@ -56,6 +56,8 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.FileParseContextImpl;
@@ -285,6 +287,10 @@ public class DatasetServiceTest {
   /** The attachment repository. */
   @Mock
   private AttachmentRepository attachmentRepository;
+
+  /** The pk catalogue repository. */
+  @Mock
+  private PkCatalogueRepository pkCatalogueRepository;
 
   /** The field value. */
   private FieldValue fieldValue;
@@ -1081,7 +1087,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void deleteRecordsNull2Test() throws Exception {
-    datasetService.deleteRecord(1L, null);
+    datasetService.deleteRecord(1L, null, false);
   }
 
   /**
@@ -1092,7 +1098,35 @@ public class DatasetServiceTest {
   @Test
   public void deleteRecordsTest() throws Exception {
     doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
-    datasetService.deleteRecord(1L, "1L");
+    datasetService.deleteRecord(1L, "1L", false);
+    Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
+  }
+
+  /**
+   * Delete record cascade test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteRecordCascadeTest() throws Exception {
+    List<Document> fieldSchemas = new ArrayList<>();
+    Document fieldSchema = new Document();
+    List<ObjectId> referenced = new ArrayList<>();
+    PkCatalogueSchema pkCatalogueSchema = new PkCatalogueSchema();
+    fieldSchema.put(LiteralConstants.PK, true);
+    fieldSchema.put(LiteralConstants.ID, new ObjectId());
+    fieldSchemas.add(fieldSchema);
+    referenced.add(new ObjectId());
+    pkCatalogueSchema.setReferenced(referenced);
+    Document recordSchemaDocument = new Document();
+    recordSchemaDocument.put(LiteralConstants.FIELD_SCHEMAS, fieldSchemas);
+    when(recordRepository.findById(Mockito.anyString())).thenReturn(recordValue);
+    when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(recordSchemaDocument);
+    when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(pkCatalogueSchema);
+    when(fieldRepository.findByIdFieldSchemaIn(Mockito.any())).thenReturn(fieldList);
+    doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
+    datasetService.deleteRecord(1L, "1L", true);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
 

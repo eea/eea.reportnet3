@@ -79,13 +79,10 @@ export const apiDataset = {
       return false;
     }
   },
-  deleteRecordById: async (datasetId, recordId) => {
+  deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
     try {
       const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteRecord, {
-          datasetId,
-          recordId
-        })
+        url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -349,16 +346,28 @@ export const apiDataset = {
     });
     return response.data;
   },
-  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+  tableDataById: async (
+    datasetId,
+    tableSchemaId,
+    pageNum,
+    pageSize,
+    fields,
+    levelError,
+    ruleId,
+    fieldSchemaId,
+    value
+  ) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.dataViewer, {
         datasetId: datasetId,
-        tableSchemaId: tableSchemaId,
+        fields: fields,
+        fieldSchemaId,
+        idRules: ruleId,
+        levelError: levelError,
         pageNum: pageNum,
         pageSize: pageSize,
-        fields: fields,
-        levelError: levelError,
-        idRules: ruleId
+        tableSchemaId: tableSchemaId,
+        value
       })
     });
 

@@ -1,7 +1,11 @@
 package org.eea.dataset.service.file;
 
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,33 +16,54 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory implements IFileParserFactory {
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   @Autowired
   private FileCommonUtils fileCommon;
 
-  /** The delimiter. */
+  /**
+   * The delimiter.
+   */
   @Value("${dataset.loadDataDelimiter}")
   private char delimiter;
 
-  /** The field max length. */
+  /**
+   * The field max length.
+   */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+  @Autowired
+  private RepresentativeController representativeControllerZuul;
 
   /**
    * Creates a new FileParser object.
    *
    * @param mimeType the mime type
    * @param datasetId the dataset id
+   *
    * @return the i file parse contextd
    */
   @Override
   public IFileParseContext createContext(String mimeType, Long datasetId) {
     FileParseContextImpl context = null;
 
+    // Obtain the data provider code to insert into the record
+    Long providerId = 0L;
+    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (metabase.getDataProviderId() != null) {
+      providerId = metabase.getDataProviderId();
+    }
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
     switch (mimeType.toLowerCase()) {
       case "csv":
         context = new FileParseContextImpl(
-            new CSVReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength));
+            new CSVReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength,
+                provider.getCode()));
         break;
       case "xml":
         // Fill it with the xml strategy
@@ -46,7 +71,7 @@ public class FileParserFactory implements IFileParserFactory {
       case "xls":
       case "xlsx":
         context = new FileParseContextImpl(
-            new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength));
+            new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength, provider.getCode()));
         break;
       default:
         break;

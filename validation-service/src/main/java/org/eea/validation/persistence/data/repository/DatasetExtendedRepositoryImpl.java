@@ -45,8 +45,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
-
-
   /**
    * Gets the table id.
    *
@@ -86,20 +84,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       throw new EEAInvalidSQLException("SQL can't be executed: " + query, e);
     }
   }
-
-
-  /**
-   * Query unique result execution.
-   *
-   * @param stringQuery the string query
-   * @return the list
-   */
-  @Override
-  public List<Object> queryUniqueResultExecution(String stringQuery) {
-    Query query = entityManager.createNativeQuery(stringQuery.toLowerCase());
-    return query.getResultList();
-  }
-
 
   /**
    * Query record validation execution.
@@ -229,7 +213,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
       List<RecordValue> records = new ArrayList<>();
-      while (rs.next()) {
+      boolean continueLoop = true;
+      while (rs.next() && continueLoop) {
         RecordValue record = new RecordValue();
         tableValue.setId(idTable);
         List<FieldValue> fields = new ArrayList<>();
@@ -250,13 +235,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             tableValue.setRecords(records);
             break;
           case TABLE:
-            int size = 0;
-            rs.last();
-            size = rs.getRow();
-            if (size > 0) {
-              records.add(record);
-              tableValue.setRecords(records);
-            }
+            continueLoop = false;
+            records.add(record);
+            tableValue.setRecords(records);
             break;
           case DATASET:
             break;
@@ -265,6 +246,4 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     }
     return tableValue;
   }
-
-
 }
