@@ -59,6 +59,7 @@ export const WebformRecord = ({
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
 
   useEffect(() => {
+    // console.log('parseNewRecordData', parseNewRecordData(record.elements, undefined));
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
       payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
@@ -66,10 +67,8 @@ export const WebformRecord = ({
   }, [record, onTabChange]);
 
   const onDeleteMultipleWebform = async () => {
-    webformRecordDispatch({
-      type: 'SET_IS_DELETING',
-      payload: { isDeleting: true }
-    });
+    webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
+
     try {
       const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
       if (isDataDeleted) {
@@ -102,6 +101,16 @@ export const WebformRecord = ({
     }
   };
 
+  const onToggleFieldVisibility = (dependency, fields = []) => {
+    if (isNil(dependency)) return true;
+
+    const filteredDependency = fields
+      .filter(field => TextUtils.areEquals(field.name, dependency.field))
+      .map(filtered => filtered.value);
+
+    return filteredDependency.map(field => dependency.value.includes(field)).includes(true);
+  };
+
   const handleDialogs = (dialog, value) => {
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
@@ -110,10 +119,19 @@ export const WebformRecord = ({
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
-
-      if (element.type === 'FIELD') {
+      if (element.type === 'BLOCK') {
         return (
           !isFieldVisible && (
+            <div key={i} className={styles.fieldsBlock}>
+              {renderElements(element.elementsRecords[0].elements)}
+            </div>
+          )
+        );
+      }
+      if (element.type === 'FIELD') {
+        return (
+          !isFieldVisible &&
+          onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
               {(element.required || element.title) && <label>{`${element.required ? '*' : ''}${element.title}`}</label>}
 

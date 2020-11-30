@@ -1,3 +1,5 @@
+import isEmpty from 'lodash/isEmpty';
+
 export const webformRecordReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
@@ -12,7 +14,18 @@ export const webformRecordReducer = (state, { type, payload }) => {
         payload.option
       ] = payload.value;
       const inmRecord = { ...state.record };
-      inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
+
+      const filteredRecord = inmRecord.elements.filter(field => {
+        if (field.type === 'BLOCK') {
+          field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === payload.option)[0].value =
+            payload.value;
+        }
+
+        return field.fieldSchemaId === payload.option;
+      });
+
+      if (!isEmpty(filteredRecord))
+        inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
 
       return {
         ...state,
@@ -20,10 +33,6 @@ export const webformRecordReducer = (state, { type, payload }) => {
         newRecord: inmNewRecord,
         record: inmRecord,
         isConditionalChanged: payload.conditional ? !state.isConditionalChanged : state.isConditionalChanged
-        // fields: {
-        //   ...state.fields,
-        //   [payload.option]: { ...state.fields[payload.option], newValue: payload.value }
-        // }
       };
 
     case 'GET_DELETE_ROW_ID':

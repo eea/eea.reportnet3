@@ -434,30 +434,35 @@
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "EUETS_1",
-          "title": "EU ETS",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "ESR_1",
-          "title": "ESR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "LULUCF_1",
-          "title": "LULUCF",
-          "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "Total_1",
-          "title": "Total",
-          "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
-          "isPrimary": false
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "EUETS_1",
+              "title": "EU ETS",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ESR_1",
+              "title": "ESR",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "LULUCF_1",
+              "title": "LULUCF",
+              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "Total_1",
+              "title": "Total",
+              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
+              "isPrimary": false
+            }
+          ]
         },
         {
           "type": "LABEL",

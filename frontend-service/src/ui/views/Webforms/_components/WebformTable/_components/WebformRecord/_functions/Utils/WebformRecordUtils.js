@@ -66,14 +66,34 @@ const parseMultiselect = record => {
 
 const parseNewRecordData = (columnsSchema, data) => {
   if (!isEmpty(columnsSchema)) {
-    let fields;
+    const fields = [];
 
     if (!isUndefined(columnsSchema)) {
-      fields = columnsSchema.map(column => {
-        return {
+      for (const column of columnsSchema) {
+        if (column.type === 'BLOCK') {
+          column.elementsRecords[0].elements.map(element => {
+            fields.push({
+              fieldData: { [element.fieldSchemaId]: null, type: element.type, fieldSchemaId: element.fieldSchemaId }
+            });
+          });
+        }
+        fields.push({
           fieldData: { [column.fieldSchemaId]: null, type: column.type, fieldSchemaId: column.fieldSchemaId }
-        };
-      });
+        });
+      }
+      // fields = columnsSchema.map(column => {
+      //   if (column.type === 'BLOCK') {
+      //     return column.elementsRecords[0].elements.map(element => {
+      //       return {
+      //         fieldData: { [element.fieldSchemaId]: null, type: element.type, fieldSchemaId: element.fieldSchemaId }
+      //       };
+      //     });
+      //   }
+
+      //   return {
+      //     fieldData: { [column.fieldSchemaId]: null, type: column.type, fieldSchemaId: column.fieldSchemaId }
+      //   };
+      // });
     }
 
     const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
