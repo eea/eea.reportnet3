@@ -17,8 +17,10 @@ export const webformRecordReducer = (state, { type, payload }) => {
 
       const filteredRecord = inmRecord.elements.filter(field => {
         if (field.type === 'BLOCK') {
-          field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === payload.option)[0].value =
-            payload.value;
+          if (!isEmpty(field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === payload.option))) {
+            field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === payload.option)[0].value =
+              payload.value;
+          }
         }
 
         return field.fieldSchemaId === payload.option;
