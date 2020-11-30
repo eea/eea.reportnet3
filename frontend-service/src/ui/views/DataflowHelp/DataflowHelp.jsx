@@ -277,7 +277,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             disabled={isEmpty(datasetsSchemas)}
             headerClassName="dataflowHelp-schemas-help-step"
             header={resources.messages['datasetSchemas']}
-            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas && config.icons['spinnerAnimate']}>
+            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
               datasetsSchemas={datasetsSchemas}
