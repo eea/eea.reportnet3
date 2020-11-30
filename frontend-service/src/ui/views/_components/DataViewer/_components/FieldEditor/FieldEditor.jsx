@@ -424,10 +424,13 @@ const FieldEditor = ({
       case 'MULTIPOLYGON':
       case 'POLYGON':
         const value = RecordUtils.getCellValue(cells, cells.field);
-        const isValidJSON = MapUtils.checkValidJSONMultipleCoordinates(value);
         let differentTypes = false;
         if (!isNil(value) && value !== '') {
           differentTypes = !TextUtils.areEquals(JSON.parse(value).geometry.type, type);
+        }
+        let isValidJSON = false;
+        if (!differentTypes) {
+          isValidJSON = MapUtils.checkValidJSONMultipleCoordinates(value);
         }
         return (
           <div className={styles.pointWrapper}>
