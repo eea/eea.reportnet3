@@ -1,3 +1,5 @@
+import isEmpty from 'lodash/isEmpty';
+
 export const webformRecordReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
@@ -6,51 +8,40 @@ export const webformRecordReducer = (state, { type, payload }) => {
     case 'HANDLE_DIALOGS':
       return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };
 
-    case 'ON_FILE_DELETE_OPENED':
-      return {
-        ...state,
-        isDeleteAttachmentVisible: true,
-        selectedFieldId: payload.fieldId,
-        selectedFieldSchemaId: payload.fieldSchemaId
-      };
-
-    case 'ON_FILE_UPLOAD_SET_FIELDS':
-      return {
-        ...state,
-        selectedFieldId: payload.fieldId,
-        selectedFieldSchemaId: payload.fieldSchemaId,
-        selectedValidExtensions: payload.validExtensions,
-        selectedMaxSize: payload.maxSize
-      };
-
     case 'ON_FILL_FIELD':
+      const inmNewRecord = { ...state.newRecord };
+      inmNewRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === payload.option)[0].fieldData[
+        payload.option
+      ] = payload.value;
+      const inmRecord = { ...state.record };
+
+      const filteredRecord = inmRecord.elements.filter(field => {
+        if (field.type === 'BLOCK') {
+          if (!isEmpty(field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === payload.option))) {
+            field.elementsRecords[0].elements.filter(field => field.fieldSchemaId === payload.option)[0].value =
+              payload.value;
+          }
+        }
+
+        return field.fieldSchemaId === payload.option;
+      });
+
+      if (!isEmpty(filteredRecord))
+        inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
+
       return {
         ...state,
-        selectedField: payload.field
-
-        // fields: {
-        //   ...state.fields,
-        //   [payload.option]: { ...state.fields[payload.option], newValue: payload.value }
-        // }
+        selectedField: payload.field,
+        newRecord: inmNewRecord,
+        record: inmRecord,
+        isConditionalChanged: payload.conditional ? !state.isConditionalChanged : state.isConditionalChanged
       };
-
-    case 'ON_TOGGLE_DELETE_DIALOG':
-      return { ...state, isDeleteAttachmentVisible: payload.value };
-
-    case 'ON_TOGGLE_DIALOG':
-      return { ...state, isFileDialogVisible: payload.value };
-
-    case 'ON_SELECT_FIELD':
-      return { ...state, selectedField: payload.field };
 
     case 'GET_DELETE_ROW_ID':
       return { ...state, selectedRecordId: payload.selectedRecordId };
 
     case 'SET_IS_DELETING':
       return { ...state, isDeleting: payload.isDeleting };
-
-    case 'SET_SECTOR_AFFECTED':
-      return { ...state, sectorAffectedValue: payload.value };
 
     default:
       return state;

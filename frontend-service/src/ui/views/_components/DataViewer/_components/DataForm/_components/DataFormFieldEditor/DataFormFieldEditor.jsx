@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useReducer, useRef, useState } from 'reac
 // import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
@@ -103,6 +104,16 @@ const DataFormFieldEditor = ({
       inputRef.current.element.focus();
     }
   }, [inputRef.current, isVisible]);
+
+  useEffect(() => {
+    if (TextUtils.areEquals('LINK', type)) {
+      if (fieldValue === '') {
+        if (!isNil(linkDropdownRef.current)) {
+          linkDropdownRef.current.clearFilter();
+        }
+      }
+    }
+  }, [fieldValue]);
 
   useEffect(() => {
     onCheckCoordinateFieldsError(field, map.showCoordinateError);
@@ -356,6 +367,11 @@ const DataFormFieldEditor = ({
           maxSelectedLabels={10}
           onChange={e => onChangeForm(field, e.value, isConditional)}
           onFilterInputChangeBackend={onFilter}
+          onFocus={() => {
+            if (isEmpty(columnWithLinks.linkItems)) {
+              onLoadColsSchema('');
+            }
+          }}
           options={columnWithLinks.linkItems}
           optionLabel="itemType"
           ref={linkDropdownRef}

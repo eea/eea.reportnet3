@@ -15,7 +15,6 @@ const useBigButtonList = ({
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
-  isReleaseCreating,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -165,18 +164,30 @@ const useBigButtonList = ({
 
   const receiptBigButton = onBuildReceiptButton();
 
-  const releaseBigButton = [
-    {
-      buttonClass: 'schemaDataset',
-      buttonIcon: isReleaseCreating ? 'spinner' : 'released',
-      buttonIconClass: isReleaseCreating ? 'spinner' : 'released',
-      caption: resources.messages['releaseDataCollection'],
-      handleRedirect: !isReleaseCreating ? () => onOpenReleaseConfirmDialog() : () => {},
-      helpClassName: 'dataflow-big-buttons-release-help-step',
-      layout: 'defaultBigButton',
-      visibility: buttonsVisibility.release
-    }
-  ];
+  const getIsReleasing = () => {
+    const datasetsProviderId = dataflowState.data.datasets.filter(
+      dataset => dataset.dataProviderId.toString() === dataProviderId
+    );
+
+    return datasetsProviderId[0].isReleasing;
+  };
+
+  const onBuildReleaseButton = () => {
+    return [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: getIsReleasing() ? 'spinner' : 'released',
+        buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
+        caption: resources.messages['releaseDataCollection'],
+        handleRedirect: !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
+        helpClassName: 'dataflow-big-buttons-release-help-step',
+        layout: 'defaultBigButton',
+        visibility: buttonsVisibility.release
+      }
+    ];
+  };
+
+  const releaseBigButton = onBuildReleaseButton();
 
   return [helpButton, feedbackButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };

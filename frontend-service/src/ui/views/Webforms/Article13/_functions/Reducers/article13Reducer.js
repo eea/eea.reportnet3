@@ -45,6 +45,9 @@ export const article13Reducer = (state, { type, payload }) => {
     case 'GET_TABLE_SCHEMA_ID':
       return { ...state, selectedTableSchemaId: payload.tableSchemaId };
 
+    case 'HAS_ERRORS':
+      return { ...state, hasErrors: payload.value };
+
     default:
       return state;
   }
