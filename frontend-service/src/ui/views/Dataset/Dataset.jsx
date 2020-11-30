@@ -479,6 +479,7 @@ export const Dataset = withRouter(({ match, history }) => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       const dataset = dataflow.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      setIsDatasetReleased(dataset[0].isReleased);
 
       setDataset(dataset[0]);
     } catch (error) {
