@@ -302,14 +302,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       case DATASET:
         break;
     }
-    TableValue table = new TableValue();
     LOG.info("Query to be executed: {}", newQuery);
-    table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-        idTable);
-    if (ischeckDC.equals(Boolean.FALSE)) {
-      if (null != table && null != table.getRecords() && !table.getRecords().isEmpty()) {
-        retrieveValidations(table.getRecords(), datasetId);
-      }
+    TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
+        datasetId, idTable);
+    if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
+        && !table.getRecords().isEmpty()) {
+      retrieveValidations(table.getRecords(), datasetId);
     }
     return table;
   }
@@ -678,9 +676,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   @Async
   @Override
-  @Transactional
   public void validateSQLRules(Long datasetId, String datasetSchemaId) {
-    List<Rule> errorRulesList = new ArrayList<>();
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -693,24 +689,25 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         } else {
           rule.setVerified(false);
           rule.setEnabled(false);
-          errorRulesList.add(rule);
         }
         rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
             .append(rule.getRuleId().toString()).append("')").toString());
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }
-    if (!errorRulesList.isEmpty()) {
 
-      RulesSchema rulesdisabled =
-          rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
-      RulesSchema rulesUnchecked =
-          rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+    RulesSchema rulesDisabledSchema =
+        rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
+    RulesSchema rulesUncheckedSchema =
+        rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+    int rulesUnchecked = rulesUncheckedSchema.getRules().size();
+    int rulesDisabled = rulesDisabledSchema.getRules().size();
+
+    if (rulesDisabled > 0 || rulesUnchecked > 0) {
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).dataflowId(dataflowId)
-          .invalidRules(rulesUnchecked.getRules().size())
-          .disabledRules(rulesdisabled.getRules().size()).build();
+          .datasetId(datasetId).dataflowId(dataflowId).invalidRules(rulesUnchecked)
+          .disabledRules(rulesDisabled).build();
       LOG.info("SQL rules contains errors");
       releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
     } else {

@@ -16,7 +16,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { TextUtils, RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -163,8 +163,13 @@ export const useSetColumns = (
     return '';
   };
 
-  const renderComplexGeometries = (value = '') => {
-    if (!isNil(value) && value !== '' && MapUtils.checkValidJSONMultipleCoordinates(value)) {
+  const renderComplexGeometries = (value = '', type) => {
+    if (
+      !isNil(value) &&
+      value !== '' &&
+      !TextUtils.areEquals(JSON.parse(value).geometry.type, type) &&
+      MapUtils.checkValidJSONMultipleCoordinates(value)
+    ) {
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
         return (
@@ -255,7 +260,7 @@ export const useSetColumns = (
               : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
                   field.fieldData.type
                 )
-              ? renderComplexGeometries(field.fieldData[column.field])
+              ? renderComplexGeometries(field.fieldData[column.field], field.fieldData.type)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
