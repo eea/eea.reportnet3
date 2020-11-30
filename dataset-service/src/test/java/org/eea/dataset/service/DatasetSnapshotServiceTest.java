@@ -218,6 +218,10 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private ValidationControllerZuul validationControllerZuul;
 
+  /** The reporting dataset service. */
+  @Mock
+  private ReportingDatasetService reportingDatasetService;
+
   /**
    * The security context.
    */
@@ -998,15 +1002,6 @@ public class DatasetSnapshotServiceTest {
 
     Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(Arrays.asList(dataset));
-    RepresentativeVO representative = new RepresentativeVO();
-    List<RepresentativeVO> representatives = new ArrayList<>();
-    representative.setDataProviderId(1L);
-    representative.setProviderAccount("providerAccount");
-    representative.setReceiptDownloaded(true);
-    representative.setReceiptOutdated(true);
-    representatives.add(representative);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
-        .thenReturn(representatives);
 
 
     DataSetSchemaVO schema = new DataSetSchemaVO();
@@ -1015,7 +1010,7 @@ public class DatasetSnapshotServiceTest {
     schema.setTableSchemas(Arrays.asList(table));
     Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(schema);
-
+    Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
     datasetSnapshotService.createReleaseSnapshots(1L, 1L);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
         Mockito.anyBoolean());
@@ -1029,16 +1024,8 @@ public class DatasetSnapshotServiceTest {
     dataset.setDataProviderId(1L);
     Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(Arrays.asList(dataset));
-    RepresentativeVO representative = new RepresentativeVO();
-    List<RepresentativeVO> representatives = new ArrayList<>();
-    representative.setDataProviderId(1L);
-    representative.setProviderAccount("providerAccount");
-    representative.setReceiptDownloaded(true);
-    representative.setReceiptOutdated(true);
-    representatives.add(representative);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
-        .thenReturn(representatives);
 
+    Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
 
     DataSetSchemaVO schema = new DataSetSchemaVO();
     TableSchemaVO table = new TableSchemaVO();

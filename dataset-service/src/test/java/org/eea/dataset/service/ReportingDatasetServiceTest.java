@@ -1,10 +1,12 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -127,5 +129,23 @@ public class ReportingDatasetServiceTest {
     assertEquals("failed assertion", datasets,
         reportingDatasetService.getDataSetIdBySchemaId(Mockito.any()));
   }
+
+
+  @Test
+  public void testUpdateReportingMetabase() {
+    ReportingDataset dataset = new ReportingDataset();
+    dataset.setId(1L);
+    dataset.setReleasing(false);
+
+    ReportingDatasetVO datasetVO = new ReportingDatasetVO();
+    datasetVO.setId(1L);
+    datasetVO.setReleasing(true);
+
+    Mockito.when(reportingDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(dataset));
+    reportingDatasetService.updateReportingDatasetMetabase(datasetVO);
+    Mockito.verify(reportingDatasetRepository, times(1)).save(Mockito.any());
+  }
+
 
 }

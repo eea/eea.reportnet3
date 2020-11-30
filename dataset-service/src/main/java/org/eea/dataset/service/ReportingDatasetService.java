@@ -24,4 +24,12 @@ public interface ReportingDatasetService {
    */
   List<ReportingDatasetVO> getDataSetIdBySchemaId(String schemaId);
 
+
+  /**
+   * Update reporting dataset metabase.
+   *
+   * @param reportingVO the reporting VO
+   */
+  void updateReportingDatasetMetabase(ReportingDatasetVO reportingVO);
+
 }

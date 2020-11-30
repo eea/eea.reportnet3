@@ -368,20 +368,21 @@ const parseValue = (type, value, feToBe = false) => {
         break;
       case 'MULTIPOINT':
       case 'LINESTRING':
-        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => [
-          coordinate[1],
-          coordinate[0]
-        ]);
+        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
+          !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
+        );
         break;
       case 'POLYGON':
       case 'MULTILINESTRING':
         inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-          coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]])
+          coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
         );
         break;
       case 'MULTIPOLYGON':
         inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
-          polygon.map(coordinate => coordinate.map(innerCoordinate => [innerCoordinate[1], innerCoordinate[0]]))
+          polygon.map(coordinate =>
+            coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
+          )
         );
         break;
       default:
@@ -464,7 +465,17 @@ const schemaById = async datasetId => {
   return dataset;
 };
 
-const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+const tableDataById = async (
+  datasetId,
+  tableSchemaId,
+  pageNum,
+  pageSize,
+  fields,
+  levelError,
+  ruleId,
+  fieldSchemaId,
+  value
+) => {
   const tableDataDTO = await apiDataset.tableDataById(
     datasetId,
     tableSchemaId,
@@ -472,7 +483,9 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
     pageSize,
     fields,
     levelError,
-    ruleId
+    ruleId,
+    fieldSchemaId,
+    value
   );
   const table = new DatasetTable({});
 

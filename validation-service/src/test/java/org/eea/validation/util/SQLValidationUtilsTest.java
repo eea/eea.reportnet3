@@ -32,21 +32,18 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class SQLValidationUtilsTest {
+
   @Mock
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
-
 
   @Mock
   private static DatasetRepository datasetRepository;
 
-
   @Mock
   private static SchemasRepository schemasRepository;
 
-
   @Mock
   private static SqlRulesService sqlRulesService;
-
 
   @Mock
   private static TableRepository tableRepository;
@@ -103,7 +100,6 @@ public class SQLValidationUtilsTest {
     tableS.setIdTableSchema(new ObjectId());
   }
 
-
   @Test
   public void testExecuteValidationSQLRuleTableNoValidations() throws Exception {
 
@@ -112,18 +108,29 @@ public class SQLValidationUtilsTest {
     List<TableValidation> tableValidations = new ArrayList<>();
     table.setTableValidations(tableValidations);
 
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    record.setId("id");
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1L);
+    recordValidations.add(recordValidation);
+    record.setRecordValidations(recordValidations);
+    records.add(record);
+    table.setRecords(records);
+
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any(), Mockito.any())).thenReturn(table);
 
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
 
@@ -141,18 +148,29 @@ public class SQLValidationUtilsTest {
     tableValidations.add(tableValidation);
     table.setTableValidations(tableValidations);
 
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    record.setId("id");
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1L);
+    recordValidations.add(recordValidation);
+    record.setRecordValidations(recordValidations);
+    records.add(record);
+    table.setRecords(records);
+
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any(), Mockito.any())).thenReturn(table);
 
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
 
@@ -188,8 +206,6 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
@@ -227,8 +243,6 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
@@ -274,8 +288,6 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
@@ -323,8 +335,6 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
@@ -384,8 +394,6 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabase);
@@ -445,8 +453,6 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
-    Mockito.when(sqlRulesService.retriveFirstResult(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<Object>());
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabase);
@@ -458,8 +464,5 @@ public class SQLValidationUtilsTest {
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
 
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
-
   }
-
-
 }
