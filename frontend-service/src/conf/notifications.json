@@ -63,6 +63,9 @@
           }
         },
         {
+          "key": "ADD_RECORDS_ERROR"
+        },
+        {
           "key": "USER_LOGOUT_ERROR"
         },
         {

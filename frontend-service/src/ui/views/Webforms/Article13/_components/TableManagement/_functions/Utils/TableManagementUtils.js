@@ -16,20 +16,31 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
   }
 };
 
+const getSingleRecordOption = singleRecord => {
+  if (singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))] === '') {
+    return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
+  }
+
+  return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]} - ${
+    singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))]
+  }`;
+};
+
 const parseListOfSinglePams = (columns = [], records = []) => {
   const options = records
-    .filter(record => record.IsGroup === 'Single')
+    .filter(record => {
+      return record.IsGroup === 'Single';
+    })
     .map(singleRecord => {
       if (
         Object.keys(singleRecord)
           .map(key => key.toUpperCase())
           .includes('ID', 'TITLE')
       ) {
-        return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]} - ${
-          singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))]
-        }`;
+        return getSingleRecordOption(singleRecord);
       }
     });
+
   return columns.map(column => {
     if (column.header === 'ListOfSinglePams') {
       column.type = 'MULTISELECT_CODELIST';

@@ -85,7 +85,8 @@ import {
   faUserShield,
   faVectorSquare,
   faGripLines,
-  faBraille
+  faBraille,
+  faTable
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -384,6 +385,8 @@ export const AwesomeIcons = icon => {
       return faFileArchive;
     case 'howTo':
       return faBookOpen;
+    case 'table':
+      return faTable;
     default:
       return faFileAlt;
   }

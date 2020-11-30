@@ -195,8 +195,10 @@ export const TableManagement = ({
   const setIsLoading = value => tableManagementDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteRow = async () => {
+    const deleteCascade = true;
+
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
       if (isDataDeleted) {
         onRefresh();
       }
