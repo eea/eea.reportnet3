@@ -108,7 +108,10 @@ export const WebformRecord = ({
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
       .map(filtered => filtered.value);
 
-    return filteredDependency.map(field => dependency.value.includes(field)).includes(true);
+    return filteredDependency
+      .flat()
+      .map(field => dependency.value.includes(field))
+      .includes(true);
   };
 
   const handleDialogs = (dialog, value) => {
@@ -187,7 +190,8 @@ export const WebformRecord = ({
         );
       } else {
         return (
-          !isSubTableVisible && (
+          !isSubTableVisible &&
+          onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.subTable}>
               <h3 className={styles.title}>
                 <div>

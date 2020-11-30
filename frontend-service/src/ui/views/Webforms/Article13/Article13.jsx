@@ -6,6 +6,10 @@ import isNil from 'lodash/isNil';
 
 import styles from './Article13.module.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { tables } from './article13.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
@@ -28,7 +32,7 @@ import { TableManagementUtils } from './_components/TableManagement/_functions/U
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
-  const { getFieldSchemaId, getTypeList } = Article13Utils;
+  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
   const { parsePamsRecords } = TableManagementUtils;
 
@@ -37,6 +41,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
+    hasErrors: true,
     isAddingRecord: false,
     isDataUpdated: false,
     isLoading: true,
@@ -56,6 +61,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   useEffect(() => {
     if (!isEmpty(article13State.data)) {
       onLoadPamsData();
+      article13Dispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(article13State.data) } });
     }
   }, [article13State.data, isDataUpdated]);
 
@@ -239,12 +245,43 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECIRD', payload: { value } });
 
-  return (
-    <Fragment>
-      <h3 className={styles.title}>
-        Questionnaire for reporting on Policies and Measures under the Monitoring Mechanism Regulation
-      </h3>
+  const renderErrorMessages = () => {
+    const missingElements = checkErrors(article13State.data);
 
+    return (
+      <Fragment>
+        <h4 className={styles.title}>{resources.messages['missingWebformTablesOrFieldsMissing']}</h4>
+        <div className={styles.missingElements}>
+          {Object.keys(missingElements).map((key, i) => {
+            const { table, fields } = missingElements[key];
+
+            return (
+              fields.some(field => field.isMissing) && (
+                <div key={i}>
+                  <span className={styles.tableTitle}>
+                    <FontAwesomeIcon icon={AwesomeIcons('table')} /> {table.name}
+                  </span>
+                  <ul>{fields.map((field, index) => field.isMissing && <li key={index}> {field.name}</li>)}</ul>
+                </div>
+              )
+            );
+          })}
+        </div>
+      </Fragment>
+    );
+  };
+
+  const renderLayout = children => (
+    <Fragment>
+      <h2 className={styles.title}>{resources.messages['webformArticle13Title']}</h2>
+      {children}
+    </Fragment>
+  );
+
+  if (article13State.hasErrors) return renderLayout(renderErrorMessages());
+
+  return renderLayout(
+    <Fragment>
       <ul className={styles.tableList}>
         {Object.keys(tableList).map((list, i) => (
           <li className={styles.tableListItem} key={i}>

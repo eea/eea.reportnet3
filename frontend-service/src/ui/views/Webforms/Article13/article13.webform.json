@@ -76,7 +76,7 @@
           "title": "Greenhouse gas(es) affected",
           "tooltip": "More than one GHG can be selected",
           "isPrimary": false
-        },    
+        },
         {
           "type": "LABEL",
           "level": 2,

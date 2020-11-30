@@ -954,6 +954,8 @@
     "linkedTableLabel": "Linked table label field",
     "linkedTableConditional": "Linked table conditional field",
     "masterTableConditional": "Master table conditional field",
-    "nonEditableDataDifferentTypes": "This field is not editable and the imported and designed types are not the same"
+    "nonEditableDataDifferentTypes": "This field is not editable and the imported and designed types are not the same",
+    "webformArticle13Title": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
+    "missingWebformTablesOrFieldsMissing": "The following tables or fields are missing, please check it."
   }
 }
