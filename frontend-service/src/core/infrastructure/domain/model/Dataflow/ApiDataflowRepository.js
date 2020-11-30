@@ -478,6 +478,7 @@ const parseDatasetDTO = datasetDTO =>
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
     isReleased: datasetDTO.isReleased,
+    isReleasing: datasetDTO.releasing,
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });

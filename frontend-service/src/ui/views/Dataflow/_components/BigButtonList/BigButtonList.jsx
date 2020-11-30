@@ -46,7 +46,6 @@ export const BigButtonList = ({
   dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
-  isReleaseCreating,
   onCleanUpReceipt,
   onSaveName,
   onShowManageReportersDialog,
@@ -136,10 +135,6 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
-
-  useEffect(() => {
-    setIsActiveButton(!isReleaseCreating);
-  }, [isReleaseCreating]);
 
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
@@ -473,7 +468,6 @@ export const BigButtonList = ({
       handleRedirect,
       isActiveButton,
       isLeadReporterOfCountry,
-      isReleaseCreating,
       onCloneDataflow,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
