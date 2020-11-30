@@ -165,9 +165,7 @@ const useBigButtonList = ({
   const receiptBigButton = onBuildReceiptButton();
 
   const getIsReleasing = () => {
-    const datasetsProviderId = dataflowState.data.datasets.filter(
-      dataset => dataset.dataProviderId.toString() === dataProviderId
-    );
+    const datasetsProviderId = dataflowState.data.datasets.filter(dataset => dataset.dataProviderId === dataProviderId);
 
     return datasetsProviderId[0].isReleasing;
   };

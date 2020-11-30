@@ -110,7 +110,11 @@ const Dataflow = withRouter(({ history, match }) => {
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
 
-  const dataProviderId = isInsideACountry ? (!isNil(representativeId) ? representativeId : uniqDataProviders[0]) : null;
+  const dataProviderId = isInsideACountry
+    ? !isNil(representativeId)
+      ? parseInt(representativeId)
+      : uniqDataProviders[0]
+    : null;
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
@@ -467,13 +471,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRelease = async () => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
-      if (typeof dataProviderId === 'string') {
-        dataflowState.data.datasets
-          .filter(dataset => dataset.dataProviderId.toString() === dataProviderId)
-          .forEach(dataset => (dataset.isReleasing = true));
-      } else {
-        dataflowState.data.datasets.forEach(dataset => (dataset.isReleasing = true));
-      }
+
+      dataflowState.data.datasets
+        .filter(dataset => dataset.dataProviderId === dataProviderId)
+        .forEach(dataset => (dataset.isReleasing = true));
     } catch (error) {
       notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
     } finally {
