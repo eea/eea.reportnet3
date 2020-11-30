@@ -862,10 +862,10 @@ public class DatasetServiceImpl implements DatasetService {
         List<?> fieldSchemasList =
             (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
         for (Object document : fieldSchemasList) {
-          Document fieldSchemaDocument= (Document) document;
+          Document fieldSchemaDocument = (Document) document;
           if (((fieldSchemaDocument.get(LiteralConstants.PK)) != null
-              && (boolean) ((fieldSchemaDocument.get(LiteralConstants.PK))) {
-            String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID).toString();
+              && (boolean) ((fieldSchemaDocument.get(LiteralConstants.PK))))) {
+            String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
             PkCatalogueSchema pkCatalogueSchema =
                 pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
             if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
