@@ -60,20 +60,21 @@ public class UpdateRecordHelperTest {
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
-  // @Test
-  // public void executeCreateProcessTest() throws EEAException, IOException, InterruptedException {
-  // doNothing().when(kafkaSender).sendMessage(Mockito.any());
-  // updateRecordHelper.executeCreateProcess(1L, records, "");
-  // Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
-  // }
+  @Test
+  public void executeCreateProcessTest() throws EEAException, IOException, InterruptedException {
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    updateRecordHelper.executeCreateProcess(1L, records, "");
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+  }
 
-  // @Test
-  // public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
-  // doNothing().when(datasetService).deleteRecord(Mockito.any(), Mockito.any(), Mockito.any());
-  // doNothing().when(kafkaSender).sendMessage(Mockito.any());
-  // updateRecordHelper.executeDeleteProcess(1L, "1L", false);
-  // Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
-  // }
+  @Test
+  public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
+    doNothing().when(datasetService).deleteRecord(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    updateRecordHelper.executeDeleteProcess(1L, "1L", false);
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+  }
 
   @Test
   public void executeUpdateFieldProcessTest()

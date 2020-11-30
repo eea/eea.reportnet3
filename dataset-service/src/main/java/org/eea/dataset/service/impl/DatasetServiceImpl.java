@@ -767,22 +767,24 @@ public class DatasetServiceImpl implements DatasetService {
         mapField.put(field.getIdFieldSchema(), field);
       });
       // get the RecordSchema
-      Document recordSchemadocument = schemasRepository.findRecordSchema(
+      Document recordSchemaDocument = schemasRepository.findRecordSchema(
           record.getTableValue().getDatasetId().getIdDatasetSchema(),
           record.getTableValue().getIdTableSchema());
       // get fks to delete
-      if (null != recordSchemadocument) {
-        List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get("fieldSchemas");
+      if (null != recordSchemaDocument) {
+        List<?> fieldSchemasList =
+            (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
         for (Object document : fieldSchemasList) {
-          if ((((Document) document).get("pk")) != null
-              && (boolean) (((Document) document).get("pk"))) {
-            String idFieldSchema = ((Document) document).get("_id").toString();
+          Document fieldSchemaDocument= (Document) document;
+          if (((fieldSchemaDocument.get(LiteralConstants.PK)) != null
+              && (boolean) ((fieldSchemaDocument.get(LiteralConstants.PK))) {
+            String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID).toString();
             PkCatalogueSchema pkCatalogueSchema =
                 pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
             if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
-              List<String> propertyKeys = pkCatalogueSchema.getReferenced().stream()
+              List<String> referenced = pkCatalogueSchema.getReferenced().stream()
                   .map(key -> key.toString()).collect(Collectors.toList());
-              List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(propertyKeys);
+              List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
               fieldsValues.stream().forEach(field -> {
                 FieldValue fieldV = mapField.get(idFieldSchema);
                 if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
