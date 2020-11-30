@@ -102,7 +102,7 @@ export const WebformTable = ({
           dataset: { name: datasetName }
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
-          type: 'ADD_RECORDS_BY_ID_ERROR',
+          type: 'ADD_RECORDS_ERROR',
           content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
         });
         webformTableDispatch({

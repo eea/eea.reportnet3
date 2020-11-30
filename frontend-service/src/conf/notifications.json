@@ -63,6 +63,13 @@
           }
         },
         {
+          "key": "ADD_RECORDS_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "USER_LOGOUT_ERROR"
         },
         {

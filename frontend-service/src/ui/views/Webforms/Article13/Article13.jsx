@@ -145,7 +145,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'ADD_RECORDS_BY_ID_ERROR',
+        type: 'ADD_RECORDS_ERROR',
         content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
     } finally {
@@ -166,7 +166,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'ADD_RECORDS_BY_ID_ERROR',
+        type: 'ADD_RECORDS_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
       });
     }
