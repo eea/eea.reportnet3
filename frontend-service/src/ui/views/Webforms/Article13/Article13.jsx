@@ -120,7 +120,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         throw new Error(403);
       }
 
-      const filteredTables = datasetSchema.tables.filter(table => table.notEmpty && table.tableSchemaName !== 'PAMs');
+      const filteredTables = datasetSchema.tables.filter(
+        table => table.notEmpty && !TextUtils.areEquals(table.tableSchemaName, 'pams')
+      );
 
       for (let i = 0; i < filteredTables.length; i++) {
         const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
