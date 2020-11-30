@@ -9,7 +9,7 @@
   "deleteFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
   "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
   "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
-  "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
+  "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}",
   "deleteRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}",
   "deleteTableDesign": "/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}",
   "downloadExportFile": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}",

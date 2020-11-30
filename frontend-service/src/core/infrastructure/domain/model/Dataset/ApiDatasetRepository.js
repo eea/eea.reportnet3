@@ -80,7 +80,8 @@ const deleteFileData = async (datasetId, fieldId) => await apiDataset.deleteFile
 const deleteRecordFieldDesign = async (datasetId, recordId) =>
   await apiDataset.deleteRecordFieldDesign(datasetId, recordId);
 
-const deleteRecordById = async (datasetId, recordId) => await apiDataset.deleteRecordById(datasetId, recordId);
+const deleteRecordById = async (datasetId, recordId, deleteInCascade) =>
+  await apiDataset.deleteRecordById(datasetId, recordId, deleteInCascade);
 
 const deleteSchemaById = async datasetId => await apiDataset.deleteSchemaById(datasetId);
 
@@ -362,31 +363,41 @@ const parseValue = (type, value, feToBe = false) => {
     const inmValue = JSON.parse(cloneDeep(value));
     const parsedValue = JSON.parse(value);
 
-    switch (type.toUpperCase()) {
-      case 'POINT':
-        inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
-        break;
-      case 'MULTIPOINT':
-      case 'LINESTRING':
-        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-          !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
-        );
-        break;
-      case 'POLYGON':
-      case 'MULTILINESTRING':
-        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-          coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
-        );
-        break;
-      case 'MULTIPOLYGON':
-        inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
-          polygon.map(coordinate =>
+    if (parsedValue.geometry.type.toUpperCase() !== type) {
+      if (type.toUpperCase() === 'POINT') {
+        return '';
+      }
+      inmValue.geometry.type = type;
+      inmValue.geometry.coordinates = [];
+    } else {
+      switch (type.toUpperCase()) {
+        case 'POINT':
+          inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
+          break;
+        case 'MULTIPOINT':
+        case 'LINESTRING':
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
+            !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
+          );
+          break;
+        case 'POLYGON':
+        case 'MULTILINESTRING':
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
             coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
-          )
-        );
-        break;
-      default:
-        break;
+          );
+          break;
+        case 'MULTIPOLYGON':
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
+            polygon.map(coordinate =>
+              coordinate.map(innerCoordinate =>
+                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+              )
+            )
+          );
+          break;
+        default:
+          break;
+      }
     }
 
     if (!feToBe) {

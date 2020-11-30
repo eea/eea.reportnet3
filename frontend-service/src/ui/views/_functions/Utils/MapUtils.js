@@ -68,7 +68,11 @@ const isValidJSON = value => {
 const checkValidJSONCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    return checkValidCoordinates(parsedJSON.geometry.coordinates);
+    if (!isEmpty(parsedJSON.geometry.coordinates)) {
+      return checkValidCoordinates(parsedJSON.geometry.coordinates);
+    } else {
+      return false;
+    }
   } else {
     return false;
   }
@@ -77,31 +81,37 @@ const checkValidJSONCoordinates = json => {
 const checkValidJSONMultipleCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    switch (parsedJSON.geometry.type.toUpperCase()) {
-      case 'LINESTRING':
-      case 'MULTIPOINT':
-        return (
-          flattenDeep(parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate))).filter(
-            check => !check
-          ).length === 0
-        );
-      case 'MULTILINESTRING':
-      case 'POLYGON':
-        return (
-          flattenDeep(
-            parsedJSON.geometry.coordinates.map(ring => ring.map(coordinate => checkValidCoordinates(coordinate)))
-          ).filter(check => !check).length === 0
-        );
-      case 'MULTIPOLYGON':
-        return (
-          flattenDeep(
-            parsedJSON.geometry.coordinates.map(polygon =>
-              polygon.map(ring => ring.map(coordinate => checkValidCoordinates(coordinate)))
-            )
-          ).filter(check => !check).length === 0
-        );
-      default:
-        break;
+    if (!isEmpty(parsedJSON.geometry.coordinates)) {
+      switch (parsedJSON.geometry.type.toUpperCase()) {
+        case 'LINESTRING':
+        case 'MULTIPOINT':
+          return (
+            flattenDeep(parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate))).filter(
+              check => !check
+            ).length === 0
+          );
+        case 'MULTILINESTRING':
+        case 'POLYGON':
+          return (
+            flattenDeep(
+              parsedJSON.geometry.coordinates.map(
+                ring => !isNil(ring) && ring.map(coordinate => checkValidCoordinates(coordinate))
+              )
+            ).filter(check => !check).length === 0
+          );
+        case 'MULTIPOLYGON':
+          return (
+            flattenDeep(
+              parsedJSON.geometry.coordinates.map(polygon =>
+                polygon.map(ring => !isNil(ring) && ring.map(coordinate => checkValidCoordinates(coordinate)))
+              )
+            ).filter(check => !check).length === 0
+          );
+        default:
+          break;
+      }
+    } else {
+      return false;
     }
   } else {
     return false;

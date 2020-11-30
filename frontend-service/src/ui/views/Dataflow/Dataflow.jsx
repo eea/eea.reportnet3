@@ -86,7 +86,6 @@ const Dataflow = withRouter(({ history, match }) => {
     isReceiptOutdated: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
-    isReleaseCreating: false,
     isReleaseDialogVisible: false,
     name: '',
     obligations: {},
@@ -111,7 +110,11 @@ const Dataflow = withRouter(({ history, match }) => {
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
 
-  const dataProviderId = isInsideACountry ? (!isNil(representativeId) ? representativeId : uniqDataProviders[0]) : null;
+  const dataProviderId = isInsideACountry
+    ? !isNil(representativeId)
+      ? parseInt(representativeId)
+      : uniqDataProviders[0]
+    : null;
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
@@ -422,13 +425,24 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const setIsReleaseCreating = value => dataflowDispatch({ type: 'RELEASE_IS_CREATING', payload: { value } });
+  const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
+    const [notification] = notificationContext.all.filter(
+      notification =>
+        notification.key === 'RELEASE_FAILED_EVENT' || notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+    );
+
+    dataflowState.data.datasets.forEach(dataset => {
+      if (dataset.dataProviderId === notification.content.providerId) {
+        dataset.isReleasing = isReleasingDatasetValue;
+      }
+    });
+  };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
-    setIsReleaseCreating,
+    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    setIsReleasingDatasetsProviderId,
     false
   );
 
@@ -456,8 +470,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
-      setIsReleaseCreating(true);
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
+
+      dataflowState.data.datasets
+        .filter(dataset => dataset.dataProviderId === dataProviderId)
+        .forEach(dataset => (dataset.isReleasing = true));
     } catch (error) {
       notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
     } finally {
@@ -490,7 +507,6 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
-            isReleaseCreating={dataflowState.isReleaseCreating}
             onCleanUpReceipt={onCleanUpReceipt}
             onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
             onSaveName={onSaveName}
@@ -507,7 +523,6 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataProviderId}
             handleRedirect={handleRedirect}
             isLeadReporterOfCountry={isLeadReporterOfCountry}
-            isReleaseCreating={dataflowState.isReleaseCreating}
             match={match}
             onCleanUpReceipt={onCleanUpReceipt}
             onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}

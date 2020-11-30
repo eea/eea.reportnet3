@@ -18,6 +18,7 @@ export const WebformView = ({
   data,
   dataflowId,
   datasetId,
+  datasetSchemaId,
   isRefresh,
   isReporting,
   selectedTable,
@@ -101,6 +102,7 @@ export const WebformView = ({
       <WebformTable
         dataflowId={dataflowId}
         datasetId={datasetId}
+        datasetSchemaId={datasetSchemaId}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}

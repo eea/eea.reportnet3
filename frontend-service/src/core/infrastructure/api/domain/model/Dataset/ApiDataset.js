@@ -79,13 +79,10 @@ export const apiDataset = {
       return false;
     }
   },
-  deleteRecordById: async (datasetId, recordId) => {
+  deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
     try {
       const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteRecord, {
-          datasetId,
-          recordId
-        })
+        url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
       });
 
       return response.status >= 200 && response.status <= 299;
