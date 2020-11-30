@@ -1081,7 +1081,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void deleteRecordsNull2Test() throws Exception {
-    datasetService.deleteRecord(1L, null);
+    datasetService.deleteRecord(1L, null, false);
   }
 
   /**
@@ -1092,7 +1092,7 @@ public class DatasetServiceTest {
   @Test
   public void deleteRecordsTest() throws Exception {
     doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
-    datasetService.deleteRecord(1L, "1L");
+    datasetService.deleteRecord(1L, "1L", false);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
 

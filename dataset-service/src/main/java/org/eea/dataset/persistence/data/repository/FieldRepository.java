@@ -35,6 +35,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   List<FieldValue> findByIdFieldSchema(String idFieldSchema);
 
   /**
+   * Find by id field schema in.
+   *
+   * @param fieldSchemaIds the field schema ids
+   * @return the list
+   */
+  List<FieldValue> findByIdFieldSchemaIn(List<String> fieldSchemaIds);
+
+  /**
    * Find by record.
    *
    * @param record the record

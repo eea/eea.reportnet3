@@ -185,13 +185,11 @@ public class RepresentativeServiceImplTest {
     representativeVO.setDataProviderId(null);
     representativeVO.setReceiptDownloaded(false);
     representativeVO.setReceiptOutdated(false);
-    representativeVO.setReleasing(false);
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(1L);
     representative.setDataProvider(dataProvider);
     representative.setReceiptDownloaded(false);
     representative.setReceiptOutdated(false);
-    representative.setReleasing(false);
     when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.of(representative));
     when(representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(arrayId));

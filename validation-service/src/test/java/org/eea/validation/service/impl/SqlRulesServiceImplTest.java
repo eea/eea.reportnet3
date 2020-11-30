@@ -431,11 +431,6 @@ public class SqlRulesServiceImplTest {
 
     when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(tableValue);
-    when(datasetRepository.queryFieldValidationExecution(Mockito.any()))
-        .thenReturn(fieldsValidation);
-    when(datasetRepository.queryRecordValidationExecution(Mockito.any()))
-        .thenReturn(recordsValidation);
-
 
     sqlRulesServiceImpl.retrieveTableData("", 1L, rule, Boolean.FALSE);
 
