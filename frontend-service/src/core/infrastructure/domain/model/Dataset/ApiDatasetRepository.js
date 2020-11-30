@@ -80,7 +80,8 @@ const deleteFileData = async (datasetId, fieldId) => await apiDataset.deleteFile
 const deleteRecordFieldDesign = async (datasetId, recordId) =>
   await apiDataset.deleteRecordFieldDesign(datasetId, recordId);
 
-const deleteRecordById = async (datasetId, recordId) => await apiDataset.deleteRecordById(datasetId, recordId);
+const deleteRecordById = async (datasetId, recordId, deleteInCascade) =>
+  await apiDataset.deleteRecordById(datasetId, recordId, deleteInCascade);
 
 const deleteSchemaById = async datasetId => await apiDataset.deleteSchemaById(datasetId);
 

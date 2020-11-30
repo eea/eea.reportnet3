@@ -957,6 +957,6 @@
     "nonEditableDataDifferentTypes": "This field is not editable and the imported and designed types are not the same",
     "webformArticle13Title": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
     "missingWebformTablesOrFieldsMissing": "The following tables or fields are missing, please check it.",
-    "addRecordsError": "There has been an error on adding record in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
+    "addRecordsError": "There has been an error adding a record"
   }
 }
