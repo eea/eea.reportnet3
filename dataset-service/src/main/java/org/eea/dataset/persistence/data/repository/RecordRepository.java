@@ -67,6 +67,15 @@ public interface RecordRepository
   void deleteRecordWithId(String recordId);
 
   /**
+   * Delete record with id in.
+   *
+   * @param recordId the record id
+   */
+  @Modifying
+  @Query("delete from RecordValue record where record.id IN ?1")
+  void deleteRecordWithIdIn(List<String> recordId);
+
+  /**
    * Delete record values to restore snapshot.
    *
    * @param partitionDatasetId the partition dataset id
