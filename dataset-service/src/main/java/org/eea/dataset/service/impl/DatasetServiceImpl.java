@@ -54,6 +54,8 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -243,6 +245,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
+
+  /** The pk catalogue repository. */
+  @Autowired
+  private PkCatalogueRepository pkCatalogueRepository;
 
   /** The Constant DATASET_ID. */
   private static final String DATASET_ID = "dataset_%s";
@@ -731,15 +737,66 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param recordId the record id
+   * @param deleteCascadePK the delete cascade
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteRecord(final Long datasetId, final String recordId) throws EEAException {
+  public void deleteRecord(final Long datasetId, final String recordId,
+      final boolean deleteCascadePK) throws EEAException {
     if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
+    deleteCascadePK(recordId, deleteCascadePK);
     recordRepository.deleteRecordWithId(recordId);
+  }
+
+  /**
+   * Delete cascade PK.
+   *
+   * @param recordId the record id
+   * @param deleteCascade the delete cascade
+   */
+  private void deleteCascadePK(final String recordId, final boolean deleteCascade) {
+    if (deleteCascade) {
+      RecordValue record = recordRepository.findById(recordId);
+      Map<String, FieldValue> mapField = new HashMap<>();
+      List<String> recordsToDelete = new ArrayList<>();
+      // get fields in record
+      record.getFields().stream().forEach(field -> {
+        mapField.put(field.getIdFieldSchema(), field);
+      });
+      // get the RecordSchema
+      Document recordSchemadocument = schemasRepository.findRecordSchema(
+          record.getTableValue().getDatasetId().getIdDatasetSchema(),
+          record.getTableValue().getIdTableSchema());
+      // get fks to delete
+      if (null != recordSchemadocument) {
+        List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get("fieldSchemas");
+        for (Object document : fieldSchemasList) {
+          if ((((Document) document).get("pk")) != null
+              && (boolean) (((Document) document).get("pk"))) {
+            String idFieldSchema = ((Document) document).get("_id").toString();
+            PkCatalogueSchema pkCatalogueSchema =
+                pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+            if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
+              List<String> propertyKeys = pkCatalogueSchema.getReferenced().stream()
+                  .map(key -> key.toString()).collect(Collectors.toList());
+              List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(propertyKeys);
+              fieldsValues.stream().forEach(field -> {
+                FieldValue fieldV = mapField.get(idFieldSchema);
+                if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
+                  recordsToDelete.add(field.getRecord().getId());
+                }
+              });
+            }
+          }
+        }
+      }
+      // delete all fks
+      LOG.info("records with fk's to delete {}", recordsToDelete);
+      recordRepository.deleteRecordWithIdIn(recordsToDelete);
+    }
   }
 
   /**

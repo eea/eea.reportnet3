@@ -218,30 +218,30 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
-  /**
-   * Test load data read only exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testLoadDataReadOnlyException() throws Exception {
-    try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-          .thenReturn(true);
-
-      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-      Mockito.when(authentication.getName()).thenReturn("user");
-      Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
-      final EEAMockMultipartFile file =
-          new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
-      dataSetControllerImpl.loadTableData(1L, file, "example", false);
-    } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
-      throw e;
-    }
-  }
+  // /**
+  // * Test load data read only exception.
+  // *
+  // * @throws Exception the exception
+  // */
+  // @Test(expected = ResponseStatusException.class)
+  // public void testLoadDataReadOnlyException() throws Exception {
+  // try {
+  // Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
+  // .thenReturn(DatasetTypeEnum.REPORTING);
+  // Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+  // .thenReturn(true);
+  //
+  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+  // Mockito.when(authentication.getName()).thenReturn("user");
+  // Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
+  // final EEAMockMultipartFile file =
+  // new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+  // dataSetControllerImpl.loadTableData(1L, file, "example", false);
+  // } catch (ResponseStatusException e) {
+  // assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+  // throw e;
+  // }
+  // }
 
   @Test(expected = ResponseStatusException.class)
   public void testLoadDataFixedNumberOfRecordsException() throws Exception {
@@ -371,21 +371,21 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null, null);
   }
 
-  /**
-   * Testget data tables values exception entry 5.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testgetDataTablesValuesExceptionEntry5() throws Exception {
-    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(new TableVO());
-    String fields = "field_1,fields_2,fields_3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null,
-        null);
-  }
+  // /**
+  // * Testget data tables values exception entry 5.
+  // *
+  // * @throws Exception the exception
+  // */
+  // @Test
+  // public void testgetDataTablesValuesExceptionEntry5() throws Exception {
+  // when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
+  // Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+  // .thenReturn(new TableVO());
+  // String fields = "field_1,fields_2,fields_3";
+  // ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+  // dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null,
+  // null);
+  // }
 
   /**
    * Testget data tables values success.
@@ -694,17 +694,19 @@ public class DataSetControllerImplTest {
   }
 
 
-  /**
-   * Testdelete record success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testdeleteRecordSuccess() throws Exception {
-    doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.deleteRecord(1L, recordId);
-    Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
-  }
+  // /**
+  // * Testdelete record success.
+  // *
+  // * @throws Exception the exception
+  // */
+  // @Test
+  // public void testdeleteRecordSuccess() throws Exception {
+  // doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any(),
+  // Mockito.any());
+  // dataSetControllerImpl.deleteRecord(1L, recordId, false);
+  // Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any(),
+  // Mockito.any());
+  // }
 
   /**
    * Test delete record read only exception.
@@ -719,7 +721,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
 
-      dataSetControllerImpl.deleteRecord(1L, recordId);
+      dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -734,7 +736,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      dataSetControllerImpl.deleteRecord(1L, recordId);
+      dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
           datasetService.findRecordSchemaIdById(1L, recordId)), e.getReason());
@@ -742,17 +744,17 @@ public class DataSetControllerImplTest {
     }
   }
 
-  /**
-   * Testdelete record not found exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordNotFoundException() throws Exception {
-    doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.deleteRecord(1L, recordId);
-  }
+  // /**
+  // * Testdelete record not found exception.
+  // *
+  // * @throws Exception the exception
+  // */
+  // @Test(expected = ResponseStatusException.class)
+  // public void testdeleteRecordNotFoundException() throws Exception {
+  // doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
+  // Mockito.any(), Mockito.any());
+  // dataSetControllerImpl.deleteRecord(1L, recordId, false);
+  // }
 
   /**
    * Testupdate field success.
