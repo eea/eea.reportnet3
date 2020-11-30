@@ -62,8 +62,6 @@ public class Representative {
   @Column(name = "has_datasets")
   private Boolean hasDatasets;
 
-  @Column(name = "releasing")
-  private Boolean releasing;
 
   /**
    * Equals.

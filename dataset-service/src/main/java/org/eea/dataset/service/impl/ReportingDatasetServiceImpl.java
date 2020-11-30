@@ -1,6 +1,11 @@
 package org.eea.dataset.service.impl;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -12,8 +17,13 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -36,6 +46,12 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
+
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -131,6 +147,58 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
     return datasetsVO;
   }
+
+
+
+  /**
+   * Update reporting dataset metabase.
+   *
+   * @param reportingVO the reporting VO
+   */
+  @Override
+  @Transactional
+  public void updateReportingDatasetMetabase(ReportingDatasetVO reportingVO) {
+    ReportingDataset reporting =
+        reportingDatasetRepository.findById(reportingVO.getId()).orElse(null);
+    if (reporting != null) {
+      // Map the VO fields that are informed into the entity. The null values from the vo are
+      // ignored
+      try {
+        BeanUtils.copyProperties(reportingVO, reporting, getNullProperties(reportingVO));
+      } catch (BeansException | IntrospectionException | IllegalAccessException
+          | InvocationTargetException e) {
+        LOG_ERROR.error("Error mapping the entity {} from the VO {}",
+            reporting.getClass().getName(), reportingVO.getClass().getName(), e);
+      }
+      reportingDatasetRepository.save(reporting);
+    }
+  }
+
+
+
+  /**
+   * Gets the null properties.
+   *
+   * @param object the object
+   * @return the null properties
+   * @throws IntrospectionException the introspection exception
+   * @throws IllegalAccessException the illegal access exception
+   * @throws InvocationTargetException the invocation target exception
+   */
+  private String[] getNullProperties(Object object)
+      throws IntrospectionException, IllegalAccessException, InvocationTargetException {
+    java.beans.PropertyDescriptor[] pds =
+        Introspector.getBeanInfo(object.getClass()).getPropertyDescriptors();
+    Set<String> emptyNames = new HashSet<>();
+    for (java.beans.PropertyDescriptor pd : pds) {
+      if (null == pd.getReadMethod().invoke(object)) {
+        emptyNames.add(pd.getName());
+      }
+    }
+    String[] result = new String[emptyNames.size()];
+    return emptyNames.toArray(result);
+  }
+
 
 
 }
