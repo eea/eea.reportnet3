@@ -117,140 +117,210 @@ import org.springframework.transaction.annotation.Propagation;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /** The Constant ROOT: {@value}. */
+  /**
+   * The Constant ROOT: {@value}.
+   */
   private static final String USER = "root";
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The field max length. */
+  /**
+   * The field max length.
+   */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The partition data set metabase repository. */
+  /**
+   * The partition data set metabase repository.
+   */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The reporting dataset repository. */
+  /**
+   * The reporting dataset repository.
+   */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The dataflow controller zull. */
+  /**
+   * The dataflow controller zull.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   @Autowired
   private TableRepository tableRepository;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Autowired
   private RecordRepository recordRepository;
 
-  /** The record validation repository. */
+  /**
+   * The record validation repository.
+   */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   @Autowired
   private FieldRepository fieldRepository;
 
-  /** The field validation repository. */
+  /**
+   * The field validation repository.
+   */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
-  /** The statistics repository. */
+  /**
+   * The statistics repository.
+   */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /** The record mapper. */
+  /**
+   * The record mapper.
+   */
   @Autowired
   private RecordMapper recordMapper;
 
-  /** The file parser factory. */
+  /**
+   * The file parser factory.
+   */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
-  /** The file export factory. */
+  /**
+   * The file export factory.
+   */
   @Autowired
   private IFileExportFactory fileExportFactory;
 
-  /** The record no validation mapper. */
+  /**
+   * The record no validation mapper.
+   */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /** The field validation mapper. */
+  /**
+   * The field validation mapper.
+   */
   @Autowired
   private FieldValidationMapper fieldValidationMapper;
 
-  /** The record validation mapper. */
+  /**
+   * The record validation mapper.
+   */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The field no validation mapper. */
+  /**
+   * The field no validation mapper.
+   */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The dataset schema service. */
+  /**
+   * The dataset schema service.
+   */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /** The attachment repository. */
+  /**
+   * The attachment repository.
+   */
   @Autowired
   private AttachmentRepository attachmentRepository;
 
-  /** The data collection repository. */
+  /**
+   * The data collection repository.
+   */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The pk catalogue repository. */
+  /**
+   * The pk catalogue repository.
+   */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
-  /** The Constant DATASET_ID. */
+  /**
+   * The Constant DATASET_ID.
+   */
   private static final String DATASET_ID = "dataset_%s";
 
   /**
@@ -260,7 +330,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   *
    * @return the data set VO
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -284,6 +356,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType, datasetId);
+
       final DataSetVO datasetVO = context.parse(is, dataflowId, partition.getId(), idTableSchema);
 
       if (datasetVO == null) {
@@ -330,7 +403,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the mimetype.
    *
    * @param file the file
+   *
    * @return the mimetype
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -406,7 +481,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -457,7 +534,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -482,6 +561,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param dataset the dataset
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -498,6 +578,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data flow id by id
    */
   @Override
@@ -511,7 +592,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
+   *
    * @return the position from any object id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -566,6 +649,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Save statistics.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -635,6 +719,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -690,6 +775,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param recordVOs the record V os
    * @param tableSchemaId the table schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -712,7 +798,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -738,6 +824,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param recordId the record id
    * @param deleteCascadePK the delete cascade
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -807,7 +894,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param mimeType the mime type
    * @param tableSchemaId the table schema id
+   *
    * @return the byte[]
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -832,6 +921,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -848,6 +938,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -877,6 +968,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param field the field
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -918,6 +1010,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   *
    * @return the long
    */
   @Override
@@ -930,6 +1023,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPartition the id partition
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -944,6 +1038,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchema the table schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1016,6 +1111,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1120,6 +1216,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldSchemaId the field schema id
    * @param conditionalValue the conditional value
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   @Override
@@ -1148,7 +1245,6 @@ public class DatasetServiceImpl implements DatasetService {
 
       Long idDatasetDestination =
           datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
-
 
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
@@ -1180,6 +1276,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
+   *
    * @return the referenced dataset id
    */
   @Override
@@ -1191,7 +1288,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the ETL dataset VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1258,6 +1357,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
    * @param providerId the provider id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1277,8 +1377,6 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(
           String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
     }
-
-
 
     // Obtain the data provider code to insert into the record
     DataProviderVO provider =
@@ -1512,7 +1610,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @return the attachment
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1526,6 +1626,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldId the field id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1546,6 +1647,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldId the field id
    * @param fileName the file name
    * @param is the is
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -1587,7 +1689,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @return the field by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1604,6 +1708,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaId the field schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1623,6 +1728,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param objectId the object id
    * @param type the type
+   *
    * @return the table fixed number of records
    */
   @Override
@@ -1652,6 +1758,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idRecord the id record
+   *
    * @return the string
    */
   @Override
@@ -1666,6 +1773,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @return the string
    */
   @Override
@@ -1673,7 +1781,6 @@ public class DatasetServiceImpl implements DatasetService {
     FieldValue field = fieldRepository.findById(idField);
     return field.getIdFieldSchema();
   }
-
 
 
   /**
@@ -1691,8 +1798,6 @@ public class DatasetServiceImpl implements DatasetService {
       List<TableSchema> listOfTablesFiltered = getTablesFromSchema(idDatasetSchema);
       // get the data from designs datasets
       if (!listOfTablesFiltered.isEmpty()) {
-
-
 
         TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
         List<RecordValue> recordDesignValues = new ArrayList<>();
@@ -1810,6 +1915,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the tables from schema.
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @return the tables from schema
    */
   private List<TableSchema> getTablesFromSchema(String idDatasetSchema) {
@@ -1828,6 +1934,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the dataflow.
    *
    * @param idDataset the id dataset
+   *
    * @return the dataflow
    */
   private DataFlowVO getDataflow(Long idDataset) {
@@ -1874,7 +1981,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param user the user
+   *
    * @return the partition data set metabase
+   *
    * @throws EEAException the EEA exception
    */
   private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
@@ -1892,6 +2001,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Validate file type.
    *
    * @param mimeType the mime type
+   *
    * @throws EEAException the EEA exception
    */
   private void validateFileType(final String mimeType) throws EEAException {
@@ -1950,6 +2060,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param pageable the pageable
    * @param totalRecords the total records
+   *
    * @return the pageable
    */
   private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
@@ -1975,6 +2086,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param newFields the new fields
    * @param result the result
    * @param idRules the id rules
+   *
    * @return the table VO
    */
   private TableVO calculatedErrorsAndRecordsToSee(final String idTableSchema, Pageable pageable,
@@ -2007,6 +2119,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param sortFieldsArray the sort fields array
    * @param newFields the new fields
    * @param idRules the id rules
+   *
    * @return the table VO
    */
   private TableVO fieldsMap(final String idTableSchema, Pageable pageable, final String fields,
@@ -2051,6 +2164,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param idTableSchema the id table schema
    * @param idFieldSchema the id field schema
+   *
    * @return the list
    */
   @Deprecated
@@ -2070,6 +2184,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Sanitize records.
    *
    * @param records the records
+   *
    * @return the list
    */
   private List<RecordValue> sanitizeRecords(final List<RecordValue> records) {
@@ -2093,6 +2208,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tableValue the table value
    * @param datasetId the dataset id
    * @param mapIdNameDatasetSchema the map id name dataset schema
+   *
    * @return the list
    */
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
@@ -2234,6 +2350,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param statName the stat name
    * @param value the value
+   *
    * @return the statistics
    */
   private Statistics fillStat(Long idDataset, String idTableSchema, String statName, String value) {
@@ -2253,6 +2370,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the field validations.
    *
    * @param recordIds the record ids
+   *
    * @return the field validations
    */
   private Map<String, List<FieldValidation>> getFieldValidations(final List<String> recordIds) {
@@ -2275,6 +2393,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the record validations.
    *
    * @param recordIds the record ids
+   *
    * @return the record validations
    */
   private Map<String, List<RecordValidation>> getRecordValidations(final List<String> recordIds) {
@@ -2300,7 +2419,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @param idTableSchema the id table schema
+   *
    * @return the long
+   *
    * @throws EEAException the EEA exception
    */
   private Long throwsMethods(final Long datasetId, final List<RecordVO> records,
@@ -2435,6 +2556,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean tableForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2454,6 +2576,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param fixedNumber the fixed number
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean tableForFixedNumberOfRecords(String objectId, Boolean fixedNumber,
@@ -2474,6 +2597,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean recordForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2494,6 +2618,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param fixedNumber the fixed number
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean recordForFixedNumberOfRecords(String objectId, Boolean fixedNumber,
@@ -2515,6 +2640,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean fieldForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2534,6 +2660,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the table from schema.
    *
    * @param originDesign the origin design
+   *
    * @return the table from schema
    */
   private List<TableSchema> getTableFromSchema(DesignDataset originDesign) {
@@ -2558,6 +2685,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param listOfTablesFiltered the list of tables filtered
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param attachments the attachments
+   *
    * @return the list
    */
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
@@ -2606,7 +2734,6 @@ public class DatasetServiceImpl implements DatasetService {
       List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
 
-
       fieldValueFor(dictionaryOriginTargetObjectId, attachments, recordAux, fieldValues,
           fieldValuesOnlyValues);
       recordAux.setFields(fieldValuesOnlyValues);
@@ -2624,6 +2751,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param recordVOs the record V os
    * @param datasetType the dataset type
    * @param tableSchema the table schema
+   *
    * @return the list
    */
   private List<RecordValue> createRecords(Long datasetId, String dataProviderCode,
@@ -2675,6 +2803,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldSchema the field schema
    * @param datasetType the dataset type
    * @param fieldVOs the field V os
+   *
    * @return the string
    */
   private String filterFieldValue(FieldSchema fieldSchema, DatasetTypeEnum datasetType,
@@ -2721,6 +2850,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset type
    */
   @Override

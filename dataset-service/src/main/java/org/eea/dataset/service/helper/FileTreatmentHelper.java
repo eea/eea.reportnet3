@@ -10,7 +10,6 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -19,12 +18,9 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -49,7 +45,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class FileTreatmentHelper {
 
-  /** The Constant FILE_EXTENSION: {@value}. */
+  /**
+   * The Constant FILE_EXTENSION: {@value}.
+   */
   private static final String FILE_EXTENSION = "fileExtension";
 
   /**
@@ -87,17 +85,6 @@ public class FileTreatmentHelper {
   @Autowired
   private LockService lockService;
 
-  /**
-   * The dataset metabase service.
-   */
-  @Autowired
-  private DatasetMetabaseService datasetMetabaseService;
-
-  /**
-   * The representative controller zuul.
-   */
-  @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * The dataset schema service.
@@ -243,6 +230,7 @@ public class FileTreatmentHelper {
    * @param integrations the integrations
    * @param fileExtension the file extension
    * @param inputStream the input stream
+   *
    * @return the integration VO
    */
   private IntegrationVO filterImportIntegration(List<IntegrationVO> integrations,
@@ -279,6 +267,7 @@ public class FileTreatmentHelper {
       String tableSchemaId) {
     try {
       LOG.info("Processing file");
+
       DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
 
       // map the VO to the entity
@@ -300,26 +289,26 @@ public class FileTreatmentHelper {
         datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
       }
 
-      List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
+      List<List<RecordValue>> batchedListOfRecords = getListOfRecords(allRecords);
 
-      // Obtain the data provider code to insert into the record
-      Long providerId = 0L;
-      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-      if (metabase.getDataProviderId() != null) {
-        providerId = metabase.getDataProviderId();
-      }
-      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+//      // Obtain the data provider code to insert into the record
+//      Long providerId = 0L;
+//      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+//      if (metabase.getDataProviderId() != null) {
+//        providerId = metabase.getDataProviderId();
+//      }
+//      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-      listaGeneral.parallelStream().forEach(value -> {
-        value.stream().forEach(r -> {
-          r.setDataProviderCode(provider.getCode());
-          for (FieldValue f : r.getFields()) {
-            if (DataType.ATTACHMENT.equals(f.getType())) {
-              f.setValue("");
-            }
-          }
-        });
-        datasetService.saveAllRecords(datasetId, value);
+      batchedListOfRecords.parallelStream().forEach(recordValues -> {
+//        value.stream().forEach(r -> {
+//          r.setDataProviderCode(provider.getCode());
+//          for (FieldValue f : r.getFields()) {
+//            if (DataType.ATTACHMENT.equals(f.getType())) {
+//              f.setValue("");
+//            }
+//          }
+//        });
+        datasetService.saveAllRecords(datasetId, recordValues);
       });
 
       LOG.info("File processed and saved into DB");
