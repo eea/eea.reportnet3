@@ -59,7 +59,6 @@ export const WebformRecord = ({
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
 
   useEffect(() => {
-    // console.log('parseNewRecordData', parseNewRecordData(record.elements, undefined));
     webformRecordDispatch({
       type: 'INITIAL_LOAD',
       payload: { newRecord: parseNewRecordData(record.elements, undefined), record, isDeleting: false }
