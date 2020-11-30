@@ -1,6 +1,5 @@
 package org.eea.validation.persistence.data.repository;
 
-import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.validation.exception.EEAInvalidSQLException;
@@ -20,9 +19,9 @@ public interface DatasetExtendedRepository {
    * @param entityTypeEnum the entity type enum
    * @param entityName the entity name
    * @param datasetId the dataset id
-   * @param idTable
+   * @param idTable the id table
    * @return the table value
-   * @throws SQLException the SQL exception
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
       Long datasetId, Long idTable) throws EEAInvalidSQLException;
@@ -44,14 +43,6 @@ public interface DatasetExtendedRepository {
   List<FieldValidation> queryFieldValidationExecution(String query);
 
   /**
-   * Query unique result execution.
-   *
-   * @param stringQuery the string query
-   * @return the object
-   */
-  List<Object> queryUniqueResultExecution(String stringQuery);
-
-  /**
    * Gets the table id.
    *
    * @param idTableSchema the id table schema
@@ -59,7 +50,4 @@ public interface DatasetExtendedRepository {
    * @return the table id
    */
   Long getTableId(String idTableSchema, Long datasetId);
-
-
-
 }

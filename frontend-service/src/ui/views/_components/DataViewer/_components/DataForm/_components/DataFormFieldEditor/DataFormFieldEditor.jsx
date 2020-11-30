@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useReducer, useRef, useState } from 'reac
 // import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
@@ -41,6 +42,7 @@ const DataFormFieldEditor = ({
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
+  onConditionalChange,
   records,
   reporting,
   type
@@ -88,6 +90,9 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (isConditionalChanged) {
+      if (isConditional) {
+        onConditionalChange(field);
+      }
       if (!isNil(linkDropdownRef.current)) {
         linkDropdownRef.current.clearFilter();
       }
@@ -99,6 +104,16 @@ const DataFormFieldEditor = ({
       inputRef.current.element.focus();
     }
   }, [inputRef.current, isVisible]);
+
+  useEffect(() => {
+    if (TextUtils.areEquals('LINK', type)) {
+      if (fieldValue === '') {
+        if (!isNil(linkDropdownRef.current)) {
+          linkDropdownRef.current.clearFilter();
+        }
+      }
+    }
+  }, [fieldValue]);
 
   useEffect(() => {
     onCheckCoordinateFieldsError(field, map.showCoordinateError);
@@ -141,6 +156,7 @@ const DataFormFieldEditor = ({
   const changePoint = (geoJson, coordinates, crs, withCRS = true) => {
     if (geoJson !== '') {
       let coords = coordinates;
+      geoJson.geometry.type = 'Point';
       if (withCRS) {
         coords = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = coords;
@@ -219,7 +235,7 @@ const DataFormFieldEditor = ({
         appendTo={document.body}
         disabled={column.readOnly && reporting}
         onChange={e => {
-          onChangeForm(field, e.target.value.value);
+          onChangeForm(field, e.target.value.value, isConditional);
         }}
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
@@ -234,7 +250,7 @@ const DataFormFieldEditor = ({
         appendTo={document.body}
         disabled={column.readOnly && reporting}
         maxSelectedLabels={10}
-        onChange={e => onChangeForm(field, e.value)}
+        onChange={e => onChangeForm(field, e.value, isConditional)}
         options={column.codelistItems.sort().map(codelistItem => {
           return { itemType: codelistItem, value: codelistItem };
         })}
@@ -319,7 +335,9 @@ const DataFormFieldEditor = ({
   const renderCalendar = (field, fieldValue) => {
     return (
       <Calendar
-        onChange={e => onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)))}
+        onChange={e =>
+          onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
+        }
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
@@ -347,8 +365,13 @@ const DataFormFieldEditor = ({
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           maxSelectedLabels={10}
-          onChange={e => onChangeForm(field, e.value)}
+          onChange={e => onChangeForm(field, e.value, isConditional)}
           onFilterInputChangeBackend={onFilter}
+          onFocus={() => {
+            if (isEmpty(columnWithLinks.linkItems)) {
+              onLoadColsSchema('');
+            }
+          }}
           options={columnWithLinks.linkItems}
           optionLabel="itemType"
           ref={linkDropdownRef}
@@ -368,7 +391,7 @@ const DataFormFieldEditor = ({
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           filterBy="itemType,value"
           onChange={e => {
-            onChangeForm(field, e.target.value.value);
+            onChangeForm(field, e.target.value.value, isConditional);
           }}
           onFilterInputChangeBackend={onFilter}
           optionLabel="itemType"
@@ -467,7 +490,7 @@ const DataFormFieldEditor = ({
       id={field}
       keyfilter={RecordUtils.getFilter(type)}
       maxLength={getMaxCharactersByType(type)}
-      onChange={e => onChangeForm(field, e.target.value)}
+      onChange={e => onChangeForm(field, e.target.value, isConditional)}
       style={{ width: '60%' }}
       value={fieldValue}
     />

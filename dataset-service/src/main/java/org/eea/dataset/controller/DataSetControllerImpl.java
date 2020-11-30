@@ -417,6 +417,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param recordId the record id
+   * @param deleteCascadePK the delete cascade PK
    */
   @Override
   @HystrixCommand
@@ -424,7 +425,8 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteRecord(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @PathVariable("recordId") String recordId) {
+      @PathVariable("recordId") String recordId,
+      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
             datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
@@ -443,7 +445,7 @@ public class DataSetControllerImpl implements DatasetController {
               datasetService.findRecordSchemaIdById(datasetId, recordId)));
     }
     try {
-      updateRecordHelper.executeDeleteProcess(datasetId, recordId);
+      updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. Message: {}", datasetId,
           e.getMessage());
@@ -644,6 +646,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the field values referenced
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/{id}/datasetSchemaId/{datasetSchemaId}/fieldSchemaId/{fieldSchemaId}/getFieldsValuesReferenced")
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @PathVariable("datasetSchemaId") String datasetSchemaId,

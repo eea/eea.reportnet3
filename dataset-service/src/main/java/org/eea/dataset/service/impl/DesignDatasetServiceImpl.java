@@ -432,6 +432,20 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       field.getReferencedField()
           .setIdPk(dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk()));
     }
+    if (dictionaryOriginTargetObjectId.containsKey(field.getReferencedField().getLabelId())) {
+      field.getReferencedField()
+          .setLabelId(dictionaryOriginTargetObjectId.get(field.getReferencedField().getLabelId()));
+    }
+    if (dictionaryOriginTargetObjectId
+        .containsKey(field.getReferencedField().getLinkedConditionalFieldId())) {
+      field.getReferencedField().setLinkedConditionalFieldId(dictionaryOriginTargetObjectId
+          .get(field.getReferencedField().getLinkedConditionalFieldId()));
+    }
+    if (dictionaryOriginTargetObjectId
+        .containsKey(field.getReferencedField().getMasterConditionalFieldId())) {
+      field.getReferencedField().setMasterConditionalFieldId(dictionaryOriginTargetObjectId
+          .get(field.getReferencedField().getMasterConditionalFieldId()));
+    }
   }
 
 

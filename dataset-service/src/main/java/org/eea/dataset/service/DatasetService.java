@@ -138,10 +138,11 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param recordId the record id
-   *
+   * @param deleteCascade the delete cascade
    * @throws EEAException the EEA exception
    */
-  void deleteRecord(@DatasetId Long datasetId, String recordId) throws EEAException;
+  void deleteRecord(@DatasetId Long datasetId, String recordId, boolean deleteCascade)
+      throws EEAException;
 
   /**
    * Delete table by schema.
