@@ -27,4 +27,12 @@ public interface FieldExtendedRepository {
    */
   List<RecordValue> queryExecutionRecord(String query);
 
+  /**
+   * Query PK execution.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  List<Object[]> queryPKExecution(String generatedQuery);
+
 }
