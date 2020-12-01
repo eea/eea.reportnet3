@@ -244,7 +244,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
         Rule rule = ruleMapper.classToEntity(ruleVO);
-        if (validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.FALSE)) {
+        if (validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.TRUE)) {
           rule.setVerified(true);
         } else {
           rule.setVerified(false);

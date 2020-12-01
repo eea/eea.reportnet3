@@ -16,6 +16,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -32,23 +33,41 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CSVReaderStrategy implements ReaderStrategy {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
-  /** The delimiter. */
+  /**
+   * The delimiter.
+   */
   private char delimiter;
 
-  /** The dataset id. */
+  /**
+   * The dataset id.
+   */
   private Long datasetId;
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   private FileCommonUtils fileCommon;
 
-  /** The field max length. */
+  /**
+   * The field max length.
+   */
   private int fieldMaxLength;
+
+
+  /**
+   * the provider Code
+   */
+  private String providerCode;
 
   /**
    * Instantiates a new CSV reader strategy.
@@ -63,6 +82,16 @@ public class CSVReaderStrategy implements ReaderStrategy {
     this.fileCommon = fileCommon;
     this.datasetId = datasetId;
     this.fieldMaxLength = fieldMaxLength;
+    this.providerCode = "";
+  }
+
+  public CSVReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
+      int fieldMaxLength, String providerCode) {
+    this.delimiter = delimiter;
+    this.fileCommon = fileCommon;
+    this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
+    this.providerCode = providerCode;
   }
 
   /**
@@ -72,7 +101,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   *
    * @return the data set VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -89,7 +120,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   *
    * @return the data set VO
+   *
    * @throws EEAException the EEA exception
    */
   private DataSetVO readLines(final InputStream inputStream, final Long dataflowId,
@@ -118,12 +151,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
       // Get the headers
       List<FieldSchemaVO> headers = setHeaders(firstLine, idTableSchema, dataSetSchema);
-
+      String idRecordSchema = fileCommon.findIdRecord(idTableSchema, dataSetSchema);
+      List<FieldSchemaVO> fieldSchemaVOS = fileCommon
+          .findFieldSchemas(idTableSchema, dataSetSchema);
+      boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, dataSetSchema, headers,
-            idTableSchema);
+            idTableSchema, idRecordSchema, fieldSchemaVOS, isDesignDataset);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -140,6 +176,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Line empty.
    *
    * @param firstLine the first line
+   *
    * @throws InvalidFileException the invalid file exception
    */
   private void lineEmpty(List<String> firstLine) throws InvalidFileException {
@@ -161,14 +198,18 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param dataSetSchema the data set schema
    * @param headers the headers
    * @param idTableSchema the id table schema
+   *
    * @throws InvalidFileException the invalid file exception
    */
   private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
       final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers, final String idTableSchema) throws InvalidFileException {
+      List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
+      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset)
+      throws InvalidFileException {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
-      addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema);
+      addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema,
+          idRecordSchema, fieldSchemaVOS, isDesignDataset);
     }
   }
 
@@ -176,6 +217,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Inits the reader.
    *
    * @param buf the buf
+   *
    * @return the CSV reader
    */
   private CSVReader initReader(final Reader buf) {
@@ -190,6 +232,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param values the values
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
+   *
    * @return the list
    */
   private List<FieldSchemaVO> setHeaders(final List<String> values, final String idTableSchema,
@@ -227,18 +270,21 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers, final String idTableSchema) {
+      List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
+      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
     // Create object Table and set the attributes
     if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(
-          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
+          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
+              idRecordSchema, fieldSchemaVOS, isDesignDataset));
       tables.add(tableVO);
 
     } else {
       tableVO.getRecords().addAll(
-          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
+          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
+              idRecordSchema, fieldSchemaVOS, isDesignDataset));
     }
   }
 
@@ -250,18 +296,21 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
    * @param headers the headers
+   *
    * @return the list
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
-      final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers) {
+      final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers,
+      final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
-      record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
+      record.setIdRecordSchema(idRecordSchema);
     }
     record.setFields(
-        createFieldsVO(values, headers, fileCommon.findFieldSchemas(idTableSchema, dataSetSchema)));
+        createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset));
     record.setDatasetPartitionId(partitionId);
+    record.setDataProviderCode(this.providerCode);
     records.add(record);
     return records;
   }
@@ -272,14 +321,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param values the values
    * @param headers the headers
    * @param headersSchema the headers schema
+   *
    * @return the list
    */
   private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers,
-      List<FieldSchemaVO> headersSchema) {
+      List<FieldSchemaVO> headersSchema, boolean isDesignDataset) {
     final List<FieldVO> fields = new ArrayList<>();
     List<String> idSchema = new ArrayList<>();
     int contAux = 0;
-    boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
+
     for (String value : values) {
       // Trim the string if it is too large
       if (value.length() >= fieldMaxLength) {
@@ -287,10 +337,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
       final FieldVO field = new FieldVO();
       if (contAux < headers.size()) {
-        field.setIdFieldSchema(headers.get(contAux).getId());
-        field.setType(headers.get(contAux).getType());
-        field.setValue(value);
-        if ((field.getIdFieldSchema() != null && !headers.get(contAux).getReadOnly()
+        FieldSchemaVO fieldSchemaVO = headers.get(contAux);
+        field.setIdFieldSchema(fieldSchemaVO.getId());
+        field.setType(fieldSchemaVO.getType());
+        field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
+
+        if ((field.getIdFieldSchema() != null && !fieldSchemaVO.getReadOnly()
             && !isDesignDataset) || (field.getIdFieldSchema() != null && isDesignDataset)) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());

@@ -114,6 +114,12 @@ public final class LiteralConstants {
   /** The Constant USER. */
   public static final String USER = "user";
 
+  /** The Constant ID: {@value}. */
+  public static final String ID = "_id";
+
+  /** The Constant FIELD_SCHEMAS: {@value}. */
+  public static final String FIELD_SCHEMAS = "fieldSchemas";
+
 
   /**
    * Instantiates a new literal constants.
