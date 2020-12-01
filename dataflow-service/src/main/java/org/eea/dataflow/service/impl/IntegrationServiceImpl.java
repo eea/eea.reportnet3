@@ -200,6 +200,7 @@ public class IntegrationServiceImpl implements IntegrationService {
         integration.getInternalParameters().put(IntegrationParams.DATASET_SCHEMA_ID,
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
         integration.getInternalParameters().put("dataflowId", dataflowIdDestination.toString());
+        integration.setId(null);
         CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
         crudManager.create(integration);
 
