@@ -373,7 +373,6 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     return null != document ? (Document) document : null;
   }
 
-
   /**
    * Update schema document.
    *
@@ -394,13 +393,46 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * Update dataset schema web form.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param webForm the web form
+   * @param webform the webform
    */
   @Override
   public void updateDatasetSchemaWebForm(String datasetSchemaId, Webform webform) {
     mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
         new Document("_id", new ObjectId(datasetSchemaId)),
         new Document("$set", new Document("webform.name", webform.getName())));
+
+  }
+
+  /**
+   * Find record schema by record schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param recordSchemaId the record schema id
+   * @return the document
+   */
+  @Override
+  public Document findRecordSchemaByRecordSchemaId(String datasetSchemaId, String recordSchemaId) {
+
+    Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+        .find(new Document("_id", new ObjectId(datasetSchemaId))
+            .append("tableSchemas.recordSchema._id", new ObjectId(recordSchemaId)))
+        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+
+    // Null check, secure data type casting and secure array access by index can be avoid as the
+    // query would return null if the requested structure does not match.
+
+    if (null != document) {
+      // Get TableSchemas
+      document = ((Document) document).get(LiteralConstants.TABLE_SCHEMAS);
+
+      // Get the TableSchema
+      document = ((ArrayList<?>) document).get(0);
+
+      // Get the RecordSchema
+      document = ((Document) document).get("recordSchema");
+    }
+
+    return null != document ? (Document) document : null;
 
   }
 }
