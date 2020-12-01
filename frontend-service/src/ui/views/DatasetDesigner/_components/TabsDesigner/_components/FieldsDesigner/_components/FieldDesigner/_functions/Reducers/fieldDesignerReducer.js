@@ -42,6 +42,11 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldPKValue: false,
         fieldFileProperties: { validExtensions: [], maxSize: 0 }
       };
+    case 'SET_ADD_FIELD_SENT':
+      return {
+        ...state,
+        addFieldCallSent: payload
+      };
     case 'SET_ATTACHMENT_PROPERTIES':
       return { ...state, fieldFileProperties: { validExtensions: payload.validExtensions, maxSize: payload.maxSize } };
     case 'SET_CODELIST_ITEMS':
