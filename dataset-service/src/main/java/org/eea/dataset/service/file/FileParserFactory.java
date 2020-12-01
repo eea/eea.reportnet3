@@ -34,8 +34,14 @@ public class FileParserFactory implements IFileParserFactory {
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
+  /**
+   * the field dataset Metabase Service
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+  /**
+   * the field representative Controller Zuul
+   */
   @Autowired
   private RepresentativeController representativeControllerZuul;
 

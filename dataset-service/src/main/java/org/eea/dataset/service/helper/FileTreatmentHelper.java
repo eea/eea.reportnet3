@@ -266,10 +266,10 @@ public class FileTreatmentHelper {
   private void rep3FileProcess(final Long datasetId, final String fileName, final InputStream is,
       String tableSchemaId) {
     try {
-      LOG.info("Processing file");
+      LOG.info("Processing file {} to load data into dataset ", fileName, datasetId);
 
       DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
-
+      LOG.info("file {} loaded in memory", fileName);
       // map the VO to the entity
       datasetVO.setId(datasetId);
       final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
@@ -298,7 +298,8 @@ public class FileTreatmentHelper {
 //        providerId = metabase.getDataProviderId();
 //      }
 //      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
-
+      LOG.info("Inserting {} records into database for dataset {} coming from file",
+          allRecords.size(), datasetId, fileName);
       batchedListOfRecords.parallelStream().forEach(recordValues -> {
 //        value.stream().forEach(r -> {
 //          r.setDataProviderCode(provider.getCode());
@@ -311,7 +312,7 @@ public class FileTreatmentHelper {
         datasetService.saveAllRecords(datasetId, recordValues);
       });
 
-      LOG.info("File processed and saved into DB");
+      LOG.info("File {} processed and saved into DB for dataset", fileName, datasetId);
       releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
           tableSchemaId, fileName);
     } catch (Exception e) {

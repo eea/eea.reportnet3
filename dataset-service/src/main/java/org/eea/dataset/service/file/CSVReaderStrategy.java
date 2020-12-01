@@ -151,12 +151,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
       // Get the headers
       List<FieldSchemaVO> headers = setHeaders(firstLine, idTableSchema, dataSetSchema);
-
+      String idRecordSchema = fileCommon.findIdRecord(idTableSchema, dataSetSchema);
+      List<FieldSchemaVO> fieldSchemaVOS = fileCommon
+          .findFieldSchemas(idTableSchema, dataSetSchema);
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, dataSetSchema, headers,
-            idTableSchema);
+            idTableSchema, idRecordSchema, fieldSchemaVOS);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -200,10 +202,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
       final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers, final String idTableSchema) throws InvalidFileException {
+      List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
+      final List<FieldSchemaVO> fieldSchemaVOS) throws InvalidFileException {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
-      addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema);
+      addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema,
+          idRecordSchema, fieldSchemaVOS);
     }
   }
 
@@ -264,18 +268,21 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers, final String idTableSchema) {
+      List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
+      List<FieldSchemaVO> fieldSchemaVOS) {
     // Create object Table and set the attributes
     if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(
-          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
+          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
+              idRecordSchema, fieldSchemaVOS));
       tables.add(tableVO);
 
     } else {
       tableVO.getRecords().addAll(
-          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
+          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
+              idRecordSchema, fieldSchemaVOS));
     }
   }
 
@@ -291,14 +298,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @return the list
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
-      final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers) {
+      final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers,
+      final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
-      record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
+      record.setIdRecordSchema(idRecordSchema);
     }
     record.setFields(
-        createFieldsVO(values, headers, fileCommon.findFieldSchemas(idTableSchema, dataSetSchema)));
+        createFieldsVO(values, headers, fieldSchemaVOS));
     record.setDatasetPartitionId(partitionId);
     record.setDataProviderCode(this.providerCode);
     records.add(record);
