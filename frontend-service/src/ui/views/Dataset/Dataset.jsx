@@ -211,13 +211,15 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
-  }, [dataViewerOptions.tableSchemaId]);
+  }, [dataViewerOptions.tableSchemaId, isTableView]);
 
   const changeUrl = () => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}`
+      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}${
+        !isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''
+      }`
     );
   };
 
@@ -516,7 +518,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
-      setIsTableView(isNil(datasetSchema.webform));
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -756,7 +758,7 @@ export const Dataset = withRouter(({ match, history }) => {
     hasWritePermissions && (
       // <div className={styles.switch}>
       //   <div className={`${styles.wrap}`}>
-      //     <span className={styles.text}>{resources.messages['tabularData']}</span>
+      //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
       //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
       //     <span className={styles.text}>{resources.messages['webform']}</span>
       //   </div>
@@ -765,7 +767,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             className={styles.tabularSwitch}
-            elements={[resources.messages['tabularData'], resources.messages['webform']]}
+            elements={[resources.messages['tabularDataView'], resources.messages['webform']]}
             onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
             value={resources.messages['webform']}
           />

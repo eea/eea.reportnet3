@@ -59,9 +59,9 @@ import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
   const {
@@ -138,7 +138,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
-    viewType: { design: true, table: false, webform: false },
+    viewType: {
+      design: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'design'),
+      tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
+      webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
+    },
     webform: null
   });
 
@@ -837,7 +841,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <TabularSwitch
         elements={Object.keys(designerState.viewType).map(view => resources.messages[`${view}View`])}
         onChange={switchView => {
-          const views = { design: 'design', tabularData: 'table', webform: 'webform' };
+          const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
           onChangeView(views[camelCase(switchView)]);
           changeMode(views[camelCase(switchView)]);
         }}
@@ -880,12 +884,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
       //     }
       //   />
-      //   <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
+      //   <span className={styles.switchTextInput}>{resources.messages['tabularDataView']}</span>
       // </Fragment>
       <TabularSwitch
-        elements={[resources.messages['design'], resources.messages['tabularData']]}
+        elements={[resources.messages['design'], resources.messages['tabularDataView']]}
         onChange={switchView =>
-          designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: switchView === 'Design' ? 'design' : 'table' } })
+          designerDispatch({
+            type: 'SET_VIEW_MODE',
+            payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
+          })
         }
         value={
           QuerystringUtils.getUrlParamValue('view') !== ''
@@ -1089,7 +1096,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && designerState.viewType['table'] ? ' p-button-animated-blink' : null
+                  designerState.datasetHasData && designerState.viewType['tabularData']
+                    ? ' p-button-animated-blink'
+                    : null
                 }`}
                 disabled={!designerState.datasetHasData}
                 icon={'validate'}
@@ -1101,7 +1110,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetStatistics.datasetErrors && designerState.viewType['table']
+                  designerState.datasetStatistics.datasetErrors && designerState.viewType['tabularData']
                     ? 'p-button-animated-blink'
                     : null
                 }`}
