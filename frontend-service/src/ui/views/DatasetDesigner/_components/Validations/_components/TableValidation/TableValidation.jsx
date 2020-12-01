@@ -370,7 +370,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
 
-      await ValidationService.createDatasetRule(datasetId, candidateRule);
+      await ValidationService.createTableRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       notificationContext.add({
