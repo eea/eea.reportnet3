@@ -184,8 +184,6 @@ public class FKValidationUtils {
         && null != idFieldSchemaPk.getReferencedField().getIdPk()) {
       idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk().toString();
     }
-
-    // este campo tiene los datos de busqueda.
     FieldSchema fkFieldSchema = getPKFieldSchemaFromSchema(datasetSchemaFK, idFieldSchema);
 
     // Id Dataset contains PK list
@@ -234,7 +232,6 @@ public class FKValidationUtils {
             fkConditionalLinkedFieldSchemaId, pkValidation, pkMustBeUsed);
       }
     } else {
-      // Parte normal
       // Retrieve PK List
       List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
       // Get list of Fields to validate
