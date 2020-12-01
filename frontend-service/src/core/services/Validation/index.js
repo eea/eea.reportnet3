@@ -1,6 +1,6 @@
 import { Create } from './Create';
 import { CreateRowRule } from './CreateRowRule';
-import { CreateTableRule } from './createTableRule';
+import { CreateTableRule } from './CreateTableRule';
 import { Delete } from './Delete';
 import { GetAll } from './GetAll';
 import { Update } from './Update';
