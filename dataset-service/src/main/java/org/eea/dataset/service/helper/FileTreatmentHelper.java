@@ -291,24 +291,10 @@ public class FileTreatmentHelper {
 
       List<List<RecordValue>> batchedListOfRecords = getListOfRecords(allRecords);
 
-//      // Obtain the data provider code to insert into the record
-//      Long providerId = 0L;
-//      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-//      if (metabase.getDataProviderId() != null) {
-//        providerId = metabase.getDataProviderId();
-//      }
-//      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
       LOG.info("Inserting {} records into database for dataset {} coming from file",
           allRecords.size(), datasetId, fileName);
       batchedListOfRecords.parallelStream().forEach(recordValues -> {
-//        value.stream().forEach(r -> {
-//          r.setDataProviderCode(provider.getCode());
-//          for (FieldValue f : r.getFields()) {
-//            if (DataType.ATTACHMENT.equals(f.getType())) {
-//              f.setValue("");
-//            }
-//          }
-//        });
+
         datasetService.saveAllRecords(datasetId, recordValues);
       });
 
