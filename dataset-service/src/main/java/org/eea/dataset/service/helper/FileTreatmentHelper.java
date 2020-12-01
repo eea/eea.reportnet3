@@ -266,7 +266,7 @@ public class FileTreatmentHelper {
   private void rep3FileProcess(final Long datasetId, final String fileName, final InputStream is,
       String tableSchemaId) {
     try {
-      LOG.info("Processing file {} to load data into dataset ", fileName, datasetId);
+      LOG.info("Processing file {} to load data into dataset {}", fileName, datasetId);
 
       DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
       LOG.info("file {} loaded in memory", fileName);
