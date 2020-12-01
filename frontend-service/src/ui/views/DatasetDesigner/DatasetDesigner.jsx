@@ -138,7 +138,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
-    viewType: { design: true, table: false, webform: false },
+    viewType: { design: true, tabularData: false, webform: false },
     webform: null
   });
 
@@ -837,7 +837,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <TabularSwitch
         elements={Object.keys(designerState.viewType).map(view => resources.messages[`${view}View`])}
         onChange={switchView => {
-          const views = { design: 'design', tabularData: 'table', webform: 'webform' };
+          const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
           onChangeView(views[camelCase(switchView)]);
           changeMode(views[camelCase(switchView)]);
         }}

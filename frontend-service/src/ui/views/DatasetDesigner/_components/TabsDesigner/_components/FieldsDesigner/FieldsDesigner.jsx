@@ -370,14 +370,15 @@ export const FieldsDesigner = ({
     </ConfirmDialog>
   );
 
+
   const renderAllFields = () => {
     if (isLoading) {
       return <Spinner className={styles.positioning} />;
     } else {
       return (
         <>
-          {viewType['table'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!viewType['table'] && renderNewField()}
+          {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+          {!viewType['tabularData'] && renderNewField()}
         </>
       );
     }
@@ -638,7 +639,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      {!viewType['table'] && (
+      {!viewType['tabularData'] && (
         <div className={styles.fieldsHeader}>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
