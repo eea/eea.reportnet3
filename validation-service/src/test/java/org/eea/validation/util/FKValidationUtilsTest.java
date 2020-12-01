@@ -64,6 +64,9 @@ public class FKValidationUtilsTest {
   /** The id. */
   private ObjectId id;
 
+  /** The referenced field schema. */
+  private ReferencedFieldSchema referencedFieldSchema;
+
 
   /**
    * Inits the mocks.
@@ -85,7 +88,7 @@ public class FKValidationUtilsTest {
     TableSchema tableSchema = new TableSchema();
     RecordSchema recordSchema = new RecordSchema();
     FieldSchema fieldSchema = new FieldSchema();
-    ReferencedFieldSchema referencedFieldSchema = new ReferencedFieldSchema();
+    referencedFieldSchema = new ReferencedFieldSchema();
     referencedFieldSchema.setIdPk(id);
     fieldSchema.setIdFieldSchema(id);
     fieldSchema.setReferencedField(referencedFieldSchema);
@@ -261,4 +264,32 @@ public class FKValidationUtilsTest {
     Mockito.when(fieldRepository.findByIdFieldSchema(id.toString())).thenReturn(fields);
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
+
+  @Test
+  public void testIsfieldMultiConstrainFK() {
+    referencedFieldSchema.setLinkedConditionalFieldId(id);
+    referencedFieldSchema.setMasterConditionalFieldId(id);
+    Rule rule = new Rule();
+    rule.setRuleId(id);
+    List<String> thenCondition = new ArrayList<>();
+    thenCondition.add("");
+    thenCondition.add("");
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    field.setValue("1");
+    fields.add(field);
+    datasetSchema.getTableSchemas().get(0).getRecordSchema().getFieldSchema().get(0)
+        .setPkHasMultipleValues(true);
+    datasetSchema.getTableSchemas().get(0).getRecordSchema().getFieldSchema().get(0)
+        .setPkMustBeUsed(false);
+    rule.setThenCondition(thenCondition);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(id.toString());
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    Mockito.when(fieldRepository.findByIdFieldSchema(id.toString())).thenReturn(fields);
+    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.FALSE));
+  }
+
+
 }

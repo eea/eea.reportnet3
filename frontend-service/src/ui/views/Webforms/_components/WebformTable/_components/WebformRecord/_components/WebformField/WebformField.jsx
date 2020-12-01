@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -10,8 +10,8 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
@@ -317,8 +317,9 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            id={field.fieldId}
             // keyfilter={getInputType[type]}
+            disabled={field.isPrimary}
+            id={field.fieldId}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -429,22 +430,22 @@ export const WebformField = ({
   };
 
   return (
-    <>
+    <Fragment>
       {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
       {isFileDialogVisible && (
         <CustomFileUpload
+          accept={getAttachExtensions || '*'}
+          chooseLabel={resources.messages['selectFile']}
+          className={styles.fileUpload}
           dialogClassName={styles.dialog}
           dialogHeader={resources.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
-          accept={getAttachExtensions || '*'}
-          chooseLabel={resources.messages['selectFile']}
-          className={styles.fileUpload}
           fileLimit={1}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           mode="advanced"
           multiple={false}
-          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           name="file"
           onUpload={onAttach}
           operation="PUT"
@@ -466,6 +467,6 @@ export const WebformField = ({
           {resources.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
-    </>
+    </Fragment>
   );
 };

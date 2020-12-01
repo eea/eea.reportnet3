@@ -163,14 +163,14 @@ export const Feedback = withRouter(({ match, history }) => {
     const data = await onLoadMessages(dataProviderId, 0);
     //mark unread messages as read
     if (data.unreadMessages.length > 0) {
-      const marked = await FeedbackService.markAsRead(
-        dataflowId,
-        data.unreadMessages
-          .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
-          .map(unreadMessage => {
-            return { id: unreadMessage.id, read: true };
-          })
-      );
+      const unreadMessages = data.unreadMessages
+        .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
+        .map(unreadMessage => {
+          return { id: unreadMessage.id, read: true };
+        });
+      if (!isEmpty(unreadMessages)) {
+        const marked = await FeedbackService.markAsRead(dataflowId, unreadMessages);
+      }
     }
 
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
