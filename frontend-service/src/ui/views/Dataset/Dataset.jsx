@@ -758,7 +758,7 @@ export const Dataset = withRouter(({ match, history }) => {
     hasWritePermissions && (
       // <div className={styles.switch}>
       //   <div className={`${styles.wrap}`}>
-      //     <span className={styles.text}>{resources.messages['tabularData']}</span>
+      //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
       //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
       //     <span className={styles.text}>{resources.messages['webform']}</span>
       //   </div>
@@ -767,7 +767,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             className={styles.tabularSwitch}
-            elements={[resources.messages['tabularData'], resources.messages['webform']]}
+            elements={[resources.messages['tabularDataView'], resources.messages['webform']]}
             onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
             value={resources.messages['webform']}
           />

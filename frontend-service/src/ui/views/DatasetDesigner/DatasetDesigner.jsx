@@ -884,10 +884,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
       //     }
       //   />
-      //   <span className={styles.switchTextInput}>{resources.messages['tabularData']}</span>
+      //   <span className={styles.switchTextInput}>{resources.messages['tabularDataView']}</span>
       // </Fragment>
       <TabularSwitch
-        elements={[resources.messages['design'], resources.messages['tabularData']]}
+        elements={[resources.messages['design'], resources.messages['tabularDataView']]}
         onChange={switchView =>
           designerDispatch({
             type: 'SET_VIEW_MODE',
