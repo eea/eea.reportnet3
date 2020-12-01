@@ -23,7 +23,11 @@ public interface TableSchemaMapper extends IMapper<TableSchema, TableSchemaVO> {
    * @return the string
    */
   default String map(ObjectId value) {
-    return value.toString();
+    if (value != null) {
+      return value.toString();
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -33,7 +37,11 @@ public interface TableSchemaMapper extends IMapper<TableSchema, TableSchemaVO> {
    * @return the object id
    */
   default ObjectId map(String value) {
-    return new ObjectId(value);
+    if (value != null) {
+      return new ObjectId(value);
+    } else {
+      return null;
+    }
   }
 
   /**

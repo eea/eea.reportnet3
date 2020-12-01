@@ -35,6 +35,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   List<FieldValue> findByIdFieldSchema(String idFieldSchema);
 
   /**
+   * Find by id field schema in.
+   *
+   * @param fieldSchemaIds the field schema ids
+   * @return the list
+   */
+  List<FieldValue> findByIdFieldSchemaIn(List<String> fieldSchemaIds);
+
+  /**
    * Find by record.
    *
    * @param record the record
@@ -128,7 +136,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
           + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
           + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
-          + "AND (fv.value like %:searchText% or :searchText IS NULL) ")
+          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
   List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(
       @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
       @Param("conditionalId") String conditionalId,

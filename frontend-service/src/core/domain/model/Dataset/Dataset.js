@@ -9,6 +9,7 @@ export class Dataset {
     errors,
     hasErrors,
     isReleased,
+    isReleasing,
     isValid = false,
     levelErrorTypes,
     name,
@@ -29,6 +30,7 @@ export class Dataset {
     this.errors = errors;
     this.hasErrors = hasErrors;
     this.isReleased = isReleased;
+    this.isReleasing = isReleasing;
     this.isValid = isValid;
     this.levelErrorTypes = levelErrorTypes;
     this.name = name;

@@ -195,8 +195,10 @@ export const TableManagement = ({
   const setIsLoading = value => tableManagementDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteRow = async () => {
+    const deleteCascade = true;
+
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
       if (isDataDeleted) {
         onRefresh();
       }
@@ -255,9 +257,7 @@ export const TableManagement = ({
       };
     });
     Promise.all(parentTablesDataPromises)
-      .then(parentTableData => {
-        tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData });
-      })
+      .then(parentTableData => tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData }))
       .finally(() => setIsLoading(false));
   };
 

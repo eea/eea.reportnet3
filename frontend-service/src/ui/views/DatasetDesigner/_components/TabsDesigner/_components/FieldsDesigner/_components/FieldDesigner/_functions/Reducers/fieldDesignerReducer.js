@@ -17,6 +17,15 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         ...state,
         isLinkSelectorVisible: false
       };
+    case 'RESET_FIELD':
+      return {
+        ...state,
+        codelistItems: [],
+        fieldLinkValue: null,
+        fieldPkMustBeUsed: false,
+        fieldPkHasMultipleValues: false,
+        fieldFileProperties: { validExtensions: [], maxSize: 0 }
+      };
     case 'RESET_NEW_FIELD':
       return {
         ...state,
@@ -46,11 +55,12 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_NAME':
       return { ...state, fieldValue: payload };
     case 'SET_LINK':
-      return { ...state, fieldLinkValue: payload };
-    case 'SET_PK_MUST_BE_USED':
-      return { ...state, fieldPkMustBeUsed: payload };
-    case 'SET_PK_HAS_MULTIPLE_VALUES':
-      return { ...state, fieldPkHasMultipleValues: payload };
+      return {
+        ...state,
+        fieldLinkValue: payload.link,
+        fieldPkMustBeUsed: payload.pkMustBeUsed,
+        fieldPkHasMultipleValues: payload.pkHasMultipleValues
+      };
     case 'SET_PK':
       return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
     case 'SET_PK_REFERENCED':

@@ -32,18 +32,26 @@ import org.slf4j.LoggerFactory;
  */
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
-
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant RECORD_ID: {@value}. */
+  private static final String RECORD_ID = "record_id";
 
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
-
-
+  /**
+   * Gets the table id.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the table id
+   */
   @Override
   public Long getTableId(String idTableSchema, Long datasetId) {
     String stringQuery = "select id from dataset_" + datasetId
@@ -76,20 +84,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       throw new EEAInvalidSQLException("SQL can't be executed: " + query, e);
     }
   }
-
-
-  /**
-   * Query unique result execution.
-   *
-   * @param stringQuery the string query
-   * @return the list
-   */
-  @Override
-  public List<Object> queryUniqueResultExecution(String stringQuery) {
-    Query query = entityManager.createNativeQuery(stringQuery.toLowerCase());
-    return query.getResultList();
-  }
-
 
   /**
    * Query record validation execution.
@@ -208,7 +202,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    * @param datasetId the dataset id
    * @param idTable the id table
    * @return the table value
-   * @throws SQLException
+   * @throws SQLException the SQL exception
    */
   private TableValue executeQuery(Connection conn, String entityName, String query,
       EntityTypeEnum entityTypeEnum, Long datasetId, Long idTable) throws SQLException {
@@ -219,19 +213,20 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
       List<RecordValue> records = new ArrayList<>();
-      while (rs.next()) {
+      boolean continueLoop = true;
+      while (rs.next() && continueLoop) {
         RecordValue record = new RecordValue();
         tableValue.setId(idTable);
         List<FieldValue> fields = new ArrayList<>();
         switch (entityTypeEnum) {
           case RECORD:
-            record.setId(rs.getString("record_id"));
+            record.setId(rs.getString(RECORD_ID));
             record.setFields(fields);
             records.add(record);
             tableValue.setRecords(records);
             break;
           case FIELD:
-            record.setId(rs.getString("record_id"));
+            record.setId(rs.getString(RECORD_ID));
             FieldValue field = new FieldValue();
             field.setId(rs.getString(entityName + "_id"));
             fields.add(field);
@@ -240,6 +235,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             tableValue.setRecords(records);
             break;
           case TABLE:
+            continueLoop = false;
+            records.add(record);
+            tableValue.setRecords(records);
             break;
           case DATASET:
             break;
@@ -248,6 +246,4 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     }
     return tableValue;
   }
-
-
 }

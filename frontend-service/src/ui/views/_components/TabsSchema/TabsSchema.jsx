@@ -87,14 +87,6 @@ export const TabsSchema = ({
           );
         })
       : null;
-  const filterActiveIndex = tableSchemaId => {
-    //TODO: Refactorizar este apaño y CUIDADO con activeIndex (integer cuando es manual, idTable cuando es por validación).
-    if (Number.isInteger(tableSchemaId)) {
-      return tabs ? activeIndex : 0;
-    } else {
-      return tabs ? tabs.findIndex(t => t.key === tableSchemaId) : 0;
-    }
-  };
 
   return (
     <TabView

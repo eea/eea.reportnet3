@@ -27,6 +27,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
+  datasetSchemaId,
   datasetSchemas,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
@@ -276,22 +277,36 @@ export const FieldsDesigner = ({
       return referencedField;
     }
     const link = {};
-    datasetSchemas.forEach(schema =>
-      schema.tables.forEach(table => {
-        if (!table.addTab) {
-          table.records.forEach(record =>
-            record.fields.forEach(field => {
-              if (!isNil(field) && field.fieldId === referencedField.idPk) {
-                link.name = `${table.tableSchemaName} - ${field.name}`;
-                link.value = `${table.tableSchemaName} - ${field.fieldId}`;
-                link.disabled = false;
-              }
-            })
-          );
+    let tableSchema = '';
+    
+    if (!isNil(datasetSchemas)) {
+      datasetSchemas.forEach(schema => {
+        if (!isNil(schema.tables)) {
+          schema.tables.forEach(table => {
+            if (!table.addTab && !isNil(table.records)) {
+              table.records.forEach(record => {
+                if (!isNil(record.fields)) {
+                  record.fields.forEach(field => {
+                    if (!isNil(field) && field.fieldId === referencedField.idPk) {
+                      link.name = `${table.tableSchemaName} - ${field.name}`;
+                      link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+                      link.disabled = false;
+                      tableSchema = table.tableSchemaId;
+                    }
+                  })
+                }
+              })
+            }
+          })
         }
       })
-    );
-    link.referencedField = { fieldSchemaId: referencedField.idPk, datasetSchemaId: referencedField.idDatasetSchema };
+    }
+
+    link.referencedField = {
+      fieldSchemaId: referencedField.idPk,
+      datasetSchemaId: referencedField.idDatasetSchema,
+      tableSchemaId: tableSchema
+    };
     return link;
   };
 
@@ -399,6 +414,7 @@ export const FieldsDesigner = ({
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchemaId}
           fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
@@ -435,13 +451,21 @@ export const FieldsDesigner = ({
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
+                datasetSchemaId={datasetSchemaId}
                 fieldDescription={field.description}
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
-                fieldName={field.name}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
+                fieldLinkedTableConditional={
+                  !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
+                }
+                fieldLinkedTableLabel={!isNil(field.referencedField) ? field.referencedField.labelId : ''}
+                fieldMasterTableConditional={
+                  !isNil(field.referencedField) ? field.referencedField.masterConditionalFieldId : ''
+                }
                 fieldMustBeUsed={field.pkMustBeUsed}
+                fieldName={field.name}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}

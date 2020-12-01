@@ -2,6 +2,8 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
+import isNil from 'lodash/isNil';
+
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
     try {
@@ -77,13 +79,10 @@ export const apiDataset = {
       return false;
     }
   },
-  deleteRecordById: async (datasetId, recordId) => {
+  deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
     try {
       const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteRecord, {
-          datasetId,
-          recordId
-        })
+        url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -266,12 +265,20 @@ export const apiDataset = {
     });
     return response.data;
   },
-  getReferencedFieldValues: async (datasetId, fieldSchemaId, searchToken) => {
+  getReferencedFieldValues: async (
+    datasetId,
+    fieldSchemaId,
+    searchToken,
+    conditionalValue = '',
+    datasetSchemaId = ''
+  ) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.referencedFieldValues, {
+        conditionalValue,
         datasetId,
+        datasetSchemaId,
         fieldSchemaId,
-        searchToken
+        searchToken: searchToken !== '' ? searchToken : undefined
       })
     });
     return response.data;
@@ -339,16 +346,28 @@ export const apiDataset = {
     });
     return response.data;
   },
-  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId) => {
+  tableDataById: async (
+    datasetId,
+    tableSchemaId,
+    pageNum,
+    pageSize,
+    fields,
+    levelError,
+    ruleId,
+    fieldSchemaId,
+    value
+  ) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.dataViewer, {
         datasetId: datasetId,
-        tableSchemaId: tableSchemaId,
+        fields: fields,
+        fieldSchemaId,
+        idRules: ruleId,
+        levelError: levelError,
         pageNum: pageNum,
         pageSize: pageSize,
-        fields: fields,
-        levelError: levelError,
-        idRules: ruleId
+        tableSchemaId: tableSchemaId,
+        value
       })
     });
 

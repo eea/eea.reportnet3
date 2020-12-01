@@ -186,6 +186,7 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           onChangePointCRS={onChangePointCRS}
           onEditorKeyChange={onEditorKeyChange}
@@ -554,6 +555,19 @@ const DataViewer = withRouter(
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
       onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
+    };
+
+    const onConditionalChange = field => {
+      dispatchRecords({
+        type: 'RESET_CONDITIONAL_FIELDS',
+        payload: {
+          field,
+          isNewRecord,
+          referencedFields: colsSchema.filter(
+            col => !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === field
+          )
+        }
+      });
     };
 
     const onConfirmDeleteTable = async () => {
@@ -1286,10 +1300,12 @@ const DataViewer = withRouter(
                   addDialogVisible={addDialogVisible}
                   colsSchema={colsSchema}
                   datasetId={datasetId}
+                  datasetSchemaId={datasetSchemaId}
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
                   hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
+                  onConditionalChange={onConditionalChange}
                   onShowFieldInfo={onShowFieldInfo}
                   onShowCoordinateError={onShowCoordinateError}
                   records={records}
@@ -1314,11 +1330,13 @@ const DataViewer = withRouter(
               <DataForm
                 colsSchema={colsSchema}
                 datasetId={datasetId}
+                datasetSchemaId={datasetSchemaId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
                 hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
+                onConditionalChange={onConditionalChange}
                 onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
