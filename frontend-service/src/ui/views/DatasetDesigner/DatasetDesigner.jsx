@@ -885,7 +885,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <TabularSwitch
         elements={[resources.messages['design'], resources.messages['tabularData']]}
         onChange={switchView =>
-          designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: switchView === 'Design' ? 'design' : 'table' } })
+          designerDispatch({
+            type: 'SET_VIEW_MODE',
+            payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
+          })
         }
         value={
           QuerystringUtils.getUrlParamValue('view') !== ''
