@@ -154,11 +154,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
       String idRecordSchema = fileCommon.findIdRecord(idTableSchema, dataSetSchema);
       List<FieldSchemaVO> fieldSchemaVOS = fileCommon
           .findFieldSchemas(idTableSchema, dataSetSchema);
+      boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, dataSetSchema, headers,
-            idTableSchema, idRecordSchema, fieldSchemaVOS);
+            idTableSchema, idRecordSchema, fieldSchemaVOS, isDesignDataset);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -203,11 +204,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
       final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
-      final List<FieldSchemaVO> fieldSchemaVOS) throws InvalidFileException {
+      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset)
+      throws InvalidFileException {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
       addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema,
-          idRecordSchema, fieldSchemaVOS);
+          idRecordSchema, fieldSchemaVOS, isDesignDataset);
     }
   }
 
@@ -269,20 +271,20 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
-      List<FieldSchemaVO> fieldSchemaVOS) {
+      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
     // Create object Table and set the attributes
     if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(
           createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
-              idRecordSchema, fieldSchemaVOS));
+              idRecordSchema, fieldSchemaVOS, isDesignDataset));
       tables.add(tableVO);
 
     } else {
       tableVO.getRecords().addAll(
           createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
-              idRecordSchema, fieldSchemaVOS));
+              idRecordSchema, fieldSchemaVOS, isDesignDataset));
     }
   }
 
@@ -299,14 +301,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
       final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers,
-      final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS) {
+      final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
       record.setIdRecordSchema(idRecordSchema);
     }
     record.setFields(
-        createFieldsVO(values, headers, fieldSchemaVOS));
+        createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset));
     record.setDatasetPartitionId(partitionId);
     record.setDataProviderCode(this.providerCode);
     records.add(record);
@@ -323,11 +325,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @return the list
    */
   private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers,
-      List<FieldSchemaVO> headersSchema) {
+      List<FieldSchemaVO> headersSchema, boolean isDesignDataset) {
     final List<FieldVO> fields = new ArrayList<>();
     List<String> idSchema = new ArrayList<>();
     int contAux = 0;
-    boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
+
     for (String value : values) {
       // Trim the string if it is too large
       if (value.length() >= fieldMaxLength) {
