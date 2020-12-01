@@ -59,9 +59,9 @@ import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
   const {
@@ -138,7 +138,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
-    viewType: { design: true, tabularData: false, webform: false },
+    viewType: {
+      design: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'design'),
+      tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
+      webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
+    },
     webform: null
   });
 

@@ -211,13 +211,15 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
-  }, [dataViewerOptions.tableSchemaId]);
+  }, [dataViewerOptions.tableSchemaId, isTableView]);
 
   const changeUrl = () => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}`
+      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}${
+        !isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''
+      }`
     );
   };
 
@@ -516,7 +518,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
-      setIsTableView(isNil(datasetSchema.webform));
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
