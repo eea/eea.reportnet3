@@ -568,8 +568,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     // we check if the field name already exist in schema
     if (checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
-      LOG.error(EEAErrorMessage.FIELD_NAME_DUPLICATED);
-      throw new EEAException(EEAErrorMessage.FIELD_NAME_DUPLICATED);
+      LOG.error(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, fieldSchemaVO.getName(),
+          fieldSchemaVO.getIdRecord(), datasetSchemaId));
+      throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED,
+          fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
     }
 
     try {
@@ -633,8 +635,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // we check if the field name already exist in schema
     if (null != fieldSchemaVO.getName()
         && checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
-      LOG.error(EEAErrorMessage.FIELD_NAME_DUPLICATED);
-      throw new EEAException(EEAErrorMessage.FIELD_NAME_DUPLICATED);
+      LOG.error(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, fieldSchemaVO.getName(),
+          fieldSchemaVO.getIdRecord(), datasetSchemaId));
+      throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED,
+          fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
     }
     boolean typeModified = false;
     try {
