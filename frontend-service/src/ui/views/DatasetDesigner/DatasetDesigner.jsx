@@ -1089,7 +1089,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && designerState.viewType['table'] ? ' p-button-animated-blink' : null
+                  designerState.datasetHasData && designerState.viewType['tabularData']
+                    ? ' p-button-animated-blink'
+                    : null
                 }`}
                 disabled={!designerState.datasetHasData}
                 icon={'validate'}
@@ -1101,7 +1103,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetStatistics.datasetErrors && designerState.viewType['table']
+                  designerState.datasetStatistics.datasetErrors && designerState.viewType['tabularData']
                     ? 'p-button-animated-blink'
                     : null
                 }`}
