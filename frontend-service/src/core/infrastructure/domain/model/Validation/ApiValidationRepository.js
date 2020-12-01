@@ -26,7 +26,7 @@ const create = async (datasetSchemaId, validationRule) => {
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
-const createDatasetRule = async (datasetSchemaId, validationRule) => {
+const createTableRule = async (datasetSchemaId, validationRule) => {
   const validation = {
     automatic: false,
     description: validationRule.description,
@@ -190,7 +190,7 @@ const updateDatasetRule = async (datasetId, validationRule) => {
 
 export const ApiValidationRepository = {
   create,
-  createDatasetRule,
+  createTableRule,
   createRowRule,
   deleteById,
   getAll,
