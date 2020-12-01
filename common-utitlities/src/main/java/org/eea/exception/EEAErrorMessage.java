@@ -124,6 +124,9 @@ public final class EEAErrorMessage {
   /** The Constant FIELD_NOT_FOUND: {@value}. */
   public static final String FIELD_NOT_FOUND = "Field not found";
 
+  /** The Constant FIELD_NAME_DUPLICATED: {@value}. */
+  public static final String FIELD_NAME_DUPLICATED = "Field name duplicated";
+
   /** The Constant FIELD_SCHEMA_ID_NOT_FOUND: {@value}. */
   public static final String FIELD_SCHEMA_ID_NOT_FOUND = "fieldSchemaId not found";
 
