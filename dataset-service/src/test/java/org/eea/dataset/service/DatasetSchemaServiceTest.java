@@ -1784,12 +1784,13 @@ public class DatasetSchemaServiceTest {
     Mockito.when(document.remove(Mockito.any())).thenReturn(null);
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn("");
     Mockito.when(document.put("description", "")).thenReturn(null);
-    Mockito.when(fieldSchemaVO.getName()).thenReturn("");
-    Mockito.when(document.put("headerName", "")).thenReturn(null);
+    // Mockito.when(document.put("headerName", "")).thenReturn(null);
     Mockito.when(fieldSchemaVO.getCodelistItems()).thenReturn(codelistItems);
     Mockito.when(fieldSchemaVO.getReferencedField()).thenReturn(referenced);
     Mockito.when(referenced.getIdDatasetSchema()).thenReturn("5ce524fad31fc52540abae73");
     Mockito.when(referenced.getIdPk()).thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
+
     Assert.assertEquals(DataType.LINK,
         dataSchemaServiceImpl.updateFieldSchema("5ce524fad31fc52540abae73", fieldSchemaVO));
   }

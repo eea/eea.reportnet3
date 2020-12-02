@@ -432,6 +432,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
+
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
@@ -464,8 +465,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       recordStoreControllerZuul.createUpdateQueryView(datasetId);
       return (response);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
-          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -520,8 +520,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Create query view
       recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 

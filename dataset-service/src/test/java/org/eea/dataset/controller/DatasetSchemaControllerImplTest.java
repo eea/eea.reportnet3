@@ -572,7 +572,6 @@ public class DatasetSchemaControllerImplTest {
     try {
       dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
     } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
   }
@@ -759,7 +758,7 @@ public class DatasetSchemaControllerImplTest {
     try {
       dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
     } catch (ResponseStatusException e) {
-      Assert.assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
   }
 

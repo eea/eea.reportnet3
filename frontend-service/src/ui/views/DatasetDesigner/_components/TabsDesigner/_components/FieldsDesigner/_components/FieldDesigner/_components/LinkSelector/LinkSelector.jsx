@@ -273,7 +273,7 @@ const LinkSelector = withRouter(
                     value={link}></ListBox>
                 );
               })}
-          </div>
+          </div>          
           <div className={styles.selectedLinkFieldsWrapper}>
             <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
             <Dropdown
@@ -288,19 +288,6 @@ const LinkSelector = withRouter(
               placeholder={resources.messages['linkedTableLabel']}
               // scrollHeight="450px"
               value={pkLinkedTableLabel}
-            />
-            <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="linkedTableConditional"
-              className={styles.fieldSelector}
-              inputId="linkedTableConditional"
-              name={resources.messages['linkedTableConditional']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
-              optionLabel="name"
-              options={linkedTableFields}
-              placeholder={resources.messages['linkedTableConditional']}
-              value={pkLinkedTableConditional}
             />
           </div>
           <div className={styles.selectedLinkFieldsWrapper}>
@@ -317,6 +304,19 @@ const LinkSelector = withRouter(
               placeholder={resources.messages['masterTableConditional']}
               // scrollHeight="450px"
               value={pkMasterTableConditional}
+            />
+            <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
+            <Dropdown
+              appendTo={document.body}
+              ariaLabel="linkedTableConditional"
+              className={styles.fieldSelector}
+              inputId="linkedTableConditional"
+              name={resources.messages['linkedTableConditional']}
+              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
+              optionLabel="name"
+              options={linkedTableFields}
+              placeholder={resources.messages['linkedTableConditional']}
+              value={pkLinkedTableConditional}
             />
           </div>
           <div className={styles.selectedLinkWrapper}>

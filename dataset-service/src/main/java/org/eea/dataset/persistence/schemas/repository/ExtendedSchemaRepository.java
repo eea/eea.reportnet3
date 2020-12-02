@@ -151,4 +151,13 @@ public interface ExtendedSchemaRepository {
    * @param webForm the web form
    */
   void updateDatasetSchemaWebForm(String datasetSchemaId, Webform webForm);
+
+  /**
+   * Find record schema by record schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param recordSchemaId the record schema id
+   * @return the document
+   */
+  Document findRecordSchemaByRecordSchemaId(String datasetSchemaId, String recordSchemaId);
 }

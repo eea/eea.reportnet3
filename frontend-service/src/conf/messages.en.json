@@ -879,7 +879,6 @@
     "uploadReplaceAttachment": "Replace file",
     "totalErrors": "total errors: ",
     "datasetSchemaCreationErrorDuplicated": "{:schemaName} already exists. Please choose a different schema name.",
-    "tabularData": "Tabular data",
     "tableIsNotCreated": "The table {:tableName} is not created in the design, please check it",
     "fieldIsNotCreated": "The field {:fieldName} is not created in the design, please check it",
     "emptyWebformTable": "This table has no fields or do not match with the webform model.",
@@ -887,7 +886,6 @@
     "webform": "Webform",
     "webformView": "Webform",
     "designView": "Design",
-    "tableView": "Tabular data",
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
     "noValidationsWithSelectedParameters": "There are no validations with the selected parameters",
     "sqlSentenceHelpDialogTitle": "SQL Help",
@@ -958,6 +956,7 @@
     "nonEditableDataDifferentTypes": "This field is not editable and the imported and designed types are not the same",
     "webformArticle13Title": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
     "missingWebformTablesOrFieldsMissing": "The following tables or fields are missing, please check it.",
-    "addRecordsError": "There has been an error adding a record"
+    "addRecordsError": "There has been an error adding a record",
+    "tabularDataView": "Tabular data"
   }
 }

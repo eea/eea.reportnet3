@@ -99,6 +99,7 @@ export const FieldDesigner = ({
     return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
   const initialFieldDesignerState = {
+    addFieldCallSent: false,
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
     fieldLinkValue: fieldLink || null,
@@ -186,7 +187,9 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: true });
+    if (!fieldDesignerState.addFieldCallSent) {
+      dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: true });
+    }
   };
 
   const onChangeFieldType = type => {
@@ -203,7 +206,12 @@ export const FieldDesigner = ({
     } else {
       if (fieldId === '-1') {
         if (type !== '') {
-          if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          if (
+            !isUndefined(fieldDesignerState.fieldValue) &&
+            fieldDesignerState.fieldValue !== '' &&
+            !fieldDesignerState.addFieldCallSent
+          ) {
+            dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: true });
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
               pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
@@ -380,14 +388,18 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: true });
+    if (!fieldDesignerState.addFieldCallSent) {
+      dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: true });
+    }
   };
 
   const onLinkDropdownSelected = fieldType => {
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
-    dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: true });
+    if (!fieldDesignerState.addFieldCallSent) {
+      dispatchFieldDesigner({ type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: true });
+    }
   };
 
   const onFieldAdd = async ({
@@ -453,6 +465,7 @@ export const FieldDesigner = ({
           inputRef.current.element.focus();
         }
       }
+      dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: false });
     }
   };
 
