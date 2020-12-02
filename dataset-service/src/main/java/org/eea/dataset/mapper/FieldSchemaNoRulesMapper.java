@@ -60,6 +60,17 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
       if (fieldSchema.getReferencedField().getIdPk() != null) {
         referenced.setIdPk(fieldSchema.getReferencedField().getIdPk().toString());
       }
+      if (fieldSchema.getReferencedField().getLabelId() != null) {
+        referenced.setLabelId(fieldSchema.getReferencedField().getLabelId().toString());
+      }
+      if (fieldSchema.getReferencedField().getLinkedConditionalFieldId() != null) {
+        referenced.setLinkedConditionalFieldId(
+            fieldSchema.getReferencedField().getLinkedConditionalFieldId().toString());
+      }
+      if (fieldSchema.getReferencedField().getMasterConditionalFieldId() != null) {
+        referenced.setMasterConditionalFieldId(
+            fieldSchema.getReferencedField().getMasterConditionalFieldId().toString());
+      }
       fieldSchemaVO.setReferencedField(referenced);
     }
   }

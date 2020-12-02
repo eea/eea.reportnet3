@@ -319,9 +319,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Gets the table schema.
    *
-   * @param idTableSchema the id table schema
-   * @param dataSetSchema the data set schema
-   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
    * @return the table schema
    */
   @Override
@@ -566,8 +565,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
+
+    // we check if the field name already exist in schema
+    if (checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
+      LOG.error(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, fieldSchemaVO.getName(),
+          fieldSchemaVO.getIdRecord(), datasetSchemaId));
+      throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED,
+          fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
+    }
+
     try {
       fieldSchemaVO.setId(new ObjectId().toString());
+
 
       if (fieldSchemaVO.getReferencedField() != null) {
         // We need to update the fieldSchema is referenced, the property isPKreferenced to true
@@ -622,6 +631,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
+
+    // we check if the field name already exist in schema
+    if (null != fieldSchemaVO.getName()
+        && checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
+      LOG.error(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, fieldSchemaVO.getName(),
+          fieldSchemaVO.getIdRecord(), datasetSchemaId));
+      throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED,
+          fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
+    }
     boolean typeModified = false;
     try {
       // Retrieve the FieldSchema from MongoDB
@@ -1894,8 +1912,42 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         webFormMapper.classToEntity(webformVO));
   }
 
+  /**
+   * Check if field name already exist.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldName the field name
+   * @param recordId the record id
+   * @return true, if successful
+   */
+  private boolean checkIfFieldNameAlreadyExist(String datasetSchemaId,
+      FieldSchemaVO fieldSchemaVO) {
+    boolean exist = false;
+    Document document = schemasRepository.findRecordSchemaByRecordSchemaId(datasetSchemaId,
+        fieldSchemaVO.getIdRecord());
+    List<Document> documentListField = null != document && null != document.get("fieldSchemas")
+        ? (List<Document>) document.get("fieldSchemas")
+        : new ArrayList();
 
+    // we found if we have the same name in the record , and check if the name that we found is
+    // diferent form himself
+    for (Document field : documentListField) {
+      if (fieldSchemaVO.getName().equalsIgnoreCase(field.get("headerName").toString())
+          && !field.get("_id").toString().equalsIgnoreCase(fieldSchemaVO.getId())) {
+        exist = true;
+        break;
+      }
+    }
 
+    return exist;
+  }
+
+  /**
+   * Release validate manual QC event.
+   *
+   * @param datasetId the dataset id
+   * @param checkNoSQL the check no SQL
+   */
   private void releaseValidateManualQCEvent(Long datasetId, boolean checkNoSQL) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
