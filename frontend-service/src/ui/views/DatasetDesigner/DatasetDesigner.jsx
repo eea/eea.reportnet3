@@ -25,14 +25,12 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'primereact/menu';
-import { RadioButton } from 'ui/views/_components/RadioButton';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -99,7 +97,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       selectedRuleId: '',
       selectedRuleLevelError: '',
       selectedRuleMessage: '',
-      tableSchemaId: ''
+      tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
     exportButtonsList: [],
     exportDatasetData: null,
@@ -847,8 +845,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }}
         value={
           QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resources.messages[QuerystringUtils.getUrlParamValue('view')]
-            : resources.messages['design']
+            ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
+            : resources.messages['designView']
         }
       />
     );
@@ -887,7 +885,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       //   <span className={styles.switchTextInput}>{resources.messages['tabularDataView']}</span>
       // </Fragment>
       <TabularSwitch
-        elements={[resources.messages['design'], resources.messages['tabularDataView']]}
+        elements={[resources.messages['designView'], resources.messages['tabularDataView']]}
         onChange={switchView =>
           designerDispatch({
             type: 'SET_VIEW_MODE',
@@ -896,8 +894,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
         value={
           QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resources.messages[QuerystringUtils.getUrlParamValue('view')]
-            : resources.messages['design']
+            ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
+            : resources.messages['designView']
         }
       />
     );
