@@ -377,19 +377,12 @@ export const apiDataset = {
     return response;
   },
   updateFieldById: async (datasetId, datasetTableRecords) => {
-    console.log('here');
-    // try {
     const response = await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDataField, { datasetId: datasetId }),
       data: datasetTableRecords
     });
 
-    console.log('response', response);
     return response;
-    // } catch (error) {
-    //   console.error(`Error updating dataset field: ${error}`);
-    //   return false;
-    // }
   },
 
   updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {

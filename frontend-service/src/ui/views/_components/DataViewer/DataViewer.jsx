@@ -675,7 +675,7 @@ const DataViewer = withRouter(
         if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
             //without await. We don't have to wait for the response.
-            const fieldUpdated = DatasetService.updateFieldById(
+            const response = await DatasetService.updateFieldById(
               datasetId,
               cell.field,
               field.id,
@@ -684,18 +684,25 @@ const DataViewer = withRouter(
                 ? value.join(',')
                 : value
             );
-            if (!fieldUpdated) {
+
+            const isFileUpdated = response.status >= 200 && response.status <= 299;
+
+            if (!isFileUpdated) {
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
             }
           } catch (error) {
-            const {
-              dataflow: { name: dataflowName },
-              dataset: { name: datasetName }
-            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'UPDATE_FIELD_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
+            if (error.response.status === 423) {
+              notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
+            } else {
+              const {
+                dataflow: { name: dataflowName },
+                dataset: { name: datasetName }
+              } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+              notificationContext.add({
+                type: 'UPDATE_FIELD_BY_ID_ERROR',
+                content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+              });
+            }
           }
         }
         if (isEditing) {
@@ -831,19 +838,14 @@ const DataViewer = withRouter(
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
-          console.log('error', error);
-          if (error.response.status === 423) {
-            notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
-          } else {
-            const {
-              dataflow: { name: dataflowName },
-              dataset: { name: datasetName }
-            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'UPDATE_RECORDS_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
-          }
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add({
+            type: 'UPDATE_RECORDS_BY_ID_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+          });
         } finally {
           onCancelRowEdit();
           setIsLoading(false);
