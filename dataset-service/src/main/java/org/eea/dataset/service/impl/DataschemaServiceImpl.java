@@ -743,6 +743,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       this.updateIsPkReferencedInFieldSchema(
           fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
           fieldSchemaVO.getReferencedField().getIdPk(), true);
+    } else if (fieldSchema.get(LiteralConstants.REFERENCED_FIELD) != null
+        && !DataType.LINK.equals(fieldSchemaVO.getType())) {
+      // If the field is not a Link type, delete the referenced field to avoid problems
+      fieldSchema.put(LiteralConstants.REFERENCED_FIELD, null);
     }
     return typeModified;
   }
