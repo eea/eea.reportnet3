@@ -957,6 +957,7 @@
     "webformArticle13Title": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
     "missingWebformTablesOrFieldsMissing": "The following tables or fields are missing, please check it.",
     "addRecordsError": "There has been an error adding a record",
-    "tabularDataView": "Tabular data"
+    "tabularDataView": "Tabular data",
+    "saveRecordLockedError": "You can't save a record with <strong>blocker</strong> errors while you are releasing to data collection. Please check it and try again."
   }
 }

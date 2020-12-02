@@ -21,20 +21,15 @@ export const apiDataset = {
     }
   },
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(DatasetConfig.addNewRecord, {
-          datasetId: datasetId,
-          tableSchemaId: tableSchemaId
-        }),
-        data: datasetTableRecords
-      });
+    const response = await HTTPRequester.post({
+      url: getUrl(DatasetConfig.addNewRecord, {
+        datasetId: datasetId,
+        tableSchemaId: tableSchemaId
+      }),
+      data: datasetTableRecords
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error adding record to dataset data: ${error}`);
-      return false;
-    }
+    return response;
   },
   addTableDesign: async (datasetId, tableSchemaName) => {
     try {
@@ -382,18 +377,21 @@ export const apiDataset = {
     return response;
   },
   updateFieldById: async (datasetId, datasetTableRecords) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateTableDataField, { datasetId: datasetId }),
-        data: datasetTableRecords
-      });
+    console.log('here');
+    // try {
+    const response = await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateTableDataField, { datasetId: datasetId }),
+      data: datasetTableRecords
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error updating dataset field: ${error}`);
-      return false;
-    }
+    console.log('response', response);
+    return response;
+    // } catch (error) {
+    //   console.error(`Error updating dataset field: ${error}`);
+    //   return false;
+    // }
   },
+
   updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
     try {
       const response = await HTTPRequester.update({

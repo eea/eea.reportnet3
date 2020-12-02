@@ -497,6 +497,9 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
+        },
+        {
+          "key": "SAVE_RECORD_LOCKED_ERROR"
         }
       ]
     },
