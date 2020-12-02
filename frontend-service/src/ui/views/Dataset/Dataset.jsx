@@ -14,7 +14,6 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
-import { Article15 } from 'ui/views/Webforms/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -22,7 +21,6 @@ import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
@@ -217,9 +215,13 @@ export const Dataset = withRouter(({ match, history }) => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}${
-        !isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''
-      }`
+      `?tab=${
+        dataViewerOptions.tableSchemaId !== ''
+          ? dataViewerOptions.tableSchemaId
+          : !isEmpty(tableSchema)
+          ? tableSchema[0].id
+          : ''
+      }${!isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''}`
     );
   };
 
