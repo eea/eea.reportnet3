@@ -712,7 +712,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
       fieldSchema.put("validExtensions", Arrays.asList(validExtensions));
     }
-    if (fieldSchemaVO.getReferencedField() != null) {
+    if (fieldSchemaVO.getReferencedField() != null
+        && DataType.LINK.equals(fieldSchemaVO.getType())) {
       Document referenced = new Document();
       referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
           new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
