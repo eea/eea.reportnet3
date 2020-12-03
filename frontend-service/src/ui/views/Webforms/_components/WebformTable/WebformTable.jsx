@@ -30,7 +30,7 @@ export const WebformTable = ({
   isReporting,
   onTabChange,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
-  setIsLoading,
+  setIsLoading = () => {},
   webform,
   webformType
 }) => {
