@@ -11,7 +11,7 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         isVisible: false,
         referenceId: null,
-        reOpenOpener: !isNil(state.opener) ? true : false,
+        reOpenOpener: !isNil(state.opener),
         ruleEdit: false,
         ruleToEdit: {},
         tableSchemaId: null
@@ -65,6 +65,11 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         reOpenOpener: false
       };
+    case 'ON_AUTOMATIC_RULE_IS_UPDATED':
+      return {
+        ...state,
+        isAutomaticRuleUpdated: payload
+      };
     default:
       return state;
   }
@@ -90,7 +95,7 @@ export const ValidationProvider = ({ children }) => {
           dispatch({ type: 'ON_CLOSE_QC_CREATION_MODAL' });
         },
 
-        onOpenModal: level => {
+        onOpenModal: () => {
           dispatch({ type: 'ON_OPEN_QC_CREATION_MODAL' });
         },
 
@@ -115,6 +120,10 @@ export const ValidationProvider = ({ children }) => {
 
         onResetOpener: () => {
           dispatch({ type: 'ON_OPENER_RESET' });
+        },
+
+        onAutomaticRuleIsUpdated: isUpdated => {
+          dispatch({ type: 'ON_AUTOMATIC_RULE_IS_UPDATED', payload: isUpdated });
         },
 
         resetReOpenOpener: () => {

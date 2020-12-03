@@ -83,7 +83,10 @@ import {
   faUserCog,
   faUsersCog,
   faUserShield,
-  faVectorSquare
+  faVectorSquare,
+  faGripLines,
+  faBraille,
+  faTable
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -102,6 +105,7 @@ import {
   faSquare as farSquareRegular,
   faFilePdf as farFilePdf
 } from '@fortawesome/free-regular-svg-icons';
+import { faBuffer, faConnectdevelop } from '@fortawesome/free-brands-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
@@ -271,6 +275,12 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'mpg':
       return faFileVideo;
+    case 'multiLineString':
+      return faConnectdevelop;
+    case 'multiPoint':
+      return faBraille;
+    case 'multiPolygon':
+      return faBuffer;
     case 'multiselect':
       return faTasks;
     case 'notifications':
@@ -291,6 +301,8 @@ export const AwesomeIcons = icon => {
       return faFilePdf;
     case 'lightPdf':
       return farFilePdf;
+    case 'line':
+      return faGripLines;
     case 'pencilRuler':
       return faPencilRuler;
     case 'percentage':
@@ -373,6 +385,8 @@ export const AwesomeIcons = icon => {
       return faFileArchive;
     case 'howTo':
       return faBookOpen;
+    case 'table':
+      return faTable;
     default:
       return faFileAlt;
   }

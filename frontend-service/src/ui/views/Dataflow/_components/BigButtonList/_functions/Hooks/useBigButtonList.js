@@ -53,7 +53,7 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
-  }, [userContext]);
+  }, [userContext, dataflowState.data.datasets]);
 
   const getButtonsVisibility = () => {
     const isDesigner =
@@ -64,6 +64,8 @@ const useBigButtonList = ({
     const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
     const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
     const isManualAcceptance = dataflowState.data.manualAcceptance;
+    const isReleased =
+      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
 
     return {
       createDataCollection: isLeadDesigner && isDesignStatus,
@@ -78,12 +80,14 @@ const useBigButtonList = ({
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
-      feedback: (isLeadDesigner && isDraftStatus) || isLeadReporterOfCountry,
+      feedback:
+        (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
+        (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
       newSchema: isDesigner && isDesignStatus,
       updateReporters: isDraftStatus,
-      receipt: isLeadReporterOfCountry,
+      receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
     };
@@ -103,16 +107,16 @@ const useBigButtonList = ({
 
   const feedbackBigButton = [
     {
-      buttonClass: 'dataflowFeedback',
+      buttonClass: 'technicalFeedback',
       buttonIcon: 'comments',
-      caption: resources.messages['dataflowFeedback'],
+      caption: resources.messages['technicalFeedback'],
       handleRedirect: () =>
         handleRedirect(
           !isLeadDesigner
             ? getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId, representativeId: dataProviderId }, true)
             : getUrl(routes.DATAFLOW_FEEDBACK_CUSTODIAN, { dataflowId }, true)
         ),
-      helpClassName: 'dataflow-big-buttons-dataflowFeedback-help-step',
+      helpClassName: 'dataflow-big-buttons-technicalFeedback-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId }, true),
       visibility: buttonsVisibility.feedback
@@ -159,75 +163,82 @@ const useBigButtonList = ({
     }
   ];
 
-  const designDatasetModels = dataflowState.data.designDatasets.map(newDatasetSchema => ({
-    buttonClass: 'schemaDataset',
-    buttonIcon: 'pencilRuler',
-    canEditName: buttonsVisibility.designDatasetsActions,
-    caption: newDatasetSchema.datasetSchemaName,
-    dataflowStatus: dataflowState.status,
-    datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-    enabled: buttonsVisibility.designDatasetsActions,
-    handleRedirect: buttonsVisibility.designDatasetsActions
-      ? () => {
-          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
-        }
-      : () => {},
-
-    helpClassName: 'dataflow-schema-help-step',
-    index: newDatasetSchema.index,
-    layout: 'defaultBigButton',
-    model: buttonsVisibility.designDatasetsActions
-      ? [
-          {
-            label: resources.messages['openDataset'],
-            icon: 'openFolder',
-            command: () => {
+  const designDatasetModels = isNil(dataflowState.data.designDatasets)
+    ? []
+    : dataflowState.data.designDatasets.map(newDatasetSchema => ({
+        buttonClass: 'schemaDataset',
+        buttonIcon: 'pencilRuler',
+        canEditName: buttonsVisibility.designDatasetsActions,
+        caption: newDatasetSchema.datasetSchemaName,
+        dataflowStatus: dataflowState.status,
+        datasetSchemaInfo: dataflowState.updatedDatasetSchema,
+        enabled: buttonsVisibility.designDatasetsActions,
+        handleRedirect: buttonsVisibility.designDatasetsActions
+          ? () => {
               handleRedirect(
                 getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
               );
             }
-          },
-          {
-            label: resources.messages['rename'],
-            icon: 'pencil',
-            disabled:
-              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] || !buttonsVisibility.designDatasetsActions
-          },
-          {
-            label: resources.messages['delete'],
-            icon: 'trash',
-            disabled:
-              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-              !buttonsVisibility.designDatasetsActions,
-            command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-          }
-          // {
-          //   label: resources.messages['exportDatasetSchema'],
-          //   icon: 'import',
-          //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
-          //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
-          // }
-        ]
-      : [],
-    onSaveName: onSaveName,
-    onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
-    placeholder: resources.messages['datasetSchemaNamePlaceholder'],
-    setErrorDialogData: setErrorDialogData,
-    tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
-    visibility: buttonsVisibility.designDatasets
-  }));
+          : () => {},
+
+        helpClassName: 'dataflow-schema-help-step',
+        index: newDatasetSchema.index,
+        layout: 'defaultBigButton',
+        model: buttonsVisibility.designDatasetsActions
+          ? [
+              {
+                label: resources.messages['openDataset'],
+                icon: 'openFolder',
+                command: () => {
+                  handleRedirect(
+                    getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+                  );
+                }
+              },
+              {
+                label: resources.messages['rename'],
+                icon: 'pencil',
+                disabled:
+                  dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
+                  !buttonsVisibility.designDatasetsActions
+              },
+              {
+                label: resources.messages['delete'],
+                icon: 'trash',
+                disabled:
+                  dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
+                  !buttonsVisibility.designDatasetsActions,
+                command: () => getDeleteSchemaIndex(newDatasetSchema.index)
+              }
+              // {
+              //   label: resources.messages['exportDatasetSchema'],
+              //   icon: 'import',
+              //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
+              //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
+              // }
+            ]
+          : [],
+        onSaveName: onSaveName,
+        onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
+        placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+        setErrorDialogData: setErrorDialogData,
+        tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
+        visibility: buttonsVisibility.designDatasets
+      }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    const allDatasets = datasets.map(dataset => {
-      return {
-        name: dataset.datasetSchemaName,
-        id: dataset.dataProviderId,
-        datasetId: dataset.datasetId,
-        datasetName: dataset.name
-      };
-    });
+    const allDatasets = isNil(datasets)
+      ? []
+      : datasets.map(dataset => {
+          return {
+            name: dataset.datasetSchemaName,
+            id: dataset.dataProviderId,
+            datasetId: dataset.datasetId,
+            datasetName: dataset.name
+          };
+        });
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
@@ -352,53 +363,55 @@ const useBigButtonList = ({
     }
   ];
 
-  const dataCollectionModels = dataflowState.data.dataCollections.map(dataCollection => ({
-    buttonClass: 'dataCollection',
-    buttonIcon: 'dataCollection',
-    caption: dataCollection.dataCollectionName,
-    handleRedirect: () => {
-      handleRedirect(getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true));
-    },
-    helpClassName: 'dataflow-datacollection-help-step',
-    layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['historicReleases'],
-        command: () => {
-          onShowHistoricReleases('dataCollection');
-          getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
-        }
-      }
-    ],
-    visibility: true
-  }));
+  const dataCollectionModels = isNil(dataflowState.data.dataCollections)
+    ? []
+    : dataflowState.data.dataCollections.map(dataCollection => ({
+        buttonClass: 'dataCollection',
+        buttonIcon: 'dataCollection',
+        caption: dataCollection.dataCollectionName,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true)
+          );
+        },
+        helpClassName: 'dataflow-datacollection-help-step',
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resources.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('dataCollection');
+              getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
+            }
+          }
+        ],
+        visibility: true
+      }));
 
-  const euDatasetModels = dataflowState.data.euDatasets.map(euDataset => ({
-    buttonClass: 'euDataset',
-    buttonIcon: 'euDataset',
-    caption: euDataset.euDatasetName,
-    handleRedirect: () => {
-      handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
-    },
-    helpClassName: 'dataflow-eudataset-help-step',
-    layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['historicReleases'],
-        command: () => {
-          onShowHistoricReleases('EUDataset');
-          getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
-        }
-      }
-    ],
-    visibility: true
-  }));
+  const euDatasetModels = isNil(dataflowState.data.euDatasets)
+    ? []
+    : dataflowState.data.euDatasets.map(euDataset => ({
+        buttonClass: 'euDataset',
+        buttonIcon: 'euDataset',
+        caption: euDataset.euDatasetName,
+        handleRedirect: () => {
+          handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
+        },
+        helpClassName: 'dataflow-eudataset-help-step',
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resources.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('EUDataset');
+              getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
+            }
+          }
+        ],
+        visibility: true
+      }));
 
   const onBuildReceiptButton = () => {
-    const { datasets } = dataflowState.data;
-    const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
-    const releasedStates = datasets.map(dataset => dataset.isReleased);
-
     return [
       {
         buttonClass: 'schemaDataset',
@@ -409,23 +422,24 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
-        visibility:
-          buttonsVisibility.receipt &&
-          uniq(representativeNames).length === 1 &&
-          !releasedStates.includes(false) &&
-          !releasedStates.includes(null)
+        visibility: buttonsVisibility.receipt
       }
     ];
   };
+
+  const isReleasing =
+    !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.length >= 1
+      ? dataflowState.data.datasets[0].isReleasing
+      : false;
 
   const onBuildReleaseButton = () => {
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: isActiveButton ? 'released' : 'spinner',
-        buttonIconClass: isActiveButton ? 'released' : 'spinner',
+        buttonIcon: isReleasing ? 'spinner' : 'released',
+        buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: isActiveButton ? () => onOpenReleaseConfirmDialog() : () => {},
+        handleRedirect: !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         visibility: buttonsVisibility.release
@@ -501,11 +515,11 @@ const useBigButtonList = ({
     ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
+    ...manualTechnicalAcceptanceBigButton,
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
     ...designDatasetModels,
-    ...manualTechnicalAcceptanceBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,

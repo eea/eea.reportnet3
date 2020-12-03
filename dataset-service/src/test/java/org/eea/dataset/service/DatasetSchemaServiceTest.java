@@ -1777,20 +1777,21 @@ public class DatasetSchemaServiceTest {
     Mockito.when(document.get("idRecord")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(datasetSchema.getTableSchemas()).thenReturn(new ArrayList<>());
-    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.NUMBER_DECIMAL);
-    Mockito.when(document.put(LiteralConstants.TYPE_DATA, DataType.NUMBER_DECIMAL.getValue()))
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.LINK);
+    Mockito.when(document.put(LiteralConstants.TYPE_DATA, DataType.LINK.getValue()))
         .thenReturn(DataType.TEXT.getValue());
     Mockito.when(document.containsKey(LiteralConstants.CODELIST_ITEMS)).thenReturn(true);
     Mockito.when(document.remove(Mockito.any())).thenReturn(null);
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn("");
     Mockito.when(document.put("description", "")).thenReturn(null);
-    Mockito.when(fieldSchemaVO.getName()).thenReturn("");
-    Mockito.when(document.put("headerName", "")).thenReturn(null);
+    // Mockito.when(document.put("headerName", "")).thenReturn(null);
     Mockito.when(fieldSchemaVO.getCodelistItems()).thenReturn(codelistItems);
     Mockito.when(fieldSchemaVO.getReferencedField()).thenReturn(referenced);
     Mockito.when(referenced.getIdDatasetSchema()).thenReturn("5ce524fad31fc52540abae73");
     Mockito.when(referenced.getIdPk()).thenReturn("5ce524fad31fc52540abae73");
-    Assert.assertEquals(DataType.NUMBER_DECIMAL,
+    Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
+
+    Assert.assertEquals(DataType.LINK,
         dataSchemaServiceImpl.updateFieldSchema("5ce524fad31fc52540abae73", fieldSchemaVO));
   }
 

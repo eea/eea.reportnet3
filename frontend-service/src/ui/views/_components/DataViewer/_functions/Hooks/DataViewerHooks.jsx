@@ -16,7 +16,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { TextUtils, RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -163,6 +163,30 @@ export const useSetColumns = (
     return '';
   };
 
+  const renderComplexGeometries = (value = '', type) => {
+    if (
+      !isNil(value) &&
+      value !== '' &&
+      !TextUtils.areEquals(JSON.parse(value).geometry.type, type) &&
+      MapUtils.checkValidJSONMultipleCoordinates(value)
+    ) {
+      const parsedGeoJson = JSON.parse(value);
+      if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
+        return (
+          <span
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>{`${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`}</span>
+        );
+      } else {
+        return '';
+      }
+    }
+    return '';
+  };
+
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
@@ -210,10 +234,15 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+            justifyContent:
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) &&
+              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                field.fieldData.type
+              )
               ? field.fieldData[column.field].sort().join(', ')
               : // : Array.isArray(field.fieldData[column.field])
               // ? field.fieldData[column.field].join(', ')
@@ -228,6 +257,10 @@ export const useSetColumns = (
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
+              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  field.fieldData.type
+                )
+              ? renderComplexGeometries(field.fieldData[column.field], field.fieldData.type)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -240,10 +273,14 @@ export const useSetColumns = (
             display: 'flex',
             alignItems: 'center',
             justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
           }}>
           {field
-            ? Array.isArray(field.fieldData[column.field]) && field.fieldData.type !== 'POINT'
+            ? Array.isArray(field.fieldData[column.field]) &&
+              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                field.fieldData.type
+              )
               ? // ? field.fieldData[column.field].sort().join(', ')
                 // : Array.isArray(field.fieldData[column.field])
                 field.fieldData[column.field].join(', ')
@@ -258,6 +295,10 @@ export const useSetColumns = (
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
               ? renderPoint(field.fieldData[column.field])
+              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  field.fieldData.type
+                )
+              ? renderComplexGeometries(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>
@@ -328,9 +369,7 @@ export const useSetColumns = (
           key={column.field}
           sortable={sort}
           style={{
-            width: !invisibleColumn
-              ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
-              : '0.01px'
+            width: invisibleColumn && '0.01px'
           }}
         />
       );
@@ -348,14 +387,7 @@ export const useSetColumns = (
     );
 
     let editCol = (
-      <Column
-        body={row => actionTemplate(row)}
-        className={styles.validationCol}
-        header={resources.messages['actions']}
-        key="actions"
-        sortable={false}
-        style={{ width: '100px' }}
-      />
+      <Column body={row => actionTemplate(row)} header={resources.messages['actions']} key="actions" sortable={false} />
     );
 
     let validationCol = (
@@ -365,7 +397,6 @@ export const useSetColumns = (
         field="validations"
         key="recordValidation"
         sortable={false}
-        style={{ width: '100px' }}
       />
     );
 

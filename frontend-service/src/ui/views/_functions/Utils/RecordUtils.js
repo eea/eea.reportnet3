@@ -5,8 +5,10 @@ import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const allAttachments = colsSchema => {
-  const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
+  const notAttachment = colsSchema.filter(col => !TextUtils.areEquals(col.type, 'ATTACHMENT'));
   return notAttachment.length === 0;
 };
 
@@ -168,7 +170,12 @@ const getFieldTypeValue = fieldType => {
     { fieldType: 'Email', value: 'Email' },
     { fieldType: 'URL', value: 'URL' },
     { fieldType: 'Phone', value: 'Phone number' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Point', value: 'Point' },
+    { fieldType: 'MultiPoint', value: 'Multiple points' },
+    { fieldType: 'Linestring', value: 'Line' },
+    { fieldType: 'MultiLineString', value: 'Multiple lines' },
+    { fieldType: 'Polygon', value: 'Polygon' },
+    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
     { fieldType: 'Codelist', value: 'Single select' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
     { fieldType: 'Link', value: 'Link' },
@@ -176,7 +183,7 @@ const getFieldTypeValue = fieldType => {
   ];
 
   if (!isUndefined(fieldType)) {
-    const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
+    const filteredTypes = fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, fieldType))[0];
     return filteredTypes.value;
   } else {
     return '';

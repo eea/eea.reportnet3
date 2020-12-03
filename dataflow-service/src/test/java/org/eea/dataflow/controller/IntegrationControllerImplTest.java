@@ -304,10 +304,10 @@ public class IntegrationControllerImplTest {
   @Test
   public void findExportIntegrationTest() {
     IntegrationVO integrationVO = new IntegrationVO();
-    Mockito.when(integrationService.getExportIntegration(Mockito.anyString(), Mockito.anyString()))
+    Mockito.when(integrationService.getExportIntegration(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(integrationVO);
     Assert.assertEquals(integrationVO,
-        integrationControllerImpl.findExportIntegration("5ce524fad31fc52540abae73", "csv"));
+        integrationControllerImpl.findExportIntegration("5ce524fad31fc52540abae73", 1L));
   }
 
   /**

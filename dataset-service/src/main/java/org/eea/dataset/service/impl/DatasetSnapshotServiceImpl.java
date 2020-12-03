@@ -41,6 +41,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -56,6 +57,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -188,6 +190,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The release mapper. */
   @Autowired
   private ReleaseMapper releaseMapper;
+
+  /** The reporting dataset service. */
+  @Autowired
+  private ReportingDatasetService reportingDatasetService;
 
   /** The user management controller zull. */
   @Autowired
@@ -1028,9 +1034,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Delete
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.DELETE_RECORDS.getValue(), datasetId));
-      // Update
+      // Update field
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_FIELD.getValue(), datasetId));
+      // Update records
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_RECORDS.getValue(), datasetId));
       // Delete dataset
       lockService.removeLockByCriteria(
           Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
@@ -1050,18 +1059,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         lockService.removeLockByCriteria(Arrays.asList(LockSignature.LOAD_TABLE.getValue(),
             datasetId, table.getIdTableSchema()));
       }
+      // Set the 'releasing' property to false in the dataset metabase
+      ReportingDatasetVO reportingVO = new ReportingDatasetVO();
+      reportingVO.setId(datasetId);
+      reportingVO.setReleasing(false);
+      reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
 
     }
     // Unlock the copy from DC to EU
     lockService.removeLockByCriteria(
         Arrays.asList(LockSignature.POPULATE_EU_DATASET.getValue(), dataflowId));
 
-    // Also, we have to update the representative 'releasing' property to false
-    if (!representatives.isEmpty()) {
-      RepresentativeVO representative = representatives.get(0);
-      representative.setReleasing(false);
-      representativeControllerZuul.updateRepresentative(representative);
-    }
     // Finally, unlock the release operation itself
     lockService.removeLockByCriteria(
         Arrays.asList(LockSignature.RELEASE_SNAPSHOTS.getValue(), dataflowId, dataProviderId));
@@ -1087,8 +1095,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       createlockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
       // Delete
       createlockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
-      // Update
+      // Update field
       createlockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
+      // Update record
+      createlockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
       // Delete dataset
       createlockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
 
@@ -1106,18 +1116,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       createlockWithSignature(LockSignature.LOAD_DATASET_DATA, mapCriteria, userName);
       // ETL Import
       createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
+
+      // Set the 'releasing' property to true in the dataset metabase
+      ReportingDatasetVO reportingVO = new ReportingDatasetVO();
+      reportingVO.setId(datasetId);
+      reportingVO.setReleasing(true);
+      reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
+
     }
     // Lock the operation to copy from the DC to the EU
     Map<String, Object> mapCriteriaCopyToEu = new HashMap<>();
     mapCriteriaCopyToEu.put("dataflowId", dataflowId);
     createlockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu, userName);
 
-    // Also, we have to update the representative 'releasing' property to true
-    if (!representatives.isEmpty()) {
-      RepresentativeVO representative = representatives.get(0);
-      representative.setReleasing(true);
-      representativeControllerZuul.updateRepresentative(representative);
-    }
   }
 
 

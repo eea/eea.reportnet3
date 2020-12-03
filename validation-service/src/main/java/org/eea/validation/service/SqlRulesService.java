@@ -1,8 +1,7 @@
 package org.eea.validation.service;
 
-import java.sql.SQLException;
-import java.util.List;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
@@ -20,13 +19,13 @@ public interface SqlRulesService {
    */
   void validateSQLRule(Long datasetId, String datasetSchemaId, Rule rule);
 
-
   /**
    * Validate SQL rule from datacollection.
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
+   * @return true, if successful
    */
   boolean validateSQLRuleFromDatacollection(Long datasetId, String datasetSchemaId, RuleVO ruleVO);
 
@@ -39,7 +38,6 @@ public interface SqlRulesService {
    */
   Rule getRule(Long datasetId, String ruleId);
 
-
   /**
    * Retrieve table data.
    *
@@ -48,22 +46,10 @@ public interface SqlRulesService {
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
-   * @throws SQLException the SQL exception
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws SQLException;
-
-
-  /**
-   * Retrive first result.
-   *
-   * @param query the query
-   * @param datasetId the dataset id
-   * @return the object
-   */
-  List<Object> retriveFirstResult(String query, Long datasetId);
-
-
+      throws EEAInvalidSQLException;
 
   /**
    * Validate SQL rules.
@@ -72,7 +58,4 @@ public interface SqlRulesService {
    * @param datasetSchemaId the dataset schema id
    */
   void validateSQLRules(Long datasetId, String datasetSchemaId);
-
-
-
 }

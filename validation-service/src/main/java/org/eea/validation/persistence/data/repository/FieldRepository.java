@@ -37,4 +37,15 @@ public interface FieldRepository
   @Query("select fv from FieldValue fv where fv.idFieldSchema = :idFieldSchema")
   List<FieldValue> findByIdFieldSchema(@Param("idFieldSchema") String idFieldSchema);
 
+
+  /**
+   * Find by ids.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Query("SELECT fv from FieldValue fv WHERE  fv.id in (:ids) ")
+  List<FieldValue> findByIds(@Param("ids") List<String> ids);
+
+
 }

@@ -9,15 +9,19 @@ import { DataFormFieldEditor } from './_components/DataFormFieldEditor';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const DataForm = ({
   addDialogVisible,
   colsSchema,
   datasetId,
+  datasetSchemaId,
   editDialogVisible,
   formType,
   getTooltipMessage,
   hasWritePermissions,
   onChangeForm,
+  onConditionalChange,
   onShowCoordinateError = () => {},
   records,
   reporting,
@@ -26,6 +30,7 @@ const DataForm = ({
   const resources = useContext(ResourcesContext);
 
   const [fieldsWithError, setFieldsWithError] = useState([]);
+  const [isConditionalChanged, setIsConditionalChanged] = useState(false);
   useEffect(() => {
     onShowCoordinateError(fieldsWithError.length);
   }, [fieldsWithError]);
@@ -44,9 +49,12 @@ const DataForm = ({
     setFieldsWithError(inmFieldsWithError);
   };
 
-  const allAttachments = () => {
-    const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
-    return notAttachment.length === 0;
+  const allAttachmentsOrComplexGeom = () => {
+    const notAttachmentOrComplexGeom = colsSchema.filter(
+      col =>
+        !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(col.type)
+    );
+    return notAttachmentOrComplexGeom.length === 0;
   };
 
   const editRecordForm = colsSchema.map((column, i) => {
@@ -57,10 +65,12 @@ const DataForm = ({
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <Fragment key={column.field}>
-              {column.type.toUpperCase() !== 'ATTACHMENT' && (
+              {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                column.type
+              ) && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
-                    column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                    TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                   }`}</label>
                   <Button
                     className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
@@ -75,19 +85,24 @@ const DataForm = ({
               <div
                 className="p-col-8"
                 style={{
-                  padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
-                  width:
-                    column.type === 'DATE' ||
-                    column.type === 'CODELIST' ||
-                    column.type === 'MULTISELECT_CODELIST' ||
-                    column.type === 'LINK'
-                      ? '30%'
-                      : ''
+                  padding: ![
+                    'ATTACHMENT',
+                    'POLYGON',
+                    'LINESTRING',
+                    'MULTIPOLYGON',
+                    'MULTILINESTRING',
+                    'MULTIPOINT'
+                  ].includes(column.type)
+                    ? '.5em'
+                    : '0',
+                  width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
                 }}>
                 <DataFormFieldEditor
                   autoFocus={i === 0}
                   column={column}
                   datasetId={datasetId}
+                  datasetSchemaId={datasetSchemaId}
+                  editing={true}
                   field={column.field}
                   fieldValue={
                     isNil(field.fieldData[column.field])
@@ -97,9 +112,23 @@ const DataForm = ({
                       : field.fieldData[column.field]
                   }
                   hasWritePermissions={hasWritePermissions}
+                  isConditional={
+                    colsSchema.filter(
+                      col =>
+                        !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === column.field
+                    ).length > 0
+                  }
+                  isConditionalChanged={isConditionalChanged}
                   isVisible={editDialogVisible}
-                  onChangeForm={onChangeForm}
+                  onChangeForm={(property, value, conditionalChanged = false) => {
+                    if (isConditionalChanged !== conditionalChanged) {
+                      setIsConditionalChanged(conditionalChanged);
+                    }
+                    onChangeForm(property, value);
+                  }}
                   onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
+                  onConditionalChange={onConditionalChange}
+                  records={records}
                   reporting={reporting}
                   type={column.type}
                 />
@@ -111,7 +140,7 @@ const DataForm = ({
     }
   });
 
-  const newRecordForm = !allAttachments() ? (
+  const newRecordForm = !allAttachmentsOrComplexGeom() ? (
     colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -119,10 +148,12 @@ const DataForm = ({
             const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
             return (
               <Fragment key={column.field}>
-                {column.type.toUpperCase() !== 'ATTACHMENT' && (
+                {!['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+                  column.type
+                ) && (
                   <div className="p-col-4" style={{ padding: '.75em' }}>
                     <label htmlFor={column.field}>{`${column.header}${
-                      column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                      TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                     }`}</label>
                     <Button
                       className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
@@ -139,22 +170,43 @@ const DataForm = ({
                 <div
                   className="p-col-8"
                   style={{
-                    padding: column.type.toUpperCase() !== 'ATTACHMENT' ? '.5em' : '0',
-                    width:
-                      column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
-                        ? '30%'
-                        : ''
+                    padding: ![
+                      'ATTACHMENT',
+                      'POLYGON',
+                      'LINESTRING',
+                      'MULTIPOLYGON',
+                      'MULTILINESTRING',
+                      'MULTIPOINT'
+                    ].includes(column.type)
+                      ? '.5em'
+                      : '0',
+                    width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
                   }}>
                   <DataFormFieldEditor
                     autoFocus={i === 0}
                     column={column}
                     datasetId={datasetId}
+                    datasetSchemaId={datasetSchemaId}
                     field={column.field}
                     fieldValue={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                     hasWritePermissions={hasWritePermissions}
+                    isConditional={
+                      colsSchema.filter(
+                        col =>
+                          !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === column.field
+                      ).length > 0
+                    }
+                    isConditionalChanged={isConditionalChanged}
                     isVisible={addDialogVisible}
-                    onChangeForm={onChangeForm}
+                    onChangeForm={(property, value, conditionalChanged = false) => {
+                      if (isConditionalChanged !== conditionalChanged) {
+                        setIsConditionalChanged(conditionalChanged);
+                      }
+                      onChangeForm(property, value);
+                    }}
                     onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
+                    onConditionalChange={onConditionalChange}
+                    records={records}
                     reporting={reporting}
                     type={column.type}
                   />
@@ -166,7 +218,7 @@ const DataForm = ({
       }
     })
   ) : (
-    <span className={styles.allAttachmentMessage}>{resources.messages['allAttachment']}</span>
+    <span className={styles.allAttachmentMessage}>{resources.messages['allAttachmentOrComplexGeom']}</span>
   );
 
   return formType === 'EDIT' ? editRecordForm : newRecordForm;

@@ -1,4 +1,6 @@
-import { isEmpty } from 'lodash';
+import first from 'lodash/first';
+import flattenDeep from 'lodash/flattenDeep';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const changeIncorrectCoordinates = record => {
@@ -33,8 +35,9 @@ const checkSRID = srid => {
 const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
   if (emptyIsValid && coordinates === '') return true;
   if (coordinates === '') return false;
+  if (isNil(coordinates)) return false;
   if (!Array.isArray(coordinates)) {
-    if (coordinates.indexOf(',') === -1) return false;
+    if (coordinates.toString().indexOf(',') === -1) return false;
   } else {
     if (isEmpty(coordinates)) return false;
   }
@@ -44,8 +47,9 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
     isValid = false;
   } else {
     splittedCoordinates.forEach(coordinate => {
-      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim()))
+      if (isNil(coordinate) || coordinate.toString().trim() === '' || isNaN(coordinate.toString().trim())) {
         isValid = false;
+      }
     });
   }
   return isValid;
@@ -64,11 +68,71 @@ const isValidJSON = value => {
 const checkValidJSONCoordinates = json => {
   if (isValidJSON(json)) {
     const parsedJSON = JSON.parse(json);
-    return checkValidCoordinates(parsedJSON.geometry.coordinates);
+    if (!isEmpty(parsedJSON.geometry.coordinates)) {
+      return checkValidCoordinates(parsedJSON.geometry.coordinates);
+    } else {
+      return false;
+    }
   } else {
     return false;
   }
 };
+
+const checkValidJSONMultipleCoordinates = json => {
+  if (isValidJSON(json)) {
+    const parsedJSON = JSON.parse(json);
+    if (!isEmpty(parsedJSON.geometry.coordinates)) {
+      switch (parsedJSON.geometry.type.toUpperCase()) {
+        case 'LINESTRING':
+        case 'MULTIPOINT':
+          return (
+            flattenDeep(parsedJSON.geometry.coordinates.map(coordinate => checkValidCoordinates(coordinate))).filter(
+              check => !check
+            ).length === 0
+          );
+        case 'MULTILINESTRING':
+        case 'POLYGON':
+          return (
+            flattenDeep(
+              parsedJSON.geometry.coordinates.map(
+                ring => !isNil(ring) && ring.map(coordinate => checkValidCoordinates(coordinate))
+              )
+            ).filter(check => !check).length === 0
+          );
+        case 'MULTIPOLYGON':
+          return (
+            flattenDeep(
+              parsedJSON.geometry.coordinates.map(polygon =>
+                polygon.map(ring => !isNil(ring) && ring.map(coordinate => checkValidCoordinates(coordinate)))
+              )
+            ).filter(check => !check).length === 0
+          );
+        default:
+          break;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+};
+
+const getFirstPointComplexGeometry = (json, geometryType) =>
+  !isNil(json)
+    ? first(
+        ['POLYGON', 'MULTILINESTRING'].includes(geometryType)
+          ? first(JSON.parse(json).geometry.coordinates)
+          : ['MULTIPOLYGON'].includes(geometryType)
+          ? first(first(JSON.parse(json).geometry.coordinates))
+          : JSON.parse(json).geometry.coordinates
+      )
+    : [55.6811608, 12.5844761];
+
+const getGeometryType = json =>
+  !isNil(json) && isValidJSON(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT';
+
+const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
@@ -110,13 +174,25 @@ const parseGeometryData = records => {
   return records;
 };
 
-const printCoordinates = (data, isGeoJson = true) => {
+const printCoordinates = (data, isGeoJson = true, geometryType) => {
   if (isGeoJson) {
+    let parsedJSON = data;
+    if (typeof parsedJSON === 'string') {
+      parsedJSON = JSON.parse(data);
+    }
+
+    switch (geometryType.toUpperCase()) {
+      case 'MULTIPOINT':
+      case 'LINESTRING':
+      case 'POLYGON':
+      case 'MULTILINESTRING':
+      case 'MULTIPOLYGON':
+        return JSON.stringify(parsedJSON.geometry.coordinates);
+      default:
+        break;
+    }
+
     if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
-      let parsedJSON = data;
-      if (typeof parsedJSON === 'string') {
-        parsedJSON = JSON.parse(data);
-      }
       return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
     } else {
       if (Array.isArray(data)) {
@@ -141,6 +217,10 @@ export const MapUtils = {
   changeIncorrectCoordinates,
   checkValidCoordinates,
   checkValidJSONCoordinates,
+  checkValidJSONMultipleCoordinates,
+  getFirstPointComplexGeometry,
+  getGeometryType,
+  getSrid,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,

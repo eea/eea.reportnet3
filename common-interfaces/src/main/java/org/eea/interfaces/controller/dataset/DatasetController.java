@@ -45,6 +45,8 @@ public interface DatasetController {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
+   * @param fieldSchemaId the field schema id
+   * @param fieldValue the field value
    * @return the data tables values
    */
   @GetMapping("TableValueDataset/{id}")
@@ -54,7 +56,9 @@ public interface DatasetController {
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
-      @RequestParam(value = "idRules", required = false) String[] idRules);
+      @RequestParam(value = "idRules", required = false) String[] idRules,
+      @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
+      @RequestParam(value = "fieldValue", required = false) String fieldValue);
 
   /**
    * Update dataset.
@@ -70,6 +74,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    * @param idTableSchema the id table schema
+   * @param replace the replace
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
@@ -81,6 +86,7 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param replace the replace
    */
   @PostMapping("{id}/loadDatasetData")
   void loadDatasetData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
@@ -149,9 +155,11 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param recordId the record id
+   * @param deleteCascadePK the delete cascade PK
    */
   @DeleteMapping("/{id}/record/{recordId}")
-  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId);
+  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
+      @RequestParam("deleteCascadePK") boolean deleteCascadePK);
 
   /**
    * Delete import table.
@@ -180,11 +188,11 @@ public interface DatasetController {
    * Export file through integration.
    *
    * @param datasetId the dataset id
-   * @param fileExtension the file extension
+   * @param integrationId the integration id
    */
   @GetMapping("/exportFileThroughIntegration")
   void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("fileExtension") String fileExtension);
+      @RequestParam("integrationId") Long integrationId);
 
   /**
    * Insert id data schema.
@@ -209,14 +217,18 @@ public interface DatasetController {
    * Gets the field values referenced.
    *
    * @param datasetIdOrigin the dataset id origin
-   * @param idFieldSchema the id field schema
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @param conditionalValue the conditional value
    * @param searchValue the search value
    * @return the field values referenced
    */
-  @GetMapping("/{id}/getFieldsValuesReferenced")
+  @GetMapping("/{id}/datasetSchemaId/{datasetSchemaId}/fieldSchemaId/{fieldSchemaId}/getFieldsValuesReferenced")
   List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
-      @RequestParam("idFieldSchema") String idFieldSchema,
-      @RequestParam("searchValue") String searchValue);
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("fieldSchemaId") String fieldSchemaId,
+      @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
+      @RequestParam(value = "searchValue", required = false) String searchValue);
 
   /**
    * Gets the referenced dataset id.

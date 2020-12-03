@@ -124,6 +124,10 @@ public final class EEAErrorMessage {
   /** The Constant FIELD_NOT_FOUND: {@value}. */
   public static final String FIELD_NOT_FOUND = "Field not found";
 
+  /** The Constant FIELD_NAME_DUPLICATED: {@value}. */
+  public static final String FIELD_NAME_DUPLICATED =
+      "Field name %s duplicated in the row %s, in the datasetSchema %s";
+
   /** The Constant FIELD_SCHEMA_ID_NOT_FOUND: {@value}. */
   public static final String FIELD_SCHEMA_ID_NOT_FOUND = "fieldSchemaId not found";
 
@@ -297,6 +301,9 @@ public final class EEAErrorMessage {
 
   /** The Constant MESSAGING_BAD_REQUEST: {@value}. */
   public static final String MESSAGING_BAD_REQUEST = "Missing required data";
+
+  /** The Constant DUPLICATED_NAME_INTEGRATION: {@value}. */
+  public static final String DUPLICATED_INTEGRATION_NAME = "Duplicated integration name";
 
   /**
    * Instantiates a new EEA error message.

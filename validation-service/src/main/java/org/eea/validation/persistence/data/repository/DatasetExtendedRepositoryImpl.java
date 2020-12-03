@@ -11,17 +11,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,18 +32,26 @@ import org.slf4j.LoggerFactory;
  */
 public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetExtendedRepositoryImpl.class);
-
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant RECORD_ID: {@value}. */
+  private static final String RECORD_ID = "record_id";
 
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
-
-
+  /**
+   * Gets the table id.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the table id
+   */
   @Override
   public Long getTableId(String idTableSchema, Long datasetId) {
     String stringQuery = "select id from dataset_" + datasetId
@@ -51,78 +61,29 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     return result.longValue();
   }
 
-
-
   /**
    * Query RS execution.
    *
    * @param query the query
+   * @param entityTypeEnum the entity type enum
+   * @param entityName the entity name
+   * @param datasetId the dataset id
+   * @param idTable the id table
    * @return the table value
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   @Override
   @Transactional
   public TableValue queryRSExecution(String query, EntityTypeEnum entityTypeEnum, String entityName,
-      Long datasetId, Long idTable) throws SQLException {
-    Session session = (Session) entityManager.getDelegate();
-    return session.doReturningWork(new ReturningWork<TableValue>() {
-      @Override
-      public TableValue execute(Connection conn) throws SQLException {
-        conn.setSchema("dataset_" + datasetId);
-        TableValue tableValue;
-        try (PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery()) {
-          LOG.info("Query executed: {}", query);
-          tableValue = new TableValue();
-          List<RecordValue> records = new ArrayList<>();
-
-          while (rs.next()) {
-            RecordValue record = new RecordValue();
-            tableValue.setId(idTable);
-            List<FieldValue> fields = new ArrayList<>();
-            switch (entityTypeEnum) {
-              case RECORD:
-                record.setId(rs.getString("record_id"));
-                record.setFields(fields);
-                records.add(record);
-                tableValue.setRecords(records);
-                break;
-              case FIELD:
-                record.setId(rs.getString("record_id"));
-                FieldValue field = new FieldValue();
-                field.setId(rs.getString(entityName + "_id"));
-                fields.add(field);
-                record.setFields(fields);
-                records.add(record);
-                tableValue.setRecords(records);
-                break;
-              case TABLE:
-                break;
-              case DATASET:
-                break;
-            }
-          }
-        } catch (PSQLException | RuntimeException e) {
-          LOG.info("SQL can't be executed: {}", e.getMessage(), e);
-          tableValue = null;
-        }
-        return tableValue;
-      }
-    });
+      Long datasetId, Long idTable) throws EEAInvalidSQLException {
+    try {
+      Session session = (Session) entityManager.getDelegate();
+      return session.doReturningWork(
+          conn -> executeQuery(conn, entityName, query, entityTypeEnum, datasetId, idTable));
+    } catch (HibernateException e) {
+      throw new EEAInvalidSQLException("SQL can't be executed: " + query, e);
+    }
   }
-
-
-  /**
-   * Query unique result execution.
-   *
-   * @param stringQuery the string query
-   * @return the list
-   */
-  @Override
-  public List<Object> queryUniqueResultExecution(String stringQuery) {
-    Query query = entityManager.createNativeQuery(stringQuery.toLowerCase());
-    return query.getResultList();
-  }
-
 
   /**
    * Query record validation execution.
@@ -209,11 +170,10 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString(12)));
             validation.setValidationDate(rs.getString(13));
 
-
             FieldValue field = new FieldValue();
             field.setId(rs.getString(3));
             field.setIdFieldSchema(rs.getString(14));
-            field.setType(rs.getString(16));
+            field.setType(DataType.fromValue(rs.getString(16)));
             field.setValue(rs.getString(17));
 
             RecordValue record = new RecordValue();
@@ -232,6 +192,58 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     });
   }
 
-
-
+  /**
+   * Execute query.
+   *
+   * @param conn the conn
+   * @param entityName the entity name
+   * @param query the query
+   * @param entityTypeEnum the entity type enum
+   * @param datasetId the dataset id
+   * @param idTable the id table
+   * @return the table value
+   * @throws SQLException the SQL exception
+   */
+  private TableValue executeQuery(Connection conn, String entityName, String query,
+      EntityTypeEnum entityTypeEnum, Long datasetId, Long idTable) throws SQLException {
+    conn.setSchema("dataset_" + datasetId);
+    TableValue tableValue;
+    try (PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery()) {
+      LOG.info("Query executed: {}", query);
+      tableValue = new TableValue();
+      List<RecordValue> records = new ArrayList<>();
+      boolean continueLoop = true;
+      while (rs.next() && continueLoop) {
+        RecordValue record = new RecordValue();
+        tableValue.setId(idTable);
+        List<FieldValue> fields = new ArrayList<>();
+        switch (entityTypeEnum) {
+          case RECORD:
+            record.setId(rs.getString(RECORD_ID));
+            record.setFields(fields);
+            records.add(record);
+            tableValue.setRecords(records);
+            break;
+          case FIELD:
+            record.setId(rs.getString(RECORD_ID));
+            FieldValue field = new FieldValue();
+            field.setId(rs.getString(entityName + "_id"));
+            fields.add(field);
+            record.setFields(fields);
+            records.add(record);
+            tableValue.setRecords(records);
+            break;
+          case TABLE:
+            continueLoop = false;
+            records.add(record);
+            tableValue.setRecords(records);
+            break;
+          case DATASET:
+            break;
+        }
+      }
+    }
+    return tableValue;
+  }
 }

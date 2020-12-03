@@ -7,7 +7,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './TabsValidations.module.scss';
+import styles from './ValidationsList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -29,8 +29,9 @@ import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-const TabsValidations = withRouter(
+const ValidationsList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
@@ -55,10 +56,11 @@ const TabsValidations = withRouter(
     }, [tabsValidationsState.isDataUpdated]);
 
     useEffect(() => {
-      const response = notificationContext.hidden.find(notification => notification.key === 'VALIDATED_QC_RULE_EVENT');
-
-      if (response) onUpdateData();
-    }, [notificationContext]);
+      if (validationContext.isAutomaticRuleUpdated) {
+        onUpdateData();
+        validationContext.onAutomaticRuleIsUpdated(false);
+      }
+    }, [validationContext.isAutomaticRuleUpdated]);
 
     const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
@@ -130,9 +132,15 @@ const TabsValidations = withRouter(
 
     const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-    const onUpdateData = () => isDataUpdated(!tabsValidationsState.isDataUpdated);
+    const onUpdateData = () => {
+      isDataUpdated(!tabsValidationsState.isDataUpdated);
+    };
 
-    useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
+    useCheckNotifications(
+      ['INVALIDATED_QC_RULE_EVENT', 'VALIDATED_QC_RULE_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+      onUpdateData,
+      true
+    );
 
     const automaticTemplate = rowData => (
       <div className={styles.checkedValueColumn}>
@@ -169,19 +177,19 @@ const TabsValidations = withRouter(
       const additionalInfo = {};
       datasetSchemaAllTables.forEach(table => {
         if (!isUndefined(table.records)) {
-          if (entityType.toUpperCase() === 'TABLE') {
+          if (TextUtils.areEquals(entityType, 'TABLE')) {
             if (table.tableSchemaId === referenceId) {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             }
-          } else if (entityType.toUpperCase() === 'RECORD') {
+          } else if (TextUtils.areEquals(entityType, 'RECORD')) {
             if (table.recordSchemaId === referenceId) {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             }
-          } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'TABLE') {
+          } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
             table.records.forEach(record =>
               record.fields.forEach(field => {
                 if (!isNil(field)) {
-                  if (entityType.toUpperCase() === 'FIELD') {
+                  if (TextUtils.areEquals(entityType, 'FIELD')) {
                     if (field.fieldId === referenceId) {
                       additionalInfo.tableName = !isUndefined(table.tableSchemaName)
                         ? table.tableSchemaName
@@ -437,4 +445,4 @@ const TabsValidations = withRouter(
   }
 );
 
-export { TabsValidations };
+export { ValidationsList };

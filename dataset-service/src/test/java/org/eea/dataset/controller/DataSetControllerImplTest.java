@@ -326,7 +326,8 @@ public class DataSetControllerImplTest {
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, errorfilter, null);
+    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, errorfilter, null,
+        null, null);
   }
 
   /**
@@ -340,7 +341,8 @@ public class DataSetControllerImplTest {
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter, null);
+    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter, null, null,
+        null);
   }
 
   /**
@@ -352,8 +354,8 @@ public class DataSetControllerImplTest {
   public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
         .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null);
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null, null);
   }
 
   /**
@@ -364,8 +366,9 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry4() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null, null);
   }
 
   /**
@@ -373,13 +376,15 @@ public class DataSetControllerImplTest {
    *
    * @throws Exception the exception
    */
-  // @Test
+  @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new TableVO(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(new TableVO());
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null);
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null,
+        null);
   }
 
   /**
@@ -390,15 +395,17 @@ public class DataSetControllerImplTest {
   @Test
   public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new TableVO());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(new TableVO());
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null);
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null,
+        null);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -694,9 +701,11 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testdeleteRecordSuccess() throws Exception {
-    doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.deleteRecord(1L, recordId);
-    Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
+    doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
+    dataSetControllerImpl.deleteRecord(1L, recordId, false);
+    Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
   }
 
   /**
@@ -712,7 +721,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
 
-      dataSetControllerImpl.deleteRecord(1L, recordId);
+      dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -727,7 +736,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      dataSetControllerImpl.deleteRecord(1L, recordId);
+      dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
           datasetService.findRecordSchemaIdById(1L, recordId)), e.getReason());
@@ -743,8 +752,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.deleteRecord(1L, recordId);
+        Mockito.any(), Mockito.anyBoolean());
+    dataSetControllerImpl.deleteRecord(1L, recordId, false);
   }
 
   /**
@@ -837,10 +846,10 @@ public class DataSetControllerImplTest {
   public void getFieldValuesReferencedTest() {
     List<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
-    Mockito
-        .when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(fields);
-    assertEquals("error", fields, dataSetControllerImpl.getFieldValuesReferenced(1L, "", ""));
+    Mockito.when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(fields);
+    assertEquals("error", fields,
+        dataSetControllerImpl.getFieldValuesReferenced(1L, "", "", "", ""));
   }
 
   /**
@@ -1213,7 +1222,7 @@ public class DataSetControllerImplTest {
   public void exportFileThroughIntegrationTest() throws EEAException {
     Mockito.doNothing().when(datasetService).exportFileThroughIntegration(Mockito.anyLong(),
         Mockito.any());
-    dataSetControllerImpl.exportFileThroughIntegration(1L, "csv");
+    dataSetControllerImpl.exportFileThroughIntegration(1L, 1L);
     Mockito.verify(datasetService, times(1)).exportFileThroughIntegration(Mockito.anyLong(),
         Mockito.any());
   }
@@ -1223,7 +1232,7 @@ public class DataSetControllerImplTest {
     Mockito.doThrow(EEAException.class).when(datasetService)
         .exportFileThroughIntegration(Mockito.anyLong(), Mockito.any());
     try {
-      dataSetControllerImpl.exportFileThroughIntegration(1L, "csv");
+      dataSetControllerImpl.exportFileThroughIntegration(1L, 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;

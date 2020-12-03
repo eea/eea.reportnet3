@@ -2,6 +2,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
   const result = [];
   for (let i = 0; i < array1.length; i++) {
@@ -11,7 +13,7 @@ const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') =
         element =>
           !isNil(element[array2Key]) &&
           !isNil(array1[i][array1Key]) &&
-          element[array2Key].toUpperCase() === array1[i][array1Key].toUpperCase()
+          TextUtils.areEquals(element[array2Key], array1[i][array1Key])
       )
     });
   }
@@ -42,14 +44,14 @@ const parseNewRecord = (columnsSchema, data) => {
 };
 
 const parseNewTableRecord = (table, pamNumber) => {
-  if (!isNil(table.records) && !isEmpty(table.records)) {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
 
     if (!isUndefined(table)) {
       fields = table.records[0].fields.map(field => {
         return {
           fieldData: {
-            [field.fieldSchema || field.fieldId]: field.name.toUpperCase() === 'FK_PAMS' ? pamNumber : null,
+            [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field.name, 'FK_PAMS') ? pamNumber : null,
             type: field.type,
             fieldSchemaId: field.fieldSchema || field.fieldId
           }
@@ -84,10 +86,20 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
           isDisabled: isNil(element.fieldSchema),
           maxSize: element.maxSize,
           name: element.name,
+          pk: element.pk,
+          pkHasMultipleValues: element.pkHasMultipleValues,
+          pkMustBeUsed: element.pkMustBeUsed,
+          pkReferenced: element.pkReferenced,
           recordId: record.recordId,
+          referencedField: element.referencedField,
           required: element.required,
           type: element.type,
           validExtensions: element.validExtensions
+        });
+      } else if (element.type === 'BLOCK') {
+        result.push({
+          ...element,
+          elementsRecords: onParseWebformRecords(records, { elements: element.elements }, tableData, totalRecords)
         });
       } else {
         if (tableData[element.tableSchemaId]) {
@@ -128,29 +140,39 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
 
       const result = [];
       for (let index = 0; index < elements.length; index++) {
-        if (elements[index].type === 'FIELD') {
+        if (TextUtils.areEquals(elements[index].type, 'FIELD')) {
           result.push({
             ...elements[index],
-            ...records[0].fields.find(
-              element =>
-                !isNil(element['name']) &&
-                !isNil(elements[index]['name']) &&
-                element['name'].toUpperCase() === elements[index]['name'].toUpperCase()
-            ),
+            ...records[0].fields.find(element => TextUtils.areEquals(element['name'], elements[index]['name'])),
             type: elements[index].type
           });
-        } else if (elements[index].type === 'TABLE') {
-          const filteredTable = datasetSchema.tables.filter(
-            table =>
-              !isNil(table.tableSchemaName) &&
-              !isNil(elements[index].name) &&
-              table.tableSchemaName.toUpperCase() === elements[index].name.toUpperCase()
+        }
+
+        if (elements[index].type === 'TABLE') {
+          const filteredTable = datasetSchema.tables.filter(table =>
+            TextUtils.areEquals(table.tableSchemaName, elements[index].name)
           );
           const parsedTable = onParseWebformData(datasetSchema, [elements[index]], filteredTable);
 
           result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
-        } else if (elements[index].type === 'LABEL') {
+        }
+
+        if (TextUtils.areEquals(elements[index].type, 'LABEL')) {
           result.push({ ...elements[index] });
+        }
+
+        if (TextUtils.areEquals(elements[index].type, 'BLOCK')) {
+          const blockedElements = [];
+
+          for (const field of elements[index].elements) {
+            blockedElements.push({
+              ...field,
+              ...records[0].fields.find(element => TextUtils.areEquals(element['name'], field['name'])),
+              type: field.type
+            });
+          }
+
+          result.push({ ...elements[index], elements: blockedElements, records, type: elements[index].type });
         }
       }
 

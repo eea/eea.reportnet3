@@ -176,7 +176,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
@@ -212,7 +212,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR')")
   public DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(
       @PathVariable("datasetId") Long datasetId) {
     try {
@@ -432,6 +432,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
+
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
@@ -464,8 +465,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       recordStoreControllerZuul.createUpdateQueryView(datasetId);
       return (response);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
-          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -520,8 +520,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Create query view
       recordStoreControllerZuul.createUpdateQueryView(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -701,7 +700,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the unique constraints
    */
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<UniqueConstraintVO> getUniqueConstraints(
@@ -851,7 +850,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the simple schema
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,

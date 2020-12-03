@@ -14,7 +14,6 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
-import { Article15 } from 'ui/views/Webforms/Article15';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -22,7 +21,6 @@ import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
@@ -31,7 +29,7 @@ import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
-import { TabsValidations } from 'ui/views/_components/TabsValidations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
@@ -64,6 +62,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [dataset, setDataset] = useState({});
   const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -91,7 +90,6 @@ export const Dataset = withRouter(({ match, history }) => {
     import: [],
     importOtherSystems: []
   });
-  const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
@@ -139,13 +137,17 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [tableSchema]);
 
   useEffect(() => {
-    if (!isUndefined(userContext.contextRoles)) {
-      setHasWritePermissions(
-        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
-          userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
-      );
+    if (!isNil(dataset) && dataset.isReleasing) {
+      setHasWritePermissions(!dataset.isReleasing);
+    } else {
+      if (!isUndefined(userContext.contextRoles)) {
+        setHasWritePermissions(
+          userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
+            userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
+        );
+      }
     }
-  }, [userContext]);
+  }, [userContext, dataset]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -158,12 +160,12 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [userContext, isDataLoaded, tableSchemaColumns]);
 
   useEffect(() => {
-    if (isEmpty(externalExportExtensions)) {
+    if (isEmpty(externalOperationsList.export)) {
       setExportButtonsList(internalExtensions);
     } else {
-      setExportButtonsList(internalExtensions.concat(externalExtensions));
+      setExportButtonsList(internalExtensions.concat(externalIntegrationsNames));
     }
-  }, [datasetName, externalExportExtensions]);
+  }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
     if (isEmpty(externalOperationsList.import)) {
@@ -202,31 +204,36 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
-    getExportExtensions(externalOperationsList.export);
+    getExportIntegrationsNames(externalOperationsList.export);
   }, [externalOperationsList]);
 
   useEffect(() => {
     if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
-  }, [dataViewerOptions.tableSchemaId]);
+  }, [dataViewerOptions.tableSchemaId, isTableView]);
 
   const changeUrl = () => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${dataViewerOptions.tableSchemaId !== '' ? dataViewerOptions.tableSchemaId : tableSchema[0].id}`
+      `?tab=${
+        dataViewerOptions.tableSchemaId !== ''
+          ? dataViewerOptions.tableSchemaId
+          : !isEmpty(tableSchema)
+          ? tableSchema[0].id
+          : ''
+      }${!isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''}`
     );
   };
 
-  const parseUniqExportExtensions = exportExtensionsOperationsList => {
-    return exportExtensionsOperationsList.map(uniqExportExtension => ({
-      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
-      code: uniqExportExtension.toLowerCase()
+  const parseExportIntegrationsNames = exportNamesOperationsList => {
+    return exportNamesOperationsList.map(exportNameOperation => ({
+      text: `${exportNameOperation.toUpperCase()} (.${exportNameOperation.toLowerCase()})`,
+      code: exportNameOperation.toLowerCase()
     }));
   };
 
-  const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
+  const getExportIntegrationsNames = exportOperationsList => {
+    parseExportIntegrationsNames(exportOperationsList.map(element => element.name));
   };
 
   const importFromFile = [
@@ -257,13 +264,13 @@ export const Dataset = withRouter(({ match, history }) => {
     command: () => onExportDataInternalExtension(type.code)
   }));
 
-  const externalExtensions = [
+  const externalIntegrationsNames = [
     {
-      label: resources.messages['externalExtensions'],
-      items: externalExportExtensions.map(type => ({
-        label: type.text,
+      label: resources.messages['customExports'],
+      items: externalOperationsList.export.map(type => ({
+        label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
         icon: config.icons['archive'],
-        command: () => onExportDataExternalExtension(type.code)
+        command: () => onExportDataExternalIntegration(type.id)
       }))
     }
   ];
@@ -448,13 +455,13 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileExtension => {
+  const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({
       type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
     });
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
     }
@@ -477,6 +484,8 @@ export const Dataset = withRouter(({ match, history }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       const dataset = dataflow.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       setIsDatasetReleased(dataset[0].isReleased);
+
+      setDataset(dataset[0]);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -491,13 +500,18 @@ export const Dataset = withRouter(({ match, history }) => {
           datasetName
         }
       });
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setIsLoading(false);
     }
   };
+
+  useCheckNotifications(
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    onLoadDataflow
+  );
 
   const getDataSchema = async () => {
     try {
@@ -506,7 +520,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
-      setIsTableView(isNil(datasetSchema.webform));
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -660,7 +674,9 @@ export const Dataset = withRouter(({ match, history }) => {
     });
 
   const datasetInsideTitle = () => {
-    if (!isEmpty(datasetFeedbackStatus)) {
+    if (dataset.isReleasing) {
+      return `${resources.messages['isReleasing']} `;
+    } else if (!isEmpty(datasetFeedbackStatus)) {
       return `${datasetFeedbackStatus} `;
     } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
       return `${resources.messages['released'].toString()}`;
@@ -744,7 +760,7 @@ export const Dataset = withRouter(({ match, history }) => {
     hasWritePermissions && (
       // <div className={styles.switch}>
       //   <div className={`${styles.wrap}`}>
-      //     <span className={styles.text}>{resources.messages['tabularData']}</span>
+      //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
       //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
       //     <span className={styles.text}>{resources.messages['webform']}</span>
       //   </div>
@@ -753,7 +769,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             className={styles.tabularSwitch}
-            elements={[resources.messages['tabularData'], resources.messages['webform']]}
+            elements={[resources.messages['tabularDataView'], resources.messages['webform']]}
             onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
             value={resources.messages['webform']}
           />
@@ -827,6 +843,7 @@ export const Dataset = withRouter(({ match, history }) => {
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
+              className={styles.exportSubmenu}
               model={exportButtonsList}
               popup={true}
               ref={exportMenuRef}
@@ -980,7 +997,7 @@ export const Dataset = withRouter(({ match, history }) => {
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
           style={{ width: '90%' }}
           visible={validationListDialogVisible}>
-          <TabsValidations
+          <ValidationsList
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}

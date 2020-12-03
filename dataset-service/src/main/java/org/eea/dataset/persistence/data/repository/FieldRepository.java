@@ -4,6 +4,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,6 +33,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @return the list
    */
   List<FieldValue> findByIdFieldSchema(String idFieldSchema);
+
+  /**
+   * Find by id field schema in.
+   *
+   * @param fieldSchemaIds the field schema ids
+   * @return the list
+   */
+  List<FieldValue> findByIdFieldSchemaIn(List<String> fieldSchemaIds);
 
   /**
    * Find by record.
@@ -92,19 +101,6 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
 
 
   /**
-   * Find by id field schema and value containing.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param searchValueText the search value text
-   * @param pageable the pageable
-   * @return the list
-   */
-  List<FieldValue> findByIdFieldSchemaAndValueContaining(
-      @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
-      Pageable pageable);
-
-
-  /**
    * Find by id.
    *
    * @param fieldId the field id
@@ -122,5 +118,29 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   @Query(nativeQuery = true,
       value = "update field_value set value = '' where id_field_schema = :fieldSchemaId")
   void clearFieldValue(@Param("fieldSchemaId") String fieldSchemaId);
+
+
+
+  /**
+   * Find by id field schema and conditional with tag.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param labelId the label id
+   * @param conditionalId the conditional id
+   * @param conditionalValue the conditional value
+   * @param searchValueText the search value text
+   * @param pageable the pageable
+   * @return the list
+   */
+  @Query(
+      value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
+          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
+          + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
+          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
+  List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(
+      @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
+      @Param("conditionalId") String conditionalId,
+      @Param("conditionalValue") String conditionalValue,
+      @Param("searchText") String searchValueText, Pageable pageable);
 
 }

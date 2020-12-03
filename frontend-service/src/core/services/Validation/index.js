@@ -1,6 +1,6 @@
 import { Create } from './Create';
-import { CreateDatasetRule } from './CreateDatasetRule';
 import { CreateRowRule } from './CreateRowRule';
+import { CreateTableRule } from './CreateTableRule';
 import { Delete } from './Delete';
 import { GetAll } from './GetAll';
 import { Update } from './Update';
@@ -11,8 +11,8 @@ import { validationRepository } from 'core/domain/model/Validation/ValidationRep
 
 export const ValidationService = {
   create: Create({ validationRepository }),
-  createDatasetRule: CreateDatasetRule({ validationRepository }),
   createRowRule: CreateRowRule({ validationRepository }),
+  createTableRule: CreateTableRule({ validationRepository }),
   deleteById: Delete({ validationRepository }),
   getAll: GetAll({ validationRepository }),
   update: Update({ validationRepository }),

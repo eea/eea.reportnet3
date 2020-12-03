@@ -1,3 +1,5 @@
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const fieldDesignerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'CANCEL_SELECT_ATTACHMENT':
@@ -15,6 +17,15 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         ...state,
         isLinkSelectorVisible: false
       };
+    case 'RESET_FIELD':
+      return {
+        ...state,
+        codelistItems: [],
+        fieldLinkValue: null,
+        fieldPkMustBeUsed: false,
+        fieldPkHasMultipleValues: false,
+        fieldFileProperties: { validExtensions: [], maxSize: 0 }
+      };
     case 'RESET_NEW_FIELD':
       return {
         ...state,
@@ -31,6 +42,11 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldPKValue: false,
         fieldFileProperties: { validExtensions: [], maxSize: 0 }
       };
+    case 'SET_ADD_FIELD_SENT':
+      return {
+        ...state,
+        addFieldCallSent: payload
+      };
     case 'SET_ATTACHMENT_PROPERTIES':
       return { ...state, fieldFileProperties: { validExtensions: payload.validExtensions, maxSize: payload.maxSize } };
     case 'SET_CODELIST_ITEMS':
@@ -44,11 +60,12 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_NAME':
       return { ...state, fieldValue: payload };
     case 'SET_LINK':
-      return { ...state, fieldLinkValue: payload };
-    case 'SET_PK_MUST_BE_USED':
-      return { ...state, fieldPkMustBeUsed: payload };
-    case 'SET_PK_HAS_MULTIPLE_VALUES':
-      return { ...state, fieldPkHasMultipleValues: payload };
+      return {
+        ...state,
+        fieldLinkValue: payload.link,
+        fieldPkMustBeUsed: payload.pkMustBeUsed,
+        fieldPkHasMultipleValues: payload.pkHasMultipleValues
+      };
     case 'SET_PK':
       return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
     case 'SET_PK_REFERENCED':
@@ -64,11 +81,11 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         ...state,
         fieldTypeValue: payload.type,
         codelistItems:
-          payload.type.fieldType.toUpperCase() !== 'MULTISELECT_CODELIST' &&
-          payload.type.fieldType.toUpperCase() !== 'CODELIST'
+          !TextUtils.areEquals(payload.type.fieldType, 'MULTISELECT_CODELIST') &&
+          !TextUtils.areEquals(payload.type.fieldType, 'CODELIST')
             ? []
             : state.codelistItems,
-        validExtensions: payload.type.fieldType.toUpperCase() !== 'ATTACHMENT' ? [] : state.validExtensions,
+        validExtensions: !TextUtils.areEquals(payload.type.fieldType, 'ATTACHMENT') ? [] : state.validExtensions,
         fieldPreviousTypeValue: payload.previousType
       };
     case 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE':

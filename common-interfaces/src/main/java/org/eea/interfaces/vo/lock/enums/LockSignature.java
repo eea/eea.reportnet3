@@ -63,6 +63,9 @@ public enum LockSignature {
   /** The insert records. */
   INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)"),
 
+  /** The update records. */
+  UPDATE_RECORDS("DataSetControllerImpl.updateRecords(..)"),
+
   /** The update field. */
   UPDATE_FIELD("DataSetControllerImpl.updateField(..)"),
 

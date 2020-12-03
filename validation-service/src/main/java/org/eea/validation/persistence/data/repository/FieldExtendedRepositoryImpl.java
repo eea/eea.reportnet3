@@ -42,4 +42,20 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     return query.getResultList();
   }
 
+
+  /**
+   * Query pk execution.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  @Override
+  public List<Object[]> queryPKExecution(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    return query.getResultList();
+
+  }
+
+
+
 }

@@ -295,13 +295,10 @@ const FieldValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       await ValidationService.update(datasetId, candidateRule);
+      if (!isNil(candidateRule) && candidateRule.automatic) {
+        validationContext.onAutomaticRuleIsUpdated(true);
+      }
       onHide();
-
-      
-      if (!isNil(candidateRule) && candidateRule.automatic)
-        notificationContext.hide({
-          type: 'VALIDATED_QC_RULE_EVENT'
-        });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'

@@ -8,6 +8,7 @@ import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
 import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.persistence.repository.OperationParametersRepository;
 import org.eea.exception.EEAErrorMessage;
@@ -93,6 +94,39 @@ public class FMEIntegrationManager extends AbstractCrudManager {
   }
 
   /**
+   * Checkname.
+   *
+   * @param integration the integration
+   * @param integrationVO the integration VO
+   * @throws EEAException
+   */
+  private void checkName(Integration integration, IntegrationVO integrationVO) throws EEAException {
+    List<Integration> existingIntegrations =
+        integrationRepository.findByInternalOperationParameter(IntegrationParams.DATAFLOW_ID,
+            integrationVO.getInternalParameters().get(IntegrationParams.DATAFLOW_ID));
+    String integrationSchemaId =
+        integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
+    for (Integration integrationAux : existingIntegrations) {
+      List<InternalOperationParameters> internalParameterAux =
+          integrationAux.getInternalParameters();
+      for (InternalOperationParameters internalParameter : internalParameterAux) {
+        if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
+            && internalParameter.getValue().equals(integrationSchemaId)) {
+          if (integrationAux.getName().trim().equalsIgnoreCase(integration.getName().trim())) {
+            LOG_ERROR.error(
+                "Error creating an integration: Integration {} with name {} is duplicated in Dataflow: {}",
+                integration.getId(), integration.getName(), integration.getDataflow());
+            throw new EEAException(
+                String.format("Integration %s with name %s is duplicated in Dataflow: %s",
+                    integration.getId(), integration.getName(), integration.getDataflow()));
+          }
+        }
+      }
+    }
+
+  }
+
+  /**
    * Update.
    *
    * @param integrationVO the integration VO
@@ -125,7 +159,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     operationParametersRepository.deleteByIntegration(integration);
     integration = integrationMapper.classToEntity(integrationVO);
-
+    checkName(integration, integrationVO);
     integrationRepository.save(integration);
     LOG.info("Integration updated: {}", integrationVO);
   }
@@ -136,7 +170,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * @param integrationVO the integration VO
    */
   @Override
-  public void create(IntegrationVO integrationVO) {
+  public void create(IntegrationVO integrationVO) throws EEAException {
 
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
@@ -150,6 +184,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     }
 
     Integration integration = integrationMapper.classToEntity(integrationVO);
+
+    checkName(integration, integrationVO);
+
     integrationRepository.save(integration);
     LOG.info("Integration created: {}", integrationVO);
   }

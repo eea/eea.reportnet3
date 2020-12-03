@@ -22,10 +22,12 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
+  datasetSchemaId,
   datasetSchemas,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
@@ -82,12 +84,8 @@ export const FieldsDesigner = ({
   useEffect(() => {
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
-        fields.filter(
-          field =>
-            field.type.toUpperCase() === 'CODELIST' ||
-            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK' ||
-            field.type.toUpperCase() === 'ATTACHMENT'
+        fields.filter(field =>
+          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
         ).length > 0
       );
     }
@@ -97,17 +95,11 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          (field.type.toUpperCase() === 'CODELIST' ||
-            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK' ||
-            field.type.toUpperCase() === 'ATTACHMENT') &&
+          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase()) &&
           field.fieldId !== fieldId
         );
       }).length > 0 ||
-        selectedField.fieldType.toUpperCase() === 'CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'LINK' ||
-        selectedField.fieldType.toUpperCase() === 'ATTACHMENT'
+        ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(selectedField.fieldType.toUpperCase())
     );
   };
 
@@ -144,7 +136,7 @@ export const FieldsDesigner = ({
       type,
       validExtensions
     });
-    onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
+    onChangeFields(inmFields, TextUtils.areEquals(type, 'LINK'), table.tableSchemaId);
     setFields(inmFields);
     // window.scrollTo(0, document.body.scrollHeight);
   };
@@ -257,7 +249,7 @@ export const FieldsDesigner = ({
       if (fieldDeleted) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, deletedFieldType.toUpperCase() === 'LINK', table.tableSchemaId);
+        onChangeFields(inmFields, TextUtils.areEquals(deletedFieldType, 'LINK'), table.tableSchemaId);
         setFields(inmFields);
       } else {
         console.error('Error during field delete');
@@ -285,22 +277,36 @@ export const FieldsDesigner = ({
       return referencedField;
     }
     const link = {};
-    datasetSchemas.forEach(schema =>
-      schema.tables.forEach(table => {
-        if (!table.addTab) {
-          table.records.forEach(record =>
-            record.fields.forEach(field => {
-              if (!isNil(field) && field.fieldId === referencedField.idPk) {
-                link.name = `${table.tableSchemaName} - ${field.name}`;
-                link.value = `${table.tableSchemaName} - ${field.fieldId}`;
-                link.disabled = false;
-              }
-            })
-          );
+    let tableSchema = '';
+    
+    if (!isNil(datasetSchemas)) {
+      datasetSchemas.forEach(schema => {
+        if (!isNil(schema.tables)) {
+          schema.tables.forEach(table => {
+            if (!table.addTab && !isNil(table.records)) {
+              table.records.forEach(record => {
+                if (!isNil(record.fields)) {
+                  record.fields.forEach(field => {
+                    if (!isNil(field) && field.fieldId === referencedField.idPk) {
+                      link.name = `${table.tableSchemaName} - ${field.name}`;
+                      link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+                      link.disabled = false;
+                      tableSchema = table.tableSchemaId;
+                    }
+                  })
+                }
+              })
+            }
+          })
         }
       })
-    );
-    link.referencedField = { fieldSchemaId: referencedField.idPk, datasetSchemaId: referencedField.idDatasetSchema };
+    }
+
+    link.referencedField = {
+      fieldSchemaId: referencedField.idPk,
+      datasetSchemaId: referencedField.idDatasetSchema,
+      tableSchemaId: tableSchema
+    };
     return link;
   };
 
@@ -372,14 +378,15 @@ export const FieldsDesigner = ({
     </ConfirmDialog>
   );
 
+
   const renderAllFields = () => {
     if (isLoading) {
       return <Spinner className={styles.positioning} />;
     } else {
       return (
         <>
-          {viewType['table'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!viewType['table'] && renderNewField()}
+          {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+          {!viewType['tabularData'] && renderNewField()}
         </>
       );
     }
@@ -408,6 +415,7 @@ export const FieldsDesigner = ({
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchemaId}
           fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
@@ -444,13 +452,21 @@ export const FieldsDesigner = ({
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
+                datasetSchemaId={datasetSchemaId}
                 fieldDescription={field.description}
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
-                fieldName={field.name}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
+                fieldLinkedTableConditional={
+                  !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
+                }
+                fieldLinkedTableLabel={!isNil(field.referencedField) ? field.referencedField.labelId : ''}
+                fieldMasterTableConditional={
+                  !isNil(field.referencedField) ? field.referencedField.masterConditionalFieldId : ''
+                }
                 fieldMustBeUsed={field.pkMustBeUsed}
+                fieldName={field.name}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}
@@ -631,7 +647,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      {!viewType['table'] && (
+      {!viewType['tabularData'] && (
         <div className={styles.fieldsHeader}>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>

@@ -1,5 +1,6 @@
 package org.eea.dataset.mapper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
@@ -60,6 +61,17 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
       if (fieldSchema.getReferencedField().getIdPk() != null) {
         referenced.setIdPk(fieldSchema.getReferencedField().getIdPk().toString());
       }
+      if (fieldSchema.getReferencedField().getLabelId() != null) {
+        referenced.setLabelId(fieldSchema.getReferencedField().getLabelId().toString());
+      }
+      if (fieldSchema.getReferencedField().getLinkedConditionalFieldId() != null) {
+        referenced.setLinkedConditionalFieldId(
+            fieldSchema.getReferencedField().getLinkedConditionalFieldId().toString());
+      }
+      if (fieldSchema.getReferencedField().getMasterConditionalFieldId() != null) {
+        referenced.setMasterConditionalFieldId(
+            fieldSchema.getReferencedField().getMasterConditionalFieldId().toString());
+      }
       fieldSchemaVO.setReferencedField(referenced);
     }
   }
@@ -79,6 +91,19 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
       referenced.setIdDatasetSchema(
           new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
       referenced.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+      if (StringUtils.isNotBlank(fieldSchemaVO.getReferencedField().getLabelId())) {
+        referenced.setLabelId(new ObjectId(fieldSchemaVO.getReferencedField().getLabelId()));
+      }
+      if (StringUtils
+          .isNotBlank(fieldSchemaVO.getReferencedField().getLinkedConditionalFieldId())) {
+        referenced.setLinkedConditionalFieldId(
+            new ObjectId(fieldSchemaVO.getReferencedField().getLinkedConditionalFieldId()));
+      }
+      if (StringUtils
+          .isNotBlank(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId())) {
+        referenced.setMasterConditionalFieldId(
+            new ObjectId(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId()));
+      }
       fieldSchema.setReferencedField(referenced);
     }
   }

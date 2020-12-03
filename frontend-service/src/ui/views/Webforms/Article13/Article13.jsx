@@ -1,16 +1,16 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
-import ReactTooltip from 'react-tooltip';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import capitalize from 'lodash/capitalize';
 
 import styles from './Article13.module.scss';
 
-import { tables } from './article13.webform.json';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { tables } from './article13.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
@@ -25,14 +25,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { article13Reducer } from './_functions/Reducers/article13Reducer';
 
 import { Article13Utils } from './_functions/Utils/Article13Utils';
-import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
-  const { getTypeList } = Article13Utils;
+  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = Article13Utils;
   const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
   const { parsePamsRecords } = TableManagementUtils;
 
@@ -41,24 +41,35 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
+    hasErrors: true,
     isAddingRecord: false,
     isDataUpdated: false,
     isLoading: true,
+    isRefresh: false,
     pamsRecords: [],
-    selectedId: null,
-    selectedTable: { tableName: null, recordId: null, pamsId: null },
+    selectedTable: { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
     selectedTableName: null,
+    selectedTableSchemaId: null,
     tableList: { group: [], single: [] },
     view: resources.messages['overview']
   });
 
-  const { isDataUpdated, isLoading, pamsRecords, selectedId, selectedTableName, tableList, view } = article13State;
+  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
 
   useEffect(() => initialLoad(), []);
 
   useEffect(() => {
-    onLoadPamsData();
+    if (!isEmpty(article13State.data)) {
+      onLoadPamsData();
+      article13Dispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(article13State.data) } });
+    }
   }, [article13State.data, isDataUpdated]);
+
+  useEffect(() => {
+    const { fieldSchema, fieldId } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
+
+    onSelectFieldSchemaId(fieldSchema || fieldId);
+  }, [article13State.data, article13State.selectedTableSchemaId]);
 
   const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
 
@@ -66,6 +77,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const generatePamId = () => {
     if (isEmpty(pamsRecords)) return 1;
+
     const recordIds = parsePamsRecords(pamsRecords)
       .map(record => parseInt(record.Id) || parseInt(record.id))
       .filter(id => !Number.isNaN(id));
@@ -75,30 +87,54 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const getParamFieldSchemaId = (param, table) => {
     return table.elements
-      .filter(element => element.name.toUpperCase() === param.toUpperCase())
+      .filter(element => TextUtils.areEquals(element.name, param))
       .map(table => table.fieldSchema)[0];
+  };
+
+  const setTableSchemaId = tableSchemaId => {
+    article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
   const onAddPamsRecord = async type => {
     setIsAddingRecord(true);
 
-    const table = article13State.data.filter(table => table.name.toLowerCase() === 'pams')[0];
-    const newEmptyRecord = parseNewRecord(table.elements);
+    const table = article13State.data.filter(table => TextUtils.areEquals(table.name, 'pams'))[0];
+    const newEmptyPamRecord = parseNewRecord(table.elements);
 
     const data = [];
-    for (let index = 0; index < newEmptyRecord.dataRow.length; index++) {
-      const row = newEmptyRecord.dataRow[index];
-
+    const pamId = generatePamId();
+    for (let index = 0; index < newEmptyPamRecord.dataRow.length; index++) {
+      const row = newEmptyPamRecord.dataRow[index];
       row.fieldData[getParamFieldSchemaId('IsGroup', table)] = type;
-      row.fieldData[getParamFieldSchemaId('Id', table)] = generatePamId();
+      row.fieldData[getParamFieldSchemaId('Id', table)] = pamId;
 
       data.push({ ...row });
     }
 
-    newEmptyRecord.dataRow = data;
+    newEmptyPamRecord.dataRow = data;
 
     try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
+
+      if (!response) {
+        throw new Error(403);
+      }
+
+      const filteredTables = datasetSchema.tables.filter(
+        table => table.notEmpty && !TextUtils.areEquals(table.tableSchemaName, 'pams')
+      );
+
+      for (let i = 0; i < filteredTables.length; i++) {
+        const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
+        const res = await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
+
+        if (!res) {
+          if (response) {
+            onUpdateData();
+          }
+          throw new Error(403);
+        }
+      }
       if (response) {
         onUpdateData();
       }
@@ -109,8 +145,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'ADD_RECORDS_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+        type: 'ADD_RECORDS_ERROR',
+        content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
     } finally {
       setIsAddingRecord(false);
@@ -125,13 +161,12 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         onUpdateData();
       }
     } catch (error) {
-      console.error('error', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'ADD_RECORDS_BY_ID_ERROR',
+        type: 'ADD_RECORDS_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
       });
     }
@@ -177,9 +212,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   };
 
   const onSelectEditTable = (pamNumberId, tableName) => {
+    const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
     const pamSchemaId = article13State.data
-      .filter(table => table.name.toUpperCase() === 'PAMS')[0]
-      .records[0].fields.filter(field => field.name.toUpperCase() === 'ID')[0].fieldId;
+      .filter(table => TextUtils.areEquals(table.name, 'PAMS'))[0]
+      .records[0].fields.filter(field => TextUtils.areEquals(field.name, 'ID'))[0].fieldId;
     let recordId = '';
     pamsRecords.forEach(pamsRecord => {
       pamsRecord.fields.forEach(field => {
@@ -188,9 +224,15 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         }
       });
     });
-    onSelectRecord(recordId);
+
+    setTableSchemaId(filteredTable.tableSchemaId);
+    onSelectRecord(recordId, pamNumberId);
     onSelectTableName(tableName);
     onToggleView(resources.messages['details']);
+  };
+
+  const onSelectFieldSchemaId = fieldSchemaId => {
+    article13Dispatch({ type: 'ON_SELECT_SCHEMA_ID', payload: { fieldSchemaId } });
   };
 
   const onSelectRecord = (recordId, pamsId) => {
@@ -205,20 +247,55 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECIRD', payload: { value } });
 
-  return (
-    <Fragment>
-      <h3 className={styles.title}>
-        Questionnaire for reporting on Policies and Measures under the Monitoring Mechanism Regulation
-      </h3>
+  const renderErrorMessages = () => {
+    const missingElements = checkErrors(article13State.data);
 
+    return (
+      <Fragment>
+        <h4 className={styles.title}>{resources.messages['missingWebformTablesOrFieldsMissing']}</h4>
+        <div className={styles.missingElements}>
+          {Object.keys(missingElements).map((key, i) => {
+            const { table, fields } = missingElements[key];
+
+            return (
+              fields.some(field => field.isMissing) && (
+                <div key={i}>
+                  <span className={styles.tableTitle}>
+                    <FontAwesomeIcon icon={AwesomeIcons('table')} /> {table.name}
+                  </span>
+                  <ul>{fields.map((field, index) => field.isMissing && <li key={index}> {field.name}</li>)}</ul>
+                </div>
+              )
+            );
+          })}
+        </div>
+      </Fragment>
+    );
+  };
+
+  const renderLayout = children => (
+    <Fragment>
+      <h2 className={styles.title}>{resources.messages['webformArticle13Title']}</h2>
+      {children}
+    </Fragment>
+  );
+
+  if (article13State.hasErrors) return renderLayout(renderErrorMessages());
+
+  return renderLayout(
+    <Fragment>
       <ul className={styles.tableList}>
-        {Object.keys(tableList).map(list => (
-          <li className={styles.tableListItem}>
+        {Object.keys(tableList).map((list, i) => (
+          <li className={styles.tableListItem} key={i}>
             <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
-            {tableList[list].map(items => (
+            {tableList[list].map((items, i) => (
               <span
-                className={`${styles.tableListId} ${items.recordId === selectedId ? styles.selected : null}`}
+                className={`${styles.tableListId} ${
+                  items.recordId === selectedTable.recordId ? styles.selected : null
+                }`}
+                key={i}
                 onClick={() => {
+                  article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                   onSelectRecord(items.recordId, items.id);
                   onToggleView(resources.messages['details']);
                 }}>
@@ -228,7 +305,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
             <Button
               className={styles.addButton}
               disabled={article13State.isAddingRecord}
-              icon={'add'}
+              icon={article13State.isAddingRecord ? 'spinnerAnimate' : 'add'}
               label={resources.messages['add']}
               onClick={() => onAddPamsRecord(capitalize(list))}
             />
@@ -245,15 +322,17 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         }}
         value={view}
       />
-
       {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchema.datasetSchemaId}
+          isRefresh={article13State.isRefresh}
           isReporting={isReporting}
-          selectedId={selectedId}
+          selectedTable={selectedTable}
           selectedTableName={selectedTableName}
+          setTableSchemaId={setTableSchemaId}
           state={state}
           tables={tables}
         />

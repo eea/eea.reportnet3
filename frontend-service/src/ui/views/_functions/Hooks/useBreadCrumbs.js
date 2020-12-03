@@ -48,8 +48,8 @@ export const useBreadCrumbs = ({
     return { label: resources.messages['dashboards'], icon: 'barChart' };
   };
 
-  const getDataflowFeedbackCrumb = () => {
-    return { label: resources.messages['dataflowFeedback'], icon: 'comments' };
+  const getTechnicalFeedbackCrumb = () => {
+    return { label: resources.messages['technicalFeedback'], icon: 'comments' };
   };
 
   const getDataflowHelpCrumb = () => {
@@ -128,7 +128,7 @@ export const useBreadCrumbs = ({
         datasetBreadCrumbs.push(getRepresentativeCrumb());
       }
 
-      breadCrumbContext.add([...datasetBreadCrumbs, getDataflowFeedbackCrumb()]);
+      breadCrumbContext.add([...datasetBreadCrumbs, getTechnicalFeedbackCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW_HELP) {

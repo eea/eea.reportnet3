@@ -1,13 +1,8 @@
 import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
-import chunk from 'lodash/chunk';
-import chain from 'lodash/chain';
-import find from 'lodash/find';
-import includes from 'lodash/includes';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
-import values from 'lodash/values';
 import isUndefined from 'lodash/isUndefined';
 import dayjs from 'dayjs';
 
@@ -56,11 +51,22 @@ const getUserRoles = userRoles => {
     }
   }
 
-  const permissionsArr = values(config.dataflowPermissions);
+  const dataflowPermissionsConfig = {
+    1: config.dataflowPermissions.DATA_CUSTODIAN,
+    2: config.dataflowPermissions.EDITOR_WRITE,
+    3: config.dataflowPermissions.EDITOR_READ,
+    4: config.dataflowPermissions.LEAD_REPORTER,
+    5: config.dataflowPermissions.NATIONAL_COORDINATOR,
+    6: config.dataflowPermissions.REPORTER_WRITE,
+    7: config.dataflowPermissions.REPORTER_READ
+  };
+
+  const dataflowPermissions = Object.values(dataflowPermissionsConfig);
+
   dataflowDuplicatedRoles.forEach(dataflowRoles => {
     let rol = null;
 
-    permissionsArr.forEach(permission => {
+    dataflowPermissions.forEach(permission => {
       dataflowRoles.forEach(dataflowRol => {
         if (isNil(rol) && dataflowRol.userRole === permission) {
           rol = dataflowRol;
@@ -472,6 +478,7 @@ const parseDatasetDTO = datasetDTO =>
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
     isReleased: datasetDTO.isReleased,
+    isReleasing: datasetDTO.releasing,
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });

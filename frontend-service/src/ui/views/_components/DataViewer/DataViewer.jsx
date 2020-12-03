@@ -46,8 +46,8 @@ import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { ExtensionUtils, MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import {
   useContextMenu,
   useLoadColsSchemasAndColumnOptions,
@@ -122,9 +122,19 @@ const DataViewer = withRouter(
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       crs: 'EPSG:4326',
+      drawElements: {
+        circle: false,
+        circlemarker: false,
+        polyline: false,
+        marker: false,
+        point: false,
+        polygon: false,
+        rectangle: false
+      },
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
+      geometryType: '',
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
       isMapOpen: false,
@@ -176,6 +186,7 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
+          datasetSchemaId={datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           onChangePointCRS={onChangePointCRS}
           onEditorKeyChange={onEditorKeyChange}
@@ -289,7 +300,12 @@ const DataViewer = withRouter(
     }, [records.isRecordDeleted]);
 
     useEffect(() => {
-      if (records.isMapOpen) datatableRef.current.closeEditingCell();
+      if (records.isMapOpen) {
+        datatableRef.current.closeEditingCell();
+      }
+      // else {
+      //   dispatchRecords({ type: 'RESET_DRAW_ELEMENTS' });
+      // }
     }, [records.isMapOpen]);
 
     useEffect(() => {
@@ -307,7 +323,7 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
-      if (records.mapGeoJson !== '') {
+      if (records.mapGeoJson !== '' && TextUtils.areEquals(records.geometryType, 'POINT')) {
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
@@ -541,6 +557,19 @@ const DataViewer = withRouter(
       onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
     };
 
+    const onConditionalChange = field => {
+      dispatchRecords({
+        type: 'RESET_CONDITIONAL_FIELDS',
+        payload: {
+          field,
+          isNewRecord,
+          referencedFields: colsSchema.filter(
+            col => !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === field
+          )
+        }
+      });
+    };
+
     const onConfirmDeleteTable = async () => {
       try {
         await DatasetService.deleteTableDataById(datasetId, tableId);
@@ -622,7 +651,7 @@ const DataViewer = withRouter(
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
         if (!isGeometry) {
-          if (type.toUpperCase() !== 'TEXTAREA') {
+          if (!TextUtils.areEquals(type, 'TEXTAREA')) {
             datatableRef.current.closeEditingCell();
             onEditorSubmitValue(props, event.target.value, record);
           }
@@ -687,8 +716,8 @@ const DataViewer = withRouter(
       }
     };
 
-    const onMapOpen = (coordinates, mapCells) =>
-      dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, mapCells } });
+    const onMapOpen = (coordinates, mapCells, fieldType) =>
+      dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells } });
 
     const onPaste = event => {
       if (event) {
@@ -921,22 +950,30 @@ const DataViewer = withRouter(
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
-          label={resources.messages['save']}
+          label={
+            TextUtils.areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']
+          }
           icon={'check'}
-          onClick={() => onSavePoint(records.newPoint)}
+          onClick={
+            TextUtils.areEquals(records.geometryType, 'POINT')
+              ? () => onSavePoint(records.newPoint)
+              : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
+          }
         />
-        <Button
-          className="p-button-secondary"
-          icon="cancel"
-          label={resources.messages['cancel']}
-          onClick={() => {
-            // dispatchRecords({
-            //   type: 'SET_NEW_RECORD',
-            //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            // });
-            dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
-          }}
-        />
+        {TextUtils.areEquals(records.geometryType, 'POINT') && (
+          <Button
+            className="p-button-secondary"
+            icon="cancel"
+            label={resources.messages['cancel']}
+            onClick={() => {
+              // dispatchRecords({
+              //   type: 'SET_NEW_RECORD',
+              //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+              // });
+              dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
+            }}
+          />
+        )}
       </div>
     );
 
@@ -971,7 +1008,13 @@ const DataViewer = withRouter(
     };
 
     const mapRender = () => (
-      <Map hasLegend={true} geoJson={records.mapGeoJson} onSelectPoint={onSelectPoint} selectedCRS={records.crs}></Map>
+      <Map
+        enabledDrawElements={records.drawElements}
+        geometryType={records.geometryType}
+        hasLegend={true}
+        geoJson={records.mapGeoJson}
+        onSelectPoint={onSelectPoint}
+        selectedCRS={records.crs}></Map>
     );
 
     const rowClassName = rowData => {
@@ -1257,10 +1300,12 @@ const DataViewer = withRouter(
                   addDialogVisible={addDialogVisible}
                   colsSchema={colsSchema}
                   datasetId={datasetId}
+                  datasetSchemaId={datasetSchemaId}
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
                   hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
+                  onConditionalChange={onConditionalChange}
                   onShowFieldInfo={onShowFieldInfo}
                   onShowCoordinateError={onShowCoordinateError}
                   records={records}
@@ -1285,11 +1330,13 @@ const DataViewer = withRouter(
               <DataForm
                 colsSchema={colsSchema}
                 datasetId={datasetId}
+                datasetSchemaId={datasetSchemaId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
                 hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
+                onConditionalChange={onConditionalChange}
                 onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}

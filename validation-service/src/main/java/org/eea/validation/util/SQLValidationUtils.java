@@ -1,6 +1,5 @@
 package org.eea.validation.util;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -116,31 +116,20 @@ public class SQLValidationUtils {
    * @param ruleId the rule id
    */
   public static void executeValidationSQLRule(Long datasetId, String ruleId) {
-    // Retrieve the rule
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
-    // Retrieve sql sentence
     String query = rule.getSqlSentence();
-    // Checking SQL sentence and if the rule does not work it will be disabled
-    // TODO
-    // Execute query
-    TableValue tableToEvaluate = new TableValue();
-    if (rule.getType().equals(EntityTypeEnum.TABLE)) {
-      if (null != sqlRulesService.retriveFirstResult(query, datasetId)) {
-        tableToEvaluate = tableRepository.findByIdTableSchema(rule.getReferenceId().toString());
+    TableValue tableToEvaluate = null;
+    try {
+      String preparedquery = "";
+      if (query.contains(";")) {
+        preparedquery = query.replace(";", "");
+      } else {
+        preparedquery = query;
       }
-    } else {
-      try {
-        String preparedquery = "";
-        if (query.contains(";")) {
-          preparedquery = query.replace(";", "");
-        } else {
-          preparedquery = query;
-        }
-        tableToEvaluate =
-            sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
-      } catch (SQLException e) {
-        LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
-      }
+      tableToEvaluate =
+          sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
+    } catch (EEAInvalidSQLException e) {
+      LOG_ERROR.error("SQL can't be executed: ", e.getMessage(), e);
     }
     if (null != tableToEvaluate.getId()) {
       String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
@@ -157,8 +146,6 @@ public class SQLValidationUtils {
         }
       }
       String fieldName = null;
-
-
 
       EntityTypeEnum ruleType = rule.getType();
       switch (ruleType) {
@@ -186,22 +173,13 @@ public class SQLValidationUtils {
           saveDataset(dataset);
           break;
         case TABLE:
-          if (table.getTableValidations().isEmpty()) {
+          if (!tableToEvaluate.getRecords().isEmpty()) {
             TableValidation tableValidation = new TableValidation();
-            tableValidation.setTableValue(tableToEvaluate);
+            tableValidation.setTableValue(table);
             tableValidation.setValidation(createValidation(rule, tableName, null));
-            List<TableValidation> tableValidations = new ArrayList<>();
-            tableValidations.add(tableValidation);
-            tableToEvaluate.setTableValidations(tableValidations);
-          } else {
-            List<TableValidation> tableValidations = tableToEvaluate.getTableValidations();
-            TableValidation tablevalidation = new TableValidation();
-            tablevalidation.setTableValue(tableToEvaluate);
-            tablevalidation.setValidation(createValidation(rule, tableName, null));
-            tableValidations.add(tablevalidation);
-            tableToEvaluate.setTableValidations(tableValidations);
+            table.getTableValidations().add(tableValidation);
+            saveTable(table);
           }
-          saveTable(table);
           break;
         case RECORD:
           List<String> recordsToEvauate = new ArrayList<>();
@@ -289,6 +267,14 @@ public class SQLValidationUtils {
 
   }
 
+  /**
+   * Creates the validation.
+   *
+   * @param rule the rule
+   * @param tableName the table name
+   * @param fieldName the field name
+   * @return the validation
+   */
   private static Validation createValidation(Rule rule, String tableName, String fieldName) {
     Validation validation = new Validation();
     validation.setIdRule(rule.getRuleId().toString());

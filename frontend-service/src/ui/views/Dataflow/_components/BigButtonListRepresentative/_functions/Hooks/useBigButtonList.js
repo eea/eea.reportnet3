@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 
@@ -17,7 +15,6 @@ const useBigButtonList = ({
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
-  isReleaseCreating,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -32,19 +29,25 @@ const useBigButtonList = ({
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
-  }, [userContext]);
+  }, [userContext, dataflowState.data.datasets]);
 
-  const getButtonsVisibility = () => ({
-    feedback: isLeadReporterOfCountry,
-    receipt: isLeadReporterOfCountry,
-    release: isLeadReporterOfCountry
-  });
+  const getButtonsVisibility = () => {
+    const isManualAcceptance = dataflowState.data.manualAcceptance;
+    const isReleased =
+      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
+
+    return {
+      feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
+      receipt: isLeadReporterOfCountry && isReleased,
+      release: isLeadReporterOfCountry
+    };
+  };
 
   const feedbackButton = {
     layout: 'defaultBigButton',
-    buttonClass: 'dataflowFeedback',
+    buttonClass: 'technicalFeedback',
     buttonIcon: 'comments',
-    caption: resources.messages['dataflowFeedback'],
+    caption: resources.messages['technicalFeedback'],
     handleRedirect: () =>
       handleRedirect(
         getUrl(
@@ -143,7 +146,7 @@ const useBigButtonList = ({
 
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowState.data;
-    const releasedStates = datasets.map(dataset => dataset.isReleased);
+    const releasedStates = isNil(datasets) ? [] : datasets.map(dataset => dataset.isReleased);
 
     return [
       {
@@ -154,29 +157,38 @@ const useBigButtonList = ({
         handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
-        visibility:
-          buttonsVisibility.receipt &&
-          !isUndefined(releasedStates) &&
-          !releasedStates.includes(false) &&
-          !releasedStates.includes(null)
+        visibility: buttonsVisibility.receipt
       }
     ];
   };
 
   const receiptBigButton = onBuildReceiptButton();
 
-  const releaseBigButton = [
-    {
-      buttonClass: 'schemaDataset',
-      buttonIcon: isReleaseCreating ? 'spinner' : 'released',
-      buttonIconClass: isReleaseCreating ? 'spinner' : 'released',
-      caption: resources.messages['releaseDataCollection'],
-      handleRedirect: !isReleaseCreating ? () => onOpenReleaseConfirmDialog() : () => {},
-      helpClassName: 'dataflow-big-buttons-release-help-step',
-      layout: 'defaultBigButton',
-      visibility: buttonsVisibility.release
-    }
-  ];
+  const getIsReleasing = () => {
+    const datasetsProviderId =
+      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.length >= 1
+        ? dataflowState.data.datasets.filter(dataset => dataset.dataProviderId === dataProviderId)
+        : false;
+
+    return datasetsProviderId ? datasetsProviderId[0].isReleasing : false;
+  };
+
+  const onBuildReleaseButton = () => {
+    return [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: getIsReleasing() ? 'spinner' : 'released',
+        buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
+        caption: resources.messages['releaseDataCollection'],
+        handleRedirect: !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
+        helpClassName: 'dataflow-big-buttons-release-help-step',
+        layout: 'defaultBigButton',
+        visibility: buttonsVisibility.release
+      }
+    ];
+  };
+
+  const releaseBigButton = onBuildReleaseButton();
 
   return [helpButton, feedbackButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };

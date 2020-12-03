@@ -141,14 +141,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
           datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
         }
-        // const datasetMetaData = await DatasetService.getMetaData(datasetId);
-        // datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
         return datasetSchema;
       }
     } catch (error) {
-      // if (error.response.status === 401 || error.response.status === 403) {
-      //   history.push(getUrl(routes.DATAFLOWS));
-      // }
       notificationContext.add({
         type: 'IMPORT_DESIGN_FAILED_EVENT',
         content: {
@@ -190,9 +185,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         }
       }
     } catch (error) {
-      // if (error.response.status === 401 || error.response.status === 403) {
-      //   history.push(getUrl(routes.DATAFLOWS));
-      // }
       notificationContext.add({
         type: 'LOAD_DATASETS_ERROR',
         content: {}
@@ -212,7 +204,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         type: 'LOAD_DOCUMENTS_ERROR',
         content: {}
       });
-      if (error.response.status === 401 || error.response.status === 403) {
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
@@ -230,7 +222,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         type: 'LOAD_WEB_LINKS_ERROR',
         content: {}
       });
-      if (error.response.status === 401 || error.response.status === 403) {
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         console.error('error', error.response);
       }
     }
@@ -285,7 +277,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             disabled={isEmpty(datasetsSchemas)}
             headerClassName="dataflowHelp-schemas-help-step"
             header={resources.messages['datasetSchemas']}
-            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas && config.icons['spinnerAnimate']}>
+            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
               datasetsSchemas={datasetsSchemas}
