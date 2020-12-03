@@ -978,7 +978,7 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         id={fieldName}
-        maxLength={60}
+        maxLength={63}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });

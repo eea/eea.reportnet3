@@ -341,6 +341,7 @@ const Tab = ({
               autoFocus={true}
               key={index}
               className={`${styles.p_tabview_input_design} tabInput`}
+              maxLength={63}
               onBlur={e => {
                 //Check for empty table name
                 if (titleHeader !== '') {
