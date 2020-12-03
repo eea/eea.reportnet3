@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -93,6 +94,12 @@ public class RulesServiceImplTest {
   /** The integrity mapper. */
   @Mock
   private IntegrityMapper integrityMapper;
+
+  /**
+   * The kafka sender utils.
+   */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Delete rule by id.
