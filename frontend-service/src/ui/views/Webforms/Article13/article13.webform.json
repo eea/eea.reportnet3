@@ -30,12 +30,17 @@
           "type": "FIELD",
           "name": "IsGroup",
           "title": "Is this a single PaM or a group of PaMs?",
+          "customInput": "RADIO_BUTTON",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "ListOfSinglePams",
           "title": "Which policies or measures does it cover?",
+          "dependency": {
+            "field": "IsGroup",
+            "value": ["Group"]
+          },
           "isPrimary": false
         },
         {
@@ -62,6 +67,7 @@
           "type": "FIELD",
           "name": "IsPolicyMeasureEnvisaged",
           "title": "Is the policy or measure envisaged with a view to limiting GHG emissions beyond the Member State commitments under Regulation (EU) 2018/842 and Regulation (EU) 2018/841",
+          "customInput": "RADIO_BUTTON",
           "isPrimary": false
         },
         {
@@ -74,48 +80,65 @@
         {
           "type": "LABEL",
           "level": 2,
-          "title": "Sector(s) and objective(s) affected",
-          "tooltip": "More than one sector can be selected",
+          "title": "Sector and Objective(s) affected",
+          "tooltip": "A sector can be selected. More than one objective can be selected, additional objectives could be added and specified under 'other'",
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "SectorObjectives",
-          "title": "Sector(s) and objective(s)",
+          "title": "Sector and Objective(s)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "SectorAffected",
               "title": "Sector(s) affected",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Objective",
-              "title": "Objective(s)",
-              "tooltip": "More than one objective can be selected, additional objectives could be added and specified under 'other'",
-              "isPrimary": false
+              "isPrimary": false,
+              "readOnly": true
             },
             {
               "type": "FIELD",
               "name": "OtherSectors",
               "title": "Other Sector(s)",
+              "dependency": {
+                "field": "SectorAffected",
+                "value": ["Other sectors"]
+              },
               "isPrimary": false
-            }
-          ]
-        },
-        {
-          "type": "TABLE",
-          "name": "OtherObjectives",
-          "title": "Other Objective(s)",
-          "multipleRecords": true,
-          "elements": [
+            },
             {
               "type": "FIELD",
-              "name": "Other",
-              "title": "Other Objective",
+              "name": "Objective",
+              "title": "Select Objective(s)",
               "isPrimary": false
+            },
+            {
+              "type": "TABLE",
+              "name": "OtherObjectives",
+              "title": "Other Objective(s)",
+              "dependency": {
+                "field": "Objective",
+                "value": [
+                  "Other energy supply",
+                  "Other energy consumption",
+                  "Other transport",
+                  "Other industrial processes",
+                  "Other waste",
+                  "Other agriculture",
+                  "Other land use, land-use change and forestry",
+                  "New objective(s)"
+                ]
+              },
+              "multipleRecords": true,
+              "elements": [
+                {
+                  "type": "FIELD",
+                  "name": "Other",
+                  "title": "Other Objective",
+                  "isPrimary": false
+                }
+              ]
             }
           ]
         },
@@ -162,6 +185,10 @@
           "type": "FIELD",
           "name": "OtherPolicyInstrument",
           "title": "Describe the other policy Instrument",
+          "dependency": {
+            "field": "TypePolicyInstrumen",
+            "value": ["Other"]
+          },
           "isPrimary": false
         },
         {
@@ -174,18 +201,27 @@
           "type": "FIELD",
           "name": "UnionPolicy",
           "title": "Related / Not related",
+          "customInput": "RADIO_BUTTON",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "UnionPolicyList",
           "title": "Select Union policy/policies",
+          "dependency": {
+            "field": "UnionPolicy",
+            "value": ["Non related"]
+          },
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "UnionPolicyOther",
           "title": "",
+          "dependency": {
+            "field": "UnionPolicyList",
+            "value": ["Other (Union policy not listed above or additional Union policy)"]
+          },
           "multipleRecords": true,
           "elements": [
             {
@@ -290,52 +326,62 @@
               "isPrimary": false
             },
             {
-              "type": "FIELD",
-              "name": "Year1",
-              "title": "Year #1",
-              "isPrimary": false
+              "type": "BLOCK",
+              "elements": [
+                {
+                  "type": "FIELD",
+                  "name": "Year1",
+                  "title": "Year #1",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Year2",
+                  "title": "Year #2",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Year3",
+                  "title": "Year #3",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Year4",
+                  "title": "Year #4",
+                  "isPrimary": false
+                }
+              ]
             },
             {
-              "type": "FIELD",
-              "name": "Year2",
-              "title": "Year #2",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Year3",
-              "title": "Year #3",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Year4",
-              "title": "Year #4",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value1",
-              "title": "Value #1",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value2",
-              "title": "Value #2",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value3",
-              "title": "Value #3",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value4",
-              "title": "Value #4",
-              "isPrimary": false
+              "type": "BLOCK",
+              "elements": [
+                {
+                  "type": "FIELD",
+                  "name": "Value1",
+                  "title": "Value #1",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Value2",
+                  "title": "Value #2",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Value3",
+                  "title": "Value #3",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Value4",
+                  "title": "Value #4",
+                  "isPrimary": false
+                }
+              ]
             }
           ]
         },
@@ -398,30 +444,35 @@
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "EUETS_1",
-          "title": "EU ETS",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "ESR_1",
-          "title": "ESR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "LULUCF_1",
-          "title": "LULUCF",
-          "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "Total_1",
-          "title": "Total",
-          "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
-          "isPrimary": false
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "EUETS_1",
+              "title": "EU ETS",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ESR_1",
+              "title": "ESR",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "LULUCF_1",
+              "title": "LULUCF",
+              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "Total_1",
+              "title": "Total",
+              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
+              "isPrimary": false
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -430,30 +481,35 @@
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "EUETS_2",
-          "title": "EU ETS",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "ESR_2",
-          "title": "ESR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "LULUCF_2",
-          "title": "LULUCF",
-          "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "Total_2",
-          "title": "Total",
-          "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
-          "isPrimary": false
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "EUETS_2",
+              "title": "EU ETS",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ESR_2",
+              "title": "ESR",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "LULUCF_2",
+              "title": "LULUCF",
+              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "Total_2",
+              "title": "Total",
+              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
+              "isPrimary": false
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -462,30 +518,35 @@
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "EUETS_3",
-          "title": "EU ETS",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "ESR_3",
-          "title": "ESR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "LULUCF_3",
-          "title": "LULUCF",
-          "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "Total_3",
-          "title": "Total",
-          "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
-          "isPrimary": false
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "EUETS_3",
+              "title": "EU ETS",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ESR_3",
+              "title": "ESR",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "LULUCF_3",
+              "title": "LULUCF",
+              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "Total_3",
+              "title": "Total",
+              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
+              "isPrimary": false
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -494,30 +555,35 @@
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "EUETS_4",
-          "title": "EU ETS",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "ESR_4",
-          "title": "ESR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "LULUCF_4",
-          "title": "LULUCF",
-          "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "Total_4",
-          "title": "Total",
-          "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
-          "isPrimary": false
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "EUETS_4",
+              "title": "EU ETS",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ESR_4",
+              "title": "ESR",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "LULUCF_4",
+              "title": "LULUCF",
+              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "Total_4",
+              "title": "Total",
+              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available",
+              "isPrimary": false
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -595,29 +661,34 @@
               "isPrimary": false
             },
             {
-              "type": "FIELD",
-              "name": "Value_EU_ETS",
-              "title": "EU ETS",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value_ESR",
-              "title": "ESD/ESR",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value_LULUCF",
-              "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "Value_Total",
-              "title": "Total",
-              "isPrimary": false
+              "type": "BLOCK",
+              "elements": [
+                {
+                  "type": "FIELD",
+                  "name": "Value_EU_ETS",
+                  "title": "EU ETS",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Value_ESR",
+                  "title": "ESD/ESR",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Value_LULUCF",
+                  "title": "LULUCF",
+                  "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number",
+                  "isPrimary": false
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Value_Total",
+                  "title": "Total",
+                  "isPrimary": false
+                }
+              ]
             }
           ]
         },
