@@ -798,7 +798,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -883,8 +883,10 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       // delete all fks
-      LOG.info("records with fk's to delete {}", recordsToDelete);
-      recordRepository.deleteRecordWithIdIn(recordsToDelete);
+      if (!recordsToDelete.isEmpty()) {
+        LOG.info("records with fk's to delete {}", recordsToDelete);
+        recordRepository.deleteRecordWithIdIn(recordsToDelete);
+      }
     }
   }
 
