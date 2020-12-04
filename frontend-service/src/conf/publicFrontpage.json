@@ -35,10 +35,10 @@
       "key": 4,
       "legalInstrument": "EEA AWP",
       "dataflow": "Nationally designated areas (CDDA)",
-      "dataFlowUrl": "http://rod.eionet.europa.eu/obligations/531",
+      "dataFlowUrl": "https://rod.eionet.europa.eu/obligations/32",
       "reportingFrequency": "Annual",
       "targetDate": "15/03/2021",
-      "pilotScenarioAmbition": "Official delivery on 2.0 or 3.0"
+      "pilotScenarioAmbition": "Volunteer test only"
     },
     {
       "id": 5,
