@@ -130,7 +130,8 @@ public interface RecordStoreController {
    */
   @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
   void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
-      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation);
+      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation,
+      @RequestParam("isMaterialized") boolean isMaterialized);
 
 
 
@@ -140,5 +141,6 @@ public interface RecordStoreController {
    * @param datasetId the dataset id
    */
   @PutMapping("/private/createUpdateQueryView")
-  void createUpdateQueryView(@RequestParam("datasetId") Long datasetId);
+  void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("isMaterialized") boolean isMaterialized);
 }

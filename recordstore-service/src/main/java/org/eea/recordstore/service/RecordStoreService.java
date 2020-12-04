@@ -126,7 +126,8 @@ public interface RecordStoreService {
    * @param dataflowId The DataCollection's dataflow.
    * @param isCreation the is creation
    */
-  void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation);
+  void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation,
+      boolean isMaterialized);
 
 
   /**
@@ -142,7 +143,16 @@ public interface RecordStoreService {
    * Creates the update query view.
    *
    * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
    */
-  void createUpdateQueryView(Long datasetId);
+  void createUpdateQueryView(Long datasetId, boolean isMaterialized);
+
+  /**
+   * Update materialized query view.
+   *
+   * @param dataflowId the dataflow id
+   */
+  void updateMaterializedQueryView(Long dataflowId);
+
 
 }

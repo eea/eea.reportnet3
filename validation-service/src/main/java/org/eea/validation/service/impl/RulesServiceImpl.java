@@ -374,7 +374,7 @@ public class RulesServiceImpl implements RulesService {
       }
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
           .append(rule.getRuleId().toString()).append("')").toString());
-      recordStoreController.createUpdateQueryView(datasetId);
+      recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
@@ -651,7 +651,7 @@ public class RulesServiceImpl implements RulesService {
       }
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
           .append(rule.getRuleId().toString()).append("')").toString());
-      recordStoreController.createUpdateQueryView(datasetId);
+      recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);

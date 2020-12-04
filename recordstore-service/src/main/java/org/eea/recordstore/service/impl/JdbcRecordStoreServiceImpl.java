@@ -265,7 +265,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   @Async
   public void createSchemas(Map<Long, String> datasetIdsAndSchemaIds, Long dataflowId,
-      boolean isCreation) {
+      boolean isCreation, boolean isMaterialized) {
 
     // Initialize resources
     try (Connection connection = dataSource.getConnection();
@@ -303,7 +303,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
-      releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
+      releaseConnectionCreatedEvents(datasetIdsAndSchemaIds, isMaterialized);
 
       // Release the lock
       String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
@@ -903,7 +903,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetIdAndSchemaId dataset ids matching schema ids
    */
-  private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId) {
+  private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId,
+      boolean isMaterialized) {
     for (Map.Entry<Long, String> entry : datasetIdAndSchemaId.entrySet()) {
       Map<String, Object> result = new HashMap<>();
       String datasetName = "dataset_" + entry.getKey();
@@ -912,7 +913,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       result.put(LiteralConstants.ID_DATASET_SCHEMA, entry.getValue());
       kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
 
-      createUpdateQueryView(entry.getKey());
+      createUpdateQueryView(entry.getKey(), isMaterialized);
 
 
     }
@@ -1058,9 +1059,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Creates the update query view.
    *
    * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
    */
   @Override
-  public void createUpdateQueryView(Long datasetId) {
+  public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
 
     DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     // delete all views because some names can be changed
@@ -1075,9 +1077,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         .forEach(table -> {
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
-            // create materialiced view of all tableSchemas
+            // create materialiced view or query view of all tableSchemas
             executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
-                datasetId);
+                datasetId, isMaterialized);
+            if (isMaterialized) {
+              createIndexMaterializedView(datasetId, table.getNameTableSchema());
+            }
             // execute view permission
             executeViewPermissions(table.getNameTableSchema(), datasetId);
           } catch (RecordStoreAccessException e) {
@@ -1085,6 +1090,33 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           }
         });
   }
+
+
+  /**
+   * Update materialized query view.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  public void updateMaterializedQueryView(Long dataflowId) {
+    LOG.info(" Update Query View");
+  }
+
+
+  /**
+   * Creates the index materialized view.
+   *
+   * @param datasetId the dataset id
+   * @param tableName the table name
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void createIndexMaterializedView(Long datasetId, String tableName)
+      throws RecordStoreAccessException {
+    String indexQuery = " CREATE UNIQUE INDEX " + tableName + "_index ON dataset_" + datasetId + "."
+        + tableName + " (record_id) ";
+    executeQueryViewCommands(indexQuery);
+  }
+
 
   /**
    * Delete all views from schema.
@@ -1133,18 +1165,26 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param queryViewName the query view name
    * @param idTableSchema the id table schema
    * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
    * @throws RecordStoreAccessException the record store access exception
    */
   private void executeViewQuery(List<FieldSchemaVO> columns, String queryViewName,
-      String idTableSchema, Long datasetId) throws RecordStoreAccessException {
+      String idTableSchema, Long datasetId, boolean isMaterialized)
+      throws RecordStoreAccessException {
 
     List<String> stringColumns = new ArrayList<>();
     for (FieldSchemaVO column : columns) {
       stringColumns.add(column.getId());
     }
+    StringBuilder stringQuery = new StringBuilder();
+    if (isMaterialized) {
+      stringQuery.append("CREATE MATERIALIZED VIEW if not exists dataset_" + datasetId + "." + "\""
+          + queryViewName + "\"" + " as (select rv.id as record_id, ");
+    } else {
+      stringQuery.append("CREATE OR REPLACE VIEW dataset_" + datasetId + "." + "\"" + queryViewName
+          + "\"" + " as (select rv.id as record_id, ");
+    }
 
-    StringBuilder stringQuery = new StringBuilder("CREATE OR REPLACE VIEW dataset_" + datasetId
-        + "." + "\"" + queryViewName + "\"" + " as (select rv.id as record_id, ");
     Iterator<String> iterator = stringColumns.iterator();
     int i = 0;
     while (iterator.hasNext()) {
@@ -1206,6 +1246,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     stringQuery.append(" inner join dataset_" + datasetId
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
         + "')");
+
+    if (isMaterialized) {
+      stringQuery.append(" WITH NO DATA ");
+    }
 
     executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
