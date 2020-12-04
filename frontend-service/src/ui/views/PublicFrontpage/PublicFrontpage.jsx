@@ -125,6 +125,12 @@ export const PublicFrontpage = () => {
                   <Card {...dataflow} />
                 ))}
               </div>
+              <h3>EEA Voluntary Dataflows:</h3>
+              <div className={styles.dataflowsList}>
+                {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
+                  <Card {...dataflow} />
+                ))}
+              </div>
             </div>
             <div className={styles.otherPortals}>
               <div className={styles.title}>

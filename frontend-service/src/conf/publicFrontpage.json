@@ -150,5 +150,17 @@
       "targetDate": "TBD",
       "pilotScenarioAmbition": "Deliver on 3.0"
     }
+  ],
+  "voluntaryDataflows": [
+    {
+      "id": 1,
+      "key": 1,
+      "legalInstrument": "Greenhouse gas Monitoring Mechanism Regulation (MMR)",
+      "dataflow": "Forest Information System for Europe",
+      "dataFlowUrl": "https://forest.eea.europa.eu/",
+      "reportingFrequency": "Annual",
+      "targetDate": "TBD",
+      "pilotScenarioAmbition": "Volunteer test only"
+    }
   ]
 }
