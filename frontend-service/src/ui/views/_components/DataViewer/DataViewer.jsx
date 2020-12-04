@@ -838,14 +838,18 @@ const DataViewer = withRouter(
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
-          const {
-            dataflow: { name: dataflowName },
-            dataset: { name: datasetName }
-          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'UPDATE_RECORDS_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          if (error.response.status === 423) {
+            notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
+          } else {
+            const {
+              dataflow: { name: dataflowName },
+              dataset: { name: datasetName }
+            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+            notificationContext.add({
+              type: 'UPDATE_RECORDS_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+            });
+          }
         } finally {
           onCancelRowEdit();
           setIsLoading(false);
