@@ -236,6 +236,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
    * @param dataflowId The DataCollection's dataflow.
    * @param isCreation the is creation
+   * @param isMaterialized the is materialized
    */
   @Override
   @HystrixCommand

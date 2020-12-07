@@ -127,6 +127,7 @@ public interface RecordStoreController {
    * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
    * @param dataflowId The DataCollection's dataflow.
    * @param isCreation the is creation
+   * @param isMaterialized the is materialized
    */
   @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
   void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
@@ -139,6 +140,7 @@ public interface RecordStoreController {
    * Creates the update query view.
    *
    * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
    */
   @PutMapping("/private/createUpdateQueryView")
   void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,

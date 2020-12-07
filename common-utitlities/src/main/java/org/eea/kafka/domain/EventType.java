@@ -335,12 +335,8 @@ public enum EventType {
   /** The updated dataset status. */
   UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true),
 
-  /** The create materialiced view event. */
-  CREATE_MATERIALICED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "create_materialiced_view_event", true),
-
   /** The update materialiced view event. */
-  UPDATE_MATERIALICED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+  UPDATE_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "update_materialiced_view_event", true),
 
   /** The datacollection national coordinator event. */

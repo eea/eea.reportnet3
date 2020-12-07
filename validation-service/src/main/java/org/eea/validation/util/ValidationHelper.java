@@ -250,7 +250,7 @@ public class ValidationHelper implements DisposableBean {
       values.put(LiteralConstants.USER,
           SecurityContextHolder.getContext().getAuthentication().getName());
       values.put("released", released);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALICED_VIEW_EVENT, values);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
 
     }
   }

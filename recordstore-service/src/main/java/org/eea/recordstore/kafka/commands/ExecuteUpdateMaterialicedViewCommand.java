@@ -28,7 +28,7 @@ public class ExecuteUpdateMaterialicedViewCommand extends AbstractEEAEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.UPDATE_MATERIALICED_VIEW_EVENT;
+    return EventType.UPDATE_MATERIALIZED_VIEW_EVENT;
   }
 
   /**
