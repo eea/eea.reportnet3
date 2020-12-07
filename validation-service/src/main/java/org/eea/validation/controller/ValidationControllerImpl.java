@@ -80,7 +80,7 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released);
+    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
   }
 
   /**
