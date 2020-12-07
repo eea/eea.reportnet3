@@ -1,20 +1,13 @@
 package org.eea.security.jwt.utils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.TokenVO;
-import org.eea.security.jwt.data.TokenDataVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -53,7 +46,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     try {
       if (StringUtils.hasText(apiKey)) {
         token = userManagementControllerZull.authenticateUserByApiKey(apiKey);
-        AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(token),APIKEY_TOKEN + apiKey);
+        AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(token),
+            APIKEY_TOKEN + apiKey);
       }
     } finally {
       filterChain.doFilter(request, response);

@@ -3,7 +3,6 @@ package org.eea.security.jwt.utils;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.FilterChain;
@@ -63,7 +62,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         AuthenticationUtils.performAuthentication(token, BEARER_TOKEN + jwt);
       }
     } catch (VerificationException e) {
-      //before showing error check if invocation came from feign client and toke was dued during the previous process
+      // before showing error check if invocation came from feign client and toke was dued during
+      // the previous process
       String feignInvocationUser = request.getHeader("FeignInvocationUser");
       String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
 
@@ -82,9 +82,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.setDetails(details);
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {
-        LOG_ERROR
-            .error("Could not set user authentication in security context for token {} and user ",
-                jwt, request.getHeader("FeignInvocationUser"), e);
+        LOG_ERROR.error(
+            "Could not set user authentication in security context for token {} and user ", jwt,
+            request.getHeader("FeignInvocationUser"), e);
       }
     }
 
