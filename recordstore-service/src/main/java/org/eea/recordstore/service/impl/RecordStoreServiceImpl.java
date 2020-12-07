@@ -347,11 +347,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
-   * @param partitionId the partition id
-   * @param datasetType the dataset type
-   * @param isSchemaSnapshot the is schema snapshot
-   * @param deleteData the delete data
-   * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   /**
@@ -385,7 +380,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param isCreation the is creation
    */
   @Override
-  public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
+  public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation,
+      boolean isMaterialized) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -407,14 +403,31 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
-    LOG.info("Command on Query View executed: {}", command);
+    LOG.info("Command on Query-Materialized View executed: {}", command);
   }
 
-
+  /**
+   * Update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
+   */
   @Override
-  public void createUpdateQueryView(Long datasetId) {
-    LOG.info("Create or Update Query View");
+  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
+    LOG.info("Update Materialized View");
   }
 
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @Override
+  public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
+    LOG.info("Create or Update Query-Materialized View");
+  }
 
 }
