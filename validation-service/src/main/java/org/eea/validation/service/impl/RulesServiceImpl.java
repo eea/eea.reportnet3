@@ -20,6 +20,10 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -93,6 +97,10 @@ public class RulesServiceImpl implements RulesService {
   /** The record store controller. */
   @Autowired
   private RecordStoreControllerZuul recordStoreController;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -324,7 +332,6 @@ public class RulesServiceImpl implements RulesService {
 
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
-
     } else {
       validateRule(rule);
       if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
@@ -364,6 +371,13 @@ public class RulesServiceImpl implements RulesService {
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+      // send notification
+      NotificationVO notificationVO =
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build();
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+          notificationVO);
+
     } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
         && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
       rule.setAutomatic(true);
