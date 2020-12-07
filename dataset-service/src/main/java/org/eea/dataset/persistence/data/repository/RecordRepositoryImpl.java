@@ -206,9 +206,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String fieldValue, String filter, List<ErrorTypeEnum> errorList, boolean levelErrorListFilled,
       boolean idRulesListFilled) {
     if (levelErrorListFilled && levelErrorList.size() != MAX_FILTERS) {
+      filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
       if (levelErrorList.size() == 1) {
-        filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-
         if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
           filter = CORRECT_APPEND_QUERY;
         } else {

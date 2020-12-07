@@ -85,7 +85,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
       datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null);
     } else {
-      DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+      DataSetMetabase dataset =
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
       // At this point the process of releasing all the datasets has been finished so we unlock
       // everything involved
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),

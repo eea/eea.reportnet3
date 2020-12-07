@@ -79,7 +79,8 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
 
     // with one id we take all the datasets with the same dataProviderId and dataflowId
-    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
     List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
         dataset.getDataflowId(), dataset.getDataProviderId());
     Collections.sort(datasets);

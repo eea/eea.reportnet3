@@ -910,7 +910,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   public Long getLastDatasetValidationForRelease(Long datasetId) {
-    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
     List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
         dataset.getDataflowId(), dataset.getDataProviderId());
     Collections.sort(datasets);
