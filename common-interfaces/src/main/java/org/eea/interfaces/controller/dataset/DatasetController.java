@@ -296,7 +296,7 @@ public interface DatasetController {
    * @param file the file
    */
   @PutMapping("/{datasetId}/field/{fieldId}/attachment")
-  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+  void updateAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
 
   /**
@@ -306,7 +306,7 @@ public interface DatasetController {
    * @param idField the id field
    */
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
-  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+  void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField);
 
 

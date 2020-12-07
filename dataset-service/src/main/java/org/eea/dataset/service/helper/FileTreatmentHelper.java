@@ -283,10 +283,8 @@ public class FileTreatmentHelper {
 
       LOG.info("Inserting {} records into database for dataset {} coming from file",
           allRecords.size(), datasetId, fileName);
-      batchedListOfRecords.parallelStream().forEach(recordValues -> {
-
-        datasetService.saveAllRecords(datasetId, recordValues);
-      });
+      batchedListOfRecords.parallelStream()
+          .forEach(recordValues -> datasetService.saveAllRecords(datasetId, recordValues));
 
       LOG.info("File {} processed and saved into DB for dataset", fileName, datasetId);
       releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,

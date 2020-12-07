@@ -40,7 +40,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-
   /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
@@ -51,7 +50,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(ExecutePropagateNewFieldCommand.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
 
   /**

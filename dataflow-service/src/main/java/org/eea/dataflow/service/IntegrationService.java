@@ -18,7 +18,7 @@ public interface IntegrationService {
    * @param integrationVO the integration VO
    * @throws EEAException the EEA exception
    */
-  void createIntegration(final IntegrationVO integrationVO) throws EEAException;
+  void createIntegration(IntegrationVO integrationVO) throws EEAException;
 
   /**
    * Delete integration.
@@ -26,7 +26,7 @@ public interface IntegrationService {
    * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
-  void deleteIntegration(final Long integrationId) throws EEAException;
+  void deleteIntegration(Long integrationId) throws EEAException;
 
   /**
    * Update integration.
@@ -34,7 +34,7 @@ public interface IntegrationService {
    * @param integrationVO the integration VO
    * @throws EEAException the EEA exception
    */
-  void updateIntegration(final IntegrationVO integrationVO) throws EEAException;
+  void updateIntegration(IntegrationVO integrationVO) throws EEAException;
 
   /**
    * Gets the all integrations by criteria.
@@ -43,8 +43,7 @@ public interface IntegrationService {
    * @return the all integrations by criteria
    * @throws EEAException the EEA exception
    */
-  List<IntegrationVO> getAllIntegrationsByCriteria(final IntegrationVO integrationVO)
-      throws EEAException;
+  List<IntegrationVO> getAllIntegrationsByCriteria(IntegrationVO integrationVO) throws EEAException;
 
   /**
    * Gets only extensions and operations.
