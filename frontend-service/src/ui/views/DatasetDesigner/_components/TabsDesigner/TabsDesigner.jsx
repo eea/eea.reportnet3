@@ -187,7 +187,7 @@ export const TabsDesigner = withRouter(
     const onTabAddCancel = () => {
       if (!isErrorDialogVisible) {
         const inmTabs = [...tabs];
-        const newTab = tabs.filter(tab => tab.newTab === true);
+        const newTab = tabs.filter(tab => tab.newTab);
         const filteredTabs = inmTabs.filter(inmTab => inmTab.index !== newTab[0].index);
         setTabs([...filteredTabs]);
       }
@@ -296,7 +296,7 @@ export const TabsDesigner = withRouter(
 
     const checkEditingTabs = () => {
       const inmTabs = [...tabs];
-      const editingTabs = inmTabs.filter(tab => tab.newTab === true);
+      const editingTabs = inmTabs.filter(tab => tab.newTab);
       return editingTabs.length > 0;
     };
 
