@@ -236,26 +236,36 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
    * @param dataflowId The DataCollection's dataflow.
    * @param isCreation the is creation
+   * @param isMaterialized the is materialized
    */
   @Override
   @HystrixCommand
   @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
   public void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
-      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation) {
+      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation,
+      @RequestParam("isMaterialized") boolean isMaterialized) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
+    recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
+        isMaterialized);
   }
 
 
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
   @Override
   @PutMapping("/private/createUpdateQueryView")
-  public void createUpdateQueryView(@RequestParam("datasetId") Long datasetId) {
-    recordStoreService.createUpdateQueryView(datasetId);
+  public void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("isMaterialized") boolean isMaterialized) {
+    recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
   }
 
 }

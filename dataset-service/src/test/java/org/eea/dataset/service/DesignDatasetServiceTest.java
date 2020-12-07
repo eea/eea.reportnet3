@@ -223,7 +223,8 @@ public class DesignDatasetServiceTest {
         .thenReturn(field);
     // when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(Arrays.asList(dataset));
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(Arrays.asList(dataset));
-    Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any());
+    Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
+        Mockito.anyBoolean());
 
     designDatasetService.copyDesignDatasets(1L, 2L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),

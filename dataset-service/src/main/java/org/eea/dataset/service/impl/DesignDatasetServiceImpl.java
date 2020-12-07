@@ -267,7 +267,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // Create the views necessary to the validation in the new datasets created
         dictionaryOriginTargetDatasetsId
             .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
-                .createUpdateQueryView(datasetDestination));
+                .createUpdateQueryView(datasetDestination, false));
 
 
         // Release the notification

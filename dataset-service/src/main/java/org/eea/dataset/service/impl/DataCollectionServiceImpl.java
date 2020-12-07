@@ -328,7 +328,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
-        recordStoreControllerZuul.createUpdateQueryView(dataset.getId());
+        recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
         List<RuleVO> rulesSql =
             rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
         if (null != rulesSql && !rulesSql.isEmpty()) {
@@ -456,7 +456,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
           // 10. Create schemas for each dataset
           // This method will release the lock
-          recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
+          recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
+              true);
         } catch (SQLException e) {
           LOG_ERROR.error("Error persisting changes. Rolling back...", e);
           releaseLockAndRollback(connection, dataflowId, isCreation);
