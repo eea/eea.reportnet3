@@ -151,8 +151,11 @@ public interface RecordStoreService {
    * Update materialized query view.
    *
    * @param dataflowId the dataflow id
+   * @param released
+   * @param user
    */
-  void updateMaterializedQueryView(Long dataflowId);
+  void updateMaterializedQueryView(Long dataflowId, String user, Boolean released);
+
 
 
 }

@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
 
@@ -131,9 +133,11 @@ public class ValidationHelper implements DisposableBean {
   private ExecutorService validationExecutorService;
 
 
+  /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The validation controller. */
   @Autowired
   private ValidationController validationController;
 
@@ -230,9 +234,29 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the uu id
    */
   @Async
-  @LockMethod(removeWhenFinish = false, isController = false)
+  @LockMethod(removeWhenFinish = true, isController = false)
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
-      String processId, boolean released) {
+      String processId, boolean released, boolean updateviews) {
+
+    DatasetTypeEnum type = datasetMetabaseControllerZuul.getType(datasetId);
+
+    if (type.equals(DatasetTypeEnum.DESIGN)) {
+      executeValidationProcess(datasetId, processId, released);
+    } else if (Boolean.FALSE.equals(updateviews)) {
+      executeValidationProcess(datasetId, processId, released);
+    } else {
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      values.put(LiteralConstants.USER,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      values.put("released", released);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALICED_VIEW_EVENT, values);
+
+    }
+  }
+
+
+  public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
     initializeProcess(processId, true, released);
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
@@ -248,6 +272,8 @@ public class ValidationHelper implements DisposableBean {
     releaseFieldsValidation(datasetId, processId);
     startProcess(processId);
   }
+
+
 
   /**
    * Reduce pending tasks for the given processId.

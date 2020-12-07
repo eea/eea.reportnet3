@@ -29,7 +29,10 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -59,6 +62,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -241,9 +245,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
-  /**
-   * The data set metabase controller zuul.
-   */
+  /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
@@ -251,6 +253,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaController;
 
+  @Autowired
+  private EUDatasetControllerZuul euDatasetControllerZuul;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -261,6 +265,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetIdsAndSchemaIds Map matching datasetIds with datasetSchemaIds.
    * @param dataflowId The DataCollection's dataflow.
    * @param isCreation the is creation
+   * @param isMaterialized the is materialized
    */
   @Override
   @Async
@@ -902,6 +907,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * insert the values into the schema of the dataset_value and table_value
    *
    * @param datasetIdAndSchemaId dataset ids matching schema ids
+   * @param isMaterialized the is materialized
    */
   private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId,
       boolean isMaterialized) {
@@ -1095,11 +1101,71 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * Update materialized query view.
    *
-   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
    */
   @Override
-  public void updateMaterializedQueryView(Long dataflowId) {
-    LOG.info(" Update Query View");
+  @Async
+  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
+    LOG.info(" Update Materialized Views");
+
+    DatasetTypeEnum type = dataSetMetabaseControllerZuul.getType(datasetId);
+    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+
+    try {
+      switch (type) {
+        case REPORTING:
+          List<ReportingDatasetVO> reportingDatasets =
+              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
+          for (ReportingDatasetVO dataset : reportingDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case COLLECTION:
+          List<DataCollectionVO> dataCollectionDatasets =
+              dataCollectionControllerZuul.findDataCollectionIdByDataflowId(dataflowId);
+          for (DataCollectionVO dataset : dataCollectionDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case EUDATASET:
+          List<EUDatasetVO> euDatasets =
+              euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
+          for (EUDatasetVO dataset : euDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (RecordStoreAccessException e) {
+      LOG_ERROR.error("Error updating Materialized view: {}", e.getMessage(), e);
+    }
+    Map<String, Object> values = new HashMap<>();
+    values.put(LiteralConstants.DATASET_ID, datasetId);
+    values.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    values.put("released", released);
+    values.put("updateviews", false);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
+  }
+
+  /**
+   * Launch update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
+    String viewToUpdate =
+        "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
+    List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+
+    String updateQuery = "refresh materialized view dataset_";
+
+    for (String view : viewList) {
+      executeQueryViewCommands(updateQuery + datasetId + "." + view);
+    }
+    LOG.info("These views: {} have been deleted.", viewList);
   }
 
 
@@ -1246,10 +1312,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     stringQuery.append(" inner join dataset_" + datasetId
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
         + "')");
-
-    if (isMaterialized) {
-      stringQuery.append(" WITH NO DATA ");
-    }
 
     executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
