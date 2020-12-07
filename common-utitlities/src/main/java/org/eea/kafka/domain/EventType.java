@@ -337,7 +337,7 @@ public enum EventType {
 
   /** The update materialiced view event. */
   UPDATE_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "update_materialiced_view_event", true),
+      "update_materialized_view_event", true),
 
   /** The datacollection national coordinator event. */
   DATACOLLECTION_NATIONAL_COORDINATOR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

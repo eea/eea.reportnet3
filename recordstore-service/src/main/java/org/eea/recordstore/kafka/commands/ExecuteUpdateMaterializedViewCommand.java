@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * The Class ExecuteUpdateMaterialicedViewCommand.
  */
 @Component
-public class ExecuteUpdateMaterialicedViewCommand extends AbstractEEAEventHandlerCommand {
+public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandlerCommand {
 
 
   /** The database management service. */

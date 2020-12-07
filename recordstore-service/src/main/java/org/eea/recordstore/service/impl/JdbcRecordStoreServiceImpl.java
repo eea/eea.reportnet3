@@ -253,6 +253,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaController;
 
+  /** The eu dataset controller zuul. */
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
 
