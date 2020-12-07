@@ -335,7 +335,7 @@ public enum EventType {
   /** The updated dataset status. */
   UPDATED_DATASET_STATUS(LiteralConstants.DATA_REPORTING_TOPIC, "updated_dataset_status", true),
 
-  /** The update materialiced view event. */
+  /** The update materialized view event. */
   UPDATE_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "update_materialized_view_event", true),
 
