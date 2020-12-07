@@ -408,6 +408,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Update materialized query view.
    *
    * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
    */
   @Override
   public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {

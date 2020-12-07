@@ -232,17 +232,19 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param processId the uu id
+   * @param released the released
+   * @param updateViews the update views
    */
   @Async
   @LockMethod(removeWhenFinish = true, isController = false)
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
-      String processId, boolean released, boolean updateviews) {
+      String processId, boolean released, boolean updateViews) {
 
     DatasetTypeEnum type = datasetMetabaseControllerZuul.getType(datasetId);
 
     if (type.equals(DatasetTypeEnum.DESIGN)) {
       executeValidationProcess(datasetId, processId, released);
-    } else if (Boolean.FALSE.equals(updateviews)) {
+    } else if (Boolean.FALSE.equals(updateViews)) {
       executeValidationProcess(datasetId, processId, released);
     } else {
       Map<String, Object> values = new HashMap<>();

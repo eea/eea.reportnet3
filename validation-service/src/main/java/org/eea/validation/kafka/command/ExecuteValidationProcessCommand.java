@@ -42,10 +42,10 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
   public void execute(EEAEventVO eeaEventVO) {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
-    Boolean updateviews = Boolean.TRUE;
-    if (null != eeaEventVO.getData().get("updateviews")) {
-      updateviews = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("updateviews")));
+    Boolean updateViews = Boolean.TRUE;
+    if (null != eeaEventVO.getData().get("updateViews")) {
+      updateViews = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("updateViews")));
     }
-    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), false, updateviews);
+    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), false, updateViews);
   }
 }

@@ -1145,7 +1145,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     values.put(LiteralConstants.USER,
         SecurityContextHolder.getContext().getAuthentication().getName());
     values.put("released", released);
-    values.put("updateviews", false);
+    values.put("updateViews", false);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 
