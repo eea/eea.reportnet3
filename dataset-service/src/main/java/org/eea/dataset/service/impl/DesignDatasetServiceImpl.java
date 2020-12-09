@@ -342,6 +342,11 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           FieldSchema field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
           field.setIdFieldSchema(newFieldId);
           field.setIdRecord(newRecordId);
+          // check if the field has referencedField, but the type is no LINK, set the referenced
+          // part as null
+          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+            field.setReferencedField(null);
+          }
           record.getFieldSchema().add(field);
 
           // if the type is Link we store to later modify the schema id's with the proper fk
@@ -403,7 +408,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord())) {
           field.setIdRecord(dictionaryOriginTargetObjectId.get(field.getIdRecord()));
         }
-        if (field.getReferencedField() != null) {
+        if (field.getReferencedField() != null && DataType.LINK.equals(field.getType())) {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to

@@ -127,7 +127,7 @@ public class JwtTokenProvider {
    * @return the token data vo
    *
    * @throws VerificationException the verification exception
-   * @see org.eea.security.jwt.data.TokenDataVO
+   * @see TokenDataVO
    */
   public TokenDataVO parseToken(String jwt) throws VerificationException {
 

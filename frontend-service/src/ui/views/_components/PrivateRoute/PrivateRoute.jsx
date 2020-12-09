@@ -10,6 +10,8 @@ import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
+import { LocalStorageUtils } from 'ui/views/_functions/Utils';
+
 export const PrivateRoute = ({ component: Component, path }) => {
   const userContext = useContext(UserContext);
 

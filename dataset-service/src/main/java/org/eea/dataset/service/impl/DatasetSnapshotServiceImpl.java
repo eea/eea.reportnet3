@@ -1034,9 +1034,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Delete
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.DELETE_RECORDS.getValue(), datasetId));
-      // Update
+      // Update field
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_FIELD.getValue(), datasetId));
+      // Update records
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_RECORDS.getValue(), datasetId));
       // Delete dataset
       lockService.removeLockByCriteria(
           Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
@@ -1092,8 +1095,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       createlockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
       // Delete
       createlockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
-      // Update
+      // Update field
       createlockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
+      // Update record
+      createlockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
       // Delete dataset
       createlockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
 

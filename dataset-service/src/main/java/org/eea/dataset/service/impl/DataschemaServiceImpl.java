@@ -730,7 +730,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
       fieldSchema.put("validExtensions", Arrays.asList(validExtensions));
     }
-    if (fieldSchemaVO.getReferencedField() != null) {
+    if (fieldSchemaVO.getReferencedField() != null
+        && DataType.LINK.equals(fieldSchemaVO.getType())) {
       Document referenced = new Document();
       referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
           new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
@@ -760,6 +761,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       this.updateIsPkReferencedInFieldSchema(
           fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
           fieldSchemaVO.getReferencedField().getIdPk(), true);
+    } else if (fieldSchema.get(LiteralConstants.REFERENCED_FIELD) != null
+        && !DataType.LINK.equals(fieldSchemaVO.getType())) {
+      // If the field is not a Link type, delete the referenced field to avoid problems
+      fieldSchema.put(LiteralConstants.REFERENCED_FIELD, null);
     }
     return typeModified;
   }

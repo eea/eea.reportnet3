@@ -8,3 +8,4 @@ export { QuerystringUtils } from './QuerystringUtils';
 export { RecordUtils } from './RecordUtils';
 export { TabsUtils } from './TabsUtils';
 export { TextUtils } from './TextUtils';
+export { LocalStorageUtils } from './LocalStorageUtils';
