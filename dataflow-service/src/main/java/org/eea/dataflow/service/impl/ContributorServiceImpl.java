@@ -205,6 +205,7 @@ public class ContributorServiceImpl implements ContributorService {
     ResourceGroupEnum resourceGroupEnumDataflow = null;
     ResourceGroupEnum resourceGroupEnumDataset = null;
 
+    contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
     switch (role) {
       case EDITOR:
         securityRoleEnum =
@@ -272,6 +273,9 @@ public class ContributorServiceImpl implements ContributorService {
       ResourceGroupEnum resourceGroupEnumDataflow, ResourceGroupEnum resourceGroupEnumDataset,
       final List<ResourceAssignationVO> resourceAssignationVOList,
       List<ResourceInfoVO> resourceInfoVOs, Boolean persistDataflowPermission) {
+
+    contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
+
     ResourceInfoVO resourceDataflow =
         resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
     if (null == resourceDataflow.getName()) {
@@ -353,6 +357,7 @@ public class ContributorServiceImpl implements ContributorService {
   public void updateContributor(Long dataflowId, ContributorVO contributorVO, String role,
       Long dataProviderId) throws EEAException {
 
+    contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
       Boolean persistDataflowPermission = null;
