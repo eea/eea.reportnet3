@@ -74,7 +74,7 @@ export const PublicFrontpage = () => {
                     <h4>Need any help?</h4>
                     <p>Please contact us at</p>
                     <p>
-                      <a href="mailto:helpdesk@eionet.europa.eu">helpdesk@reportnet.europa.eu</a>
+                      <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>
                     </p>
                   </div>
                   <hr className={styles.separator} />

@@ -38,7 +38,7 @@ export const Footer = withRouter(({ history, leftMargin }) => {
             </a>
           </div>
           <div className={styles.helpDesk}>
-            <a href="mailto:helpdesk@eionet.europa.eu">helpdesk@eionet.europa.eu</a>
+            <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>
           </div>
         </div>
       </div>
