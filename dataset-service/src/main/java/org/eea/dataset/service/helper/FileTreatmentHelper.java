@@ -12,12 +12,10 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -27,7 +25,6 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -78,13 +75,6 @@ public class FileTreatmentHelper {
    */
   @Autowired
   private DataSetMapper dataSetMapper;
-
-  /**
-   * The lock service.
-   */
-  @Autowired
-  private LockService lockService;
-
 
   /**
    * The dataset schema service.
@@ -293,10 +283,8 @@ public class FileTreatmentHelper {
 
       LOG.info("Inserting {} records into database for dataset {} coming from file",
           allRecords.size(), datasetId, fileName);
-      batchedListOfRecords.parallelStream().forEach(recordValues -> {
-
-        datasetService.saveAllRecords(datasetId, recordValues);
-      });
+      batchedListOfRecords.parallelStream()
+          .forEach(recordValues -> datasetService.saveAllRecords(datasetId, recordValues));
 
       LOG.info("File {} processed and saved into DB for dataset", fileName, datasetId);
       releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,

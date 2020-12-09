@@ -378,13 +378,16 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
+    TableVO tablevo = new TableVO();
+    tablevo.setId(1L);
+    tablevo.setLevelError(ErrorTypeEnum.ERROR);
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(new TableVO());
+            .thenReturn(tablevo);
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null,
-        null);
+    assertEquals(tablevo, dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields,
+        errorfilter, null, null, null));
   }
 
   /**
