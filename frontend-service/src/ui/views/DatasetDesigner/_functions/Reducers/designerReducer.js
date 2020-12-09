@@ -182,9 +182,6 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_UPDATE_TABS':
       return { ...state, schemaTables: payload.data };
 
-    case 'SET_IS_WEBFORM_CONFIGURED':
-      return { ...state, isWebformConfigured: payload.isWebformConfiguredValue };
-
     default:
       return state;
   }
