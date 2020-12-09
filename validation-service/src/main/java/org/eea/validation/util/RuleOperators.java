@@ -352,7 +352,7 @@ public class RuleOperators {
    */
   public static boolean recordNumberMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(regex);
+      return getValue(fieldSchemaId).matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -1751,7 +1751,7 @@ public class RuleOperators {
     try {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
-      return date1.isBefore(date2) || date1.equals(date2);
+      return date1.isAfter(date2) || date1.equals(date2);
     } catch (Exception e) {
       return true;
     }
@@ -1769,7 +1769,7 @@ public class RuleOperators {
     try {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
-      return date1.isAfter(date2) || date1.equals(date2);
+      return date1.isBefore(date2) || date1.equals(date2);
     } catch (Exception e) {
       return true;
     }
@@ -1930,7 +1930,7 @@ public class RuleOperators {
    */
   public static boolean fieldNumberMatches(String value, String regex) {
     try {
-      return value.matches(regex);
+      return value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }

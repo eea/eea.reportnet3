@@ -34,9 +34,23 @@ public class RuleOperatorsTest {
     fields.add(fieldValue1);
     fields.add(fieldValue2);
     RecordValue recordValue = new RecordValue();
-    recordValue.setDataProviderCode("ES");
     recordValue.setFields(fields);
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setRecord(recordValue);
+    RuleOperators.setEntity("");
+    recordValue.setDataProviderCode(null);
+    RuleOperators.setEntity(fieldValue);
+    recordValue.setDataProviderCode("ES");
+    RuleOperators.setEntity(fieldValue);
+    recordValue.setDataProviderCode(null);
     RuleOperators.setEntity(recordValue);
+    recordValue.setDataProviderCode("ES");
+    RuleOperators.setEntity(recordValue);
+  }
+
+  @Test
+  public void getValueTest() {
+    assertTrue(RuleOperators.recordNull("3"));
   }
 
   @Test
@@ -1977,7 +1991,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateGreaterThanOrEqualsThanRecordLeftBranchTest() {
-    fieldValue1.setValue("2019-01-01");
+    fieldValue1.setValue("2021-01-01");
     fieldValue2.setValue("2020-01-01");
     assertTrue(RuleOperators.recordDateGreaterThanOrEqualsThanRecord("1", "2"));
   }
@@ -1991,7 +2005,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateGreaterThanOrEqualsThanRecordFalseTest() {
-    fieldValue1.setValue("2021-01-01");
+    fieldValue1.setValue("2019-01-01");
     fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateGreaterThanOrEqualsThanRecord("1", "2"));
   }
@@ -1999,7 +2013,593 @@ public class RuleOperatorsTest {
   @Test
   public void recordDateGreaterThanOrEqualsThanRecordCatchTest() {
     fieldValue1.setValue(null);
-    fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDateGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDateLessThanOrEqualsThanRecordLeftBranchTest() {
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordDateLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDateLessThanOrEqualsThanRecordRightBranchTest() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordDateLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDateLessThanOrEqualsThanRecordFalseTest() {
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertFalse(RuleOperators.recordDateLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDateLessThanOrEqualsThanRecordCatchTest() {
+    fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordDateLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void fieldAndTest() {
+    assertTrue(RuleOperators.fieldAnd(true, true));
+  }
+
+  @Test
+  public void fieldAndLeftBranchTest() {
+    assertFalse(RuleOperators.fieldAnd(false, true));
+  }
+
+  @Test
+  public void fieldAndRightBranchTest() {
+    assertFalse(RuleOperators.fieldAnd(true, false));
+  }
+
+  @Test
+  public void fieldOrTest() {
+    assertFalse(RuleOperators.fieldOr(false, false));
+  }
+
+  @Test
+  public void fieldOrLeftBranchTest() {
+    assertTrue(RuleOperators.fieldOr(true, false));
+  }
+
+  @Test
+  public void fieldOrRightBranchTest() {
+    assertTrue(RuleOperators.fieldOr(false, true));
+  }
+
+  @Test
+  public void fieldNotTest() {
+    assertTrue(RuleOperators.fieldNot(false));
+  }
+
+  @Test
+  public void fieldNotFalseTest() {
+    assertFalse(RuleOperators.fieldNot(true));
+  }
+
+  @Test
+  public void fieldNullTest() {
+    assertTrue(RuleOperators.fieldNull(""));
+  }
+
+  @Test
+  public void fieldNotNullTest() {
+    assertTrue(RuleOperators.fieldNotNull("test"));
+  }
+
+  @Test
+  public void fieldNotNullFalseTest() {
+    assertFalse(RuleOperators.fieldNotNull(""));
+  }
+
+  @Test
+  public void fieldNumberEqualsTest() {
+    assertTrue(RuleOperators.fieldNumberEquals("1", 1));
+  }
+
+  @Test
+  public void fieldNumberEqualsCatchTest() {
+    assertTrue(RuleOperators.fieldNumberEquals("", 1));
+  }
+
+  @Test
+  public void fieldNumberDistinctTest() {
+    assertTrue(RuleOperators.fieldNumberDistinct("1", 2));
+  }
+
+  @Test
+  public void fieldNumberDistinctFalseTest() {
+    assertFalse(RuleOperators.fieldNumberDistinct("1", 1));
+  }
+
+  @Test
+  public void fieldNumberDistinctCatchTest() {
+    assertTrue(RuleOperators.fieldNumberDistinct("", 1));
+  }
+
+  @Test
+  public void fieldNumberGreaterThanTest() {
+    assertTrue(RuleOperators.fieldNumberGreaterThan("2", 1));
+  }
+
+  @Test
+  public void fieldNumberGreaterThanFalseTest() {
+    assertFalse(RuleOperators.fieldNumberGreaterThan("1", 2));
+  }
+
+  @Test
+  public void fieldNumberGreaterCatchTest() {
+    assertTrue(RuleOperators.fieldNumberGreaterThan("", 1));
+  }
+
+  @Test
+  public void fieldNumberLessThanTest() {
+    assertTrue(RuleOperators.fieldNumberLessThan("1", 2));
+  }
+
+  @Test
+  public void fieldNumberLessThanFalseTest() {
+    assertFalse(RuleOperators.fieldNumberLessThan("2", 1));
+  }
+
+  @Test
+  public void fieldNumberLessThanCatchTest() {
+    assertTrue(RuleOperators.fieldNumberLessThan("", 1));
+  }
+
+  @Test
+  public void fieldNumberGreaterThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldNumberGreaterThanOrEqualsThan("2", 1));
+  }
+
+  @Test
+  public void fieldNumberGreaterThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldNumberGreaterThanOrEqualsThan("1", 2));
+  }
+
+  @Test
+  public void fieldNumberGreaterThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldNumberGreaterThanOrEqualsThan("", 2));
+  }
+
+  @Test
+  public void fieldNumberLessThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldNumberLessThanOrEqualsThan("1", 2));
+  }
+
+  @Test
+  public void fieldNumberLessThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldNumberLessThanOrEqualsThan("2", 1));
+  }
+
+  @Test
+  public void fieldNumberLessThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldNumberLessThanOrEqualsThan("", 2));
+  }
+
+  @Test
+  public void fieldNumberMatchesTest() {
+    assertTrue(RuleOperators.fieldNumberMatches("123", "(.*)2(.*)"));
+  }
+
+  @Test
+  public void fieldNumberMatchesCatchTest() {
+    assertTrue(RuleOperators.fieldNumberMatches(null, "(.*)2(.*)"));
+  }
+
+  @Test
+  public void fieldStringLengthTest() {
+    assertEquals("4", RuleOperators.fieldStringLength("test"));
+  }
+
+  @Test
+  public void fieldStringLengthNullTest() {
+    assertNull(RuleOperators.fieldStringLength(null));
+  }
+
+  @Test
+  public void fieldStringEqualsTest() {
+    assertTrue(RuleOperators.fieldStringEquals("test", "test"));
+  }
+
+  @Test
+  public void fieldStringEqualsCatchTest() {
+    assertTrue(RuleOperators.fieldStringEquals(null, null));
+  }
+
+  @Test
+  public void fieldStringEqualsIgnoreCaseTest() {
+    assertTrue(RuleOperators.fieldStringEqualsIgnoreCase("test", "TEST"));
+  }
+
+  @Test
+  public void fieldStringEqualsIgnoreCaseCatchTest() {
+    assertTrue(RuleOperators.fieldStringEqualsIgnoreCase(null, null));
+  }
+
+  @Test
+  public void fieldStringMatchesTest() {
+    assertTrue(RuleOperators.fieldStringMatches("ES test", "{%R3_COUNTRY_CODE%} test"));
+  }
+
+  @Test
+  public void fieldStringMatchesCatchTest() {
+    assertTrue(RuleOperators.fieldStringMatches(null, "{%R3_COUNTRY_CODE%} test"));
+  }
+
+  @Test
+  public void fieldDayEqualsTest() {
+    assertTrue(RuleOperators.fieldDayEquals("2020-01-01", 1));
+  }
+
+  @Test
+  public void fieldDayEqualsFalseTest() {
+    assertFalse(RuleOperators.fieldDayEquals("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldDayEqualsCatchTest() {
+    assertTrue(RuleOperators.fieldDayEquals("test", 1));
+  }
+
+  @Test
+  public void fieldDayDistinctTest() {
+    assertTrue(RuleOperators.fieldDayDistinct("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldDayDistinctFalseTest() {
+    assertFalse(RuleOperators.fieldDayDistinct("2020-01-01", 1));
+  }
+
+  @Test
+  public void fieldDayDistinctCatchTest() {
+    assertTrue(RuleOperators.fieldDayDistinct("test", 1));
+  }
+
+  @Test
+  public void fieldDayGreaterThanTest() {
+    assertTrue(RuleOperators.fieldDayGreaterThan("2020-01-02", 1));
+  }
+
+  @Test
+  public void fieldDayGreaterThanFalseTest() {
+    assertFalse(RuleOperators.fieldDayGreaterThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldDayGreaterThanCatchTest() {
+    assertTrue(RuleOperators.fieldDayGreaterThan("test", 2));
+  }
+
+  @Test
+  public void fieldDayLessThanTest() {
+    assertTrue(RuleOperators.fieldDayLessThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldDayLessThanFalseTest() {
+    assertFalse(RuleOperators.fieldDayLessThan("2020-01-02", 1));
+  }
+
+  @Test
+  public void fieldDayLessThanCatchTest() {
+    assertTrue(RuleOperators.fieldDayLessThan("test", 1));
+  }
+
+  @Test
+  public void fieldDayGreaterThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldDayGreaterThanOrEqualsThan("2020-01-02", 1));
+  }
+
+  @Test
+  public void fieldDayGreaterThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldDayGreaterThanOrEqualsThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldDayGreaterThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldDayGreaterThanOrEqualsThan("test", 2));
+  }
+
+  @Test
+  public void fieldDayLessThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldDayLessThanOrEqualsThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldDayLessThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldDayLessThanOrEqualsThan("2020-01-02", 1));
+  }
+
+  @Test
+  public void fieldDayLessThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldDayLessThanOrEqualsThan("test", 1));
+  }
+
+  @Test
+  public void fieldMonthEqualsTest() {
+    assertTrue(RuleOperators.fieldMonthEquals("2020-01-01", 1));
+  }
+
+  @Test
+  public void fieldMonthEqualsFalseTest() {
+    assertFalse(RuleOperators.fieldMonthEquals("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldMonthEqualsCatchTest() {
+    assertTrue(RuleOperators.fieldMonthEquals("test", 1));
+  }
+
+  @Test
+  public void fieldMonthDistinctTest() {
+    assertTrue(RuleOperators.fieldMonthDistinct("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldMonthDistinctFalseTest() {
+    assertFalse(RuleOperators.fieldMonthDistinct("2020-01-01", 1));
+  }
+
+  @Test
+  public void fieldMonthDistinctCatchTest() {
+    assertTrue(RuleOperators.fieldMonthDistinct("test", 1));
+  }
+
+  @Test
+  public void fieldMonthGreaterThanTest() {
+    assertTrue(RuleOperators.fieldMonthGreaterThan("2020-02-01", 1));
+  }
+
+  @Test
+  public void fieldMonthGreaterThanFalseTest() {
+    assertFalse(RuleOperators.fieldMonthGreaterThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldMonthGreaterThanCatchTest() {
+    assertTrue(RuleOperators.fieldMonthGreaterThan("test", 2));
+  }
+
+  @Test
+  public void fieldMonthLessThanTest() {
+    assertTrue(RuleOperators.fieldMonthLessThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldMonthLessThanFalseTest() {
+    assertFalse(RuleOperators.fieldMonthLessThan("2020-02-01", 1));
+  }
+
+  @Test
+  public void fieldMonthLessThanCatchTest() {
+    assertTrue(RuleOperators.fieldMonthLessThan("test", 1));
+  }
+
+  @Test
+  public void fieldMonthGreaterThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldMonthGreaterThanOrEqualsThan("2020-02-01", 1));
+  }
+
+  @Test
+  public void fieldMonthGreaterThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldMonthGreaterThanOrEqualsThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldMonthGreaterThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldMonthGreaterThanOrEqualsThan("test", 2));
+  }
+
+  @Test
+  public void fieldMonthLessThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldMonthLessThanOrEqualsThan("2020-01-01", 2));
+  }
+
+  @Test
+  public void fieldMonthLessThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldMonthLessThanOrEqualsThan("2020-02-01", 1));
+  }
+
+  @Test
+  public void fieldMonthLessThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldMonthLessThanOrEqualsThan("true", 1));
+  }
+
+  @Test
+  public void fieldYearEqualsTest() {
+    assertTrue(RuleOperators.fieldYearEquals("2020-02-01", 2020));
+  }
+
+  @Test
+  public void fieldYearEqualsFalseTest() {
+    assertFalse(RuleOperators.fieldYearEquals("2020-02-01", 2021));
+  }
+
+  @Test
+  public void fieldYearEqualsCatchTest() {
+    assertTrue(RuleOperators.fieldYearEquals("test", 2021));
+  }
+
+  @Test
+  public void fieldYearDistinctTest() {
+    assertTrue(RuleOperators.fieldYearDistinct("2020-02-01", 2021));
+  }
+
+  @Test
+  public void fieldYearDistinctFalseTest() {
+    assertFalse(RuleOperators.fieldYearDistinct("2020-02-01", 2020));
+  }
+
+  @Test
+  public void fieldYearDistinctCatchTest() {
+    assertTrue(RuleOperators.fieldYearDistinct("test", 2020));
+  }
+
+  @Test
+  public void fieldYearGreaterThanTest() {
+    assertTrue(RuleOperators.fieldYearGreaterThan("2020-02-01", 2019));
+  }
+
+  @Test
+  public void fieldYearGreaterThanFalseTest() {
+    assertFalse(RuleOperators.fieldYearGreaterThan("2020-02-01", 2021));
+  }
+
+  @Test
+  public void fieldYearGreaterThanCatchTest() {
+    assertTrue(RuleOperators.fieldYearGreaterThan("test", 2021));
+  }
+
+  @Test
+  public void fieldYearLessThanTest() {
+    assertTrue(RuleOperators.fieldYearLessThan("2020-02-01", 2021));
+  }
+
+  @Test
+  public void fieldYearLessThanFalseTest() {
+    assertFalse(RuleOperators.fieldYearLessThan("2020-02-01", 2019));
+  }
+
+  @Test
+  public void fieldYearLessThanCatchTest() {
+    assertTrue(RuleOperators.fieldYearLessThan("test", 2019));
+  }
+
+  @Test
+  public void fieldYearGreaterThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldYearGreaterThanOrEqualsThan("2020-02-01", 2019));
+  }
+
+  @Test
+  public void fieldYearGreaterThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldYearGreaterThanOrEqualsThan("2020-02-01", 2021));
+  }
+
+  @Test
+  public void fieldYearGreaterThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldYearGreaterThanOrEqualsThan("test", 2021));
+  }
+
+  @Test
+  public void fieldYearLessThanOrEqualsThanTest() {
+    assertTrue(RuleOperators.fieldYearLessThanOrEqualsThan("2020-02-01", 2021));
+  }
+
+  @Test
+  public void fieldYearLessThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldYearLessThanOrEqualsThan("2020-02-01", 2019));
+  }
+
+  @Test
+  public void fieldYearLessThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldYearLessThanOrEqualsThan("test", 2019));
+  }
+
+  @Test
+  public void fieldDateEqualsTest() {
+    assertTrue(RuleOperators.fieldDateEquals("2020-01-01", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateEqualsFalseTest() {
+    assertFalse(RuleOperators.fieldDateEquals("2020-01-01", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateEqualsCatchTest() {
+    assertTrue(RuleOperators.fieldDateEquals("test", "test"));
+  }
+
+  @Test
+  public void fieldDateDistinctTest() {
+    assertTrue(RuleOperators.fieldDateDistinct("2020-01-01", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateDistinctFalseTest() {
+    assertFalse(RuleOperators.fieldDateDistinct("2020-01-01", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateDistinctCatchTest() {
+    assertTrue(RuleOperators.fieldDateDistinct("test", "test"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanTest() {
+    assertTrue(RuleOperators.fieldDateGreaterThan("2020-01-02", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanFalseTest() {
+    assertFalse(RuleOperators.fieldDateGreaterThan("2020-01-01", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanCatchTest() {
+    assertTrue(RuleOperators.fieldDateGreaterThan("test", "test"));
+  }
+
+  @Test
+  public void fieldDateLessThanTest() {
+    assertTrue(RuleOperators.fieldDateLessThan("2020-01-01", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateLessThanFalseTest() {
+    assertFalse(RuleOperators.fieldDateLessThan("2020-01-02", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateLessThanCatchTest() {
+    assertTrue(RuleOperators.fieldDateLessThan("test", "test"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanOrEqualsThanLeftBranchTest() {
+    assertTrue(RuleOperators.fieldDateGreaterThanOrEqualsThan("2020-01-02", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanOrEqualsThanRightBranchTest() {
+    assertTrue(RuleOperators.fieldDateGreaterThanOrEqualsThan("2020-01-02", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldDateGreaterThanOrEqualsThan("2020-01-01", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateGreaterThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldDateGreaterThanOrEqualsThan("test", "test"));
+  }
+
+  @Test
+  public void fieldDateLessThanOrEqualsThanLeftBranchTest() {
+    assertTrue(RuleOperators.fieldDateLessThanOrEqualsThan("2020-01-01", "2020-01-02"));
+  }
+
+  @Test
+  public void fieldDateLessThanOrEqualsThanRightBranchTest() {
+    assertTrue(RuleOperators.fieldDateLessThanOrEqualsThan("2020-01-01", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateLessThanOrEqualsThanFalseTest() {
+    assertFalse(RuleOperators.fieldDateLessThanOrEqualsThan("2020-01-02", "2020-01-01"));
+  }
+
+  @Test
+  public void fieldDateLessThanOrEqualsThanCatchTest() {
+    assertTrue(RuleOperators.fieldDateLessThanOrEqualsThan("test", "test"));
   }
 }
