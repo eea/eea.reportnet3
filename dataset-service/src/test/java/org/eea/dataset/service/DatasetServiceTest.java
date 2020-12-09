@@ -328,6 +328,7 @@ public class DatasetServiceTest {
   /** The field. */
   private FieldValue field;
 
+  /** The field with label. */
   public FieldValueWithLabelProjection fieldWithLabel;
 
   /**
@@ -1959,12 +1960,14 @@ public class DatasetServiceTest {
     tableSchema.setNameTableSchema("nameTableSchema");
     tableSchema.setRecordSchema(recordSchema);
     recordSchema.setFieldSchema(fieldSchemas);
-    fieldSchemas.add(fieldSchema);
-    fieldSchemas.add(fieldSchema2);
     fieldSchema.setHeaderName("headerName");
     fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    fieldSchema.setType(DataType.ATTACHMENT);
     fieldSchema2.setHeaderName("headerName1");
     fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.BOOLEAN);
+    fieldSchemas.add(fieldSchema);
+    fieldSchemas.add(fieldSchema2);
     recordValues.add(recordValue);
     recordValue.setFields(fieldValues);
     fieldValues.add(fieldValue);
