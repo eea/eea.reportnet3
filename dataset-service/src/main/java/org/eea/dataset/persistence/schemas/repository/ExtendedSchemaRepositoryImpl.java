@@ -59,9 +59,14 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   /** The Constant TABLESCHEMAS_ID: {@value}. */
   private static final String TABLESCHEMAS_ID = "tableSchemas._id";
 
-
   /** The Constant TABLESCHEMAS: {@value}. */
   private static final String TABLESCHEMAS = "tableSchemas.$";
+
+  /** The Constant RECORDSCHEMA_ID: {@value}. */
+  private static final String RECORDSCHEMA_ID = "tableSchemas.recordSchema._id";
+
+  /** The Constant RECORDSCHEMA: {@value}. */
+  private static final String RECORDSCHEMA = "recordSchema";
 
   /** The mongo converter. */
   @Autowired
@@ -167,8 +172,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       throws EEAException {
     try {
       return mongoOperations.updateMulti(
-          new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId))).addCriteria(
-              new Criteria("tableSchemas.recordSchema._id").is(fieldSchema.getIdRecord())),
+          new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId)))
+              .addCriteria(new Criteria(RECORDSCHEMA_ID).is(fieldSchema.getIdRecord())),
           new Update().push(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS, fieldSchema),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {
@@ -242,7 +247,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       List<Document> list = new ArrayList<>();
       list.add(fieldSchema);
       return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateMany(
-          new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas.recordSchema._id",
+          new Document("_id", new ObjectId(idDatasetSchema)).append(RECORDSCHEMA_ID,
               fieldSchema.get("idRecord")),
           new Document("$push", new Document(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS,
               new Document("$each", list).append("$position", position))));
@@ -313,7 +318,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       document = ((ArrayList<?>) document).get(0);
 
       // Get the RecordSchema
-      document = ((Document) document).get("recordSchema");
+      document = ((Document) document).get(RECORDSCHEMA);
 
       // Get FieldSchemas
       document = ((Document) document).get("fieldSchemas");
@@ -367,7 +372,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       document = ((ArrayList<?>) document).get(0);
 
       // Get the RecordSchema
-      document = ((Document) document).get("recordSchema");
+      document = ((Document) document).get(RECORDSCHEMA);
     }
 
     return null != document ? (Document) document : null;
@@ -414,8 +419,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public Document findRecordSchemaByRecordSchemaId(String datasetSchemaId, String recordSchemaId) {
 
     Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
-        .find(new Document("_id", new ObjectId(datasetSchemaId))
-            .append("tableSchemas.recordSchema._id", new ObjectId(recordSchemaId)))
+        .find(new Document("_id", new ObjectId(datasetSchemaId)).append(RECORDSCHEMA_ID,
+            new ObjectId(recordSchemaId)))
         .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
 
     // Null check, secure data type casting and secure array access by index can be avoid as the
@@ -429,7 +434,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       document = ((ArrayList<?>) document).get(0);
 
       // Get the RecordSchema
-      document = ((Document) document).get("recordSchema");
+      document = ((Document) document).get(RECORDSCHEMA);
     }
 
     return null != document ? (Document) document : null;
