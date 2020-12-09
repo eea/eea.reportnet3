@@ -31,19 +31,4 @@ public class ContributorVO implements Serializable {
   /** The data provider id. */
   private Long dataProviderId;
 
-
-  /**
-   * @return the account
-   */
-  public String getAccount() {
-    return null != account ? account.toLowerCase() : null;
-  }
-
-  /**
-   * @param account the account to set
-   */
-  public void setAccount(String account) {
-    this.account = null != account ? account.toLowerCase() : null;
-  }
-
 }
