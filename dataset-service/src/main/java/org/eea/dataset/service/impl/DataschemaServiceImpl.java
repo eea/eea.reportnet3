@@ -643,35 +643,30 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     boolean typeModified = false;
     try {
       // Retrieve the FieldSchema from MongoDB
-      if (fieldSchemaVO != null) {
-        Document fieldSchema =
-            schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-        if (fieldSchema != null) {
-          // First of all, we update the previous data in the catalog
-          updatePreviousDataInCatalog(fieldSchema);
+      Document fieldSchema =
+          schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+      if (fieldSchema != null) {
+        // First of all, we update the previous data in the catalog
+        updatePreviousDataInCatalog(fieldSchema);
 
-          // Update UniqueConstraints
-          updateUniqueConstraints(datasetSchemaId, fieldSchemaVO, fieldSchema);
+        // Update UniqueConstraints
+        updateUniqueConstraints(datasetSchemaId, fieldSchemaVO, fieldSchema);
 
-          // we find if one data is modified
-          typeModified = modifySchemaInUpdate(fieldSchemaVO, typeModified, fieldSchema);
+        // we find if one data is modified
+        typeModified = modifySchemaInUpdate(fieldSchemaVO, typeModified, fieldSchema);
 
-          // Save the modified FieldSchema in the MongoDB
-          UpdateResult updateResult =
-              schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
-          if (updateResult.getMatchedCount() == 1) {
-            if (updateResult.getModifiedCount() == 1 && typeModified) {
-              return fieldSchemaVO.getType();
-            }
-            return null;
+        // Save the modified FieldSchema in the MongoDB
+        UpdateResult updateResult =
+            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+        if (updateResult.getMatchedCount() == 1) {
+          if (updateResult.getModifiedCount() == 1 && typeModified) {
+            return fieldSchemaVO.getType();
           }
+          return null;
         }
-        LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
-        throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
-      } else {
-        LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
-        throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
       }
+      LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }

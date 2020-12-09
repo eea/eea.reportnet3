@@ -329,12 +329,12 @@ public class DataCollectionServiceTest {
     Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
         .thenReturn(new RulesSchemaVO());
     Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
   /**

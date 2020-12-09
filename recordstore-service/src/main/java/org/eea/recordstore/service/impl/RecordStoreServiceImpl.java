@@ -49,6 +49,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   /** The Constant OPERATION_NOT_IMPLEMENTED_YET. */
   private static final String OPERATION_NOT_IMPLEMENTED_YET = "Operation not implemented yet";
 
+  /** The Constant DATASETS: {@value}. */
+  private static final String DATASETS = "datasets";
 
   /** The Constant ERROR_EXECUTING_DOCKER_COMMAND. */
   private static final String ERROR_EXECUTING_DOCKER_COMMAND =
@@ -180,7 +182,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       command = command.replace("%dataset_name%", datasetName);
       try {
         dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
-            "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
+            "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", command);
       } catch (final InterruptedException e) {
         LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
         throw new RecordStoreAccessException(
@@ -268,7 +270,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     try {
       final byte[] result =
           dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
-              "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", sqlGetDatasetsName);
+              "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", sqlGetDatasetsName);
 
       if (null != result && result.length > 0) {
         final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(new String(result));
@@ -345,11 +347,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
-   * @param partitionId the partition id
-   * @param datasetType the dataset type
-   * @param isSchemaSnapshot the is schema snapshot
-   * @param deleteData the delete data
-   * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   /**
@@ -383,7 +380,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param isCreation the is creation
    */
   @Override
-  public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
+  public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation,
+      boolean isMaterialized) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -399,20 +397,37 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     final Container container = dockerInterfaceService.getContainer(containerName);
     try {
       dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
-          "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
+          "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", command);
     } catch (final InterruptedException e) {
       LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
-    LOG.info("Command on Query View executed: {}", command);
+    LOG.info("Command on Query-Materialized View executed: {}", command);
   }
 
-
+  /**
+   * Update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
+   */
   @Override
-  public void createUpdateQueryView(Long datasetId) {
-    LOG.info("Create or Update Query View");
+  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
+    LOG.info("Update Materialized View");
   }
 
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @Override
+  public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
+    LOG.info("Create or Update Query-Materialized View");
+  }
 
 }

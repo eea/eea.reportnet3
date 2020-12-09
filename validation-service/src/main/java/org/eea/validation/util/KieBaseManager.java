@@ -100,8 +100,7 @@ public class KieBaseManager {
     DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
 
     // here we have the mothod who compose the field in template
-    if (null != schemaRules && null != schemaRules.getRules()
-        && !schemaRules.getRules().isEmpty()) {
+    if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";
         String tableName = "";
@@ -121,14 +120,10 @@ public class KieBaseManager {
             break;
           case RECORD:
             // transform the rule to a tablerule
-            if (null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty()) {
+            if (isSqlSentence(rule)) {
               schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
               typeValidation = TypeValidation.TABLE;
-              for (TableSchema table : dataSetSchema.getTableSchemas()) {
-                if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
-                  rule.setReferenceId(table.getIdTableSchema());
-                }
-              }
+              fillRecordReferenceID(dataSetSchema, rule);
             } else {
               schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
               typeValidation = TypeValidation.RECORD;
@@ -137,16 +132,10 @@ public class KieBaseManager {
             break;
           case FIELD:
             // transform the rule to a tablerule
-            if (null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty()) {
+            if (isSqlSentence(rule)) {
               schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
               typeValidation = TypeValidation.TABLE;
-              for (TableSchema table : dataSetSchema.getTableSchemas()) {
-                for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-                  if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
-                    rule.setReferenceId(table.getIdTableSchema());
-                  }
-                }
-              }
+              fillFieldReferenceId(dataSetSchema, rule);
             } else {
               schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
               typeValidation = TypeValidation.FIELD;
@@ -168,6 +157,48 @@ public class KieBaseManager {
     KieHelper kieHelper = kiebaseAssemble(compiler, kieServices, ruleAttributes);
     // this is a shared variable in a single instanced object.
     return kieHelper.build();
+  }
+
+  /**
+   * Checks if is sql sentence.
+   *
+   * @param rule the rule
+   * @return true, if is sql sentence
+   */
+  private boolean isSqlSentence(Rule rule) {
+    return null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty();
+  }
+
+
+  /**
+   * Fill record reference ID.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   */
+  private void fillRecordReferenceID(DataSetSchema dataSetSchema, Rule rule) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
+        rule.setReferenceId(table.getIdTableSchema());
+      }
+    }
+  }
+
+
+  /**
+   * Fill field reference id.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   */
+  private void fillFieldReferenceId(DataSetSchema dataSetSchema, Rule rule) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
+          rule.setReferenceId(table.getIdTableSchema());
+        }
+      }
+    }
   }
 
 
@@ -215,7 +246,7 @@ public class KieBaseManager {
    * @return the list
    */
   private List<String> fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule) {
-    List<String> listValue = new ArrayList();
+    List<String> listValue = new ArrayList<>();
     for (TableSchema table : dataSetSchema.getTableSchemas()) {
       for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
         if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
