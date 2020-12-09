@@ -109,6 +109,13 @@ export const PublicFrontpage = () => {
                           Requester
                         </a>
                       </li>
+                      <li>
+                        <a
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
+                          target="_blank">
+                          webforms
+                        </a>
+                      </li>
                     </ul>
                   </div>
                 </div>
