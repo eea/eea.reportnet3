@@ -368,11 +368,25 @@ public class DatasetServiceTest {
     sortedList = new ArrayList<>();
     field = new FieldValue();
     field.setId("1");
-    field.setIdFieldSchema("123");
+    field.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
     field.setValue("123");
+    field.setRecord(recordValue);
 
     sortedList.add(field);
     fieldList.add(field);
+
+    fieldWithLabel = new FieldValueWithLabelProjection() {
+
+      @Override
+      public FieldValue getLabel() {
+        return field;
+      }
+
+      @Override
+      public FieldValue getFieldValue() {
+        return field;
+      }
+    };
 
     MockitoAnnotations.initMocks(this);
   }
@@ -1115,12 +1129,13 @@ public class DatasetServiceTest {
     List<ObjectId> referenced = new ArrayList<>();
     PkCatalogueSchema pkCatalogueSchema = new PkCatalogueSchema();
     fieldSchema.put(LiteralConstants.PK, true);
-    fieldSchema.put(LiteralConstants.ID, new ObjectId());
+    fieldSchema.put(LiteralConstants.ID, new ObjectId("5cf0e9b3b793310e9ceca190"));
     fieldSchemas.add(fieldSchema);
-    referenced.add(new ObjectId());
+    referenced.add(new ObjectId("5cf0e9b3b793310e9ceca190"));
     pkCatalogueSchema.setReferenced(referenced);
     Document recordSchemaDocument = new Document();
     recordSchemaDocument.put(LiteralConstants.FIELD_SCHEMAS, fieldSchemas);
+    recordValue.setFields(fieldList);
     when(recordRepository.findById(Mockito.anyString())).thenReturn(recordValue);
     when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
         .thenReturn(recordSchemaDocument);
@@ -1472,7 +1487,8 @@ public class DatasetServiceTest {
     referencedDoc.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     referencedDoc.put("idPk", "5ce524fad31fc52540ab" + "ae73");
     doc.put("referencedField", referencedDoc);
-    List<FieldVO> fieldsVO = new ArrayList<>();
+    FieldVO fieldVO = new FieldVO();
+    fieldVO.setId("5ce524fad31fc52540abae73");
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
@@ -1481,11 +1497,37 @@ public class DatasetServiceTest {
         .when(fieldRepository.findByIdFieldSchemaAndConditionalWithTag(Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(Arrays.asList(fieldWithLabel));
-
-    Assert.assertEquals(fieldsVO, datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
+    when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+    Assert.assertEquals(Arrays.asList(fieldVO),
+        datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
   }
 
+  @Test
+  public void getFieldValuesReferencedLabelTest() {
 
+    Document doc = new Document();
+    doc.put("typeData", DataType.LINK.getValue());
+    Document referencedDoc = new Document();
+    referencedDoc.put("idDatasetSchema", "5ce524fad31fc52540abae73");
+    referencedDoc.put("idPk", "5ce524fad31fc52540ab" + "ae73");
+    referencedDoc.put("labelId", "labelId");
+    referencedDoc.put("linkedConditionalFieldId", "linkedConditionalFieldId");
+    doc.put("referencedField", referencedDoc);
+    FieldVO fieldVO = new FieldVO();
+    fieldVO.setId("5ce524fad31fc52540abae73");
+    new ArrayList<>();
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
+    Mockito.when(
+        datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    Mockito
+        .when(fieldRepository.findByIdFieldSchemaAndConditionalWithTag(Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(fieldWithLabel));
+    when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+    Assert.assertEquals(Arrays.asList(fieldVO),
+        datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
+  }
 
   /**
    * Gets the referenced dataset id test.
@@ -1499,7 +1541,6 @@ public class DatasetServiceTest {
     Mockito.verify(datasetMetabaseService, times(1))
         .getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any());
   }
-
 
   /**
    * Test get table read only.
@@ -1882,6 +1923,16 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
+  @Test
+  public void updateRecordNoValueTest() throws EEAException {
+    FieldValue fieldValue = new FieldValue();
+    RecordValue recordValue = new RecordValue();
+    recordValue.setFields(Arrays.asList(fieldValue));
+    when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
+    datasetService.updateRecords(1L, new ArrayList<>());
+    Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
+  }
+
   /**
    * Etl import dataset schema not found test.
    *
@@ -2094,8 +2145,13 @@ public class DatasetServiceTest {
     when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
+    field.setType(DataType.ATTACHMENT);
+    field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
     fieldValues.add(field);
     when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
+    AttachmentValue attachment = new AttachmentValue();
+    attachment.setFieldValue(field);
+    when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
 
@@ -2299,10 +2355,15 @@ public class DatasetServiceTest {
     when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
+    field.setType(DataType.ATTACHMENT);
+    field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
     fieldValues.add(field);
+    AttachmentValue attachment = new AttachmentValue();
+    attachment.setFieldValue(field);
     when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
     when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
     DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
     datasetVO.setDataProviderId(1L);

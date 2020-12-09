@@ -845,7 +845,6 @@ public class DatasetServiceImpl implements DatasetService {
   private void deleteCascadePK(final String recordId) {
     RecordValue record = recordRepository.findById(recordId);
     Map<String, FieldValue> mapField = new HashMap<>();
-    List<String> recordsToDelete = new ArrayList<>();
     // get fields in record
     record.getFields().stream().forEach(field -> mapField.put(field.getIdFieldSchema(), field));
     // get the RecordSchema
@@ -856,32 +855,46 @@ public class DatasetServiceImpl implements DatasetService {
     if (null != recordSchemaDocument) {
       List<?> fieldSchemasList =
           (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
-      for (Object document : fieldSchemasList) {
-        Document fieldSchemaDocument = (Document) document;
-        if (fieldSchemaDocument.get(LiteralConstants.PK) != null
-            && (boolean) (fieldSchemaDocument.get(LiteralConstants.PK))) {
-          String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
-          PkCatalogueSchema pkCatalogueSchema =
-              pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
-          if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
-            List<String> referenced = pkCatalogueSchema.getReferenced().stream()
-                .map(ObjectId::toString).collect(Collectors.toList());
-            List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
-            fieldsValues.stream().forEach(field -> {
-              FieldValue fieldV = mapField.get(idFieldSchema);
-              if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
-                recordsToDelete.add(field.getRecord().getId());
-              }
-            });
-          }
-        }
-      }
-    }
-    // delete all fks
+      List<String> recordsToDelete = findRecordsToDelete(mapField, fieldSchemasList);
       if (!recordsToDelete.isEmpty()) {
         LOG.info("records with fk's to delete {}", recordsToDelete);
         recordRepository.deleteRecordWithIdIn(recordsToDelete);
       }
+    }
+    // delete all fks
+  }
+
+  /**
+   * Find records to delete.
+   *
+   * @param mapField the map field
+   * @param fieldSchemasList the field schemas list
+   * @return the list
+   */
+  private List<String> findRecordsToDelete(Map<String, FieldValue> mapField,
+      List<?> fieldSchemasList) {
+    List<String> recordsToDelete = new ArrayList<>();
+    for (Object document : fieldSchemasList) {
+      Document fieldSchemaDocument = (Document) document;
+      if (fieldSchemaDocument.get(LiteralConstants.PK) != null
+          && (boolean) (fieldSchemaDocument.get(LiteralConstants.PK))) {
+        String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
+        PkCatalogueSchema pkCatalogueSchema =
+            pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+        if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
+          List<String> referenced = pkCatalogueSchema.getReferenced().stream()
+              .map(ObjectId::toString).collect(Collectors.toList());
+          List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+          fieldsValues.stream().forEach(field -> {
+            FieldValue fieldV = mapField.get(idFieldSchema);
+            if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
+              recordsToDelete.add(field.getRecord().getId());
+            }
+          });
+        }
+      }
+    }
+    return recordsToDelete;
   }
 
   /**
@@ -980,8 +993,7 @@ public class DatasetServiceImpl implements DatasetService {
         schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
     if (DataType.LINK.equals(field.getType())) {
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
-          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
-          : Boolean.FALSE;
+          && (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
     }
     if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
         && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
@@ -2422,30 +2434,6 @@ public class DatasetServiceImpl implements DatasetService {
     });
 
     return result;
-  }
-
-  /**
-   * Throws methods.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   * @param idTableSchema the id table schema
-   *
-   * @return the long
-   *
-   * @throws EEAException the EEA exception
-   */
-  private Long throwsMethods(final Long datasetId, final List<RecordVO> records,
-      final String idTableSchema) throws EEAException {
-    if (datasetId == null || records == null || idTableSchema == null) {
-      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-    if (null == tableId || tableId == 0) {
-      throw new EEAException(
-          String.format(EEAErrorMessage.TABLE_NOT_FOUND, idTableSchema, datasetId));
-    }
-    return tableId;
   }
 
   /**
