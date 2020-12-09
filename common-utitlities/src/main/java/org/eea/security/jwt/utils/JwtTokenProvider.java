@@ -2,11 +2,6 @@ package org.eea.security.jwt.utils;
 
 import static org.keycloak.TokenVerifier.IS_ACTIVE;
 import static org.keycloak.TokenVerifier.SUBJECT_EXISTS_CHECK;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.KeyFactory;
@@ -21,9 +16,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.eea.security.jwt.data.TokenDataVO;
@@ -38,30 +31,44 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Jwt token provider.
  */
 @Component
+
+/** The Constant log. */
 @Slf4j
 public class JwtTokenProvider {
 
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The public key value. */
   @Value("${eea.keycloak.publicKey}")
   private String publicKeyValue;
 
+  /** The public key. */
   private PublicKey publicKey;
 
+  /** The external public key values. */
   @Value("${eea.external.publicKeys:#{null}}")
   private List<String> externalPublicKeyValues;
 
+  /** The external public keys. */
   private Map<String, PublicKey> externalPublicKeys;
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The security redis template. */
   @Autowired
   @Qualifier("securityRedisTemplate")
   private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
@@ -71,27 +78,30 @@ public class JwtTokenProvider {
    *
    * @throws NoSuchAlgorithmException the no such algorithm exception
    * @throws InvalidKeySpecException the invalid key spec exception
+   * @throws CertificateException the certificate exception
    */
   @PostConstruct
   private void createPublicKey()
       throws NoSuchAlgorithmException, InvalidKeySpecException, CertificateException {
     this.externalPublicKeys = new HashMap<>();
-    //Configure publicKey for Keycloak as it is the main Token Generator
+    // Configure publicKey for Keycloak as it is the main Token Generator
     this.publicKey = retrievePubliKeyFromString(publicKeyValue);
 
-    //Configure the rest of public keys the external systems in which Reportnet is going to trust Token Generators
+    // Configure the rest of public keys the external systems in which Reportnet is going to trust
+    // Token Generators
     if (null != externalPublicKeyValues && externalPublicKeyValues.size() > 0) {
       for (String providerKey : externalPublicKeyValues) {
         String[] providerKeyArray = providerKey.split(":");
         String issuer = providerKeyArray[0];
         String pkValue = providerKeyArray[1];
 
-        if (pkValue.startsWith("-----BEGIN CERTIFICATE-----") && pkValue
-            .endsWith("-----END CERTIFICATE-----")) {
-          //is a Certificate
-          this.externalPublicKeys.put(issuer, this.retrievePubliKeyFromCertifiate(
-              pkValue.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n")
-                  .replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----")));
+        if (pkValue.startsWith("-----BEGIN CERTIFICATE-----")
+            && pkValue.endsWith("-----END CERTIFICATE-----")) {
+          // is a Certificate
+          this.externalPublicKeys.put(issuer,
+              this.retrievePubliKeyFromCertifiate(
+                  pkValue.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n")
+                      .replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----")));
         } else {
           this.externalPublicKeys.put(issuer, this.retrievePubliKeyFromString(pkValue));
         }
@@ -185,6 +195,13 @@ public class JwtTokenProvider {
     return null != result ? result.getAccessToken() : keyToken;
   }
 
+  /**
+   * Retrieve publi key from certifiate.
+   *
+   * @param certificate the certificate
+   * @return the public key
+   * @throws CertificateException the certificate exception
+   */
   private PublicKey retrievePubliKeyFromCertifiate(String certificate) throws CertificateException {
     byte[] certBytes = certificate.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
@@ -195,6 +212,15 @@ public class JwtTokenProvider {
     return x509Certificate.getPublicKey();
   }
 
+  /**
+   * Retrieve publi key from string.
+   *
+   * @param publicKeyValue the public key value
+   * @return the public key
+   * @throws CertificateException the certificate exception
+   * @throws NoSuchAlgorithmException the no such algorithm exception
+   * @throws InvalidKeySpecException the invalid key spec exception
+   */
   private PublicKey retrievePubliKeyFromString(String publicKeyValue)
       throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException {
     X509EncodedKeySpec X509publicKey =

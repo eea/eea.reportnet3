@@ -174,7 +174,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
   const onSetAccount = inputValue => {
     const { contributors } = shareRightsState;
     const [newContributor] = contributors.filter(contributor => contributor.isNew);
-    newContributor.account = inputValue;
+    newContributor.account = inputValue.toLowerCase();
 
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
@@ -249,8 +249,10 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           disabled={!contributor.isNew}
           className={!contributor.isNew ? styles.disabledInput : ''}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
-          inputId={'contributorAccount'}
-          onBlur={() => updateContributor(contributor)}
+          onBlur={() => {
+            contributor.account = contributor.account.toLowerCase();
+            updateContributor(contributor)
+          }}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
           value={contributor.account}

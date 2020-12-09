@@ -177,14 +177,8 @@ public class FKValidationUtils {
     String fkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdReference);
     DataSetSchema datasetSchemaFK =
         schemasRepository.findByIdDataSetSchema(new ObjectId(fkSchemaId));
-    FieldSchema idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
-
-    String idFieldSchemaPKString = "";
-    if (null != idFieldSchemaPk && null != idFieldSchemaPk.getReferencedField()
-        && null != idFieldSchemaPk.getReferencedField().getIdPk()) {
-      idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk().toString();
-    }
-    FieldSchema fkFieldSchema = getPKFieldSchemaFromSchema(datasetSchemaFK, idFieldSchema);
+    String idFieldSchemaPKString = getIdFieldSchemaPK(idFieldSchema, datasetSchemaFK);
+    FieldSchema fkFieldSchema = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
 
     // Id Dataset contains PK list
     Long datasetIdRefered =
@@ -221,7 +215,8 @@ public class FKValidationUtils {
       List<String> ifFKs = createAndExecuteQuery(query);
       List<FieldValue> fieldsToValidate = fieldRepository.findByIds(ifFKs);
 
-      if (!pkMustBeUsed && !fkFieldSchema.getPkHasMultipleValues()) {
+      if (Boolean.FALSE.equals(pkMustBeUsed)
+          && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
         saveFieldValidations(errorFields);
         // Force true because we only need Field Validations
@@ -236,20 +231,38 @@ public class FKValidationUtils {
       List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
       // Get list of Fields to validate
       List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
-      if (!pkMustBeUsed) {
+      if (Boolean.FALSE.equals(pkMustBeUsed)) {
         createFieldValueValidation(fkFieldSchema, pkList, fkFields, pkValidation, errorFields);
         saveFieldValidations(errorFields);
         // Force true because we only need Field Validations
         return true;
       } else {
         if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()
-            && fkFieldSchema.getPkMustBeUsed()) {
+            && Boolean.TRUE.equals(pkMustBeUsed)) {
           return setValuesToValidate(fkFieldSchema, pkList, fkFields);
         }
 
       }
       return true;
     }
+  }
+
+  /**
+   * Gets the id field schema PK.
+   *
+   * @param idFieldSchema the id field schema
+   * @param datasetSchemaFK the dataset schema FK
+   * @return the id field schema PK
+   */
+  private static String getIdFieldSchemaPK(String idFieldSchema, DataSetSchema datasetSchemaFK) {
+    FieldSchema idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
+
+    String idFieldSchemaPKString = "";
+    if (null != idFieldSchemaPk && null != idFieldSchemaPk.getReferencedField()
+        && null != idFieldSchemaPk.getReferencedField().getIdPk()) {
+      idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk().toString();
+    }
+    return idFieldSchemaPKString;
   }
 
   /**
@@ -285,33 +298,8 @@ public class FKValidationUtils {
             pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
       }
 
-      Set<String> ifFKs = new HashSet<>();
-      String queryFks =
-          String.format(FK_QUERY_VALUES, datasetIdFK, fkFieldSchema.getIdFieldSchema().toString(),
-              datasetIdFK, fkFieldSchema.getIdFieldSchema().toString(), datasetIdFK,
-              fkConditionalMasterFieldSchemaId, datasetIdFK);
-      List<Object[]> fkList = fieldRepository.queryPKExecution(queryFks);
-      for (int i = 0; i < fkList.size(); i++) {
-        if (null != pkMap.get(fkList.get(i)[2])) {
-          List<String> pksByOptionalValue = Arrays.asList(pkMap.get(fkList.get(i)[2]).split(","));
-          List<String> fksByOptionalValue = Arrays.asList(fkList.get(i)[1].toString().split(","));
-
-          for (String value : fksByOptionalValue) {
-
-            List<String> pksByOptionalValueAux =
-                new ArrayList<>(Arrays.asList(pkMapAux.get(fkList.get(i)[2]).split(",")));
-
-            if (!pksByOptionalValue.contains(value.trim())) {
-              ifFKs.add(fkList.get(i)[0].toString());
-            }
-            if (pksByOptionalValue.contains(value.trim())) {
-              pksByOptionalValueAux.remove(value.trim());
-            }
-            pkMapAux.put((fkList.get(i)[2]).toString(),
-                pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
-          }
-        }
-      }
+      Set<String> ifFKs =
+          findFKs(fkFieldSchema, datasetIdFK, fkConditionalMasterFieldSchemaId, pkMap, pkMapAux);
       if (!ifFKs.isEmpty()) {
         List<FieldValue> fieldsToValidate = fieldRepository.findByIds(new ArrayList<>(ifFKs));
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
@@ -319,14 +307,8 @@ public class FKValidationUtils {
           saveFieldValidations(errorFields);
         }
       }
-      if (pkMustBeUsed) {
-        Integer unusedValues = 0;
-        for (Map.Entry<String, String> entry : pkMapAux.entrySet()) {
-          unusedValues = +entry.getValue().length();
-        }
-        if (unusedValues > 0) {
-          error = false;
-        }
+      if (Boolean.TRUE.equals(pkMustBeUsed)) {
+        error = !pkMapAux.entrySet().isEmpty();
       }
     } else {
       String queryPks = String.format(COMPOSE_PK_MUST_BE_USED_LIST, datasetIdFK,
@@ -339,6 +321,49 @@ public class FKValidationUtils {
       }
     }
     return error;
+  }
+
+  /**
+   * Find F ks.
+   *
+   * @param fkFieldSchema the fk field schema
+   * @param datasetIdFK the dataset id FK
+   * @param fkConditionalMasterFieldSchemaId the fk conditional master field schema id
+   * @param pkMap the pk map
+   * @param pkMapAux the pk map aux
+   * @return the sets the
+   */
+  private static Set<String> findFKs(FieldSchema fkFieldSchema, String datasetIdFK,
+      String fkConditionalMasterFieldSchemaId, Map<String, String> pkMap,
+      Map<String, String> pkMapAux) {
+    Set<String> ifFKs = new HashSet<>();
+    String queryFks =
+        String.format(FK_QUERY_VALUES, datasetIdFK, fkFieldSchema.getIdFieldSchema().toString(),
+            datasetIdFK, fkFieldSchema.getIdFieldSchema().toString(), datasetIdFK,
+            fkConditionalMasterFieldSchemaId, datasetIdFK);
+    List<Object[]> fkList = fieldRepository.queryPKExecution(queryFks);
+    for (int i = 0; i < fkList.size(); i++) {
+      if (null != pkMap.get(fkList.get(i)[2])) {
+        List<String> pksByOptionalValue = Arrays.asList(pkMap.get(fkList.get(i)[2]).split(","));
+        List<String> fksByOptionalValue = Arrays.asList(fkList.get(i)[1].toString().split(","));
+
+        for (String value : fksByOptionalValue) {
+
+          List<String> pksByOptionalValueAux =
+              new ArrayList<>(Arrays.asList(pkMapAux.get(fkList.get(i)[2]).split(",")));
+
+          if (!pksByOptionalValue.contains(value.trim())) {
+            ifFKs.add(fkList.get(i)[0].toString());
+          }
+          if (pksByOptionalValue.contains(value.trim())) {
+            pksByOptionalValueAux.remove(value.trim());
+          }
+          pkMapAux.put((fkList.get(i)[2]).toString(),
+              pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
+        }
+      }
+    }
+    return ifFKs;
   }
 
 
@@ -504,10 +529,10 @@ public class FKValidationUtils {
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
       TableSchema tableName, FieldSchema fkFieldSchema) {
+    Validation validation = new Validation();
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
-    Validation validation = new Validation();
     if (rule != null) {
       validation.setIdRule(rule.getRuleId().toString());
 
@@ -712,31 +737,4 @@ public class FKValidationUtils {
     return pkField;
   }
 
-  /**
-   * Gets the PK field schema from schema.
-   *
-   * @param schema the schema
-   * @param idFieldSchema the id field schema
-   * @return the PK field schema from schema
-   */
-  private static FieldSchema getPKFieldSchemaFromSchema(DataSetSchema schema,
-      String idFieldSchema) {
-
-    FieldSchema field = null;
-    Boolean locatedPK = false;
-
-    for (TableSchema table : schema.getTableSchemas()) {
-      for (FieldSchema fieldAux : table.getRecordSchema().getFieldSchema()) {
-        if (fieldAux.getIdFieldSchema().toString().equals(idFieldSchema)) {
-          field = fieldAux;
-          locatedPK = Boolean.TRUE;
-          break;
-        }
-      }
-      if (locatedPK.equals(Boolean.TRUE)) {
-        break;
-      }
-    }
-    return field;
-  }
 }

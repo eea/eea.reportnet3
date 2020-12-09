@@ -416,7 +416,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
         .find(new Document("_id", new ObjectId(datasetSchemaId))
             .append("tableSchemas.recordSchema._id", new ObjectId(recordSchemaId)))
-        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+        .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
 
     // Null check, secure data type casting and secure array access by index can be avoid as the
     // query would return null if the requested structure does not match.

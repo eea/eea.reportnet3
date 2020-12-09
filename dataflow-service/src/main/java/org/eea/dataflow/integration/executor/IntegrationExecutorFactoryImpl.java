@@ -31,9 +31,8 @@ public class IntegrationExecutorFactoryImpl implements IntegrationExecutorFactor
   private void init() {
     integrationMap = new HashMap<>();
     if (null != abstractIntegrationExecutorServices) {
-      abstractIntegrationExecutorServices.stream().forEach(integrationExecutor -> {
-        integrationMap.put(integrationExecutor.getExecutorType(), integrationExecutor);
-      });
+      abstractIntegrationExecutorServices.stream().forEach(integrationExecutor -> integrationMap
+          .put(integrationExecutor.getExecutorType(), integrationExecutor));
     }
   }
 
