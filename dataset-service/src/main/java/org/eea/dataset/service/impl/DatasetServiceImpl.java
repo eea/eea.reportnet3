@@ -759,7 +759,7 @@ public class DatasetServiceImpl implements DatasetService {
       Document fieldSchema =
           schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
       if (!(fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-          && (boolean) fieldSchema.get(LiteralConstants.READ_ONLY))) {
+          && fieldSchema.getBoolean(LiteralConstants.READ_ONLY))) {
         fieldValues.add(fieldValue);
       }
     }
@@ -877,7 +877,7 @@ public class DatasetServiceImpl implements DatasetService {
     for (Object document : fieldSchemasList) {
       Document fieldSchemaDocument = (Document) document;
       if (fieldSchemaDocument.get(LiteralConstants.PK) != null
-          && (boolean) (fieldSchemaDocument.get(LiteralConstants.PK))) {
+          && fieldSchemaDocument.getBoolean(LiteralConstants.PK)) {
         String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
         PkCatalogueSchema pkCatalogueSchema =
             pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
