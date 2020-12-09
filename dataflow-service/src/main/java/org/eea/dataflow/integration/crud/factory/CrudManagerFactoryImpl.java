@@ -33,9 +33,8 @@ public class CrudManagerFactoryImpl implements CrudManagerFactory {
   private void init() {
     managersMap = new HashMap<>();
     if (null != crudManagers) {
-      crudManagers.stream().forEach(crudManager -> {
-        managersMap.put(crudManager.getToolType(), crudManager);
-      });
+      crudManagers.stream()
+          .forEach(crudManager -> managersMap.put(crudManager.getToolType(), crudManager));
     }
   }
 

@@ -57,6 +57,9 @@ pipeline {
         }
 
        stage("Quality Gate"){
+       when {
+                       branch 'develop1'
+                   }
            steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
