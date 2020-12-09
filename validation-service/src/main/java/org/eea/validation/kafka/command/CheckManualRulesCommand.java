@@ -32,7 +32,6 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RuleExpressionService;
-import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
@@ -56,7 +55,7 @@ import org.springframework.stereotype.Component;
 public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CheckManualRulesCommand.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
