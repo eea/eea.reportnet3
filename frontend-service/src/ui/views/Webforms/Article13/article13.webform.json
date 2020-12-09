@@ -210,7 +210,7 @@
           "title": "Select Union policy/policies",
           "dependency": {
             "field": "UnionPolicy",
-            "value": ["Non related"]
+            "value": ["Related"]
           },
           "isPrimary": false
         },
