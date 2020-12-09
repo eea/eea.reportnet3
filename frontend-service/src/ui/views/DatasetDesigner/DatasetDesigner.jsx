@@ -396,6 +396,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setIsWebformConfigured = isWebformConfiguredValue =>
     designerDispatch({ type: 'SET_IS_WEBFORM_CONFIGURED', payload: { isWebformConfiguredValue } });
+
   const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
@@ -852,6 +853,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             : resources.messages['designView']
         }
         isWebformConfigured={designerState.isWebformConfigured}
+        webform={designerState.webform}
       />
     );
 
@@ -901,6 +903,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
             : resources.messages['designView']
         }
+        webform={designerState.webform}
         isWebformConfigured={designerState.isWebformConfigured}
       />
     );
