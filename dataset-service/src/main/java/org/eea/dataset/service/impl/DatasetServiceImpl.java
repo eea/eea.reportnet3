@@ -993,7 +993,7 @@ public class DatasetServiceImpl implements DatasetService {
         schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
     if (DataType.LINK.equals(field.getType())) {
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
-          && (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
+          && fieldSchema.getBoolean(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
     }
     if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
         && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
