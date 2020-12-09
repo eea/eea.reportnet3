@@ -141,7 +141,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
-    webform: null
+    webform: null,
+    isWebformConfigured: false
   });
 
   const exportMenuRef = useRef();
@@ -393,6 +394,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
+  const setIsWebformConfigured = isWebformConfiguredValue =>
+    designerDispatch({ type: 'SET_IS_WEBFORM_CONFIGURED', payload: { isWebformConfiguredValue } });
   const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
@@ -848,6 +851,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
             : resources.messages['designView']
         }
+        isWebformConfigured={designerState.isWebformConfigured}
       />
     );
 
@@ -897,6 +901,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
             : resources.messages['designView']
         }
+        isWebformConfigured={designerState.isWebformConfigured}
       />
     );
 
@@ -1285,7 +1290,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               appendTo={document.body}
               ariaLabel={'configureWebform'}
               inputId="configureWebformDropDown"
-              onChange={e => designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value })}
+              onChange={e => {
+                designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value });
+                setIsWebformConfigured(true);
+              }}
               optionLabel="label"
               options={WebformsConfig}
               placeholder={resources.messages['configureWebformPlaceholder']}
