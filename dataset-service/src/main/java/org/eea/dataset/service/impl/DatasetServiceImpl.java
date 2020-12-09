@@ -883,8 +883,10 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       // delete all fks
-      LOG.info("records with fk's to delete {}", recordsToDelete);
-      recordRepository.deleteRecordWithIdIn(recordsToDelete);
+      if (!recordsToDelete.isEmpty()) {
+        LOG.info("records with fk's to delete {}", recordsToDelete);
+        recordRepository.deleteRecordWithIdIn(recordsToDelete);
+      }
     }
   }
 
