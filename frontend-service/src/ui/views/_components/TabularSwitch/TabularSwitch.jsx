@@ -1,6 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
-
-import isNil from 'lodash/isNil';
+import React, { useReducer } from 'react';
 
 import styles from './TabularSwitch.module.scss';
 
@@ -8,7 +6,7 @@ import { tabularSwitchReducer } from './_functions/Reducers/tabularSwitchReducer
 
 import { TabularSwitchUtils } from './_functions/Utils/TabularSwitchUtils';
 
-const TabularSwitch = ({ className = '', elements = [], id, onChange, value = '', webform, isWebformConfigured }) => {
+const TabularSwitch = ({ className = '', elements = [], id, onChange, value = '' }) => {
   const { onSwitchAnimate, parseViews } = TabularSwitchUtils;
 
   const [tabularSwitchState, tabularSwitchDispatch] = useReducer(tabularSwitchReducer, {
@@ -16,16 +14,6 @@ const TabularSwitch = ({ className = '', elements = [], id, onChange, value = ''
   });
 
   const { views } = tabularSwitchState;
-
-  useEffect(() => {
-    if (isNil(webform?.value) && isWebformConfigured && value === 'Webform') {
-      const viewType = { ...views };
-      viewType.Design = true;
-      delete viewType[value];
-
-      tabularSwitchDispatch({ type: 'ON_CHANGE_VIEW', payload: { viewType } });
-    }
-  }, [webform?.value]);
 
   const onSwitchView = element => {
     const viewType = { ...views };
