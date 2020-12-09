@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** The Class RuleOperators. */
 public class RuleOperators {
@@ -20,9 +18,6 @@ public class RuleOperators {
 
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Instantiates a new rule operators.
@@ -625,11 +620,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean recordStringEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
-    try {
-      return recordStringEquals(fieldSchemaId1, getValue(fieldSchemaId2));
-    } catch (Exception e) {
-      return true;
-    }
+    return recordStringEquals(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
   /**
@@ -641,11 +632,7 @@ public class RuleOperators {
    */
   public static boolean recordStringEqualsIgnoreCaseRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
-    try {
-      return recordStringEqualsIgnoreCase(fieldSchemaId1, getValue(fieldSchemaId2));
-    } catch (Exception e) {
-      return true;
-    }
+    return recordStringEqualsIgnoreCase(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
   /**
@@ -656,11 +643,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean recordStringMatchesRecord(String fieldSchemaId1, String fieldSchemaId2) {
-    try {
-      return recordStringMatches(fieldSchemaId1, getValue(fieldSchemaId2));
-    } catch (Exception e) {
-      return true;
-    }
+    return recordStringMatches(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
   /**
