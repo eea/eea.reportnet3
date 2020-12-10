@@ -497,6 +497,9 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
+        },
+        {
+          "key": "EDIT_ADD_DATA_RELEASING_ERROR"
         }
       ]
     },

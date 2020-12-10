@@ -11,6 +11,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -64,6 +65,15 @@ public class UpdateRecordHelperTest {
   public void executeCreateProcessTest() throws EEAException, IOException, InterruptedException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     updateRecordHelper.executeCreateProcess(1L, records, "");
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+  }
+  
+  @Test
+  public void executeMultiCreateProcessTest() throws EEAException, IOException, InterruptedException {
+	List<TableVO> tables = new ArrayList<>();
+	tables.add(new TableVO());
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    updateRecordHelper.executeMultiCreateProcess(1L, tables);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 

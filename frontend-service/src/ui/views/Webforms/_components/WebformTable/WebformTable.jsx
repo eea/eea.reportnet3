@@ -92,7 +92,7 @@ export const WebformTable = ({
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
-        if (response) {
+        if (response.status >= 200 && response.status <= 299) {
           onUpdateData();
         }
       } catch (error) {

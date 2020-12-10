@@ -63,7 +63,7 @@ export const ManageIntegrations = ({
     isLoading: true,
     isUpdatedVisible: false,
     name: '',
-    operation: { label: '', value: '' },
+    operation: {},
     parameterKey: '',
     parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
     parameterValue: '',
