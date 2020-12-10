@@ -475,6 +475,20 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
+  
+  @Override
+  @HystrixCommand
+  @PostMapping("/{datasetId}/insertRecordsMultiTable")
+  @LockMethod
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
+  public void insertRecordsMultiTable(@LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,@RequestBody List<TableVO> tableRecords) {
+	  try {
+	      updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
+	    } catch (EEAException e) {
+	      LOG_ERROR.error("Error inserting records: {}", e.getMessage());
+	      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+	    }
+  }
 
 
   /**
