@@ -59,9 +59,9 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * @param records the records
    * @throws EEAException the EEA exception
    */
-  public void executeUpdateProcess(final Long datasetId, List<RecordVO> records)
-      throws EEAException {
-    datasetService.updateRecords(datasetId, records);
+  public void executeUpdateProcess(final Long datasetId, List<RecordVO> records,
+      boolean updateCascadePK) throws EEAException {
+    datasetService.updateRecords(datasetId, records, updateCascadePK);
     LOG.info("Records have been modified");
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);

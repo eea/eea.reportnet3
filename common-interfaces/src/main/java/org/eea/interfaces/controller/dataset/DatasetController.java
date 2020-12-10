@@ -146,9 +146,11 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    */
   @PutMapping("/{id}/updateRecord")
-  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
+  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records,
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
 
   /**
    * Delete record.
@@ -159,7 +161,7 @@ public interface DatasetController {
    */
   @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
-      @RequestParam("deleteCascadePK") boolean deleteCascadePK);
+      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
 
   /**
    * Delete import table.

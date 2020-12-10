@@ -54,9 +54,10 @@ public class UpdateRecordHelperTest {
 
   @Test
   public void executeUpdateProcessTest() throws EEAException, IOException, InterruptedException {
-    doNothing().when(datasetService).updateRecords(Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).updateRecords(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeUpdateProcess(1L, records);
+    updateRecordHelper.executeUpdateProcess(1L, records, false);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
