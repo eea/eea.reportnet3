@@ -46,10 +46,15 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean setEntity(FieldValue fieldValue) {
-    countryCode = fieldValue.getRecord().getDataProviderCode();
-    if (null == countryCode) {
-      countryCode = "XX";
+
+    if (null != fieldValue.getRecord()) {
+      if (null != fieldValue.getRecord().getDataProviderCode()) {
+        countryCode = fieldValue.getRecord().getDataProviderCode();
+      } else {
+        countryCode = "XX";
+      }
     }
+
     return true;
   }
 
@@ -57,7 +62,7 @@ public class RuleOperators {
    * Do nothing when its called with an entity different of RecordValue.
    *
    * @param otherEntity the other entity
-   * @return true, if successfule
+   * @return true, if successful
    */
   public static boolean setEntity(Object otherEntity) {
     return true;
@@ -99,11 +104,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean recordIfThen(boolean argIf, boolean argThen) {
-    if (argIf) {
-      return argThen;
-    } else {
-      return true;
-    }
+    return !argIf || argThen;
   }
 
   /**
@@ -352,7 +353,8 @@ public class RuleOperators {
    */
   public static boolean recordNumberMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(replaceKeywords(regex));
+      String value = getValue(fieldSchemaId);
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -368,7 +370,7 @@ public class RuleOperators {
    */
   public static Integer recordStringLength(String fieldSchemaId) {
     try {
-      return Integer.valueOf(getValue(fieldSchemaId).length());
+      return getValue(fieldSchemaId).length();
     } catch (Exception e) {
       return null;
     }
@@ -604,7 +606,8 @@ public class RuleOperators {
    */
   public static boolean recordStringMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(replaceKeywords(regex));
+      String value = getValue(fieldSchemaId);
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -1930,7 +1933,7 @@ public class RuleOperators {
    */
   public static boolean fieldNumberMatches(String value, String regex) {
     try {
-      return value.matches(replaceKeywords(regex));
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }
@@ -1989,7 +1992,7 @@ public class RuleOperators {
    */
   public static boolean fieldStringMatches(String value, String regex) {
     try {
-      return value.matches(replaceKeywords(regex));
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }
@@ -2281,7 +2284,6 @@ public class RuleOperators {
     } catch (Exception e) {
       return true;
     }
-
   }
 
   /**
