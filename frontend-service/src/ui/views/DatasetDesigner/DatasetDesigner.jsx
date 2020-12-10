@@ -521,7 +521,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification?.content?.datasetId == datasetId) {
+    if (isNotification && isNotification.content.datasetId == datasetId) {
       onHighlightRefresh(true);
     }
   }, [notificationContext]);
