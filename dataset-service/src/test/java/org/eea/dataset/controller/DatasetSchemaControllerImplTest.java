@@ -467,7 +467,7 @@ public class DatasetSchemaControllerImplTest {
   public void updateTableSchemaTest() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
+    doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
@@ -490,6 +490,43 @@ public class DatasetSchemaControllerImplTest {
       dataSchemaControllerImpl.updateTableSchema(1L, tableSchema);
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateTableSchemaTestException2() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    EEAException exception =
+        new EEAException(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, "", 1L));
+    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    try {
+      TableSchemaVO tableSchema = new TableSchemaVO();
+      tableSchema.setIdTableSchema("");
+      dataSchemaControllerImpl.updateTableSchema(1L, tableSchema);
+    } catch (ResponseStatusException ex) {
+      assertEquals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, "", 1L),
+          ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      throw ex;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateTableSchemaTestException3() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    EEAException exception =
+        new EEAException(String.format(EEAErrorMessage.TABLE_NOT_FOUND, "", 1L));
+    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    try {
+      TableSchemaVO tableSchema = new TableSchemaVO();
+      tableSchema.setIdTableSchema("");
+      dataSchemaControllerImpl.updateTableSchema(1L, tableSchema);
+    } catch (ResponseStatusException ex) {
+      assertEquals(String.format(EEAErrorMessage.TABLE_NOT_FOUND, "", 1L), ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
       throw ex;
     }
