@@ -197,9 +197,9 @@ public class RulesErrorUtils {
     // we put the origin name and shorcode for the new validation
     ruleValidation
         .setTableName(null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName());
-    ruleValidation.setShortCode(ruleDataset.getShortCode());
 
     if (ruleDataset != null) {
+      ruleValidation.setShortCode(ruleDataset.getShortCode());
       ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleDataset.getShortCode());
     }
     return datasetValue;
