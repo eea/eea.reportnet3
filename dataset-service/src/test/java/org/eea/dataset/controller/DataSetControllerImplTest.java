@@ -1270,4 +1270,23 @@ public class DataSetControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void insertRecordsMultiTable() throws EEAException {
+    dataSetControllerImpl.insertRecordsMultiTable(1L, new ArrayList<TableVO>());
+    Mockito.verify(updateRecordHelper, times(1)).executeMultiCreateProcess(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void insertRecordsMultiTableExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(updateRecordHelper)
+        .executeMultiCreateProcess(Mockito.anyLong(), Mockito.any());
+    try {
+      dataSetControllerImpl.insertRecordsMultiTable(1L, new ArrayList<TableVO>());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
 }
