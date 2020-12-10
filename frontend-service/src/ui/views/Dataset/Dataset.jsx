@@ -426,10 +426,17 @@ export const Dataset = withRouter(({ match, history }) => {
       });
     }
   };
+  useEffect(() => {
+    const isNotification = notificationContext.toShow.find(
+      notification => notification.key === 'VALIDATION_FINISHED_EVENT'
+    );
+    if (isNotification && isNotification.content.datasetId == datasetId) {
+      onHighlightRefresh(true);
+    }
+  }, [notificationContext]);
 
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
-  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
   useCheckNotifications(
     ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
     setIsLoadingFile,
