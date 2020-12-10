@@ -517,9 +517,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  useEffect(() => {
+    const isNotification = notificationContext.toShow.find(
+      notification => notification.key === 'VALIDATION_FINISHED_EVENT'
+    );
+    if (isNotification && isNotification?.content?.datasetId == datasetId) {
+      onHighlightRefresh(true);
+    }
+  }, [notificationContext]);
+
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
-  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
   useCheckNotifications(
     ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
     setIsLoadingFile,
