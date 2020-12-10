@@ -734,7 +734,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<FieldValue> fieldValues = new ArrayList<>();
     String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     for (RecordValue recordValue : recordValues) {
-      fieldValueUpdateRecordFor(datasetId, fieldValues, datasetSchemaId, recordValue);
+      fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue);
     }
     fieldRepository.saveAll(fieldValues);
   }
@@ -742,13 +742,12 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Field value update record for.
    *
-   * @param datasetId the dataset id
    * @param fieldValues the field values
    * @param datasetSchemaId the dataset schema id
    * @param recordValue the record value
    */
-  private void fieldValueUpdateRecordFor(final Long datasetId, List<FieldValue> fieldValues,
-      String datasetSchemaId, RecordValue recordValue) {
+  private void fieldValueUpdateRecordFor(List<FieldValue> fieldValues, String datasetSchemaId,
+      RecordValue recordValue) {
     for (FieldValue fieldValue : recordValue.getFields()) {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
@@ -759,11 +758,8 @@ public class DatasetServiceImpl implements DatasetService {
       }
       Document fieldSchema =
           schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
-      Boolean readOnly = fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-          ? (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
-          : Boolean.FALSE;
-      if (!readOnly && !DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId))
-          || DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId))) {
+      if (!(fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+          && fieldSchema.getBoolean(LiteralConstants.READ_ONLY))) {
         fieldValues.add(fieldValue);
       }
     }
@@ -798,7 +794,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -834,7 +830,9 @@ public class DatasetServiceImpl implements DatasetService {
     if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
-    deleteCascadePK(recordId, deleteCascadePK);
+    if (deleteCascadePK) {
+      deleteCascadePK(recordId);
+    }
     recordRepository.deleteRecordWithId(recordId);
   }
 
@@ -844,48 +842,59 @@ public class DatasetServiceImpl implements DatasetService {
    * @param recordId the record id
    * @param deleteCascade the delete cascade
    */
-  private void deleteCascadePK(final String recordId, final boolean deleteCascade) {
-    if (deleteCascade) {
-      RecordValue record = recordRepository.findById(recordId);
-      Map<String, FieldValue> mapField = new HashMap<>();
-      List<String> recordsToDelete = new ArrayList<>();
-      // get fields in record
-      record.getFields().stream().forEach(field -> {
-        mapField.put(field.getIdFieldSchema(), field);
-      });
-      // get the RecordSchema
-      Document recordSchemaDocument = schemasRepository.findRecordSchema(
-          record.getTableValue().getDatasetId().getIdDatasetSchema(),
-          record.getTableValue().getIdTableSchema());
-      // get fks to delete
-      if (null != recordSchemaDocument) {
-        List<?> fieldSchemasList =
-            (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
-        for (Object document : fieldSchemasList) {
-          Document fieldSchemaDocument = (Document) document;
-          if (((fieldSchemaDocument.get(LiteralConstants.PK)) != null
-              && (boolean) ((fieldSchemaDocument.get(LiteralConstants.PK))))) {
-            String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
-            PkCatalogueSchema pkCatalogueSchema =
-                pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
-            if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
-              List<String> referenced = pkCatalogueSchema.getReferenced().stream()
-                  .map(key -> key.toString()).collect(Collectors.toList());
-              List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
-              fieldsValues.stream().forEach(field -> {
-                FieldValue fieldV = mapField.get(idFieldSchema);
-                if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
-                  recordsToDelete.add(field.getRecord().getId());
-                }
-              });
+  private void deleteCascadePK(final String recordId) {
+    RecordValue record = recordRepository.findById(recordId);
+    Map<String, FieldValue> mapField = new HashMap<>();
+    // get fields in record
+    record.getFields().stream().forEach(field -> mapField.put(field.getIdFieldSchema(), field));
+    // get the RecordSchema
+    Document recordSchemaDocument = schemasRepository.findRecordSchema(
+        record.getTableValue().getDatasetId().getIdDatasetSchema(),
+        record.getTableValue().getIdTableSchema());
+    // get fks to delete
+    if (null != recordSchemaDocument) {
+      List<?> fieldSchemasList =
+          (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+      List<String> recordsToDelete = findRecordsToDelete(mapField, fieldSchemasList);
+      if (!recordsToDelete.isEmpty()) {
+        LOG.info("records with fk's to delete {}", recordsToDelete);
+        recordRepository.deleteRecordWithIdIn(recordsToDelete);
+      }
+    }
+    // delete all fks
+  }
+
+  /**
+   * Find records to delete.
+   *
+   * @param mapField the map field
+   * @param fieldSchemasList the field schemas list
+   * @return the list
+   */
+  private List<String> findRecordsToDelete(Map<String, FieldValue> mapField,
+      List<?> fieldSchemasList) {
+    List<String> recordsToDelete = new ArrayList<>();
+    for (Object document : fieldSchemasList) {
+      Document fieldSchemaDocument = (Document) document;
+      if (fieldSchemaDocument.get(LiteralConstants.PK) != null
+          && fieldSchemaDocument.getBoolean(LiteralConstants.PK)) {
+        String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
+        PkCatalogueSchema pkCatalogueSchema =
+            pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+        if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
+          List<String> referenced = pkCatalogueSchema.getReferenced().stream()
+              .map(ObjectId::toString).collect(Collectors.toList());
+          List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+          fieldsValues.stream().forEach(field -> {
+            FieldValue fieldV = mapField.get(idFieldSchema);
+            if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
+              recordsToDelete.add(field.getRecord().getId());
             }
-          }
+          });
         }
       }
-      // delete all fks
-      LOG.info("records with fk's to delete {}", recordsToDelete);
-      recordRepository.deleteRecordWithIdIn(recordsToDelete);
     }
+    return recordsToDelete;
   }
 
   /**
@@ -984,8 +993,7 @@ public class DatasetServiceImpl implements DatasetService {
         schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
     if (DataType.LINK.equals(field.getType())) {
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
-          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
-          : Boolean.FALSE;
+          && fieldSchema.getBoolean(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
     }
     if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
         && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
@@ -1388,11 +1396,17 @@ public class DatasetServiceImpl implements DatasetService {
     // Construct Maps to relate ids
     Map<String, TableSchema> tableMap = new HashMap<>();
     Map<String, FieldSchema> fieldMap = new HashMap<>();
+    Set<String> tableWithAttachmentFieldSet = new HashSet<>();
     for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
       tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
       // Match each fieldSchemaId with its headerName
       for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
         fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
+        if (DataType.ATTACHMENT.equals(field.getType())) {
+          LOG.warn("Table with id schema {} contains attachment field, processing",
+              tableSchema.getIdTableSchema());
+          tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
+        }
       }
     }
 
@@ -1404,15 +1418,17 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Loops to build the entity
     dataset.setId(datasetId);
+    DatasetTypeEnum datasetType = getDatasetType(dataset.getId());
 
     etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-        readOnlyTables, fixedNumberTables);
+        readOnlyTables, fixedNumberTables, datasetType);
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
 
     List<RecordValue> allRecords = new ArrayList<>();
 
-    tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords);
+    tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
+        tableWithAttachmentFieldSet);
     recordRepository.saveAll(allRecords);
     LOG.info("Data saved into dataset {}", datasetId);
   }
@@ -1427,21 +1443,27 @@ public class DatasetServiceImpl implements DatasetService {
    * @param allRecords the all records
    */
   private void tableValueFor(Long datasetId, DatasetValue dataset, List<String> readOnlyTables,
-      List<String> fixedNumberTables, List<RecordValue> allRecords) {
+      List<String> fixedNumberTables, List<RecordValue> allRecords,
+      Set<String> tableWithAttachmentFieldSet) {
     for (TableValue tableValue : dataset.getTableValues()) {
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
       fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
       if (!readOnlyTables.contains(tableValue.getIdTableSchema())
           && !fixedNumberTables.contains(tableValue.getIdTableSchema())) {
-        // Put an empty value to the field if it's an attachment type
-        tableValue.getRecords().stream().forEach(r -> {
-          r.getFields().stream().forEach(f -> {
-            if (DataType.ATTACHMENT.equals(f.getType())) {
-              f.setValue("");
-            }
+        // Put an empty value to the field if it's an attachment type if and only if table has
+        // fields of this type
+        if (tableWithAttachmentFieldSet.contains(tableValue.getIdTableSchema())) {
+          LOG.warn("Table {} and id schema {} contains attachment field, processing",
+              tableValue.getId(), tableValue.getIdTableSchema());
+          tableValue.getRecords().stream().forEach(r -> {
+            r.getFields().stream().forEach(f -> {
+              if (DataType.ATTACHMENT.equals(f.getType())) {
+                f.setValue("");
+              }
+            });
           });
-        });
+        }
         allRecords.addAll(tableValue.getRecords());
       }
       if (null == oldTableId) {
@@ -1466,9 +1488,10 @@ public class DatasetServiceImpl implements DatasetService {
   private void etlTableFor(ETLDatasetVO etlDatasetVO, DataProviderVO provider,
       final PartitionDataSetMetabase partition, Map<String, TableSchema> tableMap,
       Map<String, FieldSchema> fieldMap, DatasetValue dataset, List<TableValue> tables,
-      List<String> readOnlyTables, List<String> fixedNumberTables) {
+      List<String> readOnlyTables, List<String> fixedNumberTables, DatasetTypeEnum datasetType) {
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
-      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
+      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable,
+          datasetType);
       // Check if table is read Only and save into a list
       TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
@@ -1507,7 +1530,7 @@ public class DatasetServiceImpl implements DatasetService {
       case FIELD:
         readOnly = fieldForReadOnly(objectId, readOnly, schema);
         break;
-      case DATASET:
+      default:
         break;
     }
     return readOnly;
@@ -1746,7 +1769,7 @@ public class DatasetServiceImpl implements DatasetService {
         fixedNumber = recordForFixedNumberOfRecords(objectId, fixedNumber, schema);
         break;
       case FIELD:
-      case DATASET:
+      default:
         break;
     }
     return fixedNumber;
@@ -2414,30 +2437,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Throws methods.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   * @param idTableSchema the id table schema
-   *
-   * @return the long
-   *
-   * @throws EEAException the EEA exception
-   */
-  private Long throwsMethods(final Long datasetId, final List<RecordVO> records,
-      final String idTableSchema) throws EEAException {
-    if (datasetId == null || records == null || idTableSchema == null) {
-      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-    if (null == tableId || tableId == 0) {
-      throw new EEAException(
-          String.format(EEAErrorMessage.TABLE_NOT_FOUND, idTableSchema, datasetId));
-    }
-    return tableId;
-  }
-
-  /**
    * Etl build entity.
    *
    * @param provider the provider
@@ -2450,7 +2449,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private void etlBuildEntity(DataProviderVO provider, final PartitionDataSetMetabase partition,
       Map<String, TableSchema> tableMap, Map<String, FieldSchema> fieldMap, DatasetValue dataset,
-      List<TableValue> tables, ETLTableVO etlTable) {
+      List<TableValue> tables, ETLTableVO etlTable, DatasetTypeEnum datasetType) {
     TableValue table = new TableValue();
     TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
     if (tableSchema != null) {
@@ -2464,7 +2463,7 @@ public class DatasetServiceImpl implements DatasetService {
         List<FieldValue> fieldValues = new ArrayList<>();
         List<String> idSchema = new ArrayList<>();
         etlFieldBuildFor(fieldMap, dataset, tableSchema, etlRecord, recordValue, fieldValues,
-            idSchema);
+            idSchema, datasetType);
         // set the fields if not declared in the records
         setMissingField(
             tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema().getFieldSchema(),
@@ -2489,25 +2488,24 @@ public class DatasetServiceImpl implements DatasetService {
    * @param etlRecord the etl record
    * @param recordValue the record value
    * @param fieldValues the field values
-   * @param idSchema the id schema
+   * @param idFieldSchemas the id schema
    */
   private void etlFieldBuildFor(Map<String, FieldSchema> fieldMap, DatasetValue dataset,
       TableSchema tableSchema, ETLRecordVO etlRecord, RecordValue recordValue,
-      List<FieldValue> fieldValues, List<String> idSchema) {
+      List<FieldValue> fieldValues, List<String> idFieldSchemas, DatasetTypeEnum datasetType) {
     for (ETLFieldVO etlField : etlRecord.getFields()) {
       FieldValue field = new FieldValue();
       FieldSchema fieldSchema =
           fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
-      if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
-          && !DatasetTypeEnum.DESIGN.equals(getDatasetType(dataset.getId()))
-          || fieldSchema != null && DatasetTypeEnum.DESIGN.equals(getDatasetType(dataset.getId()))
-          || fieldSchema != null && fieldSchema.getReadOnly() == null) {
+      // Fill if is a design dataset or if not readonly
+      if (fieldSchema != null && (DatasetTypeEnum.DESIGN.equals(datasetType)
+          || !Boolean.TRUE.equals(fieldSchema.getReadOnly()))) {
         field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
         field.setType(fieldSchema.getType());
         field.setValue(etlField.getValue());
         field.setRecord(recordValue);
         fieldValues.add(field);
-        idSchema.add(field.getIdFieldSchema());
+        idFieldSchemas.add(field.getIdFieldSchema());
       }
     }
   }

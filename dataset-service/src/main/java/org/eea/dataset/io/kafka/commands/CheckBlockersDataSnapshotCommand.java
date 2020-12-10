@@ -51,7 +51,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(ExecutePropagateNewFieldCommand.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CheckBlockersDataSnapshotCommand.class);
 
   /**
    * The Constant LOG_ERROR.
@@ -72,13 +72,15 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
    * Execute.
    *
    * @param eeaEventVO the eea event VO
+   * @throws EEAException the EEA exception
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
 
     // with one id we take all the datasets with the same dataProviderId and dataflowId
-    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
     List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
         dataset.getDataflowId(), dataset.getDataProviderId());
     Collections.sort(datasets);

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** The Class RuleOperators. */
 public class RuleOperators {
@@ -20,9 +18,6 @@ public class RuleOperators {
 
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Instantiates a new rule operators.
@@ -51,10 +46,15 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean setEntity(FieldValue fieldValue) {
-    countryCode = fieldValue.getRecord().getDataProviderCode();
-    if (null == countryCode) {
-      countryCode = "XX";
+
+    if (null != fieldValue.getRecord()) {
+      if (null != fieldValue.getRecord().getDataProviderCode()) {
+        countryCode = fieldValue.getRecord().getDataProviderCode();
+      } else {
+        countryCode = "XX";
+      }
     }
+
     return true;
   }
 
@@ -62,7 +62,7 @@ public class RuleOperators {
    * Do nothing when its called with an entity different of RecordValue.
    *
    * @param otherEntity the other entity
-   * @return true, if successfule
+   * @return true, if successful
    */
   public static boolean setEntity(Object otherEntity) {
     return true;
@@ -104,11 +104,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean recordIfThen(boolean argIf, boolean argThen) {
-    if (argIf) {
-      return argThen;
-    } else {
-      return true;
-    }
+    return !argIf || argThen;
   }
 
   /**
@@ -357,7 +353,8 @@ public class RuleOperators {
    */
   public static boolean recordNumberMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(regex);
+      String value = getValue(fieldSchemaId);
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -373,7 +370,7 @@ public class RuleOperators {
    */
   public static Integer recordStringLength(String fieldSchemaId) {
     try {
-      return Integer.valueOf(getValue(fieldSchemaId).length());
+      return getValue(fieldSchemaId).length();
     } catch (Exception e) {
       return null;
     }
@@ -609,7 +606,8 @@ public class RuleOperators {
    */
   public static boolean recordStringMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(replaceKeywords(regex));
+      String value = getValue(fieldSchemaId);
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -625,11 +623,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean recordStringEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
-    try {
-      return recordStringEquals(fieldSchemaId1, getValue(fieldSchemaId2));
-    } catch (Exception e) {
-      return true;
-    }
+    return recordStringEquals(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
   /**
@@ -641,11 +635,7 @@ public class RuleOperators {
    */
   public static boolean recordStringEqualsIgnoreCaseRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
-    try {
-      return recordStringEqualsIgnoreCase(fieldSchemaId1, getValue(fieldSchemaId2));
-    } catch (Exception e) {
-      return true;
-    }
+    return recordStringEqualsIgnoreCase(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
   /**
@@ -656,11 +646,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean recordStringMatchesRecord(String fieldSchemaId1, String fieldSchemaId2) {
-    try {
-      return recordStringMatches(fieldSchemaId1, getValue(fieldSchemaId2));
-    } catch (Exception e) {
-      return true;
-    }
+    return recordStringMatches(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
   /**
@@ -1768,7 +1754,7 @@ public class RuleOperators {
     try {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
-      return date1.isBefore(date2) || date1.equals(date2);
+      return date1.isAfter(date2) || date1.equals(date2);
     } catch (Exception e) {
       return true;
     }
@@ -1786,7 +1772,7 @@ public class RuleOperators {
     try {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
-      return date1.isAfter(date2) || date1.equals(date2);
+      return date1.isBefore(date2) || date1.equals(date2);
     } catch (Exception e) {
       return true;
     }
@@ -1947,7 +1933,7 @@ public class RuleOperators {
    */
   public static boolean fieldNumberMatches(String value, String regex) {
     try {
-      return value.matches(regex);
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }
@@ -2006,7 +1992,7 @@ public class RuleOperators {
    */
   public static boolean fieldStringMatches(String value, String regex) {
     try {
-      return value.matches(replaceKeywords(regex));
+      return value.isEmpty() || value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }
@@ -2298,7 +2284,6 @@ public class RuleOperators {
     } catch (Exception e) {
       return true;
     }
-
   }
 
   /**
