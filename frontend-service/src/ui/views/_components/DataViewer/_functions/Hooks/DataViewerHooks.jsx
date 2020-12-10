@@ -369,7 +369,10 @@ export const useSetColumns = (
           key={column.field}
           sortable={sort}
           style={{
-            width: invisibleColumn && '0.01px'
+            width:
+              invisibleColumn === ''
+                ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
+                : '0.01px'
           }}
         />
       );
@@ -387,7 +390,13 @@ export const useSetColumns = (
     );
 
     let editCol = (
-      <Column body={row => actionTemplate(row)} header={resources.messages['actions']} key="actions" sortable={false} />
+      <Column
+        body={row => actionTemplate(row)}
+        header={resources.messages['actions']}
+        key="actions"
+        sortable={false}
+        style={{ width: '100px' }}
+      />
     );
 
     let validationCol = (
@@ -397,6 +406,7 @@ export const useSetColumns = (
         field="validations"
         key="recordValidation"
         sortable={false}
+        style={{ width: '125px' }}
       />
     );
 
@@ -411,7 +421,7 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord, initialCellValue]);
+  }, [colsSchema, columnOptions, initialCellValue]);
 
   return {
     columns,

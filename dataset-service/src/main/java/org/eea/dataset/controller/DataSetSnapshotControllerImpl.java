@@ -412,7 +412,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/historicReleasesRepresentative",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE') OR (hasRole('DATA_CUSTODIAN','DATAFLOW_NATIONAL_COORDINATOR'))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR') OR (hasRole('DATA_CUSTODIAN'))")
   public List<ReleaseVO> historicReleasesByRepresentative(
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("representativeId") Long representativeId) {

@@ -139,7 +139,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'release/3.0.0-RC.5.0'
+                branch 'develop1'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
@@ -178,7 +178,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/3.0.0-RC.5.0"
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
                 }
             }
             parallel {
