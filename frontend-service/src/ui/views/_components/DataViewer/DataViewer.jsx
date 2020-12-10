@@ -692,7 +692,7 @@ const DataViewer = withRouter(
             }
           } catch (error) {
             if (error.response.status === 423) {
-              notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
+              notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
             } else {
               const {
                 dataflow: { name: dataflowName },
@@ -756,7 +756,7 @@ const DataViewer = withRouter(
         }
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
+          notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
         } else {
           const {
             dataflow: { name: dataflowName },
@@ -815,7 +815,7 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
+            notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
           } else {
             const {
               dataflow: { name: dataflowName },
@@ -839,7 +839,7 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'SAVE_RECORD_LOCKED_ERROR' });
+            notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
           } else {
             const {
               dataflow: { name: dataflowName },
