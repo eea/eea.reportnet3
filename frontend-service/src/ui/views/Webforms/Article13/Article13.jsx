@@ -66,6 +66,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   }, [article13State.data, isDataUpdated]);
 
   useEffect(() => {
+    setIsAddingRecord(false);
+  }, [tableList]);
+
+  useEffect(() => {
     const { fieldSchema, fieldId } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
 
     onSelectFieldSchemaId(fieldSchema || fieldId);
@@ -148,8 +152,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         type: 'ADD_RECORDS_ERROR',
         content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
-    } finally {
       setIsAddingRecord(false);
+    } finally {
     }
   };
 
@@ -245,7 +249,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const onUpdateData = () => article13Dispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
 
-  const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECIRD', payload: { value } });
+  const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECORD', payload: { value } });
 
   const renderErrorMessages = () => {
     const missingElements = checkErrors(article13State.data);
