@@ -25,7 +25,6 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.exception.EEAInvalidSQLException;
-import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -395,7 +394,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @throws PSQLException the PSQL exception
    * @throws EEAInvalidSQLException
    */
-  private TableValue retrieveTableData(String query, Long datasetId, Rule rule)
+  private void retrieveTableData(String query, Long datasetId, Rule rule)
       throws EEAInvalidSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
@@ -423,8 +422,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
 
     LOG.info("Query to be executed: {}", newQuery);
 
-    return datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-        idTable);
+    datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId, idTable);
   }
 
   /**
@@ -521,8 +519,4 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
     }
   }
 
-
-
 }
-
-
