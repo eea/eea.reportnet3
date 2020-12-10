@@ -115,9 +115,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
-      const isResponseStatusOk = response.status >= 200 && response.status <= 299;
+      const isResponseAddRecordStatusOk = response.status >= 200 && response.status <= 299;
 
-      if (!isResponseStatusOk) {
+      if (!isResponseAddRecordStatusOk) {
         throw new Error(403);
       }
 
@@ -128,16 +128,16 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       for (let i = 0; i < filteredTables.length; i++) {
         const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
         const res = await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
-        const isResStatusOk = res.status >= 200 && res.status <= 299;
+        const isResponseAddRecordTableStatusOk = res.status >= 200 && res.status <= 299;
 
-        if (!isResStatusOk) {
-          if (isResponseStatusOk) {
+        if (!isResponseAddRecordTableStatusOk) {
+          if (isResponseAddRecordStatusOk) {
             onUpdateData();
           }
           throw new Error(403);
         }
       }
-      if (isResponseStatusOk) {
+      if (isResponseAddRecordStatusOk) {
         onUpdateData();
       }
     } catch (error) {
