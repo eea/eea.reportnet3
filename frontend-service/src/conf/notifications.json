@@ -499,7 +499,7 @@
           }
         },
         {
-          "key": "SAVE_RECORD_LOCKED_ERROR"
+          "key": "EDIT_ADD_DATA_RELEASING_ERROR"
         }
       ]
     },
