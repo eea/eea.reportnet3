@@ -663,11 +663,18 @@ const FieldEditor = ({
     }
   };
 
-  return !isEmpty(fieldType) && !isReadOnlyField
-    ? renderField(fieldType)
-    : !reporting
-    ? renderField(fieldType)
-    : RecordUtils.getCellValue(cells, cells.field);
+  return !isEmpty(fieldType) && !isReadOnlyField ? (
+    renderField(fieldType)
+  ) : !reporting ? (
+    renderField(fieldType)
+  ) : (
+    <span
+      style={{
+        whiteSpace: cells && cells.field && fieldType === 'TEXTAREA' ? 'pre-wrap' : 'none'
+      }}>
+      {RecordUtils.getCellValue(cells, cells.field)}
+    </span>
+  );
 };
 
 export { FieldEditor };

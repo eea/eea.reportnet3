@@ -236,7 +236,7 @@ export const useSetColumns = (
             alignItems: 'center',
             justifyContent:
               field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
@@ -274,7 +274,7 @@ export const useSetColumns = (
             alignItems: 'center',
             justifyContent:
               field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
@@ -332,6 +332,7 @@ export const useSetColumns = (
       let invisibleColumn =
         column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
       const readOnlyColumn = column.readOnly && isReporting ? styles.readOnlyFields : '';
+
       return (
         <Column
           body={dataTemplate}
@@ -421,7 +422,7 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, initialCellValue]);
+  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue]);
 
   return {
     columns,
