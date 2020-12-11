@@ -559,7 +559,9 @@ public class FKValidationUtils {
       validation.setValidationDate(new Date().toString());
       validation.setTableName(tableName.getNameTableSchema());
       validation.setShortCode(rule.getShortCode());
-      validation.setFieldName(fkFieldSchema.getHeaderName());
+      if (null != fkFieldSchema) {
+        validation.setFieldName(fkFieldSchema.getHeaderName());
+      }
     }
     return validation;
   }
