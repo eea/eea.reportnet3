@@ -346,7 +346,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
         try {
           String preparedquery =
               query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
-          retrieveTableData(preparedquery, datasetId, rule);
+          launchValidationQuery(preparedquery, datasetId, rule);
         } catch (EEAInvalidSQLException e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = false;
@@ -394,7 +394,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @throws PSQLException the PSQL exception
    * @throws EEAInvalidSQLException
    */
-  private void retrieveTableData(String query, Long datasetId, Rule rule)
+  private void launchValidationQuery(String query, Long datasetId, Rule rule)
       throws EEAInvalidSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
@@ -406,7 +406,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       case FIELD:
         entityName = retriveFieldName(schema, rule.getReferenceId().toString());
         idTable =
-            retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(), datasetId);
+            getTableId(schema, rule.getReferenceId().toString(), datasetId);
         break;
       case TABLE:
         entityName = retriveTableName(schema, rule.getReferenceId().toString());
@@ -434,7 +434,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @return the long
    */
   @Transactional
-  private Long retriveIsTableFromFieldSchema(DataSetSchemaVO schema, String fieldSchemaId,
+  private Long getTableId(DataSetSchemaVO schema, String fieldSchemaId,
       Long datasetId) {
     String tableSchemaId = "";
     for (TableSchemaVO table : schema.getTableSchemas()) {
