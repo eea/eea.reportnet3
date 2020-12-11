@@ -147,7 +147,6 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param records the records
-   * @param updateCascadePK the update cascade PK
    */
   @PutMapping("/{id}/updateRecord")
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
