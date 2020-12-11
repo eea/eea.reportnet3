@@ -119,8 +119,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
+      const isResponseAddRecordStatusOk = response.status >= 200 && response.status <= 299;
 
-      if (!response) {
+      if (!isResponseAddRecordStatusOk) {
         throw new Error(403);
       }
 
@@ -131,15 +132,16 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       for (let i = 0; i < filteredTables.length; i++) {
         const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
         const res = await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
+        const isResponseAddRecordTableStatusOk = res.status >= 200 && res.status <= 299;
 
-        if (!res) {
-          if (response) {
+        if (!isResponseAddRecordTableStatusOk) {
+          if (isResponseAddRecordStatusOk) {
             onUpdateData();
           }
           throw new Error(403);
         }
       }
-      if (response) {
+      if (isResponseAddRecordStatusOk) {
         onUpdateData();
       }
     } catch (error) {
@@ -161,7 +163,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
-      if (response) {
+      if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
     } catch (error) {
@@ -332,6 +334,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           dataflowId={dataflowId}
           datasetId={datasetId}
           datasetSchemaId={datasetSchema.datasetSchemaId}
+          getFieldSchemaId={getFieldSchemaId}
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
           selectedTable={selectedTable}

@@ -17,7 +17,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
-import { Article13Utils } from '../../Article13/_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
@@ -26,6 +25,7 @@ export const WebformTable = ({
   dataflowId,
   datasetId,
   datasetSchemaId,
+  getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isRefresh,
   isReporting,
   onTabChange,
@@ -35,7 +35,6 @@ export const WebformTable = ({
   webformType
 }) => {
   const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
-  const { getFieldSchemaId } = Article13Utils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -92,7 +91,7 @@ export const WebformTable = ({
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
-        if (response) {
+        if (response.status >= 200 && response.status <= 299) {
           onUpdateData();
         }
       } catch (error) {

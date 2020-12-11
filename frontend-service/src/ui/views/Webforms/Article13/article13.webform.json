@@ -210,14 +210,14 @@
           "title": "Select Union policy/policies",
           "dependency": {
             "field": "UnionPolicy",
-            "value": ["Non related"]
+            "value": ["Related"]
           },
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "UnionPolicyOther",
-          "title": "",
+          "title": "Other Union Policy",
           "dependency": {
             "field": "UnionPolicyList",
             "value": ["Other (Union policy not listed above or additional Union policy)"]
