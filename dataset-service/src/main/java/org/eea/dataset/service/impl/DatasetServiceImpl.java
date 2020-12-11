@@ -719,7 +719,6 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
-   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
   @Override
@@ -2926,7 +2925,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument) {
     // we took the both fields, database and filled in new record
-    String idFieldSchema = (fieldSchemaDocument.get(LiteralConstants.ID)).toString();
+    String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
     FieldValue fieldValueInRecord = fieldValues.stream()
         .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
     FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
@@ -2935,7 +2934,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
       PkCatalogueSchema pkCatalogueSchema =
           pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
-      if (null != pkCatalogueSchema && pkCatalogueSchema.getReferenced() != null) {
+      if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
         List<String> referenced = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString)
             .collect(Collectors.toList());
         List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
