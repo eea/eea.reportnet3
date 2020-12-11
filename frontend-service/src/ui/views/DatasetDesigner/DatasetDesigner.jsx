@@ -692,10 +692,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const response = await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
       if (response) {
         onLoadSchema();
-        onCloseConfigureWebformModal();
       }
     } catch (error) {
       console.error('Error during datasetSchema Webform update: ', error);
+    } finally {
+      onCloseConfigureWebformModal();
     }
   };
 
