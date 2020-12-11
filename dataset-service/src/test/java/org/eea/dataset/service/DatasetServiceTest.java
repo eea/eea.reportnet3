@@ -57,6 +57,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -1155,7 +1156,11 @@ public class DatasetServiceTest {
   @Test
   public void updateRecordsTest() throws EEAException {
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
-    datasetService.updateRecords(1L, new ArrayList<>(), false);
+    when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    DataSetSchema datasetSchema = new DataSetSchema();
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    datasetService.updateRecords(1L, new ArrayList<>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1184,8 +1189,15 @@ public class DatasetServiceTest {
     dataEnd.setValue("123");
     when(fieldRepository.findById(Mockito.anyString())).thenReturn(dataEnd);
 
+    when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    DataSetSchema datasetSchema = new DataSetSchema();
+    Webform webform = new Webform();
+    webform.setName("NAME");
+    datasetSchema.setWebform(webform);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
-    datasetService.updateRecords(1L, new ArrayList<>(), true);
+    datasetService.updateRecords(1L, new ArrayList<>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1925,7 +1937,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void updateRecordsNullTest() throws Exception {
-    datasetService.updateRecords(null, new ArrayList<>(), false);
+    datasetService.updateRecords(null, new ArrayList<>());
   }
 
   /**
@@ -1935,7 +1947,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void updateRecordsNull2Test() throws Exception {
-    datasetService.updateRecords(1L, null, false);
+    datasetService.updateRecords(1L, null);
   }
 
   /**
@@ -1949,8 +1961,12 @@ public class DatasetServiceTest {
     RecordValue recordValue = new RecordValue();
     fieldValue.setValue("Lorem ipsum");
     recordValue.setFields(Arrays.asList(fieldValue));
+    when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    DataSetSchema datasetSchema = new DataSetSchema();
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
-    datasetService.updateRecords(1L, new ArrayList<>(), false);
+    datasetService.updateRecords(1L, new ArrayList<>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1960,7 +1976,11 @@ public class DatasetServiceTest {
     RecordValue recordValue = new RecordValue();
     recordValue.setFields(Arrays.asList(fieldValue));
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
-    datasetService.updateRecords(1L, new ArrayList<>(), false);
+    when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    DataSetSchema datasetSchema = new DataSetSchema();
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    datasetService.updateRecords(1L, new ArrayList<>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 

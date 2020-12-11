@@ -150,8 +150,7 @@ public interface DatasetController {
    * @param updateCascadePK the update cascade PK
    */
   @PutMapping("/{id}/updateRecord")
-  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records,
-      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
+  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
    * Delete record.

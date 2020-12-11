@@ -724,8 +724,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void updateRecords(final Long datasetId, final List<RecordVO> records,
-      boolean updateCascadePK) throws EEAException {
+  public void updateRecords(final Long datasetId, final List<RecordVO> records)
+      throws EEAException {
     if (datasetId == null || records == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
@@ -733,13 +733,16 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
 
-    // we update the ids in cascade for any pk value changed
-    if (updateCascadePK) {
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    if (null != datasetSchema.getWebform() && null != datasetSchema.getWebform().getName()) {
+      // we update the ids in cascade for any pk value changed
       for (RecordValue recordValue : recordValues) {
         updateCascadePK(recordValue.getId(), recordValue.getFields());
       }
     }
-    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     for (RecordValue recordValue : recordValues) {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue);
     }
