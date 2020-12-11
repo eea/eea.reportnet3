@@ -67,11 +67,12 @@ public class UpdateRecordHelperTest {
     updateRecordHelper.executeCreateProcess(1L, records, "");
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
-  
+
   @Test
-  public void executeMultiCreateProcessTest() throws EEAException, IOException, InterruptedException {
-	List<TableVO> tables = new ArrayList<>();
-	tables.add(new TableVO());
+  public void executeMultiCreateProcessTest()
+      throws EEAException, IOException, InterruptedException {
+    List<TableVO> tables = new ArrayList<>();
+    tables.add(new TableVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     updateRecordHelper.executeMultiCreateProcess(1L, tables);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());

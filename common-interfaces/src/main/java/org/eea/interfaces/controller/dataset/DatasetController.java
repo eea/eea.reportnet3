@@ -160,7 +160,7 @@ public interface DatasetController {
    */
   @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
-      @RequestParam("deleteCascadePK") boolean deleteCascadePK);
+      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
 
   /**
    * Delete import table.
