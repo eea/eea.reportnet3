@@ -28,13 +28,16 @@ import { Article13Utils } from './_functions/Utils/Article13Utils';
 import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
-import { TableManagementUtils } from './_components/TableManagement/_functions/Utils/TableManagementUtils';
-
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = Article13Utils;
-  const { onParseWebformData, onParseWebformRecords, parseNewRecord, parseNewTableRecord } = WebformsUtils;
-  const { parsePamsRecords } = TableManagementUtils;
+  const {
+    onParseWebformData,
+    onParseWebformRecords,
+    parseNewRecord,
+    parseNewTableRecord,
+    parsePamsRecords
+  } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -70,7 +73,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   }, [tableList]);
 
   useEffect(() => {
-    const { fieldSchema, fieldId } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
+    const { fieldId, fieldSchema } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
 
     onSelectFieldSchemaId(fieldSchema || fieldId);
   }, [article13State.data, article13State.selectedTableSchemaId]);
@@ -348,7 +351,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           dataflowId={dataflowId}
           datasetId={datasetId}
           loading={isLoading}
-          isReporting={isReporting}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
           onSelectEditTable={onSelectEditTable}
