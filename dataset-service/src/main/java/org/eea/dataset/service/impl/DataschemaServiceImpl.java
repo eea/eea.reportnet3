@@ -165,6 +165,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The Constant FIELDSCHEMAS: {@value}. */
+  private static final String FIELDSCHEMAS = "fieldSchemas";
+
   /**
    * Creates the empty data set schema.
    *
@@ -508,7 +511,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findRecordSchema(datasetSchemaId, tableSchemaId);
     // if the table havent got any record he hasnt any document too
     if (null != recordSchemadocument) {
-      List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get("fieldSchemas");
+      List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get(FIELDSCHEMAS);
       fieldSchemasList.stream().forEach(document -> {
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
             ((Document) document).get("_id").toString());
@@ -588,7 +591,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
       // we create this if to clean blank space at begining and end of any codelistItem
       // n codelist and multiselect
-      if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
+      if (fieldSchemaVO.getCodelistItems() != null
           && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
               || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
         String[] codelistItems = fieldSchemaVO.getCodelistItems();
@@ -597,8 +600,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         fieldSchemaVO.setCodelistItems(codelistItems);
       }
-      if (fieldSchemaVO.getValidExtensions() != null
-          && fieldSchemaVO.getValidExtensions().length != 0) {
+      if (fieldSchemaVO.getValidExtensions() != null) {
         String[] validExtensions = fieldSchemaVO.getValidExtensions();
         for (int i = 0; i < validExtensions.length; i++) {
           validExtensions[i] = validExtensions[i].trim();
@@ -1925,8 +1927,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     boolean exist = false;
     Document document = schemasRepository.findRecordSchemaByRecordSchemaId(datasetSchemaId,
         fieldSchemaVO.getIdRecord());
-    List<Document> documentListField = null != document && null != document.get("fieldSchemas")
-        ? (List<Document>) document.get("fieldSchemas")
+    List<Document> documentListField = null != document && null != document.get(FIELDSCHEMAS)
+        ? (List<Document>) document.get(FIELDSCHEMAS)
         : new ArrayList();
 
     // we found if we have the same name in the record , and check if the name that we found is

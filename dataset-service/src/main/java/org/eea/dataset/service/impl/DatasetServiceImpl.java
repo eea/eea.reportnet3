@@ -742,8 +742,9 @@ public class DatasetServiceImpl implements DatasetService {
         updateCascadePK(recordValue.getId(), recordValue.getFields());
       }
     }
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
     for (RecordValue recordValue : recordValues) {
-      fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue);
+      fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue, datasetType);
     }
     fieldRepository.saveAll(fieldValues);
   }
@@ -756,9 +757,10 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValues the field values
    * @param datasetSchemaId the dataset schema id
    * @param recordValue the record value
+   * @param datasetType the dataset type
    */
   private void fieldValueUpdateRecordFor(List<FieldValue> fieldValues, String datasetSchemaId,
-      RecordValue recordValue) {
+      RecordValue recordValue, DatasetTypeEnum datasetType) {
     for (FieldValue fieldValue : recordValue.getFields()) {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
@@ -770,7 +772,8 @@ public class DatasetServiceImpl implements DatasetService {
       Document fieldSchema =
           schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
       if (!(fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-          && fieldSchema.getBoolean(LiteralConstants.READ_ONLY))) {
+          && fieldSchema.getBoolean(LiteralConstants.READ_ONLY)
+          && !DatasetTypeEnum.DESIGN.equals(datasetType))) {
         fieldValues.add(fieldValue);
       }
     }
@@ -2829,7 +2832,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Skip if write is not allowed
     if (Boolean.TRUE.equals(fieldSchema.getReadOnly())
-        && DatasetTypeEnum.DESIGN.equals(datasetType)) {
+        && !DatasetTypeEnum.DESIGN.equals(datasetType)) {
       return value;
     }
 
@@ -2926,26 +2929,27 @@ public class DatasetServiceImpl implements DatasetService {
   private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument) {
     // we took the both fields, database and filled in new record
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
-    FieldValue fieldValueInRecord = fieldValues.stream()
-        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
-    FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
-
-    // we compare if that value is diferent, if not we ignore the pk cascade
-    if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
-      PkCatalogueSchema pkCatalogueSchema =
-          pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
-      if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
-        List<String> referenced = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString)
-            .collect(Collectors.toList());
-        List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
-        // we save if the data are the same th
-        fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
-          if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
-            fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
-            fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
-                fieldValuePkOtherTable.getValue());
-          }
-        });
+    Optional<FieldValue> fieldValueInRecord = fieldValues.stream()
+        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst();
+    if (fieldValueInRecord.isPresent()) {
+      FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.get().getId());
+      // we compare if that value is diferent, if not we ignore the pk cascade
+      if (!fieldValueInRecord.get().getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
+        PkCatalogueSchema pkCatalogueSchema =
+            pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+        if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
+          List<String> referenced = pkCatalogueSchema.getReferenced().stream()
+              .map(ObjectId::toString).collect(Collectors.toList());
+          List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+          // we save if the data are the same th
+          fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
+            if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
+              fieldValuePkOtherTable.setValue(fieldValueInRecord.get().getValue());
+              fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
+                  fieldValuePkOtherTable.getValue());
+            }
+          });
+        }
       }
     }
   }
