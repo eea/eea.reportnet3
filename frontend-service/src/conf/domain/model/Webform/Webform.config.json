@@ -1,0 +1,3 @@
+{
+  "createPamsRecords": "/dataset/{:datasetId}/insertRecordsMultiTable"
+}
