@@ -1,17 +1,10 @@
-import capitalize from 'lodash/capitalize';
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
 
 import { apiWebform } from 'core/infrastructure/api/domain/model/Webform';
 
-import { CoreUtils } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const addPamsRecords = async (datasetId, tables, pamId, type) => {
-  console.log('test', parsePamTables(tables, pamId, type));
   return await apiWebform.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
 };
 

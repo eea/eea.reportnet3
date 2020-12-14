@@ -64,7 +64,6 @@ const addRecordsById = async (datasetId, tableSchemaId, records) => {
     datasetTableRecords.push(datasetTableRecord);
   });
 
-  console.log('datasetTableRecords', datasetTableRecords);
   return await apiDataset.addRecordsById(datasetId, tableSchemaId, datasetTableRecords);
 };
 

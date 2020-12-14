@@ -56,29 +56,6 @@ const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') =
   return result;
 };
 
-const parseNewRecord = (columnsSchema, data) => {
-  if (!isEmpty(columnsSchema)) {
-    let fields;
-
-    if (!isUndefined(columnsSchema)) {
-      fields = columnsSchema.map(column => {
-        if (column.type === 'FIELD') {
-          return {
-            fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
-          };
-        }
-      });
-    }
-
-    const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
-
-    obj.datasetPartitionId = null;
-    if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
-    return obj;
-  }
-};
-
 const parseNewTableRecord = (table, pamNumber) => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
@@ -236,7 +213,6 @@ export const WebformsUtils = {
   mergeArrays,
   onParseWebformData,
   onParseWebformRecords,
-  parseNewRecord,
   parseNewTableRecord,
   parsePamsRecords
 };

@@ -1,15 +1,13 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './Article13.module.scss';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { tables } from './article13.webform.json';
 
 import { Button } from 'ui/views/_components/Button';
@@ -30,17 +28,9 @@ import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
-  const { datasetSchema } = state;
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = Article13Utils;
-  const {
-    onParseWebformData,
-    onParseWebformRecords,
-    parseNewRecord,
-    parseNewTableRecord,
-    parsePamsRecords
-  } = WebformsUtils;
-
-  console.log('datasetSchema', datasetSchema);
+  const { datasetSchema } = state;
+  const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -95,68 +85,17 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     return Math.max(...recordIds) + 1;
   };
 
-  const getParamFieldSchemaId = (param, table) => {
-    return table.elements
-      .filter(element => TextUtils.areEquals(element.name, param))
-      .map(table => table.fieldSchema)[0];
-  };
-
   const setTableSchemaId = tableSchemaId => {
     article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
   const onAddPamsRecord = async type => {
     setIsAddingRecord(true);
-
-    const table = article13State.data.filter(table => TextUtils.areEquals(table.name, 'pams'))[0];
-    const newEmptyPamRecord = parseNewRecord(table.elements);
-
-    const data = [];
-    const pamId = generatePamId();
-    for (let index = 0; index < newEmptyPamRecord.dataRow.length; index++) {
-      const row = newEmptyPamRecord.dataRow[index];
-      row.fieldData[getParamFieldSchemaId('IsGroup', table)] = type;
-      row.fieldData[getParamFieldSchemaId('Id', table)] = pamId;
-
-      data.push({ ...row });
-    }
-
-    newEmptyPamRecord.dataRow = data;
-
     const filteredTables = datasetSchema.tables.filter(table => table.tableSchemaNotEmpty);
 
     try {
-      const res = await WebformService.addPamsRecords(datasetId, filteredTables, pamId, type);
-      console.log('res', res);
-    } catch (error) {
-      console.log('error', error);
-    }
-    try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, []);
-      const isResponseAddRecordStatusOk = response.status >= 200 && response.status <= 299;
-
-      if (!isResponseAddRecordStatusOk) {
-        throw new Error(403);
-      }
-
-      const filteredTables = datasetSchema.tables.filter(
-        table => table.tableSchemaNotEmpty && !TextUtils.areEquals(table.tableSchemaName, 'pams')
-      );
-
-      for (let i = 0; i < filteredTables.length; i++) {
-        const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
-        console.log('newEmptyRecord', newEmptyRecord);
-        const res = await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
-        const isResponseAddRecordTableStatusOk = res.status >= 200 && res.status <= 299;
-
-        if (!isResponseAddRecordTableStatusOk) {
-          if (isResponseAddRecordStatusOk) {
-            onUpdateData();
-          }
-          throw new Error(403);
-        }
-      }
-      if (isResponseAddRecordStatusOk) {
+      const response = await WebformService.addPamsRecords(datasetId, filteredTables, generatePamId(), type);
+      if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
     } catch (error) {
@@ -170,7 +109,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
       setIsAddingRecord(false);
-    } finally {
     }
   };
 
