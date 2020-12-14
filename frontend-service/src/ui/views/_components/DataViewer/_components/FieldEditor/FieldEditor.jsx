@@ -664,7 +664,6 @@ const FieldEditor = ({
   };
 
   const renderFieldAsLabel = (value, type) => {
-    debugger;
     if (cells && cells.field && !isEmpty(type)) {
       if (
         ['POINT', 'POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type.toUpperCase())
