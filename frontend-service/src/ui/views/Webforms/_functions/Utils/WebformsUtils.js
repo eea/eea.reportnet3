@@ -1,8 +1,44 @@
+import compact from 'lodash/compact';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
+const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selectedValue) => {
+  const initialValues = {};
+
+  let tableIdx = 0;
+  if (QuerystringUtils.getUrlParamValue('tab') !== '') {
+    const filteredTable = schemaTables.filter(
+      schemaTable => schemaTable.id === QuerystringUtils.getUrlParamValue('tab')
+    );
+    if (!isEmpty(filteredTable)) {
+      tableIdx = allTables.indexOf(filteredTable[0].name);
+    }
+    //Search on subtables for parent id
+    if (tableIdx === -1) {
+      configTables.forEach(table => {
+        table.elements.forEach(element => {
+          if (element.type === 'TABLE') {
+            if (element.name === filteredTable[0].name) {
+              tableIdx = allTables.indexOf(table.name);
+            }
+          }
+        });
+      });
+    }
+  }
+  const value = allTables[tableIdx === -1 ? 0 : tableIdx];
+
+  compact(allTables).forEach(table => {
+    initialValues[table] = false;
+    initialValues[selectedValue ? selectedValue : value] = true;
+  });
+
+  return initialValues;
+};
 
 const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
   const result = [];
@@ -18,29 +54,6 @@ const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') =
     });
   }
   return result;
-};
-
-const parseNewRecord = (columnsSchema, data) => {
-  if (!isEmpty(columnsSchema)) {
-    let fields;
-
-    if (!isUndefined(columnsSchema)) {
-      fields = columnsSchema.map(column => {
-        if (column.type === 'FIELD') {
-          return {
-            fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
-          };
-        }
-      });
-    }
-
-    const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
-
-    obj.datasetPartitionId = null;
-    if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
-    return obj;
-  }
 };
 
 const parseNewTableRecord = (table, pamNumber) => {
@@ -183,10 +196,23 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
   return data;
 };
 
+const parsePamsRecords = records =>
+  records.map(record => {
+    const { recordId, recordSchemaId } = record;
+    let data = {};
+
+    record.elements.forEach(
+      element => (data = { ...data, [element.name]: element.value, recordId: recordId, recordSchemaId: recordSchemaId })
+    );
+
+    return data;
+  });
+
 export const WebformsUtils = {
+  getWebformTabs,
   mergeArrays,
   onParseWebformData,
   onParseWebformRecords,
-  parseNewRecord,
-  parseNewTableRecord
+  parseNewTableRecord,
+  parsePamsRecords
 };
