@@ -18,6 +18,7 @@ import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
 import { DatasetService } from 'core/services/Dataset';
+import { WebformService } from 'core/services/Webform';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -38,6 +39,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     parseNewTableRecord,
     parsePamsRecords
   } = WebformsUtils;
+
+  console.log('datasetSchema', datasetSchema);
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -120,8 +123,16 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
     newEmptyPamRecord.dataRow = data;
 
+    const filteredTables = datasetSchema.tables.filter(table => table.tableSchemaNotEmpty);
+
     try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyPamRecord]);
+      const res = await WebformService.addPamsRecords(datasetId, filteredTables, pamId, type);
+      console.log('res', res);
+    } catch (error) {
+      console.log('error', error);
+    }
+    try {
+      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, []);
       const isResponseAddRecordStatusOk = response.status >= 200 && response.status <= 299;
 
       if (!isResponseAddRecordStatusOk) {
@@ -129,11 +140,12 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       }
 
       const filteredTables = datasetSchema.tables.filter(
-        table => table.notEmpty && !TextUtils.areEquals(table.tableSchemaName, 'pams')
+        table => table.tableSchemaNotEmpty && !TextUtils.areEquals(table.tableSchemaName, 'pams')
       );
 
       for (let i = 0; i < filteredTables.length; i++) {
         const newEmptyRecord = parseNewTableRecord(filteredTables[i], pamId);
+        console.log('newEmptyRecord', newEmptyRecord);
         const res = await DatasetService.addRecordsById(datasetId, filteredTables[i].tableSchemaId, [newEmptyRecord]);
         const isResponseAddRecordTableStatusOk = res.status >= 200 && res.status <= 299;
 
@@ -264,7 +276,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         <h4 className={styles.title}>{resources.messages['missingWebformTablesOrFieldsMissing']}</h4>
         <div className={styles.missingElements}>
           {Object.keys(missingElements).map((key, i) => {
-            const { table, fields } = missingElements[key];
+            const { fields, table } = missingElements[key];
 
             return (
               fields.some(field => field.isMissing) && (
