@@ -719,7 +719,6 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -732,12 +731,24 @@ public class DatasetServiceImpl implements DatasetService {
     }
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
+
     String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    if (null != datasetSchema.getWebform() && null != datasetSchema.getWebform().getName()) {
+      // we update the ids in cascade for any pk value changed
+      for (RecordValue recordValue : recordValues) {
+        updateCascadePK(recordValue.getId(), recordValue.getFields());
+      }
+    }
     for (RecordValue recordValue : recordValues) {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue);
     }
     fieldRepository.saveAll(fieldValues);
   }
+
+
 
   /**
    * Field value update record for.
@@ -840,7 +851,6 @@ public class DatasetServiceImpl implements DatasetService {
    * Delete cascade PK.
    *
    * @param recordId the record id
-   * @param deleteCascade the delete cascade
    */
   private void deleteCascadePK(final String recordId) {
     RecordValue record = recordRepository.findById(recordId);
@@ -1441,6 +1451,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param readOnlyTables the read only tables
    * @param fixedNumberTables the fixed number tables
    * @param allRecords the all records
+   * @param tableWithAttachmentFieldSet the table with attachment field set
    */
   private void tableValueFor(Long datasetId, DatasetValue dataset, List<String> readOnlyTables,
       List<String> fixedNumberTables, List<RecordValue> allRecords,
@@ -1484,6 +1495,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tables the tables
    * @param readOnlyTables the read only tables
    * @param fixedNumberTables the fixed number tables
+   * @param datasetType the dataset type
    */
   private void etlTableFor(ETLDatasetVO etlDatasetVO, DataProviderVO provider,
       final PartitionDataSetMetabase partition, Map<String, TableSchema> tableMap,
@@ -2109,7 +2121,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param newFields the new fields
    * @param result the result
    * @param idRules the id rules
-   *
+   * @param fieldSchema the field schema
+   * @param fieldValue the field value
    * @return the table VO
    */
   private TableVO calculatedErrorsAndRecordsToSee(final String idTableSchema, Pageable pageable,
@@ -2142,7 +2155,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param sortFieldsArray the sort fields array
    * @param newFields the new fields
    * @param idRules the id rules
-   *
+   * @param fieldSchema the field schema
+   * @param fieldValue the field value
    * @return the table VO
    */
   private TableVO fieldsMap(final String idTableSchema, Pageable pageable, final String fields,
@@ -2446,6 +2460,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataset the dataset
    * @param tables the tables
    * @param etlTable the etl table
+   * @param datasetType the dataset type
    */
   private void etlBuildEntity(DataProviderVO provider, final PartitionDataSetMetabase partition,
       Map<String, TableSchema> tableMap, Map<String, FieldSchema> fieldMap, DatasetValue dataset,
@@ -2489,6 +2504,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param recordValue the record value
    * @param fieldValues the field values
    * @param idFieldSchemas the id schema
+   * @param datasetType the dataset type
    */
   private void etlFieldBuildFor(Map<String, FieldSchema> fieldMap, DatasetValue dataset,
       TableSchema tableSchema, ETLRecordVO etlRecord, RecordValue recordValue,
@@ -2866,4 +2882,71 @@ public class DatasetServiceImpl implements DatasetService {
     return type;
   }
 
+  /**
+   * Update cascade PK.
+   *
+   * @param recordValueId the record value id
+   * @param fieldValues the field values
+   */
+  private void updateCascadePK(final String recordValueId, final List<FieldValue> fieldValues) {
+
+    // we took recordValue to take more information necesary to calculate pk
+    RecordValue record = recordRepository.findById(recordValueId);
+
+    // we bring the schema
+    Document recordSchemaDocument = schemasRepository.findRecordSchema(
+        record.getTableValue().getDatasetId().getIdDatasetSchema(),
+        record.getTableValue().getIdTableSchema());
+    // get fks to delete
+    if (null != recordSchemaDocument) {
+      List<?> fieldSchemasList =
+          (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+
+      Document fieldSchemaDocument = null;
+      for (Object document : fieldSchemasList) {
+        if (((Document) document).get(LiteralConstants.PK) != null
+            && ((Document) document).getBoolean(LiteralConstants.PK)) {
+          fieldSchemaDocument = (Document) document;
+          break;
+        }
+      }
+      // we look if the record to update have any pk
+      if (null != fieldSchemaDocument) {
+        updatePKsValues(fieldValues, fieldSchemaDocument);
+      }
+    }
+  }
+
+  /**
+   * Update P ks values.
+   *
+   * @param fieldValues the field values
+   * @param fieldSchemaDocument the field schema document
+   */
+  private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument) {
+    // we took the both fields, database and filled in new record
+    String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
+    FieldValue fieldValueInRecord = fieldValues.stream()
+        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
+    FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
+
+    // we compare if that value is diferent, if not we ignore the pk cascade
+    if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
+      PkCatalogueSchema pkCatalogueSchema =
+          pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+      if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
+        List<String> referenced = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString)
+            .collect(Collectors.toList());
+        List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+        // we save if the data are the same th
+        fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
+          if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
+            fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
+            fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
+                fieldValuePkOtherTable.getValue());
+          }
+        });
+      }
+    }
+  }
 }
