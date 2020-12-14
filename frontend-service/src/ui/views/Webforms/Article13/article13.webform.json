@@ -5,6 +5,7 @@
       "label": "PaMs",
       "title": "Overview Table",
       "multipleRecords": false,
+      "isVisible": false,
       "elements": [
         {
           "type": "FIELD",
@@ -55,8 +56,62 @@
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "TitleNational",
+              "title": "Name of PaM or group of PaMs in national language",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "IsGroup",
+              "title": "Is this a single PaM or a group of PaMs?",
+              "customInput": "RADIO_BUTTON",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ListOfSinglePams",
+              "title": "Which policies or measures does it cover?",
+              "dependency": {
+                "field": "IsGroup",
+                "value": ["Group"]
+              },
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ShortDescription",
+              "title": "Short description",
+              "isPrimary": false
+            }
+          ]
+        },
         {
           "type": "FIELD",
           "name": "GeographicalCoverage",
@@ -400,6 +455,7 @@
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
         {
@@ -684,6 +740,7 @@
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
         {
