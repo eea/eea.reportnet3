@@ -135,7 +135,12 @@ export const WebformRecord = ({
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
-              {(element.required || element.title) && <label>{`${element.required ? '*' : ''}${element.title}`}</label>}
+              {(element.required || element.title) && (
+                <label>
+                  {element.title}
+                  <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
+                </label>
+              )}
 
               {element.tooltip && (
                 <Button
@@ -185,6 +190,7 @@ export const WebformRecord = ({
           <Fragment>
             {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
             {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+            {element.level === 4 && <p className={styles[`label${element.level}`]}>{element.title}</p>}
           </Fragment>
         );
       } else {
