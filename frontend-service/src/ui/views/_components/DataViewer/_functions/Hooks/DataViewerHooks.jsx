@@ -324,14 +324,15 @@ export const useSetColumns = (
     //Template for Field validation
 
     //Calculate the max width of data column
-    const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
-    const maxWidth = Math.max(...textMaxWidth) + 30;
+    // const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
+    // const maxWidth = Math.max(...textMaxWidth);
 
     let columnsArr = colsSchema.map((column, i) => {
       let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
       let invisibleColumn =
         column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
       const readOnlyColumn = column.readOnly && isReporting ? styles.readOnlyFields : '';
+      const headerWidth = RecordUtils.getTextWidth(column.header, '14pt Open Sans');
 
       return (
         <Column
@@ -372,7 +373,7 @@ export const useSetColumns = (
           style={{
             width:
               invisibleColumn === ''
-                ? `${!isUndefined(maxWidths[i]) ? (maxWidth > maxWidths[i] ? maxWidth : maxWidths[i]) : maxWidth}px`
+                ? `${column.readOnly ? Number(headerWidth) + 100 : Number(headerWidth) + 70}px`
                 : '0.01px'
           }}
         />
