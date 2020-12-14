@@ -33,7 +33,7 @@ export const article13Reducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'SET_IS_ADDING_RECIRD':
+    case 'SET_IS_ADDING_RECORD':
       return { ...state, isAddingRecord: payload.value };
 
     case 'ON_REFRESH':

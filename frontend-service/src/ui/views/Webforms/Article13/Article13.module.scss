@@ -44,9 +44,10 @@
     background-color: var(--tabview-bg);
     border-radius: 6px;
     display: flex;
+    flex-flow: wrap;
     list-style: none;
     margin: 1rem 0;
-    padding: 0.5rem;
+    padding: 0.5rem 5rem 0.5rem 0.5rem;
     color: var(--main-font-color);
 
     .tableListTitle {
