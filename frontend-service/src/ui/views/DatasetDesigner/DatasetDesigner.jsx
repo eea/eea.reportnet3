@@ -351,8 +351,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const getImportExtensions = ['.zip'].concat(designerState.externalOperationsList.import
-    .map(file => `.${file.fileExtension}`))
+  const getImportExtensions = ['.zip']
+    .concat(designerState.externalOperationsList.import.map(file => `.${file.fileExtension}`))
     .join(', ')
     .toLowerCase();
 
@@ -1103,7 +1103,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? ' p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
