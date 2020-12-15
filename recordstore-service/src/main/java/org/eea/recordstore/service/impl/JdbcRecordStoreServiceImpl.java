@@ -893,17 +893,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
   /**
-   * Release lock and notification.
-   *
-   * @param dataflowId the dataflow id
-   * @param isCreation the is creation
-   */
-  private void releaseLockAndNotification(Long dataflowId, boolean isCreation) {
-
-
-  }
-
-  /**
    * Releases CONNECTION_CREATED_EVENT Kafka events to initialize databases content. Before that,
    * insert the values into the schema of the dataset_value and table_value
    *

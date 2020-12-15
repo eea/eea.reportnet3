@@ -74,7 +74,7 @@ export const PublicFrontpage = () => {
                     <h4>Need any help?</h4>
                     <p>Please contact us at</p>
                     <p>
-                      <a href="mailto:helpdesk@eionet.europa.eu">helpdesk@eionet.europa.eu</a>
+                      <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>
                     </p>
                   </div>
                   <hr className={styles.separator} />
@@ -109,6 +109,13 @@ export const PublicFrontpage = () => {
                           Requester
                         </a>
                       </li>
+                      <li>
+                        <a
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
+                          target="_blank">
+                          webforms
+                        </a>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -122,6 +129,12 @@ export const PublicFrontpage = () => {
               <h3>Dataflows currently (01.08.2020) in scope for Reportnet 3.0:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
+                  <Card {...dataflow} />
+                ))}
+              </div>
+              <h3>EEA Voluntary Dataflows:</h3>
+              <div className={styles.dataflowsList}>
+                {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
                   <Card {...dataflow} />
                 ))}
               </div>

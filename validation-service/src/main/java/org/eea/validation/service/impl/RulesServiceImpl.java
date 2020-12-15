@@ -124,8 +124,8 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
 
-  /** The Constant DATASET_: {@value}. */
-  private static final String DATASET_ = "dataset_";
+  /** The Constant DATASET: {@value}. */
+  private static final String DATASET = "dataset_";
 
   /**
    * Gets the rules schema by dataset id.
@@ -1081,15 +1081,15 @@ public class RulesServiceImpl implements RulesService {
 
           // Change the dataset_X in the sentence itself if necessary, like
           // select * from table_one t1 inner join dataset_256.table_two....
-          newWhenCondition = newWhenCondition.replace(DATASET_ + oldDatasetId.toString(),
-              DATASET_ + newDatasetId.toString());
+          newWhenCondition = newWhenCondition.replace(DATASET + oldDatasetId.toString(),
+              DATASET + newDatasetId.toString());
           rule.setWhenCondition(newWhenCondition);
 
           // Do the same in the property SqlSentence
           if (StringUtils.isNotBlank(rule.getSqlSentence())) {
             String newSqlSentence = rule.getSqlSentence();
-            newSqlSentence = newSqlSentence.replace(DATASET_ + oldDatasetId.toString(),
-                DATASET_ + newDatasetId.toString());
+            newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
+                DATASET + newDatasetId.toString());
             rule.setSqlSentence(newSqlSentence);
           }
 

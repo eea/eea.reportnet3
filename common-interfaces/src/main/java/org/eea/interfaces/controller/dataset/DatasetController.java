@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+
 /**
  * The Interface DatasetController.
  */
@@ -159,7 +160,7 @@ public interface DatasetController {
    */
   @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
-      @RequestParam("deleteCascadePK") boolean deleteCascadePK);
+      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
 
   /**
    * Delete import table.
@@ -322,4 +323,14 @@ public interface DatasetController {
   void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
       @RequestParam("integrationId") Long integrationId,
       @RequestParam("operation") IntegrationOperationTypeEnum operation);
+
+  /**
+   * Insert records multi table.
+   *
+   * @param datasetId the dataset id
+   * @param tableRecords the table records
+   */
+  @PostMapping("/{datasetId}/insertRecordsMultiTable")
+  void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
+      @RequestBody List<TableVO> tableRecords);
 }
