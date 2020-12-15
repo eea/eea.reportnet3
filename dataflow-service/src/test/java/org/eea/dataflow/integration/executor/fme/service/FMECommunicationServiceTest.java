@@ -12,6 +12,7 @@ import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
+import org.eea.dataflow.integration.executor.fme.service.impl.FMECommunicationServiceImpl;
 import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.exception.EEAErrorMessage;
@@ -44,7 +45,7 @@ import org.springframework.web.client.RestTemplate;
 public class FMECommunicationServiceTest {
 
   @InjectMocks
-  private FMECommunicationService fmeCommunicationService;
+  private FMECommunicationServiceImpl fmeCommunicationService;
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
