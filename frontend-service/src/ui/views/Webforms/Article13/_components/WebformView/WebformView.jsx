@@ -12,7 +12,7 @@ import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
-import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const WebformView = ({
   data,
@@ -29,10 +29,11 @@ export const WebformView = ({
   tables
 }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
+  const { getWebformTabs } = WebformsUtils;
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isLoading: false,
-    isVisible: Article15Utils.getWebformTabs(
+    isVisible: getWebformTabs(
       tables.map(table => table.name),
       state.schemaTables,
       tables,
@@ -63,8 +64,6 @@ export const WebformView = ({
       isVisible[name] = true;
     });
 
-    // changeUrl(name);
-
     webformViewDispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
@@ -72,32 +71,34 @@ export const WebformView = ({
     const filteredTabs = data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
 
-    return data.map((webform, i) => {
-      const isCreated = headers.includes(webform.name);
-      const childHasErrors = webform.elements
-        .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-        .map(table => table.hasErrors);
+    return data
+      .filter(table => table.isVisible)
+      .map((webform, i) => {
+        const isCreated = headers.includes(webform.name);
+        const childHasErrors = webform.elements
+          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
+          .map(table => table.hasErrors);
 
-      const hasErrors = [webform.hasErrors].concat(childHasErrors);
-      return (
-        <Button
-          className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
-          disabled={isLoading}
-          icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-          iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-          iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
-          key={i}
-          label={webform.label}
-          onClick={() => onChangeWebformTab(webform.name)}
-          style={{ display: isReporting && !isCreated ? 'none' : '' }}
-        />
-      );
-    });
+        const hasErrors = [webform.hasErrors].concat(childHasErrors);
+        return (
+          <Button
+            className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
+            disabled={isLoading}
+            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
+            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
+            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            key={i}
+            label={webform.label}
+            onClick={() => onChangeWebformTab(webform.name)}
+            style={{ display: isReporting && !isCreated ? 'none' : '' }}
+          />
+        );
+      });
   };
 
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(isVisible))[0];
-    const visibleContent = data.filter(table => table.name === visibleTitle)[0];
+    const visibleContent = data.filter(table => table.name === visibleTitle && table.isVisible)[0];
 
     return (
       <WebformTable

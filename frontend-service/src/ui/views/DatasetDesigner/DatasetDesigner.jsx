@@ -352,8 +352,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const getImportExtensions = designerState.externalOperationsList.import
-    .map(file => `.${file.fileExtension}`)
+  const getImportExtensions = ['.zip']
+    .concat(designerState.externalOperationsList.import.map(file => `.${file.fileExtension}`))
     .join(', ')
     .toLowerCase();
 
@@ -1068,30 +1068,27 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
           <Toolbar>
             <div className="p-toolbar-group-left">
-              {(!isEmpty(designerState.externalOperationsList.import) ||
-                !isEmpty(designerState.externalOperationsList.importOtherSystems)) && (
-                <Fragment>
-                  <Button
-                    className={`p-button-rounded p-button-secondary p-button-animated-blink`}
-                    icon={'import'}
-                    label={resources.messages['importDataset']}
-                    onClick={
-                      !isEmpty(designerState.externalOperationsList.importOtherSystems)
-                        ? event => importMenuRef.current.show(event)
-                        : () => manageDialogs('isImportDatasetDialogVisible', true)
-                    }
+              <Fragment>
+                <Button
+                  className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+                  icon={'import'}
+                  label={resources.messages['importDataset']}
+                  onClick={
+                    !isEmpty(designerState.externalOperationsList.importOtherSystems)
+                      ? event => importMenuRef.current.show(event)
+                      : () => manageDialogs('isImportDatasetDialogVisible', true)
+                  }
+                />
+                {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
+                  <Menu
+                    id="importDataSetMenu"
+                    model={designerState.importButtonsList}
+                    onShow={e => getPosition(e)}
+                    popup={true}
+                    ref={importMenuRef}
                   />
-                  {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                    <Menu
-                      id="importDataSetMenu"
-                      model={designerState.importButtonsList}
-                      onShow={e => getPosition(e)}
-                      popup={true}
-                      ref={importMenuRef}
-                    />
-                  )}
-                </Fragment>
-              )}
+                )}
+              </Fragment>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
@@ -1115,7 +1112,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? ' p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}

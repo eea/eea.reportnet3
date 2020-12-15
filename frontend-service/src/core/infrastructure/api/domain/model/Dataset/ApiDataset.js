@@ -265,7 +265,8 @@ export const apiDataset = {
     fieldSchemaId,
     searchToken,
     conditionalValue = '',
-    datasetSchemaId = ''
+    datasetSchemaId = '',
+    resultsNumber = ''
   ) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.referencedFieldValues, {
@@ -273,6 +274,7 @@ export const apiDataset = {
         datasetId,
         datasetSchemaId,
         fieldSchemaId,
+        resultsNumber: resultsNumber !== '' ? resultsNumber : undefined,
         searchToken: searchToken !== '' ? searchToken : undefined
       })
     });

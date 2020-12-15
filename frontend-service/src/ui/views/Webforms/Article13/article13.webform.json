@@ -5,6 +5,7 @@
       "label": "PaMs",
       "title": "Overview Table",
       "multipleRecords": false,
+      "isVisible": false,
       "elements": [
         {
           "type": "FIELD",
@@ -55,8 +56,62 @@
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "TitleNational",
+              "title": "Name of PaM or group of PaMs in national language",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "IsGroup",
+              "title": "Is this a single PaM or a group of PaMs?",
+              "customInput": "RADIO_BUTTON",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ListOfSinglePams",
+              "title": "Which policies or measures does it cover?",
+              "dependency": {
+                "field": "IsGroup",
+                "value": ["Group"]
+              },
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ShortDescription",
+              "title": "Short description",
+              "isPrimary": false
+            }
+          ]
+        },
         {
           "type": "FIELD",
           "name": "GeographicalCoverage",
@@ -78,22 +133,15 @@
           "isPrimary": false
         },
         {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Sector and Objective(s) affected",
-          "tooltip": "A sector can be selected. More than one objective can be selected, additional objectives could be added and specified under 'other'",
-          "isPrimary": false
-        },
-        {
           "type": "TABLE",
           "name": "SectorObjectives",
-          "title": "Sector and Objective(s)",
+          "title": "Sector(s) affected and Objective(s)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "SectorAffected",
-              "title": "Sector(s) affected",
+              "title": "Sector affected",
               "isPrimary": false,
               "readOnly": true
             },
@@ -111,6 +159,7 @@
               "type": "FIELD",
               "name": "Objective",
               "title": "Select Objective(s)",
+              "tooltip": "Objective means ‘initial statement of the outcomes (including resultsand impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
               "isPrimary": false
             },
             {
@@ -146,7 +195,7 @@
           "type": "FIELD",
           "name": "QuantifiedObjective",
           "title": "Quantified Objective",
-          "tooltip": "Include the figure(s) if the objectives(s) is (are) quantified",
+          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base yearshall be included if the objective(s) is(are) quantified",
           "isPrimary": false
         },
         {
@@ -193,7 +242,7 @@
         },
         {
           "type": "LABEL",
-          "level": 2,
+          "level": 4,
           "title": "Union policy which resulted in the implementation of the PaM",
           "tooltip": "Only Union policy/policies that are implemented through the national policy or where national policies are aimed directly at meeting the objectives of Union policies shall be listed. Union policies are organized by sector that is most likely applicable. The selected ‘Sector(s) affected’ can differ from the sector(s) listed here. More than one Union policy can be selected, additional union policies could be added and specified under 'other'. Sectors are not listed in alphabetical order"
         },
@@ -248,7 +297,7 @@
         },
         {
           "type": "LABEL",
-          "level": 2,
+          "level": 4,
           "title": "Implementation Period"
         },
         {
@@ -277,14 +326,9 @@
           "isPrimary": false
         },
         {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Entities responsible for implementing the policy"
-        },
-        {
           "type": "TABLE",
           "name": "Entities",
-          "title": "Entity",
+          "title": "Entities responsible for implementing the policy",
           "multipleRecords": true,
           "elements": [
             {
@@ -302,15 +346,9 @@
           ]
         },
         {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Indicators used to monitor and evaluate progress over time (ex-post or ex-ante)",
-          "tooltip": "Any indicator used (including the unit) and values for such indicators shall be provided, that was used to monitor and evaluate progress of PaMs. Those values can be either ex-post or ex-ante values and the year or years for which the value applies shall be specified. Values for multiple indicators and years may be reported. Identified performance indicators shall be relevant, accepted, credible, easy and robust"
-        },
-        {
           "type": "TABLE",
           "name": "Indicators",
-          "title": "Indicator",
+          "title": "Indicators used to monitor and evaluate progress over time (ex-post or ex-ante)",
           "multipleRecords": true,
           "elements": [
             {
@@ -386,14 +424,9 @@
           ]
         },
         {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Reference to assessments and underpinning technical reports"
-        },
-        {
           "type": "TABLE",
           "name": "Reference",
-          "title": "Reference",
+          "title": "Reference to assessments and underpinning technical reports",
           "multipleRecords": true,
           "elements": [
             {
@@ -422,6 +455,7 @@
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
         {
@@ -433,13 +467,13 @@
         },
         {
           "type": "LABEL",
-          "level": 2,
+          "level": 4,
           "title": "Ex-ante assessment",
           "isPrimary": false
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "GHG emissions reductions for year 2025 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
@@ -476,7 +510,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "GHG emissions reductions for year 2030 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
@@ -513,7 +547,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "GHG emissions reductions for year 2035 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
@@ -550,7 +584,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "GHG emissions reductions for year 2040 (kt CO2-equivalent per year)",
           "isPrimary": false
         },
@@ -586,39 +620,21 @@
           ]
         },
         {
-          "type": "LABEL",
-          "level": 3,
+          "type": "FIELD",
+          "name": "Explanation",
           "title": "Explanation of the basis for the mitigation estimates",
           "isPrimary": false
         },
         {
           "type": "FIELD",
-          "name": "Explanation",
-          "title": "",
-          "isPrimary": false
-        },
-        {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Factors affected by the PaM",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
           "name": "FactorsAffected",
-          "title": "",
-          "isPrimary": false
-        },
-        {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Documentation / Source of estimation if available",
+          "title": "Factors affected by the PaM",
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "Documentation_AnteAssessment",
-          "title": "Documentation of ex-ante assessment",
+          "title": "Documentation / Source of estimation if available",
           "multipleRecords": true,
           "elements": [
             {
@@ -637,21 +653,15 @@
         },
         {
           "type": "LABEL",
-          "level": 2,
+          "level": 4,
           "title": "Ex-post assessment",
           "tooltip": " Ex-post evaluations include all evaluations based on results from parts of, or the whole implementation period. Ex-post assessments for more than one year may be reported, where available reporting shall focus on years ending with 0 or 5",
           "isPrimary": false
         },
         {
-          "type": "LABEL",
-          "level": 3,
-          "title": "GHG emissions reductions (kt CO2-equivalent per year)",
-          "isPrimary": false
-        },
-        {
           "type": "TABLE",
           "name": "GHG_emissions",
-          "title": "Ex-post GHG emissions reductions",
+          "title": "GHG emissions reductions (kt CO2-equivalent per year)",
           "multipleRecords": true,
           "elements": [
             {
@@ -693,39 +703,21 @@
           ]
         },
         {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Explanation of the basis for the mitigation estimates",
-          "isPrimary": false
-        },
-        {
           "type": "FIELD",
           "name": "ExplanationMitigation",
-          "title": "",
-          "isPrimary": false
-        },
-        {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Factors affected by PaM",
+          "title": "Explanation of the basis for the mitigation",
           "isPrimary": false
         },
         {
           "type": "FIELD",
           "name": "FactorAffectedPams",
-          "title": "",
-          "isPrimary": false
-        },
-        {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Documentation/ Source of estimation if available",
+          "title": "Factors affected by the PaM",
           "isPrimary": false
         },
         {
           "type": "TABLE",
           "name": "Documentation_PostAssessment",
-          "title": "Documentation of ex-post assessment",
+          "title": "Documentation/ Source of estimation if available",
           "multipleRecords": true,
           "elements": [
             {
@@ -748,11 +740,12 @@
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
         {
           "type": "LABEL",
-          "level": 2,
+          "level": 4,
           "title": "Projected costs and benefits",
           "isPrimary": false
         },
@@ -765,7 +758,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "Cost",
           "isPrimary": false
         },
@@ -783,7 +776,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "Benefit",
           "tooltip": "A benefit shall be indicated in the template as a negative cost",
           "isPrimary": false
@@ -804,7 +797,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "Net Cost",
           "isPrimary": false
         },
@@ -827,28 +820,16 @@
           "isPrimary": false
         },
         {
-          "type": "LABEL",
-          "level": 3,
+          "type": "FIELD",
+          "name": "ProjectedDescriptionCost",
           "title": "Description of cost estimates (basis for cost estimate, what type of costs are included in the estimate, methodology)",
           "tooltip": "The description shall include the type of costs andn benefits that have been taken into consideration, the stakeholders considered in the assessment of costs and benefits, the baseline against which costs and benefits are compared, and the methodology",
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "ProjectedDescriptionCost",
-          "title": "",
-          "isPrimary": false
-        },
-        {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Documentation / Source of cost estimation",
-          "isPrimary": false
-        },
-        {
           "type": "TABLE",
           "name": "DocumentationCostEstimation_1",
-          "title": "Documentation of projected cost and benefit estimates",
+          "title": "Documentation / Source of cost estimation",
           "multipleRecords": true,
           "elements": [
             {
@@ -866,20 +847,14 @@
           ]
         },
         {
-          "type": "LABEL",
-          "level": 3,
+          "type": "FIELD",
+          "name": "ProjectedDescriptionNonGHG",
           "title": "Description of non-GHG mitigation benefits",
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "ProjectedDescriptionNonGHG",
-          "title": "",
-          "isPrimary": false
-        },
-        {
           "type": "LABEL",
-          "level": 2,
+          "level": 4,
           "title": "Realised costs and benefits",
           "isPrimary": false
         },
@@ -892,7 +867,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "Cost",
           "isPrimary": false
         },
@@ -910,7 +885,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "Benefit",
           "tooltip": "A benefit shall be indicated in the template as a negative cost",
           "isPrimary": false
@@ -929,7 +904,7 @@
         },
         {
           "type": "LABEL",
-          "level": 3,
+          "level": 4,
           "title": "Net Cost",
           "isPrimary": false
         },
@@ -952,28 +927,16 @@
           "isPrimary": false
         },
         {
-          "type": "LABEL",
-          "level": 3,
+          "type": "FIELD",
+          "name": "RealizedDescriptionCost",
           "title": "Description of cost estimates (basis for cost estimate, what type of costs are included in the estimate, methodology)",
           "tooltip": "The description shall include the type of costs and benefits that have been taken into consideration, the stakeholders considered in the assessment of costs and benefits, the baseline against which costs and benefits are compared, and the methodology",
           "isPrimary": false
         },
         {
-          "type": "FIELD",
-          "name": "RealizedDescriptionCost",
-          "title": "",
-          "isPrimary": false
-        },
-        {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Documentation / Source of cost estimation ",
-          "isPrimary": false
-        },
-        {
           "type": "TABLE",
           "name": "DocumentationCostEstimation_2",
-          "title": "Documentation of realised cost and benefit estimates",
+          "title": "Documentation / Source of cost estimation",
           "multipleRecords": true,
           "elements": [
             {
@@ -991,15 +954,9 @@
           ]
         },
         {
-          "type": "LABEL",
-          "level": 3,
-          "title": "Description of non-GHG mitigation benefits",
-          "isPrimary": false
-        },
-        {
           "type": "FIELD",
           "name": "RealizedDescriptionNonGHG",
-          "title": "",
+          "title": "Description of non-GHG mitigation benefits",
           "isPrimary": false
         }
       ]
