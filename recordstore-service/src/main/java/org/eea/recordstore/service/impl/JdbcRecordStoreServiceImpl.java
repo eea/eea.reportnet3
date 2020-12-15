@@ -672,7 +672,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             : EventType.RELEASE_FAILED_EVENT;
 
     restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
-        deleteData, successEventType, failEventType, true);
+        deleteData, successEventType, failEventType);
 
   }
 
@@ -750,11 +750,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param deleteData the delete data
    * @param successEventType the success event type
    * @param failEventType the fail event type
-   * @param launchEvent the launch event
    */
   private void restoreSnapshot(Long datasetId, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      EventType successEventType, EventType failEventType, Boolean launchEvent) {
+      EventType successEventType, EventType failEventType) {
 
     String signature = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
@@ -783,41 +782,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
-      if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
-        // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-        // not neccesary
-        String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-            LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+      copyProcess(datasetId, idSnapshot, datasetType, cm);
 
-        String copyQueryTable =
-            COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-        copyFromFile(copyQueryTable, nameFileTableValue, cm);
-      }
-      // Record value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
-
-      String copyQueryRecord = COPY_DATASET + datasetId
-          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
-      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-
-      // Field value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-
-      String copyQueryField = COPY_DATASET + datasetId
-          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
-      copyFromFile(copyQueryField, nameFileFieldValue, cm);
-
-      // Attachment value
-      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-
-      String copyQueryAttachment = COPY_DATASET + datasetId
-          + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
-
-      if (Boolean.TRUE.equals(launchEvent) && !DatasetTypeEnum.EUDATASET.equals(datasetType)
+      if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT)) {
         // Send kafka event to launch Validation
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
@@ -841,10 +808,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
       }
       LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
-      if (Boolean.TRUE.equals(launchEvent)) {
-        releaseNotificableKafkaEvent(failEventType, value, datasetId,
-            "Error restoring the snapshot data");
-      }
+      releaseNotificableKafkaEvent(failEventType, value, datasetId,
+          "Error restoring the snapshot data");
       if (EventType.RELEASE_FAILED_EVENT.equals(failEventType)) {
         LOG_ERROR.error(
             "Release datasets operation failed during the restoring snapshot with the message: {}",
@@ -860,6 +825,53 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       removeLockByCriteria(signature, datasetIdFromSnapshot);
     }
 
+  }
+
+  /**
+   * Copy process.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param datasetType the dataset type
+   * @param cm the cm
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
+      CopyManager cm) throws IOException, SQLException {
+    if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
+      // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+      // not neccesary
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+      String copyQueryTable =
+          COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+      copyFromFile(copyQueryTable, nameFileTableValue, cm);
+    }
+    // Record value
+    String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+        LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+
+    String copyQueryRecord = COPY_DATASET + datasetId
+        + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+    copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+    // Field value
+    String nameFileFieldValue = pathSnapshot
+        + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+
+    String copyQueryField = COPY_DATASET + datasetId
+        + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+    copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+    // Attachment value
+    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+        LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+    String copyQueryAttachment = COPY_DATASET + datasetId
+        + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+    copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
   }
 
   /**
@@ -1092,6 +1104,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Update materialized query view.
    *
    * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
    */
   @Override
   @Async
