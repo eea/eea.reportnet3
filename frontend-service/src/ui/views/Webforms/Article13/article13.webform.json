@@ -151,7 +151,7 @@
               "title": "Other Sector(s)",
               "dependency": {
                 "field": "SectorAffected",
-                "value": ["Other sectors"]
+                "value": ["9"]
               },
               "isPrimary": false
             },
@@ -459,6 +459,34 @@
       "multipleRecords": false,
       "elements": [
         {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true,
+              "isEditable": false,
+              "customType": "TEXT_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "isPrimary": false,
+              "isEditable": false,
+              "customType": "TEXT_ONLY"
+            }
+          ]
+        },
+        {
           "type": "FIELD",
           "name": "PolicyImpacting",
           "title": "Policy impacting EU ETS, LULUCF and/or ESD/ESR emissions",
@@ -743,6 +771,34 @@
       "isVisible": true,
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true,
+              "isEditable": false,
+              "customType": "TEXT_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "isPrimary": false,
+              "isEditable": false,
+              "customType": "TEXT_ONLY"
+            }
+          ]
+        },
         {
           "type": "LABEL",
           "level": 4,
