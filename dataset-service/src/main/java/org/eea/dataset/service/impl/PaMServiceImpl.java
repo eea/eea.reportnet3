@@ -3,7 +3,7 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.PaMService;
-import org.eea.interfaces.vo.pams.EntitiesPaMsVO;
+import org.eea.interfaces.vo.pams.EntityPaMVO;
 import org.eea.interfaces.vo.pams.SectorVO;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * The Class PaMsServiceImpl.
  */
 @Service
-public class PaMsServiceImpl implements PaMService {
+public class PaMServiceImpl implements PaMService {
 
   /**
    * Gets the list single paM.
@@ -24,9 +24,9 @@ public class PaMsServiceImpl implements PaMService {
   public List<SinglePaMVO> getListSinglePaM() {
     SinglePaMVO singlePaMs = new SinglePaMVO();
     SectorVO sectorVO = new SectorVO();
-    EntitiesPaMsVO entities = new EntitiesPaMsVO();
+    EntityPaMVO entity = new EntityPaMVO();
     List<SinglePaMVO> singlesPaMs = new ArrayList<>();
-    List<EntitiesPaMsVO> entitiesList = new ArrayList<>();
+    List<EntityPaMVO> entitiesList = new ArrayList<>();
     List<String> unionPolicyList = new ArrayList<>();
     List<String> objectives = new ArrayList<>();
     List<String> otherObjectives = new ArrayList<>();
@@ -42,9 +42,9 @@ public class PaMsServiceImpl implements PaMService {
     sectorVO.setOtherObjectives(otherObjectives);
     sectorVO.setObjectives(objectives);
     sectors.add(sectorVO);
-    entities.setName("National government");
-    entities.setType("Government");
-    entitiesList.add(entities);
+    entity.setName("National government");
+    entity.setType("Government");
+    entitiesList.add(entity);
     singlePaMs.setId("1");
     singlePaMs.setImplementationPeriodComment("implementationPeriodComment");
     singlePaMs.setImplementationPeriodFinish("2020");

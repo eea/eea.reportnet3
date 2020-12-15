@@ -6,7 +6,7 @@ import lombok.Data;
  * Instantiates a new entities pa ms VO.
  */
 @Data
-public class EntitiesPaMsVO {
+public class EntityPaMVO {
 
   /** The type. */
   private String type;

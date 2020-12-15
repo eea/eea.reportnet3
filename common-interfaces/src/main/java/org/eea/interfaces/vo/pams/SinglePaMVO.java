@@ -38,7 +38,7 @@ public class SinglePaMVO {
   private List<String> unionPolicyList;
 
   /** The entities. */
-  private List<EntitiesPaMsVO> entities;
+  private List<EntityPaMVO> entities;
 
   /** The Policy impacting. */
   private String PolicyImpacting;
