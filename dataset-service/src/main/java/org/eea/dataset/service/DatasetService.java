@@ -128,10 +128,11 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
-   *
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
-  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
+  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records, boolean updateCascadePK)
+      throws EEAException;
 
   /**
    * Delete record.

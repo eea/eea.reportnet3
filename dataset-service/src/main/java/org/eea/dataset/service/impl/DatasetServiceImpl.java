@@ -719,12 +719,13 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateRecords(final Long datasetId, final List<RecordVO> records)
-      throws EEAException {
+  public void updateRecords(final Long datasetId, final List<RecordVO> records,
+      boolean updateCascadePK) throws EEAException {
     if (datasetId == null || records == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
@@ -732,16 +733,13 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
 
-    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
-    DataSetSchema datasetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
-
-    if (null != datasetSchema.getWebform() && null != datasetSchema.getWebform().getName()) {
+    if (!updateCascadePK) {
       // we update the ids in cascade for any pk value changed
       for (RecordValue recordValue : recordValues) {
         updateCascadePK(recordValue.getId(), recordValue.getFields());
       }
     }
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     for (RecordValue recordValue : recordValues) {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue);
     }
@@ -865,6 +863,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (null != recordSchemaDocument) {
       List<?> fieldSchemasList =
           (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+
       List<String> recordsToDelete = findRecordsToDelete(mapField, fieldSchemasList);
       if (!recordsToDelete.isEmpty()) {
         LOG.info("records with fk's to delete {}", recordsToDelete);
@@ -884,6 +883,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<String> findRecordsToDelete(Map<String, FieldValue> mapField,
       List<?> fieldSchemasList) {
     List<String> recordsToDelete = new ArrayList<>();
+    String fieldValuePk = null;
     for (Object document : fieldSchemasList) {
       Document fieldSchemaDocument = (Document) document;
       if (fieldSchemaDocument.get(LiteralConstants.PK) != null
@@ -895,12 +895,65 @@ public class DatasetServiceImpl implements DatasetService {
           List<String> referenced = pkCatalogueSchema.getReferenced().stream()
               .map(ObjectId::toString).collect(Collectors.toList());
           List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+
+          FieldValue fieldV = mapField.get(idFieldSchema);
+          fieldValuePk = fieldV.getValue();
           fieldsValues.stream().forEach(field -> {
-            FieldValue fieldV = mapField.get(idFieldSchema);
             if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
               recordsToDelete.add(field.getRecord().getId());
             }
           });
+
+          String idListOfSinglePamsField = null;
+          for (Object documentFieldList : fieldSchemasList) {
+            if (((Document) documentFieldList).get("headerName") != null
+                && ((Document) documentFieldList).getString("headerName")
+                    .equals("ListOfSinglePams")) {
+              idListOfSinglePamsField = ((Document) documentFieldList).get("_id").toString();
+            }
+          }
+
+          // we update id of the group in the webform
+          List<FieldValue> fieldValuesWithData =
+              fieldRepository.findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValuePk);
+
+          if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
+
+            for (FieldValue fieldValue : fieldValuesWithData) {
+              List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
+
+              List<Long> itemsLong = new ArrayList();
+              for (int i = 0; i < items.size(); i++) {
+                if (!items.get(i).equalsIgnoreCase(fieldValuePk)) {
+                  itemsLong.add(Long.valueOf(items.get(i)));
+                }
+              }
+              String cadena = "";
+              if (!itemsLong.isEmpty()) {
+                Collections.sort(itemsLong);
+                for (int i = 0; i < itemsLong.size(); i++) {
+                  if (i == 0) {
+                    cadena = itemsLong.get(i) + ",";
+                  } else if (i == itemsLong.size() - 1) {
+                    cadena = cadena + itemsLong.get(i);
+                  } else {
+                    cadena = cadena + itemsLong.get(i) + ",";
+                  }
+
+
+                }
+                if (',' == cadena.charAt(0)) {
+                  cadena = cadena.substring(1, cadena.length() - 1);
+                }
+
+                if (',' == cadena.charAt(cadena.length() - 1)) {
+                  cadena = cadena.substring(0, cadena.length() - 1);
+                }
+              }
+              fieldValue.setValue(cadena);
+              fieldRepository.save(fieldValue);
+            }
+          }
         }
       }
     }
@@ -2903,16 +2956,20 @@ public class DatasetServiceImpl implements DatasetService {
           (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
 
       Document fieldSchemaDocument = null;
+      String idListOfSinglePamsField = null;
       for (Object document : fieldSchemasList) {
         if (((Document) document).get(LiteralConstants.PK) != null
             && ((Document) document).getBoolean(LiteralConstants.PK)) {
           fieldSchemaDocument = (Document) document;
-          break;
+        }
+        if (((Document) document).get("headerName") != null
+            && ((Document) document).getString("headerName").equals("ListOfSinglePams")) {
+          idListOfSinglePamsField = ((Document) document).get("_id").toString();
         }
       }
       // we look if the record to update have any pk
       if (null != fieldSchemaDocument) {
-        updatePKsValues(fieldValues, fieldSchemaDocument);
+        updatePKsValues(fieldValues, fieldSchemaDocument, idListOfSinglePamsField);
       }
     }
   }
@@ -2923,11 +2980,13 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValues the field values
    * @param fieldSchemaDocument the field schema document
    */
-  private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument) {
+  private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument,
+      String idListOfSinglePamsField) {
     // we took the both fields, database and filled in new record
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
     FieldValue fieldValueInRecord = fieldValues.stream()
         .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
+
     FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
 
     // we compare if that value is diferent, if not we ignore the pk cascade
@@ -2944,8 +3003,49 @@ public class DatasetServiceImpl implements DatasetService {
             fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
             fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
                 fieldValuePkOtherTable.getValue());
+
           }
         });
+      }
+      // we update id of the group in the webform
+      List<FieldValue> fieldValuesWithData = fieldRepository
+          .findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValueDatabase.getValue());
+
+      if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
+
+        for (FieldValue fieldValue : fieldValuesWithData) {
+          List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
+
+          List<Long> itemsLong = new ArrayList();
+          for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).equalsIgnoreCase(fieldValueDatabase.getValue())) {
+              items.set(i, fieldValueInRecord.getValue());
+            }
+            itemsLong.add(Long.valueOf(items.get(i)));
+          }
+          String cadena = "";
+          Collections.sort(itemsLong);
+          for (int i = 0; i < itemsLong.size(); i++) {
+            if (i == 0) {
+              cadena = itemsLong.get(i) + ",";
+            } else if (i == itemsLong.size() - 1) {
+              cadena = cadena + itemsLong.get(i);
+            } else {
+              cadena = cadena + itemsLong.get(i) + ",";
+            }
+
+
+          }
+          if (',' == cadena.charAt(0)) {
+            cadena = cadena.substring(1, cadena.length() - 1);
+          }
+
+          if (',' == cadena.charAt(cadena.length() - 1)) {
+            cadena = cadena.substring(0, cadena.length() - 1);
+          }
+          fieldValue.setValue(cadena);
+          fieldRepository.save(fieldValue);
+        }
       }
     }
   }

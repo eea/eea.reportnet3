@@ -383,6 +383,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    */
   @Override
   @HystrixCommand
@@ -390,7 +391,8 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void updateRecords(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestBody List<RecordVO> records) {
+      @RequestBody List<RecordVO> records,
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
           "Error updating records. The datasetId or the records to update are emtpy or null");
@@ -404,7 +406,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
-      updateRecordHelper.executeUpdateProcess(datasetId, records);
+      updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating records in the datasetId {}. Message: {}", datasetId,
           e.getMessage());
