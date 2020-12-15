@@ -14,6 +14,6 @@ public interface PaMService {
    *
    * @return the single pa ms
    */
-  List<SinglePaMVO> getSinglesPaMs();
+  List<SinglePaMVO> getSinglePaMs();
 
 }

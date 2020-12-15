@@ -21,7 +21,7 @@ public class PaMsServiceImpl implements PaMService {
    * @return the single paMs
    */
   @Override
-  public List<SinglePaMVO> getSinglesPaMs() {
+  public List<SinglePaMVO> getSinglePaMs() {
     SinglePaMVO singlePaMs = new SinglePaMVO();
     SectorVO sectorVO = new SectorVO();
     EntitiesPaMsVO entities = new EntitiesPaMsVO();

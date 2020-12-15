@@ -26,8 +26,8 @@ public interface PamController {
    * @param paMsId the pa ms id
    * @return the singles pa ms
    */
-  @GetMapping("/{datasetId}/getSinglesPaMs/{paMsId}")
-  List<SinglePaMVO> getSinglesPaMs(@PathVariable("datasetId") Long datasetId,
+  @GetMapping("/{datasetId}/getSinglePaMs/{paMsId}")
+  List<SinglePaMVO> getSinglePaMs(@PathVariable("datasetId") Long datasetId,
       @PathVariable("paMsId") String paMsId);
 
 }

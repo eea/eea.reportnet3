@@ -30,11 +30,11 @@ public class PamControllerImpl implements PamController {
    * @return the singles pa ms
    */
   @Override
-  @GetMapping("/{datasetId}/getSinglesPaMs/{paMsId}")
+  @GetMapping("/{datasetId}/getSinglePaMs/{paMsId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN')")
-  public List<SinglePaMVO> getSinglesPaMs(@PathVariable("datasetId") Long datasetId,
+  public List<SinglePaMVO> getSinglePaMs(@PathVariable("datasetId") Long datasetId,
       @PathVariable("paMsId") String paMsId) {
-    return paMService.getSinglesPaMs();
+    return paMService.getSinglePaMs();
   }
 
 }
