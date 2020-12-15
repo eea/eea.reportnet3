@@ -2,10 +2,10 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.eea.dataset.service.PaMsService;
+import org.eea.dataset.service.PaMService;
 import org.eea.interfaces.vo.pams.EntitiesPaMsVO;
 import org.eea.interfaces.vo.pams.SectorVO;
-import org.eea.interfaces.vo.pams.SinglePaMsVO;
+import org.eea.interfaces.vo.pams.SinglePaMVO;
 import org.springframework.stereotype.Service;
 
 
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * The Class PaMsServiceImpl.
  */
 @Service
-public class PaMsServiceImpl implements PaMsService {
+public class PaMsServiceImpl implements PaMService {
 
   /**
    * Gets the single paMs.
@@ -21,11 +21,11 @@ public class PaMsServiceImpl implements PaMsService {
    * @return the single paMs
    */
   @Override
-  public List<SinglePaMsVO> getSinglePaMs() {
-    SinglePaMsVO singlePaMs = new SinglePaMsVO();
+  public List<SinglePaMVO> getSinglesPaMs() {
+    SinglePaMVO singlePaMs = new SinglePaMVO();
     SectorVO sectorVO = new SectorVO();
     EntitiesPaMsVO entities = new EntitiesPaMsVO();
-    List<SinglePaMsVO> singlesPaMs = new ArrayList<>();
+    List<SinglePaMVO> singlesPaMs = new ArrayList<>();
     List<EntitiesPaMsVO> entitiesList = new ArrayList<>();
     List<String> unionPolicyList = new ArrayList<>();
     List<String> objectives = new ArrayList<>();

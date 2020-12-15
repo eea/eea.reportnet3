@@ -8,7 +8,7 @@ import lombok.Data;
  * Instantiates a new single paMs VO.
  */
 @Data
-public class SinglePaMsVO {
+public class SinglePaMVO {
 
   /** The id. */
   private String id;

@@ -1,7 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
-import org.eea.interfaces.vo.pams.SinglePaMsVO;
+import org.eea.interfaces.vo.pams.SinglePaMVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 /**
  * The Interface PaMsController.
  */
-public interface PamsController {
+public interface PamController {
 
   /**
    * The Interface DataCollectionControllerZuul.
    */
   @FeignClient(value = "dataset", contextId = "pams", path = "/pams")
-  interface PaMsControllerZuul extends PamsController {
+  interface PaMsControllerZuul extends PamController {
 
   }
 
@@ -26,8 +26,8 @@ public interface PamsController {
    * @param paMsId the pa ms id
    * @return the singles pa ms
    */
-  @GetMapping("/{datasetId}/getSinglePaMs/{paMsId}")
-  List<SinglePaMsVO> getSinglesPaMs(@PathVariable("datasetId") Long datasetId,
+  @GetMapping("/{datasetId}/getSinglesPaMs/{paMsId}")
+  List<SinglePaMVO> getSinglesPaMs(@PathVariable("datasetId") Long datasetId,
       @PathVariable("paMsId") String paMsId);
 
 }
