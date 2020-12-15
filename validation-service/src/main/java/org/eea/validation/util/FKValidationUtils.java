@@ -169,7 +169,7 @@ public class FKValidationUtils {
    * @return the boolean
    */
   public static Boolean isfieldFK(DatasetValue datasetValue, String idFieldSchema, String idRule,
-      Boolean pkMustBeUsed) {
+      boolean pkMustBeUsed) {
     // Id dataset to Validate
     long datasetIdReference = datasetValue.getId();
 
@@ -215,8 +215,7 @@ public class FKValidationUtils {
       List<String> ifFKs = createAndExecuteQuery(query);
       List<FieldValue> fieldsToValidate = fieldRepository.findByIds(ifFKs);
 
-      if (Boolean.FALSE.equals(pkMustBeUsed)
-          && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
+      if (!pkMustBeUsed && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
         saveFieldValidations(errorFields);
         // Force true because we only need Field Validations
@@ -231,14 +230,13 @@ public class FKValidationUtils {
       List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
       // Get list of Fields to validate
       List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
-      if (Boolean.FALSE.equals(pkMustBeUsed)) {
+      if (!pkMustBeUsed) {
         createFieldValueValidation(fkFieldSchema, pkList, fkFields, pkValidation, errorFields);
         saveFieldValidations(errorFields);
         // Force true because we only need Field Validations
         return true;
       } else {
-        if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()
-            && Boolean.TRUE.equals(pkMustBeUsed)) {
+        if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed() && pkMustBeUsed) {
           return setValuesToValidate(fkFieldSchema, pkList, fkFields);
         }
 

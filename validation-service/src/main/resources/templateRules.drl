@@ -155,7 +155,7 @@ function boolean isGeometry(FieldValue fieldValue){
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
-function boolean isfieldFK(DatasetValue datasetId, String idFieldSchema,String idRule,Boolean pkMustBeUsed){	
+function boolean isfieldFK(DatasetValue datasetId, String idFieldSchema,String idRule,boolean pkMustBeUsed){	
 
 		return FKValidationUtils.isfieldFK(datasetId,idFieldSchema,idRule,pkMustBeUsed);
  }
