@@ -51,7 +51,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The Class FMECommunicationService.
+ * The Class FMECommunicationServiceImpl.
  */
 @Service
 public class FMECommunicationServiceImpl implements FMECommunicationService {
