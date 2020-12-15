@@ -727,8 +727,8 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const getImportExtensions = externalOperationsList.import
-    .map(file => `.${file.fileExtension}`)
+  const getImportExtensions = ['.zip'].concat(externalOperationsList.import
+    .map(file => `.${file.fileExtension}`))
     .join(', ')
     .toLowerCase();
 
@@ -814,7 +814,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
             {hasWritePermissions &&
-              (!isEmpty(externalOperationsList.import) || !isEmpty(externalOperationsList.importOtherSystems)) && (
+              (
                 <Fragment>
                   <Button
                     className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${

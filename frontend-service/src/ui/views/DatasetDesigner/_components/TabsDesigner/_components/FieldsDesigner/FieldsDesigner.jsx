@@ -278,7 +278,7 @@ export const FieldsDesigner = ({
     }
     const link = {};
     let tableSchema = '';
-    
+
     if (!isNil(datasetSchemas)) {
       datasetSchemas.forEach(schema => {
         if (!isNil(schema.tables)) {
@@ -293,13 +293,13 @@ export const FieldsDesigner = ({
                       link.disabled = false;
                       tableSchema = table.tableSchemaId;
                     }
-                  })
+                  });
                 }
-              })
+              });
             }
-          })
+          });
         }
-      })
+      });
     }
 
     link.referencedField = {
@@ -377,7 +377,6 @@ export const FieldsDesigner = ({
       {resources.messages['deleteFieldConfirm']}
     </ConfirmDialog>
   );
-
 
   const renderAllFields = () => {
     if (isLoading) {
