@@ -20,14 +20,14 @@ public interface PamController {
   }
 
   /**
-   * Update data collection.
+   * Gets the list single paM.
    *
    * @param datasetId the dataset id
-   * @param paMsId the pa ms id
-   * @return the singles pa ms
+   * @param groupPaMId the group paM id
+   * @return the list single paM
    */
-  @GetMapping("/{datasetId}/getSinglePaMs/{paMsId}")
-  List<SinglePaMVO> getSinglePaMs(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("paMsId") String paMsId);
+  @GetMapping("/{datasetId}/getListSinglePaM/{groupPaMId}")
+  List<SinglePaMVO> getListSinglePaM(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("groupPaMId") String groupPaMId);
 
 }

@@ -10,10 +10,10 @@ import org.eea.interfaces.vo.pams.SinglePaMVO;
 public interface PaMService {
 
   /**
-   * Gets the single pa ms.
+   * Gets the list single paM.
    *
-   * @return the single pa ms
+   * @return the list single paM
    */
-  List<SinglePaMVO> getSinglePaMs();
+  List<SinglePaMVO> getListSinglePaM();
 
 }

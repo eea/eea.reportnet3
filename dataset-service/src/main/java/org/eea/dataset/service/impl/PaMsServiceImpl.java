@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 public class PaMsServiceImpl implements PaMService {
 
   /**
-   * Gets the single paMs.
+   * Gets the list single paM.
    *
-   * @return the single paMs
+   * @return the list single paM
    */
   @Override
-  public List<SinglePaMVO> getSinglePaMs() {
+  public List<SinglePaMVO> getListSinglePaM() {
     SinglePaMVO singlePaMs = new SinglePaMVO();
     SectorVO sectorVO = new SectorVO();
     EntitiesPaMsVO entities = new EntitiesPaMsVO();

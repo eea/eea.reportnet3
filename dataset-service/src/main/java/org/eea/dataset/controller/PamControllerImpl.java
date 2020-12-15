@@ -23,18 +23,18 @@ public class PamControllerImpl implements PamController {
   PaMService paMService;
 
   /**
-   * Gets the singles paMs of a group.
+   * Gets the list single paM.
    *
    * @param datasetId the dataset id
-   * @param paMsId the pa ms id
-   * @return the singles pa ms
+   * @param groupPaMId the group paM id
+   * @return the list single paM
    */
   @Override
-  @GetMapping("/{datasetId}/getSinglePaMs/{paMsId}")
+  @GetMapping("/{datasetId}/getListSinglePaM/{groupPaMId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN')")
-  public List<SinglePaMVO> getSinglePaMs(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("paMsId") String paMsId) {
-    return paMService.getSinglePaMs();
+  public List<SinglePaMVO> getListSinglePaM(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("groupPaMId") String groupPaMId) {
+    return paMService.getListSinglePaM();
   }
 
 }
