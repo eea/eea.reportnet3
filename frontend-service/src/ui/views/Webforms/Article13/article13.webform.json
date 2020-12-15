@@ -815,6 +815,12 @@
           "isPrimary": false
         },
         {
+          "type": "FIELD",
+          "name": "ProjectedReferenceYear",
+          "title": "Price reference year",
+          "isPrimary": false
+        },
+        {
           "type": "LABEL",
           "level": 4,
           "title": "Cost",
@@ -873,12 +879,6 @@
         },
         {
           "type": "FIELD",
-          "name": "ProjectedReferenceYear",
-          "title": "Price reference year",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
           "name": "ProjectedDescriptionCost",
           "title": "Description of cost estimates (basis for cost estimate, what type of costs are included in the estimate, methodology)",
           "tooltip": "The description shall include the type of costs andn benefits that have been taken into consideration, the stakeholders considered in the assessment of costs and benefits, the baseline against which costs and benefits are compared, and the methodology",
@@ -921,6 +921,12 @@
           "name": "RealizedYear",
           "title": "Year(s) for which cost has been calculated",
           "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
+          "isPrimary": false
+        },
+        {
+          "type": "FIELD",
+          "name": "RealizedReferenceYear",
+          "title": "Price reference year",
           "isPrimary": false
         },
         {
@@ -976,12 +982,6 @@
           "type": "FIELD",
           "name": "RealizedAbsoluteNetCost",
           "title": "Absolute net cost per year in EUR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "RealizedReferenceYear",
-          "title": "Price reference year",
           "isPrimary": false
         },
         {
