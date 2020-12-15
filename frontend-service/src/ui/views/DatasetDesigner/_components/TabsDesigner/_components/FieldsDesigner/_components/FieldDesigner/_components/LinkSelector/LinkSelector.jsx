@@ -167,7 +167,7 @@ const LinkSelector = withRouter(
         .find(datasetSchema => datasetSchema.datasetSchemaId === field.referencedField.datasetSchemaId)
         .tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
 
-      linkedFields = linkedTable.records[0].fields
+      linkedFields = linkedTable.records[0]?.fields
         .filter(
           field =>
             !field.pk &&
@@ -273,7 +273,7 @@ const LinkSelector = withRouter(
                     value={link}></ListBox>
                 );
               })}
-          </div>          
+          </div>
           <div className={styles.selectedLinkFieldsWrapper}>
             <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
             <Dropdown
@@ -364,9 +364,9 @@ const LinkSelector = withRouter(
               link,
               pkMustBeUsed,
               pkHasMultipleValues,
-              linkedTableLabel: pkLinkedTableLabel.fieldSchemaId,
-              linkedTableConditional: pkLinkedTableConditional.fieldSchemaId,
-              masterTableConditional: pkMasterTableConditional.fieldSchemaId
+              linkedTableLabel: pkLinkedTableLabel?.fieldSchemaId,
+              linkedTableConditional: pkLinkedTableConditional?.fieldSchemaId,
+              masterTableConditional: pkMasterTableConditional?.fieldSchemaId
             });
             setIsVisible(false);
           }}

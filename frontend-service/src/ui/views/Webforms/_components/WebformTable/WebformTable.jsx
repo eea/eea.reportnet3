@@ -17,7 +17,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
-import { Article13Utils } from '../../Article13/_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
@@ -26,6 +25,7 @@ export const WebformTable = ({
   dataflowId,
   datasetId,
   datasetSchemaId,
+  getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isRefresh,
   isReporting,
   onTabChange,
@@ -35,7 +35,6 @@ export const WebformTable = ({
   webformType
 }) => {
   const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
-  const { getFieldSchemaId } = Article13Utils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -76,6 +75,26 @@ export const WebformTable = ({
     }
   }, [isDataUpdated]);
 
+  const getTableElements = obj => {
+    const tableElements = [];
+    obj.elements.filter(element => {
+      if (
+        element.type === 'TABLE' &&
+        !isNil(element.tableSchemaId) &&
+        element.elements.filter(el => el.type === 'TABLE').length === 0
+      ) {
+        tableElements.push(element);
+      } else {
+        if (!isNil(element.elements) && element.type === 'TABLE') {
+          tableElements.push(element);
+          tableElements.push(...getTableElements(element));
+        }
+      }
+    });
+
+    return tableElements;
+  };
+
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onAddMultipleWebform = async tableSchemaId => {
@@ -85,7 +104,7 @@ export const WebformTable = ({
     });
 
     if (!isEmpty(webformData.elementsRecords)) {
-      const filteredTable = webformData.elementsRecords[0].elements.filter(
+      const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
         element => element.tableSchemaId === tableSchemaId
       )[0];
       const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId);
@@ -130,17 +149,14 @@ export const WebformTable = ({
         selectedTable.pamsId
       );
       if (!isNil(parentTableData.records)) {
-        const tableSchemaIds = webform.elements
-          .filter(element => element.type === 'TABLE' && !isNil(element.tableSchemaId))
-          .map(table => table.tableSchemaId);
+        const tables = getTableElements(webform);
+        const tableSchemaIds = tables.map(table => table.tableSchemaId);
 
         const tableData = {};
 
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
-
-          const { fieldSchema, fieldId } = getFieldSchemaId(webform.elements, tableSchemaId);
-
+          const { fieldSchema, fieldId } = getFieldSchemaId(tables, tableSchemaId);
           const tableChildData = await DatasetService.tableDataById(
             datasetId,
             tableSchemaId,
@@ -152,10 +168,8 @@ export const WebformTable = ({
             fieldSchema || fieldId,
             selectedTable.pamsId
           );
-
           tableData[tableSchemaId] = tableChildData;
         }
-
         const records = onParseWebformRecords(
           parentTableData.records,
           webform,
@@ -240,7 +254,7 @@ export const WebformTable = ({
 
   if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
 
-  const childHasErrors = webformData.elements
+  const childHasErrors = getTableElements(webformData)
     .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
     .map(table => table.hasErrors);
 
