@@ -41,6 +41,9 @@
     font-size: 1.25rem;
     margin: 0 0 1rem;
   }
+  .label4 {
+    font-weight: 400;
+  }
   .field + h3 {
     margin-top: 3rem;
   }
@@ -80,6 +83,9 @@
       display: inline-block;
       max-width: 75%;
       margin-bottom: 0.5rem;
+    }
+    .requiredMark {
+      color: var(--errors);
     }
     .label2 {
       margin-top: 4rem 0 0 0;
