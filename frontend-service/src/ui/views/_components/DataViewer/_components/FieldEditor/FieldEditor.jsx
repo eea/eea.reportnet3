@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
+import uuid from 'uuid';
 
 import styles from './FieldEditor.module.scss';
 
@@ -52,6 +53,8 @@ const FieldEditor = ({
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
+  const [calendarId, setCalendarId] = useState(uuid.v4());
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
   const [currentCRS, setCurrentCRS] = useState(
     ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
@@ -183,6 +186,38 @@ const FieldEditor = ({
       value: ''
     });
     return codelistsItems;
+  };
+
+  const saveFieldOnBlurOnKeyDown = e => {
+    const dateValue = isEmpty(e.target.value) ? '' : RecordUtils.formatDate(e.target.value, isNil(e.target.value));
+    const isCorrectDateFromatedValue = getIsCorrectDateFromatedValue(dateValue);
+    if (isCorrectDateFromatedValue || isEmpty(dateValue)) {
+      if (e.key === 'Enter') {
+        onEditorValueChange(cells, dateValue, record);
+        e.target.blur();
+      } else {
+        onEditorValueChange(cells, dateValue, record);
+        onEditorSubmitValue(cells, dateValue, record);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isCalendarVisible) {
+      const elementToCapture = document.getElementById(calendarId);
+      !isNil(elementToCapture) &&
+        elementToCapture.addEventListener('keydown', event => {
+          const keyName = event.key;
+          if (keyName === 'Tab' || keyName === 'Enter') {
+            saveFieldOnBlurOnKeyDown(event);
+          }
+        });
+    }
+  }, [isCalendarVisible]);
+
+  const getIsCorrectDateFromatedValue = date => {
+    const year = date.split('-')[0];
+    return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
@@ -485,11 +520,19 @@ const FieldEditor = ({
           //   value={RecordUtils.getCellValue(cells, cells.field)}
           // />
           <Calendar
-            onChange={e => {
-              onEditorValueChange(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), record);
-              onEditorSubmitValue(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), record);
+            inputId={calendarId}
+            onBlur={e => {
+              saveFieldOnBlurOnKeyDown(e);
+              setIsCalendarVisible(false);
             }}
-            onFocus={e => onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)))}
+            onFocus={e => {
+              setIsCalendarVisible(true);
+              onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
+            }}
+            onSelect={e => {
+              onEditorValueChange(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
+              onEditorSubmitValue(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
+            }}
             appendTo={document.body}
             dateFormat="yy-mm-dd"
             // keepInvalid={true}
