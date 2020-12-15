@@ -288,6 +288,8 @@ public class DatasetServiceTest {
   @Mock
   private AttachmentRepository attachmentRepository;
 
+  @Mock
+  private PaMService paMService;
   /** The pk catalogue repository. */
   @Mock
   private PkCatalogueRepository pkCatalogueRepository;
@@ -1143,6 +1145,7 @@ public class DatasetServiceTest {
     when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(pkCatalogueSchema);
     when(fieldRepository.findByIdFieldSchemaIn(Mockito.any())).thenReturn(fieldList);
     doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
+    doNothing().when(paMService).deleteGroups(Mockito.any(), Mockito.any());
     datasetService.deleteRecord(1L, "1L", true);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
@@ -1535,7 +1538,7 @@ public class DatasetServiceTest {
         .thenReturn(Arrays.asList(fieldWithLabel));
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
     Assert.assertEquals(Arrays.asList(fieldVO),
-        datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
+        datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));
   }
 
   @Test
@@ -1562,7 +1565,7 @@ public class DatasetServiceTest {
         .thenReturn(Arrays.asList(fieldWithLabel));
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
     Assert.assertEquals(Arrays.asList(fieldVO),
-        datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
+        datasetService.getFieldValuesReferenced(1L, "", "", "", "", 50));
   }
 
   /**

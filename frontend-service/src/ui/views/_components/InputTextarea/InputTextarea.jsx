@@ -57,6 +57,7 @@ export class InputTextarea extends Component {
     cols: 10,
     displayedHeight: 100,
     expandableOnClick: false,
+    maxLength: 10000,
     moveCaretToEnd: false,
     onInput: null,
     rows: 1,
@@ -68,6 +69,7 @@ export class InputTextarea extends Component {
   static propTypes = {
     autoResize: PropTypes.bool,
     expandableOnClick: PropTypes.bool,
+    maxLength: PropTypes.number,
     moveCaretToEnd: PropTypes.bool,
     onInput: PropTypes.func,
     cols: PropTypes.number,
@@ -229,6 +231,7 @@ export class InputTextarea extends Component {
           autoFocus={this.props.autoFocus}
           className={className}
           id={this.props.id}
+          maxLength={this.props.maxLength}
           ref={input => (this.element = input)}
           onFocus={this.onFocus}
           onBlur={this.onBlur}

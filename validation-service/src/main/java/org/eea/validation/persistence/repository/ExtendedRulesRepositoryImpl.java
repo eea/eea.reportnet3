@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.CheckForNull;
@@ -36,6 +37,9 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
 
   /** The Constant REFERENCE_ID: {@value}. */
   private static final String REFERENCE_ID = "referenceId";
+
+  /** The Constant RULE_ENABLED: {@value}. */
+  private static final String RULE_ENABLED = "$$rule.enabled";
 
   /** The mongo template. */
   @Autowired
@@ -221,7 +225,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
       Document filterExpression = new Document();
       filterExpression.append(INPUT, RULES);
       filterExpression.append("as", "rule");
-      filterExpression.append("cond", new Document("$eq", Arrays.asList("$$rule.enabled", true)));
+      filterExpression.append("cond", new Document("$eq", Arrays.asList(RULE_ENABLED, true)));
       Document filter = new Document(FILTER, filterExpression);
       result = mongoTemplate.aggregate(Aggregation.newAggregation(
           Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
@@ -304,7 +308,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   public RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId) {
     List<RulesSchema> result;
 
-    Document enabled = new Document("$eq", Arrays.asList("$$rule.enabled", true));
+    Document enabled = new Document("$eq", Arrays.asList(RULE_ENABLED, true));
     Document verified = new Document("$eq", Arrays.asList("$$rule.verified", true));
     Document filterExpression = new Document();
     filterExpression.append(INPUT, RULES);
@@ -332,7 +336,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   public RulesSchema getAllDisabledRules(ObjectId datasetSchemaId) {
     List<RulesSchema> result;
 
-    Document enabled = new Document("$eq", Arrays.asList("$$rule.enabled", false));
+    Document enabled = new Document("$eq", Arrays.asList(RULE_ENABLED, false));
     Document filterExpression = new Document();
     filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
@@ -443,6 +447,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
         Aggregation.project().and(aggregationOperationContext -> filter)
             .as(LiteralConstants.RULES)),
         RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
-    return rulesSchema.getRules();
+    List<Rule> rules = new ArrayList<>();
+    if (rulesSchema != null && rulesSchema.getRules() != null) {
+      rules = rulesSchema.getRules();
+    }
+    return rules;
   }
 }

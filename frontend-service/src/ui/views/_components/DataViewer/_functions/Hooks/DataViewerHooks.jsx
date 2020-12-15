@@ -236,7 +236,7 @@ export const useSetColumns = (
             alignItems: 'center',
             justifyContent:
               field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
@@ -274,7 +274,7 @@ export const useSetColumns = (
             alignItems: 'center',
             justifyContent:
               field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre' : 'none'
+            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field]) &&
@@ -324,14 +324,16 @@ export const useSetColumns = (
     //Template for Field validation
 
     //Calculate the max width of data column
-    const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
-    const maxWidth = Math.max(...textMaxWidth) + 30;
+    // const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
+    // const maxWidth = Math.max(...textMaxWidth);
 
     let columnsArr = colsSchema.map((column, i) => {
       let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
       let invisibleColumn =
         column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
       const readOnlyColumn = column.readOnly && isReporting ? styles.readOnlyFields : '';
+      const headerWidth = RecordUtils.getTextWidth(column.header, '14pt Open Sans');
+
       return (
         <Column
           body={dataTemplate}
@@ -369,7 +371,10 @@ export const useSetColumns = (
           key={column.field}
           sortable={sort}
           style={{
-            width: invisibleColumn && '0.01px'
+            width:
+              invisibleColumn === ''
+                ? `${column.readOnly ? Number(headerWidth) + 100 : Number(headerWidth) + 70}px`
+                : '0.01px'
           }}
         />
       );
@@ -387,7 +392,13 @@ export const useSetColumns = (
     );
 
     let editCol = (
-      <Column body={row => actionTemplate(row)} header={resources.messages['actions']} key="actions" sortable={false} />
+      <Column
+        body={row => actionTemplate(row)}
+        header={resources.messages['actions']}
+        key="actions"
+        sortable={false}
+        style={{ width: '100px' }}
+      />
     );
 
     let validationCol = (
@@ -397,6 +408,7 @@ export const useSetColumns = (
         field="validations"
         key="recordValidation"
         sortable={false}
+        style={{ width: '125px' }}
       />
     );
 
@@ -411,7 +423,7 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord, initialCellValue]);
+  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue]);
 
   return {
     columns,

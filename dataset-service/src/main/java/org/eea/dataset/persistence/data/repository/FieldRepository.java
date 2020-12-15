@@ -135,6 +135,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   @Query(
       value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
           + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
+          + "AND fv.value <> '' "
           + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
           + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
   List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(
@@ -144,10 +145,13 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       @Param("searchText") String searchValueText, Pageable pageable);
 
   @Query("SELECT DISTINCT fv  FROM FieldValue fv WHERE fv.idFieldSchema =:idListOfSinglePamsField"
-      + " AND fv.value IN (SELECT fv2.value FROM FieldValue fv2 WHERE fv2.value =:fieldValueInRecord"
+      + " AND fv.value IN (SELECT fv2.value FROM FieldValue fv2 "
+      + "WHERE fv2.value =:fieldValueInRecord"
       + " OR fv2.value LIKE CONCAT(:fieldValueInRecord,',%')"
       + " OR fv2.value LIKE CONCAT('%,',:fieldValueInRecord,',%')"
-      + " OR fv2.value LIKE  CONCAT('%,',:fieldValueInRecord))")
+      + " OR fv2.value LIKE CONCAT('%, ',:fieldValueInRecord,',%')"
+      + " OR fv2.value LIKE CONCAT('%, ',:fieldValueInRecord)"
+      + " OR fv2.value LIKE CONCAT('%,',:fieldValueInRecord))")
   List<FieldValue> findAllCascadeListOfSinglePams(
       @Param("idListOfSinglePamsField") String idListOfSinglePamsField,
       @Param("fieldValueInRecord") String fieldValueInRecord);

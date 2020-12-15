@@ -667,6 +667,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param fieldSchemaId the field schema id
    * @param conditionalValue the conditional value
    * @param searchValue the search value
+   * @param resultsNumber the results number
    * @return the field values referenced
    */
   @Override
@@ -676,9 +677,10 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("datasetSchemaId") String datasetSchemaId,
       @PathVariable("fieldSchemaId") String fieldSchemaId,
       @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
-      @RequestParam(value = "searchValue", required = false) String searchValue) {
+      @RequestParam(value = "searchValue", required = false) String searchValue,
+      @RequestParam(value = "resultsNumber", required = false) Integer resultsNumber) {
     return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId, fieldSchemaId,
-        conditionalValue, searchValue);
+        conditionalValue, searchValue, resultsNumber);
   }
 
   /**

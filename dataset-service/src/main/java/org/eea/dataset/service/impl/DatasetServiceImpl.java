@@ -60,6 +60,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -300,6 +301,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  @Autowired
+  private PaMService paMService;
   /**
    * The attachment repository.
    */
@@ -733,15 +736,16 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
 
-    if (!updateCascadePK) {
+    if (updateCascadePK) {
       // we update the ids in cascade for any pk value changed
       for (RecordValue recordValue : recordValues) {
         updateCascadePK(recordValue.getId(), recordValue.getFields());
       }
     }
     String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
     for (RecordValue recordValue : recordValues) {
-      fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue);
+      fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue, datasetType);
     }
     fieldRepository.saveAll(fieldValues);
   }
@@ -754,9 +758,10 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValues the field values
    * @param datasetSchemaId the dataset schema id
    * @param recordValue the record value
+   * @param datasetType the dataset type
    */
   private void fieldValueUpdateRecordFor(List<FieldValue> fieldValues, String datasetSchemaId,
-      RecordValue recordValue) {
+      RecordValue recordValue, DatasetTypeEnum datasetType) {
     for (FieldValue fieldValue : recordValue.getFields()) {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
@@ -768,7 +773,8 @@ public class DatasetServiceImpl implements DatasetService {
       Document fieldSchema =
           schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
       if (!(fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-          && fieldSchema.getBoolean(LiteralConstants.READ_ONLY))) {
+          && fieldSchema.getBoolean(LiteralConstants.READ_ONLY)
+          && !DatasetTypeEnum.DESIGN.equals(datasetType))) {
         fieldValues.add(fieldValue);
       }
     }
@@ -883,7 +889,6 @@ public class DatasetServiceImpl implements DatasetService {
   private List<String> findRecordsToDelete(Map<String, FieldValue> mapField,
       List<?> fieldSchemasList) {
     List<String> recordsToDelete = new ArrayList<>();
-    String fieldValuePk = null;
     for (Object document : fieldSchemasList) {
       Document fieldSchemaDocument = (Document) document;
       if (fieldSchemaDocument.get(LiteralConstants.PK) != null
@@ -897,63 +902,13 @@ public class DatasetServiceImpl implements DatasetService {
           List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
 
           FieldValue fieldV = mapField.get(idFieldSchema);
-          fieldValuePk = fieldV.getValue();
           fieldsValues.stream().forEach(field -> {
             if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
               recordsToDelete.add(field.getRecord().getId());
             }
           });
-
-          String idListOfSinglePamsField = null;
-          for (Object documentFieldList : fieldSchemasList) {
-            if (((Document) documentFieldList).get("headerName") != null
-                && ((Document) documentFieldList).getString("headerName")
-                    .equals("ListOfSinglePams")) {
-              idListOfSinglePamsField = ((Document) documentFieldList).get("_id").toString();
-            }
-          }
-
-          // we update id of the group in the webform
-          List<FieldValue> fieldValuesWithData =
-              fieldRepository.findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValuePk);
-
-          if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
-
-            for (FieldValue fieldValue : fieldValuesWithData) {
-              List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
-
-              List<Long> itemsLong = new ArrayList();
-              for (int i = 0; i < items.size(); i++) {
-                if (!items.get(i).equalsIgnoreCase(fieldValuePk)) {
-                  itemsLong.add(Long.valueOf(items.get(i)));
-                }
-              }
-              String cadena = "";
-              if (!itemsLong.isEmpty()) {
-                Collections.sort(itemsLong);
-                for (int i = 0; i < itemsLong.size(); i++) {
-                  if (i == 0) {
-                    cadena = itemsLong.get(i) + ",";
-                  } else if (i == itemsLong.size() - 1) {
-                    cadena = cadena + itemsLong.get(i);
-                  } else {
-                    cadena = cadena + itemsLong.get(i) + ",";
-                  }
-
-
-                }
-                if (',' == cadena.charAt(0)) {
-                  cadena = cadena.substring(1, cadena.length() - 1);
-                }
-
-                if (',' == cadena.charAt(cadena.length() - 1)) {
-                  cadena = cadena.substring(0, cadena.length() - 1);
-                }
-              }
-              fieldValue.setValue(cadena);
-              fieldRepository.save(fieldValue);
-            }
-          }
+          // delete pams list
+          paMService.deleteGroups(fieldSchemasList, fieldV.getValue());
         }
       }
     }
@@ -1287,12 +1242,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldSchemaId the field schema id
    * @param conditionalValue the conditional value
    * @param searchValue the search value
-   *
+   * @param resultsNumber the results number
    * @return the field values referenced
    */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue) {
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
     Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
@@ -1319,11 +1274,17 @@ public class DatasetServiceImpl implements DatasetService {
 
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
-      // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
-      // want to show on the screen
+      // If the variable resultsNumbers is null, then the limit of results by default it will be 15.
+      // Otherwise the limit will be
+      // the number passed with a max of 100. That will be the results showed on screen.
+      if (resultsNumber == null || resultsNumber == 0) {
+        resultsNumber = 15;
+      } else if (resultsNumber > 100) {
+        resultsNumber = 100;
+      }
       List<FieldValueWithLabelProjection> fields = fieldRepository
           .findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId, conditionalSchemaId,
-              conditionalValue, searchValue, PageRequest.of(0, 15, Sort.by("value")));
+              conditionalValue, searchValue, PageRequest.of(0, resultsNumber, Sort.by("value")));
 
       fields.stream().forEach(fExtended -> {
         if (fExtended != null) {
@@ -2882,7 +2843,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Skip if write is not allowed
     if (Boolean.TRUE.equals(fieldSchema.getReadOnly())
-        && DatasetTypeEnum.DESIGN.equals(datasetType)) {
+        && !DatasetTypeEnum.DESIGN.equals(datasetType)) {
       return value;
     }
 
@@ -2984,68 +2945,31 @@ public class DatasetServiceImpl implements DatasetService {
       String idListOfSinglePamsField) {
     // we took the both fields, database and filled in new record
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
-    FieldValue fieldValueInRecord = fieldValues.stream()
-        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
+    Optional<FieldValue> fieldValueInRecord = fieldValues.stream()
+        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst();
+    if (fieldValueInRecord.isPresent()) {
+      FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.get().getId());
+      // we compare if that value is diferent, if not we ignore the pk cascade
+      if (!fieldValueInRecord.get().getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
+        PkCatalogueSchema pkCatalogueSchema =
+            pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+        if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
+          List<String> referenced = pkCatalogueSchema.getReferenced().stream()
+              .map(ObjectId::toString).collect(Collectors.toList());
+          List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+          // we save if the data are the same th
+          fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
+            if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
+              fieldValuePkOtherTable.setValue(fieldValueInRecord.get().getValue());
+              fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
+                  fieldValuePkOtherTable.getValue());
 
-    FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
-
-    // we compare if that value is diferent, if not we ignore the pk cascade
-    if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
-      PkCatalogueSchema pkCatalogueSchema =
-          pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
-      if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
-        List<String> referenced = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString)
-            .collect(Collectors.toList());
-        List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
-        // we save if the data are the same th
-        fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
-          if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
-            fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
-            fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
-                fieldValuePkOtherTable.getValue());
-
-          }
-        });
-      }
-      // we update id of the group in the webform
-      List<FieldValue> fieldValuesWithData = fieldRepository
-          .findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValueDatabase.getValue());
-
-      if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
-
-        for (FieldValue fieldValue : fieldValuesWithData) {
-          List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
-
-          List<Long> itemsLong = new ArrayList();
-          for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).equalsIgnoreCase(fieldValueDatabase.getValue())) {
-              items.set(i, fieldValueInRecord.getValue());
             }
-            itemsLong.add(Long.valueOf(items.get(i)));
-          }
-          String cadena = "";
-          Collections.sort(itemsLong);
-          for (int i = 0; i < itemsLong.size(); i++) {
-            if (i == 0) {
-              cadena = itemsLong.get(i) + ",";
-            } else if (i == itemsLong.size() - 1) {
-              cadena = cadena + itemsLong.get(i);
-            } else {
-              cadena = cadena + itemsLong.get(i) + ",";
-            }
-
-
-          }
-          if (',' == cadena.charAt(0)) {
-            cadena = cadena.substring(1, cadena.length() - 1);
-          }
-
-          if (',' == cadena.charAt(cadena.length() - 1)) {
-            cadena = cadena.substring(0, cadena.length() - 1);
-          }
-          fieldValue.setValue(cadena);
-          fieldRepository.save(fieldValue);
+          });
         }
+        // we call pams service
+        paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase,
+            fieldValueInRecord.get());
       }
     }
   }

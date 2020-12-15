@@ -12,13 +12,14 @@ import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
-import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const WebformView = ({
   data,
   dataflowId,
   datasetId,
   datasetSchemaId,
+  getFieldSchemaId,
   isRefresh,
   isReporting,
   selectedTable,
@@ -28,10 +29,11 @@ export const WebformView = ({
   tables
 }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
+  const { getWebformTabs } = WebformsUtils;
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isLoading: false,
-    isVisible: Article15Utils.getWebformTabs(
+    isVisible: getWebformTabs(
       tables.map(table => table.name),
       state.schemaTables,
       tables,
@@ -61,8 +63,6 @@ export const WebformView = ({
       isVisible[tab] = false;
       isVisible[name] = true;
     });
-
-    // changeUrl(name);
 
     webformViewDispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
@@ -103,6 +103,7 @@ export const WebformView = ({
         dataflowId={dataflowId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
+        getFieldSchemaId={getFieldSchemaId}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}

@@ -852,9 +852,9 @@ public class DataSetControllerImplTest {
     List<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
     Mockito.when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(fields);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(fields);
     assertEquals("error", fields,
-        dataSetControllerImpl.getFieldValuesReferenced(1L, "", "", "", ""));
+        dataSetControllerImpl.getFieldValuesReferenced(1L, "", "", "", "", null));
   }
 
   /**
