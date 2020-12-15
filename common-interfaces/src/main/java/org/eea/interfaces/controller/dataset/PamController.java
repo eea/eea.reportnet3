@@ -15,7 +15,7 @@ public interface PamController {
    * The Interface DataCollectionControllerZuul.
    */
   @FeignClient(value = "dataset", contextId = "pam", path = "/pam")
-  interface PaMsControllerZuul extends PamController {
+  interface PaMControllerZuul extends PamController {
 
   }
 
