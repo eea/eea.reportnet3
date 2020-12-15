@@ -1237,12 +1237,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldSchemaId the field schema id
    * @param conditionalValue the conditional value
    * @param searchValue the search value
-   *
+   * @param resultsNumber the results number
    * @return the field values referenced
    */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue) {
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
     Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
@@ -1269,11 +1269,17 @@ public class DatasetServiceImpl implements DatasetService {
 
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
-      // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
-      // want to show on the screen
+      // If the variable resultsNumbers is null, then the limit of results by default it will be 15.
+      // Otherwise the limit will be
+      // the number passed with a max of 100. That will be the results showed on screen.
+      if (resultsNumber == null || resultsNumber == 0) {
+        resultsNumber = 15;
+      } else if (resultsNumber > 100) {
+        resultsNumber = 100;
+      }
       List<FieldValueWithLabelProjection> fields = fieldRepository
           .findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId, conditionalSchemaId,
-              conditionalValue, searchValue, PageRequest.of(0, 15, Sort.by("value")));
+              conditionalValue, searchValue, PageRequest.of(0, resultsNumber, Sort.by("value")));
 
       fields.stream().forEach(fExtended -> {
         if (fExtended != null) {
