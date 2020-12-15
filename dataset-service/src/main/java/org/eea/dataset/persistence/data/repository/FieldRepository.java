@@ -135,6 +135,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   @Query(
       value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
           + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
+          + "AND fv.value <> '' "
           + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
           + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
   List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(

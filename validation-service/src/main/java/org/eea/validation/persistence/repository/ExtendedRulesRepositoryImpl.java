@@ -448,7 +448,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
             .as(LiteralConstants.RULES)),
         RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
     List<Rule> rules = new ArrayList<>();
-    if (rulesSchema.getRules() != null) {
+    if (rulesSchema != null && rulesSchema.getRules() != null) {
       rules = rulesSchema.getRules();
     }
     return rules;
