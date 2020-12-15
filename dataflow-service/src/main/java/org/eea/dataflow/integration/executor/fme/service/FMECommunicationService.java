@@ -137,11 +137,12 @@ public class FMECommunicationService {
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
       LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-      result = checkResult != null && checkResult.getBody() != null
-          && checkResult.getBody().getId() != null ? checkResult.getBody().getId() : 0;
+      result = checkResult.getBody() != null && checkResult.getBody().getId() != null
+          ? checkResult.getBody().getId()
+          : 0;
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
-          exception.getMessage());
+          exception.getMessage(), exception);
     }
 
     return result;
@@ -264,13 +265,13 @@ public class FMECommunicationService {
           .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
           byte[].class);
     } catch (HttpClientErrorException e) {
-      LOG_ERROR.info("Error downloading file: {}  from FME", fileName);
+      LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
-
-
-    return new ByteArrayInputStream(checkResult.getBody());
-
-
+    InputStream stream = null;
+    if (checkResult != null && checkResult.getBody() != null) {
+      stream = new ByteArrayInputStream(checkResult.getBody());
+    }
+    return stream;
   }
 
   /**

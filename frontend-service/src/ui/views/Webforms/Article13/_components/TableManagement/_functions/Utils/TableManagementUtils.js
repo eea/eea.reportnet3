@@ -28,9 +28,7 @@ const getSingleRecordOption = singleRecord => {
 
 const parseListOfSinglePams = (columns = [], records = []) => {
   const options = records
-    .filter(record => {
-      return record.IsGroup === 'Single';
-    })
+    .filter(record => record.IsGroup === 'Single')
     .map(singleRecord => {
       if (
         Object.keys(singleRecord)
@@ -79,24 +77,6 @@ const parseTableSchemaColumns = (schemaTables, records) => {
 
   return parseListOfSinglePams(columns, records);
 };
-
-const parsePamsRecords = records =>
-  records.map(record => {
-    const { recordId, recordSchemaId } = record;
-    let data = {};
-
-    record.elements.forEach(
-      element =>
-        (data = {
-          ...data,
-          [element.name]: element.value,
-          recordId: recordId,
-          recordSchemaId: recordSchemaId
-        })
-    );
-
-    return data;
-  });
 
 const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTables) => {
   const getFilteredData = () => {
@@ -183,13 +163,7 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
     return {
       ...record,
       dataRow: record.dataRow.map(element => {
-        return {
-          ...element,
-          fieldData: {
-            ...element.fieldData,
-            tableSchemas: additionalInfo.tableSchemas
-          }
-        };
+        return { ...element, fieldData: { ...element.fieldData, tableSchemas: additionalInfo.tableSchemas } };
       })
     };
   });
@@ -198,6 +172,5 @@ const parsePamsRecordsWithParentData = (records, parentTablesWithData, schemaTab
 export const TableManagementUtils = {
   getFieldSchemaColumnIdByHeader,
   parsePamsRecordsWithParentData,
-  parsePamsRecords,
   parseTableSchemaColumns
 };

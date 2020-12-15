@@ -451,7 +451,9 @@ export const FieldDesigner = ({
           pkMustBeUsed,
           readOnly,
           recordId,
-          referencedField,
+          referencedField: !isNil(referencedField)
+            ? parseReferenceField(referencedField)
+            : fieldDesignerState.fieldLinkValue,
           required,
           type,
           validExtensions

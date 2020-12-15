@@ -147,6 +147,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
           + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
     } catch (final InterruptedException e) {
       LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+      Thread.currentThread().interrupt();
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
@@ -185,6 +186,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
             "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", command);
       } catch (final InterruptedException e) {
         LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+        Thread.currentThread().interrupt();
         throw new RecordStoreAccessException(
             String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
       }
@@ -281,6 +283,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       }
     } catch (final InterruptedException e) {
       LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+      Thread.currentThread().interrupt();
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
@@ -400,6 +403,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
           "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", command);
     } catch (final InterruptedException e) {
       LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+      Thread.currentThread().interrupt();
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }

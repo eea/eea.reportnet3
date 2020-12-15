@@ -663,11 +663,40 @@ const FieldEditor = ({
     }
   };
 
-  return !isEmpty(fieldType) && !isReadOnlyField
-    ? renderField(fieldType)
-    : !reporting
-    ? renderField(fieldType)
-    : RecordUtils.getCellValue(cells, cells.field);
+  const renderFieldAsLabel = (value, type) => {
+    if (cells && cells.field && !isEmpty(type)) {
+      if (
+        ['POINT', 'POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type.toUpperCase())
+      ) {
+        if (value !== '') {
+          const parsedJSON = JSON.parse(value);
+          return `${parsedJSON.geometry.coordinates.join(', ')} - ${parsedJSON.properties.srid}`;
+        } else {
+          return '';
+        }
+      } else {
+        return value;
+      }
+    } else {
+      return '';
+    }
+  };
+
+  return !isEmpty(fieldType) && !isReadOnlyField ? (
+    renderField(fieldType)
+  ) : !reporting ? (
+    renderField(fieldType)
+  ) : (
+    <span
+      style={{
+        whiteSpace: cells && cells.field && fieldType === 'TEXTAREA' ? 'pre-wrap' : 'none'
+      }}>
+      {renderFieldAsLabel(
+        RecordUtils.getCellValue(cells, cells.field),
+        RecordUtils.getCellInfo(colsSchema, cells.field).type
+      )}
+    </span>
+  );
 };
 
 export { FieldEditor };
