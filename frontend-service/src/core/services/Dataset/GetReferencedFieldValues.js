@@ -3,6 +3,14 @@ export const GetReferencedFieldValues = ({ datasetRepository }) => async (
   fieldSchemaId,
   searchToken,
   conditionalValue,
-  datasetSchemaId
+  datasetSchemaId,
+  resultsNumber
 ) =>
-  datasetRepository.getReferencedFieldValues(datasetId, fieldSchemaId, searchToken, conditionalValue, datasetSchemaId);
+  datasetRepository.getReferencedFieldValues(
+    datasetId,
+    fieldSchemaId,
+    searchToken,
+    conditionalValue,
+    datasetSchemaId,
+    resultsNumber
+  );
