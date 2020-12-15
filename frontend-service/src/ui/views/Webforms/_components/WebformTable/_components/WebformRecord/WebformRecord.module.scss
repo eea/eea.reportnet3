@@ -176,24 +176,40 @@
 }
 
 .subTable {
-  // border: 0.1rem solid var(--gray-25);
-  // padding: 1rem;
-  border-radius: 10px;
-  height: 100%;
-  margin: 2rem 0 2rem 0;
-  width: 100%;
-  border: 1px solid var(--gray-25);
   padding: 1rem;
-
+  margin: 2rem 0 2rem 0;
+  border: 1px solid var(--gray-25);
+  .content {
+    border: 1px solid var(--gray-25);
+  }
   .title {
-    align-items: center;
     border-radius: 10px;
     border: 0.1rem solid var(--gray-25);
+    padding: 1rem;
+  }
+}
+
+.showInsideParentTable .content {
+  padding: 0;
+}
+.showInsideParentTable {
+  .title {
+    padding: 0 0 1em 0;
+  }
+}
+
+.subTable,
+.showInsideParentTable {
+  border-radius: 10px;
+  height: 100%;
+  width: 100%;
+
+  .title {
     display: flex;
+    align-items: center;
     font-weight: 400;
     justify-content: space-between;
     margin: 0.5rem 0;
-    padding: 1rem;
   }
 
   .nonExistTable {
@@ -201,7 +217,6 @@
   }
 
   .content {
-    border: 1px solid var(--gray-25);
     margin-bottom: 0.5rem;
     padding-bottom: 0;
   }

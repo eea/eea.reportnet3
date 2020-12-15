@@ -130,6 +130,7 @@ export const WebformRecord = ({
           )
         );
       }
+
       if (element.type === 'FIELD') {
         return (
           !isFieldVisible &&
@@ -197,7 +198,8 @@ export const WebformRecord = ({
         return (
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div key={i} className={styles.subTable}>
+            <div key={i} className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}>
+
               <h3 className={styles.title}>
                 <div>
                   {element.title ? element.title : element.name}
@@ -205,6 +207,7 @@ export const WebformRecord = ({
                     <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
                   )}
                 </div>
+
                 {element.multipleRecords && (
                   <Button
                     disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
@@ -216,6 +219,7 @@ export const WebformRecord = ({
                   />
                 )}
               </h3>
+
               {element.tableNotCreated && (
                 <span
                   className={styles.nonExistTable}
