@@ -294,7 +294,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           selectedTableName={selectedTableName}
           setTableSchemaId={setTableSchemaId}
           state={state}
-          tables={tables}
+          tables={tables.filter(table => table.isVisible)}
         />
       ) : (
         <TableManagement
