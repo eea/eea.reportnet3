@@ -135,14 +135,14 @@ export const WebformRecord = ({
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
-              {(element.required || element.title) && (
+              {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
                   <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
                 </label>
               )}
 
-              {element.tooltip && (
+              {element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
