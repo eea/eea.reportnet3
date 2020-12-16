@@ -205,26 +205,6 @@
           "isPrimary": false
         },
         {
-          "type": "TABLE",
-          "name": "ReferenceAssessments",
-          "title": "Reference to assessments or underpinning technical reports",
-          "multipleRecords": true,
-          "elements": [
-            {
-              "type": "FIELD",
-              "name": "Reference",
-              "title": "Reference",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "URL",
-              "title": "URL",
-              "isPrimary": false
-            }
-          ]
-        },
-        {
           "type": "FIELD",
           "name": "TypePolicyInstrumen",
           "title": "Type of policy Instrument",
