@@ -364,7 +364,7 @@ export const WebformField = ({
           </div>
         );
 
-      case 'TEXT_ONLY':
+      case 'READ_ONLY':
         return (
           <Fragment>
             {field.title}: <strong>{field.value}</strong>
