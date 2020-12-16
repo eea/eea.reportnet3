@@ -71,32 +71,34 @@ export const WebformView = ({
     const filteredTabs = data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
 
-    return data.map((webform, i) => {
-      const isCreated = headers.includes(webform.name);
-      const childHasErrors = webform.elements
-        .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-        .map(table => table.hasErrors);
+    return data
+      .filter(table => table.isVisible)
+      .map((webform, i) => {
+        const isCreated = headers.includes(webform.name);
+        const childHasErrors = webform.elements
+          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
+          .map(table => table.hasErrors);
 
-      const hasErrors = [webform.hasErrors].concat(childHasErrors);
-      return (
-        <Button
-          className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
-          disabled={isLoading}
-          icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-          iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-          iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
-          key={i}
-          label={webform.label}
-          onClick={() => onChangeWebformTab(webform.name)}
-          style={{ display: isReporting && !isCreated ? 'none' : '' }}
-        />
-      );
-    });
+        const hasErrors = [webform.hasErrors].concat(childHasErrors);
+        return (
+          <Button
+            className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
+            disabled={isLoading}
+            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
+            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
+            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            key={i}
+            label={webform.label}
+            onClick={() => onChangeWebformTab(webform.name)}
+            style={{ display: isReporting && !isCreated ? 'none' : '' }}
+          />
+        );
+      });
   };
 
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(isVisible))[0];
-    const visibleContent = data.filter(table => table.name === visibleTitle)[0];
+    const visibleContent = data.filter(table => table.name === visibleTitle && table.isVisible)[0];
 
     return (
       <WebformTable

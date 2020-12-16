@@ -57,7 +57,6 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
-import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -289,6 +288,8 @@ public class DatasetServiceTest {
   @Mock
   private AttachmentRepository attachmentRepository;
 
+  @Mock
+  private PaMService paMService;
   /** The pk catalogue repository. */
   @Mock
   private PkCatalogueRepository pkCatalogueRepository;
@@ -1144,6 +1145,7 @@ public class DatasetServiceTest {
     when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(pkCatalogueSchema);
     when(fieldRepository.findByIdFieldSchemaIn(Mockito.any())).thenReturn(fieldList);
     doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
+    doNothing().when(paMService).deleteGroups(Mockito.any(), Mockito.any());
     datasetService.deleteRecord(1L, "1L", true);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
@@ -1159,8 +1161,7 @@ public class DatasetServiceTest {
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
     DataSetSchema datasetSchema = new DataSetSchema();
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    datasetService.updateRecords(1L, new ArrayList<>());
+    datasetService.updateRecords(1L, new ArrayList<>(), false);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1191,13 +1192,8 @@ public class DatasetServiceTest {
 
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    DataSetSchema datasetSchema = new DataSetSchema();
-    Webform webform = new Webform();
-    webform.setName("NAME");
-    datasetSchema.setWebform(webform);
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
-    datasetService.updateRecords(1L, new ArrayList<>());
+    datasetService.updateRecords(1L, new ArrayList<>(), true);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1937,7 +1933,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void updateRecordsNullTest() throws Exception {
-    datasetService.updateRecords(null, new ArrayList<>());
+    datasetService.updateRecords(null, new ArrayList<>(), false);
   }
 
   /**
@@ -1947,7 +1943,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void updateRecordsNull2Test() throws Exception {
-    datasetService.updateRecords(1L, null);
+    datasetService.updateRecords(1L, null, false);
   }
 
   /**
@@ -1964,9 +1960,8 @@ public class DatasetServiceTest {
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
     DataSetSchema datasetSchema = new DataSetSchema();
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
-    datasetService.updateRecords(1L, new ArrayList<>());
+    datasetService.updateRecords(1L, new ArrayList<>(), false);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1979,8 +1974,7 @@ public class DatasetServiceTest {
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
     DataSetSchema datasetSchema = new DataSetSchema();
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    datasetService.updateRecords(1L, new ArrayList<>());
+    datasetService.updateRecords(1L, new ArrayList<>(), false);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 

@@ -398,6 +398,8 @@ public class KieBaseManager {
       TypeValidation typeValidation, String schemaName, String whenCondition, String message,
       String error, String tableSchemaName, String shortCode, String fieldName) {
     Map<String, String> ruleAdd = new HashMap<>();
+    message = message.replaceAll("\"", "'");
+    shortCode = shortCode.replaceAll("\"", "'");
     ruleAdd.put(ConditionsDrools.DATASCHEMA_ID.getValue(), idSchema);
     ruleAdd.put(ConditionsDrools.RULE_ID.getValue(), idRule);
     ruleAdd.put(ConditionsDrools.SCHEMA_NAME.getValue(), schemaName);

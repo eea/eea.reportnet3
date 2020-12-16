@@ -60,6 +60,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -300,6 +301,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The paM service. */
+  @Autowired
+  private PaMService paMService;
   /**
    * The attachment repository.
    */
@@ -715,16 +719,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Update records.
+   * Update records. if we fill updateCascadePk it update the pk in cascade in the dataset
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateRecords(final Long datasetId, final List<RecordVO> records)
-      throws EEAException {
+  public void updateRecords(final Long datasetId, final List<RecordVO> records,
+      boolean updateCascadePK) throws EEAException {
     if (datasetId == null || records == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
@@ -732,16 +737,13 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
 
-    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
-    DataSetSchema datasetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
-
-    if (null != datasetSchema.getWebform() && null != datasetSchema.getWebform().getName()) {
+    if (updateCascadePK) {
       // we update the ids in cascade for any pk value changed
       for (RecordValue recordValue : recordValues) {
         updateCascadePK(recordValue.getId(), recordValue.getFields());
       }
     }
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     for (RecordValue recordValue : recordValues) {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue, datasetType);
@@ -829,7 +831,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Delete record.
+   * Delete record. if we fill deleteCascadePk it delete the pk in cascade in the dataset
    *
    * @param datasetId the dataset id
    * @param recordId the record id
@@ -866,8 +868,9 @@ public class DatasetServiceImpl implements DatasetService {
         record.getTableValue().getIdTableSchema());
     // get fks to delete
     if (null != recordSchemaDocument) {
-      List<?> fieldSchemasList =
-          (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+      List<Document> fieldSchemasList =
+          (ArrayList) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+
       List<String> recordsToDelete = findRecordsToDelete(mapField, fieldSchemasList);
       if (!recordsToDelete.isEmpty()) {
         LOG.info("records with fk's to delete {}", recordsToDelete);
@@ -885,7 +888,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the list
    */
   private List<String> findRecordsToDelete(Map<String, FieldValue> mapField,
-      List<?> fieldSchemasList) {
+      List<Document> fieldSchemasList) {
     List<String> recordsToDelete = new ArrayList<>();
     for (Object document : fieldSchemasList) {
       Document fieldSchemaDocument = (Document) document;
@@ -898,12 +901,15 @@ public class DatasetServiceImpl implements DatasetService {
           List<String> referenced = pkCatalogueSchema.getReferenced().stream()
               .map(ObjectId::toString).collect(Collectors.toList());
           List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+
+          FieldValue fieldV = mapField.get(idFieldSchema);
           fieldsValues.stream().forEach(field -> {
-            FieldValue fieldV = mapField.get(idFieldSchema);
             if (fieldV != null && field.getValue().equals(fieldV.getValue())) {
               recordsToDelete.add(field.getRecord().getId());
             }
           });
+          // delete pams list
+          paMService.deleteGroups(fieldSchemasList, fieldV.getValue());
         }
       }
     }
@@ -2912,27 +2918,33 @@ public class DatasetServiceImpl implements DatasetService {
           (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
 
       Document fieldSchemaDocument = null;
+      String idListOfSinglePamsField = null;
       for (Object document : fieldSchemasList) {
         if (((Document) document).get(LiteralConstants.PK) != null
             && ((Document) document).getBoolean(LiteralConstants.PK)) {
           fieldSchemaDocument = (Document) document;
-          break;
+        }
+        if (((Document) document).get("headerName") != null
+            && ((Document) document).getString("headerName").equals("ListOfSinglePams")) {
+          idListOfSinglePamsField = ((Document) document).get("_id").toString();
         }
       }
       // we look if the record to update have any pk
       if (null != fieldSchemaDocument) {
-        updatePKsValues(fieldValues, fieldSchemaDocument);
+        updatePKsValues(fieldValues, fieldSchemaDocument, idListOfSinglePamsField);
       }
     }
   }
 
   /**
-   * Update P ks values.
+   * Update Pks values in cascade when we update the id.
    *
    * @param fieldValues the field values
    * @param fieldSchemaDocument the field schema document
+   * @param idListOfSinglePamsField the id list of single pams field
    */
-  private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument) {
+  private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument,
+      String idListOfSinglePamsField) {
     // we took the both fields, database and filled in new record
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
     Optional<FieldValue> fieldValueInRecord = fieldValues.stream()
@@ -2953,9 +2965,13 @@ public class DatasetServiceImpl implements DatasetService {
               fieldValuePkOtherTable.setValue(fieldValueInRecord.get().getValue());
               fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
                   fieldValuePkOtherTable.getValue());
+
             }
           });
         }
+        // we call pams service
+        paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase,
+            fieldValueInRecord.get());
       }
     }
   }
