@@ -151,7 +151,7 @@
               "title": "Other Sector(s)",
               "dependency": {
                 "field": "SectorAffected",
-                "value": ["9"]
+                "value": ["8"]
               },
               "isPrimary": false
             },
