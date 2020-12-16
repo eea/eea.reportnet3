@@ -199,14 +199,15 @@ export const WebformRecord = ({
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}>
-
-              <h3 className={styles.title}>
-                <div>
-                  {element.title ? element.title : element.name}
-                  {element.hasErrors && (
-                    <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
-                  )}
-                </div>
+              <div className={styles.title}>
+                <h3>
+                  <div>
+                    {element.title ? element.title : element.name}
+                    {element.hasErrors && (
+                      <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
+                    )}
+                  </div>
+                </h3>
 
                 {element.multipleRecords && (
                   <Button
@@ -218,7 +219,7 @@ export const WebformRecord = ({
                     onClick={() => onAddMultipleWebform(element.tableSchemaId)}
                   />
                 )}
-              </h3>
+              </div>
 
               {element.tableNotCreated && (
                 <span
