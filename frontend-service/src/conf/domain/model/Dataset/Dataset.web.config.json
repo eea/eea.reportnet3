@@ -32,7 +32,7 @@
   "updateDatasetSchemaDesign": "/dataschema/{:datasetId}/datasetSchema",
   "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
   "updateTableDataField": "/dataset/{:datasetId}/updateField",
-  "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
+  "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}",
   "updateTableDesign": "/dataschema/{:datasetId}/tableSchema",
   "validateDataset": "/validation/dataset/{:datasetId}",
   "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",

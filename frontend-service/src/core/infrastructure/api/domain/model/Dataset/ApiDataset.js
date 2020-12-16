@@ -402,15 +402,11 @@ export const apiDataset = {
       return false;
     }
   },
-  updateRecordsById: async (datasetId, datasetTableRecords) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableDataRecord, {
-        datasetId: datasetId
-      }),
+  updateRecordsById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateTableDataRecord, { datasetId, updateInCascade }),
       data: datasetTableRecords
     });
-
-    return response;
   },
   updateDatasetSchemaById: async (datasetId, datasetSchema) => {
     try {

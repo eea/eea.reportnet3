@@ -105,7 +105,7 @@ const WebformDataFormFieldEditor = ({
       renderTextarea(field, fieldValue)
     ) : (
       <InputText
-        disabled={column.readOnly || TextUtils.areEquals(column.header, 'id')}
+        disabled={column.readOnly}
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
