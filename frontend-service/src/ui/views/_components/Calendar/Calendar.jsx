@@ -17,8 +17,10 @@ export const Calendar = ({
   maxDate,
   minDate,
   monthNavigator,
+  onBlur,
   onChange,
   onFocus,
+  onSelect,
   placeholder,
   readOnlyInput,
   selectionMode,
@@ -44,8 +46,10 @@ export const Calendar = ({
       maxDate={maxDate}
       minDate={minDate}
       monthNavigator={monthNavigator}
+      onBlur={onBlur}
       onChange={onChange}
       onFocus={onFocus}
+      onSelect={onSelect}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
       selectionMode={selectionMode}

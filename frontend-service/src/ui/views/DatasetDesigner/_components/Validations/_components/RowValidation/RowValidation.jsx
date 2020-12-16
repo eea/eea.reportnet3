@@ -311,7 +311,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
       }
 
-      if (candidateRule.expressionType === 'fieldValidation') {
+      if (candidateRule.expressionType === 'fieldValidation' || candidateRule.expressionType === 'fieldComparison') {
         setExpressionsFieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
       }
 
@@ -338,7 +338,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
       }
 
-      if (candidateRule.expressionType === 'fieldValidation') {
+      if (candidateRule.expressionType === 'fieldValidation' || candidateRule.expressionType === 'fieldComparison') {
         setExpressionsFieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
       }
 

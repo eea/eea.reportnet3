@@ -24,8 +24,13 @@ const getOperatorEquivalence = (valueTypeSelector, operatorType, operatorValue =
 export const getComparisonExpression = expression => {
   const { operatorType, operatorValue, field1, field2, field1Type, valueTypeSelector, field2Type } = expression;
 
-  const transField2 =
-    field1Type === 'NUMBER_DECIMAL' && valueTypeSelector === 'value' ? Number.parseFloat(field2) : field2;
+  let transField2 = field2;
+  if (field1Type === 'NUMBER_DECIMAL' && valueTypeSelector === 'value') {
+    transField2 = Number.parseFloat(field2);
+  }
+  if (field1Type === 'NUMBER_INTEGER' && valueTypeSelector === 'value') {
+    transField2 = Number(field2);
+  }
 
   if (expression.expressions.length > 1) {
     return getCreationComparisonDTO(expression.expressions);
@@ -60,7 +65,6 @@ export const getComparisonExpression = expression => {
         params: [field1]
       };
     }
-
     return {
       operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
       params: [field1, transField2]
