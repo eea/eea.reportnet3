@@ -10,6 +10,8 @@ import { Button } from 'ui/views/_components/Button';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 
+import { WebformService } from 'core/services/Webform';
+
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
@@ -55,6 +57,18 @@ export const WebformView = ({
       onChangeWebformTab(selectedTableName);
     }
   }, [selectedTableName]);
+
+  useEffect(() => {
+    getSingleData();
+  }, [datasetId, selectedTable.pamsId]);
+
+  const getSingleData = async () => {
+    try {
+      const singleData = await WebformService.singlePamData(datasetId, selectedTable.pamsId);
+    } catch (error) {
+      console.error('error', error);
+    }
+  };
 
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
