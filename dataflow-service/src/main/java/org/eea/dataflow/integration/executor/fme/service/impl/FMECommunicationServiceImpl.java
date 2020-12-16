@@ -131,15 +131,16 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
-    ResponseEntity<SubmitResult> checkResult = new ResponseEntity<>(HttpStatus.OK);
+    ResponseEntity<SubmitResult> checkResult = null;
     Integer result = 0;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
-      LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-      if (checkResult.getBody() != null && checkResult.getBody().getId() != null) {
+      if (null != checkResult && checkResult.getBody() != null
+          && checkResult.getBody().getId() != null) {
+        LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
         result = checkResult.getBody().getId();
       }
     } catch (HttpStatusCodeException exception) {
@@ -186,7 +187,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult.getBody()) {
+    if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
     return result;
@@ -264,7 +265,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         createHttpRequest(null, uriParams, headerInfo);
 
 
-    ResponseEntity<byte[]> checkResult = new ResponseEntity<>(HttpStatus.OK);
+    ResponseEntity<byte[]> checkResult = null;
     try {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
@@ -273,7 +274,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
     InputStream stream = new ByteArrayInputStream(new byte[0]);
-    if (checkResult.getBody() != null) {
+    if (null != checkResult && checkResult.getBody() != null) {
       stream = new ByteArrayInputStream(checkResult.getBody());
     }
     return stream;
