@@ -132,7 +132,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     ResponseEntity<SubmitResult> checkResult = new ResponseEntity<>(HttpStatus.OK);
-    Integer result = null;
+    Integer result = 0;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
@@ -272,7 +272,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     } catch (HttpClientErrorException e) {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
-    InputStream stream = null;
+    InputStream stream = new ByteArrayInputStream(new byte[0]);
     if (checkResult.getBody() != null) {
       stream = new ByteArrayInputStream(checkResult.getBody());
     }

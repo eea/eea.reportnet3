@@ -79,6 +79,8 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
+  const { areEquals } = TextUtils;
+
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
     setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
@@ -461,7 +463,7 @@ const FieldEditor = ({
         const value = RecordUtils.getCellValue(cells, cells.field);
         let differentTypes = false;
         if (!isNil(value) && value !== '') {
-          differentTypes = !TextUtils.areEquals(JSON.parse(value).geometry.type, type);
+          differentTypes = !areEquals(JSON.parse(value).geometry.type, type);
         }
         let isValidJSON = false;
         if (!differentTypes) {

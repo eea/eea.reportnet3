@@ -74,6 +74,8 @@ const DataFormFieldEditor = ({
     showCoordinateError: false
   });
 
+  const { areEquals } = TextUtils;
+
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
       if (type === 'LINK') onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
@@ -106,7 +108,7 @@ const DataFormFieldEditor = ({
   }, [inputRef.current, isVisible]);
 
   useEffect(() => {
-    if (TextUtils.areEquals('LINK', type)) {
+    if (areEquals('LINK', type)) {
       if (fieldValue === '') {
         if (!isNil(linkDropdownRef.current)) {
           linkDropdownRef.current.clearFilter();
@@ -174,7 +176,7 @@ const DataFormFieldEditor = ({
   };
 
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
-    if (isNil(type) || !TextUtils.areEquals(type, 'LINK') || isNil(referencedField)) {
+    if (isNil(type) || !areEquals(type, 'LINK') || isNil(referencedField)) {
       return [];
     }
 
