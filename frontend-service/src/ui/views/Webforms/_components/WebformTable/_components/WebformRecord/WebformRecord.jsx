@@ -192,6 +192,14 @@ export const WebformRecord = ({
             {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
             {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
             {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+            {element.tooltip && isNil(element.customType) && (
+              <Button
+                className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                icon="infoCircle"
+                tooltip={element.tooltip}
+                tooltipOptions={{ position: 'top' }}
+              />
+            )}
           </Fragment>
         );
       } else {
