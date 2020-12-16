@@ -3,6 +3,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { TextUtils } from 'ui/views/_functions/Utils';
+
 const formatDate = (date, isInvalidDate) => {
   if (isInvalidDate) return '';
 
@@ -32,7 +34,7 @@ const getInputType = {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
+    const splittedValue = !Array.isArray(value) ? TextUtils.removeCommaSeparatedWhiteSpaces(value).split(',') : value;
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)
@@ -53,10 +55,9 @@ const parseMultiselect = record => {
         if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
           field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
         } else {
-          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
-            .split(',')
-            .map(item => item.trim())
-            .join(',');
+          field.fieldData[field.fieldData.fieldSchemaId] = TextUtils.removeCommaSeparatedWhiteSpaces(
+            field.fieldData[field.fieldData.fieldSchemaId]
+          );
         }
       }
     }

@@ -103,6 +103,8 @@ export const useSetColumns = (
   const [originalColumns, setOriginalColumns] = useState([]);
   const [selectedHeader, setSelectedHeader] = useState();
 
+  const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+
   const onShowFieldInfo = (header, visible) => {
     setSelectedHeader(header);
     setIsColumnInfoVisible(visible);
@@ -167,7 +169,7 @@ export const useSetColumns = (
     if (
       !isNil(value) &&
       value !== '' &&
-      !TextUtils.areEquals(JSON.parse(value).geometry.type, type) &&
+      !areEquals(JSON.parse(value).geometry.type, type) &&
       MapUtils.checkValidJSONMultipleCoordinates(value)
     ) {
       const parsedGeoJson = JSON.parse(value);
@@ -252,7 +254,7 @@ export const useSetColumns = (
                 (!isNil(field.fieldData[column.field]) &&
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
-              ? field.fieldData[column.field].split(',').join(', ')
+              ? removeCommaSeparatedWhiteSpaces(field.fieldData[column.field]).split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
@@ -290,7 +292,7 @@ export const useSetColumns = (
                 (!isNil(field.fieldData[column.field]) &&
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
-              ? field.fieldData[column.field].split(',').join(', ')
+              ? removeCommaSeparatedWhiteSpaces(field.fieldData[column.field]).split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'

@@ -1,7 +1,8 @@
-import { RecordUtils } from 'ui/views/_functions/Utils';
 import cloneDeep from 'lodash/cloneDeep';
 import isUndefined from 'lodash/isUndefined';
+
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
+import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 export const recordReducer = (state, { type, payload }) => {
   const getRecordIdByIndex = (tableData, recordIdx) => {
@@ -153,7 +154,9 @@ export const recordReducer = (state, { type, payload }) => {
     case 'SAVE_MAP_COORDINATES':
       const inmMapGeoJson = cloneDeep(state.mapGeoJson);
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
-      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(payload.split(','));
+      parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(
+        TextUtils.removeCommaSeparatedWhiteSpaces(payload).split(',')
+      );
       parsedInmMapGeoJson.properties.srid = state.newPointCRS;
       return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson), newPoint: '' };
     case 'SET_MAP_NEW_POINT':
