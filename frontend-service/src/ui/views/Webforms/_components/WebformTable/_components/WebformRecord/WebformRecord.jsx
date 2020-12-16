@@ -199,27 +199,27 @@ export const WebformRecord = ({
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}>
-              <div className={styles.title}>
-                <h3>
-                  <div>
+              {!element.showInsideParentTable && (
+                <div className={styles.title}>
+                  <h3>
                     {element.title ? element.title : element.name}
                     {element.hasErrors && (
                       <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
                     )}
-                  </div>
-                </h3>
+                  </h3>
 
-                {element.multipleRecords && (
-                  <Button
-                    disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
-                    icon={
-                      addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
-                    }
-                    label={resources.messages['addRecord']}
-                    onClick={() => onAddMultipleWebform(element.tableSchemaId)}
-                  />
-                )}
-              </div>
+                  {element.multipleRecords && (
+                    <Button
+                      disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                      icon={
+                        addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
+                      }
+                      label={resources.messages['addRecord']}
+                      onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                    />
+                  )}
+                </div>
+              )}
 
               {element.tableNotCreated && (
                 <span
