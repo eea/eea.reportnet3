@@ -3,6 +3,8 @@ import flattenDeep from 'lodash/flattenDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { TextUtils } from 'ui/views/_functions/Utils';
+
 const changeIncorrectCoordinates = record => {
   const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"srid": "EPSG:4326"}}`;
   record.dataRow.forEach(row => {
@@ -42,7 +44,7 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
     if (isEmpty(coordinates)) return false;
   }
   let isValid = true;
-  const splittedCoordinates = Array.isArray(coordinates) ? coordinates : coordinates.split(',');
+  const splittedCoordinates = Array.isArray(coordinates) ? coordinates : TextUtils.splitByComma(coordinates);
   if (splittedCoordinates.length < 2) {
     isValid = false;
   } else {
@@ -162,8 +164,8 @@ const parseGeometryData = records => {
         } else {
           parsedJSON.geometry.coordinates =
             splittedValue.length === 0
-              ? [value.replace(', ', ',').split(',')[0], value.replace(', ', ',').split(',')[1]]
-              : [splittedValue[0].replace(', ', ',').split(',')[0], splittedValue[0].replace(', ', ',').split(',')[1]];
+              ? [TextUtils.splitByComma(value)[0], TextUtils.splitByComma(value)[1]]
+              : [TextUtils.splitByComma(splittedValue[0])[0], TextUtils.splitByComma(splittedValue[0])[1]];
           parsedJSON.properties.srid = splittedValue.length === 0 ? '4326' : checkSRID(splittedValue[1]);
         }
 
@@ -203,7 +205,7 @@ const printCoordinates = (data, isGeoJson = true, geometryType) => {
     }
   } else {
     if (!isNil(data)) {
-      const splittedCoordinate = Array.isArray(data) ? data : data.replace(', ', ',').split(',');
+      const splittedCoordinate = Array.isArray(data) ? data : TextUtils.splitByComma(data);
       return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
         isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
       }}`;
