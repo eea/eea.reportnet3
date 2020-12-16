@@ -79,7 +79,7 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
-  const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+  const { areEquals } = TextUtils;
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
@@ -166,11 +166,11 @@ const FieldEditor = ({
         setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
         if (checkCoordinates) {
           geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates)
-            ? MapUtils.parseCoordinates(removeCommaSeparatedWhiteSpaces(coordinates).split(','), parseToFloat)
+            ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
             : [];
         } else {
           geoJson.geometry.coordinates = MapUtils.parseCoordinates(
-            removeCommaSeparatedWhiteSpaces(coordinates).split(','),
+            coordinates.replace(', ', ',').split(','),
             parseToFloat
           );
         }

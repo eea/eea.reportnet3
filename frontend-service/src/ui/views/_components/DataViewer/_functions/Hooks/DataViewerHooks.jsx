@@ -103,7 +103,7 @@ export const useSetColumns = (
   const [originalColumns, setOriginalColumns] = useState([]);
   const [selectedHeader, setSelectedHeader] = useState();
 
-  const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+  const { areEquals, splitByComma } = TextUtils;
 
   const onShowFieldInfo = (header, visible) => {
     setSelectedHeader(header);
@@ -254,7 +254,7 @@ export const useSetColumns = (
                 (!isNil(field.fieldData[column.field]) &&
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
-              ? removeCommaSeparatedWhiteSpaces(field.fieldData[column.field]).split(',').join(', ')
+              ? splitByComma(field.fieldData[column.field]).join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
@@ -292,7 +292,7 @@ export const useSetColumns = (
                 (!isNil(field.fieldData[column.field]) &&
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
-              ? removeCommaSeparatedWhiteSpaces(field.fieldData[column.field]).split(',').join(', ')
+              ? splitByComma(field.fieldData[column.field]).join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'

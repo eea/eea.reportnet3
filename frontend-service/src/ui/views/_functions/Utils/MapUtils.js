@@ -44,9 +44,7 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
     if (isEmpty(coordinates)) return false;
   }
   let isValid = true;
-  const splittedCoordinates = Array.isArray(coordinates)
-    ? coordinates
-    : TextUtils.removeCommaSeparatedWhiteSpaces(coordinates).split(',');
+  const splittedCoordinates = Array.isArray(coordinates) ? coordinates : TextUtils.splitByComma(coordinates);
   if (splittedCoordinates.length < 2) {
     isValid = false;
   } else {
@@ -166,14 +164,8 @@ const parseGeometryData = records => {
         } else {
           parsedJSON.geometry.coordinates =
             splittedValue.length === 0
-              ? [
-                  TextUtils.removeCommaSeparatedWhiteSpaces(value).split(',')[0],
-                  TextUtils.removeCommaSeparatedWhiteSpaces(value).split(',')[1]
-                ]
-              : [
-                  TextUtils.removeCommaSeparatedWhiteSpaces(splittedValue[0]).split(',')[0],
-                  TextUtils.removeCommaSeparatedWhiteSpaces(splittedValue[0]).split(',')[1]
-                ];
+              ? [TextUtils.splitByComma(value)[0], TextUtils.splitByComma(value)[1]]
+              : [TextUtils.splitByComma(splittedValue[0])[0], TextUtils.splitByComma(splittedValue[0])[1]];
           parsedJSON.properties.srid = splittedValue.length === 0 ? '4326' : checkSRID(splittedValue[1]);
         }
 
@@ -213,9 +205,7 @@ const printCoordinates = (data, isGeoJson = true, geometryType) => {
     }
   } else {
     if (!isNil(data)) {
-      const splittedCoordinate = Array.isArray(data)
-        ? data
-        : TextUtils.removeCommaSeparatedWhiteSpaces(data).split(',');
+      const splittedCoordinate = Array.isArray(data) ? data : TextUtils.splitByComma(data);
       return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
         isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
       }}`;

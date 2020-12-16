@@ -74,7 +74,7 @@ const DataFormFieldEditor = ({
     showCoordinateError: false
   });
 
-  const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+  const { areEquals } = TextUtils;
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
@@ -165,7 +165,7 @@ const DataFormFieldEditor = ({
         geoJson.properties.srid = crs.value;
       } else {
         geoJson.geometry.coordinates = MapUtils.parseCoordinates(
-          removeCommaSeparatedWhiteSpaces(coordinates).split(','),
+          coordinates.replace(', ', ',').split(','),
           MapUtils.checkValidCoordinates(coords)
         );
       }

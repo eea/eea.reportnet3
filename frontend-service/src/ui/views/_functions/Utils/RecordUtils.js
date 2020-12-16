@@ -240,7 +240,7 @@ const getLinkValue = (linkOptions, value) => {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = !Array.isArray(value) ? TextUtils.removeCommaSeparatedWhiteSpaces(value).split(',') : value;
+    const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)
