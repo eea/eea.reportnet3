@@ -111,7 +111,8 @@ export const WebformField = ({
       field.fieldSchemaId,
       filter,
       !isNil(conditionalField) ? conditionalField.value : field.value,
-      datasetSchemaId
+      datasetSchemaId,
+      50
     );
 
     const linkItems = referencedFieldValues

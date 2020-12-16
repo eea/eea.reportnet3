@@ -1182,8 +1182,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void createIndexMaterializedView(Long datasetId, String tableName)
       throws RecordStoreAccessException {
-    String indexQuery = " CREATE UNIQUE INDEX " + tableName + "_index ON dataset_" + datasetId + "."
-        + tableName + " (record_id) ";
+    String indexQuery = " CREATE UNIQUE INDEX " + "\"" + tableName + "_index" + "\""
+        + " ON dataset_" + datasetId + "." + "\"" + tableName + "\"" + " (record_id) ";
     executeQueryViewCommands(indexQuery);
   }
 

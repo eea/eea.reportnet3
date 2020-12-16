@@ -144,4 +144,22 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       @Param("conditionalValue") String conditionalValue,
       @Param("searchText") String searchValueText, Pageable pageable);
 
+  /**
+   * Find all cascade list of single pams.
+   *
+   * @param idListOfSinglePamsField the id list of single pams field
+   * @param fieldValueInRecord the field value in record
+   * @return the list
+   */
+  @Query("SELECT DISTINCT fv  FROM FieldValue fv WHERE fv.idFieldSchema =:idListOfSinglePamsField"
+      + " AND fv.value IN (SELECT fv2.value FROM FieldValue fv2 "
+      + "WHERE fv2.value =:fieldValueInRecord"
+      + " OR fv2.value LIKE CONCAT(:fieldValueInRecord,',%')"
+      + " OR fv2.value LIKE CONCAT('%,',:fieldValueInRecord,',%')"
+      + " OR fv2.value LIKE CONCAT('%, ',:fieldValueInRecord,',%')"
+      + " OR fv2.value LIKE CONCAT('%, ',:fieldValueInRecord)"
+      + " OR fv2.value LIKE CONCAT('%,',:fieldValueInRecord))")
+  List<FieldValue> findAllCascadeListOfSinglePams(
+      @Param("idListOfSinglePamsField") String idListOfSinglePamsField,
+      @Param("fieldValueInRecord") String fieldValueInRecord);
 }
