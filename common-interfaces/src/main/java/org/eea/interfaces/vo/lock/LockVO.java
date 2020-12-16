@@ -1,6 +1,5 @@
 package org.eea.interfaces.vo.lock;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -17,11 +16,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class LockVO implements Serializable {
-  /**
-   * The Constant serialVersionUID.
-   */
-  private static final long serialVersionUID = 6204847320615411241L;
+public class LockVO {
 
   /**
    * The id.
