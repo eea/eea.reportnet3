@@ -22,7 +22,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selecte
       configTables.forEach(table => {
         table.elements.forEach(element => {
           if (element.type === 'TABLE') {
-            if (element.name === filteredTable[0].name) {
+            if (element.name === filteredTable[0].name && element.name !== 'PaMs') {
               tableIdx = allTables.indexOf(table.name);
             }
           }
