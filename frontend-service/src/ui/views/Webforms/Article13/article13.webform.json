@@ -205,26 +205,6 @@
           "isPrimary": false
         },
         {
-          "type": "TABLE",
-          "name": "ReferenceAssessments",
-          "title": "Reference to assessments or underpinning technical reports",
-          "multipleRecords": true,
-          "elements": [
-            {
-              "type": "FIELD",
-              "name": "Reference",
-              "title": "Reference",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "URL",
-              "title": "URL",
-              "isPrimary": false
-            }
-          ]
-        },
-        {
           "type": "FIELD",
           "name": "TypePolicyInstrumen",
           "title": "Type of policy Instrument",
@@ -472,18 +452,16 @@
                 "name": "Id",
                 "title": "PaM Id",
                 "tooltip": "Use this to order the PaMs to your convenience",
-                "isPrimary": true,
-                "isEditable": false,
-                "customType": "TEXT_ONLY"
+                "isPrimary": true,                
+                "customType": "READ_ONLY"
               },
               {
                 "type": "FIELD",
                 "name": "Title",
                 "title": "Name of PaM or group of PaMs",
                 "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-                "isPrimary": false,
-                "isEditable": false,
-                "customType": "TEXT_ONLY"
+                "isPrimary": false,                
+                "customType": "READ_ONLY"
               }
             ]
         },
@@ -786,18 +764,16 @@
                 "name": "Id",
                 "title": "PaM Id",
                 "tooltip": "Use this to order the PaMs to your convenience",
-                "isPrimary": true,
-                "isEditable": false,
-                "customType": "TEXT_ONLY"
+                "isPrimary": true,                
+                "customType": "READ_ONLY"
               },
               {
                 "type": "FIELD",
                 "name": "Title",
                 "title": "Name of PaM or group of PaMs",
                 "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-                "isPrimary": false,
-                "isEditable": false,
-                "customType": "TEXT_ONLY"
+                "isPrimary": false,                
+                "customType": "READ_ONLY"
               }
             ]
         },

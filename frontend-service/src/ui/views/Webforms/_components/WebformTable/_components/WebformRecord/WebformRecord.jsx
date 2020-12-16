@@ -130,19 +130,20 @@ export const WebformRecord = ({
           )
         );
       }
+
       if (element.type === 'FIELD') {
         return (
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
-              {(element.required || element.title) && (
+              {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
                   <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
                 </label>
               )}
 
-              {element.tooltip && (
+              {element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
@@ -197,14 +198,17 @@ export const WebformRecord = ({
         return (
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div key={i} className={styles.subTable}>
-              <h3 className={styles.title}>
-                <div>
-                  {element.title ? element.title : element.name}
-                  {element.hasErrors && (
-                    <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
-                  )}
-                </div>
+            <div key={i} className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}>
+              <div className={styles.title}>
+                <h3>
+                  <div>
+                    {element.title ? element.title : element.name}
+                    {element.hasErrors && (
+                      <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
+                    )}
+                  </div>
+                </h3>
+
                 {element.multipleRecords && (
                   <Button
                     disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
@@ -215,7 +219,8 @@ export const WebformRecord = ({
                     onClick={() => onAddMultipleWebform(element.tableSchemaId)}
                   />
                 )}
-              </h3>
+              </div>
+
               {element.tableNotCreated && (
                 <span
                   className={styles.nonExistTable}
