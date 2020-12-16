@@ -188,8 +188,9 @@ public class DataflowServiceImpl implements DataflowService {
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
-          if (!map.isEmpty()) {
-            setReportingDatasetStatus(map, dataflowVO);
+          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+          if (!map.isEmpty() && null != datasetsStatusList) {
+            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
           }
           dataflowVOs.add(dataflowVO);
         });
@@ -205,49 +206,46 @@ public class DataflowServiceImpl implements DataflowService {
    * @param map the map
    * @param dataflowVO the dataflow VO
    */
-  private void setReportingDatasetStatus(Map<Long, List<DataflowStatusDataset>> map,
+  private void setReportingDatasetStatus(List<DataflowStatusDataset> datasetsStatusList,
       DataFlowVO dataflowVO) {
     boolean containsPending = false;
     int releasedCount = 0;
     int techAcceptedCount = 0;
     boolean containsCorrectionR = false;
     boolean containsFinalFeedback = false;
-    List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-    if (datasetsStatusList != null) {
-      for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
-        switch (datasetsStatusList.get(i).getStatus()) {
-          case PENDING:
-            containsPending = true;
-            break;
-          case RELEASED:
-            releasedCount++;
-            break;
-          case CORRECTION_REQUESTED:
-            containsCorrectionR = true;
-            break;
-          case TECHNICALLY_ACCEPTED:
-            techAcceptedCount++;
-            break;
-          case FINAL_FEEDBACK:
-            containsFinalFeedback = true;
-            break;
-          default:
-            containsPending = true;
-            break;
-        }
+    for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+      switch (datasetsStatusList.get(i).getStatus()) {
+        case PENDING:
+          containsPending = true;
+          break;
+        case RELEASED:
+          releasedCount++;
+          break;
+        case CORRECTION_REQUESTED:
+          containsCorrectionR = true;
+          break;
+        case TECHNICALLY_ACCEPTED:
+          techAcceptedCount++;
+          break;
+        case FINAL_FEEDBACK:
+          containsFinalFeedback = true;
+          break;
+        default:
+          containsPending = true;
+          break;
       }
-      if (containsPending) {
-        dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
-      } else {
-        if (releasedCount == datasetsStatusList.size()) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
-        } else if (techAcceptedCount == datasetsStatusList.size()) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
-        } else if (containsCorrectionR) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
-        } else if (containsFinalFeedback) {
-          dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
-        }
+    }
+    if (containsPending) {
+      dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
+    } else {
+      if (releasedCount == datasetsStatusList.size()) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
+      } else if (techAcceptedCount == datasetsStatusList.size()) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+      } else if (containsCorrectionR) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
+      } else if (containsFinalFeedback) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
       }
     }
   }

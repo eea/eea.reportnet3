@@ -1542,7 +1542,7 @@ public class DatasetServiceTest {
         .thenReturn(Arrays.asList(fieldWithLabel));
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
     Assert.assertEquals(Arrays.asList(fieldVO),
-        datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
+        datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));
   }
 
   @Test
@@ -1569,7 +1569,7 @@ public class DatasetServiceTest {
         .thenReturn(Arrays.asList(fieldWithLabel));
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
     Assert.assertEquals(Arrays.asList(fieldVO),
-        datasetService.getFieldValuesReferenced(1L, "", "", "", ""));
+        datasetService.getFieldValuesReferenced(1L, "", "", "", "", 50));
   }
 
   /**

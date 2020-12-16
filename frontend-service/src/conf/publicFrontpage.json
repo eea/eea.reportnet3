@@ -28,7 +28,7 @@
       "dataFlowUrl": "http://rod.eionet.europa.eu/obligations/531",
       "reportingFrequency": "Annual",
       "targetDate": "31/12/2020",
-      "pilotScenarioAmbition": "Official delivery on 2.0 or 3.0"
+      "pilotScenarioAmbition": "Volunteer test only"
     },
     {
       "id": 4,

@@ -253,13 +253,21 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
-const getReferencedFieldValues = async (datasetId, fieldSchemaId, searchToken, conditionalValue, datasetSchemaId) => {
+const getReferencedFieldValues = async (
+  datasetId,
+  fieldSchemaId,
+  searchToken,
+  conditionalValue,
+  datasetSchemaId,
+  resultsNumber
+) => {
   const referencedFieldValuesDTO = await apiDataset.getReferencedFieldValues(
     datasetId,
     fieldSchemaId,
     searchToken,
     conditionalValue,
-    datasetSchemaId
+    datasetSchemaId,
+    resultsNumber
   );
   return referencedFieldValuesDTO.map(
     referencedFieldDTO =>
@@ -501,7 +509,7 @@ const tableDataById = async (
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.idTableSchema;
-  table.totalRecords = ruleId === '' ? tableDataDTO.totalRecords : tableDataDTO.totalFilteredRecords;
+  table.totalRecords = isEmpty(ruleId) || isNil(ruleId) ? tableDataDTO.totalRecords : tableDataDTO.totalFilteredRecords;
   table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
   let field;

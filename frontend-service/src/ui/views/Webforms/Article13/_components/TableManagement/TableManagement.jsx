@@ -13,8 +13,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
-import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { MultiSelect } from 'ui/views/_components/MultiSelect';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { WebformDataForm } from './_components/WebformDataForm';
 
@@ -25,15 +23,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { tableManagementReducer } from './_functions/Reducers/tableManagementReducer';
 
-import { Article15Utils } from '../../../Article15/_functions/Utils/Article15Utils';
 import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
 import { MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const TableManagement = ({
   dataflowId,
   datasetId,
-  isReporting,
   loading,
   onAddTableRecord,
   onRefresh,
@@ -44,13 +41,14 @@ export const TableManagement = ({
 }) => {
   const {
     getFieldSchemaColumnIdByHeader,
-    parsePamsRecords,
     parsePamsRecordsWithParentData,
     parseTableSchemaColumns
   } = TableManagementUtils;
 
-  const resources = useContext(ResourcesContext);
+  const { getWebformTabs, parsePamsRecords } = WebformsUtils;
+
   const notificationContext = useContext(NotificationContext);
+  const resources = useContext(ResourcesContext);
 
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
@@ -230,7 +228,7 @@ export const TableManagement = ({
 
   const onLoadParentTablesData = () => {
     const configParentTables = Object.keys(
-      Article15Utils.getWebformTabs(
+      getWebformTabs(
         tables.map(table => table.name.toUpperCase()),
         schemaTables,
         tables
@@ -325,7 +323,7 @@ export const TableManagement = ({
             } else {
               tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
               const configParentTables = Object.keys(
-                Article15Utils.getWebformTabs(
+                getWebformTabs(
                   tables.map(table => table.name),
                   schemaTables,
                   tables

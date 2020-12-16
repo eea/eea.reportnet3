@@ -49,6 +49,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
@@ -695,17 +696,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     // that if control the codelist to add new items when codelist had already been created
     // this method work for codelist and multiselect_codedlist
-    if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
-        && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
-            || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
-      // we clean blank space in codelist and multiselect
-      String[] codelistItems = fieldSchemaVO.getCodelistItems();
-      for (int i = 0; i < codelistItems.length; i++) {
-        codelistItems[i] = codelistItems[i].trim();
-      }
-      fieldSchema.put(LiteralConstants.CODELIST_ITEMS, Arrays.asList(codelistItems));
-      typeModified = true;
-    }
+    typeModified = modifiedCodelist(fieldSchemaVO, typeModified, fieldSchema);
     if (fieldSchemaVO.getRequired() != null) {
       fieldSchema.put("required", fieldSchemaVO.getRequired());
     }
@@ -720,6 +711,62 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
     }
 
+    modifyValidExtensions(fieldSchemaVO, fieldSchema);
+    if (fieldSchemaVO.getReferencedField() != null
+        && DataType.LINK.equals(fieldSchemaVO.getType())) {
+      ReferencedFieldSchemaVO referencedField = fieldSchemaVO.getReferencedField();
+      Document referenced = fillReferencedDocument(referencedField);
+      fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
+      // We need to update the fieldSchema that is referenced, the property isPKreferenced to
+      // true
+      updateIsPkReferencedInFieldSchema(referencedField.getIdDatasetSchema(),
+          referencedField.getIdPk(), true);
+    } else if (fieldSchema.get(LiteralConstants.REFERENCED_FIELD) != null
+        && !DataType.LINK.equals(fieldSchemaVO.getType())) {
+      // If the field is not a Link type, delete the referenced field to avoid problems
+      fieldSchema.put(LiteralConstants.REFERENCED_FIELD, null);
+    }
+    return typeModified;
+  }
+
+  /**
+   * Fill referenced document.
+   *
+   * @param referencedField the referenced field
+   * @return the document
+   */
+  private Document fillReferencedDocument(ReferencedFieldSchemaVO referencedField) {
+    Document referenced = new Document();
+    referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
+        new ObjectId(referencedField.getIdDatasetSchema()));
+    referenced.put("idPk", new ObjectId(referencedField.getIdPk()));
+    if (StringUtils.isNotBlank(referencedField.getLabelId())) {
+      referenced.put("labelId", new ObjectId(referencedField.getLabelId()));
+    } else {
+      referenced.put("labelId", null);
+    }
+    if (StringUtils.isNotBlank(referencedField.getLinkedConditionalFieldId())) {
+      referenced.put("linkedConditionalFieldId",
+          new ObjectId(referencedField.getLinkedConditionalFieldId()));
+    } else {
+      referenced.put("linkedConditionalFieldId", null);
+    }
+    if (StringUtils.isNotBlank(referencedField.getMasterConditionalFieldId())) {
+      referenced.put("masterConditionalFieldId",
+          new ObjectId(referencedField.getMasterConditionalFieldId()));
+    } else {
+      referenced.put("masterConditionalFieldId", null);
+    }
+    return referenced;
+  }
+
+  /**
+   * Modify valid extensions.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchema the field schema
+   */
+  private void modifyValidExtensions(FieldSchemaVO fieldSchemaVO, Document fieldSchema) {
     if (fieldSchemaVO.getValidExtensions() != null) {
       String[] validExtensions = fieldSchemaVO.getValidExtensions();
       for (int i = 0; i < validExtensions.length; i++) {
@@ -727,41 +774,28 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
       fieldSchema.put("validExtensions", Arrays.asList(validExtensions));
     }
-    if (fieldSchemaVO.getReferencedField() != null
-        && DataType.LINK.equals(fieldSchemaVO.getType())) {
-      Document referenced = new Document();
-      referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
-          new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
-      referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
-      if (StringUtils.isNotBlank(fieldSchemaVO.getReferencedField().getLabelId())) {
-        referenced.put("labelId", new ObjectId(fieldSchemaVO.getReferencedField().getLabelId()));
-      } else {
-        referenced.put("labelId", null);
+  }
+
+  /**
+   * Modified codelist.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @param typeModified the type modified
+   * @param fieldSchema the field schema
+   * @return true, if successful
+   */
+  private boolean modifiedCodelist(FieldSchemaVO fieldSchemaVO, boolean typeModified,
+      Document fieldSchema) {
+    if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
+        && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+            || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
+      // we clean blank space in codelist and multiselect
+      String[] codelistItems = fieldSchemaVO.getCodelistItems();
+      for (int i = 0; i < codelistItems.length; i++) {
+        codelistItems[i] = codelistItems[i].trim();
       }
-      if (StringUtils
-          .isNotBlank(fieldSchemaVO.getReferencedField().getLinkedConditionalFieldId())) {
-        referenced.put("linkedConditionalFieldId",
-            new ObjectId(fieldSchemaVO.getReferencedField().getLinkedConditionalFieldId()));
-      } else {
-        referenced.put("linkedConditionalFieldId", null);
-      }
-      if (StringUtils
-          .isNotBlank(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId())) {
-        referenced.put("masterConditionalFieldId",
-            new ObjectId(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId()));
-      } else {
-        referenced.put("masterConditionalFieldId", null);
-      }
-      fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
-      // We need to update the fieldSchema that is referenced, the property isPKreferenced to
-      // true
-      this.updateIsPkReferencedInFieldSchema(
-          fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-          fieldSchemaVO.getReferencedField().getIdPk(), true);
-    } else if (fieldSchema.get(LiteralConstants.REFERENCED_FIELD) != null
-        && !DataType.LINK.equals(fieldSchemaVO.getType())) {
-      // If the field is not a Link type, delete the referenced field to avoid problems
-      fieldSchema.put(LiteralConstants.REFERENCED_FIELD, null);
+      fieldSchema.put(LiteralConstants.CODELIST_ITEMS, Arrays.asList(codelistItems));
+      typeModified = true;
     }
     return typeModified;
   }
@@ -1918,8 +1952,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Check if field name already exist.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fieldName the field name
-   * @param recordId the record id
+   * @param fieldSchemaVO the field schema VO
    * @return true, if successful
    */
   private boolean checkIfFieldNameAlreadyExist(String datasetSchemaId,
