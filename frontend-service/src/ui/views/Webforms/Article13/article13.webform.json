@@ -265,7 +265,7 @@
           "type": "FIELD",
           "name": "PaMRelateAirQuality",
           "title": "Does the PaM relate to Air Pollution policy?",
-          "tooltip": ":'Yes' shall be selected if the PaM has been reported under Directive (EU) 2016/2284",
+          "tooltip": "'Yes' shall be selected if the PaM has been reported under Directive (EU) 2016/2284",
           "isPrimary": false
         },
         {
