@@ -111,7 +111,8 @@ export const WebformField = ({
       field.fieldSchemaId,
       filter,
       !isNil(conditionalField) ? conditionalField.value : field.value,
-      datasetSchemaId
+      datasetSchemaId,
+      50
     );
 
     const linkItems = referencedFieldValues
@@ -363,6 +364,13 @@ export const WebformField = ({
           </div>
         );
 
+      case 'READ_ONLY':
+        return (
+          <Fragment>
+            {field.title}: <strong>{field.value}</strong>
+          </Fragment>
+        );
+
       case 'ATTACHMENT':
         const colSchema = columnsSchema.filter(colSchema => colSchema.fieldSchemaId === field.fieldSchemaId)[0];
         return (
@@ -431,7 +439,7 @@ export const WebformField = ({
 
   return (
     <Fragment>
-      {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
+      {renderTemplate(element, element.fieldSchemaId, element.customType ? element.customType : element.fieldType)}
       {isFileDialogVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}

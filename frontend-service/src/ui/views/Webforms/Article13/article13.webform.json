@@ -5,6 +5,7 @@
       "label": "PaMs",
       "title": "Overview Table",
       "multipleRecords": false,
+      "isVisible": false,
       "elements": [
         {
           "type": "FIELD",
@@ -55,8 +56,62 @@
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "TitleNational",
+              "title": "Name of PaM or group of PaMs in national language",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "IsGroup",
+              "title": "Is this a single PaM or a group of PaMs?",
+              "customInput": "RADIO_BUTTON",
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ListOfSinglePams",
+              "title": "Which policies or measures does it cover?",
+              "dependency": {
+                "field": "IsGroup",
+                "value": ["Group"]
+              },
+              "isPrimary": false
+            },
+            {
+              "type": "FIELD",
+              "name": "ShortDescription",
+              "title": "Short description",
+              "isPrimary": false
+            }
+          ]
+        },
         {
           "type": "FIELD",
           "name": "GeographicalCoverage",
@@ -96,7 +151,7 @@
               "title": "Other Sector(s)",
               "dependency": {
                 "field": "SectorAffected",
-                "value": ["Other sectors"]
+                "value": ["9"]
               },
               "isPrimary": false
             },
@@ -114,14 +169,14 @@
               "dependency": {
                 "field": "Objective",
                 "value": [
-                  "Other energy supply",
-                  "Other energy consumption",
-                  "Other transport",
-                  "Other industrial processes",
-                  "Other waste",
-                  "Other agriculture",
-                  "Other land use, land-use change and forestry",
-                  "New objective(s)"
+                  "9",
+                  "15",
+                  "24",
+                  "29",
+                  "38",
+                  "45",
+                  "56",
+                  "57"
                 ]
               },
               "multipleRecords": true,
@@ -148,26 +203,6 @@
           "name": "AssessmentContribution",
           "title": "Assessment of the contribution of the policy or measure to the achievement of the long-term strategy referred to in Article 15 Regulation (EU) 2018/1999",
           "isPrimary": false
-        },
-        {
-          "type": "TABLE",
-          "name": "ReferenceAssessments",
-          "title": "Reference to assessments or underpinning technical reports",
-          "multipleRecords": true,
-          "elements": [
-            {
-              "type": "FIELD",
-              "name": "Reference",
-              "title": "Reference",
-              "isPrimary": false
-            },
-            {
-              "type": "FIELD",
-              "name": "URL",
-              "title": "URL",
-              "isPrimary": false
-            }
-          ]
         },
         {
           "type": "FIELD",
@@ -400,8 +435,36 @@
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+              {
+              
+                "type": "FIELD",
+                "name": "Id",
+                "title": "PaM Id",
+                "tooltip": "Use this to order the PaMs to your convenience",
+                "isPrimary": true,                
+                "customType": "READ_ONLY"
+              },
+              {
+                "type": "FIELD",
+                "name": "Title",
+                "title": "Name of PaM or group of PaMs",
+                "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+                "isPrimary": false,                
+                "customType": "READ_ONLY"
+              }
+            ]
+        },
         {
           "type": "FIELD",
           "name": "PolicyImpacting",
@@ -684,8 +747,36 @@
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",
+      "isVisible": true,
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "PaMs",
+          "label": "PaMs",
+          "title": "Policies and measures",
+          "multipleRecords": false,
+          "showInsideParentTable": true,
+          "elements": [
+              {
+              
+                "type": "FIELD",
+                "name": "Id",
+                "title": "PaM Id",
+                "tooltip": "Use this to order the PaMs to your convenience",
+                "isPrimary": true,                
+                "customType": "READ_ONLY"
+              },
+              {
+                "type": "FIELD",
+                "name": "Title",
+                "title": "Name of PaM or group of PaMs",
+                "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+                "isPrimary": false,                
+                "customType": "READ_ONLY"
+              }
+            ]
+        },
         {
           "type": "LABEL",
           "level": 4,
@@ -697,6 +788,12 @@
           "name": "ProjectedYear",
           "title": "Year(s) for which cost has been calculated",
           "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
+          "isPrimary": false
+        },
+        {
+          "type": "FIELD",
+          "name": "ProjectedReferenceYear",
+          "title": "Price reference year",
           "isPrimary": false
         },
         {
@@ -758,12 +855,6 @@
         },
         {
           "type": "FIELD",
-          "name": "ProjectedReferenceYear",
-          "title": "Price reference year",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
           "name": "ProjectedDescriptionCost",
           "title": "Description of cost estimates (basis for cost estimate, what type of costs are included in the estimate, methodology)",
           "tooltip": "The description shall include the type of costs andn benefits that have been taken into consideration, the stakeholders considered in the assessment of costs and benefits, the baseline against which costs and benefits are compared, and the methodology",
@@ -806,6 +897,12 @@
           "name": "RealizedYear",
           "title": "Year(s) for which cost has been calculated",
           "tooltip": "Provide a year or a range of years (e.g 2010-2015)",
+          "isPrimary": false
+        },
+        {
+          "type": "FIELD",
+          "name": "RealizedReferenceYear",
+          "title": "Price reference year",
           "isPrimary": false
         },
         {
@@ -861,12 +958,6 @@
           "type": "FIELD",
           "name": "RealizedAbsoluteNetCost",
           "title": "Absolute net cost per year in EUR",
-          "isPrimary": false
-        },
-        {
-          "type": "FIELD",
-          "name": "RealizedReferenceYear",
-          "title": "Price reference year",
           "isPrimary": false
         },
         {
