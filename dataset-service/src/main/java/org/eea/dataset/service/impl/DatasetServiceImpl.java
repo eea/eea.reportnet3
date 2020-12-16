@@ -867,8 +867,8 @@ public class DatasetServiceImpl implements DatasetService {
         record.getTableValue().getIdTableSchema());
     // get fks to delete
     if (null != recordSchemaDocument) {
-      List<?> fieldSchemasList =
-          (ArrayList<?>) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+      List<Document> fieldSchemasList =
+          (ArrayList) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
 
       List<String> recordsToDelete = findRecordsToDelete(mapField, fieldSchemasList);
       if (!recordsToDelete.isEmpty()) {
@@ -887,7 +887,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the list
    */
   private List<String> findRecordsToDelete(Map<String, FieldValue> mapField,
-      List<?> fieldSchemasList) {
+      List<Document> fieldSchemasList) {
     List<String> recordsToDelete = new ArrayList<>();
     for (Object document : fieldSchemasList) {
       Document fieldSchemaDocument = (Document) document;

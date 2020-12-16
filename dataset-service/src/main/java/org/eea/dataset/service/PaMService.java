@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import org.bson.Document;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
 
@@ -34,5 +35,5 @@ public interface PaMService {
    * @param fieldSchemasList the field schemas list
    * @param fieldValuePk the field value pk
    */
-  void deleteGroups(List<?> fieldSchemasList, String fieldValuePk);
+  void deleteGroups(List<Document> fieldSchemasList, String fieldValuePk);
 }

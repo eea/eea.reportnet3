@@ -113,12 +113,12 @@ public class PaMServiceImpl implements PaMService {
    * @param fieldValuePk the field value pk
    */
   @Override
-  public void deleteGroups(List<?> fieldSchemasList, String fieldValuePk) {
+  public void deleteGroups(List<Document> fieldSchemasList, String fieldValuePk) {
 
     String idListOfSinglePamsField = null;
     for (Object documentFieldList : fieldSchemasList) {
-      if (((Document) documentFieldList).get("headerName") != null
-          && ((Document) documentFieldList).getString("headerName").equals("ListOfSinglePams")) {
+      if (null != ((Document) documentFieldList).get("headerName")
+          && "ListOfSinglePams".equals(((Document) documentFieldList).getString("headerName"))) {
         idListOfSinglePamsField = ((Document) documentFieldList).get("_id").toString();
       }
     }
