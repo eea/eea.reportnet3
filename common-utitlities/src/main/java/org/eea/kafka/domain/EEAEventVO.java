@@ -1,17 +1,13 @@
 package org.eea.kafka.domain;
 
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
 /**
  * The Class EEAEventVO.
  */
-public class EEAEventVO implements Serializable {
-
-  /** The Constant serialVersionUID. */
-  private static final long serialVersionUID = -3529245031747221245L;
+public class EEAEventVO {
 
   /** The event type. */
   private EventType eventType;
