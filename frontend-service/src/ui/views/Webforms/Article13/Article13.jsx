@@ -38,7 +38,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
     hasErrors: true,
-    isAddingRecord: false,
+    isAddingSingleRecord: false,
+    isAddingGroupRecord: false,
     isDataUpdated: false,
     isLoading: true,
     isRefresh: false,
@@ -62,7 +63,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   }, [article13State.data, isDataUpdated]);
 
   useEffect(() => {
-    setIsAddingRecord(false);
+    setIsAddingSingleRecord(false);
+    setIsAddingGroupRecord(false);
   }, [tableList]);
 
   useEffect(() => {
@@ -90,11 +92,20 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   };
 
   const onAddPamsRecord = async type => {
-    setIsAddingRecord(true);
+    if (type === 'single') {
+      setIsAddingSingleRecord(true);
+    } else if (type === 'group') {
+      setIsAddingGroupRecord(true);
+    }
     const filteredTables = datasetSchema.tables.filter(table => table.tableSchemaNotEmpty);
 
     try {
-      const response = await WebformService.addPamsRecords(datasetId, filteredTables, generatePamId(), type);
+      const response = await WebformService.addPamsRecords(
+        datasetId,
+        filteredTables,
+        generatePamId(),
+        capitalize(type)
+      );
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
@@ -108,7 +119,11 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         type: 'ADD_RECORDS_ERROR',
         content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
       });
-      setIsAddingRecord(false);
+      if (type === 'single') {
+        setIsAddingSingleRecord(false);
+      } else if (type === 'group') {
+        setIsAddingGroupRecord(false);
+      }
     }
   };
 
@@ -204,7 +219,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const onUpdateData = () => article13Dispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
 
-  const setIsAddingRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_RECORD', payload: { value } });
+  const setIsAddingSingleRecord = value =>
+    article13Dispatch({ type: 'SET_IS_ADDING_SINGLE_RECORD', payload: { value } });
+
+  const setIsAddingGroupRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_GROUP_RECORD', payload: { value } });
 
   const renderErrorMessages = () => {
     const missingElements = checkErrors(article13State.data);
@@ -263,10 +281,18 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
             ))}
             <Button
               className={styles.addButton}
-              disabled={article13State.isAddingRecord}
-              icon={article13State.isAddingRecord ? 'spinnerAnimate' : 'add'}
-              label={resources.messages['add']}
-              onClick={() => onAddPamsRecord(capitalize(list))}
+              disabled={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
+              icon={
+                list === 'single'
+                  ? article13State.isAddingSingleRecord
+                    ? 'spinnerAnimate'
+                    : 'add'
+                  : article13State.isAddingGroupRecord
+                  ? 'spinnerAnimate'
+                  : 'add'
+              }
+              label={resources.messages[list === 'single' ? 'addSingle' : 'addGroup']}
+              onClick={() => onAddPamsRecord(list)}
             />
           </li>
         ))}

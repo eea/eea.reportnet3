@@ -36,13 +36,16 @@
   .label2 {
     font-size: 1.75rem;
     margin: 2.5rem 0 1.25rem 0;
+    display: inline-block;
   }
   .label3 {
     font-size: 1.25rem;
     margin: 0 0 1rem;
+    display: inline-block;
   }
   .label4 {
     font-weight: 400;
+    display: inline-block;
   }
   .field + h3 {
     margin-top: 3rem;
@@ -105,6 +108,17 @@
         color: var(--errors);
       }
     }
+
+    :global .webform-validationErrors {
+      width: 2em !important;
+      &:first-of-type {
+        margin-left: 1rem !important;
+      }
+      :global .pi {
+        font-size: 1.8em;
+      }
+    }
+
     .infoButtonWrapper {
       border-radius: 5px;
       border: 0.1rem solid var(--gray-25);
@@ -130,16 +144,6 @@
         &:focus {
           box-shadow: none !important;
         }
-      }
-    }
-
-    :global .webform-validationErrors {
-      width: 2em !important;
-      &:first-of-type {
-        margin-left: 1rem !important;
-      }
-      :global .pi {
-        font-size: 1.8em;
       }
     }
 
