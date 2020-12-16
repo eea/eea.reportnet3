@@ -85,7 +85,7 @@ export const WebformTable = ({
       ) {
         tableElements.push(element);
       } else {
-        if (!isNil(element.elements) && element.type === 'TABLE') {
+        if (!isNil(element.elements) && element.type === 'TABLE' && !isNil(element.tableSchemaId)) {
           tableElements.push(element);
           tableElements.push(...getTableElements(element));
         }
