@@ -33,8 +33,11 @@ export const article13Reducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'SET_IS_ADDING_RECORD':
-      return { ...state, isAddingRecord: payload.value };
+    case 'SET_IS_ADDING_SINGLE_RECORD':
+      return { ...state, isAddingSingleRecord: payload.value };
+
+    case 'SET_IS_ADDING_GROUP_RECORD':
+      return { ...state, isAddingGroupRecord: payload.value };
 
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };
