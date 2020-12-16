@@ -2937,7 +2937,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Update P ks values.
+   * Update Pks values in cascade when we update the id.
    *
    * @param fieldValues the field values
    * @param fieldSchemaDocument the field schema document
