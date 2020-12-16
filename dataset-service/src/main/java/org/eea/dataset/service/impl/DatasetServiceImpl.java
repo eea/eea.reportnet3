@@ -719,7 +719,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Update records.
+   * Update records. if we fill updateCascadePk it update the pk in cascade in the dataset
    *
    * @param datasetId the dataset id
    * @param records the records
@@ -831,7 +831,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Delete record.
+   * Delete record. if we fill deleteCascadePk it delete the pk in cascade in the dataset
    *
    * @param datasetId the dataset id
    * @param recordId the record id

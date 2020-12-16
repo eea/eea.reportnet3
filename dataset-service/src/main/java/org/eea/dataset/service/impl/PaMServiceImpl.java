@@ -71,7 +71,8 @@ public class PaMServiceImpl implements PaMService {
   }
 
   /**
-   * Update groups.
+   * Update groups in lsitofsingle pams and transform when we update a single pams id in a group of
+   * pams.
    *
    * @param idListOfSinglePamsField the id list of single pams field
    * @param fieldValueToUpdate the field value to update
@@ -80,18 +81,20 @@ public class PaMServiceImpl implements PaMService {
   @Override
   public void updateGroups(String idListOfSinglePamsField, FieldValue fieldValueToUpdate,
       FieldValue fieldValueInRecord) {
-    // TODO Auto-generated method stub
-
     // we update id of the group in the webform
     List<FieldValue> fieldValuesWithData = fieldRepository
         .findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValueToUpdate.getValue());
 
+    // if we find atleast one listofsingle filled we transform it
     if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
 
+
       for (FieldValue fieldValue : fieldValuesWithData) {
+        // we split and separate any , value
         List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
 
         List<Long> itemsLong = new ArrayList();
+        // we split and separate any value and transfrom to a long list
         for (int i = 0; i < items.size(); i++) {
           if (items.get(i).trim().equalsIgnoreCase(fieldValueToUpdate.getValue())) {
             items.set(i, fieldValueInRecord.getValue());
@@ -107,7 +110,7 @@ public class PaMServiceImpl implements PaMService {
   }
 
   /**
-   * Delete groups.
+   * Delete groups if we delete a pk in cascade.
    *
    * @param fieldSchemasList the field schemas list
    * @param fieldValuePk the field value pk
@@ -115,6 +118,7 @@ public class PaMServiceImpl implements PaMService {
   @Override
   public void deleteGroups(List<Document> fieldSchemasList, String fieldValuePk) {
 
+    // we find the id of list of single pams to delte the part
     String idListOfSinglePamsField = null;
     for (Object documentFieldList : fieldSchemasList) {
       if (null != ((Document) documentFieldList).get("headerName")
@@ -127,11 +131,14 @@ public class PaMServiceImpl implements PaMService {
     List<FieldValue> fieldValuesWithData =
         fieldRepository.findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValuePk);
 
+    // if we find atleast one listofsingle filled we transform it
     if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
 
       for (FieldValue fieldValue : fieldValuesWithData) {
+        // we split and separate any , value
         List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
 
+        // we split and separate any value and transfrom to a long list
         List<Long> itemsLong = new ArrayList();
         for (int i = 0; i < items.size(); i++) {
           if (!items.get(i).trim().equalsIgnoreCase(fieldValuePk)) {
@@ -150,7 +157,7 @@ public class PaMServiceImpl implements PaMService {
   }
 
   /**
-   * Clean and compose string.
+   * Clean and compose string. we create the same string with comas, and clean it
    *
    * @param itemsLong the items long
    * @param composeListSinglesPams the compose list singles pams
@@ -159,6 +166,7 @@ public class PaMServiceImpl implements PaMService {
   private String cleanAndComposeString(List<Long> itemsLong, String composeListSinglesPams) {
     Collections.sort(itemsLong);
     StringBuilder valueCompose = new StringBuilder("");
+    // we compose the new string sorting it
     for (int i = 0; i < itemsLong.size(); i++) {
       if (i == itemsLong.size() - 1) {
         valueCompose.append(itemsLong.get(i));
@@ -166,12 +174,14 @@ public class PaMServiceImpl implements PaMService {
         valueCompose.append(itemsLong.get(i)).append(", ");
       }
     }
+    // we delete the espaces and commas in the 1 or 2 char in the string to clean it
     if (',' == valueCompose.charAt(0) || ' ' == valueCompose.charAt(0)) {
       valueCompose.substring(1, valueCompose.length() - 1);
       if (',' == valueCompose.charAt(0) || ' ' == valueCompose.charAt(0)) {
         valueCompose.substring(1, valueCompose.length() - 1);
       }
     }
+    // we delete the espaces and commas in the last or penultimate char in the string to clean it
     if (',' == valueCompose.charAt(valueCompose.length() - 1)
         || ' ' == valueCompose.charAt(valueCompose.length() - 1)) {
       valueCompose.substring(0, valueCompose.length() - 1);
