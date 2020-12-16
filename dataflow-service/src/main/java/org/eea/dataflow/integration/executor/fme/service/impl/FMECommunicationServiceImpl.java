@@ -131,7 +131,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
-    ResponseEntity<SubmitResult> checkResult = null;
+    ResponseEntity<SubmitResult> checkResult = new ResponseEntity<>(HttpStatus.OK);
     Integer result = 0;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
@@ -139,9 +139,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
       LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-      result = checkResult.getBody() != null && checkResult.getBody().getId() != null
-          ? checkResult.getBody().getId()
-          : 0;
+      if (checkResult.getBody() != null && checkResult.getBody().getId() != null) {
+        result = checkResult.getBody().getId();
+      }
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage(), exception);
@@ -264,7 +264,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         createHttpRequest(null, uriParams, headerInfo);
 
 
-    ResponseEntity<byte[]> checkResult = null;
+    ResponseEntity<byte[]> checkResult = new ResponseEntity<>(HttpStatus.OK);
     try {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
@@ -273,7 +273,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
     InputStream stream = new ByteArrayInputStream(new byte[0]);
-    if (checkResult != null && checkResult.getBody() != null) {
+    if (checkResult.getBody() != null) {
       stream = new ByteArrayInputStream(checkResult.getBody());
     }
     return stream;
