@@ -102,10 +102,9 @@ export const WebformRecord = ({
 
   const onToggleFieldVisibility = (dependency, fields = []) => {
     if (isNil(dependency)) return true;
-
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
-      .map(filtered => filtered.value);
+      .map(filtered => (Array.isArray(filtered.value) ? filtered.value : filtered.value.split(', ')));
 
     return filteredDependency
       .flat()
@@ -121,6 +120,7 @@ export const WebformRecord = ({
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
+
       if (element.type === 'BLOCK') {
         return (
           !isFieldVisible && (
