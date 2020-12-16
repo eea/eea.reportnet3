@@ -53,9 +53,6 @@ const FieldEditor = ({
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
-  const [calendarId, setCalendarId] = useState(uuid.v4());
-  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-
   const [currentCRS, setCurrentCRS] = useState(
     ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
       RecordUtils.getCellInfo(colsSchema, cells.field).type
@@ -67,6 +64,8 @@ const FieldEditor = ({
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+  const [isFilledDateValue, setIsFilledDateValue] = useState(false);
   const [isMapDisabled, setIsMapDisabled] = useState(
     RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
       ? !MapUtils.checkValidCoordinates(
@@ -78,6 +77,10 @@ const FieldEditor = ({
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
+
+  const { areEquals } = TextUtils;
+
+  const calendarId = uuid.v4();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
@@ -192,12 +195,10 @@ const FieldEditor = ({
     const dateValue = isEmpty(e.target.value) ? '' : RecordUtils.formatDate(e.target.value, isNil(e.target.value));
     const isCorrectDateFromatedValue = getIsCorrectDateFromatedValue(dateValue);
     if (isCorrectDateFromatedValue || isEmpty(dateValue)) {
+      onEditorValueChange(cells, dateValue, record);
+      onEditorSubmitValue(cells, dateValue, record);
       if (e.key === 'Enter') {
-        onEditorValueChange(cells, dateValue, record);
         e.target.blur();
-      } else {
-        onEditorValueChange(cells, dateValue, record);
-        onEditorSubmitValue(cells, dateValue, record);
       }
     }
   };
@@ -461,7 +462,7 @@ const FieldEditor = ({
         const value = RecordUtils.getCellValue(cells, cells.field);
         let differentTypes = false;
         if (!isNil(value) && value !== '') {
-          differentTypes = !TextUtils.areEquals(JSON.parse(value).geometry.type, type);
+          differentTypes = !areEquals(JSON.parse(value).geometry.type, type);
         }
         let isValidJSON = false;
         if (!differentTypes) {
@@ -522,12 +523,17 @@ const FieldEditor = ({
           <Calendar
             inputId={calendarId}
             onBlur={e => {
-              saveFieldOnBlurOnKeyDown(e);
-              setIsCalendarVisible(false);
+              if (!isFilledDateValue) {
+                saveFieldOnBlurOnKeyDown(e);
+                setIsCalendarVisible(false);
+              } else {
+                setIsFilledDateValue(false);
+              }
             }}
             onFocus={e => {
               setIsCalendarVisible(true);
               onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
+              !isNil(isFilledDateValue) && setIsFilledDateValue(true);
             }}
             onSelect={e => {
               onEditorValueChange(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
