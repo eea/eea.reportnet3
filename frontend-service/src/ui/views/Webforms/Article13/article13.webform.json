@@ -193,7 +193,7 @@
           "name": "OtherPolicyInstrument",
           "title": "Describe the other policy Instrument",
           "dependency": {
-            "field": "TypePolicyInstrumen",
+            "field": "TypePolicyInstrument",
             "value": ["Other"]
           }
         },

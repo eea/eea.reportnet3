@@ -319,7 +319,7 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            // keyfilter={getInputType[type]}
+            keyfilter={RecordUtils.getFilter(type)}
             id={field.fieldId}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
@@ -328,7 +328,6 @@ export const WebformField = ({
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
-            type="text"
             value={field.value}
           />
         );
