@@ -11,7 +11,8 @@
           "type": "FIELD",
           "name": "Id",
           "title": "PaM Id",
-          "tooltip": "Use this to order the PaMs to your convenience"
+          "tooltip": "Use this to order the PaMs to your convenience",
+          "isPrimary": true
         },
         {
           "type": "FIELD",
@@ -65,7 +66,8 @@
               "type": "FIELD",
               "name": "Id",
               "title": "PaM Id",
-              "tooltip": "Use this to order the PaMs to your convenience"
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true
             },
             {
               "type": "FIELD",
@@ -404,7 +406,8 @@
                 "type": "FIELD",
                 "name": "Id",
                 "title": "PaM Id",
-                "tooltip": "Use this to order the PaMs to your convenience",               
+                "tooltip": "Use this to order the PaMs to your convenience",
+                "isPrimary": true,                
                 "customType": "READ_ONLY"
               },
               {
@@ -678,7 +681,8 @@
                 "type": "FIELD",
                 "name": "Id",
                 "title": "PaM Id",
-                "tooltip": "Use this to order the PaMs to your convenience",              
+                "tooltip": "Use this to order the PaMs to your convenience",
+                "isPrimary": true,                
                 "customType": "READ_ONLY"
               },
               {

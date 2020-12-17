@@ -324,7 +324,7 @@ export const WebformField = ({
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, true);
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
