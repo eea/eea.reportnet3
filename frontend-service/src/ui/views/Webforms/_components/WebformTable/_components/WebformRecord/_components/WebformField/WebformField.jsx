@@ -319,7 +319,6 @@ export const WebformField = ({
         return (
           <InputText
             // keyfilter={getInputType[type]}
-            disabled={field.isPrimary}
             id={field.fieldId}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
