@@ -138,10 +138,11 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
-      LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-      result = checkResult.getBody() != null && checkResult.getBody().getId() != null
-          ? checkResult.getBody().getId()
-          : 0;
+      if (null != checkResult && checkResult.getBody() != null
+          && checkResult.getBody().getId() != null) {
+        LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
+        result = checkResult.getBody().getId();
+      }
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage(), exception);
@@ -186,7 +187,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult.getBody()) {
+    if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
     return result;
@@ -273,7 +274,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
     InputStream stream = new ByteArrayInputStream(new byte[0]);
-    if (checkResult != null && checkResult.getBody() != null) {
+    if (null != checkResult && checkResult.getBody() != null) {
       stream = new ByteArrayInputStream(checkResult.getBody());
     }
     return stream;
