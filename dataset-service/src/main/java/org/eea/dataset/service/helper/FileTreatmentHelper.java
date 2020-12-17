@@ -135,9 +135,12 @@ public class FileTreatmentHelper {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())
           && fileExtension.equals(integration.getInternalParameters().get(FILE_EXTENSION))) {
         auxExtensionList.add(integration.getInternalParameters().get(FILE_EXTENSION));
-        Map<String, String> externalParameters = new HashMap<>();
         byte[] imageBytes;
         try {
+          Map<String, String> externalParameters = new HashMap<>();
+          if (null != integration.getExternalParameters()) {
+            externalParameters = integration.getExternalParameters();
+          }
           imageBytes = IOUtils.toByteArray(is);
           String encodedString = Base64.getEncoder().encodeToString(imageBytes);
           is.close();
@@ -233,6 +236,9 @@ public class FileTreatmentHelper {
             byte[] byteArray = IOUtils.toByteArray(inputStream);
             String encodedString = Base64.getEncoder().encodeToString(byteArray);
             Map<String, String> externalParameters = new HashMap<>();
+            if (null != integration.getExternalParameters()) {
+              externalParameters = integration.getExternalParameters();
+            }
             externalParameters.put("fileIS", encodedString);
             integration.setExternalParameters(externalParameters);
             return integration;
