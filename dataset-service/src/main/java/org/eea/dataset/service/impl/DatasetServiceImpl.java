@@ -1293,7 +1293,7 @@ public class DatasetServiceImpl implements DatasetService {
       List<FieldValueWithLabelProjection> fields = null;
       // If there is no conditional, execute a easier query. Due to perform issues, better split the
       // original sql into two queries
-      // one with conditional and the other without
+      // one with conditional and the other without it
       if (StringUtils.isNotBlank(conditionalSchemaId)) {
         fields = fieldRepository.findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId,
             conditionalSchemaId, conditionalValue, searchValue,
