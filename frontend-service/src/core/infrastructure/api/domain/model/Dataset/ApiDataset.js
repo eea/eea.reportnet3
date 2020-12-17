@@ -378,9 +378,9 @@ export const apiDataset = {
 
     return response;
   },
-  updateFieldById: async (datasetId, datasetTableRecords) => {
+  updateFieldById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
     const response = await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableDataField, { datasetId: datasetId }),
+      url: getUrl(DatasetConfig.updateTableDataField, { datasetId, updateInCascade }),
       data: datasetTableRecords
     });
 

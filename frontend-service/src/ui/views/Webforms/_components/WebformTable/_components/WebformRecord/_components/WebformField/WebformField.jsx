@@ -148,14 +148,15 @@ export const WebformField = ({
     }
   };
 
-  const onEditorSubmitValue = async (field, option, value) => {
+  const onEditorSubmitValue = async (field, option, value, updateInCascade = false) => {
+    console.trace();
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
     try {
-      DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
+      DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue, updateInCascade);
     } catch (error) {
       console.error('error', error);
     }
@@ -323,7 +324,7 @@ export const WebformField = ({
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value, true);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
