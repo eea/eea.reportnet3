@@ -40,7 +40,8 @@ export const WebformView = ({
       state.schemaTables,
       tables,
       selectedTableName
-    )
+    ),
+    singlesCalculatedData: {}
   });
 
   const { isLoading, isVisible } = webformViewState;
@@ -65,6 +66,8 @@ export const WebformView = ({
   const getSingleData = async () => {
     try {
       const singleData = await WebformService.singlePamData(datasetId, selectedTable.pamsId);
+      console.log({ singleData });
+      webformViewDispatch({ type: 'SET_SINGLE_CALCULATED_DATA', payload: singleData });
     } catch (error) {
       console.error('error', error);
     }
