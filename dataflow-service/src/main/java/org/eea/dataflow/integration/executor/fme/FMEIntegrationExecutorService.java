@@ -293,7 +293,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     executionResultVO.setExecutionResultParams(executionResultParams);
 
     // Update FMEJob
-    if (null != fmeJobId) {
+    if (null != fmeJobId && 0 != fmeJobId) {
       fmeJob.setJobId(Long.valueOf(fmeJobId));
       fmeJob.setStatus(FMEJobstatus.QUEUED);
     } else {

@@ -131,7 +131,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (dataflowState.isCustodian) {
-      if (dataflowState.status === 'DRAFT') {
+      if (dataflowState.status === DataflowConf.dataflowStatus['OPEN']) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
         leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowRequesterDesignHelp');
