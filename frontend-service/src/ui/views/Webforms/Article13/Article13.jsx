@@ -28,7 +28,7 @@ import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
-  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = Article13Utils;
+  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
   const { datasetSchema } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
 
@@ -41,6 +41,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     isAddingSingleRecord: false,
     isAddingGroupRecord: false,
     isDataUpdated: false,
+    isDataUpdatedWithSingles: false,
     isLoading: true,
     isRefresh: false,
     pamsRecords: [],
@@ -51,9 +52,18 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     view: resources.messages['overview']
   });
 
-  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
+  const {
+    isDataUpdated,
+    isDataUpdatedWithSingles,
+    isLoading,
+    pamsRecords,
+    selectedTable,
+    selectedTableName,
+    tableList,
+    view
+  } = article13State;
 
-  useEffect(() => initialLoad(), []);
+  useEffect(() => initialLoad(), [pamsRecords]);
 
   useEffect(() => {
     if (!isEmpty(article13State.data)) {
@@ -73,8 +83,14 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     onSelectFieldSchemaId(fieldSchema || fieldId);
   }, [article13State.data, article13State.selectedTableSchemaId]);
 
-  const initialLoad = () => article13Dispatch({ type: 'INITIAL_LOAD', payload: { data: onLoadData() } });
-
+  const initialLoad = () => {
+    if (!isDataUpdatedWithSingles) {
+      article13Dispatch({
+        type: 'INITIAL_LOAD',
+        payload: { data: onLoadData(), isDataUpdatedWithSingles: !isEmpty(pamsRecords) }
+      });
+    }
+  };
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
   const generatePamId = () => {
@@ -147,7 +163,23 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   };
 
   const onLoadData = () => {
-    if (!isEmpty(datasetSchema)) return onParseWebformData(datasetSchema, tables, datasetSchema.tables);
+    if (!isEmpty(datasetSchema)) {
+      const data = onParseWebformData(datasetSchema, tables, datasetSchema.tables);
+
+      data.forEach(table =>
+        table.elements.forEach(element => {
+          if (TextUtils.areEquals(element.name, 'pams')) {
+            const listOfSingles = element.elements.find(el => TextUtils.areEquals(el.name, 'ListOfSinglePams'));
+            if (!isNil(listOfSingles)) {
+              listOfSingles.fieldType = 'MULTISELECT_CODELIST';
+              listOfSingles.codelistItems = parseListOfSinglePams(pamsRecords);
+            }
+          }
+        })
+      );
+
+      return data;
+    }
   };
 
   const onLoadPamsData = async () => {
