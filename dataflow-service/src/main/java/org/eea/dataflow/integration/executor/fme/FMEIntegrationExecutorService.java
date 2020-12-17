@@ -217,6 +217,17 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
 
     Integer fmeJobId = null;
+
+    if (null != integration.getExternalParameters()) {
+      Map<String, String> externalParameters = integration.getExternalParameters();
+      externalParameters.forEach((k, v) -> {
+        if (!k.equals(IntegrationParams.FILE_IS)
+            && !k.equals(IntegrationParams.DATABASE_CONNECTION_PUBLIC)) {
+          parameters.add(saveParameter(k, v));
+        }
+      });
+    }
+
     switch (operation) {
       case EXPORT:
         parameters.add(saveParameter(IntegrationParams.EXPORT_FILE_NAME, fileName));
@@ -225,7 +236,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             integrationOperationParams.get(IntegrationParams.DATASET_ID) + "/"
                 + paramDataProvider));
         fmeAsyncJob.setPublishedParameters(parameters);
-
         LOG.info("Creating Export FS in FME");
         if (fmeCommunicationService
             .createDirectory(integrationOperationParams.get(IntegrationParams.DATASET_ID),

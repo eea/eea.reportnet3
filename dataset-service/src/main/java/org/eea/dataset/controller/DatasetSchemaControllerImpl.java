@@ -501,6 +501,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
+        // Create query view
+        recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
         dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
@@ -517,8 +519,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
         }
       }
-      // Create query view
-      recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
