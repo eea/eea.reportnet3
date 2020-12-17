@@ -565,14 +565,14 @@ const tableDataById = async (
   return table;
 };
 
-const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
+const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
   const datasetTableField = new DatasetTableField({});
   datasetTableField.id = fieldId;
   datasetTableField.idFieldSchema = fieldSchemaId;
   datasetTableField.type = fieldType;
   datasetTableField.value = parseValue(fieldType, fieldValue, true);
 
-  return await apiDataset.updateFieldById(datasetId, datasetTableField);
+  return await apiDataset.updateFieldById(datasetId, datasetTableField, updateInCascade);
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
