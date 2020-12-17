@@ -206,7 +206,7 @@
         },
         {
           "type": "FIELD",
-          "name": "TypePolicyInstrumen",
+          "name": "TypePolicyInstrument",
           "title": "Type of policy Instrument",
           "isPrimary": false
         },
@@ -215,7 +215,7 @@
           "name": "OtherPolicyInstrument",
           "title": "Describe the other policy Instrument",
           "dependency": {
-            "field": "TypePolicyInstrumen",
+            "field": "TypePolicyInstrument",
             "value": ["Other"]
           },
           "isPrimary": false
