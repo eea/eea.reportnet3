@@ -768,11 +768,13 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testupdateFieldSuccess() throws Exception {
-    doNothing().when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.updateField(1L, new FieldVO());
+    doNothing().when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
+    dataSetControllerImpl.updateField(1L, new FieldVO(), false);
     Mockito.verify(updateRecordHelper, times(1)).executeFieldUpdateProcess(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.anyBoolean());
   }
+
 
   /**
    * Testupdate field not found exception.
@@ -782,8 +784,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testupdateFieldNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.updateField(1L, new FieldVO());
+        Mockito.any(), Mockito.anyBoolean());
+    dataSetControllerImpl.updateField(1L, new FieldVO(), false);
   }
 
   /**
@@ -799,7 +801,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
 
-      dataSetControllerImpl.updateField(1L, new FieldVO());
+      dataSetControllerImpl.updateField(1L, new FieldVO(), false);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;

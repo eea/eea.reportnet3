@@ -212,9 +212,11 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param field the field
+   * @param updateCascadePK the update cascade PK
    */
   @PutMapping("/{id}/updateField")
-  void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
+  void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field,
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
 
   /**
    * Gets the field values referenced.

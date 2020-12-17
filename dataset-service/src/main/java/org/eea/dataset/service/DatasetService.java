@@ -192,10 +192,11 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param field the field
-   *
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
-  void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
+  void updateField(@DatasetId Long datasetId, FieldVO field, boolean updateCascadePK)
+      throws EEAException;
 
   /**
    * Save all records.
