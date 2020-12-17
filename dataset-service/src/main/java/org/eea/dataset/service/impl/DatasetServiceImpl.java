@@ -992,16 +992,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Update field.
+   * Update field. if cascade pk is true we update the pk in cascade
    *
    * @param datasetId the dataset id
    * @param field the field
-   *
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateField(final Long datasetId, final FieldVO field) throws EEAException {
+  public void updateField(final Long datasetId, final FieldVO field, boolean updateCascadePK)
+      throws EEAException {
     if (datasetId == null || field == null) {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
@@ -1029,8 +1030,13 @@ public class DatasetServiceImpl implements DatasetService {
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
+    if (updateCascadePK) {
+      fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
+    }
     fieldRepository.saveValue(field.getId(), field.getValue());
   }
+
+
 
   /**
    * Find table id by table schema.
@@ -2972,6 +2978,61 @@ public class DatasetServiceImpl implements DatasetService {
         // we call pams service
         paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase,
             fieldValueInRecord.get());
+      }
+    }
+  }
+
+  /**
+   * Field value update PK. we change in cascade when we update a pk value
+   *
+   * @param fieldValueVO the field value VO
+   * @param fieldSchemaDocument the field schema document
+   * @param datasetSchemaId the dataset schema id
+   */
+  private void fieldValueUpdatePK(final FieldVO fieldValueVO, final Document fieldSchemaDocument,
+      final String datasetSchemaId) {
+
+    // we took fieldValue to take more information necesary to calculate pk
+    FieldValue fieldValue = fieldRepository.findById(fieldValueVO.getId());
+
+    // we bring the schema
+    Document recordSchemaDocument = schemasRepository.findRecordSchema(datasetSchemaId,
+        fieldValue.getRecord().getTableValue().getIdTableSchema());
+    // get fks to delete
+    if (null != recordSchemaDocument) {
+      List<Document> fieldSchemasList =
+          (ArrayList) recordSchemaDocument.get(LiteralConstants.FIELD_SCHEMAS);
+
+
+      String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
+      PkCatalogueSchema pkCatalogueSchema =
+          pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+
+      if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
+        List<String> referenced = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString)
+            .collect(Collectors.toList());
+        // we update the rest of pk
+        List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+        fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
+          if (fieldValue.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
+            fieldValuePkOtherTable.setValue(fieldValueVO.getValue());
+            fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
+                fieldValuePkOtherTable.getValue());
+
+          }
+        });
+        // we took the list of single pams value
+        String idListOfSinglePamsField = null;
+        for (Object document : fieldSchemasList) {
+          if (((Document) document).get("headerName") != null
+              && ((Document) document).getString("headerName").equals("ListOfSinglePams")) {
+            idListOfSinglePamsField = ((Document) document).get("_id").toString();
+            break;
+          }
+        }
+        // we call pams service
+        paMService.updateGroups(idListOfSinglePamsField, fieldValue,
+            fieldNoValidationMapper.classToEntity(fieldValueVO));
       }
     }
   }

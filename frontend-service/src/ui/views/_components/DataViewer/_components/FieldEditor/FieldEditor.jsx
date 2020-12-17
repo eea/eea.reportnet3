@@ -198,6 +198,7 @@ const FieldEditor = ({
       onEditorValueChange(cells, dateValue, record);
       onEditorSubmitValue(cells, dateValue, record);
       if (e.key === 'Enter') {
+        isEmpty(e.target.value) && setIsFilledDateValue(false);
         e.target.blur();
       }
     }
@@ -523,7 +524,7 @@ const FieldEditor = ({
           <Calendar
             inputId={calendarId}
             onBlur={e => {
-              if (!isFilledDateValue) {
+              if (isFilledDateValue) {
                 saveFieldOnBlurOnKeyDown(e);
                 setIsCalendarVisible(false);
               } else {
@@ -533,7 +534,9 @@ const FieldEditor = ({
             onFocus={e => {
               setIsCalendarVisible(true);
               onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
-              !isNil(isFilledDateValue) && setIsFilledDateValue(true);
+              !isEmpty(RecordUtils.getCellValue(cells, cells.field))
+                ? setIsFilledDateValue(true)
+                : setIsFilledDateValue(false);
             }}
             onSelect={e => {
               onEditorValueChange(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
