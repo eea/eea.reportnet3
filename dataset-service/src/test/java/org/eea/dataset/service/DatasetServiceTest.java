@@ -1572,10 +1572,8 @@ public class DatasetServiceTest {
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
-    Mockito
-        .when(fieldRepository.findByIdFieldSchemaAndConditionalWithTag(Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(Arrays.asList(fieldWithLabel));
+    Mockito.when(fieldRepository.findByIdFieldSchemaWithTag(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(fieldWithLabel));
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
     Assert.assertEquals(Arrays.asList(fieldVO),
         datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));

@@ -1289,9 +1289,19 @@ public class DatasetServiceImpl implements DatasetService {
       } else if (resultsNumber > 100) {
         resultsNumber = 100;
       }
-      List<FieldValueWithLabelProjection> fields = fieldRepository
-          .findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId, conditionalSchemaId,
-              conditionalValue, searchValue, PageRequest.of(0, resultsNumber, Sort.by("value")));
+
+      List<FieldValueWithLabelProjection> fields = null;
+      // If there is no conditional, execute a easier query. Due to perform issues, better split the
+      // original sql into two queries
+      // one with conditional and the other without it
+      if (StringUtils.isNotBlank(conditionalSchemaId)) {
+        fields = fieldRepository.findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId,
+            conditionalSchemaId, conditionalValue, searchValue,
+            PageRequest.of(0, resultsNumber, Sort.by("value")));
+      } else {
+        fields = fieldRepository.findByIdFieldSchemaWithTag(idPk, labelSchemaId, searchValue,
+            PageRequest.of(0, resultsNumber, Sort.by("value")));
+      }
 
       fields.stream().forEach(fExtended -> {
         if (fExtended != null) {
@@ -1304,9 +1314,7 @@ public class DatasetServiceImpl implements DatasetService {
       // Remove the duplicate values
       HashSet<String> seen = new HashSet<>();
       fieldsVO.removeIf(e -> !seen.add(e.getValue()));
-
     }
-
     return fieldsVO;
   }
 
