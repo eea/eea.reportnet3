@@ -1,7 +1,7 @@
 {
   "dataflowStatus": {
     "DESIGN": "DESIGN",
-    "DRAFT": "DRAFT"
+    "OPEN": "DRAFT"
   },
   "errorTypes": {
     "dataflowExists": "Dataflow name already exists",
