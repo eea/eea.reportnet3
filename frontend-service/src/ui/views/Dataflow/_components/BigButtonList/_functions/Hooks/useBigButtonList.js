@@ -62,7 +62,7 @@ const useBigButtonList = ({
         config.permissions.EDITOR_WRITE
       ]);
     const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
-    const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
+    const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['OPEN'];
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isReleased =
       !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
