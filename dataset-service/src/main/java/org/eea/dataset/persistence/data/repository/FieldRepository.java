@@ -162,4 +162,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   List<FieldValue> findAllCascadeListOfSinglePams(
       @Param("idListOfSinglePamsField") String idListOfSinglePamsField,
       @Param("fieldValueInRecord") String fieldValueInRecord);
+
+  /**
+   * Exists by id field schema and value.
+   *
+   * @param idFieldSchema the id field schema
+   * @param value the value
+   * @return true, if successful
+   */
+  @Query
+  boolean existsByIdFieldSchemaAndValue(String idFieldSchema, String value);
 }
