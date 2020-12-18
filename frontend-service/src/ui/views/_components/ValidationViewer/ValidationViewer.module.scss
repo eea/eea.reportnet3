@@ -7,6 +7,14 @@
 }
 
 .validationToolbar {
+  border-top: 1px solid var(--c-custom-gray) !important;
+  border-left: 1px solid var(--c-custom-gray) !important;
+  border-right: 1px solid var(--c-custom-gray) !important;
+  border-bottom: 0px !important;
+  border-top-left-radius: 3px !important;
+  border-top-right-radius: 3px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
   border: none !important;
   margin-bottom: 16px;
 }
