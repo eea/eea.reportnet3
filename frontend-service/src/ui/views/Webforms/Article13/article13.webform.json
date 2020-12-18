@@ -111,30 +111,35 @@
           "type": "FIELD",
           "name": "IsPolicyMeasureEnvisaged",
           "title": "Is the policy or measure envisaged with a view to limiting GHG emissions beyond the Member State commitments under Regulation (EU) 2018/842 and Regulation (EU) 2018/841",
-          "customInput": "RADIO_BUTTON"
+          "customInput": "RADIO_BUTTON",
+          "calculatedWhenGroup": true
         },
         {
           "type": "FIELD",
           "name": "GHGAffected",
           "title": "Greenhouse gas(es) affected",
-          "tooltip": "More than one GHG can be selected"
+          "tooltip": "More than one GHG can be selected",
+          "calculatedWhenGroup": true
         },
         {
           "type": "TABLE",
           "name": "SectorObjectives",
           "title": "Sector(s) affected and Objective(s)",
           "multipleRecords": true,
+          "hasCalculatedFields": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "SectorAffected",
               "title": "Sector affected",
-              "readOnly": true
+              "readOnly": true,
+              "calculatedWhenGroup": true
             },
             {
               "type": "FIELD",
               "name": "OtherSectors",
               "title": "Other Sector(s)",
+              "calculatedWhenGroup": true,
               "dependency": {
                 "field": "SectorAffected",
                 "value": ["8"]
@@ -144,7 +149,8 @@
               "type": "FIELD",
               "name": "Objective",
               "title": "Select Objective(s)",
-              "tooltip": "Objective means ‘initial statement of the outcomes (including resultsand impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided"
+              "tooltip": "Objective means ‘initial statement of the outcomes (including resultsand impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
+              "calculatedWhenGroup": true
             },
             {
               "type": "TABLE",
@@ -152,16 +158,7 @@
               "title": "Other Objective(s)",
               "dependency": {
                 "field": "Objective",
-                "value": [
-                  "9",
-                  "15",
-                  "24",
-                  "29",
-                  "38",
-                  "45",
-                  "56",
-                  "57"
-                ]
+                "value": ["9", "15", "24", "29", "38", "45", "56", "57"]
               },
               "multipleRecords": true,
               "elements": [
@@ -194,6 +191,7 @@
           "type": "FIELD",
           "name": "OtherPolicyInstrument",
           "title": "Describe the other policy Instrument",
+          "calculatedWhenGroup": true,
           "dependency": {
             "field": "TypePolicyInstrument",
             "value": ["Other"]
@@ -215,6 +213,7 @@
           "type": "FIELD",
           "name": "UnionPolicyList",
           "title": "Select Union policy/policies",
+          "calculatedWhenGroup": true,
           "dependency": {
             "field": "UnionPolicy",
             "value": ["Related"]
@@ -247,7 +246,8 @@
           "type": "FIELD",
           "name": "StatusImplementation",
           "title": "Status of implementation",
-          "tooltip": "Expired PaMs must be reported in the template only if they have an effect, or they are expected to continue to have an effect on GHG emissions"
+          "tooltip": "Expired PaMs must be reported in the template only if they have an effect, or they are expected to continue to have an effect on GHG emissions",
+          "calculatedWhenGroup": true
         },
         {
           "type": "LABEL",
@@ -257,29 +257,34 @@
         {
           "type": "FIELD",
           "name": "ImplementationPeriodStart",
-          "title": "Start"
+          "title": "Start",
+          "calculatedWhenGroup": true
         },
         {
           "type": "FIELD",
           "name": "ImplementationPeriodFinish",
-          "title": "Finish"
+          "title": "Finish",
+          "calculatedWhenGroup": true
         },
         {
           "type": "FIELD",
           "name": "ImplementationPeriodComment",
           "title": "Comment on Implementation Period",
-          "tooltip": "Provide any remark on Implementation Period of the PaM"
+          "tooltip": "Provide any remark on Implementation Period of the PaM",
+          "calculatedWhenGroup": true
         },
         {
           "type": "FIELD",
           "name": "ProjectionsScenario",
-          "title": "Projections scenario in which the PaM is included"
+          "title": "Projections scenario in which the PaM is included",
+          "calculatedWhenGroup": true
         },
         {
           "type": "TABLE",
           "name": "Entities",
           "title": "Entities responsible for implementing the policy",
           "multipleRecords": true,
+          "hasCalculatedFields": true,
           "elements": [
             {
               "type": "FIELD",
@@ -401,29 +406,29 @@
           "multipleRecords": false,
           "showInsideParentTable": true,
           "elements": [
-              {
-              
-                "type": "FIELD",
-                "name": "Id",
-                "title": "PaM Id",
-                "tooltip": "Use this to order the PaMs to your convenience",
-                "isPrimary": true,                
-                "customType": "READ_ONLY"
-              },
-              {
-                "type": "FIELD",
-                "name": "Title",
-                "title": "Name of PaM or group of PaMs",
-                "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-                "customType": "READ_ONLY"
-              }
-            ]
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true,
+              "customType": "READ_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "customType": "READ_ONLY"
+            }
+          ]
         },
         {
           "type": "FIELD",
           "name": "PolicyImpacting",
           "title": "Policy impacting EU ETS, LULUCF and/or ESD/ESR emissions",
-          "tooltip": "More than one can be selected"
+          "tooltip": "More than one can be selected",
+          "calculatedWhenGroup": true
         },
         {
           "type": "LABEL",
@@ -548,7 +553,7 @@
               "type": "FIELD",
               "name": "LULUCF_4",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"            
+              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -676,23 +681,22 @@
           "multipleRecords": false,
           "showInsideParentTable": true,
           "elements": [
-              {
-              
-                "type": "FIELD",
-                "name": "Id",
-                "title": "PaM Id",
-                "tooltip": "Use this to order the PaMs to your convenience",
-                "isPrimary": true,                
-                "customType": "READ_ONLY"
-              },
-              {
-                "type": "FIELD",
-                "name": "Title",
-                "title": "Name of PaM or group of PaMs",
-                "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",                                
-                "customType": "READ_ONLY"
-              }
-            ]
+            {
+              "type": "FIELD",
+              "name": "Id",
+              "title": "PaM Id",
+              "tooltip": "Use this to order the PaMs to your convenience",
+              "isPrimary": true,
+              "customType": "READ_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "Title",
+              "title": "Name of PaM or group of PaMs",
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "customType": "READ_ONLY"
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -713,7 +717,7 @@
         {
           "type": "LABEL",
           "level": 4,
-          "title": "Cost"        
+          "title": "Cost"
         },
         {
           "type": "FIELD",
@@ -729,7 +733,7 @@
           "type": "LABEL",
           "level": 4,
           "title": "Benefit",
-          "tooltip": "A benefit shall be indicated in the template as a negative cost"        
+          "tooltip": "A benefit shall be indicated in the template as a negative cost"
         },
         {
           "type": "FIELD",

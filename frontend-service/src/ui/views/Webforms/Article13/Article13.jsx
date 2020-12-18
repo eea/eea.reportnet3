@@ -348,6 +348,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           getFieldSchemaId={getFieldSchemaId}
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
+          pamsRecords={pamsRecords}
           selectedTable={selectedTable}
           selectedTableName={selectedTableName}
           setTableSchemaId={setTableSchemaId}

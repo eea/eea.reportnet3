@@ -25,6 +25,7 @@ import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
   addingOnTableSchemaId,
+  calculateSingle,
   columnsSchema,
   dataflowId,
   datasetId,
@@ -32,6 +33,7 @@ export const WebformRecord = ({
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
+  isGroup,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
@@ -153,24 +155,28 @@ export const WebformRecord = ({
               )}
               <div className={styles.fieldWrapper}>
                 <div className={styles.template}>
-                  <WebformField
-                    columnsSchema={columnsSchema}
-                    datasetId={datasetId}
-                    datasetSchemaId={datasetSchemaId}
-                    element={element}
-                    isConditional={
-                      !isNil(webformRecordState.record) &&
-                      webformRecordState.record.elements.filter(
-                        col =>
-                          !isNil(col.referencedField) &&
-                          col.referencedField.masterConditionalFieldId === element.fieldSchemaId
-                      ).length > 0
-                    }
-                    isConditionalChanged={isConditionalChanged}
-                    onFillField={onFillField}
-                    onSaveField={onSaveField}
-                    record={record}
-                  />
+                  {!isNil(isGroup) && element.calculatedWhenGroup && isGroup(record) ? (
+                    calculateSingle(element)
+                  ) : (
+                    <WebformField
+                      columnsSchema={columnsSchema}
+                      datasetId={datasetId}
+                      datasetSchemaId={datasetSchemaId}
+                      element={element}
+                      isConditional={
+                        !isNil(webformRecordState.record) &&
+                        webformRecordState.record.elements.filter(
+                          col =>
+                            !isNil(col.referencedField) &&
+                            col.referencedField.masterConditionalFieldId === element.fieldSchemaId
+                        ).length > 0
+                      }
+                      isConditionalChanged={isConditionalChanged}
+                      onFillField={onFillField}
+                      onSaveField={onSaveField}
+                      record={record}
+                    />
+                  )}
                   {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
                 {element.validations &&
@@ -216,16 +222,20 @@ export const WebformRecord = ({
                     )}
                   </h3>
 
-                  {element.multipleRecords && (
-                    <Button
-                      disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
-                      icon={
-                        addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
-                      }
-                      label={resources.messages['addRecord']}
-                      onClick={() => onAddMultipleWebform(element.tableSchemaId)}
-                    />
-                  )}
+                  {!isNil(isGroup) && isNil(element.hasCalculatedFields) && !isGroup()
+                    ? null
+                    : element.multipleRecords && (
+                        <Button
+                          disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                          icon={
+                            addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple
+                              ? 'spinnerAnimate'
+                              : 'plus'
+                          }
+                          label={resources.messages['addRecord']}
+                          onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                        />
+                      )}
                 </div>
               )}
 
@@ -240,10 +250,12 @@ export const WebformRecord = ({
               {element.elementsRecords.map((record, i) => {
                 return (
                   <WebformRecord
+                    calculateSingle={calculateSingle}
                     columnsSchema={columnsSchema}
                     dataflowId={dataflowId}
                     datasetId={datasetId}
                     datasetSchemaId={datasetSchemaId}
+                    isGroup={isGroup}
                     key={i}
                     multipleRecords={element.multipleRecords}
                     onAddMultipleWebform={onAddMultipleWebform}

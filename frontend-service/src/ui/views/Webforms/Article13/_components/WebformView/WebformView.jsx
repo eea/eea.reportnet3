@@ -3,6 +3,7 @@ import React, { Fragment, useEffect, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
+import uniq from 'lodash/uniq';
 
 import styles from './WebformView.module.scss';
 
@@ -15,6 +16,7 @@ import { WebformService } from 'core/services/Webform';
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const WebformView = ({
   data,
@@ -24,6 +26,7 @@ export const WebformView = ({
   getFieldSchemaId,
   isRefresh,
   isReporting,
+  pamsRecords,
   selectedTable,
   selectedTableName,
   setTableSchemaId,
@@ -32,7 +35,7 @@ export const WebformView = ({
 }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
-
+  console.log({ pamsRecords });
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isLoading: false,
     isVisible: getWebformTabs(
@@ -44,7 +47,7 @@ export const WebformView = ({
     singlesCalculatedData: {}
   });
 
-  const { isLoading, isVisible } = webformViewState;
+  const { isLoading, isVisible, singlesCalculatedData } = webformViewState;
 
   useEffect(() => {
     const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
@@ -66,11 +69,71 @@ export const WebformView = ({
   const getSingleData = async () => {
     try {
       const singleData = await WebformService.singlePamData(datasetId, selectedTable.pamsId);
-      console.log({ singleData });
-      webformViewDispatch({ type: 'SET_SINGLE_CALCULATED_DATA', payload: singleData });
+      webformViewDispatch({ type: 'SET_SINGLE_CALCULATED_DATA', payload: singleData.data });
     } catch (error) {
       console.error('error', error);
     }
+  };
+
+  const calculateSingle = field => {
+    switch (field.name.toLowerCase()) {
+      case 'sectoraffected':
+      case 'policyinstrument':
+      case 'implementationperiodcomment':
+      case 'implementationperiodfinish':
+      case 'implementationperiodstart':
+      case 'policyimpacting':
+      case 'projectionsscenario':
+      case 'statusimplementation':
+      case 'unionpolicylist':
+        return <span disabled={true}>{combinationFieldRender(field.name)}</span>;
+      case 'ispolicymeasureenvisaged':
+        return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
+      default:
+        break;
+    }
+
+    return <span disabled={true}>{field.value}</span>;
+  };
+
+  const checkValueFieldRender = (fieldName, valueToCheck) => {
+    let containsValue = false;
+    let fieldValue;
+
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
+          containsValue = true;
+        } else {
+          fieldValue = singleRecordValue;
+        }
+      }
+    });
+
+    return containsValue ? valueToCheck : fieldValue;
+  };
+
+  const combinationFieldRender = fieldName => {
+    const combinatedValues = [];
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        combinatedValues.push(Array.isArray(singleRecordValue) ? singleRecordValue.join(', ') : singleRecordValue);
+      }
+    });
+
+    return uniq(combinatedValues).join(', ');
+  };
+
+  const isGroup = record => {
+    const filteredField = pamsRecords
+      .find(pamRecord => pamRecord.recordId === selectedTable.recordId)
+      .elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
+    console.log(filteredField.value);
+    return TextUtils.areEquals(filteredField.value, 'Group');
   };
 
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
@@ -119,10 +182,12 @@ export const WebformView = ({
 
     return (
       <WebformTable
+        calculateSingle={calculateSingle}
         dataflowId={dataflowId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
+        isGroup={isGroup}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
