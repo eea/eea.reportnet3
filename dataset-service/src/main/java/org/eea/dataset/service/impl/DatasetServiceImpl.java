@@ -2807,8 +2807,8 @@ public class DatasetServiceImpl implements DatasetService {
         dictionaryRecordFieldValues = pagedFieldValues.stream()
             .collect(Collectors.groupingBy(fv -> fv.getRecord().getId()));
 
-        LOG.info("Grouped {} records from table {}", dictionaryRecordFieldValues.size(),
-            record.getTableValue().getIdTableSchema());
+//        LOG.info("Grouped {} records from table {}", dictionaryRecordFieldValues.size(),
+//            record.getTableValue().getIdTableSchema());
       }
 
       recordAux.setTableValue(tableAux);
@@ -2817,13 +2817,16 @@ public class DatasetServiceImpl implements DatasetService {
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+      List<FieldValue> fieldValues =
+          dictionaryRecordFieldValues.containsKey(record.getId()) ? dictionaryRecordFieldValues
+              .get(record.getId()) : new ArrayList<>();
+
       dictionaryRecordFieldValues
           .remove(record
               .getId());//remove the record from the map to avoid reprocessing and to know when to ask another page
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-      LOG.info("Remaining {} records from table {}", dictionaryRecordFieldValues.size(),
-          record.getTableValue().getIdTableSchema());
+//      LOG.info("Remaining {} records from table {}", dictionaryRecordFieldValues.size(),
+//          record.getTableValue().getIdTableSchema());
       createFieldValueForRecord(dictionaryOriginTargetObjectId, dictionaryIdFieldAttachment,
           recordAux, fieldValues,
           fieldValuesOnlyValues);
