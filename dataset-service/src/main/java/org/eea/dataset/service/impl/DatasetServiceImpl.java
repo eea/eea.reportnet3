@@ -2916,8 +2916,10 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param recordValueId the record value id
    * @param fieldValues the field values
+   * @throws EEAException the EEA exception
    */
-  private void updateCascadePK(final String recordValueId, final List<FieldValue> fieldValues) {
+  private void updateCascadePK(final String recordValueId, final List<FieldValue> fieldValues)
+      throws EEAException {
 
     // we took recordValue to take more information necesary to calculate pk
     RecordValue record = recordRepository.findById(recordValueId);
@@ -2956,17 +2958,29 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValues the field values
    * @param fieldSchemaDocument the field schema document
    * @param idListOfSinglePamsField the id list of single pams field
+   * @throws EEAException the EEA exception
    */
   private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument,
-      String idListOfSinglePamsField) {
+      String idListOfSinglePamsField) throws EEAException {
     // we took the both fields, database and filled in new record
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
-    Optional<FieldValue> fieldValueInRecord = fieldValues.stream()
-        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst();
-    if (fieldValueInRecord.isPresent()) {
-      FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.get().getId());
+    FieldValue fieldValueInRecord = fieldValues.stream()
+        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
+
+
+    // we find if exist for this pk the same value in pk and throw a error if exist
+    if (null != fieldValueInRecord) {
+      boolean fieldValueExist = fieldRepository.existsByIdFieldSchemaAndValue(
+          fieldValueInRecord.getIdFieldSchema(), fieldValueInRecord.getValue());
+
+      if (fieldValueExist) {
+        throw new EEAException(
+            String.format(EEAErrorMessage.PK_ID_ALREADY_EXIST, fieldValueInRecord.getValue()));
+      }
+
+      FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
       // we compare if that value is diferent, if not we ignore the pk cascade
-      if (!fieldValueInRecord.get().getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
+      if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
         PkCatalogueSchema pkCatalogueSchema =
             pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
         if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
@@ -2976,7 +2990,7 @@ public class DatasetServiceImpl implements DatasetService {
           // we save if the data are the same th
           fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
             if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
-              fieldValuePkOtherTable.setValue(fieldValueInRecord.get().getValue());
+              fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
               fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
                   fieldValuePkOtherTable.getValue());
 
@@ -2984,8 +2998,7 @@ public class DatasetServiceImpl implements DatasetService {
           });
         }
         // we call pams service
-        paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase,
-            fieldValueInRecord.get());
+        paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase, fieldValueInRecord);
       }
     }
   }
@@ -2996,12 +3009,21 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValueVO the field value VO
    * @param fieldSchemaDocument the field schema document
    * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
    */
   private void fieldValueUpdatePK(final FieldVO fieldValueVO, final Document fieldSchemaDocument,
-      final String datasetSchemaId) {
+      final String datasetSchemaId) throws EEAException {
 
+    // we find if exist for this pk the same value in pk and throw a error if exist
+    boolean fieldValueExist = fieldRepository
+        .existsByIdFieldSchemaAndValue(fieldValueVO.getIdFieldSchema(), fieldValueVO.getValue());
+    if (fieldValueExist) {
+      throw new EEAException(
+          String.format(EEAErrorMessage.PK_ID_ALREADY_EXIST, fieldValueVO.getValue()));
+    }
     // we took fieldValue to take more information necesary to calculate pk
     FieldValue fieldValue = fieldRepository.findById(fieldValueVO.getId());
+
 
     // we bring the schema
     Document recordSchemaDocument = schemasRepository.findRecordSchema(datasetSchemaId,
