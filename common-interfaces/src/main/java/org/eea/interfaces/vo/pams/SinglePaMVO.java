@@ -41,6 +41,12 @@ public class SinglePaMVO {
   private List<EntityPaMVO> entities;
 
   /** The Policy impacting. */
-  private String PolicyImpacting;
+  private String policyImpacting;
+
+  /** The type policy instrument. */
+  private List<String> typePolicyInstrument;
+
+  /** The ghg affected. */
+  private List<String> ghgAffected;
 
 }

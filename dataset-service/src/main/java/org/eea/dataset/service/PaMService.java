@@ -3,7 +3,9 @@ package org.eea.dataset.service;
 import java.util.List;
 import org.bson.Document;
 import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
+import org.eea.multitenancy.DatasetId;
 
 
 /**
@@ -15,8 +17,10 @@ public interface PaMService {
    * Gets the list single paM.
    *
    * @return the list single paM
+   * @throws EEAException
    */
-  List<SinglePaMVO> getListSinglePaM();
+  List<SinglePaMVO> getListSinglePaM(@DatasetId Long datasetId, String groupPaMId)
+      throws EEAException;
 
 
   /**
