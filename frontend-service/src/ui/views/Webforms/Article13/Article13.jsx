@@ -296,36 +296,42 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       <ul className={styles.tableList}>
         {Object.keys(tableList).map((list, i) => (
           <li className={styles.tableListItem} key={i}>
-            <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
-            {tableList[list].map((items, i) => (
-              <span
-                className={`${styles.tableListId} ${
-                  items.recordId === selectedTable.recordId ? styles.selected : null
-                }`}
-                key={i}
-                onClick={() => {
-                  article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
-                  onSelectRecord(items.recordId, items.id);
-                  onToggleView(resources.messages['details']);
-                }}>
-                {items.id || '-'}
-              </span>
-            ))}
-            <Button
-              className={styles.addButton}
-              disabled={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
-              icon={
-                list === 'single'
-                  ? article13State.isAddingSingleRecord
+            <div className={styles.tableListTitleWrapper}>
+              <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
+            </div>
+            <div className={styles.tableListContentWrapper}>
+              {tableList[list].map((items, i) => (
+                <span
+                  className={`${styles.tableListId} ${
+                    items.recordId === selectedTable.recordId ? styles.selected : null
+                  }`}
+                  key={i}
+                  onClick={() => {
+                    article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
+                    onSelectRecord(items.recordId, items.id);
+                    onToggleView(resources.messages['details']);
+                  }}>
+                  {items.id || '-'}
+                </span>
+              ))}
+            </div>
+            <div className={styles.addButtonWrapper}>
+              <Button
+                className={styles.addButton}
+                disabled={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
+                icon={
+                  list === 'single'
+                    ? article13State.isAddingSingleRecord
+                      ? 'spinnerAnimate'
+                      : 'add'
+                    : article13State.isAddingGroupRecord
                     ? 'spinnerAnimate'
                     : 'add'
-                  : article13State.isAddingGroupRecord
-                  ? 'spinnerAnimate'
-                  : 'add'
-              }
-              label={resources.messages[list === 'single' ? 'addSingle' : 'addGroup']}
-              onClick={() => onAddPamsRecord(list)}
-            />
+                }
+                label={resources.messages[list === 'single' ? 'addSingle' : 'addGroup']}
+                onClick={() => onAddPamsRecord(list)}
+              />
+            </div>
           </li>
         ))}
       </ul>
