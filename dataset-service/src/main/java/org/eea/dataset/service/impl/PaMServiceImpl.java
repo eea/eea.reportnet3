@@ -62,7 +62,7 @@ public class PaMServiceImpl implements PaMService {
     // get datasetSchema
     Map<String, String> schemaIds = getPaMsSchemaIds(datasetId, dataflowId);
 
-    // TODO @DatasetId doesn't works
+    // @DatasetId doesn't works
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     // --------
 
