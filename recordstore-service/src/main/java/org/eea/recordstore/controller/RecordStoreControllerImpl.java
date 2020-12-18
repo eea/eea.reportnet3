@@ -84,12 +84,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @PostMapping(value = "/dataset/create/{datasetName}")
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO need to create standard
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
-      // TODO Error control
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
