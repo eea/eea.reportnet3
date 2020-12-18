@@ -252,26 +252,30 @@
         {
           "type": "LABEL",
           "level": 4,
-          "title": "Implementation Period"
+          "title": "Implementation Period",
+          "hideWhenCalculated": true
         },
         {
           "type": "FIELD",
           "name": "ImplementationPeriodStart",
           "title": "Start",
-          "calculatedWhenGroup": true
+          "calculatedWhenGroup": true,
+          "hideWhenCalculated": true
         },
         {
           "type": "FIELD",
           "name": "ImplementationPeriodFinish",
           "title": "Finish",
-          "calculatedWhenGroup": true
+          "calculatedWhenGroup": true,
+          "hideWhenCalculated": true
         },
         {
           "type": "FIELD",
           "name": "ImplementationPeriodComment",
           "title": "Comment on Implementation Period",
           "tooltip": "Provide any remark on Implementation Period of the PaM",
-          "calculatedWhenGroup": true
+          "calculatedWhenGroup": true,
+          "hideWhenCalculated": true
         },
         {
           "type": "FIELD",
@@ -289,12 +293,14 @@
             {
               "type": "FIELD",
               "name": "Type",
-              "title": "Type"
+              "title": "Type",
+              "calculatedWhenGroup": true
             },
             {
               "type": "FIELD",
               "name": "Name",
-              "title": "Name"
+              "title": "Name",
+              "calculatedWhenGroup": true
             }
           ]
         },

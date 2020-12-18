@@ -1,5 +1,6 @@
-import React, { Fragment, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
@@ -8,8 +9,12 @@ import uniq from 'lodash/uniq';
 import styles from './WebformView.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Column } from 'primereact/column';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { WebformService } from 'core/services/Webform';
 
@@ -33,6 +38,8 @@ export const WebformView = ({
   state,
   tables
 }) => {
+  const resources = useContext(ResourcesContext);
+
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
   console.log({ pamsRecords });
@@ -77,18 +84,32 @@ export const WebformView = ({
 
   const calculateSingle = field => {
     switch (field.name.toLowerCase()) {
+      case 'ghgaffected':
       case 'sectoraffected':
       case 'policyinstrument':
-      case 'implementationperiodcomment':
-      case 'implementationperiodfinish':
-      case 'implementationperiodstart':
       case 'policyimpacting':
-      case 'projectionsscenario':
-      case 'statusimplementation':
       case 'unionpolicylist':
-        return <span disabled={true}>{combinationFieldRender(field.name)}</span>;
+        const fields = combinationFieldRender(field.name);
+        return (
+          <ul>
+            {fields?.map(field => (
+              <li>{field}</li>
+            ))}
+          </ul>
+        );
       case 'ispolicymeasureenvisaged':
         return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
+      // case 'implementationperiodcomment':
+      // case 'implementationperiodfinish':
+      // case 'implementationperiodstart':
+      case 'statusimplementation':
+        return tableFieldRender(field.name, [
+          'implementationperiodstart',
+          'implementationperiodfinish',
+          'implementationperiodcomment'
+        ]);
+      case 'projectionsscenario':
+        return tableFieldRender(field.name, []);
       default:
         break;
     }
@@ -125,18 +146,52 @@ export const WebformView = ({
       }
     });
 
-    return uniq(combinatedValues).join(', ');
+    return uniq(combinatedValues);
   };
 
   const isGroup = record => {
     const filteredField = pamsRecords
       .find(pamRecord => pamRecord.recordId === selectedTable.recordId)
       .elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
-    console.log(filteredField.value);
     return TextUtils.areEquals(filteredField.value, 'Group');
   };
 
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
+
+  const renderColumns = fields =>
+    !isNil(fields[0]) &&
+    Object.keys(fields[0]).map(field => (
+      <Column
+        key={field}
+        columnResizeMode="expand"
+        field={field}
+        filter={true}
+        filterMatchMode="contains"
+        header={resources.messages[field]}
+        sortable={true}
+      />
+    ));
+
+  const tableFieldRender = (fieldName, columnFields) => {
+    const combinatedTableValues = [];
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        const columnFieldsValues = { pamsId: singleRecord['id'], [fieldName]: singleRecordValue };
+        columnFields.forEach(columnField => {
+          const columnFieldValue =
+            singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === columnField.toLowerCase())];
+          if (!isNil(columnFieldValue)) {
+            columnFieldsValues[columnField] = columnFieldValue;
+          }
+        });
+        combinatedTableValues.push(columnFieldsValues);
+      }
+    });
+    console.log({ combinatedTableValues });
+    return <DataTable value={combinatedTableValues}>{renderColumns(combinatedTableValues)}</DataTable>;
+  };
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {

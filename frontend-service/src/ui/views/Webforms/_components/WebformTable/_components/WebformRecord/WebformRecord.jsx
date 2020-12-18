@@ -114,6 +114,42 @@ export const WebformRecord = ({
       .includes(true);
   };
 
+  const checkAddButtonVisibility = el => {
+    if (isNil(isGroup)) {
+      return true;
+    } else {
+      if (isGroup() && !isNil(el.hasCalculatedFields)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
+  const checkLabelVisibility = el => {
+    if (isNil(isGroup)) {
+      return true;
+    } else {
+      if (isGroup() && el.hideWhenCalculated) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
+  const checkRequiredLabelVisibility = el => {
+    if (isNil(isGroup)) {
+      return true;
+    } else {
+      if (isGroup() && el.calculatedWhenGroup) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
   const handleDialogs = (dialog, value) => {
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
@@ -135,13 +171,16 @@ export const WebformRecord = ({
 
       if (element.type === 'FIELD') {
         return (
+          checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
-                  <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
+                  {checkRequiredLabelVisibility(element) && (
+                    <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
+                  )}
                 </label>
               )}
 
@@ -155,8 +194,10 @@ export const WebformRecord = ({
               )}
               <div className={styles.fieldWrapper}>
                 <div className={styles.template}>
-                  {!isNil(isGroup) && element.calculatedWhenGroup && isGroup(record) ? (
-                    calculateSingle(element)
+                  {!isNil(isGroup) && element.calculatedWhenGroup && isGroup() ? (
+                    !element.hideWhenCalculated ? (
+                      calculateSingle(element)
+                    ) : null
                   ) : (
                     <WebformField
                       columnsSchema={columnsSchema}
@@ -194,19 +235,21 @@ export const WebformRecord = ({
         );
       } else if (element.type === 'LABEL') {
         return (
-          <Fragment>
-            {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
-            {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
-            {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
-            {element.tooltip && isNil(element.customType) && (
-              <Button
-                className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
-                icon="infoCircle"
-                tooltip={element.tooltip}
-                tooltipOptions={{ position: 'top' }}
-              />
-            )}
-          </Fragment>
+          checkLabelVisibility(element) && (
+            <Fragment>
+              {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+              {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+              {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+              {element.tooltip && isNil(element.customType) && (
+                <Button
+                  className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                  icon="infoCircle"
+                  tooltip={element.tooltip}
+                  tooltipOptions={{ position: 'top' }}
+                />
+              )}
+            </Fragment>
+          )
         );
       } else {
         return (
@@ -222,20 +265,16 @@ export const WebformRecord = ({
                     )}
                   </h3>
 
-                  {!isNil(isGroup) && isNil(element.hasCalculatedFields) && !isGroup()
-                    ? null
-                    : element.multipleRecords && (
-                        <Button
-                          disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
-                          icon={
-                            addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple
-                              ? 'spinnerAnimate'
-                              : 'plus'
-                          }
-                          label={resources.messages['addRecord']}
-                          onClick={() => onAddMultipleWebform(element.tableSchemaId)}
-                        />
-                      )}
+                  {checkAddButtonVisibility(element) && element.multipleRecords && (
+                    <Button
+                      disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                      icon={
+                        addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
+                      }
+                      label={resources.messages['addRecord']}
+                      onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                    />
+                  )}
                 </div>
               )}
 

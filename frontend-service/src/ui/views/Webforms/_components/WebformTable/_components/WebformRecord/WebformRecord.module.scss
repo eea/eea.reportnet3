@@ -109,7 +109,7 @@
     :global .p-dropdown {
       width: 100%;
     }
-    :global .p-inputtext {
+    :global .p-inputtext:not(.p-column-filter) {
       padding: 1rem 0.5rem;
     }
     label {

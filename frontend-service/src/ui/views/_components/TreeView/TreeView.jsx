@@ -68,6 +68,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
 
   const groupFields = fields => {
     parseData(fields);
+    console.log({ fields });
     if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
       return (
         <DataTable

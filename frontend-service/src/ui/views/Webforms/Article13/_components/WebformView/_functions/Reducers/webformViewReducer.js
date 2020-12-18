@@ -64,8 +64,8 @@ export const webformViewReducer = (state, { type, payload }) => {
             ],
             statusImplementation: 'Adopted',
             implementationPeriodStart: '2000',
-            implementationPeriodFinish: '2020',
-            implementationPeriodComment: 'ImplementPeriodComment',
+            implementationPeriodFinish: '2021',
+            implementationPeriodComment: 'ImplementPeriodComment 2',
             projectionsScenario: 'Without measures',
             unionPolicyList: ['3', '4'],
             entities: [

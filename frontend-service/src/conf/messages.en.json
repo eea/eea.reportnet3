@@ -958,6 +958,12 @@
     "tabularDataView": "Tabular data",
     "editAddDataReleasingError": "You cannot edit/add data while the releasing process is running. ",
     "addSingle": "Add single",
-    "addGroup": "Add group"
+    "addGroup": "Add group",
+    "pamsId": "PaM number",
+    "StatusImplementation": "Status of Implementation",
+    "implementationperiodcomment": "Comment on Implementation Period",
+    "implementationperiodfinish": "Finish",
+    "implementationperiodstart": "Start",
+    "ProjectionsScenario": "Type"
   }
 }
