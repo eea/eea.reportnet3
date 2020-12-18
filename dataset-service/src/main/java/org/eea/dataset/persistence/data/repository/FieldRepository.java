@@ -172,4 +172,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    */
   @Query
   boolean existsByIdFieldSchemaAndValue(String idFieldSchema, String value);
+
+  /**
+   * Find one by id field schema and value.
+   *
+   * @param idFieldSchema the id field schema
+   * @param value the value
+   * @return the field value
+   */
+  @Query
+  FieldValue findOneByIdFieldSchemaAndValue(String idFieldSchema, String value);
 }
