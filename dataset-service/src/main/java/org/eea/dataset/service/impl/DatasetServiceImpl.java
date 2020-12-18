@@ -2959,38 +2959,40 @@ public class DatasetServiceImpl implements DatasetService {
     FieldValue fieldValueInRecord = fieldValues.stream()
         .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
 
+
     // we find if exist for this pk the same value in pk and throw a error if exist
-    boolean fieldValueExist = fieldRepository.existsByIdFieldSchemaAndValue(
-        fieldValueInRecord.getIdFieldSchema(), fieldValueInRecord.getValue());
+    if (null != fieldValueInRecord) {
+      boolean fieldValueExist = fieldRepository.existsByIdFieldSchemaAndValue(
+          fieldValueInRecord.getIdFieldSchema(), fieldValueInRecord.getValue());
 
-    if (fieldValueExist) {
-      throw new EEAException(
-          String.format(EEAErrorMessage.PK_ID_ALREADY_EXIST, fieldValueInRecord.getValue()));
-    }
-
-    FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
-    // we compare if that value is diferent, if not we ignore the pk cascade
-    if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
-      PkCatalogueSchema pkCatalogueSchema =
-          pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
-      if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
-        List<String> referenced = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString)
-            .collect(Collectors.toList());
-        List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
-        // we save if the data are the same th
-        fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
-          if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
-            fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
-            fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
-                fieldValuePkOtherTable.getValue());
-
-          }
-        });
+      if (fieldValueExist) {
+        throw new EEAException(
+            String.format(EEAErrorMessage.PK_ID_ALREADY_EXIST, fieldValueInRecord.getValue()));
       }
-      // we call pams service
-      paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase, fieldValueInRecord);
-    }
 
+      FieldValue fieldValueDatabase = fieldRepository.findById(fieldValueInRecord.getId());
+      // we compare if that value is diferent, if not we ignore the pk cascade
+      if (!fieldValueInRecord.getValue().equalsIgnoreCase(fieldValueDatabase.getValue())) {
+        PkCatalogueSchema pkCatalogueSchema =
+            pkCatalogueRepository.findByIdPk(new ObjectId(idFieldSchema));
+        if (null != pkCatalogueSchema && null != pkCatalogueSchema.getReferenced()) {
+          List<String> referenced = pkCatalogueSchema.getReferenced().stream()
+              .map(ObjectId::toString).collect(Collectors.toList());
+          List<FieldValue> fieldsValues = fieldRepository.findByIdFieldSchemaIn(referenced);
+          // we save if the data are the same th
+          fieldsValues.stream().forEach(fieldValuePkOtherTable -> {
+            if (fieldValueDatabase.getValue().equalsIgnoreCase(fieldValuePkOtherTable.getValue())) {
+              fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
+              fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
+                  fieldValuePkOtherTable.getValue());
+
+            }
+          });
+        }
+        // we call pams service
+        paMService.updateGroups(idListOfSinglePamsField, fieldValueDatabase, fieldValueInRecord);
+      }
+    }
   }
 
   /**
