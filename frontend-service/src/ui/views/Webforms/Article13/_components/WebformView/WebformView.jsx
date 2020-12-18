@@ -83,6 +83,7 @@ export const WebformView = ({
   };
 
   const calculateSingle = field => {
+    if (field.type === 'TABLE') console.log({ field });
     switch (field.name.toLowerCase()) {
       case 'ghgaffected':
       case 'sectoraffected':

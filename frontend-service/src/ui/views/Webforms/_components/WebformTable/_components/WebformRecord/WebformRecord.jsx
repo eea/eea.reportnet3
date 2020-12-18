@@ -126,6 +126,18 @@ export const WebformRecord = ({
     }
   };
 
+  const checkCalculatedTableVisibility = el => {
+    if (isNil(isGroup)) {
+      return false;
+    } else {
+      if (isGroup() && !isNil(el.hasCalculatedFields)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
   const checkLabelVisibility = el => {
     if (isNil(isGroup)) {
       return true;
@@ -286,27 +298,29 @@ export const WebformRecord = ({
                   }}
                 />
               )}
-              {element.elementsRecords.map((record, i) => {
-                return (
-                  <WebformRecord
-                    calculateSingle={calculateSingle}
-                    columnsSchema={columnsSchema}
-                    dataflowId={dataflowId}
-                    datasetId={datasetId}
-                    datasetSchemaId={datasetSchemaId}
-                    isGroup={isGroup}
-                    key={i}
-                    multipleRecords={element.multipleRecords}
-                    onAddMultipleWebform={onAddMultipleWebform}
-                    onRefresh={onRefresh}
-                    onTabChange={onTabChange}
-                    newRecord={webformRecordState.newRecord}
-                    record={record}
-                    tableId={tableId}
-                    tableName={element.title}
-                  />
-                );
-              })}
+              {checkCalculatedTableVisibility(element)
+                ? calculateSingle(element)
+                : element.elementsRecords.map((record, i) => {
+                    return (
+                      <WebformRecord
+                        calculateSingle={calculateSingle}
+                        columnsSchema={columnsSchema}
+                        dataflowId={dataflowId}
+                        datasetId={datasetId}
+                        datasetSchemaId={datasetSchemaId}
+                        isGroup={isGroup}
+                        key={i}
+                        multipleRecords={element.multipleRecords}
+                        onAddMultipleWebform={onAddMultipleWebform}
+                        onRefresh={onRefresh}
+                        onTabChange={onTabChange}
+                        newRecord={webformRecordState.newRecord}
+                        record={record}
+                        tableId={tableId}
+                        tableName={element.title}
+                      />
+                    );
+                  })}
             </div>
           )
         );
