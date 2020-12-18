@@ -3,9 +3,11 @@ import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } 
 import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
+import concat from 'lodash/concat';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import styles from './ValidationViewer.module.scss';
 
@@ -33,6 +35,7 @@ const ValidationViewer = React.memo(
     levelErrorTypes,
     onSelectValidation,
     schemaTables,
+    tables,
     visible
   }) => {
     const resources = useContext(ResourcesContext);
@@ -56,6 +59,12 @@ const ValidationViewer = React.memo(
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
+    const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
+    const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
+    const [originsTypesFilter, setOriginsTypesFilter] = useState([]);
+    const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
+    const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
+    const [allFieldsFilter, setAllFieldsFilter] = useState([]);
 
     const [validationState, validationDispatch] = useReducer(validationReducer, {
       totalErrors: 0,
@@ -65,6 +74,20 @@ const ValidationViewer = React.memo(
     });
 
     const { totalErrors, totalFilteredGroupedRecords, totalFilteredRecords, totalRecords } = validationState;
+
+    let dropdownLevelErrorsFilterRef = useRef();
+    let dropdownTypeEntitiesFilterRef = useRef();
+    let dropdownOriginsFilterRef = useRef();
+
+    useEffect(() => {
+      const allTypesFilter = concat(
+        levelErrorsTypesFilter,
+        originsTypesFilter,
+        typeEntitiesTypesFilter,
+        fieldsTypesFilter
+      );
+      setValidationsAllTypesFilters(allTypesFilter);
+    }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
 
     useEffect(() => {
       const headers = [
@@ -168,16 +191,10 @@ const ValidationViewer = React.memo(
       return style;
     };
 
-    const getFilteredState = value => setFiltered(value);
-
     const onChangePage = event => {
       setNumberRows(event.rows);
       setFirstRow(event.first);
       fetchData(sortField, sortOrder, event.first, event.rows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
-    };
-
-    const onLoadFilteredData = fetchedData => {
-      setFilteredData(fetchedData);
     };
 
     const onLoadErrors = async (
@@ -240,7 +257,142 @@ const ValidationViewer = React.memo(
       onLoadLevelErrorsFilter();
       onLoadTypeEntitiesFilter();
       onLoadOriginsFilter();
+      ///////////////////////////////////////////////////////////////////////////////////////////////Filters Component
+      onLoadLevelErrorsTypes();
+      onLoadTablesTypes();
+      onLoadFieldsTypes();
+      onLoadEntitiesTypes();
     };
+
+    const getFilteredState = value => setFiltered(value);
+
+    const onLoadFilteredData = fetchedData => {
+      setFilteredData(fetchedData);
+    };
+
+    const onLoadLevelErrorsTypes = () => {
+      const allLevelErrorsFilterList = [
+        { type: 'levelError', value: 'BLOCKER' },
+        { type: 'levelError', value: 'ERROR' },
+        { type: 'levelError', value: 'INFO' },
+        { type: 'levelError', value: 'WARNING' }
+      ];
+
+      setLevelErrorsTypesFilter(allLevelErrorsFilterList);
+    };
+
+    const onLoadEntitiesTypes = () => {
+      const allTypeEntitiesFilterList = [
+        { type: 'entityType', value: 'DATASET' },
+        { type: 'entityType', value: 'TABLE' },
+        { type: 'entityType', value: 'RECORD' },
+        { type: 'entityType', value: 'FIELD' }
+      ];
+      setTypeEntitiesTypesFilter(allTypeEntitiesFilterList);
+    };
+
+    const onLoadTablesTypes = () => {
+      const allOriginsFilterList = [];
+
+      schemaTables.forEach(table => {
+        if (!isNil(table.name)) {
+          allOriginsFilterList.push({ type: 'tableSchemaName', value: `${table.name.toString()}` });
+        }
+      });
+
+      setOriginsTypesFilter(allOriginsFilterList);
+    };
+
+    const onLoadFieldsTypes = () => {
+      const tablesWithRecords = tables.filter(table => !isUndefined(table.records));
+
+      const fields = [];
+      tablesWithRecords.forEach(table => {
+        table.records.forEach(record => {
+          record.fields.forEach(field => fields.push(field.name));
+        });
+      });
+
+      const allFieldsFilterList = [];
+
+      uniq(fields);
+      fields.forEach(field => {
+        if (!isNil(field)) {
+          allFieldsFilterList.push({ type: 'fieldSchemaName', value: `${field.toString()}` });
+        }
+      });
+
+      setFieldsTypesFilter(allFieldsFilterList);
+    };
+
+    const onLoadFilteredValidations = filterData => {
+      console.log('filterData', filterData);
+      const selectedEntitiesValues = filterData.entityType;
+      const entitiesValues = allTypeEntitiesFilter.map(entityFilter => entityFilter.value);
+
+      // Changed selected filters
+      // entitiesValues.forEach(tableName => {
+      //   selectedEntitiesValues.forEach(selectedTable => {
+      //     if (tableName === selectedTable) {
+      //       entitiesValues.splice(entitiesValues.indexOf(selectedTable), 1);
+      //     }
+      //   });
+      // });
+
+      // console.log('selectedEntitiesValues', selectedEntitiesValues);
+      // console.log('entitiesValues', entitiesValues);
+
+      // const selectedTablesNamesValues = filterData.tableSchemaName;
+      // const tablesNamesValues = allOriginsFilter.map(tableNameFilter => tableNameFilter.value);
+
+      // tablesNamesValues.forEach(tableName => {
+      //   selectedTablesNamesValues.forEach(selectedTable => {
+      //     if (tableName === selectedTable) {
+      //       tablesNamesValues.splice(tablesNamesValues.indexOf(selectedTable), 1);
+      //     }
+      //   });
+      // });
+
+      // console.log('tablesNamesValues', tablesNamesValues);
+
+      // const selectedFieldsValues = uniq(filterData.fieldSchemaName);
+      // const fieldsValues = allFieldsFilter.map(fieldFilter => fieldFilter.value);
+
+      // fieldsValues.forEach(field => {
+      //   selectedFieldsValues.forEach(selectedField => {
+      //     if (field === selectedField) {
+      //       fieldsValues.splice(fieldsValues.indexOf(selectedField), 1);
+      //     }
+      //   });
+      // });
+      // console.log('selectedFieldsValues', selectedFieldsValues);
+      // console.log('fieldsValues', fieldsValues);
+
+      // const selectedErrorsTypes = filterData.levelError;
+      // const errorsValues = allLevelErrorsFilter.map(errorsFilter => errorsFilter.value);
+      // errorsValues.forEach(error => {
+      //   selectedErrorsTypes.forEach(selectedError => {
+      //     if (error === selectedError) {
+      //       errorsValues.splice(errorsValues.indexOf(selectedError), 1);
+      //     }
+      //   });
+      // });
+      // console.log('selectedErrorsTypes', selectedErrorsTypes);
+      // console.log('errorsValues', errorsValues);
+
+      onLoadErrors(
+        firstRow,
+        numberRows,
+        // sortField,
+        filterData.fieldSchemaName,
+        sortOrder,
+        filterData.levelError,
+        filterData.entityType,
+        filterData.tableSchemaName
+      );
+    };
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const onLoadLevelErrorsFilter = () => {
       const allLevelErrorsFilterList = [];
@@ -287,6 +439,56 @@ const ValidationViewer = React.memo(
       }
     };
 
+    const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
+      levelErrorsDeselected = levelErrorsDeselected.map(filter => filter.toString().toUpperCase());
+
+      removeSelectAllFromList(levelErrorsDeselected);
+
+      setLevelErrorsFilter(levelErrorsDeselected);
+
+      setIsFilteredLevelErrors(levelErrorsDeselected.length > 0);
+
+      if (levelErrorsDeselected.length <= 0) {
+        checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
+      } else {
+        setAreActiveFilters(true);
+      }
+
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsDeselected, typeEntitiesFilter, originsFilter);
+
+      setFirstRow(0);
+    };
+
+    const onLoadErrorsWithEntityFilter = typeEntitiesDeselected => {
+      typeEntitiesDeselected = typeEntitiesDeselected.map(filter => filter.toString().toUpperCase());
+
+      removeSelectAllFromList(typeEntitiesDeselected);
+
+      if (typeEntitiesDeselected.length <= 0) {
+        checkActiveFilters(isFilteredOrigins, isFilteredLevelErrors, false);
+      } else {
+        setAreActiveFilters(true);
+      }
+
+      setTypeEntitiesFilter(typeEntitiesDeselected);
+      setIsFilteredTypeEntities(typeEntitiesDeselected.length > 0);
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
+      setFirstRow(0);
+    };
+
+    const onLoadErrorsWithOriginsFilter = originsDeselected => {
+      setOriginsFilter(originsDeselected);
+
+      if (originsDeselected.length <= 0) {
+        checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
+      } else {
+        setAreActiveFilters(true);
+      }
+      setIsFilteredOrigins(originsDeselected.length > 0);
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsDeselected);
+      setFirstRow(0);
+    };
+
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
       setIsLoading(true);
       const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
@@ -318,6 +520,24 @@ const ValidationViewer = React.memo(
       originsFilter
     ) => {
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+    };
+
+    const checkActiveFilters = (originsFilter, levelErrorsFilter, typeEntitiesFilter) => {
+      if (originsFilter || levelErrorsFilter || typeEntitiesFilter) {
+        setAreActiveFilters(true);
+      } else {
+        setAreActiveFilters(false);
+      }
+    };
+
+    const getExportButtonPosition = e => {
+      const exportButton = e.currentTarget;
+      const left = `${exportButton.offsetLeft}px`;
+      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
+      const top = `${topValue}px `;
+      const menu = exportButton.nextElementSibling;
+      menu.style.top = top;
+      menu.style.left = left;
     };
 
     const onRowSelect = async event => {
@@ -399,15 +619,15 @@ const ValidationViewer = React.memo(
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
     };
 
-    if (isLoading) {
-      return (
-        <div>
-          <div className={styles.spinner}>
-            <Spinner className={styles.spinnerPosition} />
-          </div>
-        </div>
-      );
-    }
+    // if (isLoading) {
+    //   return (
+    //     <div>
+    //       <div className={styles.spinner}>
+    //         <Spinner className={styles.spinnerPosition} />
+    //       </div>
+    //     </div>
+    //   );
+    // }
 
     return (
       <div className={styles.validationWrapper}>
@@ -415,12 +635,96 @@ const ValidationViewer = React.memo(
           buttonsList
         ) : (
           <Toolbar className={styles.validationToolbar}>
+            <div className="p-toolbar-group-left">
+              <Button
+                className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
+                icon={'filter'}
+                label={resources.messages['table']}
+                onClick={event => {
+                  dropdownOriginsFilterRef.current.show(event);
+                }}
+                iconClasses={isFilteredOrigins ? styles.filterActive : styles.filterInactive}
+              />
+
+              <DropdownFilter
+                disabled={isLoading}
+                filters={allOriginsFilter}
+                popup={true}
+                ref={dropdownOriginsFilterRef}
+                id="exportTableMenu"
+                showNotCheckedFilters={onLoadErrorsWithOriginsFilter}
+                onShow={e => {
+                  getExportButtonPosition(e);
+                }}
+              />
+
+              <Button
+                className={`${styles.level} p-button-rounded p-button-secondary-transparent`}
+                icon={'filter'}
+                label={resources.messages['levelError']}
+                onClick={event => {
+                  dropdownLevelErrorsFilterRef.current.show(event);
+                }}
+                iconClasses={isFilteredLevelErrors ? styles.filterActive : styles.filterInactive}
+              />
+
+              <DropdownFilter
+                disabled={isLoading}
+                filters={allLevelErrorsFilter}
+                popup={true}
+                ref={dropdownLevelErrorsFilterRef}
+                id="exportTableMenu"
+                showNotCheckedFilters={onLoadErrorsWithErrorLevelFilter}
+                onShow={e => {
+                  getExportButtonPosition(e);
+                }}
+                showLevelErrorIcons={true}
+              />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent`}
+                icon={'filter'}
+                label={resources.messages['entity']}
+                onClick={event => {
+                  dropdownTypeEntitiesFilterRef.current.show(event);
+                }}
+                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
+              />
+
+              <DropdownFilter
+                disabled={isLoading}
+                filters={allTypeEntitiesFilter}
+                popup={true}
+                ref={dropdownTypeEntitiesFilterRef}
+                id="exportTableMenu"
+                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
+                onShow={e => {
+                  getExportButtonPosition(e);
+                }}
+              />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent`}
+                disabled={!areActiveFilters}
+                icon={'cross'}
+                label={resources.messages['cleanFilters']}
+                onClick={() => {
+                  resetFilters();
+                  fetchData('', sortOrder, 0, numberRows, [], [], []);
+                  setFirstRow(0);
+                  setAreActiveFilters(false);
+                }}
+              />
+            </div>
             <div>
               <Filters
                 data={fetchedData}
                 getFilteredData={onLoadFilteredData}
                 getFilteredSearched={getFilteredState}
+                sendData={onLoadFilteredValidations}
                 selectOptions={['entityType', 'tableSchemaName', 'fieldSchemaName', 'levelError']}
+                validationsAllTypesFilters={validationsAllTypesFilters}
+                validations
               />
             </div>
 
@@ -450,7 +754,7 @@ const ValidationViewer = React.memo(
           </Toolbar>
         )}
         <>
-          {!isEmpty(filteredData) ? (
+          {!isEmpty(fetchedData) ? (
             <DataTable
               autoLayout={true}
               first={firstRow}
@@ -470,7 +774,7 @@ const ValidationViewer = React.memo(
               sortField={sortField}
               sortOrder={sortOrder}
               totalRecords={totalFilteredRecords}
-              value={filteredData}>
+              value={fetchedData}>
               {columns}
             </DataTable>
           ) : (
