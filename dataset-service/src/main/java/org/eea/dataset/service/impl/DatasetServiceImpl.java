@@ -2800,9 +2800,15 @@ public class DatasetServiceImpl implements DatasetService {
             .findByRecord_TableValue_Id(tableAux.getId(), fieldValuePage);
         currentPage++;
 
+        LOG.info("Retrieved {} records from table {}", pagedFieldValues.size(),
+            record.getTableValue().getIdTableSchema());
+
         //make list of field vaues grouped by their record id
         dictionaryRecordFieldValues = pagedFieldValues.stream()
             .collect(Collectors.groupingBy(fv -> fv.getRecord().getId()));
+
+        LOG.info("Grouped {} records from table {}", dictionaryRecordFieldValues.size(),
+            record.getTableValue().getIdTableSchema());
       }
 
       recordAux.setTableValue(tableAux);
@@ -2811,12 +2817,13 @@ public class DatasetServiceImpl implements DatasetService {
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      List<FieldValue> fieldValues = dictionaryRecordFieldValues.get(record.getId());
+      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
       dictionaryRecordFieldValues
           .remove(record
               .getId());//remove the record from the map to avoid reprocessing and to know when to ask another page
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-
+      LOG.info("Remaining {} records from table {}", dictionaryRecordFieldValues.size(),
+          record.getTableValue().getIdTableSchema());
       createFieldValueForRecord(dictionaryOriginTargetObjectId, dictionaryIdFieldAttachment,
           recordAux, fieldValues,
           fieldValuesOnlyValues);
@@ -2958,6 +2965,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param recordValueId the record value id
    * @param fieldValues the field values
+   *
    * @throws EEAException the EEA exception
    */
   private void updateCascadePK(final String recordValueId, final List<FieldValue> fieldValues)
@@ -3000,6 +3008,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValues the field values
    * @param fieldSchemaDocument the field schema document
    * @param idListOfSinglePamsField the id list of single pams field
+   *
    * @throws EEAException the EEA exception
    */
   private void updatePKsValues(final List<FieldValue> fieldValues, Document fieldSchemaDocument,
@@ -3008,7 +3017,6 @@ public class DatasetServiceImpl implements DatasetService {
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
     FieldValue fieldValueInRecord = fieldValues.stream()
         .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
-
 
     // we find if exist for this pk the same value in pk(in another field) and throw a error if
     // exist
@@ -3050,6 +3058,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldValueVO the field value VO
    * @param fieldSchemaDocument the field schema document
    * @param datasetSchemaId the dataset schema id
+   *
    * @throws EEAException the EEA exception
    */
   private void fieldValueUpdatePK(final FieldVO fieldValueVO, final Document fieldSchemaDocument,
@@ -3065,7 +3074,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // we took fieldValue to take more information necesary to calculate pk
     FieldValue fieldValue = fieldRepository.findById(fieldValueVO.getId());
-
 
     // we bring the schema
     Document recordSchemaDocument = schemasRepository.findRecordSchema(datasetSchemaId,
