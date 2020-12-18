@@ -2792,6 +2792,8 @@ public class DatasetServiceImpl implements DatasetService {
 
       //get next page of fields if the current page is already processed
       if (dictionaryRecordFieldValues.isEmpty()) {
+        TenantResolver.setTenantName(
+            String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
         //creating a page of 1000 records, this means 1000*Number Of Fields in a Record
         Pageable fieldValuePage = PageRequest.of(currentPage,
             1000 * dictorionaryTableNumberOfFields.get(record.getTableValue().getIdTableSchema()));
