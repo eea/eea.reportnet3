@@ -193,8 +193,8 @@ const FieldEditor = ({
 
   const saveFieldOnBlurOnKeyDown = e => {
     const dateValue = isEmpty(e.target.value) ? '' : RecordUtils.formatDate(e.target.value, isNil(e.target.value));
-    const isCorrectDateFromatedValue = getIsCorrectDateFromatedValue(dateValue);
-    if (isCorrectDateFromatedValue || isEmpty(dateValue)) {
+    const isCorrectDateFormatedValue = getisCorrectDateFormatedValue(dateValue);
+    if (isCorrectDateFormatedValue || isEmpty(dateValue)) {
       onEditorValueChange(cells, dateValue, record);
       onEditorSubmitValue(cells, dateValue, record);
       if (e.key === 'Enter') {
@@ -216,7 +216,7 @@ const FieldEditor = ({
     }
   }, [isCalendarVisible]);
 
-  const getIsCorrectDateFromatedValue = date => {
+  const getisCorrectDateFormatedValue = date => {
     const year = date.split('-')[0];
     return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
   };
