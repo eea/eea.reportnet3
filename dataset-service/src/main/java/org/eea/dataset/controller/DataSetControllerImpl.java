@@ -635,6 +635,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param field the field
+   * @param updateCascadePK the update cascade PK
    */
   @Override
   @HystrixCommand
@@ -642,7 +643,8 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestBody FieldVO field) {
+      @RequestBody FieldVO field,
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
             EntityTypeEnum.FIELD))) {
@@ -651,7 +653,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
-      updateRecordHelper.executeFieldUpdateProcess(datasetId, field);
+      updateRecordHelper.executeFieldUpdateProcess(datasetId, field, updateCascadePK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating a field in the dataset {}. Message: {}", datasetId,
           e.getMessage());

@@ -1236,8 +1236,48 @@ public class DatasetServiceTest {
     fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    datasetService.updateField(1L, new FieldVO());
+    datasetService.updateField(1L, new FieldVO(), false);
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldPKTest() throws EEAException {
+    FieldVO fieldVO = new FieldVO();
+    fieldVO.setId("5cf0e9b3b793310e9ceca190");
+    FieldValue dataEnd = new FieldValue();
+    dataEnd.setValue("123");
+    dataEnd.setRecord(recordValue);
+
+
+    List<Document> fieldSchemas = new ArrayList<>();
+    Document fieldSchema = new Document();
+    List<ObjectId> referenced = new ArrayList<>();
+    PkCatalogueSchema pkCatalogueSchema = new PkCatalogueSchema();
+    fieldSchema.put(LiteralConstants.PK, true);
+    fieldSchema.put(LiteralConstants.ID, new ObjectId("5cf0e9b3b793310e9ceca190"));
+    fieldSchema.put("headerName", "ListOfSinglePams");
+    fieldSchemas.add(fieldSchema);
+    referenced.add(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    pkCatalogueSchema.setReferenced(referenced);
+    Document recordSchemaDocument = new Document();
+    recordSchemaDocument.put(LiteralConstants.FIELD_SCHEMAS, fieldSchemas);
+    recordValue.setFields(fieldList);
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+
+    when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(recordSchemaDocument);
+    when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(pkCatalogueSchema);
+    when(fieldRepository.findByIdFieldSchemaIn(Mockito.any())).thenReturn(fieldList);
+
+
+    when(fieldRepository.findById("5cf0e9b3b793310e9ceca190")).thenReturn(dataEnd);
+
+    when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    datasetService.updateField(1L, fieldVO, true);
+    Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1252,7 +1292,7 @@ public class DatasetServiceTest {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
     try {
-      datasetService.updateField(1L, new FieldVO());
+      datasetService.updateField(1L, new FieldVO(), false);
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.FIELD_READ_ONLY, e.getMessage());
       throw e;
@@ -1270,7 +1310,7 @@ public class DatasetServiceTest {
     FieldVO multiselectField = new FieldVO();
     multiselectField.setType(DataType.MULTISELECT_CODELIST);
     multiselectField.setValue("");
-    datasetService.updateField(1L, multiselectField);
+    datasetService.updateField(1L, multiselectField, false);
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
   }
 
@@ -1288,7 +1328,7 @@ public class DatasetServiceTest {
     fieldSchema.put(LiteralConstants.PK_HAS_MULTIPLE_VALUES, Boolean.TRUE);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    datasetService.updateField(1L, multiselectField);
+    datasetService.updateField(1L, multiselectField, false);
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
   }
 
@@ -1300,7 +1340,7 @@ public class DatasetServiceTest {
   @Test
   public void updateFieldException1Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
-    datasetService.updateField(null, new FieldVO());
+    datasetService.updateField(null, new FieldVO(), false);
   }
 
   /**
@@ -1311,7 +1351,7 @@ public class DatasetServiceTest {
   @Test
   public void updateFieldException2Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
-    datasetService.updateField(1L, null);
+    datasetService.updateField(1L, null, false);
   }
 
   /**
@@ -1532,10 +1572,8 @@ public class DatasetServiceTest {
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
-    Mockito
-        .when(fieldRepository.findByIdFieldSchemaAndConditionalWithTag(Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(Arrays.asList(fieldWithLabel));
+    Mockito.when(fieldRepository.findByIdFieldSchemaWithTag(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(fieldWithLabel));
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
     Assert.assertEquals(Arrays.asList(fieldVO),
         datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));

@@ -162,6 +162,25 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       @Param("conditionalValue") String conditionalValue,
       @Param("searchText") String searchValueText, Pageable pageable);
 
+
+  /**
+   * Find by id field schema with tag.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param labelId the label id
+   * @param searchValueText the search value text
+   * @param pageable the pageable
+   * @return the list
+   */
+  @Query(
+      value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
+          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
+          + "AND fv.value <> '' "
+          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
+  List<FieldValueWithLabelProjection> findByIdFieldSchemaWithTag(
+      @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
+      @Param("searchText") String searchValueText, Pageable pageable);
+
   /**
    * Find all cascade list of single pams.
    *

@@ -1184,7 +1184,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws RecordStoreAccessException {
     String indexQuery = " CREATE UNIQUE INDEX " + "\"" + tableName + "_index" + "\""
         + " ON dataset_" + datasetId + "." + "\"" + tableName + "\"" + " (record_id) ";
-    executeQueryViewCommands(indexQuery);
+    executeQueryViewCommands(indexQuery.toLowerCase());
   }
 
 

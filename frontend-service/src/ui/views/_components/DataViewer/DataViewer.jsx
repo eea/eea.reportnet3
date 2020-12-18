@@ -170,6 +170,8 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let divRef = useRef();
 
+    const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
     const { menu } = useContextMenu(
       resources,
@@ -323,7 +325,7 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
-      if (records.mapGeoJson !== '' && TextUtils.areEquals(records.geometryType, 'POINT')) {
+      if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT')) {
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
@@ -490,10 +492,9 @@ const DataViewer = withRouter(
             if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
               field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
             } else {
-              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
-                .split(',')
-                .map(item => item.trim())
-                .join(',');
+              field.fieldData[field.fieldData.fieldSchemaId] = removeCommaSeparatedWhiteSpaces(
+                field.fieldData[field.fieldData.fieldSchemaId]
+              );
             }
           }
         }
@@ -651,7 +652,7 @@ const DataViewer = withRouter(
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
         if (!isGeometry) {
-          if (!TextUtils.areEquals(type, 'TEXTAREA')) {
+          if (!areEquals(type, 'TEXTAREA')) {
             datatableRef.current.closeEditingCell();
             onEditorSubmitValue(props, event.target.value, record);
           }
@@ -969,17 +970,15 @@ const DataViewer = withRouter(
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
-          label={
-            TextUtils.areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']
-          }
+          label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           icon={'check'}
           onClick={
-            TextUtils.areEquals(records.geometryType, 'POINT')
+            areEquals(records.geometryType, 'POINT')
               ? () => onSavePoint(records.newPoint)
               : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
           }
         />
-        {TextUtils.areEquals(records.geometryType, 'POINT') && (
+        {areEquals(records.geometryType, 'POINT') && (
           <Button
             className="p-button-secondary"
             icon="cancel"
