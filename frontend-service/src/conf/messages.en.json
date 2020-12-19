@@ -964,6 +964,11 @@
     "implementationperiodcomment": "Comment on Implementation Period",
     "implementationperiodfinish": "Finish",
     "implementationperiodstart": "Start",
-    "ProjectionsScenario": "Type"
+    "ProjectionsScenario": "Type",
+    "type": "Type",
+    "sectorAffected": "Sector affected",
+    "otherSectors": "Other sectors",
+    "objectives": "Objectives",
+    "otherObjectives": "Other objectives"
   }
 }

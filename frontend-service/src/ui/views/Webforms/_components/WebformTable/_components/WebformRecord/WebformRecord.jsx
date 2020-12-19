@@ -126,6 +126,18 @@ export const WebformRecord = ({
     }
   };
 
+  const checkCalculatedFieldVisibility = el => {
+    if (isNil(isGroup)) {
+      return false;
+    } else {
+      if (isGroup() && el.calculatedWhenGroup && !el.hideWhenCalculated) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
   const checkCalculatedTableVisibility = el => {
     if (isNil(isGroup)) {
       return false;
@@ -206,10 +218,8 @@ export const WebformRecord = ({
               )}
               <div className={styles.fieldWrapper}>
                 <div className={styles.template}>
-                  {!isNil(isGroup) && element.calculatedWhenGroup && isGroup() ? (
-                    !element.hideWhenCalculated ? (
-                      calculateSingle(element)
-                    ) : null
+                  {checkCalculatedFieldVisibility(element) ? (
+                    calculateSingle(element)
                   ) : (
                     <WebformField
                       columnsSchema={columnsSchema}

@@ -42,7 +42,7 @@ export const WebformView = ({
 
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
-  console.log({ pamsRecords });
+
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isLoading: false,
     isVisible: getWebformTabs(
@@ -83,7 +83,6 @@ export const WebformView = ({
   };
 
   const calculateSingle = field => {
-    if (field.type === 'TABLE') console.log({ field });
     switch (field.name.toLowerCase()) {
       case 'ghgaffected':
       case 'sectoraffected':
@@ -100,9 +99,6 @@ export const WebformView = ({
         );
       case 'ispolicymeasureenvisaged':
         return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
-      // case 'implementationperiodcomment':
-      // case 'implementationperiodfinish':
-      // case 'implementationperiodstart':
       case 'statusimplementation':
         return tableFieldRender(field.name, [
           'implementationperiodstart',
@@ -111,6 +107,10 @@ export const WebformView = ({
         ]);
       case 'projectionsscenario':
         return tableFieldRender(field.name, []);
+      case 'entities':
+        return combinationTableRender('entities');
+      case 'sectorobjectives':
+        return combinationTableRender('sectors');
       default:
         break;
     }
@@ -148,6 +148,18 @@ export const WebformView = ({
     });
 
     return uniq(combinatedValues);
+  };
+
+  const combinationTableRender = tableName => {
+    const combinatedTableValues = [];
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        combinatedTableValues.push(...singleRecordValue);
+      }
+    });
+    return renderTable(combinatedTableValues);
   };
 
   const isGroup = record => {
@@ -190,9 +202,10 @@ export const WebformView = ({
         combinatedTableValues.push(columnFieldsValues);
       }
     });
-    console.log({ combinatedTableValues });
-    return <DataTable value={combinatedTableValues}>{renderColumns(combinatedTableValues)}</DataTable>;
+    return renderTable(combinatedTableValues);
   };
+
+  const renderTable = fields => <DataTable value={fields}>{renderColumns(fields)}</DataTable>;
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {

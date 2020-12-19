@@ -39,7 +39,7 @@ const parseListOfSinglePams = (columns = [], records = []) => {
       }
     })
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-  console.log({ options });
+
   return columns.map(column => {
     if (column.header === 'ListOfSinglePams') {
       column.type = 'MULTISELECT_CODELIST';
