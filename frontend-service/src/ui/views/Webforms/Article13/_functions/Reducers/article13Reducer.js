@@ -50,6 +50,32 @@ export const article13Reducer = (state, { type, payload }) => {
 
     case 'HAS_ERRORS':
       return { ...state, hasErrors: payload.value };
+    case 'UPDATE_PAMS_RECORDS':
+      const inmTableList = { ...state.tableList };
+      Object.values(inmTableList).forEach(element => {
+        element.forEach(pam => {
+          if (pam.recordId === payload.recordId) {
+            pam.id = payload.pamsId;
+          }
+        });
+      });
+
+      const inmPamsRecords = [...state.pamsRecords];
+      inmPamsRecords.forEach(pamRecord => {
+        if (pamRecord.recordId === payload.recordId) {
+          pamRecord.fields.forEach(field => {
+            if (field.fieldId === payload.fieldId) {
+              field.value = payload.pamsId;
+            }
+          });
+        }
+      });
+      console.log(inmPamsRecords);
+
+      const inmSelectedTable = { ...state.selectedTable };
+      inmSelectedTable.pamsId = payload.pamsId;
+
+      return { ...state, pamsRecords: inmPamsRecords, tableList: inmTableList, selectedTable: inmSelectedTable };
 
     default:
       return state;

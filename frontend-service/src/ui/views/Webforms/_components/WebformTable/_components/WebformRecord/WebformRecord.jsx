@@ -39,6 +39,7 @@ export const WebformRecord = ({
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
+  onUpdatePamsId,
   record,
   tableId,
   tableName,
@@ -237,6 +238,7 @@ export const WebformRecord = ({
                       isConditionalChanged={isConditionalChanged}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
+                      onUpdatePamsId={onUpdatePamsId}
                       record={record}
                     />
                   )}
@@ -324,6 +326,7 @@ export const WebformRecord = ({
                         onAddMultipleWebform={onAddMultipleWebform}
                         onRefresh={onRefresh}
                         onTabChange={onTabChange}
+                        onUpdatePamsId={onUpdatePamsId}
                         newRecord={webformRecordState.newRecord}
                         record={record}
                         tableId={tableId}

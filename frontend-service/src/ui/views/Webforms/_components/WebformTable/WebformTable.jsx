@@ -31,6 +31,7 @@ export const WebformTable = ({
   isRefresh,
   isReporting,
   onTabChange,
+  onUpdatePamsId,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
   setIsLoading = () => {},
   webform,
@@ -224,6 +225,7 @@ export const WebformTable = ({
       onAddMultipleWebform={onAddMultipleWebform}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
+      onUpdatePamsId={onUpdatePamsId}
       record={record}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}

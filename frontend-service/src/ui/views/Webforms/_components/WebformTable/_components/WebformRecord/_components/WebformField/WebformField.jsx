@@ -38,6 +38,7 @@ export const WebformField = ({
   newRecord,
   onFillField,
   onSaveField,
+  onUpdatePamsId,
   record
 }) => {
   const resources = useContext(ResourcesContext);
@@ -149,14 +150,23 @@ export const WebformField = ({
   };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false) => {
-    console.trace();
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
     try {
-      DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue, updateInCascade);
+      await DatasetService.updateFieldById(
+        datasetId,
+        option,
+        field.fieldId,
+        field.fieldType,
+        parsedValue,
+        updateInCascade
+      );
+      if (!isNil(onUpdatePamsId) && updateInCascade) {
+        onUpdatePamsId(field.recordId, field.value, field.fieldId);
+      }
     } catch (error) {
       console.error('error', error);
     }
