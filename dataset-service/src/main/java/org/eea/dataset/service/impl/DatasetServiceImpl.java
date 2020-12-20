@@ -2764,7 +2764,14 @@ public class DatasetServiceImpl implements DatasetService {
     Map<String, List<FieldValue>> dictionaryRecordFieldValues = new HashMap<>();
 
     for (TableSchema desingTable : listOfTablesFiltered) {
+      //get target table by translating origing table schema into target table schema and then query to target database
+      TenantResolver.setTenantName(
+          String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
+      TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
+          .get(desingTable.getIdTableSchema()));
 
+      TenantResolver.setTenantName(
+          String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
       Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
       TableValue orignTable = this.tableRepository
           .findByIdTableSchema(desingTable.getIdTableSchema().toString());
@@ -2776,9 +2783,6 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
 
-      //get target table by translating origing table schema into target table schema and then query to target database
-      TableValue tableAux = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
-          .get(desingTable.getIdTableSchema()));
       //run through the origin table, getting its records and field and translating them into the new schema
       while ((pagedFieldValues = fieldRepository
           .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
@@ -2801,7 +2805,7 @@ public class DatasetServiceImpl implements DatasetService {
             recordValue.setId(null);
             recordValue.setDatasetPartitionId(datasetPartitionId);
             recordValue.setIdRecordSchema(targetIdRecordSchema);
-            recordValue.setTableValue(tableAux);
+            recordValue.setTableValue(targetTable);
 
           }
           auxField.setRecord(recordValue);
