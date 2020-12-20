@@ -40,6 +40,7 @@ export const WebformField = ({
   onSaveField,
   onUpdateSinglesList,
   onUpdatePamsId,
+  pamsRecords,
   record
 }) => {
   const resources = useContext(ResourcesContext);
@@ -198,6 +199,16 @@ export const WebformField = ({
     .flat()
     .join(', ');
 
+  const renderSinglePamsTemplate = option => {
+    const pams = pamsRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
+
+    if (!isNil(pams)) {
+      return `#${option.label} - ${pams.elements.find(element => TextUtils.areEquals(element.name, 'Title')).value}`;
+    } else {
+      return option.label;
+    }
+  };
+
   const renderTemplate = (field, option, type) => {
     switch (type) {
       case 'DATE':
@@ -276,6 +287,7 @@ export const WebformField = ({
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
+            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') && renderSinglePamsTemplate}
             onChange={event => {
               onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);

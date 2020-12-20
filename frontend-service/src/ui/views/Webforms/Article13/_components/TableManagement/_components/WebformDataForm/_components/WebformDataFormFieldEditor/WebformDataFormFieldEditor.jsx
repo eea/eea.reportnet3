@@ -31,6 +31,8 @@ const WebformDataFormFieldEditor = ({
     }
   }, [inputRef.current]);
 
+  const getId = item => item.substring(item.indexOf('#') + 1, item.indexOf(' '));
+
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
@@ -83,15 +85,20 @@ const WebformDataFormFieldEditor = ({
     if (TextUtils.areEquals(field, 'listofsinglepams') && hasSingle && !isEmpty(fieldValue)) {
       onChangeForm(field, []);
     }
+
+    const options = column.codelistItems.map(codelistItem => ({
+      itemType: codelistItem,
+      value: TextUtils.areEquals(field, 'listofsinglepams') ? getId(codelistItem) : codelistItem
+    }));
     return (
       <MultiSelect
         appendTo={document.body}
         disabled={TextUtils.areEquals(field, 'listofsinglepams') && hasSingle}
         onChange={e => onChangeForm(field, e.value)}
         optionLabel="itemType"
-        options={column.codelistItems.sort().map(codelistItem => ({ itemType: codelistItem, value: codelistItem }))}
+        options={options}
         style={{ height: '34px' }}
-        value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        value={RecordUtils.getMultiselectValues(options, fieldValue)}
       />
     );
   };

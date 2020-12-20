@@ -70,7 +70,6 @@ export const article13Reducer = (state, { type, payload }) => {
           });
         }
       });
-      console.log(inmPamsRecords);
 
       const inmSelectedTable = { ...state.selectedTable };
       inmSelectedTable.pamsId = payload.pamsId;

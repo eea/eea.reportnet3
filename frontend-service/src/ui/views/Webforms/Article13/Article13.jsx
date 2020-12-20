@@ -217,10 +217,8 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     }
   };
 
-  const onUpdatePamsId = (recordId, pamsId, fieldId) => {
-    console.log({ recordId, tableList, pamsId, fieldId });
+  const onUpdatePamsId = (recordId, pamsId, fieldId) =>
     article13Dispatch({ type: 'UPDATE_PAMS_RECORDS', payload: { fieldId, pamsId, recordId } });
-  };
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];

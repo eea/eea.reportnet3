@@ -163,7 +163,7 @@ export const WebformView = ({
     return renderTable(combinatedTableValues);
   };
 
-  const isGroup = record => {
+  const isGroup = () => {
     const filteredField = pamsRecords
       .find(pamRecord => pamRecord.recordId === selectedTable.recordId)
       .elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
@@ -267,6 +267,7 @@ export const WebformView = ({
         onTabChange={isVisible}
         onUpdateSinglesList={onUpdateSinglesList}
         onUpdatePamsId={onUpdatePamsId}
+        pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
         webform={visibleContent}

@@ -41,6 +41,7 @@ export const WebformRecord = ({
   onTabChange,
   onUpdateSinglesList,
   onUpdatePamsId,
+  pamsRecords,
   record,
   tableId,
   tableName,
@@ -241,6 +242,7 @@ export const WebformRecord = ({
                       onSaveField={onSaveField}
                       onUpdateSinglesList={onUpdateSinglesList}
                       onUpdatePamsId={onUpdatePamsId}
+                      pamsRecords={pamsRecords}
                       record={record}
                     />
                   )}
@@ -325,12 +327,13 @@ export const WebformRecord = ({
                         isGroup={isGroup}
                         key={i}
                         multipleRecords={element.multipleRecords}
+                        newRecord={webformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
                         onRefresh={onRefresh}
                         onTabChange={onTabChange}
                         onUpdateSinglesList={onUpdateSinglesList}
                         onUpdatePamsId={onUpdatePamsId}
-                        newRecord={webformRecordState.newRecord}
+                        pamsRecords={pamsRecords}
                         record={record}
                         tableId={tableId}
                         tableName={element.title}
