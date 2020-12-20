@@ -38,6 +38,7 @@ export const WebformField = ({
   newRecord,
   onFillField,
   onSaveField,
+  onUpdateSinglesList,
   onUpdatePamsId,
   record
 }) => {
@@ -166,6 +167,9 @@ export const WebformField = ({
       );
       if (!isNil(onUpdatePamsId) && updateInCascade) {
         onUpdatePamsId(field.recordId, field.value, field.fieldId);
+      }
+      if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
+        onUpdateSinglesList();
       }
     } catch (error) {
       console.error('error', error);

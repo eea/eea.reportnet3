@@ -90,6 +90,7 @@
               "type": "FIELD",
               "name": "ListOfSinglePams",
               "title": "Which policies or measures does it cover?",
+              "updatesSingleListData": true,
               "dependency": {
                 "field": "IsGroup",
                 "value": ["Group"]

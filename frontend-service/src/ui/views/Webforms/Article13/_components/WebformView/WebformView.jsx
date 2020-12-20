@@ -217,6 +217,10 @@ export const WebformView = ({
     webformViewDispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
+  const onUpdateSinglesList = () => {
+    getSingleData();
+  };
+
   const renderWebFormHeaders = () => {
     const filteredTabs = data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
@@ -261,6 +265,7 @@ export const WebformView = ({
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
+        onUpdateSinglesList={onUpdateSinglesList}
         onUpdatePamsId={onUpdatePamsId}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
