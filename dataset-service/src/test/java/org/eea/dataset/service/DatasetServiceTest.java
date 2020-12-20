@@ -110,7 +110,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
@@ -2314,6 +2316,8 @@ public class DatasetServiceTest {
   public void testCopyData() {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
     dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    dictionaryOriginTargetObjectId
+        .put("0A07FD45F1CD7965A2B0F13E57948A12", "0A07FD45F1CD7965A2B0F13E57948A12");
     Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
     dictionaryOriginTargetDatasetsId.put(1L, 2L);
 
@@ -2321,12 +2325,12 @@ public class DatasetServiceTest {
     designDataset.setId(2L);
     designDataset.setDatasetSchema("5ce524fad31fc52540abae73");
     DataSetSchema schema = new DataSetSchema();
-    TableSchema desingTableSchema = new TableSchema();
+    TableSchema designTableSchema = new TableSchema();
 
-    desingTableSchema.setToPrefill(Boolean.TRUE);
-    desingTableSchema.setIdTableSchema(new ObjectId());
+    designTableSchema.setToPrefill(Boolean.TRUE);
+    designTableSchema.setIdTableSchema(new ObjectId());
     RecordSchema recordSchema = new RecordSchema();
-    recordSchema.setIdTableSchema(desingTableSchema.getIdTableSchema());
+    recordSchema.setIdTableSchema(designTableSchema.getIdTableSchema());
     recordSchema.setIdRecordSchema(new ObjectId());
     List<FieldSchema> fieldSchemas = new ArrayList<>();
     FieldSchema fieldSchema = new FieldSchema();
@@ -2334,22 +2338,26 @@ public class DatasetServiceTest {
     fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
     fieldSchemas.add(fieldSchema);
     recordSchema.setFieldSchema(fieldSchemas);
-    desingTableSchema.setRecordSchema(recordSchema);
+    designTableSchema.setRecordSchema(recordSchema);
     List<TableSchema> desingTableSchemas = new ArrayList<>();
-    desingTableSchemas.add(desingTableSchema);
+    desingTableSchemas.add(designTableSchema);
     schema.setTableSchemas(desingTableSchemas);
+
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(designDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(designDataset));
+
     List<RecordValue> recordDesignValues = new ArrayList<>();
     RecordValue record = new RecordValue();
     TableValue table = new TableValue();
     table.setId(1L);
     record.setTableValue(table);
     record.setId("record1");
+    record.setIdRecordSchema("0A07FD45F1CD7965A2B0F13E57948A12");
     recordDesignValues.add(record);
     table.setIdTableSchema(recordSchema.getIdTableSchema().toString());
     when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
+    when(this.tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
     field.setType(DataType.ATTACHMENT);
@@ -2358,7 +2366,19 @@ public class DatasetServiceTest {
     fieldValues.add(field);
 
     when(fieldRepository.findByRecord_TableValue_Id(Mockito.anyLong(), Mockito.any(Pageable.class)))
-        .thenReturn(fieldValues);
+        .then(new Answer<List<FieldValue>>() {
+
+          @Override
+          public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
+            List<FieldValue> result;
+            if (((Pageable) invocation.getArgument(1)).getPageNumber() == 0) {
+              result = fieldValues;
+            } else {
+              result = new ArrayList<>();
+            }
+            return result;
+          }
+        });
     AttachmentValue attachment = new AttachmentValue();
     attachment.setFieldValue(field);
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -2741,16 +2742,6 @@ public class DatasetServiceImpl implements DatasetService {
 
     TenantResolver.setTenantName(
         String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-    List<RecordValue> recordDesignValues = new ArrayList<>();
-
-    Map<String, Integer> dictorionaryTableNumberOfFields = new HashMap<>();
-    for (TableSchema desingTable : listOfTablesFiltered) {
-      recordDesignValues.addAll(
-          recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
-      dictorionaryTableNumberOfFields.put(desingTable.getIdTableSchema().toString(),
-          desingTable.getRecordSchema().getFieldSchema().size());
-    }
-    List<RecordValue> recordDesignValuesList = new ArrayList<>();
 
     // attachment values
     Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
@@ -2767,76 +2758,76 @@ public class DatasetServiceImpl implements DatasetService {
 
     Optional<PartitionDataSetMetabase> datasetPartition =
         partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
-    Long datasetPartitionId = null;
-    if (null != datasetPartition.orElse(null)) {
-      datasetPartitionId = datasetPartition.get().getId();
-    }
+    final Long datasetPartitionId =
+        datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
 
-    Map<String, Long> dictionaryTableId = new HashMap<>();
     Map<String, List<FieldValue>> dictionaryRecordFieldValues = new HashMap<>();
-    Integer currentPage = 0;
-    for (RecordValue record : recordDesignValues) {
 
-      RecordValue recordAux = new RecordValue();
-      TableValue tableAux = record.getTableValue();
+    for (TableSchema desingTable : listOfTablesFiltered) {
 
-      if (dictionaryTableId.containsKey(tableAux.getIdTableSchema())) {
-        tableAux.setId(dictionaryTableId.get(tableAux.getIdTableSchema()));
-      } else {
+      Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
+      TableValue orignTable = this.tableRepository
+          .findByIdTableSchema(desingTable.getIdTableSchema().toString());
+
+      //creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
+      Integer currentPage = 0;
+      Pageable fieldValuePage = PageRequest.of(currentPage,
+          1000 * numberOfFieldsInRecord);
+
+      List<FieldValue> pagedFieldValues;
+
+      //get target table by translating origing table schema into target table schema and then query to target database
+      TableValue tableAux = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
+          .get(desingTable.getIdTableSchema()));
+      //run through the origin table, getting its records and field and translating them into the new schema
+      while ((pagedFieldValues = fieldRepository
+          .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
         TenantResolver
             .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-        tableAux.setId(tableRepository.findIdByIdTableSchema(
-            dictionaryOriginTargetObjectId.get(record.getTableValue().getIdTableSchema())));
-        dictionaryTableId.put(tableAux.getIdTableSchema(), tableAux.getId());
-      }
 
-      //get next page of fields if the current page is already processed
-      if (dictionaryRecordFieldValues.isEmpty()) {
-        TenantResolver.setTenantName(
-            String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-        //creating a page of 1000 records, this means 1000*Number Of Fields in a Record
-        Pageable fieldValuePage = PageRequest.of(currentPage,
-            1000 * dictorionaryTableNumberOfFields.get(record.getTableValue().getIdTableSchema()));
+        //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
+        dictionaryRecordFieldValues.putAll(pagedFieldValues.stream().map(field -> {
+          FieldValue auxField = new FieldValue();
+          auxField.setValue(field.getValue());
+          auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+          auxField.setType(field.getType());
 
-        List<FieldValue> pagedFieldValues = fieldRepository
-            .findByRecord_TableValue_Id(tableAux.getId(), fieldValuePage);
+          //transform the grouping record in the target one. Do it only once, meaning, recordValue.id is not null
+          RecordValue recordValue = field.getRecord();
+          if (StringUtils.isNotEmpty(recordValue.getId())) {
+            String targetIdRecordSchema = dictionaryOriginTargetObjectId
+                .get(field.getRecord().getIdRecordSchema());
+
+            recordValue.setId(null);
+            recordValue.setDatasetPartitionId(datasetPartitionId);
+            recordValue.setIdRecordSchema(targetIdRecordSchema);
+            recordValue.setTableValue(tableAux);
+
+          }
+          auxField.setRecord(recordValue);
+          if (DataType.ATTACHMENT.equals(field.getType())) {
+            if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
+              dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
+              dictionaryIdFieldAttachment.get(field.getId()).setId(null);
+            }
+
+          }
+          auxField.setGeometry(field.getGeometry());
+          return auxField;
+        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getIdRecordSchema())));
         currentPage++;
-
-        LOG.info("Retrieved {} records from table {}", pagedFieldValues.size(),
-            record.getTableValue().getIdTableSchema());
-
-        //make list of field vaues grouped by their record id
-        dictionaryRecordFieldValues = pagedFieldValues.stream()
-            .collect(Collectors.groupingBy(fv -> fv.getRecord().getId()));
-
-//        LOG.info("Grouped {} records from table {}", dictionaryRecordFieldValues.size(),
-//            record.getTableValue().getIdTableSchema());
+        fieldValuePage = PageRequest.of(currentPage,
+            1000 * numberOfFieldsInRecord);
       }
 
-      recordAux.setTableValue(tableAux);
-      recordAux.setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
-      recordAux.setDatasetPartitionId(datasetPartitionId);
-
-      TenantResolver.setTenantName(
-          String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      List<FieldValue> fieldValues =
-          dictionaryRecordFieldValues.containsKey(record.getId()) ? dictionaryRecordFieldValues
-              .get(record.getId()) : new ArrayList<>();
-
-      dictionaryRecordFieldValues
-          .remove(record
-              .getId());//remove the record from the map to avoid reprocessing and to know when to ask another page
-      List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-//      LOG.info("Remaining {} records from table {}", dictionaryRecordFieldValues.size(),
-//          record.getTableValue().getIdTableSchema());
-      createFieldValueForRecord(dictionaryOriginTargetObjectId, dictionaryIdFieldAttachment,
-          recordAux, fieldValues,
-          fieldValuesOnlyValues);
-      recordAux.setFields(fieldValuesOnlyValues);
-      recordDesignValuesList.add(recordAux);
     }
+
     attachments.addAll(dictionaryIdFieldAttachment.values());
-    return recordDesignValuesList;
+    return dictionaryRecordFieldValues.entrySet().stream().map(entry -> {
+      RecordValue recordValue = entry.getValue().get(0).getRecord();
+      recordValue.setFields(entry.getValue());
+      return recordValue;
+    }).collect(Collectors.toList());
   }
 
 
