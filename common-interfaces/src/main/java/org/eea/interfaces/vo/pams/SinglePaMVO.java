@@ -13,6 +13,9 @@ public class SinglePaMVO {
   /** The id. */
   private String id;
 
+  /** The paM name. */
+  private String paMName;
+
   /** The is policy measure envisaged. */
   private String isPolicyMeasureEnvisaged;
 
@@ -48,5 +51,6 @@ public class SinglePaMVO {
 
   /** The ghg affected. */
   private List<String> ghgAffected;
+
 
 }

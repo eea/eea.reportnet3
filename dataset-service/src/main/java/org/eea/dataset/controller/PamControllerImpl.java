@@ -23,7 +23,7 @@ public class PamControllerImpl implements PamController {
 
   /** The pa M service. */
   @Autowired
-  PaMService paMService;
+  private PaMService paMService;
 
   /**
    * Gets the list single paM.

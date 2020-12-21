@@ -38,11 +38,11 @@ public class PaMServiceImpl implements PaMService {
 
   /** The file common utils. */
   @Autowired
-  FileCommonUtils fileCommonUtils;
+  private FileCommonUtils fileCommonUtils;
 
   /** The dataset service. */
   @Autowired
-  DatasetService datasetService;
+  private DatasetService datasetService;
 
   /**
    * Gets the list single paM.
@@ -76,6 +76,7 @@ public class PaMServiceImpl implements PaMService {
       for (int i = 0; i < singlePams.length; i++) {
         SinglePaMVO singlePaMVO = new SinglePaMVO();
         singlePaMVO.setId(singlePams[i]);
+        singlePaMVO.setPaMName("name");
         // set attributes of table1
         setAttributesTable1(schemaIds, singlePams[i], singlePaMVO);
         // set attributes entities
@@ -513,8 +514,7 @@ public class PaMServiceImpl implements PaMService {
    * @return the list
    */
   private List<FieldValue> hasRecordsAndFields(FieldValue fieldValue) {
-    return fieldValue.getRecord() != null || fieldValue.getRecord().getFields() != null
-        ? fieldValue.getRecord().getFields()
-        : null;
+    return fieldValue != null && fieldValue.getRecord() != null
+        && fieldValue.getRecord().getFields() != null ? fieldValue.getRecord().getFields() : null;
   }
 }
