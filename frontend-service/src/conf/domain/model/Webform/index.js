@@ -1,2 +1,2 @@
-import WebformConfig from './Webform.config.json';
+import WebformConfig from './Webform.web.config.json';
 export { WebformConfig };

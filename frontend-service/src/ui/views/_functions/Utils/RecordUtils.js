@@ -244,7 +244,7 @@ const getMultiselectValues = (multiselectItemsOptions, value) => {
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)
-    );
+    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   }
 };
 
