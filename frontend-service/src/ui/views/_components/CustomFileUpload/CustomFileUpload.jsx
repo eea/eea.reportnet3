@@ -329,7 +329,7 @@ export const CustomFileUpload = ({
           ref={fileInput}
           type="file"
         />
-        <label for="file" className={className}>
+        <label htmlFor="file" className={className}>
           <span className="pi pi-fw pi-plus" />
           <span>{chooseLabel}</span>
         </label>
