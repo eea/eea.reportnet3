@@ -2792,12 +2792,10 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
 
-      //run through the origin table, getting its records and field and translating them into the new schema
+      //run through the origin table, getting its records and fields and translating them into the new schema
       while ((pagedFieldValues = fieldRepository
           .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
-        TenantResolver
-            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-
+        
         //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
         dictionaryRecordFieldValues.putAll(pagedFieldValues.stream().map(field -> {
           FieldValue auxField = new FieldValue();
