@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -2759,7 +2760,7 @@ public class DatasetServiceImpl implements DatasetService {
     final Long datasetPartitionId =
         datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
 
-    Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
+    Map<String, RecordValue> mapTargetRecordValues = new LinkedHashMap<>();
     for (TableSchema desingTable : listOfTablesFiltered) {
       // Get number of fields per record. Doing it on origin table schema as origin and target has
       // the same structure
@@ -2806,10 +2807,11 @@ public class DatasetServiceImpl implements DatasetService {
           auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
           auxField.setType(field.getType());
 
-          // transform the grouping record in the target one. Do it only once
-          String targetIdRecordSchema =
-              dictionaryOriginTargetObjectId.get(field.getRecord().getIdRecordSchema());
-          if (!mapTargetRecordValues.containsKey(field.getRecord().getId())) {
+          //transform the grouping record in the target one. Do it only once
+          String targetIdRecordSchema = dictionaryOriginTargetObjectId
+              .get(field.getRecord().getIdRecordSchema());
+          String originRecordId = field.getRecord().getId();
+          if (!mapTargetRecordValues.containsKey(originRecordId)) {
 
             RecordValue targetRecordValue = new RecordValue();
 
@@ -2817,12 +2819,11 @@ public class DatasetServiceImpl implements DatasetService {
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
             targetRecordValue.setFields(new ArrayList<>());
-            // using temporary recordId as grouping criteria, then it will be removed before giving
-            // back
-            mapTargetRecordValues.put(field.getRecord().getId(), targetRecordValue);
+            //using temporary recordId as grouping criteria, then it will be removed before giving back
+            mapTargetRecordValues.put(originRecordId, targetRecordValue);
           }
 
-          auxField.setRecord(mapTargetRecordValues.get(field.getRecord().getId()));
+          auxField.setRecord(mapTargetRecordValues.get(originRecordId));
 
           if (DataType.ATTACHMENT.equals(field.getType())) {
             if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
@@ -2832,7 +2833,7 @@ public class DatasetServiceImpl implements DatasetService {
 
           }
           auxField.setGeometry(field.getGeometry());
-          mapTargetRecordValues.get(field.getRecord().getId()).getFields().add(auxField);
+          mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
         });
         currentPage++;
         fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
