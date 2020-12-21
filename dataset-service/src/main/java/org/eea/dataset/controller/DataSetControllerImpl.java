@@ -12,6 +12,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -91,6 +92,10 @@ public class DataSetControllerImpl implements DatasetController {
   /** The dataset schema service. */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
+
+  /** The file treatment helper. */
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /** The lock service. */
   @Deprecated
@@ -194,7 +199,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace) {
     try {
-      datasetService.importFileData(datasetId, tableSchemaId, file, replace);
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
     } catch (EEAException e) {
       LOG.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
           tableSchemaId, file.getName());

@@ -109,6 +109,19 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+  public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
+      boolean replace) throws EEAException {
+    DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+    if (null == schema) {
+      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
+          tableSchemaId, file.getName());
+      throw new EEAException(
+          "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
+    }
+    fileDataImportManagement(datasetId, tableSchemaId, schema, file, replace);
+  }
+
   /**
    * File data import management.
    *
@@ -119,7 +132,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param delete the delete
    * @throws EEAException the EEA exception
    */
-  public void fileDataImportManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void fileDataImportManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
       MultipartFile multipartFile, boolean delete) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
@@ -211,7 +224,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param integrationVO the integration VO
    */
-  public void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       File file, IntegrationVO integrationVO) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     if (null != integrationVO) {
