@@ -2764,18 +2764,27 @@ public class DatasetServiceImpl implements DatasetService {
     Map<String, List<FieldValue>> dictionaryRecordFieldValues = new HashMap<>();
 
     for (TableSchema desingTable : listOfTablesFiltered) {
+      //Get number of fields per record. Doing it on origin table schema as origin and target has the same structure
+      Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
+
       //get target table by translating origing table schema into target table schema and then query to target database
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
       TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
           .get(desingTable.getIdTableSchema()));
 
+      LOG.info("Target table recovered {}, mapped from schema {} to {}", targetTable,
+          desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
+              .get(desingTable.getIdTableSchema()));
+
+      //Get first page of origin records
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
       TableValue orignTable = this.tableRepository
           .findByIdTableSchema(desingTable.getIdTableSchema().toString());
-
+      LOG.info("Origin table recovered {}, mapped from schema {} to {}", orignTable,
+          orignTable.getIdTableSchema(), dictionaryOriginTargetObjectId
+              .get(orignTable.getIdTableSchema()));
       //creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
       Integer currentPage = 0;
       Pageable fieldValuePage = PageRequest.of(currentPage,
