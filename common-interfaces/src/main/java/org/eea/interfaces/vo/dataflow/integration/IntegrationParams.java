@@ -1,4 +1,4 @@
-package org.eea.dataflow.integration.utils;
+package org.eea.interfaces.vo.dataflow.integration;
 
 /**
  * The Class IntegrationParams.
