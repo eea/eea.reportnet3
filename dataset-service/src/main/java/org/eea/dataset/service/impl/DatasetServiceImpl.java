@@ -2773,7 +2773,8 @@ public class DatasetServiceImpl implements DatasetService {
       TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
           .get(desingTable.getIdTableSchema().toString()));
 
-      LOG.info("Target table recovered {}, mapped from schema {} to {}", targetTable,
+      LOG.info("Target table recovered {}, mapped from schema {} to {}",
+          targetTable.getIdTableSchema(),
           desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
               .get(desingTable.getIdTableSchema().toString()));
 
