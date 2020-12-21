@@ -2356,6 +2356,9 @@ public class DatasetServiceTest {
     record.setIdRecordSchema("0A07FD45F1CD7965A2B0F13E57948A12");
     recordDesignValues.add(record);
     table.setIdTableSchema(recordSchema.getIdTableSchema().toString());
+    DatasetValue datasetValue = new DatasetValue();
+    datasetValue.setId(1l);
+    table.setDatasetId(datasetValue);
     when(this.tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
