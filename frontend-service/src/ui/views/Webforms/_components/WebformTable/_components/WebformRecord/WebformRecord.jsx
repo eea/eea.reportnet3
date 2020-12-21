@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformRecord.module.scss';
 
@@ -249,7 +250,9 @@ export const WebformRecord = ({
                   {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
                 {element.validations &&
-                  element.validations.map((validation, index) => (
+                  uniqBy(element.validations, element => {
+                    return [element.message, element.errorLevel].join();
+                  }).map((validation, index) => (
                     <IconTooltip
                       className={'webform-validationErrors'}
                       key={index}
