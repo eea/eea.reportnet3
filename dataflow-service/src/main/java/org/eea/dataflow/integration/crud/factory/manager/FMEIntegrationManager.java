@@ -2,9 +2,9 @@ package org.eea.dataflow.integration.crud.factory.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
-import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.domain.InternalOperationParameters;
@@ -14,6 +14,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,9 +112,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       for (InternalOperationParameters internalParameter : internalParameterAux) {
         if (internalParameter.getParameter().equals(IntegrationParams.DATASET_SCHEMA_ID)
             && internalParameter.getValue().equals(integrationSchemaId)) {
-          if (integrationAux.getName().trim().equalsIgnoreCase(integration.getName().trim())
-              && !IntegrationOperationTypeEnum.EXPORT_EU_DATASET
-                  .equals(integration.getOperation())) {
+          if (integrationAux.getName().trim().equalsIgnoreCase(integration.getName().trim())) {
             LOG_ERROR.error(
                 "Error creating an integration: Integration {} with name {} is duplicated in Dataflow: {}",
                 integration.getId(), integration.getName(), integration.getDataflow());
@@ -141,6 +140,11 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       throw new EEAException(EEAErrorMessage.INTEGRATION_NOT_FOUND);
     }
 
+    // Update the default integration EXPORT_EU_DATASET
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integration.getOperation())
+        || IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integrationVO.getOperation())) {
+      integrationVO = updateDefaultIntegration(integration, integrationVO);
+    }
 
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
@@ -205,6 +209,84 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     }
   }
 
+  /**
+   * Update default integration.
+   *
+   * @param integration the integration
+   * @param integrationVO the integration VO
+   * @return the integration VO
+   */
+  private IntegrationVO updateDefaultIntegration(Integration integration,
+      IntegrationVO integrationVO) {
 
+    if (!integration.getOperation().equals(integrationVO.getOperation())) {
+      LOG_ERROR.error(
+          "Error updating an integration: Cannot modify the operation type from/to EXPORT_EU_DATASET. integration = {}, integrationVO = {}",
+          integration, integrationVO);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.OPERATION_TYPE_NOT_EDITABLE);
+    }
 
+    Map<String, String> newInternalParameters = integrationVO.getInternalParameters();
+    Map<String, String> newExternalParameters = integrationVO.getExternalParameters();
+    String name = integrationVO.getName();
+    String description = integrationVO.getDescription();
+
+    integrationVO = integrationMapper.entityToClass(integration);
+
+    updateInternalParameters(integrationVO, newInternalParameters);
+
+    if (null != newExternalParameters) {
+      integrationVO.setExternalParameters(newExternalParameters);
+    }
+
+    if (null != name && !name.isEmpty()) {
+      integrationVO.setName(name);
+    }
+
+    if (null != description && !description.isEmpty()) {
+      integrationVO.setDescription(description);
+    }
+
+    return integrationVO;
+  }
+
+  /**
+   * Update internal parameters.
+   *
+   * @param integrationVO the integration VO
+   * @param newInternalParameters the new internal parameters
+   */
+  private void updateInternalParameters(IntegrationVO integrationVO,
+      Map<String, String> newInternalParameters) {
+
+    Map<String, String> oldInternalParametersMap = integrationVO.getInternalParameters();
+    String dataflowId = newInternalParameters.get(IntegrationParams.DATAFLOW_ID);
+    String datasetSchemaId = newInternalParameters.get(IntegrationParams.DATASET_SCHEMA_ID);
+    String repository = newInternalParameters.get(IntegrationParams.REPOSITORY);
+    String processName = newInternalParameters.get(IntegrationParams.PROCESS_NAME);
+    String databaseConnection =
+        newInternalParameters.get(IntegrationParams.DATABASE_CONNECTION_PUBLIC);
+
+    if (null != dataflowId && !dataflowId.isEmpty()) {
+      oldInternalParametersMap.put(IntegrationParams.DATAFLOW_ID, dataflowId);
+    }
+
+    if (null != datasetSchemaId && !datasetSchemaId.isEmpty()) {
+      oldInternalParametersMap.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
+    }
+
+    if (null != repository && !repository.isEmpty()) {
+      oldInternalParametersMap.put(IntegrationParams.REPOSITORY, repository);
+    }
+
+    if (null != processName && !processName.isEmpty()) {
+      oldInternalParametersMap.put(IntegrationParams.PROCESS_NAME, processName);
+    }
+
+    if (null != databaseConnection) {
+      oldInternalParametersMap.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
+          databaseConnection);
+    }
+  }
 }

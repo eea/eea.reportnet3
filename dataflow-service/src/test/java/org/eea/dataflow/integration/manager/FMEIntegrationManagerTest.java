@@ -281,6 +281,7 @@ public class FMEIntegrationManagerTest {
 
     Mockito.when(integrationRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(integration));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
     Mockito.when(integrationMapper.classToEntity(Mockito.any())).thenReturn(integration);
     Mockito.when(integrationRepository.save(Mockito.any())).thenReturn(null);
     integrationManager.update(integrationVO);
@@ -303,7 +304,7 @@ public class FMEIntegrationManagerTest {
       integrationManager.update(integrationVO);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION, e.getReason());
+      Assert.assertEquals(EEAErrorMessage.OPERATION_TYPE_NOT_EDITABLE, e.getReason());
       throw e;
     }
   }

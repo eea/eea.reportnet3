@@ -47,43 +47,80 @@
     flex-flow: wrap;
     list-style: none;
     margin: 1rem 0;
-    padding: 0.5rem 5rem 0.5rem 0.5rem;
     color: var(--main-font-color);
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
 
-    .tableListTitle {
-      border-radius: 6px;
-      padding: 0.5rem;
-      text-transform: capitalize;
-    }
-
-    .tableListId {
-      align-items: center;
-      border-radius: 50%;
-      box-shadow: var(--card-item-box-shadow);
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      margin: 0.5rem 1rem;
-      min-height: 40px;
-      min-width: 40px;
-      padding: 0.5rem;
-
-      &:hover {
-        box-shadow: var(--card-item-box-shadow-hover);
-        transform: scale(1.02, 1.02);
-        transition: transform 0.1s ease;
+    .tableListTitleWrapper {
+      width: 8%;
+      .tableListTitle {
+        border-radius: 6px;
+        padding: 0.5rem;
+        text-transform: capitalize;
       }
     }
 
-    .selected {
-      background-color: var(--c-corporate-blue-lighter);
-      color: var(--white);
+    .tableListContentWrapper {
+      display: flex;
+      flex-wrap: wrap;
+      width: 77%;
+      .tableListId {
+        align-items: center;
+        border-radius: 50%;
+        box-shadow: var(--card-item-box-shadow);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        margin: 0.5rem 1rem;
+        min-height: 40px;
+        min-width: 40px;
+        padding: 0.5rem;
+
+        &:hover {
+          box-shadow: var(--card-item-box-shadow-hover);
+          transform: scale(1.02, 1.02);
+          transition: transform 0.1s ease;
+        }
+      }
+      .selected {
+        background-color: var(--c-corporate-blue-lighter);
+        color: var(--white);
+      }
     }
 
-    .addButton {
-      position: absolute;
-      right: 0;
-      transform: translateX(-50%);
+    .addButtonWrapper {
+      width: 15%;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 990px) {
+      .tableListTitleWrapper {
+        width: 15%;
+      }
+      .tableListContentWrapper {
+        width: 60%;
+      }
+      .addButtonWrapper {
+        width: 25%;
+      }
+    }
+    @media (max-width: 590px) {
+      flex-direction: column;
+      align-items: center;
+      .tableListTitleWrapper {
+        width: 100%;
+        text-align: center;
+      }
+      .tableListContentWrapper {
+        width: 100%;
+        margin: 1.5rem 0;
+      }
+      .addButtonWrapper {
+        width: 100%;
+        justify-content: center;
+      }
     }
   }
 }

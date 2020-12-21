@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface Dataset service.
@@ -524,4 +525,16 @@ public interface DatasetService {
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
+
+  /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @throws EEAException the EEA exception
+   */
+  void importFileData(Long datasetId, String tableSchemaId, MultipartFile file, boolean replace)
+      throws EEAException;
 }

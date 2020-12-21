@@ -2316,6 +2316,7 @@ public class DatasetServiceTest {
   public void testCopyData() {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
     dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    dictionaryOriginTargetObjectId.put("5fe06162f81da02a7cddaea5", "5fe06162f81da02a7cddaea5");
     dictionaryOriginTargetObjectId
         .put("0A07FD45F1CD7965A2B0F13E57948A12", "0A07FD45F1CD7965A2B0F13E57948A12");
     Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
@@ -2328,7 +2329,7 @@ public class DatasetServiceTest {
     TableSchema designTableSchema = new TableSchema();
 
     designTableSchema.setToPrefill(Boolean.TRUE);
-    designTableSchema.setIdTableSchema(new ObjectId());
+    designTableSchema.setIdTableSchema(new ObjectId("5fe06162f81da02a7cddaea5"));
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdTableSchema(designTableSchema.getIdTableSchema());
     recordSchema.setIdRecordSchema(new ObjectId());
@@ -2359,6 +2360,7 @@ public class DatasetServiceTest {
     DatasetValue datasetValue = new DatasetValue();
     datasetValue.setId(1l);
     table.setDatasetId(datasetValue);
+
     when(this.tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();

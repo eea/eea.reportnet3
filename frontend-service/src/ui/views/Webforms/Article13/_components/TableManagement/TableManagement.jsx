@@ -260,12 +260,14 @@ export const TableManagement = ({
   };
 
   const onSaveRecord = async record => {
+    const updateInCascade = true;
+
     record.dataRow = record.dataRow.filter(
       field => !['datasetPartitionId', 'id'].includes(Object.keys(field.fieldData)[0])
     );
     try {
       tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
-      await DatasetService.updateRecordsById(datasetId, record);
+      await DatasetService.updateRecordsById(datasetId, record, updateInCascade);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },

@@ -50,6 +50,7 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -369,11 +370,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable) {
 
-    List<FieldValue> fields = fieldRepository.findAll(pageable).getContent();
+    Page<FieldValue> fields = fieldRepository.findAll(pageable);
     List<FieldValidation> fieldValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      fields.stream().filter(Objects::nonNull).forEach(field -> {
+      fields.forEach(field -> {
 
         List<FieldValidation> resultFields = runFieldValidations(field, session);
 
@@ -381,10 +382,10 @@ public class ValidationServiceImpl implements ValidationService {
           field.getFieldValidations().stream().filter(Objects::nonNull)
               .forEach(fieldVal -> fieldVal.setFieldValue(field));
         }
-        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         fieldValidations.addAll(resultFields);
       });
       if (!fieldValidations.isEmpty()) {
+        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         validationFieldRepository.saveAll(fieldValidations);
       }
     } finally {
