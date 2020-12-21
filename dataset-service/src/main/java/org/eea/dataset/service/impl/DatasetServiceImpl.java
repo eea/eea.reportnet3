@@ -2821,7 +2821,7 @@ public class DatasetServiceImpl implements DatasetService {
 
           }
 
-          auxField.setRecord(mapTargetRecordValues.get(targetIdRecordSchema));
+          auxField.setRecord(mapTargetRecordValues.get(field.getRecord().getId()));
           if (DataType.ATTACHMENT.equals(field.getType())) {
             if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
               dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
