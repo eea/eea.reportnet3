@@ -484,7 +484,7 @@ export const WebformField = ({
           name="file"
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
             datasetId,
             fieldId: selectedFieldId
           })}`}

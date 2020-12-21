@@ -57,7 +57,7 @@
           "type": "FIELD",
           "name": "AssessmentsIntroDocument",
           "title": "If necessary, you can upload here an additional document (max. 2 MB)",
-		  "tooltip": "Accepted file formats are PDF files, MS Word files and JPG "
+		  "tooltip": "Accepted file formats are PDF files, MS Word files and JPG figures"
         },
         {
           "type": "LABEL",

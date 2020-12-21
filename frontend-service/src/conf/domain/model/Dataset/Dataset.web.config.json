@@ -1,4 +1,5 @@
 {
+  "addAttachment": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
   "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
   "addNewRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
   "addTableDesign": "/dataschema/{:datasetId}/tableSchema",
@@ -18,9 +19,8 @@
   "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
   "exportDatasetDataExternal": "/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}",
   "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}",
-  "importDatasetData": "/dataset/{:datasetId}/loadDatasetData",
-  "importFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
-  "importTableData": "/dataset/{:datasetId}/loadTableData/{:tableId}",
+  "importFileDataset": "/dataset/{:datasetId}/importFileData",
+  "importFileTable": "/dataset/{:datasetId}/importFileData?tableSchemaId={:tableSchemaId}",
   "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
   "listGroupedValidations": "/validation/listGroupValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
   "loadStatistics": "/datasetmetabase/{:datasetId}/loadStatistics",
