@@ -2793,6 +2793,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
 
+      Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
       //run through the origin table, getting its records and fields and translating them into the new schema
       while ((pagedFieldValues = fieldRepository
           .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
@@ -2805,18 +2806,19 @@ public class DatasetServiceImpl implements DatasetService {
           auxField.setType(field.getType());
 
           //transform the grouping record in the target one. Do it only once, meaning, recordValue.id is not null
-          RecordValue recordValue = field.getRecord();
-          if (StringUtils.isNotEmpty(recordValue.getId())) {
-            String targetIdRecordSchema = dictionaryOriginTargetObjectId
-                .get(field.getRecord().getIdRecordSchema());
+          String targetIdRecordSchema = dictionaryOriginTargetObjectId
+              .get(field.getRecord().getIdRecordSchema());
+          if (!mapTargetRecordValues.containsKey(targetIdRecordSchema)) {
 
-            recordValue.setId(null);
-            recordValue.setDatasetPartitionId(datasetPartitionId);
-            recordValue.setIdRecordSchema(targetIdRecordSchema);
-            recordValue.setTableValue(targetTable);
+            RecordValue targetRecordValue = new RecordValue();
+            targetRecordValue.setDatasetPartitionId(datasetPartitionId);
+            targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
+            targetRecordValue.setTableValue(targetTable);
+            mapTargetRecordValues.put(targetIdRecordSchema, targetRecordValue);
 
           }
-          auxField.setRecord(recordValue);
+
+          auxField.setRecord(mapTargetRecordValues.get(targetIdRecordSchema));
           if (DataType.ATTACHMENT.equals(field.getType())) {
             if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
               dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
