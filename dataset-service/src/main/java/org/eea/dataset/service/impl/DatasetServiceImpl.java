@@ -2777,12 +2777,12 @@ public class DatasetServiceImpl implements DatasetService {
           desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
               .get(desingTable.getIdTableSchema()));
 
-      //Get first page of origin records
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
       TableValue orignTable = this.tableRepository
           .findByIdTableSchema(desingTable.getIdTableSchema().toString());
-      LOG.info("Origin table recovered {}, mapped from schema {} to {}", orignTable,
+      LOG.info("Origin table recovered {}, in origin dataset {}, mapped from schema {} to {}",
+          orignTable.getIdTableSchema(), orignTable.getDatasetId().getId(),
           orignTable.getIdTableSchema(), dictionaryOriginTargetObjectId
               .get(orignTable.getIdTableSchema()));
       //creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
@@ -2795,7 +2795,7 @@ public class DatasetServiceImpl implements DatasetService {
       //run through the origin table, getting its records and fields and translating them into the new schema
       while ((pagedFieldValues = fieldRepository
           .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
-        
+
         //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
         dictionaryRecordFieldValues.putAll(pagedFieldValues.stream().map(field -> {
           FieldValue auxField = new FieldValue();
