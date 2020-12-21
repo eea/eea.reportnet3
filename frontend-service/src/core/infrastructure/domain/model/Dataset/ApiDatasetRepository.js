@@ -565,14 +565,14 @@ const tableDataById = async (
   return table;
 };
 
-const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
+const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
   const datasetTableField = new DatasetTableField({});
   datasetTableField.id = fieldId;
   datasetTableField.idFieldSchema = fieldSchemaId;
   datasetTableField.type = fieldType;
   datasetTableField.value = parseValue(fieldType, fieldValue, true);
 
-  return await apiDataset.updateFieldById(datasetId, datasetTableField);
+  return await apiDataset.updateFieldById(datasetId, datasetTableField, updateInCascade);
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
@@ -595,7 +595,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   return recordUpdated;
 };
 
-const updateRecordsById = async (datasetId, record) => {
+const updateRecordsById = async (datasetId, record, updateInCascade) => {
   const fields = record.dataRow.map(dataTableFieldDTO => {
     let newField = new DatasetTableField({});
     newField.id = dataTableFieldDTO.fieldData.id;
@@ -616,7 +616,7 @@ const updateRecordsById = async (datasetId, record) => {
   datasetTableRecord.idRecordSchema = record.recordSchemaId;
   datasetTableRecord.id = record.recordId;
   //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-  return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
+  return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord], updateInCascade);
 };
 
 const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {

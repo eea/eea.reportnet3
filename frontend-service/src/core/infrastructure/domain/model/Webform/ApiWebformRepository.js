@@ -8,6 +8,8 @@ const addPamsRecords = async (datasetId, tables, pamId, type) => {
   return await apiWebform.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
 };
 
+const singlePamData = async (datasetId, groupPaMId) => await apiWebform.singlePamData(datasetId, groupPaMId);
+
 const parsePamTables = (tables, pamId, type) => {
   return tables.map(table => ({
     idTableSchema: table.tableSchemaId,
@@ -38,4 +40,4 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   return null;
 };
 
-export const ApiWebformRepository = { addPamsRecords };
+export const ApiWebformRepository = { addPamsRecords, singlePamData };
