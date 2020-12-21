@@ -327,7 +327,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
-  /** The file treatment helper. */
+  /**
+   * The file treatment helper.
+   */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
@@ -819,7 +821,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -2766,8 +2768,7 @@ public class DatasetServiceImpl implements DatasetService {
     final Long datasetPartitionId =
         datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
 
-    Map<String, List<FieldValue>> dictionaryRecordFieldValues = new HashMap<>();
-
+    Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
     for (TableSchema desingTable : listOfTablesFiltered) {
       //Get number of fields per record. Doing it on origin table schema as origin and target has the same structure
       Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
@@ -2798,13 +2799,14 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
 
-      Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
       //run through the origin table, getting its records and fields and translating them into the new schema
       while ((pagedFieldValues = fieldRepository
           .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
-
+        LOG.info(
+            "fieldValuePage current data, currentPage {}, number of records {}, number of retrieved record {}",
+            fieldValuePage.getPageNumber(), fieldValuePage.getPageSize(), pagedFieldValues.size());
         //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
-        dictionaryRecordFieldValues.putAll(pagedFieldValues.stream().map(field -> {
+        pagedFieldValues.stream().forEach(field -> {
           FieldValue auxField = new FieldValue();
           auxField.setValue(field.getValue());
           auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
@@ -2816,17 +2818,18 @@ public class DatasetServiceImpl implements DatasetService {
           if (!mapTargetRecordValues.containsKey(field.getRecord().getId())) {
 
             RecordValue targetRecordValue = new RecordValue();
-            targetRecordValue.setId(field.getRecord()
-                .getId()); //using temporary recordId as grouping criteria, then it will be removed before giving back
+
             targetRecordValue.setDatasetPartitionId(datasetPartitionId);
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
+            targetRecordValue.setFields(new ArrayList<>());
+            //using temporary recordId as grouping criteria, then it will be removed before giving back
             mapTargetRecordValues.put(field.getRecord()
                 .getId(), targetRecordValue);
-
           }
 
           auxField.setRecord(mapTargetRecordValues.get(field.getRecord().getId()));
+
           if (DataType.ATTACHMENT.equals(field.getType())) {
             if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
               dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
@@ -2835,8 +2838,8 @@ public class DatasetServiceImpl implements DatasetService {
 
           }
           auxField.setGeometry(field.getGeometry());
-          return auxField;
-        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getId())));
+          mapTargetRecordValues.get(field.getRecord().getId()).getFields().add(auxField);
+        });
         currentPage++;
         fieldValuePage = PageRequest.of(currentPage,
             1000 * numberOfFieldsInRecord);
@@ -2845,12 +2848,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     attachments.addAll(dictionaryIdFieldAttachment.values());
-    return dictionaryRecordFieldValues.entrySet().stream().map(entry -> {
-      RecordValue recordValue = entry.getValue().get(0).getRecord();
-      recordValue.setFields(entry.getValue());
-      recordValue.setId(null);
-      return recordValue;
-    }).collect(Collectors.toList());
+    return mapTargetRecordValues.values().stream().collect(Collectors.toList());
   }
 
 
@@ -2986,6 +2984,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -3163,6 +3162,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   *
    * @return the schema if reportable
    */
   private DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
