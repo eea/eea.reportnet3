@@ -137,14 +137,24 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [tableSchema]);
 
   useEffect(() => {
-    if (!isNil(dataset) && dataset.isReleasing) {
-      setHasWritePermissions(!dataset.isReleasing);
+    if (!isNil(webformData)) {
+      setHasWritePermissions(isNil(webformData));
     } else {
-      if (!isUndefined(userContext.contextRoles)) {
-        setHasWritePermissions(
-          userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
-            userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
-        );
+      if (!isNil(dataset) && dataset.isReleasing) {
+        setHasWritePermissions(!dataset.isReleasing);
+      } else {
+        if (!isUndefined(userContext.contextRoles)) {
+          setHasWritePermissions(
+            userContext.hasPermission(
+              [config.permissions.LEAD_REPORTER],
+              `${config.permissions.DATASET}${datasetId}`
+            ) ||
+              userContext.hasPermission(
+                [config.permissions.REPORTER_WRITE],
+                `${config.permissions.DATASET}${datasetId}`
+              )
+          );
+        }
       }
     }
   }, [userContext, dataset]);
@@ -763,8 +773,7 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) &&
-    hasWritePermissions && (
+    !isNil(webformData) && (
       // <div className={styles.switch}>
       //   <div className={`${styles.wrap}`}>
       //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
