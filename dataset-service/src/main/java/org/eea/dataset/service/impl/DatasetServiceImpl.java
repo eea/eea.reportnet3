@@ -2812,17 +2812,19 @@ public class DatasetServiceImpl implements DatasetService {
           auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
           auxField.setType(field.getType());
 
-          // transform the grouping record in the target one. Do it only once, meaning,
-          // recordValue.id is not null
-          RecordValue recordValue = field.getRecord();
-          if (StringUtils.isNotEmpty(recordValue.getId())) {
-            String targetIdRecordSchema =
-                dictionaryOriginTargetObjectId.get(field.getRecord().getIdRecordSchema());
+          //transform the grouping record in the target one. Do it only once
+          String targetIdRecordSchema = dictionaryOriginTargetObjectId
+              .get(field.getRecord().getIdRecordSchema());
+          if (!mapTargetRecordValues.containsKey(field.getRecord().getId())) {
 
-            recordValue.setId(null);
-            recordValue.setDatasetPartitionId(datasetPartitionId);
-            recordValue.setIdRecordSchema(targetIdRecordSchema);
-            recordValue.setTableValue(targetTable);
+            RecordValue targetRecordValue = new RecordValue();
+            targetRecordValue.setId(field.getRecord()
+                .getId()); //using temporary recordId as grouping criteria, then it will be removed before giving back
+            targetRecordValue.setDatasetPartitionId(datasetPartitionId);
+            targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
+            targetRecordValue.setTableValue(targetTable);
+            mapTargetRecordValues.put(field.getRecord()
+                .getId(), targetRecordValue);
 
           }
           auxField.setRecord(recordValue);
@@ -2835,7 +2837,7 @@ public class DatasetServiceImpl implements DatasetService {
           }
           auxField.setGeometry(field.getGeometry());
           return auxField;
-        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getIdRecordSchema())));
+        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getId())));
         currentPage++;
         fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
       }
@@ -2846,6 +2848,7 @@ public class DatasetServiceImpl implements DatasetService {
     return dictionaryRecordFieldValues.entrySet().stream().map(entry -> {
       RecordValue recordValue = entry.getValue().get(0).getRecord();
       recordValue.setFields(entry.getValue());
+      recordValue.setId(null);
       return recordValue;
     }).collect(Collectors.toList());
   }
