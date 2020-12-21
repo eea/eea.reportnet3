@@ -2805,12 +2805,14 @@ public class DatasetServiceImpl implements DatasetService {
           auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
           auxField.setType(field.getType());
 
-          //transform the grouping record in the target one. Do it only once, meaning, recordValue.id is not null
+          //transform the grouping record in the target one. Do it only once
           String targetIdRecordSchema = dictionaryOriginTargetObjectId
               .get(field.getRecord().getIdRecordSchema());
-          if (!mapTargetRecordValues.containsKey(targetIdRecordSchema)) {
+          if (!mapTargetRecordValues.containsKey(field.getRecord().getId())) {
 
             RecordValue targetRecordValue = new RecordValue();
+            targetRecordValue.setId(field.getRecord()
+                .getId()); //using temporary recordId as grouping criteria, then it will be removed before giving back
             targetRecordValue.setDatasetPartitionId(datasetPartitionId);
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
@@ -2828,7 +2830,7 @@ public class DatasetServiceImpl implements DatasetService {
           }
           auxField.setGeometry(field.getGeometry());
           return auxField;
-        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getIdRecordSchema())));
+        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getId())));
         currentPage++;
         fieldValuePage = PageRequest.of(currentPage,
             1000 * numberOfFieldsInRecord);
@@ -2840,6 +2842,7 @@ public class DatasetServiceImpl implements DatasetService {
     return dictionaryRecordFieldValues.entrySet().stream().map(entry -> {
       RecordValue recordValue = entry.getValue().get(0).getRecord();
       recordValue.setFields(entry.getValue());
+      recordValue.setId(null);
       return recordValue;
     }).collect(Collectors.toList());
   }
