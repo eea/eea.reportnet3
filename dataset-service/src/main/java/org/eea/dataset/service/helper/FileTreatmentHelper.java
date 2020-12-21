@@ -109,6 +109,15 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+  /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @throws EEAException the EEA exception
+   */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
       boolean replace) throws EEAException {
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
