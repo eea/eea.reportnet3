@@ -472,6 +472,28 @@ const ValidationViewer = React.memo(
           <Toolbar className={styles.validationToolbar}>
             <div className="p-toolbar-group-left">
               <Button
+                className={`p-button-rounded p-button-secondary-transparent`}
+                icon={'filter'}
+                label={resources.messages['entity']}
+                onClick={event => {
+                  dropdownTypeEntitiesFilterRef.current.show(event);
+                }}
+                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
+              />
+
+              <DropdownFilter
+                disabled={isLoading}
+                filters={allTypeEntitiesFilter}
+                popup={true}
+                ref={dropdownTypeEntitiesFilterRef}
+                id="exportTableMenu"
+                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
+                onShow={e => {
+                  getExportButtonPosition(e);
+                }}
+              />
+
+              <Button
                 className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
                 label={resources.messages['table']}
@@ -514,28 +536,6 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
                 showLevelErrorIcons={true}
-              />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['entity']}
-                onClick={event => {
-                  dropdownTypeEntitiesFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allTypeEntitiesFilter}
-                popup={true}
-                ref={dropdownTypeEntitiesFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
               />
 
               <Button
