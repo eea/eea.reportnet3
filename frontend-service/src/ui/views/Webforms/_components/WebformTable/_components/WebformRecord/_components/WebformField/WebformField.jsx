@@ -233,6 +233,7 @@ export const WebformField = ({
         if (field.pkHasMultipleValues) {
           return (
             <MultiSelect
+              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -284,6 +285,7 @@ export const WebformField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
+            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
@@ -482,7 +484,7 @@ export const WebformField = ({
           name="file"
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
             datasetId,
             fieldId: selectedFieldId
           })}`}
