@@ -999,7 +999,9 @@ public class RulesServiceImpl implements RulesService {
     if (StringUtils.isNotBlank(rule.getWhenCondition())
         && !rule.getWhenCondition().contains("isfieldFK")) {
 
-      LOG.info("A new rule is going to be created in the copy schema process");
+      LOG.info(
+          "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
+          rule.getRuleName(), rule.getReferenceId());
       // Here we change the fields of the rule involved with the help of the dictionary
       fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
 
