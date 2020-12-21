@@ -65,6 +65,12 @@ const ValidationViewer = React.memo(
     const [allFieldsFilter, setAllFieldsFilter] = useState([]);
     const [filtered, setFiltered] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
+    const [filterBy, setFilterBy] = useState({
+      entityType: [],
+      tableSchemaName: [],
+      fieldSchemaName: [],
+      levelError: []
+    });
 
     const [validationState, validationDispatch] = useReducer(validationReducer, {
       totalErrors: 0,
@@ -326,10 +332,10 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilteredValidations = filterData => {
-      const selectedEntitiesValues = filterData.entityType;
-      const entitiesValues = allTypeEntitiesFilter.map(entityFilter => entityFilter.value);
-
       // Changed selected filters
+      // const selectedEntitiesValues = filterData.entityType;
+      // const entitiesValues = allTypeEntitiesFilter.map(entityFilter => entityFilter.value);
+
       // entitiesValues.forEach(tableName => {
       //   selectedEntitiesValues.forEach(selectedTable => {
       //     if (tableName === selectedTable) {
@@ -389,6 +395,7 @@ const ValidationViewer = React.memo(
         filterData.entityType,
         filterData.tableSchemaName
       );
+      setFilterBy(filterData);
     };
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -720,6 +727,7 @@ const ValidationViewer = React.memo(
             <div>
               <Filters
                 data={fetchedData}
+                filterByList={filterBy}
                 getFilteredData={onLoadFilteredData}
                 getFilteredSearched={getFilteredState}
                 sendData={onLoadFilteredValidations}
