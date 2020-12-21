@@ -27,13 +27,16 @@ axios.interceptors.response.use(
   },
   error => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+
+    if (error?.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const { refreshToken } = userStorage.getTokens();
+
       return HTTPRequester.post({
         url: getUrl(UserConfig.refreshToken, { refreshToken })
       }).then(res => {
         const { accessToken, refreshToken } = res.data;
+
         if (res.status >= 200 && res.status <= 299) {
           userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
           axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStorage.getTokens().accessToken;
@@ -42,7 +45,8 @@ axios.interceptors.response.use(
         }
       });
     }
-    if (error.response.status === 403) {
+
+    if (error?.response?.status === 403) {
       window.location.href = '/dataflows/error/notAllowed';
       return;
     }

@@ -956,6 +956,19 @@
     "missingWebformTablesOrFieldsMissing": "The following tables or fields are missing, please check it.",
     "addRecordsError": "There has been an error adding a record",
     "tabularDataView": "Tabular data",
-    "editAddDataReleasingError": "You cannot edit/add data while the releasing process is running. "
+    "editAddDataReleasingError": "Error. The process is already running.",
+    "addSingle": "Add single",
+    "addGroup": "Add group",
+    "pamsId": "PaM number",
+    "StatusImplementation": "Status of Implementation",
+    "implementationperiodcomment": "Comment on Implementation Period",
+    "implementationperiodfinish": "Finish",
+    "implementationperiodstart": "Start",
+    "ProjectionsScenario": "Type",
+    "type": "Type",
+    "sectorAffected": "Sector affected",
+    "otherSectors": "Other sectors",
+    "objectives": "Objectives",
+    "otherObjectives": "Other objectives"
   }
 }

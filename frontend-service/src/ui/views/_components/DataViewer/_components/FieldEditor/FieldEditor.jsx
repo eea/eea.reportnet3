@@ -193,12 +193,11 @@ const FieldEditor = ({
 
   const saveFieldOnBlurOnKeyDown = e => {
     const dateValue = isEmpty(e.target.value) ? '' : RecordUtils.formatDate(e.target.value, isNil(e.target.value));
-    const isCorrectDateFromatedValue = getIsCorrectDateFromatedValue(dateValue);
-    if (isCorrectDateFromatedValue || isEmpty(dateValue)) {
+    const isCorrectDateFormatedValue = getisCorrectDateFormatedValue(dateValue);
+    if (isCorrectDateFormatedValue || isEmpty(dateValue)) {
       onEditorValueChange(cells, dateValue, record);
       onEditorSubmitValue(cells, dateValue, record);
       if (e.key === 'Enter') {
-        isEmpty(e.target.value) && setIsFilledDateValue(false);
         e.target.blur();
       }
     }
@@ -217,7 +216,7 @@ const FieldEditor = ({
     }
   }, [isCalendarVisible]);
 
-  const getIsCorrectDateFromatedValue = date => {
+  const getisCorrectDateFormatedValue = date => {
     const year = date.split('-')[0];
     return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
   };
@@ -524,7 +523,7 @@ const FieldEditor = ({
           <Calendar
             inputId={calendarId}
             onBlur={e => {
-              if (isFilledDateValue) {
+              if (!isFilledDateValue) {
                 saveFieldOnBlurOnKeyDown(e);
                 setIsCalendarVisible(false);
               } else {
@@ -534,9 +533,7 @@ const FieldEditor = ({
             onFocus={e => {
               setIsCalendarVisible(true);
               onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
-              !isEmpty(RecordUtils.getCellValue(cells, cells.field))
-                ? setIsFilledDateValue(true)
-                : setIsFilledDateValue(false);
+              !isNil(isFilledDateValue) && setIsFilledDateValue(true);
             }}
             onSelect={e => {
               onEditorValueChange(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);

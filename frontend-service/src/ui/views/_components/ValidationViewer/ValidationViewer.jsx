@@ -47,8 +47,6 @@ const ValidationViewer = React.memo(
     const [fetchedData, setFetchedData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [grouped, setGrouped] = useState(true);
-    const [filtered, setFiltered] = useState(false);
-    const [filteredData, setFilteredData] = useState([]);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -65,6 +63,8 @@ const ValidationViewer = React.memo(
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
     const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
     const [allFieldsFilter, setAllFieldsFilter] = useState([]);
+    const [filtered, setFiltered] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
 
     const [validationState, validationDispatch] = useReducer(validationReducer, {
       totalErrors: 0,
@@ -326,7 +326,6 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilteredValidations = filterData => {
-      console.log('filterData', filterData);
       const selectedEntitiesValues = filterData.entityType;
       const entitiesValues = allTypeEntitiesFilter.map(entityFilter => entityFilter.value);
 
@@ -593,14 +592,16 @@ const ValidationViewer = React.memo(
     };
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {filtered && totalRecords !== filteredData.length
-          ? `${resources.messages['filtered']}: ${filteredData.length} | `
+        {areActiveFilters && totalRecords !== totalFilteredRecords
+          ? `${resources.messages['filtered']}: ${!grouped ? totalFilteredRecords : totalFilteredGroupedRecords} | `
           : ''}
         {resources.messages['totalRecords']} {totalRecords}{' '}
         {`${resources.messages['records'].toLowerCase()}${
           grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
         }`}
-        {filtered && totalRecords === filteredData.length ? ` (${resources.messages['filtered'].toLowerCase()})` : ''}
+        {areActiveFilters && totalRecords === totalFilteredRecords
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          : ''}
       </Fragment>
     );
 
@@ -636,6 +637,28 @@ const ValidationViewer = React.memo(
         ) : (
           <Toolbar className={styles.validationToolbar}>
             <div className="p-toolbar-group-left">
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent`}
+                icon={'filter'}
+                label={resources.messages['entity']}
+                onClick={event => {
+                  dropdownTypeEntitiesFilterRef.current.show(event);
+                }}
+                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
+              />
+
+              <DropdownFilter
+                disabled={isLoading}
+                filters={allTypeEntitiesFilter}
+                popup={true}
+                ref={dropdownTypeEntitiesFilterRef}
+                id="exportTableMenu"
+                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
+                onShow={e => {
+                  getExportButtonPosition(e);
+                }}
+              />
+
               <Button
                 className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
@@ -679,28 +702,6 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
                 showLevelErrorIcons={true}
-              />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['entity']}
-                onClick={event => {
-                  dropdownTypeEntitiesFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allTypeEntitiesFilter}
-                popup={true}
-                ref={dropdownTypeEntitiesFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
               />
 
               <Button
