@@ -2769,43 +2769,41 @@ public class DatasetServiceImpl implements DatasetService {
     Map<String, List<FieldValue>> dictionaryRecordFieldValues = new HashMap<>();
 
     for (TableSchema desingTable : listOfTablesFiltered) {
-      // Get number of fields per record. Doing it on origin table schema as origin and target has
-      // the same structure
+      //Get number of fields per record. Doing it on origin table schema as origin and target has the same structure
       Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
 
-      // get target table by translating origing table schema into target table schema and then
-      // query to target database
+      //get target table by translating origing table schema into target table schema and then query to target database
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
-      TableValue targetTable = tableRepository.findByIdTableSchema(
-          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
+      TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
+          .get(desingTable.getIdTableSchema().toString()));
 
       LOG.info("Target table recovered {}, mapped from schema {} to {}",
-          targetTable.getIdTableSchema(), desingTable.getIdTableSchema(),
-          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
+          targetTable.getIdTableSchema(),
+          desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
+              .get(desingTable.getIdTableSchema().toString()));
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      TableValue orignTable =
-          this.tableRepository.findByIdTableSchema(desingTable.getIdTableSchema().toString());
+      TableValue orignTable = this.tableRepository
+          .findByIdTableSchema(desingTable.getIdTableSchema().toString());
       LOG.info("Origin table recovered {}, in origin dataset {}, mapped from schema {} to {}",
           orignTable.getIdTableSchema(), orignTable.getDatasetId().getId(),
-          orignTable.getIdTableSchema(),
-          dictionaryOriginTargetObjectId.get(orignTable.getIdTableSchema()));
-      // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
+          orignTable.getIdTableSchema(), dictionaryOriginTargetObjectId
+              .get(orignTable.getIdTableSchema()));
+      //creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
       Integer currentPage = 0;
-      Pageable fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
+      Pageable fieldValuePage = PageRequest.of(currentPage,
+          1000 * numberOfFieldsInRecord);
 
       List<FieldValue> pagedFieldValues;
 
-      // run through the origin table, getting its records and fields and translating them into the
-      // new schema
-      while ((pagedFieldValues =
-          fieldRepository.findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage))
-              .size() > 0) {
+      Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
+      //run through the origin table, getting its records and fields and translating them into the new schema
+      while ((pagedFieldValues = fieldRepository
+          .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
 
-        // make list of field vaues grouped by their record id. The field values will be set with
-        // the taget schemas id so they can be inserted
+        //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
         dictionaryRecordFieldValues.putAll(pagedFieldValues.stream().map(field -> {
           FieldValue auxField = new FieldValue();
           auxField.setValue(field.getValue());
@@ -2840,7 +2838,8 @@ public class DatasetServiceImpl implements DatasetService {
           return auxField;
         }).collect(Collectors.groupingBy(fv -> fv.getRecord().getId())));
         currentPage++;
-        fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
+        fieldValuePage = PageRequest.of(currentPage,
+            1000 * numberOfFieldsInRecord);
       }
 
     }
