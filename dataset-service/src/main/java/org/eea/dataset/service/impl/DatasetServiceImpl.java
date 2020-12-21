@@ -2738,7 +2738,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
       List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId,
       List<AttachmentValue> attachments) {
-
+    List<RecordValue> result = new ArrayList<>();
     TenantResolver.setTenantName(
         String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
 
@@ -2821,6 +2821,7 @@ public class DatasetServiceImpl implements DatasetService {
             targetRecordValue.setFields(new ArrayList<>());
             //using temporary recordId as grouping criteria, then it will be removed before giving back
             mapTargetRecordValues.put(originRecordId, targetRecordValue);
+            result.add(targetRecordValue);
           }
 
           auxField.setRecord(mapTargetRecordValues.get(originRecordId));
@@ -2834,6 +2835,11 @@ public class DatasetServiceImpl implements DatasetService {
           }
           auxField.setGeometry(field.getGeometry());
           mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
+          //when the record has reached the number of fields per record then remove from the map to avoid rehashing
+          if (mapTargetRecordValues.get(originRecordId).getFields().size()
+              == numberOfFieldsInRecord) {
+            mapTargetRecordValues.remove(originRecordId);
+          }
         });
         currentPage++;
         fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
@@ -2842,7 +2848,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     attachments.addAll(dictionaryIdFieldAttachment.values());
-    return mapTargetRecordValues.values().stream().collect(Collectors.toList());
+    return result;
   }
 
 
