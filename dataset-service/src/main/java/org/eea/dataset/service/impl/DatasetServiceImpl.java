@@ -66,7 +66,6 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
-import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -98,7 +97,6 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
-import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -114,7 +112,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Class DatasetServiceImpl.
@@ -327,12 +324,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
-
-  /**
-   * The file treatment helper.
-   */
-  @Autowired
-  private FileTreatmentHelper fileTreatmentHelper;
 
   /**
    * The Constant DATASET_ID.
@@ -822,7 +813,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -2771,42 +2762,45 @@ public class DatasetServiceImpl implements DatasetService {
 
     Map<String, RecordValue> mapTargetRecordValues = new LinkedHashMap<>();
     for (TableSchema desingTable : listOfTablesFiltered) {
-      //Get number of fields per record. Doing it on origin table schema as origin and target has the same structure
+      // Get number of fields per record. Doing it on origin table schema as origin and target has
+      // the same structure
       Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
 
-      //get target table by translating origing table schema into target table schema and then query to target database
+      // get target table by translating origing table schema into target table schema and then
+      // query to target database
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
-      TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
-          .get(desingTable.getIdTableSchema().toString()));
+      TableValue targetTable = tableRepository.findByIdTableSchema(
+          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
 
       LOG.info("Target table recovered {}, mapped from schema {} to {}",
-          targetTable.getIdTableSchema(),
-          desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
-              .get(desingTable.getIdTableSchema().toString()));
+          targetTable.getIdTableSchema(), desingTable.getIdTableSchema(),
+          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      TableValue orignTable = this.tableRepository
-          .findByIdTableSchema(desingTable.getIdTableSchema().toString());
+      TableValue orignTable =
+          this.tableRepository.findByIdTableSchema(desingTable.getIdTableSchema().toString());
       LOG.info("Origin table recovered {}, in origin dataset {}, mapped from schema {} to {}",
           orignTable.getIdTableSchema(), orignTable.getDatasetId().getId(),
-          orignTable.getIdTableSchema(), dictionaryOriginTargetObjectId
-              .get(orignTable.getIdTableSchema()));
-      //creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
+          orignTable.getIdTableSchema(),
+          dictionaryOriginTargetObjectId.get(orignTable.getIdTableSchema()));
+      // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
       Integer currentPage = 0;
-      Pageable fieldValuePage = PageRequest.of(currentPage,
-          1000 * numberOfFieldsInRecord);
+      Pageable fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
 
       List<FieldValue> pagedFieldValues;
 
-      //run through the origin table, getting its records and fields and translating them into the new schema
-      while ((pagedFieldValues = fieldRepository
-          .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
+      // run through the origin table, getting its records and fields and translating them into the
+      // new schema
+      while ((pagedFieldValues =
+          fieldRepository.findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage))
+              .size() > 0) {
         LOG.info(
             "fieldValuePage current data, currentPage {}, number of records {}, number of retrieved record {}",
             fieldValuePage.getPageNumber(), fieldValuePage.getPageSize(), pagedFieldValues.size());
-        //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
+        // make list of field vaues grouped by their record id. The field values will be set with
+        // the taget schemas id so they can be inserted
         pagedFieldValues.stream().forEach(field -> {
           FieldValue auxField = new FieldValue();
           auxField.setValue(field.getValue());
@@ -2842,8 +2836,7 @@ public class DatasetServiceImpl implements DatasetService {
           mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
         });
         currentPage++;
-        fieldValuePage = PageRequest.of(currentPage,
-            1000 * numberOfFieldsInRecord);
+        fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
       }
 
     }
@@ -2976,30 +2969,6 @@ public class DatasetServiceImpl implements DatasetService {
       type = DatasetTypeEnum.EUDATASET;
     }
     return type;
-  }
-
-  /**
-   * Import file data.
-   *
-   * @param datasetId the dataset id
-   * @param tableSchemaId the table schema id
-   * @param file the file
-   * @param replace the replace
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
-      boolean replace) throws EEAException {
-    DataSetSchema schema = getSchemaIfReportable(datasetId, tableSchemaId);
-    if (null == schema) {
-      releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
-      LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getName());
-      throw new EEAException(
-          "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
-    }
-    fileTreatmentHelper.fileDataImportManagement(datasetId, tableSchemaId, schema, file, replace);
   }
 
   /**
@@ -3166,7 +3135,8 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @return the schema if reportable
    */
-  private DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
+  @Override
+  public DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
 
     DataSetMetabase dataset = null;
     DataSetSchema schema = null;
