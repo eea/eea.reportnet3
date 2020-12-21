@@ -510,6 +510,7 @@ public class FileTreatmentHelper implements DisposableBean {
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).fileName(fileName).build();
     try {
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
       LOG.error("Error realeasing event: notificationVO={}", notificationVO, e);
