@@ -2816,7 +2816,8 @@ public class DatasetServiceImpl implements DatasetService {
             targetRecordValue.setDatasetPartitionId(datasetPartitionId);
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
-            mapTargetRecordValues.put(targetIdRecordSchema, targetRecordValue);
+            mapTargetRecordValues.put(field.getRecord()
+                .getId(), targetRecordValue);
 
           }
 
