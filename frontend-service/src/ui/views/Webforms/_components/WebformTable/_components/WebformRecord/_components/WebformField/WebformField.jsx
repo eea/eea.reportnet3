@@ -233,6 +233,7 @@ export const WebformField = ({
         if (field.pkHasMultipleValues) {
           return (
             <MultiSelect
+              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -284,6 +285,7 @@ export const WebformField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
+            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}

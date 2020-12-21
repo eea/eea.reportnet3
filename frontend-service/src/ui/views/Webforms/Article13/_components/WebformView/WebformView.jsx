@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
-import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
@@ -91,13 +91,7 @@ export const WebformView = ({
       case 'policyimpacting':
       case 'unionpolicylist':
         const fields = combinationFieldRender(field.name);
-        return (
-          <ul>
-            {fields?.map(field => (
-              <li>{field}</li>
-            ))}
-          </ul>
-        );
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'ispolicymeasureenvisaged':
         return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
       case 'statusimplementation':

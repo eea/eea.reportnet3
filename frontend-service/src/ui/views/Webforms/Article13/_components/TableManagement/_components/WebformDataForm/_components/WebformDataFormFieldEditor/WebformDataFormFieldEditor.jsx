@@ -92,6 +92,7 @@ const WebformDataFormFieldEditor = ({
     }));
     return (
       <MultiSelect
+        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={TextUtils.areEquals(field, 'listofsinglepams') && hasSingle}
         onChange={e => onChangeForm(field, e.value)}
