@@ -2771,11 +2771,11 @@ public class DatasetServiceImpl implements DatasetService {
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
       TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
-          .get(desingTable.getIdTableSchema()));
+          .get(desingTable.getIdTableSchema().toString()));
 
       LOG.info("Target table recovered {}, mapped from schema {} to {}", targetTable,
           desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
-              .get(desingTable.getIdTableSchema()));
+              .get(desingTable.getIdTableSchema().toString()));
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
