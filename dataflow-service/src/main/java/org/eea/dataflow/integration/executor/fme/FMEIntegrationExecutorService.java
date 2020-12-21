@@ -12,7 +12,6 @@ import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
-import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -22,6 +21,7 @@ import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.joda.time.LocalDateTime;
@@ -217,17 +217,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
 
     Integer fmeJobId = null;
-
-    if (null != integration.getExternalParameters()) {
-      Map<String, String> externalParameters = integration.getExternalParameters();
-      externalParameters.forEach((k, v) -> {
-        if (!k.equals(IntegrationParams.FILE_IS)
-            && !k.equals(IntegrationParams.DATABASE_CONNECTION_PUBLIC)) {
-          parameters.add(saveParameter(k, v));
-        }
-      });
-    }
-
     switch (operation) {
       case EXPORT:
         parameters.add(saveParameter(IntegrationParams.EXPORT_FILE_NAME, fileName));
@@ -236,6 +225,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             integrationOperationParams.get(IntegrationParams.DATASET_ID) + "/"
                 + paramDataProvider));
         fmeAsyncJob.setPublishedParameters(parameters);
+
         LOG.info("Creating Export FS in FME");
         if (fmeCommunicationService
             .createDirectory(integrationOperationParams.get(IntegrationParams.DATASET_ID),
@@ -293,7 +283,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     executionResultVO.setExecutionResultParams(executionResultParams);
 
     // Update FMEJob
-    if (null != fmeJobId && 0 != fmeJobId) {
+    if (null != fmeJobId) {
       fmeJob.setJobId(Long.valueOf(fmeJobId));
       fmeJob.setStatus(FMEJobstatus.QUEUED);
     } else {

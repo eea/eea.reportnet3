@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,7 +55,6 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
-import org.eea.dataset.persistence.schemas.repository.ExtendedSchemaRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -67,6 +65,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -98,6 +97,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -113,6 +113,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Class DatasetServiceImpl.
@@ -326,6 +327,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
+  /** The file treatment helper. */
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
+
   /**
    * The Constant DATASET_ID.
    */
@@ -530,7 +535,7 @@ public class DatasetServiceImpl implements DatasetService {
         LOG.info("Ordered by idFieldSchema {}", commonShortFields);
       }
 
-      // 5º retrieve validations to set them into the final result
+      // 5Âº retrieve validations to set them into the final result
       retrieveValidations(recordVOs);
 
     }
@@ -814,7 +819,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -2975,6 +2980,29 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
+      boolean replace) throws EEAException {
+    DataSetSchema schema = getSchemaIfReportable(datasetId, tableSchemaId);
+    if (null == schema) {
+      releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
+          tableSchemaId, file.getName());
+      throw new EEAException(
+          "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
+    }
+    fileTreatmentHelper.fileDataImportManagement(datasetId, tableSchemaId, schema, file, replace);
+  }
+
+  /**
    * Update cascade PK.
    *
    * @param recordValueId the record value id
@@ -3128,5 +3156,47 @@ public class DatasetServiceImpl implements DatasetService {
             fieldNoValidationMapper.classToEntity(fieldValueVO));
       }
     }
+  }
+
+  /**
+   * Gets the schema if reportable.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @return the schema if reportable
+   */
+  private DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
+
+    DataSetMetabase dataset = null;
+    DataSetSchema schema = null;
+
+    // Dataset: DESIGN
+    dataset = designDatasetRepository.findById(datasetId).orElse(null);
+    if (null != dataset) {
+      if (TypeStatusEnum.DESIGN
+          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+      }
+    }
+
+    // Dataset: REPORTING
+    else {
+      dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+      if (null != dataset && TypeStatusEnum.DRAFT
+          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+        if (null != tableSchemaId) {
+          TableSchema tableSchema = schema.getTableSchemas().stream()
+              .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
+              .orElse(null);
+          if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
+              || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+            schema = null;
+          }
+        }
+      }
+    }
+
+    return schema;
   }
 }
