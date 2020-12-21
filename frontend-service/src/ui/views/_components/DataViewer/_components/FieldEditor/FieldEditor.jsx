@@ -183,7 +183,7 @@ const FieldEditor = ({
 
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
-    codelistsItems.sort();
+    codelistsItems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
     codelistsItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -604,6 +604,7 @@ const FieldEditor = ({
           return (
             <MultiSelect
               // onChange={e => onChangeForm(field, e.value)}
+              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               filter={true}
@@ -613,7 +614,11 @@ const FieldEditor = ({
                 try {
                   setLinkItemsValue(e.value);
                   onEditorValueChange(cells, e.value);
-                  onEditorSubmitValue(cells, e.value, record);
+                  onEditorSubmitValue(
+                    cells,
+                    e.value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })),
+                    record
+                  );
                 } catch (error) {
                   console.error(error);
                 }
@@ -675,13 +680,18 @@ const FieldEditor = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
+            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {
               try {
                 setCodelistItemValue(e.value);
                 onEditorValueChange(cells, e.value);
-                onEditorSubmitValue(cells, e.value, record);
+                onEditorSubmitValue(
+                  cells,
+                  e.value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })),
+                  record
+                );
               } catch (error) {
                 console.error(error);
               }
