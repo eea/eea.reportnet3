@@ -52,5 +52,8 @@ public class SinglePaMVO {
   /** The ghg affected. */
   private List<String> ghgAffected;
 
+  /** The other union policy. */
+  private String otherUnionPolicy;
+
 
 }
