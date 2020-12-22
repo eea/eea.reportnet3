@@ -108,9 +108,8 @@ export const WebformTable = ({
       payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
     });
 
-    let sectorObjectivesTable;
-
     if (!isEmpty(webformData.elementsRecords)) {
+      let sectorObjectivesTable;
       const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
         if (element.name === 'SectorObjectives') {
           sectorObjectivesTable = element;
