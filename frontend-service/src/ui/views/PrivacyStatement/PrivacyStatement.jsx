@@ -257,8 +257,10 @@ const PrivacyStatement = withRouter(() => {
               </p>
               <p>
                 You are entitled to have recourse at any time to the European Data Protection Supervisor (
-                <a href="https://edps.europa.eu">https://edps.europa.eu</a>;{' '}
-                <a href="mailto:edps@edps.europa.eu">edps@edps.europa.eu</a>) if you consider that your rights under
+                <a href="https://edps.europa.eu" target="_blank">
+                  https://edps.europa.eu
+                </a>
+                ; <a href="mailto:edps@edps.europa.eu">edps@edps.europa.eu</a>) if you consider that your rights under
                 Regulation (EU) 2018/1725 have been infringed as a result of the processing of your personal data by the
                 EEA.
               </p>
