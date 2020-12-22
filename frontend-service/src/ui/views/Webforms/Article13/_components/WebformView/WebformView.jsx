@@ -181,7 +181,6 @@ export const WebformView = ({
     ));
 
   const tableFieldRender = (fieldName, columnFields) => {
-    console.log({ singlesCalculatedData });
     const combinatedTableValues = [];
     singlesCalculatedData.forEach(singleRecord => {
       const singleRecordValue =
