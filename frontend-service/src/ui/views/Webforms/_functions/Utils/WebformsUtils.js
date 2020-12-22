@@ -108,10 +108,6 @@ const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
 
     if (!isUndefined(table)) {
       fields = table.records[0].fields.map(field => {
-        /*  console.log('id_SectorObjectives_FieldSchemaId', id_SectorObjectives_FieldSchemaId);
-        console.log('field.fieldId ', field.fieldId);
-        console.log('field.fieldSchema', field.fieldSchema); */
-
         return {
           fieldData: {
             [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field.name, 'FK_PAMS')

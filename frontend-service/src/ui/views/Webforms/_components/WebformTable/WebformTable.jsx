@@ -118,8 +118,6 @@ export const WebformTable = ({
         return element.tableSchemaId === tableSchemaId;
       })[0];
 
-      // console.log('SectorObjectives', SectorObjectives);
-
       const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {

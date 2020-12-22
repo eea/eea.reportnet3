@@ -146,7 +146,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const onAddTableRecord = async (table, pamNumber) => {
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
 
-    // console.log('newEmptyRecord Article13', newEmptyRecord);
     try {
       const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
       if (response.status >= 200 && response.status <= 299) {
