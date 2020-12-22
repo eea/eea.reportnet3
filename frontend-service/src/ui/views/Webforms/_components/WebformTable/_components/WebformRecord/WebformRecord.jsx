@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformRecord.module.scss';
 
@@ -106,6 +107,7 @@ export const WebformRecord = ({
   };
 
   const onToggleFieldVisibility = (dependency, fields = []) => {
+    if (!isNil(isGroup) && isGroup()) return true;
     if (isNil(dependency)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
@@ -157,7 +159,7 @@ export const WebformRecord = ({
     if (isNil(isGroup)) {
       return true;
     } else {
-      if (isGroup() && el.hideWhenCalculated) {
+      if ((isGroup() && el.hideWhenCalculated) || (!isGroup() && el.hideWhenSingle)) {
         return false;
       } else {
         return true;
@@ -249,7 +251,9 @@ export const WebformRecord = ({
                   {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
                 {element.validations &&
-                  element.validations.map((validation, index) => (
+                  uniqBy(element.validations, element => {
+                    return [element.message, element.errorLevel].join();
+                  }).map((validation, index) => (
                     <IconTooltip
                       className={'webform-validationErrors'}
                       key={index}
