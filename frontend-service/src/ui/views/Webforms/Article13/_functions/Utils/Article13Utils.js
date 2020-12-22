@@ -77,6 +77,21 @@ const checkErrors = data => {
   return errors || {};
 };
 
+const getSingleRecordOption = singleRecord => {
+  if (singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value === '') {
+    return `${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
+  }
+
+  return `${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
+  // if (singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value === '') {
+  //   return `#${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
+  // }
+
+  // return `#${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value} - ${
+  //   singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Title')).value
+  // }`;
+};
+
 const hasErrors = data => {
   const errors = [];
 
@@ -99,4 +114,19 @@ const hasErrors = data => {
   return errors.includes(true);
 };
 
-export const Article13Utils = { checkErrors, getFieldSchemaId, getTypeList, hasErrors };
+const parseListOfSinglePams = (records = []) => {
+  const options = [];
+  records.forEach(record => {
+    if (
+      record.elements.find(el => TextUtils.areEquals(el.name, 'IsGroup')).value === 'Single' &&
+      record.elements.find(el => TextUtils.areEquals(el.name, 'Id')) &&
+      record.elements.find(el => TextUtils.areEquals(el.name, 'Title'))
+    ) {
+      options.push(getSingleRecordOption(record));
+    }
+  });
+
+  return options.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+};
+
+export const Article13Utils = { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams };

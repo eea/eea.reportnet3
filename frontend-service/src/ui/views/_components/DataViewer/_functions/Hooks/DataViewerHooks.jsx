@@ -231,6 +231,7 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
+
       return (
         <div
           style={{
@@ -251,10 +252,14 @@ export const useSetColumns = (
               (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData.type === 'LINK' &&
-                  !Array.isArray(field.fieldData[column.field]))
-              ? splitByComma(field.fieldData[column.field]).join(', ')
+                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+              ? !Array.isArray(field.fieldData[column.field])
+                ? splitByComma(field.fieldData[column.field])
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
+                : field.fieldData[column.field]
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
@@ -289,10 +294,14 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData.type === 'LINK' &&
-                  !Array.isArray(field.fieldData[column.field]))
-              ? splitByComma(field.fieldData[column.field]).join(', ')
+                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+              ? !Array.isArray(field.fieldData[column.field])
+                ? splitByComma(field.fieldData[column.field])
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
+                : field.fieldData[column.field]
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'

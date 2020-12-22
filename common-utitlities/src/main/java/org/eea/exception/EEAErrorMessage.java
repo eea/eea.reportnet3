@@ -305,6 +305,10 @@ public final class EEAErrorMessage {
   /** The Constant DUPLICATED_NAME_INTEGRATION: {@value}. */
   public static final String DUPLICATED_INTEGRATION_NAME = "Duplicated integration name";
 
+  /** The Constant PK_ID_ALREADY_EXIST: {@value}. */
+  public static final String PK_ID_ALREADY_EXIST =
+      "The value %s in a pk already exist in this Webform";
+
   /**
    * Instantiates a new EEA error message.
    */

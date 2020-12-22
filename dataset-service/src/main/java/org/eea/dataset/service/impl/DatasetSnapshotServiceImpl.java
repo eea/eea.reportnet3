@@ -373,19 +373,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
-    Optional<Snapshot> snap = snapshotRepository.findById(idSnapshot);
-    if (snap.isPresent()) {
-      if (Boolean.TRUE.equals(snap.get().getAutomatic())) {
-        LOG_ERROR.error("Error deleting snapshot, the snapshot is automatic");
-        throw new EEAException(EEAErrorMessage.ERROR_DELETING_SNAPSHOT);
-      }
-      // Remove from the metabase
-      snapshotRepository.deleteById(idSnapshot);
-      // Delete the file
-      recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
-
-      LOG.info("Snapshot {} removed", idSnapshot);
+    if (Boolean.TRUE.equals(snapshotRepository.findById(idSnapshot).get().getAutomatic())) {
+      LOG_ERROR.error("Error deleting snapshot, the snapshot is automatic");
+      throw new EEAException(EEAErrorMessage.ERROR_DELETING_SNAPSHOT);
     }
+    // Remove from the metabase
+    snapshotRepository.deleteById(idSnapshot);
+    // Delete the file
+    recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
+
+    LOG.info("Snapshot {} removed", idSnapshot);
   }
 
   /**
@@ -1033,8 +1030,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
+    // List of the representatives
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
+            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
     // Lock all the operations related to the datasets involved
-    addLocksRelatedToRelease(datasetsFilters, dataflowId);
+    addLocksRelatedToRelease(datasetsFilters, representatives, dataflowId);
 
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
 
@@ -1055,6 +1056,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<Long> datasets = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
+    // List of the representatives
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
+            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
     // We have to lock all the dataset operations (insert, delete, update...)
     for (Long datasetId : datasets) {
@@ -1075,7 +1080,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
       // Import
       lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId));
+          Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
       // Import Etl
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
@@ -1086,8 +1091,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         lockService.removeLockByCriteria(Arrays.asList(LockSignature.DELETE_IMPORT_TABLE.getValue(),
             datasetId, table.getIdTableSchema()));
 
-        lockService.removeLockByCriteria(Arrays.asList(LockSignature.LOAD_TABLE.getValue(),
-            datasetId, table.getIdTableSchema()));
+        lockService.removeLockByCriteria(
+            Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
       }
       // Set the 'releasing' property to false in the dataset metabase
       ReportingDatasetVO reportingVO = new ReportingDatasetVO();
@@ -1110,10 +1115,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * Adds the locks related to release.
    *
    * @param datasets the datasets
+   * @param representatives the representatives
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void addLocksRelatedToRelease(List<Long> datasets, Long dataflowId) throws EEAException {
+  private void addLocksRelatedToRelease(List<Long> datasets, List<RepresentativeVO> representatives,
+      Long dataflowId) throws EEAException {
     // We have to lock all the dataset operations (insert, delete, update...)
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     for (Long datasetId : datasets) {
@@ -1138,10 +1145,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         mapCriteriaTables.put("tableSchemaId", table.getIdTableSchema());
 
         createlockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables, userName);
-        createlockWithSignature(LockSignature.LOAD_TABLE, mapCriteriaTables, userName);
       }
       // Import
-      createlockWithSignature(LockSignature.LOAD_DATASET_DATA, mapCriteria, userName);
+      createlockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
       // ETL Import
       createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
 
