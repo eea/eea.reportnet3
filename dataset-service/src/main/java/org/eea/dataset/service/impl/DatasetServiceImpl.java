@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -813,7 +812,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -2760,7 +2759,7 @@ public class DatasetServiceImpl implements DatasetService {
     final Long datasetPartitionId =
         datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
 
-    Map<String, RecordValue> mapTargetRecordValues = new LinkedHashMap<>();
+    Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
     for (TableSchema desingTable : listOfTablesFiltered) {
       // Get number of fields per record. Doing it on origin table schema as origin and target has
       // the same structure
@@ -2786,8 +2785,8 @@ public class DatasetServiceImpl implements DatasetService {
           orignTable.getIdTableSchema(),
           dictionaryOriginTargetObjectId.get(orignTable.getIdTableSchema()));
       // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
-      Integer currentPage = 0;
-      Pageable fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
+
+      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord, Sort.by("record"));
 
       List<FieldValue> pagedFieldValues;
 
@@ -2795,7 +2794,7 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues =
           fieldRepository.findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage))
-              .size() > 0) {
+          .size() > 0) {
         LOG.info(
             "fieldValuePage current data, currentPage {}, number of records {}, number of retrieved record {}",
             fieldValuePage.getPageNumber(), fieldValuePage.getPageSize(), pagedFieldValues.size());
@@ -2841,8 +2840,8 @@ public class DatasetServiceImpl implements DatasetService {
             mapTargetRecordValues.remove(originRecordId);
           }
         });
-        currentPage++;
-        fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
+
+        fieldValuePage = fieldValuePage.next();
       }
 
     }
