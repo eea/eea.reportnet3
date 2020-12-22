@@ -970,6 +970,7 @@
     "sectorAffected": "Sector affected",
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
-    "otherObjectives": "Other objectives"
+    "otherObjectives": "Other objectives",
+    "pamname": "PaM name"
   }
 }
