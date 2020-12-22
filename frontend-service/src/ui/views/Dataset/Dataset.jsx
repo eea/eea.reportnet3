@@ -90,6 +90,7 @@ export const Dataset = withRouter(({ match, history }) => {
     import: [],
     importOtherSystems: []
   });
+  const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
@@ -137,27 +138,21 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [tableSchema]);
 
   useEffect(() => {
-    if (!isNil(webformData)) {
-      setHasWritePermissions(isNil(webformData));
+    if (!isNil(dataset) && dataset.isReleasing) {
+      setHasWritePermissions(!dataset.isReleasing);
     } else {
-      if (!isNil(dataset) && dataset.isReleasing) {
-        setHasWritePermissions(!dataset.isReleasing);
-      } else {
-        if (!isUndefined(userContext.contextRoles)) {
-          setHasWritePermissions(
-            userContext.hasPermission(
-              [config.permissions.LEAD_REPORTER],
-              `${config.permissions.DATASET}${datasetId}`
-            ) ||
-              userContext.hasPermission(
-                [config.permissions.REPORTER_WRITE],
-                `${config.permissions.DATASET}${datasetId}`
-              )
-          );
-        }
+      if (!isUndefined(userContext.contextRoles)) {
+        setHasWritePermissions(
+          userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
+            userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
+        );
       }
     }
   }, [userContext, dataset]);
+
+  useEffect(() => {
+    !isNil(webformData) && setHasWebformWritePermissions(false);
+  }, [webformData]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -773,7 +768,8 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) && (
+    !isNil(webformData) &&
+    hasWritePermissions && (
       // <div className={styles.switch}>
       //   <div className={`${styles.wrap}`}>
       //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
