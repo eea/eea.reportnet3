@@ -1347,7 +1347,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             name="file"
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
               datasetId: datasetId
             })}`}
           />

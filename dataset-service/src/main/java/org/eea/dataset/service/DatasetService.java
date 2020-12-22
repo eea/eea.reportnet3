@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -524,4 +525,14 @@ public interface DatasetService {
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
+
+  /**
+   * Gets the schema if reportable.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   *
+   * @return the schema if reportable
+   */
+  DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId);
 }

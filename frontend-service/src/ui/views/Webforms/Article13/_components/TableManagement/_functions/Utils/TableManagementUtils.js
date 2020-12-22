@@ -17,6 +17,11 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
 };
 
 const getSingleRecordOption = singleRecord => {
+  // if (singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))] === '') {
+  //   return `${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
+  // }
+
+  // return `${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
   if (singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))] === '') {
     return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
   }
@@ -37,7 +42,8 @@ const parseListOfSinglePams = (columns = [], records = []) => {
       ) {
         return getSingleRecordOption(singleRecord);
       }
-    });
+    })
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
   return columns.map(column => {
     if (column.header === 'ListOfSinglePams') {

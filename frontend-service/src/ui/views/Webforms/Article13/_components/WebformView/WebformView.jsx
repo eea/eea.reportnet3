@@ -1,18 +1,27 @@
-import React, { Fragment, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
+import uniq from 'lodash/uniq';
 
 import styles from './WebformView.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Column } from 'primereact/column';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { WebformService } from 'core/services/Webform';
 
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const WebformView = ({
   data,
@@ -22,12 +31,16 @@ export const WebformView = ({
   getFieldSchemaId,
   isRefresh,
   isReporting,
+  onUpdatePamsId,
+  pamsRecords,
   selectedTable,
   selectedTableName,
   setTableSchemaId,
   state,
   tables
 }) => {
+  const resources = useContext(ResourcesContext);
+
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
 
@@ -38,10 +51,11 @@ export const WebformView = ({
       state.schemaTables,
       tables,
       selectedTableName
-    )
+    ),
+    singlesCalculatedData: {}
   });
 
-  const { isLoading, isVisible } = webformViewState;
+  const { isLoading, isVisible, singlesCalculatedData } = webformViewState;
 
   useEffect(() => {
     const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
@@ -56,7 +70,137 @@ export const WebformView = ({
     }
   }, [selectedTableName]);
 
+  useEffect(() => {
+    getSingleData();
+  }, [datasetId, selectedTable.pamsId]);
+
+  const getSingleData = async () => {
+    try {
+      const singleData = await WebformService.singlePamData(datasetId, selectedTable.pamsId);
+      webformViewDispatch({ type: 'SET_SINGLE_CALCULATED_DATA', payload: singleData.data });
+    } catch (error) {
+      console.error('error', error);
+    }
+  };
+
+  const calculateSingle = field => {
+    switch (field.name.toLowerCase()) {
+      case 'ghgaffected':
+      case 'sectoraffected':
+      case 'policyinstrument':
+      case 'policyimpacting':
+      case 'unionpolicylist':
+        const fields = combinationFieldRender(field.name);
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
+      case 'ispolicymeasureenvisaged':
+        return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
+      case 'statusimplementation':
+        return tableFieldRender(field.name, [
+          'implementationperiodstart',
+          'implementationperiodfinish',
+          'implementationperiodcomment'
+        ]);
+      case 'projectionsscenario':
+        return tableFieldRender(field.name, []);
+      case 'entities':
+        return combinationTableRender('entities');
+      case 'sectorobjectives':
+        return combinationTableRender('sectors');
+      default:
+        break;
+    }
+
+    return <span disabled={true}>{field.value}</span>;
+  };
+
+  const checkValueFieldRender = (fieldName, valueToCheck) => {
+    let containsValue = false;
+    let fieldValue;
+
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
+          containsValue = true;
+        } else {
+          fieldValue = singleRecordValue;
+        }
+      }
+    });
+
+    return containsValue ? valueToCheck : fieldValue;
+  };
+
+  const combinationFieldRender = fieldName => {
+    const combinatedValues = [];
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        combinatedValues.push(Array.isArray(singleRecordValue) ? singleRecordValue.join(', ') : singleRecordValue);
+      }
+    });
+
+    return uniq(combinatedValues);
+  };
+
+  const combinationTableRender = tableName => {
+    const combinatedTableValues = [];
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        combinatedTableValues.push(...singleRecordValue);
+      }
+    });
+    return renderTable(combinatedTableValues);
+  };
+
+  const isGroup = () => {
+    const filteredField = pamsRecords
+      .find(pamRecord => pamRecord.recordId === selectedTable.recordId)
+      .elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
+    return TextUtils.areEquals(filteredField.value, 'Group');
+  };
+
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
+
+  const renderColumns = fields =>
+    !isNil(fields[0]) &&
+    Object.keys(fields[0]).map(field => (
+      <Column
+        key={field}
+        columnResizeMode="expand"
+        field={field}
+        filter={true}
+        filterMatchMode="contains"
+        header={resources.messages[field]}
+        sortable={true}
+      />
+    ));
+
+  const tableFieldRender = (fieldName, columnFields) => {
+    const combinatedTableValues = [];
+    singlesCalculatedData.forEach(singleRecord => {
+      const singleRecordValue =
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+      if (!isNil(singleRecordValue)) {
+        const columnFieldsValues = { pamsId: singleRecord['id'], [fieldName]: singleRecordValue };
+        columnFields.forEach(columnField => {
+          const columnFieldValue =
+            singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === columnField.toLowerCase())];
+          if (!isNil(columnFieldValue)) {
+            columnFieldsValues[columnField] = columnFieldValue;
+          }
+        });
+        combinatedTableValues.push(columnFieldsValues);
+      }
+    });
+    return renderTable(combinatedTableValues);
+  };
+
+  const renderTable = fields => <DataTable value={fields}>{renderColumns(fields)}</DataTable>;
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {
@@ -65,6 +209,10 @@ export const WebformView = ({
     });
 
     webformViewDispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
+  };
+
+  const onUpdateSinglesList = () => {
+    getSingleData();
   };
 
   const renderWebFormHeaders = () => {
@@ -102,13 +250,18 @@ export const WebformView = ({
 
     return (
       <WebformTable
+        calculateSingle={calculateSingle}
         dataflowId={dataflowId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
+        isGroup={isGroup}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
+        onUpdateSinglesList={onUpdateSinglesList}
+        onUpdatePamsId={onUpdatePamsId}
+        pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
         webform={visibleContent}

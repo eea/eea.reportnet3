@@ -3,5 +3,6 @@ export const UpdateField = ({ datasetRepository }) => async (
   fieldSchemaId,
   fieldId,
   fieldType,
-  fieldValue
-) => datasetRepository.updateFieldById(datasetId, fieldSchemaId, fieldId, fieldType, fieldValue);
+  fieldValue,
+  updateInCascade
+) => datasetRepository.updateFieldById(datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade);

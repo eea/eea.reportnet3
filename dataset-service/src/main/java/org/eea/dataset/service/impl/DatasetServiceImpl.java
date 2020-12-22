@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,7 +55,6 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
-import org.eea.dataset.persistence.schemas.repository.ExtendedSchemaRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -530,7 +528,7 @@ public class DatasetServiceImpl implements DatasetService {
         LOG.info("Ordered by idFieldSchema {}", commonShortFields);
       }
 
-      // 5º retrieve validations to set them into the final result
+      // 5Âº retrieve validations to set them into the final result
       retrieveValidations(recordVOs);
 
     }
@@ -2739,7 +2737,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
       List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId,
       List<AttachmentValue> attachments) {
-
+    List<RecordValue> result = new ArrayList<>();
     TenantResolver.setTenantName(
         String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
 
@@ -2761,64 +2759,66 @@ public class DatasetServiceImpl implements DatasetService {
     final Long datasetPartitionId =
         datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
 
-    Map<String, List<FieldValue>> dictionaryRecordFieldValues = new HashMap<>();
-
+    Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
     for (TableSchema desingTable : listOfTablesFiltered) {
-      //Get number of fields per record. Doing it on origin table schema as origin and target has the same structure
+      // Get number of fields per record. Doing it on origin table schema as origin and target has
+      // the same structure
       Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
 
-      //get target table by translating origing table schema into target table schema and then query to target database
+      // get target table by translating origing table schema into target table schema and then
+      // query to target database
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
-      TableValue targetTable = tableRepository.findByIdTableSchema(dictionaryOriginTargetObjectId
-          .get(desingTable.getIdTableSchema().toString()));
-
-      LOG.info("Target table recovered {}, mapped from schema {} to {}",
-          targetTable.getIdTableSchema(),
-          desingTable.getIdTableSchema(), dictionaryOriginTargetObjectId
-              .get(desingTable.getIdTableSchema().toString()));
+      TableValue targetTable = tableRepository.findByIdTableSchema(
+          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      TableValue orignTable = this.tableRepository
-          .findByIdTableSchema(desingTable.getIdTableSchema().toString());
-      LOG.info("Origin table recovered {}, in origin dataset {}, mapped from schema {} to {}",
-          orignTable.getIdTableSchema(), orignTable.getDatasetId().getId(),
-          orignTable.getIdTableSchema(), dictionaryOriginTargetObjectId
-              .get(orignTable.getIdTableSchema()));
-      //creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
-      Integer currentPage = 0;
-      Pageable fieldValuePage = PageRequest.of(currentPage,
-          1000 * numberOfFieldsInRecord);
+      TableValue orignTable =
+          this.tableRepository.findByIdTableSchema(desingTable.getIdTableSchema().toString());
+
+      // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
+
+      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord, Sort.by("record"));
 
       List<FieldValue> pagedFieldValues;
 
-      Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
-      //run through the origin table, getting its records and fields and translating them into the new schema
-      while ((pagedFieldValues = fieldRepository
-          .findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage)).size() > 0) {
+      // run through the origin table, getting its records and fields and translating them into the
+      // new schema
+      while ((pagedFieldValues =
+          fieldRepository.findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage))
+          .size() > 0) {
 
-        //make list of field vaues grouped by their record id. The field values will be set with the taget schemas id so they can be inserted
-        dictionaryRecordFieldValues.putAll(pagedFieldValues.stream().map(field -> {
+        //NOTE: In case insert order matters it is necessary to retrieve all the records and recover their fields
+        //For this, the best is getting fields in big completed sets and assign them to the records to avoid excessive queries to bd
+
+        // make list of field vaues grouped by their record id. The field values will be set with
+        // the taget schemas id so they can be inserted
+        pagedFieldValues.stream().forEach(field -> {
           FieldValue auxField = new FieldValue();
           auxField.setValue(field.getValue());
           auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
           auxField.setType(field.getType());
 
-          //transform the grouping record in the target one. Do it only once, meaning, recordValue.id is not null
+          //transform the grouping record in the target one. Do it only once
           String targetIdRecordSchema = dictionaryOriginTargetObjectId
               .get(field.getRecord().getIdRecordSchema());
-          if (!mapTargetRecordValues.containsKey(targetIdRecordSchema)) {
+          String originRecordId = field.getRecord().getId();
+          if (!mapTargetRecordValues.containsKey(originRecordId)) {
 
             RecordValue targetRecordValue = new RecordValue();
+
             targetRecordValue.setDatasetPartitionId(datasetPartitionId);
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
-            mapTargetRecordValues.put(targetIdRecordSchema, targetRecordValue);
-
+            targetRecordValue.setFields(new ArrayList<>());
+            //using temporary recordId as grouping criteria, then it will be removed before giving back
+            mapTargetRecordValues.put(originRecordId, targetRecordValue);
+            result.add(targetRecordValue);
           }
 
-          auxField.setRecord(mapTargetRecordValues.get(targetIdRecordSchema));
+          auxField.setRecord(mapTargetRecordValues.get(originRecordId));
+
           if (DataType.ATTACHMENT.equals(field.getType())) {
             if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
               dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
@@ -2827,21 +2827,21 @@ public class DatasetServiceImpl implements DatasetService {
 
           }
           auxField.setGeometry(field.getGeometry());
-          return auxField;
-        }).collect(Collectors.groupingBy(fv -> fv.getRecord().getIdRecordSchema())));
-        currentPage++;
-        fieldValuePage = PageRequest.of(currentPage,
-            1000 * numberOfFieldsInRecord);
+          mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
+          //when the record has reached the number of fields per record then remove from the map to avoid rehashing
+          if (mapTargetRecordValues.get(originRecordId).getFields().size()
+              == numberOfFieldsInRecord) {
+            mapTargetRecordValues.remove(originRecordId);
+          }
+        });
+
+        fieldValuePage = fieldValuePage.next();
       }
 
     }
 
     attachments.addAll(dictionaryIdFieldAttachment.values());
-    return dictionaryRecordFieldValues.entrySet().stream().map(entry -> {
-      RecordValue recordValue = entry.getValue().get(0).getRecord();
-      recordValue.setFields(entry.getValue());
-      return recordValue;
-    }).collect(Collectors.toList());
+    return result;
   }
 
 
@@ -3124,5 +3124,49 @@ public class DatasetServiceImpl implements DatasetService {
             fieldNoValidationMapper.classToEntity(fieldValueVO));
       }
     }
+  }
+
+  /**
+   * Gets the schema if reportable.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   *
+   * @return the schema if reportable
+   */
+  @Override
+  public DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
+
+    DataSetMetabase dataset = null;
+    DataSetSchema schema = null;
+
+    // Dataset: DESIGN
+    dataset = designDatasetRepository.findById(datasetId).orElse(null);
+    if (null != dataset) {
+      if (TypeStatusEnum.DESIGN
+          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+      }
+    }
+
+    // Dataset: REPORTING
+    else {
+      dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+      if (null != dataset && TypeStatusEnum.DRAFT
+          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+        if (null != tableSchemaId) {
+          TableSchema tableSchema = schema.getTableSchemas().stream()
+              .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
+              .orElse(null);
+          if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
+              || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+            schema = null;
+          }
+        }
+      }
+    }
+
+    return schema;
   }
 }
