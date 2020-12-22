@@ -112,12 +112,13 @@ public class RulesControllerImpl implements RulesController {
    * Delete rules schema.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @Override
   @HystrixCommand
   @DeleteMapping("/private/deleteRulesSchema")
-  public void deleteRulesSchema(String datasetSchemaId) {
-    rulesService.deleteEmptyRulesSchema(datasetSchemaId);
+  public void deleteRulesSchema(String datasetSchemaId, Long datasetId) {
+    rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
   }
 
   /**
@@ -558,11 +559,23 @@ public class RulesControllerImpl implements RulesController {
   }
 
 
+  /**
+   * Gets the integrity rules by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity rules by dataset schema id
+   */
   @Override
   @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
   public List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
       @PathVariable("datasetSchemaId") String datasetSchemaId) {
     return rulesService.getIntegritySchemas(datasetSchemaId);
+  }
+
+  @Override
+  @PostMapping("/private/insertIntegrities")
+  public void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO) {
+    rulesService.insertIntegritySchemas(integritiesVO);
   }
 
 }

@@ -612,7 +612,7 @@ public class RulesServiceImplTest {
   @Test
   public void deleteEmptyRulesSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(new RulesSchema());
-    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac", 1L);
     Mockito.verify(rulesRepository, times(1)).deleteByIdDatasetSchema(Mockito.any());
   }
 
@@ -622,7 +622,7 @@ public class RulesServiceImplTest {
   @Test
   public void deleteEmptyRulesScehmaNoSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
-    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac", 1L);
     Mockito.verify(rulesRepository, times(1)).findByIdDatasetSchema(Mockito.any());
   }
 

@@ -68,7 +68,8 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    */
   @DeleteMapping("/private/deleteRulesSchema")
-  void deleteRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId);
+  void deleteRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId);
 
   /**
    * Delete rule by id.
@@ -353,5 +354,9 @@ public interface RulesController {
   @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
   List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
       @PathVariable("datasetSchemaId") String datasetSchemaId);
+
+
+  @PostMapping("/private/insertIntegrities")
+  void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO);
 
 }

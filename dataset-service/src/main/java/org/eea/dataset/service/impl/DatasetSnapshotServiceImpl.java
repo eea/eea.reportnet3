@@ -695,7 +695,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG.info("Schema Unique class recovered");
 
 
-      rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString());
+      rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString(), idDataset);
       rulesRepository.save(rules);
 
       uniqueConstraintRepository.deleteByDatasetSchemaId(schema.getIdDataSetSchema());
@@ -712,7 +712,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           documentControllerZuul.getSnapshotDocument(idDataset, nameFileIntegrity);
       List<IntegrityVO> listIntegrityVO =
           objectMapperUnique.readValue(contentIntegrity, new TypeReference<List<IntegrityVO>>() {});
-
+      if (listIntegrityVO != null && !listIntegrityVO.isEmpty()) {
+        rulesControllerZuul.insertIntegritySchema(listIntegrityVO);
+      }
 
 
       LOG.info("Schema Integrity class recovered");

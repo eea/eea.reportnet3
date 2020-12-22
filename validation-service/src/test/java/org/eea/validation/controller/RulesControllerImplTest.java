@@ -294,8 +294,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void deleteRulesSchemaTest() throws EEAException {
-    rulesControllerImpl.deleteRulesSchema("5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesService, times(1)).deleteEmptyRulesSchema(Mockito.any());
+    rulesControllerImpl.deleteRulesSchema("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(rulesService, times(1)).deleteEmptyRulesSchema(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -306,7 +306,7 @@ public class RulesControllerImplTest {
   @Test
   public void deleteRulesSchemaNoschemaIDTest() throws EEAException {
     try {
-      rulesControllerImpl.deleteRulesSchema(null);
+      rulesControllerImpl.deleteRulesSchema(null, 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
