@@ -147,7 +147,8 @@ public class FileTreatmentHelper implements DisposableBean {
     try (InputStream input = multipartFile.getInputStream()) {
 
       // Prepare the folder where files will be stored
-      File folder = new File(pathImport + datasetId);
+      File root = new File(pathImport);
+      File folder = new File(root, datasetId.toString());
       String fileName = multipartFile.getOriginalFilename();
       String saveLocationPath = folder.getCanonicalPath();
       folder.mkdirs();
