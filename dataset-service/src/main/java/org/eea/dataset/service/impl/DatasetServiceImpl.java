@@ -2786,7 +2786,10 @@ public class DatasetServiceImpl implements DatasetService {
       // run through the origin table, getting its records and fields and translating them into the
       // new schema
       while ((pagedFieldValues =
-          fieldRepository.findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage))
+          fieldRepository
+              .findByRecord_IdRecordSchema(
+                  desingTable.getRecordSchema().getIdRecordSchema().toString(),
+                  fieldValuePage))
           .size() > 0) {
 
         //NOTE: In case insert order matters it is necessary to retrieve all the records and recover their fields
