@@ -1,7 +1,5 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
-
-import DOMPurify from 'dompurify';
 
 import styles from './PrivacyStatement.module.scss';
 
@@ -10,7 +8,7 @@ import { Title } from 'ui/views/_components/Title';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const PrivacyStatement = withRouter(({ history }) => {
+const PrivacyStatement = withRouter(() => {
   const resources = useContext(ResourcesContext);
 
   const onClickAnchorLink = e => {
@@ -57,17 +55,42 @@ const PrivacyStatement = withRouter(({ history }) => {
             <ul>
               <li>
                 <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprIntroduction">
-                  {resources.messages['gdprIntroduction']}
+                  Introduction
                 </a>
               </li>
               <li>
                 <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprDataCollectedTitle">
-                  {resources.messages['gdprDataCollectedTitle']}
+                  What personal data do we collect and for what purpose
                 </a>
               </li>
               <li>
                 <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprWhoCanSee">
-                  {resources.messages['gdprWhoCanSee']}
+                  Who can see your personal data
+                </a>
+              </li>
+              <li>
+                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowCanAccess">
+                  How can you access or rectify your information
+                </a>
+              </li>
+              <li>
+                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprSiteUsage">
+                  Site usage statistics and personalised experience settings
+                </a>
+              </li>
+              <li>
+                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowLongStore">
+                  How long do we store your personal data
+                </a>
+              </li>
+              <li>
+                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowSecure">
+                  How do we secure your personal data
+                </a>
+              </li>
+              <li>
+                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowContact">
+                  How to contact us and right to appeal
                 </a>
               </li>
             </ul>
@@ -159,6 +182,85 @@ const PrivacyStatement = withRouter(({ history }) => {
               <p>
                 There are no third country transfers. We store your data within the European Economic Area/European
                 Union.
+              </p>
+            </section>
+            <section id="gdprHowCanAccess">
+              <h3>How can you access or rectify your information</h3>
+              <p>
+                For authenticated users: if you wish to access, modify any of your personal data please log in with your
+                EU login account and click on the profile icon in the top left navigation.
+              </p>
+              <p>
+                If you wish to modify any of your uploaded content you should be able to do it just by logging in and
+                re-editing your uploaded content to the site. In some cases, you are also able to delete the content you
+                have uploaded yourself.
+              </p>
+              <p>
+                You can receive a copy of your personal data that has been submitted to the Reportnet 3.0 platform by
+                sending an email to the Reportnet Helpdesk (
+                <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>).
+              </p>
+            </section>
+            <section id="gdprSiteUsage">
+              <h3>Site usage statistics and personalised experience settings</h3>
+              <p>
+                We do not store personal data in cookies. We may store your own page settings in non-personalized ways
+                (e.g. your language settings).
+              </p>
+              <p>
+                By default, the browsing experience of website visitors is tracked by EEA Matomo software in order to
+                produce anonymised statistics. For example, when you visit our website, we may collect some data on your
+                browsing experience such as your masked IP address (anonymized by removing the last two bytes), the web
+                page you visited, when you visited and the website page you were redirected from.
+              </p>
+              <p>
+                This information is used to gather aggregated and anonymous statistics with a view to improving our
+                services and to enhance your user experience. The analytical reports generated by EEA Matomo can only be
+                accessed by the EEA staff, other relevant EU institution staff or by duly authorised external
+                sub-contractors, who may be required to analyse, develop and/or regularly maintain certain sites.
+              </p>
+              <p>
+                By default, our Matomo installation respects users’ preferences and will not track visitors which have
+                specified "I do not want to be tracked" in their web browsers (aka "Do not track").
+              </p>
+            </section>
+            <section id="gdprHowLongStore">
+              <h3>How long do we store your personal data</h3>
+              <p>
+                For authenticated users: The personal data you provide in Reportnet 3.0 will be kept up to seven (7)
+                years. After seven (7) years from the date that you have registered to Reportnet 3.0, your personal data
+                will be anonymised and the link to your EU login account will be removed.
+              </p>
+              <p>
+                Additionally, you always have the right to get your account deleted from the Reportnet 3.0 Directory by
+                sending an email to the Reportnet Helpdesk (
+                <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>).
+              </p>
+            </section>
+            <section id="gdprHowSecure">
+              <h3>How do we secure your personal data</h3>
+              <p>
+                Access to your personal data is subject to strict security controls like encryption and access control.
+                We do not share your personal data with third parties without your prior consent.
+              </p>
+              <p>
+                The functioning of the servers and databases containing the personal data is compliant with the EEA's
+                Information Security Policy and the provisions established by the EEA's Information Security Officer.
+              </p>
+            </section>
+            <section id="gdprHowContact">
+              <h3>How to contact us and right to appeal</h3>
+              <p>
+                You may contact the EEA’s Data Protection Officer (DPO) in case of any difficulties relating to the
+                processing of your data at the following email address:{' '}
+                <a href="mailto:dpo@eea.europa.eu">dpo@eea.europa.eu</a>.
+              </p>
+              <p>
+                You are entitled to have recourse at any time to the European Data Protection Supervisor (
+                <a href="https://edps.europa.eu">https://edps.europa.eu</a>;{' '}
+                <a href="mailto:edps@edps.europa.eu">edps@edps.europa.eu</a>) if you consider that your rights under
+                Regulation (EU) 2018/1725 have been infringed as a result of the processing of your personal data by the
+                EEA.
               </p>
             </section>
           </div>
