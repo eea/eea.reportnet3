@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -341,5 +342,16 @@ public interface RulesController {
   @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
   void deleteAutomaticRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId);
+
+
+  /**
+   * Gets the integrity rules by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity rules by dataset schema id
+   */
+  @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
+  List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId);
 
 }

@@ -62,6 +62,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
@@ -212,6 +213,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   /** The Constant FILE_PATTERN_NAME_UNIQUE. */
   private static final String FILE_PATTERN_NAME_UNIQUE = "uniqueSnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
+  private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
@@ -623,6 +627,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
           nameFileUnique);
 
+      // We need to create a file related to the IntegritySchema
+      List<IntegrityVO> listIntegrity =
+          rulesControllerZuul.getIntegrityRulesByDatasetSchemaId(idDatasetSchema);
+      ObjectMapper objectMapperIntegrity = new ObjectMapper();
+      String nameFileIntegrity = String.format(FILE_PATTERN_NAME_INTEGRITY, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
+      outStream.reset();
+      objectMapperIntegrity.writeValue(outStream, listIntegrity);
+      documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
+          nameFileIntegrity);
+
+
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
@@ -689,6 +705,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       uniqueConstraintRepository.saveAll(listUnique);
 
 
+      // Since there's the Integrity rule, we need to restore that file too
+      // Get the integrity document to mapper it into the List of IntegritySchema
+      String nameFileIntegrity = String.format(FILE_PATTERN_NAME_INTEGRITY, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
+      ObjectMapper objectMapperIntegrity = new ObjectMapper();
+      objectMapperIntegrity.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      byte[] contentIntegrity =
+          documentControllerZuul.getSnapshotDocument(idDataset, nameFileIntegrity);
+      List<IntegrityVO> listIntegrityVO =
+          objectMapperUnique.readValue(contentIntegrity, new TypeReference<List<IntegrityVO>>() {});
+
+
+
+      LOG.info("Schema Integrity class recovered");
+
+
       // First we delete all the entries in the catalogue of the previous schema, before replacing
       // it
       // by the one of the snapshot
@@ -702,9 +734,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       schemaService.updatePKCatalogueAndForeignsAfterSnapshot(
           schema.getIdDataSetSchema().toString(), idDataset);
 
+      // Redo the views of the dataset
+      recordStoreControllerZuul.createUpdateQueryView(idDataset, false);
+
       LOG.info("Schema Snapshot {} totally restored", idSnapshot);
     } catch (EEAException | FeignException e) {
-      LOG_ERROR.error("Error restoring a schema snapshot. IdDataset {}, IdSnapshot {}.Message: ",
+      LOG_ERROR.error("Error restoring a schema snapshot. IdDataset {}, IdSnapshot {}. Message: {}",
           idDataset, idSnapshot, e.getMessage(), e);
       releaseEvent(EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset,
           "Error restoring the schema snapshot");

@@ -256,4 +256,13 @@ public interface RulesService {
    * @param referenceId the reference id
    */
   void deleteAutomaticRuleByReferenceId(String datasetSchemaId, String referenceId);
+
+
+  /**
+   * Gets the integrity schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity schemas
+   */
+  List<IntegrityVO> getIntegritySchemas(String datasetSchemaId);
 }

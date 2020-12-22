@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
@@ -556,5 +557,12 @@ public class RulesControllerImpl implements RulesController {
     LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
   }
 
+
+  @Override
+  @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
+  public List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.getIntegritySchemas(datasetSchemaId);
+  }
 
 }

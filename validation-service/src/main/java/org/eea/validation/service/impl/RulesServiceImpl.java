@@ -1205,4 +1205,18 @@ public class RulesServiceImpl implements RulesService {
 
     return uncheckedRules;
   }
+
+
+  /**
+   * Gets the integrity schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity schemas
+   */
+  @Override
+  public List<IntegrityVO> getIntegritySchemas(String datasetSchemaId) {
+    List<IntegritySchema> integrities =
+        integritySchemaRepository.findByOriginDatasetSchemaId(new ObjectId(datasetSchemaId));
+    return integrityMapper.entityListToClass(integrities);
+  }
 }
