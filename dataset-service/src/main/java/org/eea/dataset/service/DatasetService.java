@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -23,7 +24,6 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface Dataset service.
@@ -527,16 +527,12 @@ public interface DatasetService {
   DatasetTypeEnum getDatasetType(Long datasetId);
 
   /**
-   * Import file data.
+   * Gets the schema if reportable.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
-   * @param file the file
-   * @param replace the replace
-   * @throws EEAException the EEA exception
+   *
+   * @return the schema if reportable
    */
-  void importFileData(Long datasetId, String tableSchemaId, MultipartFile file, boolean replace)
-      throws EEAException;
-
-
+  DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId);
 }

@@ -41,6 +41,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return the list
    */
   FieldValue findFirstByIdFieldSchemaAndValue(String idFieldSchema, String value);
@@ -50,6 +51,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return the list
    */
   List<FieldValue> findByIdFieldSchemaAndValue(String idFieldSchema, String value);
@@ -73,14 +75,18 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   List<FieldValue> findByRecord(RecordValue record);
 
   /**
-   * Find by record.
+   * Find FieldValues by record Id.
    *
-   * @param tableId the table id
+   * @param recordIdSchema the record id schema
    * @param pageable the pageable
    *
    * @return the list
    */
-  List<FieldValue> findByRecord_TableValue_Id(Long tableId, Pageable pageable);
+  @Query(value =
+      "with records as(select rv.id  from record_value rv  where rv.id_record_schema=:recordIdSchema )"
+          + "select fv.* from field_value fv join records on records.id=fv.id_record ", nativeQuery = true)
+  List<FieldValue> findByRecord_IdRecordSchema(@Param("recordIdSchema") String recordIdSchema,
+      Pageable pageable);
 
   /**
    * Find first type by id field schema.
@@ -224,6 +230,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return true, if successful
    */
   @Query
@@ -234,6 +241,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return the field value
    */
   @Query

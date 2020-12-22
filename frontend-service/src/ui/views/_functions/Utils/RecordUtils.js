@@ -126,25 +126,31 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
   return !isNil(codelistItems)
-    ? codelistItems.sort().map(codelistItem => {
-        return { itemType: codelistItem, value: codelistItem };
-      })
+    ? codelistItems
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+        .map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })
     : [];
 };
 
 const getCodelistItemsInSingleColumn = column => {
   const codelistItems = column.codelistItems;
   return !isNil(codelistItems)
-    ? codelistItems.sort().map(codelistItem => {
-        return { itemType: codelistItem, value: codelistItem };
-      })
+    ? codelistItems
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+        .map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })
     : [];
 };
 
 const getCodelistItemsWithEmptyOption = (column, noneText) => {
-  const codelistItems = column.codelistItems.sort().map(codelistItem => {
-    return { itemType: codelistItem, value: codelistItem };
-  });
+  const codelistItems = column.codelistItems
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+    .map(codelistItem => {
+      return { itemType: codelistItem, value: codelistItem };
+    });
 
   codelistItems.unshift({
     itemType: noneText,

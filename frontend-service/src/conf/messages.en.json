@@ -960,6 +960,7 @@
     "addSingle": "Add single",
     "addGroup": "Add group",
     "pamsId": "PaM number",
+    "pamName": "PaM name",
     "StatusImplementation": "Status of Implementation",
     "implementationperiodcomment": "Comment on Implementation Period",
     "implementationperiodfinish": "Finish",
@@ -969,6 +970,7 @@
     "sectorAffected": "Sector affected",
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
-    "otherObjectives": "Other objectives"
+    "otherObjectives": "Other objectives",
+    "pamname": "PaM name"
   }
 }

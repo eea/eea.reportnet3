@@ -185,7 +185,7 @@
         },
         {
           "type": "FIELD",
-          "name": "TypePolicyInstrumen",
+          "name": "TypePolicyInstrument",
           "title": "Type of policy Instrument"
         },
         {
@@ -229,11 +229,13 @@
             "value": ["Other (Union policy not listed above or additional Union policy)"]
           },
           "multipleRecords": true,
+          "hasCalculatedFields": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "OtherUnionPolicy",
-              "title": "Other Union Policy"
+              "title": "Other Union Policy",
+              "calculatedWhenGroup": true
             }
           ]
         },
@@ -427,6 +429,13 @@
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
               "customType": "READ_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "paMNames",
+              "title": "Group of policies and measures",
+              "calculatedWhenGroup": true,
+              "hideWhenSingle": true
             }
           ]
         },
@@ -702,6 +711,13 @@
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
               "customType": "READ_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "paMNames",
+              "title": "Group of policies and measures",
+              "calculatedWhenGroup": true,
+              "hideWhenSingle": true
             }
           ]
         },

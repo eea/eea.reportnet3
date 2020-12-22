@@ -110,6 +110,28 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @throws EEAException the EEA exception
+   */
+  public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
+      boolean replace) throws EEAException {
+    DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+    if (null == schema) {
+      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
+          tableSchemaId, file.getName());
+      throw new EEAException(
+          "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
+    }
+    fileDataImportManagement(datasetId, tableSchemaId, schema, file, replace);
+  }
+
+  /**
    * File data import management.
    *
    * @param datasetId the dataset id
@@ -119,13 +141,14 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param delete the delete
    * @throws EEAException the EEA exception
    */
-  public void fileDataImportManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void fileDataImportManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
       MultipartFile multipartFile, boolean delete) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
       // Prepare the folder where files will be stored
-      File folder = new File(pathImport + datasetId);
+      File root = new File(pathImport);
+      File folder = new File(root, datasetId.toString());
       String fileName = multipartFile.getOriginalFilename();
       String saveLocationPath = folder.getCanonicalPath();
       folder.mkdirs();
@@ -211,7 +234,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param integrationVO the integration VO
    */
-  public void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       File file, IntegrationVO integrationVO) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     if (null != integrationVO) {
@@ -459,6 +482,7 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO =
         NotificationVO.builder().user(user).datasetId(datasetId).fileName(fileName).build();
     try {
@@ -483,6 +507,7 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .fileName(fileName).error(error).build();
     try {
@@ -507,9 +532,11 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).fileName(fileName).build();
     try {
+      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
       LOG.error("Error realeasing event: notificationVO={}", notificationVO, e);
@@ -532,6 +559,7 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.IMPORT_DESIGN_FAILED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).fileName(fileName).error(error).build();
     try {

@@ -2369,7 +2369,8 @@ public class DatasetServiceTest {
     field.setRecord(record);
     fieldValues.add(field);
 
-    when(fieldRepository.findByRecord_TableValue_Id(Mockito.anyLong(), Mockito.any(Pageable.class)))
+    when(fieldRepository
+        .findByRecord_IdRecordSchema(Mockito.anyString(), Mockito.any(Pageable.class)))
         .then(new Answer<List<FieldValue>>() {
 
           @Override
