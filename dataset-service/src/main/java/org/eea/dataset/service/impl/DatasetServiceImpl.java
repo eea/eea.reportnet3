@@ -2774,12 +2774,10 @@ public class DatasetServiceImpl implements DatasetService {
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-      TableValue orignTable =
-          this.tableRepository.findByIdTableSchema(desingTable.getIdTableSchema().toString());
 
       // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
 
-      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord, Sort.by("record"));
+      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord);
 
       List<FieldValue> pagedFieldValues;
 

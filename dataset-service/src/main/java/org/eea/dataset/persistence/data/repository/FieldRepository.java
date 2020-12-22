@@ -83,7 +83,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @return the list
    */
   @Query(value =
-      "with records as(select rv.id, row_number() over() as record_number  from record_value rv  where rv.id_record_schema=:recordIdSchema order by record_number asc)"
+      "with records as(select rv.id  from record_value rv  where rv.id_record_schema=:recordIdSchema )"
           + "select fv.* from field_value fv join records on records.id=fv.id_record ", nativeQuery = true)
   List<FieldValue> findByRecord_IdRecordSchema(@Param("recordIdSchema") String recordIdSchema,
       Pageable pageable);
