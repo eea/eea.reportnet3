@@ -108,19 +108,19 @@ export const WebformTable = ({
       payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
     });
 
-    let SectorObjectives;
+    let sectorObjectivesTable;
 
     if (!isEmpty(webformData.elementsRecords)) {
       const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
         if (element.name === 'SectorObjectives') {
-          SectorObjectives = element;
+          sectorObjectivesTable = element;
         }
         return element.tableSchemaId === tableSchemaId;
       })[0];
 
       // console.log('SectorObjectives', SectorObjectives);
 
-      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId, SectorObjectives);
+      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
