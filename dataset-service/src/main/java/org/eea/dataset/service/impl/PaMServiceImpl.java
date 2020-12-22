@@ -9,12 +9,15 @@ import java.util.Map;
 import org.bson.Document;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.pams.EntityPaMVO;
 import org.eea.interfaces.vo.pams.SectorVO;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
@@ -43,6 +46,12 @@ public class PaMServiceImpl implements PaMService {
   /** The dataset service. */
   @Autowired
   private DatasetService datasetService;
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * Gets the list single paM.
@@ -74,9 +83,12 @@ public class PaMServiceImpl implements PaMService {
     if (singlePamsValue != null) {
       String[] singlePams = singlePamsValue.split(PaMConstants.SEPARATOR);
       for (int i = 0; i < singlePams.length; i++) {
+        FieldValue single = fieldRepository
+            .findFirstByIdFieldSchemaAndValue(schemaIds.get(PaMConstants.ID), singlePams[i]);
         SinglePaMVO singlePaMVO = new SinglePaMVO();
         singlePaMVO.setId(singlePams[i]);
-        singlePaMVO.setPaMName("name");
+        singlePaMVO
+            .setPaMName(getValue(hasRecordsAndFields(single), schemaIds.get(PaMConstants.TITLE)));
         // set attributes of table1
         setAttributesTable1(schemaIds, singlePams[i], singlePaMVO);
         // set attributes entities
@@ -85,6 +97,9 @@ public class PaMServiceImpl implements PaMService {
         setAttributesTable2(schemaIds, singlePams[i], singlePaMVO);
         // set attributes sectors
         setAttributesSectors(schemaIds, singlePams[i], singlePaMVO);
+        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+        // set union policy other
+        setAttributesUnionPolicyOther(schemaIds, singlePams[i], singlePaMVO);
 
         listSinglePaM.add(singlePaMVO);
       }
@@ -116,9 +131,11 @@ public class PaMServiceImpl implements PaMService {
         sectorPaMs.setOtherSectors(getValue(fields, schemaIds.get(PaMConstants.OTHER_SECTORS)));
         sectorPaMs.setSectorAffected(getValue(fields, schemaIds.get(PaMConstants.SECTOR_AFFECTED)));
         String objectiveList = getValue(fields, schemaIds.get(PaMConstants.OBJECTIVE));
-        sectorPaMs.setObjectives(
+
+        sectorPaMs.setObjectives(getObjectivesValue(
             objectiveList != null ? Arrays.asList(objectiveList.split(PaMConstants.SEPARATOR))
-                : null);
+                : null,
+            schemaIds));
         String pkSectorObjective = getValue(fields, schemaIds.get(PaMConstants.PK));
         // add attributes otherObjectives
         List<String> objectives =
@@ -130,6 +147,25 @@ public class PaMServiceImpl implements PaMService {
     singlePaMVO.setSectors(sectors);
 
 
+  }
+
+
+  private List<String> getObjectivesValue(List<String> objectiveIds,
+      Map<String, String> schemaIds) {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME,
+        schemaIds.get(PaMConstants.DATASET_ID_PK)));
+    System.out.println(TenantResolver.getTenantName());
+    List<String> objectivesValue = new ArrayList<>();
+    if (null != objectiveIds) {
+      for (String objective : objectiveIds) {
+        FieldValue fkSectorObjectives = datasetService.getFieldValueByValue(
+            Long.valueOf(schemaIds.get(PaMConstants.DATASET_ID_PK)),
+            schemaIds.get(PaMConstants.OBJECTIVE_PK), objective);
+        objectivesValue.add(getValue(hasRecordsAndFields(fkSectorObjectives),
+            schemaIds.get(PaMConstants.OBJECTIVE_OBJECTIVES)));
+      }
+    }
+    return objectivesValue;
   }
 
 
@@ -198,6 +234,23 @@ public class PaMServiceImpl implements PaMService {
     }
   }
 
+  /**
+   * Sets the attributes union policy other.
+   *
+   * @param schemaIds the schema ids
+   * @param singlePamId the single pam id
+   * @param singlePaMVO the single pa MVO
+   */
+  private void setAttributesUnionPolicyOther(Map<String, String> schemaIds, String singlePamId,
+      SinglePaMVO singlePaMVO) {
+    FieldValue fkPamsTable2 = fieldRepository.findFirstByIdFieldSchemaAndValue(
+        schemaIds.get(PaMConstants.FK_PAMS_UNION_POLICY_OTHER), singlePamId);
+    if (fkPamsTable2 != null) {
+      List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
+      singlePaMVO
+          .setOtherUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.OTHER_UNION_POLICY)));
+    }
+  }
 
   /**
    * Sets the attributes entities.
@@ -288,12 +341,16 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.getIdTableSchema(PaMConstants.SECTOR_OBJECTIVES, schema);
     String otherObjectivesId =
         fileCommonUtils.getIdTableSchema(PaMConstants.OTHER_OBJECTIVES, schema);
+    String unionPolicyOtherId =
+        fileCommonUtils.getIdTableSchema(PaMConstants.UNION_POLICY_OTHER, schema);
 
     // PAMS
     schemaIds.put(PaMConstants.LIST_OF_SINGLE_PAMS, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.LIST_OF_SINGLE_PAMS, tablePamsId, schema)));
     schemaIds.put(PaMConstants.ID,
         isFieldSchemaNull(fileCommonUtils.findIdFieldSchema(PaMConstants.ID, tablePamsId, schema)));
+    schemaIds.put(PaMConstants.TITLE, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.TITLE, tablePamsId, schema)));
 
     // TABLE1
     schemaIds.put(PaMConstants.FK_PAMS_TABLE_1, isFieldSchemaNull(
@@ -342,6 +399,15 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER_SECTORS, sectorObjectivesId, schema)));
     schemaIds.put(PaMConstants.OBJECTIVE, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.OBJECTIVE, sectorObjectivesId, schema)));
+    // GET PKS OTHER SCHEMA
+    DataSetSchemaVO schemaPKs =
+        getSchemaPK(datasetId, schemaIds.get(PaMConstants.SECTOR_AFFECTED), schema, schemaIds);
+    String objectivesId = fileCommonUtils.getIdTableSchema(PaMConstants.OBJECTIVES, schemaPKs);
+    String sectorsId = fileCommonUtils.getIdTableSchema(PaMConstants.OBJECTIVES, schemaPKs);
+    schemaIds.put(PaMConstants.OBJECTIVE_OBJECTIVES, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.OBJECTIVE, objectivesId, schemaPKs)));
+    schemaIds.put(PaMConstants.OBJECTIVE_PK, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.ID, objectivesId, schemaPKs)));
 
     // OTHER OBJECTIVES
     schemaIds.put(PaMConstants.FK_PAMS_OTHER_OBJECTIVES, isFieldSchemaNull(
@@ -350,6 +416,14 @@ public class PaMServiceImpl implements PaMService {
         .findIdFieldSchema(PaMConstants.FK_SECTOR_OBJECTIVES, otherObjectivesId, schema)));
     schemaIds.put(PaMConstants.OTHER, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER, otherObjectivesId, schema)));
+
+    // UNION POLICY OTHER
+    schemaIds.put(PaMConstants.FK_PAMS_UNION_POLICY_OTHER, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.FK_PAMS, unionPolicyOtherId, schema)));
+    schemaIds.put(PaMConstants.OTHER_UNION_POLICY, isFieldSchemaNull(fileCommonUtils
+        .findIdFieldSchema(PaMConstants.OTHER_UNION_POLICY, unionPolicyOtherId, schema)));
+
+
 
     return schemaIds;
   }
@@ -497,6 +571,8 @@ public class PaMServiceImpl implements PaMService {
     return null;
   }
 
+
+
   /**
    * Checks if is field schema null.
    *
@@ -516,5 +592,63 @@ public class PaMServiceImpl implements PaMService {
   private List<FieldValue> hasRecordsAndFields(FieldValue fieldValue) {
     return fieldValue != null && fieldValue.getRecord() != null
         && fieldValue.getRecord().getFields() != null ? fieldValue.getRecord().getFields() : null;
+  }
+
+  private DataSetSchemaVO getSchemaPK(Long datasetIdReference, String idFieldSchemaFK,
+      DataSetSchemaVO schemaFK, Map<String, String> schemaIds) {
+    String idFieldSchemaPKString = getIdFieldSchemaPK(idFieldSchemaFK, schemaFK);
+    // Id Dataset contains PK list
+    Long datasetIdRefered =
+        datasetService.getReferencedDatasetId(datasetIdReference, idFieldSchemaPKString);
+    schemaIds.put(PaMConstants.DATASET_ID_PK, datasetIdRefered.toString());
+    // Get PK Schema
+    String pkSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetIdRefered);
+    // DataSetSchema datasetSchemaPK
+    return datasetSchemaService.getDataSchemaById(pkSchemaId);
+  }
+
+  /**
+   * Gets the id field schema PK.
+   *
+   * @param idFieldSchema the id field schema
+   * @param datasetSchemaFK the dataset schema FK
+   * @return the id field schema PK
+   */
+  private static String getIdFieldSchemaPK(String idFieldSchema, DataSetSchemaVO datasetSchemaFK) {
+    FieldSchemaVO idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
+
+    String idFieldSchemaPKString = "";
+    if (null != idFieldSchemaPk && null != idFieldSchemaPk.getReferencedField()
+        && null != idFieldSchemaPk.getReferencedField().getIdPk()) {
+      idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk();
+    }
+    return idFieldSchemaPKString;
+  }
+
+  /**
+   * Gets the PK field from FK field.
+   *
+   * @param schema the schema
+   * @param idFieldSchema the id field schema
+   * @return the PK field from FK field
+   */
+  private static FieldSchemaVO getPKFieldFromFKField(DataSetSchemaVO schema, String idFieldSchema) {
+
+    FieldSchemaVO pkField = null;
+    Boolean locatedPK = false;
+
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getId().equals(idFieldSchema)) {
+          pkField = field;
+          locatedPK = Boolean.TRUE;
+          break;
+        }
+      }
+      if (locatedPK.equals(Boolean.TRUE)) {
+        break;
+      }
+    }
+    return pkField;
   }
 }

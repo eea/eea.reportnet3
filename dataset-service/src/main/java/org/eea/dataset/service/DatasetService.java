@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -524,4 +525,6 @@ public interface DatasetService {
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
+
+  FieldValue getFieldValueByValue(@DatasetId Long datasetId, String schemaId, String ojective);
 }
