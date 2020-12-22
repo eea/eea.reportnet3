@@ -59,6 +59,7 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 const DataViewer = withRouter(
   ({
     hasCountryCode,
+    hasWebformWritePermissions,
     hasWritePermissions,
     isDatasetDeleted = false,
     isExportable,
@@ -1146,7 +1147,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
+              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {

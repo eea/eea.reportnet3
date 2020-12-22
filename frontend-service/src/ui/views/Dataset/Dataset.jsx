@@ -951,6 +951,7 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
+          hasWebformWritePermissions={hasWebformWritePermissions}
           hasWritePermissions={hasWritePermissions}
           isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
