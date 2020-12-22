@@ -23,8 +23,21 @@ public final class PaMConstants {
   /** The Constant OTHER_OBJECTIVES: {@value}. */
   public static final String OTHER_OBJECTIVES = "OtherObjectives";
 
+  /** The Constant UNION_POLICY_OTHER: {@value}. */
+  public static final String UNION_POLICY_OTHER = "UnionPolicyOther";
+
   /** The Constant LIST_OF_SINGLE_PAMS: {@value}. */
   public static final String LIST_OF_SINGLE_PAMS = "ListOfSinglePams";
+
+  /** The Constant OBJECTIVES: {@value}. */
+  public static final String OBJECTIVES = "Objectives";
+
+  public static final String OBJECTIVE_PK = "OBJECTIVE_PK";
+
+  public static final String OBJECTIVE_OBJECTIVES = "OBJECTIVE_OBJECTIVES";
+
+  /** The Constant SECTORS: {@value}. */
+  public static final String SECTORS = "Sectors";
 
   /** The Constant ID: {@value}. */
   public static final String ID = "Id";
@@ -40,6 +53,9 @@ public final class PaMConstants {
 
   /** The Constant FK_PAMS_TABLE_2: {@value}. */
   public static final String FK_PAMS_TABLE_2 = "FK_PAMS_TABLE_2";
+
+  /** The Constant FK_PAMS_UNION_POLICY_OTHER: {@value}. */
+  public static final String FK_PAMS_UNION_POLICY_OTHER = "FK_PAMS_UNION_POLICY_OTHER";
 
   /** The Constant FK_PAMS_SECTOR_OBJECTIVES: {@value}. */
   public static final String FK_PAMS_SECTOR_OBJECTIVES = "FK_PAMS_SECTOR_OBJECTIVES";
@@ -103,6 +119,16 @@ public final class PaMConstants {
 
   /** The Constant GHG_AFFECTED: {@value}. */
   public static final String GHG_AFFECTED = "GHGAffected";
+
+  /** The Constant TITLE: {@value}. */
+  public static final String TITLE = "Title";
+
+  /** The Constant OTHER_UNION_POLICY: {@value}. */
+  public static final String OTHER_UNION_POLICY = "OtherUnionPolicy";
+
+  /** The Constant DATASET_ID_PK: {@value}. */
+  public static final String DATASET_ID_PK = "DATASET_ID_PK";
+
 
 
   /**

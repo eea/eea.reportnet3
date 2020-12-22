@@ -74,9 +74,12 @@ public class PaMServiceImpl implements PaMService {
     if (singlePamsValue != null) {
       String[] singlePams = singlePamsValue.split(PaMConstants.SEPARATOR);
       for (int i = 0; i < singlePams.length; i++) {
+        FieldValue single = fieldRepository
+            .findFirstByIdFieldSchemaAndValue(schemaIds.get(PaMConstants.ID), singlePams[i]);
         SinglePaMVO singlePaMVO = new SinglePaMVO();
         singlePaMVO.setId(singlePams[i]);
-        singlePaMVO.setPaMName("name");
+        singlePaMVO
+            .setPaMName(getValue(hasRecordsAndFields(single), schemaIds.get(PaMConstants.TITLE)));
         // set attributes of table1
         setAttributesTable1(schemaIds, singlePams[i], singlePaMVO);
         // set attributes entities
@@ -85,6 +88,8 @@ public class PaMServiceImpl implements PaMService {
         setAttributesTable2(schemaIds, singlePams[i], singlePaMVO);
         // set attributes sectors
         setAttributesSectors(schemaIds, singlePams[i], singlePaMVO);
+        // set union policy other
+        setAttributesUnionPolicyOther(schemaIds, singlePams[i], singlePaMVO);
 
         listSinglePaM.add(singlePaMVO);
       }
@@ -198,6 +203,23 @@ public class PaMServiceImpl implements PaMService {
     }
   }
 
+  /**
+   * Sets the attributes union policy other.
+   *
+   * @param schemaIds the schema ids
+   * @param singlePamId the single pam id
+   * @param singlePaMVO the single pa MVO
+   */
+  private void setAttributesUnionPolicyOther(Map<String, String> schemaIds, String singlePamId,
+      SinglePaMVO singlePaMVO) {
+    FieldValue fkPamsTable2 = fieldRepository.findFirstByIdFieldSchemaAndValue(
+        schemaIds.get(PaMConstants.FK_PAMS_UNION_POLICY_OTHER), singlePamId);
+    if (fkPamsTable2 != null) {
+      List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
+      singlePaMVO
+          .setOtherUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.OTHER_UNION_POLICY)));
+    }
+  }
 
   /**
    * Sets the attributes entities.
@@ -288,12 +310,18 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.getIdTableSchema(PaMConstants.SECTOR_OBJECTIVES, schema);
     String otherObjectivesId =
         fileCommonUtils.getIdTableSchema(PaMConstants.OTHER_OBJECTIVES, schema);
+    String unionPolicyOtherId =
+        fileCommonUtils.getIdTableSchema(PaMConstants.UNION_POLICY_OTHER, schema);
+
 
     // PAMS
     schemaIds.put(PaMConstants.LIST_OF_SINGLE_PAMS, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.LIST_OF_SINGLE_PAMS, tablePamsId, schema)));
     schemaIds.put(PaMConstants.ID,
         isFieldSchemaNull(fileCommonUtils.findIdFieldSchema(PaMConstants.ID, tablePamsId, schema)));
+    schemaIds.put(PaMConstants.TITLE, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.TITLE, tablePamsId, schema)));
+
 
     // TABLE1
     schemaIds.put(PaMConstants.FK_PAMS_TABLE_1, isFieldSchemaNull(
@@ -350,6 +378,14 @@ public class PaMServiceImpl implements PaMService {
         .findIdFieldSchema(PaMConstants.FK_SECTOR_OBJECTIVES, otherObjectivesId, schema)));
     schemaIds.put(PaMConstants.OTHER, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER, otherObjectivesId, schema)));
+
+    // UNION POLICY OTHER
+    schemaIds.put(PaMConstants.FK_PAMS_UNION_POLICY_OTHER, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.FK_PAMS, unionPolicyOtherId, schema)));
+    schemaIds.put(PaMConstants.OTHER_UNION_POLICY, isFieldSchemaNull(fileCommonUtils
+        .findIdFieldSchema(PaMConstants.OTHER_UNION_POLICY, unionPolicyOtherId, schema)));
+
+
 
     return schemaIds;
   }
