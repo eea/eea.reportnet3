@@ -181,12 +181,17 @@ export const WebformView = ({
     ));
 
   const tableFieldRender = (fieldName, columnFields) => {
+    console.log({ singlesCalculatedData });
     const combinatedTableValues = [];
     singlesCalculatedData.forEach(singleRecord => {
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
       if (!isNil(singleRecordValue)) {
-        const columnFieldsValues = { pamsId: singleRecord['id'], [fieldName]: singleRecordValue };
+        const columnFieldsValues = {
+          pamsId: singleRecord['id'],
+          pamName: singleRecord['paMName'],
+          [fieldName]: singleRecordValue
+        };
         columnFields.forEach(columnField => {
           const columnFieldValue =
             singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === columnField.toLowerCase())];
