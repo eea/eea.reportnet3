@@ -727,8 +727,8 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const getImportExtensions = ['.zip'].concat(externalOperationsList.import
-    .map(file => `.${file.fileExtension}`))
+  const getImportExtensions = ['.zip']
+    .concat(externalOperationsList.import.map(file => `.${file.fileExtension}`))
     .join(', ')
     .toLowerCase();
 
@@ -813,35 +813,34 @@ export const Dataset = withRouter(({ match, history }) => {
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
-            {hasWritePermissions &&
-              (
-                <Fragment>
-                  <Button
-                    className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
-                      !hasWritePermissions ? null : 'p-button-animated-blink'
-                    }`}
-                    disabled={!hasWritePermissions}
-                    icon={'import'}
-                    label={resources.messages['importDataset']}
-                    onClick={
-                      !isEmpty(externalOperationsList.importOtherSystems)
-                        ? event => importMenuRef.current.show(event)
-                        : () => setIsImportDatasetDialogVisible(true)
-                    }
+            {hasWritePermissions && (
+              <Fragment>
+                <Button
+                  className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
+                    !hasWritePermissions ? null : 'p-button-animated-blink'
+                  }`}
+                  disabled={!hasWritePermissions}
+                  icon={'import'}
+                  label={resources.messages['importDataset']}
+                  onClick={
+                    !isEmpty(externalOperationsList.importOtherSystems)
+                      ? event => importMenuRef.current.show(event)
+                      : () => setIsImportDatasetDialogVisible(true)
+                  }
+                />
+                {!isEmpty(externalOperationsList.importOtherSystems) && (
+                  <Menu
+                    model={importButtonsList}
+                    popup={true}
+                    ref={importMenuRef}
+                    id="importDataSetMenu"
+                    onShow={e => {
+                      getPosition(e);
+                    }}
                   />
-                  {!isEmpty(externalOperationsList.importOtherSystems) && (
-                    <Menu
-                      model={importButtonsList}
-                      popup={true}
-                      ref={importMenuRef}
-                      id="importDataSetMenu"
-                      onShow={e => {
-                        getPosition(e);
-                      }}
-                    />
-                  )}
-                </Fragment>
-              )}
+                )}
+              </Fragment>
+            )}
             <Button
               id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
@@ -1031,7 +1030,7 @@ export const Dataset = withRouter(({ match, history }) => {
           name="file"
           onUpload={onUpload}
           replaceCheck={true}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
             datasetId: datasetId
           })}`}
         />

@@ -1265,9 +1265,9 @@ const DataViewer = withRouter(
             onError={onImportTableError}
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
-              tableId: tableId
+              tableSchemaId: tableId
             })}`}
           />
         )}
@@ -1295,7 +1295,7 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
               datasetId,
               fieldId: records.selectedFieldId
             })}`}
