@@ -250,6 +250,7 @@ const DataViewer = withRouter(
       colsSchema,
       columnOptions,
       hasCountryCode,
+      hasWebformWritePermissions,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       onFileDeleteVisible,
