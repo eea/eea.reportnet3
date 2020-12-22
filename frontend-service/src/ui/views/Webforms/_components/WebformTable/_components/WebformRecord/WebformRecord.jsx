@@ -107,6 +107,7 @@ export const WebformRecord = ({
   };
 
   const onToggleFieldVisibility = (dependency, fields = []) => {
+    if (!isNil(isGroup) && isGroup()) return true;
     if (isNil(dependency)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
@@ -158,7 +159,7 @@ export const WebformRecord = ({
     if (isNil(isGroup)) {
       return true;
     } else {
-      if (isGroup() && el.hideWhenCalculated) {
+      if ((isGroup() && el.hideWhenCalculated) || (!isGroup() && el.hideWhenSingle)) {
         return false;
       } else {
         return true;
