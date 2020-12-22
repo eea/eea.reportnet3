@@ -1362,5 +1362,17 @@
   {
     "key": "config/dataset/pathImport",
     "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.pam.path",
+    "value": "L3BhbS8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.pam.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.pam.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

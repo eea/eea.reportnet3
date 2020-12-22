@@ -812,7 +812,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -1874,7 +1874,6 @@ public class DatasetServiceImpl implements DatasetService {
           List<RecordValue> data = recordRepository
               .findByTableValueAllRecords(desingTable.getIdTableSchema().toString());
           recordDesignValues.addAll(data);
-
         }
         List<RecordValue> recordDesignValuesList = new ArrayList<>();
 
@@ -1918,29 +1917,26 @@ public class DatasetServiceImpl implements DatasetService {
   private void recordDesingAssignation(Long datasetId, DesignDataset design,
       List<RecordValue> recordDesignValues, List<RecordValue> recordDesignValuesList,
       Long datasetPartitionId, List<AttachmentValue> attachments) {
+
+    Long dataProviderId = datasetMetabaseService.findDatasetMetabase(datasetId).getDataProviderId();
+    DataProviderVO dataproviderVO = new DataProviderVO();
+    if (null != dataProviderId) {
+      dataproviderVO = representativeControllerZuul.findDataProviderById(dataProviderId);
+    }
     for (RecordValue record : recordDesignValues) {
       RecordValue recordAux = new RecordValue();
       TableValue tableAux = record.getTableValue();
       TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-      tableAux
-          .setId(tableRepository.findIdByIdTableSchema(record.getTableValue().getIdTableSchema()));
 
       recordAux.setTableValue(tableAux);
       recordAux.setIdRecordSchema(record.getIdRecordSchema());
       recordAux.setDatasetPartitionId(datasetPartitionId);
-
-      Long dataProviderId =
-          datasetMetabaseService.findDatasetMetabase(datasetId).getDataProviderId();
-
-      if (null != dataProviderId) {
-        DataProviderVO dataprovider =
-            representativeControllerZuul.findDataProviderById(dataProviderId);
-        if (null != dataprovider && null != dataprovider.getCode()) {
-          recordAux.setDataProviderCode(dataprovider.getCode());
-        }
+      if (StringUtils.isNotBlank(dataproviderVO.getCode())) {
+        recordAux.setDataProviderCode(dataproviderVO.getCode());
       }
 
       TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+
       List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
       createFieldValueForRecord(attachments, recordAux, fieldValues, fieldValuesOnlyValues);
@@ -2783,15 +2779,14 @@ public class DatasetServiceImpl implements DatasetService {
 
       // run through the origin table, getting its records and fields and translating them into the
       // new schema
-      while ((pagedFieldValues =
-          fieldRepository
-              .findByRecord_IdRecordSchema(
-                  desingTable.getRecordSchema().getIdRecordSchema().toString(),
-                  fieldValuePage))
-          .size() > 0) {
+      while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+          desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
+              .size() > 0) {
 
-        //NOTE: In case insert order matters it is necessary to retrieve all the records and recover their fields
-        //For this, the best is getting fields in big completed sets and assign them to the records to avoid excessive queries to bd
+        // NOTE: In case insert order matters it is necessary to retrieve all the records and
+        // recover their fields
+        // For this, the best is getting fields in big completed sets and assign them to the records
+        // to avoid excessive queries to bd
 
         // make list of field vaues grouped by their record id. The field values will be set with
         // the taget schemas id so they can be inserted
@@ -2801,9 +2796,9 @@ public class DatasetServiceImpl implements DatasetService {
           auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
           auxField.setType(field.getType());
 
-          //transform the grouping record in the target one. Do it only once
-          String targetIdRecordSchema = dictionaryOriginTargetObjectId
-              .get(field.getRecord().getIdRecordSchema());
+          // transform the grouping record in the target one. Do it only once
+          String targetIdRecordSchema =
+              dictionaryOriginTargetObjectId.get(field.getRecord().getIdRecordSchema());
           String originRecordId = field.getRecord().getId();
           if (!mapTargetRecordValues.containsKey(originRecordId)) {
 
@@ -2813,7 +2808,8 @@ public class DatasetServiceImpl implements DatasetService {
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
             targetRecordValue.setFields(new ArrayList<>());
-            //using temporary recordId as grouping criteria, then it will be removed before giving back
+            // using temporary recordId as grouping criteria, then it will be removed before giving
+            // back
             mapTargetRecordValues.put(originRecordId, targetRecordValue);
             result.add(targetRecordValue);
           }
@@ -2829,9 +2825,10 @@ public class DatasetServiceImpl implements DatasetService {
           }
           auxField.setGeometry(field.getGeometry());
           mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
-          //when the record has reached the number of fields per record then remove from the map to avoid rehashing
-          if (mapTargetRecordValues.get(originRecordId).getFields().size()
-              == numberOfFieldsInRecord) {
+          // when the record has reached the number of fields per record then remove from the map to
+          // avoid rehashing
+          if (mapTargetRecordValues.get(originRecordId).getFields()
+              .size() == numberOfFieldsInRecord) {
             mapTargetRecordValues.remove(originRecordId);
           }
         });
