@@ -86,12 +86,14 @@ export const WebformView = ({
   const calculateSingle = field => {
     let fields = [];
     switch (field.name.toLowerCase()) {
+      case 'unionpolicyother':
+        fields = combinationFieldRender('otherUnionPolicy');
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'ghgaffected':
       case 'sectoraffected':
       case 'policyinstrument':
       case 'policyimpacting':
       case 'unionpolicylist':
-      case 'otherunionpolicy':
         fields = combinationFieldRender(field.name);
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'pamnames':
@@ -111,6 +113,8 @@ export const WebformView = ({
         return combinationTableRender('entities');
       case 'sectorobjectives':
         return combinationTableRender('sectors');
+      // case 'unionpolicyother':
+      //   return combinationTableRender('otherUnionPolicy');
       default:
         break;
     }

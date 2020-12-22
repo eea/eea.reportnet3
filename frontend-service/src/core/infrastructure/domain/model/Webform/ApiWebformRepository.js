@@ -36,6 +36,7 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   if (TextUtils.areEquals(fieldName, 'id')) return pamId;
   if (TextUtils.areEquals(fieldName, 'fk_pams')) return pamId;
   if (TextUtils.areEquals(fieldName, 'isGroup')) return type;
+  if (TextUtils.areEquals(fieldName, 'Id_SectorObjectives')) return `${pamId}_1`;
 
   return null;
 };
