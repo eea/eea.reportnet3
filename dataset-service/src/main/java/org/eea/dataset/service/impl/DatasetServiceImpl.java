@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -813,7 +812,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -2738,7 +2737,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
       List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId,
       List<AttachmentValue> attachments) {
-
+    List<RecordValue> result = new ArrayList<>();
     TenantResolver.setTenantName(
         String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
 
@@ -2760,7 +2759,7 @@ public class DatasetServiceImpl implements DatasetService {
     final Long datasetPartitionId =
         datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
 
-    Map<String, RecordValue> mapTargetRecordValues = new LinkedHashMap<>();
+    Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
     for (TableSchema desingTable : listOfTablesFiltered) {
       // Get number of fields per record. Doing it on origin table schema as origin and target has
       // the same structure
@@ -2773,21 +2772,14 @@ public class DatasetServiceImpl implements DatasetService {
       TableValue targetTable = tableRepository.findByIdTableSchema(
           dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
 
-      LOG.info("Target table recovered {}, mapped from schema {} to {}",
-          targetTable.getIdTableSchema(), desingTable.getIdTableSchema(),
-          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
-
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
       TableValue orignTable =
           this.tableRepository.findByIdTableSchema(desingTable.getIdTableSchema().toString());
-      LOG.info("Origin table recovered {}, in origin dataset {}, mapped from schema {} to {}",
-          orignTable.getIdTableSchema(), orignTable.getDatasetId().getId(),
-          orignTable.getIdTableSchema(),
-          dictionaryOriginTargetObjectId.get(orignTable.getIdTableSchema()));
+
       // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
-      Integer currentPage = 0;
-      Pageable fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
+
+      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord, Sort.by("record"));
 
       List<FieldValue> pagedFieldValues;
 
@@ -2795,10 +2787,11 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues =
           fieldRepository.findByRecord_TableValue_Id(orignTable.getId(), fieldValuePage))
-              .size() > 0) {
-        LOG.info(
-            "fieldValuePage current data, currentPage {}, number of records {}, number of retrieved record {}",
-            fieldValuePage.getPageNumber(), fieldValuePage.getPageSize(), pagedFieldValues.size());
+          .size() > 0) {
+
+        //NOTE: In case insert order matters it is necessary to retrieve all the records and recover their fields
+        //For this, the best is getting fields in big completed sets and assign them to the records to avoid excessive queries to bd
+
         // make list of field vaues grouped by their record id. The field values will be set with
         // the taget schemas id so they can be inserted
         pagedFieldValues.stream().forEach(field -> {
@@ -2821,6 +2814,7 @@ public class DatasetServiceImpl implements DatasetService {
             targetRecordValue.setFields(new ArrayList<>());
             //using temporary recordId as grouping criteria, then it will be removed before giving back
             mapTargetRecordValues.put(originRecordId, targetRecordValue);
+            result.add(targetRecordValue);
           }
 
           auxField.setRecord(mapTargetRecordValues.get(originRecordId));
@@ -2834,15 +2828,20 @@ public class DatasetServiceImpl implements DatasetService {
           }
           auxField.setGeometry(field.getGeometry());
           mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
+          //when the record has reached the number of fields per record then remove from the map to avoid rehashing
+          if (mapTargetRecordValues.get(originRecordId).getFields().size()
+              == numberOfFieldsInRecord) {
+            mapTargetRecordValues.remove(originRecordId);
+          }
         });
-        currentPage++;
-        fieldValuePage = PageRequest.of(currentPage, 1000 * numberOfFieldsInRecord);
+
+        fieldValuePage = fieldValuePage.next();
       }
 
     }
 
     attachments.addAll(dictionaryIdFieldAttachment.values());
-    return mapTargetRecordValues.values().stream().collect(Collectors.toList());
+    return result;
   }
 
 
