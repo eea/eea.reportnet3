@@ -432,6 +432,10 @@ export const useSetColumns = (
       columnsArr.unshift(providerCode);
     }
 
+    if (!hasWebformWritePermissions) {
+      columnsArr.splice(columnsArr.indexOf(editCol), 1);
+    }
+
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
