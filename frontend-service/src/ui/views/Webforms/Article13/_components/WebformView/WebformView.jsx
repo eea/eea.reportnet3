@@ -84,13 +84,18 @@ export const WebformView = ({
   };
 
   const calculateSingle = field => {
+    let fields = [];
     switch (field.name.toLowerCase()) {
       case 'ghgaffected':
       case 'sectoraffected':
       case 'policyinstrument':
       case 'policyimpacting':
       case 'unionpolicylist':
-        const fields = combinationFieldRender(field.name);
+      case 'otherunionpolicy':
+        fields = combinationFieldRender(field.name);
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
+      case 'pamnames':
+        fields = combinationFieldRender('paMName', 'id');
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'ispolicymeasureenvisaged':
         return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
@@ -132,13 +137,26 @@ export const WebformView = ({
     return containsValue ? valueToCheck : fieldValue;
   };
 
-  const combinationFieldRender = fieldName => {
+  const combinationFieldRender = (fieldName, previousField = '', separator = '-') => {
     const combinatedValues = [];
     singlesCalculatedData.forEach(singleRecord => {
+      let previousFieldValue = '';
+      if (previousField !== '') {
+        previousFieldValue =
+          singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === previousField.toLowerCase())];
+      }
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
       if (!isNil(singleRecordValue)) {
-        combinatedValues.push(Array.isArray(singleRecordValue) ? singleRecordValue.join(', ') : singleRecordValue);
+        combinatedValues.push(
+          Array.isArray(singleRecordValue)
+            ? singleRecordValue
+                .map(value => (previousFieldValue !== '' ? `${previousFieldValue} ${separator} ${value}` : value))
+                .join(', ')
+            : previousFieldValue !== ''
+            ? `${previousFieldValue} ${separator} ${singleRecordValue}`
+            : singleRecordValue
+        );
       }
     });
 
