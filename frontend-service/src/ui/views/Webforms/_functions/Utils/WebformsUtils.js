@@ -56,15 +56,66 @@ const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') =
   return result;
 };
 
-const parseNewTableRecord = (table, pamNumber) => {
+const getSchemaIdForIdSectorObjectivesField = records => {
+  let isFound = false;
+  let id_SectorObjectives_FieldSchemaId;
+  records.forEach(record => {
+    if (!isEmpty(record.fields) && !isFound) {
+      const { fields } = record;
+
+      fields.forEach(field => {
+        if (field.name === 'Id_SectorObjectives' && !isFound) {
+          id_SectorObjectives_FieldSchemaId = field.fieldSchema;
+          isFound = true;
+        }
+      });
+    }
+  });
+  return id_SectorObjectives_FieldSchemaId;
+};
+
+const findMaximumIdValue = (records, SectorObjectivesTable) => {
+  let fieldsIds = [];
+
+  let id_SectorObjectives_FieldSchemaId = getSchemaIdForIdSectorObjectivesField(records);
+
+  if (id_SectorObjectives_FieldSchemaId && SectorObjectivesTable) {
+    SectorObjectivesTable.elementsRecords.forEach(record => {
+      record.fields.forEach(field => {
+        if (field.fieldSchemaId === id_SectorObjectives_FieldSchemaId) {
+          fieldsIds.push(field.value);
+        }
+      });
+    });
+  }
+
+  fieldsIds = fieldsIds
+    .filter(fieldId => !isNil(fieldId) && fieldId !== '')
+    .map(fieldId => fieldId.split('_')[1])
+    .map(fieldId => parseInt(fieldId));
+
+  if (isEmpty(fieldsIds)) {
+    return 1;
+  }
+
+  return Math.max(...fieldsIds);
+};
+
+const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
+    let id_SectorObjectives_FieldSchemaId = getSchemaIdForIdSectorObjectivesField(table.records);
 
     if (!isUndefined(table)) {
       fields = table.records[0].fields.map(field => {
         return {
           fieldData: {
-            [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field.name, 'FK_PAMS') ? pamNumber : null,
+            [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field.name, 'FK_PAMS')
+              ? pamNumber
+              : field.fieldSchema === id_SectorObjectives_FieldSchemaId ||
+                field.fieldId === id_SectorObjectives_FieldSchemaId
+              ? `${pamNumber}_${findMaximumIdValue(table.records, SectorObjectivesTable) + 1}`
+              : null,
             type: field.type,
             fieldSchemaId: field.fieldSchema || field.fieldId
           }
@@ -135,6 +186,7 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
 
 const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
+
   data.map(table => {
     if (table.records) {
       table.records[0].fields = table.records[0].fields.map(field => {
