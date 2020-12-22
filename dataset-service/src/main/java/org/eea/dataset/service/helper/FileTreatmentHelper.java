@@ -482,6 +482,7 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO =
         NotificationVO.builder().user(user).datasetId(datasetId).fileName(fileName).build();
     try {
@@ -506,6 +507,7 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .fileName(fileName).error(error).build();
     try {
@@ -530,10 +532,11 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).fileName(fileName).build();
     try {
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
       LOG.error("Error realeasing event: notificationVO={}", notificationVO, e);
@@ -556,6 +559,7 @@ public class FileTreatmentHelper implements DisposableBean {
         : EventType.IMPORT_DESIGN_FAILED_EVENT;
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).fileName(fileName).error(error).build();
     try {
