@@ -141,7 +141,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
-    webform: null
+    webform: null,
+    selectedWebform: undefined
   });
 
   const exportMenuRef = useRef();
@@ -351,8 +352,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const getImportExtensions = designerState.externalOperationsList.import
-    .map(file => `.${file.fileExtension}`)
+  const getImportExtensions = ['.zip']
+    .concat(designerState.externalOperationsList.import.map(file => `.${file.fileExtension}`))
     .join(', ')
     .toLowerCase();
 
@@ -517,9 +518,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  useEffect(() => {
+    const isNotification = notificationContext.toShow.find(
+      notification => notification.key === 'VALIDATION_FINISHED_EVENT'
+    );
+    if (isNotification && isNotification.content.datasetId == datasetId) {
+      onHighlightRefresh(true);
+    }
+  }, [notificationContext]);
+
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
-  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
   useCheckNotifications(
     ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
     setIsLoadingFile,
@@ -677,13 +686,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onUpdateWebform = async webform => {
+  const onUpdateWebform = async () => {
     try {
-      const webformObject = { webform: { name: webform } };
-      await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
-      onCloseConfigureWebformModal();
+      const webformObject = { webform: { name: designerState.selectedWebform.value } };
+      const response = await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
+      if (response) {
+        onLoadSchema();
+      }
     } catch (error) {
       console.error('Error during datasetSchema Webform update: ', error);
+    } finally {
+      onCloseConfigureWebformModal();
     }
   };
 
@@ -936,12 +949,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const renderConfigureWebformFooter = (
     <Fragment>
       <Button
+        disabled={
+          isUndefined(designerState.selectedWebform) ||
+          designerState?.selectedWebform?.value === designerState?.webform?.value
+        }
         className={`p-button-animated-blink ${styles.saveButton}`}
         label={resources.messages['save']}
         icon={'check'}
         onClick={() => {
-          onUpdateWebform(designerState.webform.value);
-          if (isNil(designerState.webform.value)) {
+          onUpdateWebform();
+          if (isNil(designerState?.selectedWebform?.value)) {
             changeMode('design');
           }
         }}
@@ -951,7 +968,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         icon={'cancel'}
         label={resources.messages['cancel']}
         onClick={() => {
-          designerDispatch({ type: 'UPDATE_PREVIOUS_WEBFORM', payload: {} });
+          designerDispatch({ type: 'RESET_SELECTED_WEBFORM' });
           onCloseConfigureWebformModal();
         }}
       />
@@ -1051,30 +1068,27 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
           <Toolbar>
             <div className="p-toolbar-group-left">
-              {(!isEmpty(designerState.externalOperationsList.import) ||
-                !isEmpty(designerState.externalOperationsList.importOtherSystems)) && (
-                <Fragment>
-                  <Button
-                    className={`p-button-rounded p-button-secondary p-button-animated-blink`}
-                    icon={'import'}
-                    label={resources.messages['importDataset']}
-                    onClick={
-                      !isEmpty(designerState.externalOperationsList.importOtherSystems)
-                        ? event => importMenuRef.current.show(event)
-                        : () => manageDialogs('isImportDatasetDialogVisible', true)
-                    }
+              <Fragment>
+                <Button
+                  className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+                  icon={'import'}
+                  label={resources.messages['importDataset']}
+                  onClick={
+                    !isEmpty(designerState.externalOperationsList.importOtherSystems)
+                      ? event => importMenuRef.current.show(event)
+                      : () => manageDialogs('isImportDatasetDialogVisible', true)
+                  }
+                />
+                {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
+                  <Menu
+                    id="importDataSetMenu"
+                    model={designerState.importButtonsList}
+                    onShow={e => getPosition(e)}
+                    popup={true}
+                    ref={importMenuRef}
                   />
-                  {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                    <Menu
-                      id="importDataSetMenu"
-                      model={designerState.importButtonsList}
-                      onShow={e => getPosition(e)}
-                      popup={true}
-                      ref={importMenuRef}
-                    />
-                  )}
-                </Fragment>
-              )}
+                )}
+              </Fragment>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
@@ -1098,7 +1112,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? ' p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -1270,26 +1283,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
           </Dialog>
         )}
-
         {designerState.isConfigureWebformDialogVisible && (
           <Dialog
             footer={renderConfigureWebformFooter}
             header={resources.messages['configureWebform']}
-            onHide={() => onCloseConfigureWebformModal()}
+            onHide={() => {
+              designerDispatch({ type: 'RESET_SELECTED_WEBFORM' });
+              onCloseConfigureWebformModal();
+            }}
             style={{ width: '30%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
-            <div className={styles.titleWrapper}>
-              <span>{resources.messages['configureWebformMessage']}</span>
-            </div>
+            <div className={styles.titleWrapper}>{resources.messages['configureWebformMessage']}</div>
             <Dropdown
               appendTo={document.body}
               ariaLabel={'configureWebform'}
               inputId="configureWebformDropDown"
-              onChange={e => designerDispatch({ type: 'UPDATE_WEBFORM', payload: e.target.value })}
+              onChange={e =>
+                designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
+              }
               optionLabel="label"
               options={WebformsConfig}
               placeholder={resources.messages['configureWebformPlaceholder']}
-              value={designerState.webform}
+              value={isUndefined(designerState.selectedWebform) ? designerState.webform : designerState.selectedWebform}
             />
           </Dialog>
         )}
@@ -1332,7 +1347,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             name="file"
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
               datasetId: datasetId
             })}`}
           />

@@ -1045,7 +1045,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
       // Import
       lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId));
+          Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
       // Import Etl
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
@@ -1056,8 +1056,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         lockService.removeLockByCriteria(Arrays.asList(LockSignature.DELETE_IMPORT_TABLE.getValue(),
             datasetId, table.getIdTableSchema()));
 
-        lockService.removeLockByCriteria(Arrays.asList(LockSignature.LOAD_TABLE.getValue(),
-            datasetId, table.getIdTableSchema()));
+        lockService.removeLockByCriteria(
+            Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
       }
       // Set the 'releasing' property to false in the dataset metabase
       ReportingDatasetVO reportingVO = new ReportingDatasetVO();
@@ -1110,10 +1110,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         mapCriteriaTables.put("tableSchemaId", table.getIdTableSchema());
 
         createlockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables, userName);
-        createlockWithSignature(LockSignature.LOAD_TABLE, mapCriteriaTables, userName);
       }
       // Import
-      createlockWithSignature(LockSignature.LOAD_DATASET_DATA, mapCriteria, userName);
+      createlockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
       // ETL Import
       createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
 

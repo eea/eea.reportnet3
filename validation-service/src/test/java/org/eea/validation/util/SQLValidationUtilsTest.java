@@ -337,7 +337,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
+        .thenReturn(rule.getReferenceId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 

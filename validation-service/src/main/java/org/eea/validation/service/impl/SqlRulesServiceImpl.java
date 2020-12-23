@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
@@ -98,6 +99,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private RuleMapper ruleMapper;
 
+  /** The Constant DATASET_: {@value}. */
+  private static final String DATASET = "dataset_";
+
+  /** The Constant INNER_JOIN_DATASET: {@value}. */
+  private static final String INNER_JOIN_DATASET = "inner join dataset_";
+
   /**
    * Validate SQL rule.
    *
@@ -115,9 +122,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
         .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
 
-    String query = proccessQuery(datasetId, rule.getSqlSentence(), datasetSchemaId);
+    String query = proccessQuery(datasetId, rule.getSqlSentence());
 
-    if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.TRUE)) {
+    if (validateRule(query, datasetId, rule, Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
@@ -147,9 +154,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       RuleVO ruleVO) {
     Rule rule = ruleMapper.classToEntity(ruleVO);
 
-    String query = proccessQuery(datasetId, ruleVO.getSqlSentence(), datasetSchemaId);
+    String query = proccessQuery(datasetId, ruleVO.getSqlSentence());
     boolean verifAndEnabled = true;
-    if (validateRule(query, datasetId, rule, Boolean.TRUE).equals(Boolean.FALSE)) {
+    if (!validateRule(query, datasetId, rule, Boolean.TRUE)) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
       rule.setEnabled(verifAndEnabled);
@@ -199,7 +206,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     String entityName = "";
     Long idTable = null;
 
-    String newQuery = proccessQuery(datasetId, query, schema.getIdDataSetSchema());
+    String newQuery = proccessQuery(datasetId, query);
 
     switch (rule.getType()) {
       case FIELD:
@@ -303,8 +310,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param ischeckDC the ischeck DC
    * @return the boolean
    */
-  private Boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
-    Boolean isSQLCorrect = Boolean.TRUE;
+  private boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
+    boolean isSQLCorrect = true;
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
@@ -319,15 +326,15 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
         } catch (EEAInvalidSQLException e) {
           LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
-          isSQLCorrect = Boolean.FALSE;
+          isSQLCorrect = false;
         }
       } else {
-        isSQLCorrect = Boolean.FALSE;
+        isSQLCorrect = false;
       }
     } else {
-      isSQLCorrect = Boolean.FALSE;
+      isSQLCorrect = false;
     }
-    if (isSQLCorrect.equals(Boolean.FALSE)) {
+    if (!isSQLCorrect) {
       LOG.info("Rule validation not passed: {}", rule);
     } else {
       LOG.info("Rule validation passed: {}", rule);
@@ -341,12 +348,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @return the boolean
    */
-  private Boolean checkQuerySyntax(String query) {
-    Boolean queryContainsKeyword = Boolean.TRUE;
+  private boolean checkQuerySyntax(String query) {
+    boolean queryContainsKeyword = true;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
       if (query.toLowerCase().contains(word.toLowerCase())) {
-        queryContainsKeyword = Boolean.FALSE;
+        queryContainsKeyword = false;
         break;
       }
     }
@@ -444,7 +451,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     Map<String, List<RecordValidation>> recordValidations =
         getRecordValidations(recordIds, datasetId);
     records.stream().forEach(record -> {
-      record.getFields().stream().filter(field -> null != field).forEach(field -> {
+      record.getFields().stream().filter(Objects::nonNull).forEach(field -> {
         List<FieldValidation> validations = fieldValidations.get(field.getId());
         field.setFieldValidations(validations);
         if (null != validations && !validations.isEmpty()) {
@@ -484,8 +491,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         + "v.TYPE_ENTITY as type_entity," + "v.VALIDATION_DATE as validation_date,"
         + "fv.ID_FIELD_SCHEMA as id_field_schema," + "fv.ID_RECORD as id_record,"
         + "fv.TYPE as field_value_type," + "fv.VALUE as value " + "from dataset_" + datasetId
-        + ".FIELD_VALIDATION fval " + "inner join dataset_" + datasetId + ".VALIDATION v "
-        + "on fval.ID_VALIDATION=v.ID " + "inner join dataset_" + datasetId + ".FIELD_VALUE fv "
+        + ".FIELD_VALIDATION fval " + INNER_JOIN_DATASET + datasetId + ".VALIDATION v "
+        + "on fval.ID_VALIDATION=v.ID " + INNER_JOIN_DATASET + datasetId + ".FIELD_VALUE fv "
         + "on fval.ID_FIELD=fv.ID " + "where fv.ID_RECORD " + "in (");
 
     for (int i = 0; i < recordIds.size(); i++) {
@@ -529,9 +536,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         + "rv.DATA_PROVIDER_CODE as data_provider_code,"
         + "rv.DATASET_PARTITION_ID as dataset_partition, "
         + "rv.ID_RECORD_SCHEMA as record_schema, " + "rv.ID_TABLE as id_table " + "from dataset_"
-        + datasetId + ".RECORD_VALIDATION rval " + "inner join dataset_" + datasetId
-        + ".VALIDATION v " + "on rval.ID_VALIDATION=v.ID " + "inner join dataset_" + datasetId
-        + ".RECORD_VALUE rv " + "on rval.ID_RECORD=rv.ID " + "where rv.ID in (");
+        + datasetId + ".RECORD_VALIDATION rval " + INNER_JOIN_DATASET + datasetId + ".VALIDATION v "
+        + "on rval.ID_VALIDATION=v.ID " + INNER_JOIN_DATASET + datasetId + ".RECORD_VALUE rv "
+        + "on rval.ID_RECORD=rv.ID " + "where rv.ID in (");
 
     for (int i = 0; i < recordIds.size(); i++) {
       query.append("'" + recordIds.get(i) + "'");
@@ -560,13 +567,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param query the query
-   * @param datasetSchemaId the dataset schema id
    * @return the string
    */
-  private String proccessQuery(Long datasetId, String query, String datasetSchemaId) {
-    String processedQuery = null;
+  private String proccessQuery(Long datasetId, String query) {
 
-    if (query.contains("dataset_")) {
+    if (query.contains(DATASET)) {
       Map<String, Long> datasetSchemasMap = getListOfDatasetsOnQuery(query);
       DatasetTypeEnum datasetType = datasetMetabaseController.getType(datasetId);
       Long dataflowId =
@@ -574,90 +579,131 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
-        case DESIGN:
-          processedQuery = query;
-          break;
         case COLLECTION:
-          List<DataCollectionVO> dataCollectionList =
-              dataCollectionController.findDataCollectionIdByDataflowId(dataflowId);
-          Map<String, Long> dataCollectionSchamasMap = new HashMap<>();
-          for (DataCollectionVO dataCollection : dataCollectionList) {
-            dataCollectionSchamasMap.put(dataCollection.getDatasetSchema(), dataCollection.getId());
-          }
-          for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
-            String key = auxDatasetMap.getKey();
-            Long datasetDatacollection = dataCollectionSchamasMap.get(key);
-            datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
-          }
-          for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
-            query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
-                "dataset_" + auxDatasetOldAndNew.getValue());
-          }
-          processedQuery = query;
+          query = modifyQueryForCollection(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
           break;
         case EUDATASET:
-          List<EUDatasetVO> euDatasetList =
-              euDatasetController.findEUDatasetByDataflowId(dataflowId);
-          Map<String, Long> euDatasetSchamasMap = new HashMap<>();
-          for (EUDatasetVO euDataset : euDatasetList) {
-            euDatasetSchamasMap.put(euDataset.getDatasetSchema(), euDataset.getId());
-          }
-
-          for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
-            String key = auxDatasetMap.getKey();
-            Long datasetDatacollection = euDatasetSchamasMap.get(key);
-            datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
-          }
-
-          for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
-            query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
-                "dataset_" + auxDatasetOldAndNew.getValue());
-          }
-          processedQuery = query;
-
+          query = modifyQueryForEU(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
           break;
         case REPORTING:
-          List<ReportingDatasetVO> reportingDatasetList =
-              datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
-          List<RepresentativeVO> dataprovidersVOList =
-              representativeController.findRepresentativesByIdDataFlow(dataflowId);
-          Long providerId =
-              datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataProviderId();
-          dataprovidersVOList
-              .removeIf(dataprovider -> dataprovider.getDataProviderId() != providerId);
-          List<Long> dataprovidersIdList = new ArrayList<>();
-          List<String> datasetIdList = new ArrayList<>();
-          for (ReportingDatasetVO dataset : reportingDatasetList) {
-            datasetIdList.add(dataset.getDatasetSchema());
-          }
-          for (RepresentativeVO provider : dataprovidersVOList) {
-            dataprovidersIdList.add(provider.getDataProviderId());
-          }
-          Map<String, Long> reportingDatasetSchamasMap = new HashMap<>();
-          for (ReportingDatasetVO reportingDataset : reportingDatasetList) {
-            if (dataprovidersIdList.contains(reportingDataset.getDataProviderId())) {
-              reportingDatasetSchamasMap.put(reportingDataset.getDatasetSchema(),
-                  reportingDataset.getId());
-            }
-          }
-          for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
-            if (datasetIdList.contains(auxDatasetMap.getKey())) {
-              String key = auxDatasetMap.getKey();
-              Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
-              datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
-            }
-          }
-          for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
-            query = query.replaceAll("dataset_" + auxDatasetOldAndNew.getKey(),
-                "dataset_" + auxDatasetOldAndNew.getValue());
-          }
-          processedQuery = query;
+          query = modifyQueryForReportingDataset(datasetId, query, datasetSchemasMap, dataflowId,
+              datasetIdOldNew);
+          break;
+        case DESIGN:
+        default:
           break;
       }
-    } else {
-      processedQuery = query;
     }
-    return processedQuery;
+
+    return query;
+  }
+
+  /**
+   * Modify query for collection.
+   *
+   * @param query the query
+   * @param datasetSchemasMap the dataset schemas map
+   * @param dataflowId the dataflow id
+   * @param datasetIdOldNew the dataset id old new
+   * @return the string
+   */
+  private String modifyQueryForCollection(String query, Map<String, Long> datasetSchemasMap,
+      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+    List<DataCollectionVO> dataCollectionList =
+        dataCollectionController.findDataCollectionIdByDataflowId(dataflowId);
+    Map<String, Long> dataCollectionSchamasMap = new HashMap<>();
+    for (DataCollectionVO dataCollection : dataCollectionList) {
+      dataCollectionSchamasMap.put(dataCollection.getDatasetSchema(), dataCollection.getId());
+    }
+    for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
+      String key = auxDatasetMap.getKey();
+      Long datasetDatacollection = dataCollectionSchamasMap.get(key);
+      datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+    }
+    for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
+      query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
+          DATASET + auxDatasetOldAndNew.getValue());
+    }
+    return query;
+  }
+
+  /**
+   * Modify query for EU.
+   *
+   * @param query the query
+   * @param datasetSchemasMap the dataset schemas map
+   * @param dataflowId the dataflow id
+   * @param datasetIdOldNew the dataset id old new
+   * @return the string
+   */
+  private String modifyQueryForEU(String query, Map<String, Long> datasetSchemasMap,
+      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+    List<EUDatasetVO> euDatasetList = euDatasetController.findEUDatasetByDataflowId(dataflowId);
+    Map<String, Long> euDatasetSchamasMap = new HashMap<>();
+    for (EUDatasetVO euDataset : euDatasetList) {
+      euDatasetSchamasMap.put(euDataset.getDatasetSchema(), euDataset.getId());
+    }
+
+    for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
+      String key = auxDatasetMap.getKey();
+      Long datasetDatacollection = euDatasetSchamasMap.get(key);
+      datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+    }
+
+    for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
+      query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
+          DATASET + auxDatasetOldAndNew.getValue());
+    }
+    return query;
+  }
+
+  /**
+   * Modify query for reporting dataset.
+   *
+   * @param datasetId the dataset id
+   * @param query the query
+   * @param datasetSchemasMap the dataset schemas map
+   * @param dataflowId the dataflow id
+   * @param datasetIdOldNew the dataset id old new
+   * @return the string
+   */
+  private String modifyQueryForReportingDataset(Long datasetId, String query,
+      Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+    List<ReportingDatasetVO> reportingDatasetList =
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+    List<RepresentativeVO> dataprovidersVOList =
+        representativeController.findRepresentativesByIdDataFlow(dataflowId);
+    Long providerId =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataProviderId();
+    List<Long> dataprovidersIdList = new ArrayList<>();
+    dataprovidersVOList.forEach(dataprovider -> {
+      if (dataprovider.getDataProviderId().equals(providerId)) {
+        dataprovidersIdList.add(dataprovider.getDataProviderId());
+      }
+    });
+    List<String> datasetIdList = new ArrayList<>();
+    for (ReportingDatasetVO dataset : reportingDatasetList) {
+      datasetIdList.add(dataset.getDatasetSchema());
+    }
+    Map<String, Long> reportingDatasetSchamasMap = new HashMap<>();
+    for (ReportingDatasetVO reportingDataset : reportingDatasetList) {
+      if (dataprovidersIdList.contains(reportingDataset.getDataProviderId())) {
+        reportingDatasetSchamasMap.put(reportingDataset.getDatasetSchema(),
+            reportingDataset.getId());
+      }
+    }
+    for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
+      if (datasetIdList.contains(auxDatasetMap.getKey())) {
+        String key = auxDatasetMap.getKey();
+        Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
+        datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      }
+    }
+    for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
+      query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
+          DATASET + auxDatasetOldAndNew.getValue());
+    }
+    return query;
   }
 
   /**
@@ -668,10 +714,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private Map<String, Long> getListOfDatasetsOnQuery(String query) {
     Map<String, Long> datasetSchamasMap = new HashMap<>();
-    String dataset = "dataset_";
     String[] palabras = query.split("\\s+");
     for (String palabra : palabras) {
-      if (palabra.contains(dataset)) {
+      if (palabra.contains(DATASET)) {
         String datasetIdFromotherSchemas =
             palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
         datasetSchamasMap.put(

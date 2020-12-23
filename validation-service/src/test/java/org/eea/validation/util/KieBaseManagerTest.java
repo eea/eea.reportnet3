@@ -92,6 +92,7 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rules.add(rule);
+    rule.setShortCode("123");
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
@@ -113,6 +114,7 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rules.add(rule);
+    rule.setShortCode("123");
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
@@ -133,6 +135,7 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rules.add(rule);
+    rule.setShortCode("123");
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
@@ -152,6 +155,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
+    rule.setShortCode("123");
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.NUMBER_INTEGER);
@@ -177,6 +181,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
+    rule.setShortCode("123");
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.NUMBER_DECIMAL);
@@ -200,6 +205,7 @@ public class KieBaseManagerTest {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setReferenceId(id);
     rule.setRuleId(id);
+    rule.setShortCode("123");
     rule.setThenCondition(thenCondition);
     rules.add(rule);
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
@@ -227,6 +233,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
+    rule.setShortCode("123");
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.BOOLEAN);
@@ -248,6 +255,7 @@ public class KieBaseManagerTest {
     rule.setType(EntityTypeEnum.TABLE);
     rule.setReferenceId(id);
     rule.setRuleId(id);
+    rule.setShortCode("123");
     rule.setThenCondition(thenCondition);
     kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -271,6 +279,7 @@ public class KieBaseManagerTest {
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rule.setReferenceId(id);
     rule.setRuleId(id);
+    rule.setShortCode("123");
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
@@ -292,6 +301,7 @@ public class KieBaseManagerTest {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setReferenceId(id);
     rule.setRuleId(id);
+    rule.setShortCode("123");
     rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))

@@ -358,7 +358,8 @@ public class UserManagementControllerImpl implements UserManagementController {
     UserRepresentationVO user = null;
     UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
     if (users != null && users.length == 1 && StringUtils.isNotBlank(email)
-        && StringUtils.isNotBlank(users[0].getEmail()) && email.equals(users[0].getEmail())) {
+        && StringUtils.isNotBlank(users[0].getEmail())
+        && email.equalsIgnoreCase(users[0].getEmail())) {
       user = userRepresentationMapper.entityToClass(users[0]);
     }
     return user;

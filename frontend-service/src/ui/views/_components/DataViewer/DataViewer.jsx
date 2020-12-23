@@ -170,6 +170,8 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let divRef = useRef();
 
+    const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
     const { menu } = useContextMenu(
       resources,
@@ -323,7 +325,7 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
-      if (records.mapGeoJson !== '' && TextUtils.areEquals(records.geometryType, 'POINT')) {
+      if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT')) {
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
         const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
@@ -490,10 +492,9 @@ const DataViewer = withRouter(
             if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
               field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
             } else {
-              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
-                .split(',')
-                .map(item => item.trim())
-                .join(',');
+              field.fieldData[field.fieldData.fieldSchemaId] = removeCommaSeparatedWhiteSpaces(
+                field.fieldData[field.fieldData.fieldSchemaId]
+              );
             }
           }
         }
@@ -651,7 +652,7 @@ const DataViewer = withRouter(
         setFetchedData(updatedData);
       } else if (event.key === 'Enter') {
         if (!isGeometry) {
-          if (!TextUtils.areEquals(type, 'TEXTAREA')) {
+          if (!areEquals(type, 'TEXTAREA')) {
             datatableRef.current.closeEditingCell();
             onEditorSubmitValue(props, event.target.value, record);
           }
@@ -675,7 +676,7 @@ const DataViewer = withRouter(
         if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
             //without await. We don't have to wait for the response.
-            const fieldUpdated = DatasetService.updateFieldById(
+            const response = await DatasetService.updateFieldById(
               datasetId,
               cell.field,
               field.id,
@@ -684,18 +685,25 @@ const DataViewer = withRouter(
                 ? value.join(',')
                 : value
             );
-            if (!fieldUpdated) {
+
+            const isFileUpdated = response.status >= 200 && response.status <= 299;
+
+            if (!isFileUpdated) {
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
             }
           } catch (error) {
-            const {
-              dataflow: { name: dataflowName },
-              dataset: { name: datasetName }
-            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'UPDATE_FIELD_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
+            if (error.response.status === 423) {
+              notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+            } else {
+              const {
+                dataflow: { name: dataflowName },
+                dataset: { name: datasetName }
+              } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+              notificationContext.add({
+                type: 'UPDATE_FIELD_BY_ID_ERROR',
+                content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+              });
+            }
           }
         }
         if (isEditing) {
@@ -748,20 +756,24 @@ const DataViewer = withRouter(
           setIsTableDeleted(false);
         }
       } catch (error) {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'ADD_RECORDS_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName,
-            tableName
-          }
-        });
+        if (error.response.status === 423) {
+          notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+        } else {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add({
+            type: 'ADD_RECORDS_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              dataflowName,
+              datasetName,
+              tableName
+            }
+          });
+        }
       } finally {
         setConfirmPasteVisible(false);
         setIsPasting(false);
@@ -803,14 +815,18 @@ const DataViewer = withRouter(
           setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
-          const {
-            dataflow: { name: dataflowName },
-            dataset: { name: datasetName }
-          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          if (error.response.status === 423) {
+            notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+          } else {
+            const {
+              dataflow: { name: dataflowName },
+              dataset: { name: datasetName }
+            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+            notificationContext.add({
+              type: 'ADD_RECORDS_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+            });
+          }
         } finally {
           if (!addAnotherOne) {
             setAddDialogVisible(false);
@@ -823,14 +839,18 @@ const DataViewer = withRouter(
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
-          const {
-            dataflow: { name: dataflowName },
-            dataset: { name: datasetName }
-          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'UPDATE_RECORDS_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          if (error.response.status === 423) {
+            notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+          } else {
+            const {
+              dataflow: { name: dataflowName },
+              dataset: { name: datasetName }
+            } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+            notificationContext.add({
+              type: 'UPDATE_RECORDS_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
+            });
+          }
         } finally {
           onCancelRowEdit();
           setIsLoading(false);
@@ -950,17 +970,15 @@ const DataViewer = withRouter(
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
           // disabled={isSaving}
-          label={
-            TextUtils.areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']
-          }
+          label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           icon={'check'}
           onClick={
-            TextUtils.areEquals(records.geometryType, 'POINT')
+            areEquals(records.geometryType, 'POINT')
               ? () => onSavePoint(records.newPoint)
               : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
           }
         />
-        {TextUtils.areEquals(records.geometryType, 'POINT') && (
+        {areEquals(records.geometryType, 'POINT') && (
           <Button
             className="p-button-secondary"
             icon="cancel"
@@ -1247,9 +1265,9 @@ const DataViewer = withRouter(
             onError={onImportTableError}
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
-              tableId: tableId
+              tableSchemaId: tableId
             })}`}
           />
         )}
@@ -1277,7 +1295,7 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
               datasetId,
               fieldId: records.selectedFieldId
             })}`}

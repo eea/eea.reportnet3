@@ -126,25 +126,31 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
   return !isNil(codelistItems)
-    ? codelistItems.sort().map(codelistItem => {
-        return { itemType: codelistItem, value: codelistItem };
-      })
+    ? codelistItems
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+        .map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })
     : [];
 };
 
 const getCodelistItemsInSingleColumn = column => {
   const codelistItems = column.codelistItems;
   return !isNil(codelistItems)
-    ? codelistItems.sort().map(codelistItem => {
-        return { itemType: codelistItem, value: codelistItem };
-      })
+    ? codelistItems
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+        .map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })
     : [];
 };
 
 const getCodelistItemsWithEmptyOption = (column, noneText) => {
-  const codelistItems = column.codelistItems.sort().map(codelistItem => {
-    return { itemType: codelistItem, value: codelistItem };
-  });
+  const codelistItems = column.codelistItems
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+    .map(codelistItem => {
+      return { itemType: codelistItem, value: codelistItem };
+    });
 
   codelistItems.unshift({
     itemType: noneText,
@@ -240,11 +246,11 @@ const getLinkValue = (linkOptions, value) => {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
+    const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)
-    );
+    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   }
 };
 

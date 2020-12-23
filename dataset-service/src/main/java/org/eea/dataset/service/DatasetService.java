@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -70,7 +71,9 @@ public interface DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
@@ -128,10 +131,12 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    *
    * @throws EEAException the EEA exception
    */
-  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
+  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records, boolean updateCascadePK)
+      throws EEAException;
 
   /**
    * Delete record.
@@ -139,6 +144,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param recordId the record id
    * @param deleteCascade the delete cascade
+   *
    * @throws EEAException the EEA exception
    */
   void deleteRecord(@DatasetId Long datasetId, String recordId, boolean deleteCascade)
@@ -158,7 +164,9 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param mimeType the mime type
    * @param tableSchemaId the table schema id
+   *
    * @return the byte[]
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -171,6 +179,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @param tableSchemaId the id table schema
+   *
    * @throws EEAException the EEA exception
    */
   void insertRecords(@DatasetId Long datasetId, List<RecordVO> records, String tableSchemaId)
@@ -191,10 +200,12 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param field the field
+   * @param updateCascadePK the update cascade PK
    *
    * @throws EEAException the EEA exception
    */
-  void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
+  void updateField(@DatasetId Long datasetId, FieldVO field, boolean updateCascadePK)
+      throws EEAException;
 
   /**
    * Save all records.
@@ -326,10 +337,12 @@ public interface DatasetService {
    * @param fieldSchemaId the field schema id
    * @param conditionalValue the conditional value
    * @param searchValue the search value
+   * @param resultsNumber the results number
+   *
    * @return the field values referenced
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue);
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber);
 
   /**
    * Gets the referenced dataset id.
@@ -372,6 +385,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param type the type
+   *
    * @return the table read only
    */
   Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
@@ -388,6 +402,7 @@ public interface DatasetService {
    * status design or reportingDataset in state Draft.
    *
    * @param idDataset the id dataset
+   *
    * @return the boolean
    */
   boolean isDatasetReportable(Long idDataset);
@@ -396,7 +411,9 @@ public interface DatasetService {
    * Gets the mimetype.
    *
    * @param file the file
+   *
    * @return the mimetype
+   *
    * @throws EEAException the EEA exception
    */
   String getMimetype(String file) throws EEAException;
@@ -416,7 +433,9 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @return the attachment
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -428,6 +447,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @throws EEAException the EEA exception
    */
   void deleteAttachment(@DatasetId Long datasetId, String idField) throws EEAException;
@@ -439,6 +459,7 @@ public interface DatasetService {
    * @param idField the id field
    * @param fileName the file name
    * @param is the is
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -451,7 +472,9 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @return the field by id
+   *
    * @throws EEAException the EEA exception
    */
   FieldVO getFieldById(@DatasetId Long datasetId, String idField) throws EEAException;
@@ -462,6 +485,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaId the field schema id
+   *
    * @throws EEAException the EEA exception
    */
   void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
@@ -473,6 +497,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
+   *
    * @throws EEAException the EEA exception
    */
   void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException;
@@ -483,6 +508,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param objectId the object id
    * @param type the type
+   *
    * @return the table fixed number of records
    */
   Boolean getTableFixedNumberOfRecords(Long datasetId, String objectId, EntityTypeEnum type);
@@ -492,6 +518,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idRecord the id record
+   *
    * @return the string
    */
   String findRecordSchemaIdById(@DatasetId Long datasetId, String idRecord);
@@ -501,6 +528,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   *
    * @return the string
    */
   String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
@@ -510,15 +538,25 @@ public interface DatasetService {
    *
    * @param designs the designs
    * @param datasetId the dataset id
-   * @param idDatasetSchema the id dataset schema
    */
-  void spreadDataPrefill(List<DesignDataset> designs, Long datasetId, String idDatasetSchema);
+  void spreadDataPrefill(DesignDataset designs, Long datasetId);
 
   /**
    * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
+
+  /**
+   * Gets the schema if reportable.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   *
+   * @return the schema if reportable
+   */
+  DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId);
 }

@@ -38,6 +38,9 @@ export const WebformField = ({
   newRecord,
   onFillField,
   onSaveField,
+  onUpdateSinglesList,
+  onUpdatePamsId,
+  pamsRecords,
   record
 }) => {
   const resources = useContext(ResourcesContext);
@@ -111,7 +114,8 @@ export const WebformField = ({
       field.fieldSchemaId,
       filter,
       !isNil(conditionalField) ? conditionalField.value : field.value,
-      datasetSchemaId
+      datasetSchemaId,
+      50
     );
 
     const linkItems = referencedFieldValues
@@ -147,14 +151,27 @@ export const WebformField = ({
     }
   };
 
-  const onEditorSubmitValue = async (field, option, value) => {
+  const onEditorSubmitValue = async (field, option, value, updateInCascade = false) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
     try {
-      DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
+      await DatasetService.updateFieldById(
+        datasetId,
+        option,
+        field.fieldId,
+        field.fieldType,
+        parsedValue,
+        updateInCascade
+      );
+      if (!isNil(onUpdatePamsId) && updateInCascade) {
+        onUpdatePamsId(field.recordId, field.value, field.fieldId);
+      }
+      if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
+        onUpdateSinglesList();
+      }
     } catch (error) {
       console.error('error', error);
     }
@@ -182,6 +199,16 @@ export const WebformField = ({
     .flat()
     .join(', ');
 
+  const renderSinglePamsTemplate = option => {
+    const pams = pamsRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
+
+    if (!isNil(pams)) {
+      return `#${option.label} - ${pams.elements.find(element => TextUtils.areEquals(element.name, 'Title')).value}`;
+    } else {
+      return option.label;
+    }
+  };
+
   const renderTemplate = (field, option, type) => {
     switch (type) {
       case 'DATE':
@@ -206,6 +233,7 @@ export const WebformField = ({
         if (field.pkHasMultipleValues) {
           return (
             <MultiSelect
+              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -257,9 +285,11 @@ export const WebformField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
+            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
+            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') && renderSinglePamsTemplate}
             onChange={event => {
               onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -317,17 +347,15 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            // keyfilter={getInputType[type]}
-            disabled={field.isPrimary}
+            keyfilter={RecordUtils.getFilter(type)}
             id={field.fieldId}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
-            type="text"
             value={field.value}
           />
         );
@@ -361,6 +389,13 @@ export const WebformField = ({
               }}
             />
           </div>
+        );
+
+      case 'READ_ONLY':
+        return (
+          <Fragment>
+            {field.title}: <strong>{field.value}</strong>
+          </Fragment>
         );
 
       case 'ATTACHMENT':
@@ -431,7 +466,7 @@ export const WebformField = ({
 
   return (
     <Fragment>
-      {renderTemplate(element, element.fieldSchemaId, element.fieldType)}
+      {renderTemplate(element, element.fieldSchemaId, element.customType ? element.customType : element.fieldType)}
       {isFileDialogVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
@@ -449,7 +484,7 @@ export const WebformField = ({
           name="file"
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
             datasetId,
             fieldId: selectedFieldId
           })}`}

@@ -1,8 +1,44 @@
+import compact from 'lodash/compact';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
+const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selectedValue) => {
+  const initialValues = {};
+
+  let tableIdx = 0;
+  if (QuerystringUtils.getUrlParamValue('tab') !== '') {
+    const filteredTable = schemaTables.filter(
+      schemaTable => schemaTable.id === QuerystringUtils.getUrlParamValue('tab')
+    );
+    if (!isEmpty(filteredTable)) {
+      tableIdx = allTables.indexOf(filteredTable[0].name);
+    }
+    //Search on subtables for parent id
+    if (tableIdx === -1) {
+      configTables.forEach(table => {
+        table.elements.forEach(element => {
+          if (element.type === 'TABLE') {
+            if (element.name === filteredTable[0].name && element.name !== 'PaMs') {
+              tableIdx = allTables.indexOf(table.name);
+            }
+          }
+        });
+      });
+    }
+  }
+  const value = allTables[tableIdx === -1 ? 0 : tableIdx];
+
+  compact(allTables).forEach(table => {
+    initialValues[table] = false;
+    initialValues[selectedValue ? selectedValue : value] = true;
+  });
+
+  return initialValues;
+};
 
 const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
   const result = [];
@@ -20,38 +56,66 @@ const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') =
   return result;
 };
 
-const parseNewRecord = (columnsSchema, data) => {
-  if (!isEmpty(columnsSchema)) {
-    let fields;
+const getSchemaIdForIdSectorObjectivesField = records => {
+  let isFound = false;
+  let id_SectorObjectives_FieldSchemaId;
+  records.forEach(record => {
+    if (!isEmpty(record.fields) && !isFound) {
+      const { fields } = record;
 
-    if (!isUndefined(columnsSchema)) {
-      fields = columnsSchema.map(column => {
-        if (column.type === 'FIELD') {
-          return {
-            fieldData: { [column.fieldSchema]: null, type: column.fieldType, fieldSchemaId: column.fieldSchema }
-          };
+      fields.forEach(field => {
+        if (field.name === 'Id_SectorObjectives' && !isFound) {
+          id_SectorObjectives_FieldSchemaId = field.fieldSchema;
+          isFound = true;
         }
       });
     }
-
-    const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };
-
-    obj.datasetPartitionId = null;
-    if (!isUndefined(data) && data.length > 0) obj.datasetPartitionId = data.datasetPartitionId;
-
-    return obj;
-  }
+  });
+  return id_SectorObjectives_FieldSchemaId;
 };
 
-const parseNewTableRecord = (table, pamNumber) => {
+const findMaximumIdValue = (records, SectorObjectivesTable) => {
+  let fieldsIds = [];
+
+  let id_SectorObjectives_FieldSchemaId = getSchemaIdForIdSectorObjectivesField(records);
+
+  if (id_SectorObjectives_FieldSchemaId && SectorObjectivesTable) {
+    SectorObjectivesTable.elementsRecords.forEach(record => {
+      record.fields.forEach(field => {
+        if (field.fieldSchemaId === id_SectorObjectives_FieldSchemaId) {
+          fieldsIds.push(field.value);
+        }
+      });
+    });
+  }
+
+  fieldsIds = fieldsIds
+    .filter(fieldId => !isNil(fieldId) && fieldId !== '')
+    .map(fieldId => fieldId.split('_')[1])
+    .map(fieldId => parseInt(fieldId));
+
+  if (isEmpty(fieldsIds)) {
+    return 1;
+  }
+
+  return Math.max(...fieldsIds);
+};
+
+const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
+    let id_SectorObjectives_FieldSchemaId = getSchemaIdForIdSectorObjectivesField(table.records);
 
     if (!isUndefined(table)) {
       fields = table.records[0].fields.map(field => {
         return {
           fieldData: {
-            [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field.name, 'FK_PAMS') ? pamNumber : null,
+            [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field.name, 'FK_PAMS')
+              ? pamNumber
+              : field.fieldSchema === id_SectorObjectives_FieldSchemaId ||
+                field.fieldId === id_SectorObjectives_FieldSchemaId
+              ? `${pamNumber}_${findMaximumIdValue(table.records, SectorObjectivesTable) + 1}`
+              : null,
             type: field.type,
             fieldSchemaId: field.fieldSchema || field.fieldId
           }
@@ -122,6 +186,7 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
 
 const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
+
   data.map(table => {
     if (table.records) {
       table.records[0].fields = table.records[0].fields.map(field => {
@@ -183,10 +248,23 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
   return data;
 };
 
+const parsePamsRecords = records =>
+  records.map(record => {
+    const { recordId, recordSchemaId } = record;
+    let data = {};
+
+    record.elements.forEach(
+      element => (data = { ...data, [element.name]: element.value, recordId: recordId, recordSchemaId: recordSchemaId })
+    );
+
+    return data;
+  });
+
 export const WebformsUtils = {
+  getWebformTabs,
   mergeArrays,
   onParseWebformData,
   onParseWebformRecords,
-  parseNewRecord,
-  parseNewTableRecord
+  parseNewTableRecord,
+  parsePamsRecords
 };

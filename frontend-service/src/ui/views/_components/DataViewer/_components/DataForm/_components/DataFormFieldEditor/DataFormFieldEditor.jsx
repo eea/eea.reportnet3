@@ -74,6 +74,8 @@ const DataFormFieldEditor = ({
     showCoordinateError: false
   });
 
+  const { areEquals } = TextUtils;
+
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
       if (type === 'LINK') onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
@@ -106,7 +108,7 @@ const DataFormFieldEditor = ({
   }, [inputRef.current, isVisible]);
 
   useEffect(() => {
-    if (TextUtils.areEquals('LINK', type)) {
+    if (areEquals('LINK', type)) {
       if (fieldValue === '') {
         if (!isNil(linkDropdownRef.current)) {
           linkDropdownRef.current.clearFilter();
@@ -174,7 +176,7 @@ const DataFormFieldEditor = ({
   };
 
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
-    if (isNil(type) || !TextUtils.areEquals(type, 'LINK') || isNil(referencedField)) {
+    if (isNil(type) || !areEquals(type, 'LINK') || isNil(referencedField)) {
       return [];
     }
 
@@ -247,13 +249,16 @@ const DataFormFieldEditor = ({
   const renderMultiselectCodelist = (field, fieldValue) => {
     return (
       <MultiSelect
+        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={column.readOnly && reporting}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value, isConditional)}
-        options={column.codelistItems.sort().map(codelistItem => {
-          return { itemType: codelistItem, value: codelistItem };
-        })}
+        options={column.codelistItems
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+          .map(codelistItem => {
+            return { itemType: codelistItem, value: codelistItem };
+          })}
         optionLabel="itemType"
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
@@ -359,6 +364,7 @@ const DataFormFieldEditor = ({
     if (column.pkHasMultipleValues) {
       return (
         <MultiSelect
+          addSpaceCommaSeparator={true}
           appendTo={document.body}
           clearButton={false}
           disabled={column.readOnly && reporting}

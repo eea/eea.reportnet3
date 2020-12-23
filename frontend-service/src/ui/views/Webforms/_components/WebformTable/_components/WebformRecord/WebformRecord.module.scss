@@ -36,14 +36,50 @@
   .label2 {
     font-size: 1.75rem;
     margin: 2.5rem 0 1.25rem 0;
+    display: inline-block;
   }
   .label3 {
     font-size: 1.25rem;
     margin: 0 0 1rem;
+    display: inline-block;
+  }
+  .label4 {
+    font-weight: 400;
+    display: inline-block;
   }
   .field + h3 {
     margin-top: 3rem;
   }
+  h3 {
+    .infoButtonWrapper {
+      border-radius: 5px;
+      border: 0.1rem solid var(--gray-25);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      .infoButton {
+        background-color: var(--white) !important;
+        border-radius: 50% !important;
+        color: red !important;
+        font-size: 12pt !important;
+        height: 0.7em !important;
+        margin-left: 0.4rem !important;
+        width: 0.7em !important;
+        margin-right: 0.25rem;
+
+        > span {
+          left: 46% !important;
+          margin-left: -0.48em !important;
+          margin-top: -0.5em !important;
+        }
+
+        &:focus {
+          box-shadow: none !important;
+        }
+      }
+    }
+  }
+
   h3 + .subTable {
     margin-top: 0;
   }
@@ -73,13 +109,16 @@
     :global .p-dropdown {
       width: 100%;
     }
-    :global .p-inputtext {
+    :global .p-inputtext:not(.p-column-filter) {
       padding: 1rem 0.5rem;
     }
     label {
       display: inline-block;
       max-width: 75%;
       margin-bottom: 0.5rem;
+    }
+    .requiredMark {
+      color: var(--errors);
     }
     .label2 {
       margin-top: 4rem 0 0 0;
@@ -99,6 +138,17 @@
         color: var(--errors);
       }
     }
+
+    :global .webform-validationErrors {
+      width: 2em !important;
+      &:first-of-type {
+        margin-left: 1rem !important;
+      }
+      :global .pi {
+        font-size: 1.8em;
+      }
+    }
+
     .infoButtonWrapper {
       border-radius: 5px;
       border: 0.1rem solid var(--gray-25);
@@ -127,16 +177,6 @@
       }
     }
 
-    :global .webform-validationErrors {
-      width: 2em !important;
-      &:first-of-type {
-        margin-left: 1rem !important;
-      }
-      :global .pi {
-        font-size: 1.8em;
-      }
-    }
-
     .infoCircle {
       background-color: var(--white);
       border-radius: 50%;
@@ -157,6 +197,28 @@
       }
     }
   }
+  .infoCircle {
+    background-color: var(--white);
+    border-radius: 50%;
+    color: var(--datatable-header-info-button-color) !important;
+    font-size: 12pt;
+    height: 0.7em;
+    margin-left: 0.4rem !important;
+    width: 0.7em !important;
+
+    > span {
+      left: 46%;
+      margin-left: -0.48em;
+      margin-top: -0.5em;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0) !important;
+    }
+  }
 
   .errorList {
     list-style: none;
@@ -170,24 +232,45 @@
 }
 
 .subTable {
-  // border: 0.1rem solid var(--gray-25);
-  // padding: 1rem;
-  border-radius: 10px;
-  height: 100%;
-  margin: 2rem 0 2rem 0;
-  width: 100%;
-  border: 1px solid var(--gray-25);
   padding: 1rem;
-
+  margin: 2rem 0 2rem 0;
+  border: 1px solid var(--gray-25);
+  .content {
+    border: 1px solid var(--gray-25);
+  }
   .title {
-    align-items: center;
     border-radius: 10px;
     border: 0.1rem solid var(--gray-25);
-    display: flex;
-    font-weight: 400;
-    justify-content: space-between;
+    padding: 0 1rem;
     margin: 0.5rem 0;
-    padding: 1rem;
+  }
+}
+
+.showInsideParentTable .content {
+  padding: 0;
+}
+.showInsideParentTable {
+  .title {
+    h3 {
+      padding: 0 0 1em 0;
+    }
+  }
+}
+
+.subTable,
+.showInsideParentTable {
+  border-radius: 10px;
+  height: 100%;
+  width: 100%;
+
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h3 {
+      font-weight: 400;
+    }
   }
 
   .nonExistTable {
@@ -195,7 +278,6 @@
   }
 
   .content {
-    border: 1px solid var(--gray-25);
     margin-bottom: 0.5rem;
     padding-bottom: 0;
   }

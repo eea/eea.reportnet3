@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uuid from 'uuid';
 
 import styles from './ComparisonExpression.module.scss';
 
@@ -336,6 +337,7 @@ const ComparisonExpression = ({
     if (operatorType === 'date') {
       return (
         <Calendar
+          id={uuid.v4()}
           appendTo={document.body}
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
@@ -351,6 +353,7 @@ const ComparisonExpression = ({
     if (operatorType === 'day') {
       return (
         <InputNumber
+          id={uuid.v4()}
           disabled={isDisabled}
           format={false}
           max={32}
@@ -370,6 +373,7 @@ const ComparisonExpression = ({
         return (
           <span className={styles.inputStringMatch}>
             <InputText
+              id={uuid.v4()}
               disabled={isDisabled}
               onChange={e => onUpdateExpressionField('field2', e.target.value)}
               placeholder={resourcesContext.messages.value}
@@ -392,6 +396,7 @@ const ComparisonExpression = ({
       if (operatorValue === 'MATCH') {
         return (
           <InputText
+            id={uuid.v4()}
             disabled={isDisabled}
             onChange={e => onUpdateExpressionField('field2', e.target.value)}
             placeholder={resourcesContext.messages.value}
@@ -403,6 +408,7 @@ const ComparisonExpression = ({
       if (fieldType === 'NUMBER_DECIMAL') {
         return (
           <InputText
+            id={uuid.v4()}
             keyfilter="num"
             disabled={isDisabled}
             format={false}
@@ -416,6 +422,7 @@ const ComparisonExpression = ({
 
       return (
         <InputNumber
+          id={uuid.v4()}
           disabled={isDisabled}
           format={false}
           mode="decimal"
@@ -432,6 +439,7 @@ const ComparisonExpression = ({
     if (operatorType === 'year') {
       return (
         <InputNumber
+          id={uuid.v4()}
           disabled={isDisabled}
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
@@ -447,6 +455,7 @@ const ComparisonExpression = ({
     if (operatorType === 'month') {
       return (
         <InputNumber
+          id={uuid.v4()}
           disabled={isDisabled}
           format={false}
           max={13}
@@ -462,6 +471,7 @@ const ComparisonExpression = ({
     }
     return (
       <InputText
+        id={uuid.v4()}
         keyfilter={valueKeyFilter}
         disabled={isDisabled}
         onChange={e => {

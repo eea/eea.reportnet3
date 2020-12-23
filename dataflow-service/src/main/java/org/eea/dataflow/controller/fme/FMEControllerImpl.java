@@ -126,8 +126,11 @@ public class FMEControllerImpl implements FMEController {
 
     StreamingResponseBody stream = out -> {
       InputStream is = fmeCommunicationService.receiveFile(datasetId, providerId, fileName);
-      streamingUtil.copy(is, out);
-      is.close();
+      try {
+        streamingUtil.copy(is, out);
+      } finally {
+        is.close();
+      }
     };
 
     HttpHeaders httpHeaders = new HttpHeaders();
