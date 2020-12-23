@@ -17,15 +17,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   private DatasetService datasetService;
 
@@ -46,20 +52,26 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    String stringDataset = (String) eeaEventVO.getData().get("dataset_id");
+    String stringTargetDataset = (String) eeaEventVO.getData().get("dataset_id");
     String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
-    Long dataset = Long.valueOf(stringDataset);
-    Long dataflowId = dataSetMetabaseRepository.findDataflowIdById(dataset);
+    Long targetDatasetId = Long.valueOf(stringTargetDataset);
+    Long dataflowId = dataSetMetabaseRepository.findDataflowIdById(targetDatasetId);
     List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
-    boolean isdesing = false;
+    boolean isDesignDataset = false;
+    DesignDataset originDatasetDesign = null;
     if (!designs.isEmpty()) {
       for (DesignDataset design : designs) {
-        if (design.getId().equals(dataset)) {
-          isdesing = true;
+        if (design.getId().equals(targetDatasetId)) {
+          isDesignDataset = true; //target datasetId is a design, break loop as it will not be processed
+          break;
+        }
+        if (idDatasetSchema.equals(design.getDatasetSchema())) {
+          originDatasetDesign = design;
         }
       }
-      if (!isdesing) {
-        datasetService.spreadDataPrefill(designs, dataset, idDatasetSchema);
+      if (!isDesignDataset && null
+          != originDatasetDesign) {//target dataset is a reporting dataset and we have found the design dataset with data to be copied into the target dataset
+        datasetService.spreadDataPrefill(originDatasetDesign, targetDatasetId);
       }
     }
   }
