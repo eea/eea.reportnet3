@@ -2600,7 +2600,7 @@ public class DatasetServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
-    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
+
     DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
     datasetVO.setDataProviderId(1L);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(datasetVO);
