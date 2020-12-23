@@ -151,7 +151,10 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [userContext, dataset]);
 
   useEffect(() => {
-    !isNil(webformData) && setHasWebformWritePermissions(false);
+    if (!isNil(webformData)) {
+      const webformsValues = config.webforms.map(webform => webform.value);
+      setHasWebformWritePermissions(!webformsValues.includes(webformData));
+    }
   }, [webformData]);
 
   useEffect(() => {
