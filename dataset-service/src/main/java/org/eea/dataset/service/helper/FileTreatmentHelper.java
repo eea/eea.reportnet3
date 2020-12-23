@@ -89,6 +89,7 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The import executor service. */
   private ExecutorService importExecutorService;
 
+  /** The batch size. */
   private int batchSize = 1000;
 
   /**
@@ -366,6 +367,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param user the user
    * @param error the error
+   * @param integrationVO the integration VO
    */
   private void finishImportProcessConditionally(Long datasetId, String tableSchemaId, File file,
       String user, String error, IntegrationVO integrationVO) {
