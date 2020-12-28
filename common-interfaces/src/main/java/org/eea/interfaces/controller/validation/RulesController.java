@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -65,9 +66,11 @@ public interface RulesController {
    * Delete rules schema.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @DeleteMapping("/private/deleteRulesSchema")
-  void deleteRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId);
+  void deleteRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId);
 
   /**
    * Delete rule by id.
@@ -273,10 +276,10 @@ public interface RulesController {
   /**
    * Validate sql rule data collection.
    *
-   * @param query the query
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param ruleVO the rule VO
+   * @return true, if successful
    */
   @PostMapping("/private/validateSqlRuleDataCollection")
   boolean validateSqlRuleDataCollection(@RequestParam("datasetId") Long datasetId,
@@ -341,5 +344,25 @@ public interface RulesController {
   @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
   void deleteAutomaticRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId);
+
+
+  /**
+   * Gets the integrity rules by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity rules by dataset schema id
+   */
+  @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
+  List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId);
+
+
+  /**
+   * Insert integrity schema.
+   *
+   * @param integritiesVO the integrities VO
+   */
+  @PostMapping("/private/insertIntegrities")
+  void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO);
 
 }

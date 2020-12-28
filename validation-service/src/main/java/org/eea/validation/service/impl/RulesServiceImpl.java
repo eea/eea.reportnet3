@@ -179,11 +179,14 @@ public class RulesServiceImpl implements RulesService {
    * Delete empty rules schema.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @Override
-  public void deleteEmptyRulesSchema(String datasetSchemaId) {
+  public void deleteEmptyRulesSchema(String datasetSchemaId, Long datasetId) {
     RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
     if (null != ruleSchema) {
+      // Check first if the rule has an integrity type rule to delete the associated data
+      deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
       rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
       rulesSequenceRepository.deleteByDatasetSchemaId(ruleSchema.getIdDatasetSchema());
     }
@@ -1207,4 +1210,42 @@ public class RulesServiceImpl implements RulesService {
 
     return uncheckedRules;
   }
+
+
+  /**
+   * Gets the integrity schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity schemas
+   */
+  @Override
+  public List<IntegrityVO> getIntegritySchemas(String datasetSchemaId) {
+    List<IntegritySchema> integrities =
+        integritySchemaRepository.findByOriginDatasetSchemaId(new ObjectId(datasetSchemaId));
+    return integrityMapper.entityListToClass(integrities);
+  }
+
+
+  /**
+   * Insert integrity schemas.
+   *
+   * @param integritiesVO the integrities VO
+   */
+  @Override
+  public void insertIntegritySchemas(List<IntegrityVO> integritiesVO) {
+
+    List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVO);
+    for (IntegritySchema integrity : integrities) {
+      integritySchemaRepository.save(integrity);
+
+      Long datasetReferencedId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
+      Long datasetOriginId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
+          datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+          integrity.getReferencedDatasetSchemaId().toString());
+    }
+  }
+
 }

@@ -270,7 +270,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         integrationControllerZuul.deleteSchemaIntegrations(datasetSchemaId);
 
         // delete the schema to dataset
-        rulesControllerZuul.deleteRulesSchema(datasetSchemaId);
+        rulesControllerZuul.deleteRulesSchema(datasetSchemaId, datasetId);
         // delete the metabase
         datasetMetabaseService.deleteDesignDataset(datasetId);
         // delete the schema in database

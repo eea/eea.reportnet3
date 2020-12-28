@@ -44,8 +44,9 @@ public interface RulesService {
    * Delete empty rules schema.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
-  void deleteEmptyRulesSchema(String datasetSchemaId);
+  void deleteEmptyRulesSchema(String datasetSchemaId, Long datasetId);
 
   /**
    * Delete rule by id.
@@ -256,4 +257,20 @@ public interface RulesService {
    * @param referenceId the reference id
    */
   void deleteAutomaticRuleByReferenceId(String datasetSchemaId, String referenceId);
+
+
+  /**
+   * Gets the integrity schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity schemas
+   */
+  List<IntegrityVO> getIntegritySchemas(String datasetSchemaId);
+
+  /**
+   * Insert integrity schemas.
+   *
+   * @param integritiesVO the integrities VO
+   */
+  void insertIntegritySchemas(List<IntegrityVO> integritiesVO);
 }
