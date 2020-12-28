@@ -60,6 +60,7 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
 

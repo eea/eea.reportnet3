@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.junit.Assert;
@@ -604,4 +605,44 @@ public class RulesControllerImplTest {
     rulesControllerImpl.getIntegrityRulesByDatasetSchemaId(Mockito.any());
     Mockito.verify(rulesService, times(1)).getIntegritySchemas(Mockito.any());
   }
+
+
+  @Test
+  public void validateSqlRuleTest() throws EEAException {
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+    rulesControllerImpl.validateSqlRule(1L, "5e44110d6a9e3a270ce13fac", new RuleVO());
+    Mockito.verify(sqlRulesService, times(1)).validateSQLRule(Mockito.anyLong(),
+        Mockito.anyString(), Mockito.any());
+  }
+
+
+  @Test
+  public void validateSqlRulesTest() throws EEAException {
+    rulesControllerImpl.validateSqlRules(Mockito.anyLong(), Mockito.anyString());
+    Mockito.verify(sqlRulesService, times(1)).validateSQLRules(Mockito.anyLong(),
+        Mockito.anyString());
+  }
+
+
+
+  @Test
+  public void getAllDisabledRulesTest() throws EEAException {
+    rulesControllerImpl.getAllDisabledRules(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).getAllDisabledRules(Mockito.anyLong(), Mockito.any());
+  }
+
+
+  @Test
+  public void getAllUncheckedRulesTest() throws EEAException {
+    rulesControllerImpl.getAllUncheckedRules(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).getAllUncheckedRules(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test
+  public void deleteAutomaticRuleByReferenceIdTest() {
+    rulesControllerImpl.deleteAutomaticRuleByReferenceId(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).deleteAutomaticRuleByReferenceId(Mockito.any(),
+        Mockito.any());
+  }
+
 }

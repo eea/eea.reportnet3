@@ -16,6 +16,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -238,7 +239,6 @@ public class RulesServiceImplTest {
     List<RuleVO> rulesVO = new ArrayList<>();
     List<IntegrityVO> listIntegrityVO = new ArrayList<>();
     ObjectId id = new ObjectId();
-    new RulesSchemaVO();
     Rule rule = new Rule();
     RuleVO ruleVO = new RuleVO();
     ruleVO.setRuleId(id.toString());
@@ -1616,5 +1616,39 @@ public class RulesServiceImplTest {
     Mockito.verify(integritySchemaRepository, times(1)).save(Mockito.any());
   }
 
+
+  @Test
+  public void getAllDisabledRulesTest() {
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    design.setDatasetSchema("5e44110d6a9e3a270ce13fac");
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    designs.add(design);
+    Rule rule = new Rule();
+    rule.setRuleId(new ObjectId());
+    List<Rule> rules = new ArrayList<>();
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
+    Assert.assertEquals(Integer.valueOf(1), rulesServiceImpl.getAllDisabledRules(1L, designs));
+  }
+
+  @Test
+  public void getAllUncheckedRulesTest() {
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    design.setDatasetSchema("5e44110d6a9e3a270ce13fac");
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    designs.add(design);
+    Rule rule = new Rule();
+    rule.setRuleId(new ObjectId());
+    List<Rule> rules = new ArrayList<>();
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Assert.assertEquals(Integer.valueOf(1), rulesServiceImpl.getAllUncheckedRules(1L, designs));
+  }
 
 }
