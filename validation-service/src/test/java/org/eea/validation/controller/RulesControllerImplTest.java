@@ -592,4 +592,16 @@ public class RulesControllerImplTest {
     Mockito.verify(sqlRulesService, times(1)).validateSQLRuleFromDatacollection(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
+
+  @Test
+  public void insertIntegrityTest() throws EEAException {
+    rulesControllerImpl.insertIntegritySchema(Mockito.any());
+    Mockito.verify(rulesService, times(1)).insertIntegritySchemas(Mockito.any());
+  }
+
+  @Test
+  public void getIntegrityRulesByDatasetSchemaIdTest() throws EEAException {
+    rulesControllerImpl.getIntegrityRulesByDatasetSchemaId(Mockito.any());
+    Mockito.verify(rulesService, times(1)).getIntegritySchemas(Mockito.any());
+  }
 }

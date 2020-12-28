@@ -1226,6 +1226,11 @@ public class RulesServiceImpl implements RulesService {
   }
 
 
+  /**
+   * Insert integrity schemas.
+   *
+   * @param integritiesVO the integrities VO
+   */
   @Override
   public void insertIntegritySchemas(List<IntegrityVO> integritiesVO) {
 

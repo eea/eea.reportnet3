@@ -305,11 +305,11 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesPKTest() throws EEAException {
     DataSetSchema datasetSchema = new DataSetSchema();
-    List<TableSchema> tableSchemaList = new ArrayList();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
     TableSchema tableSchema = new TableSchema();
     RecordSchema recordSchema = new RecordSchema();
     FieldSchema fieldSchema = new FieldSchema();
-    List<FieldSchema> fieldSchemaList = new ArrayList();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
     fieldSchema.setIdFieldSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
     fieldSchemaList.add(fieldSchema);
     recordSchema.setFieldSchema(fieldSchemaList);
@@ -1576,10 +1576,44 @@ public class RulesServiceImplTest {
    */
   @Test
   public void findSqlSentencesByDatasetSchemaIdTest() {
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(new ArrayList());
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(new ArrayList<>());
     rulesServiceImpl.findSqlSentencesByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1))
         .findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+  @Test
+  public void getIntegritySchemasTest() {
+    Mockito.when(integritySchemaRepository.findByOriginDatasetSchemaId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    rulesServiceImpl.getIntegritySchemas("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(integritySchemaRepository, times(1))
+        .findByOriginDatasetSchemaId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+
+  @Test
+  public void insertIntegritySchemasTest() {
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId("1");
+    integrityVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setOriginDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setReferencedDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setIsDoubleReferenced(false);
+    integrityVO.setOriginFields(Arrays.asList("5e44110d6a9e3a270ce13fac"));
+    integrityVO.setReferencedFields(Arrays.asList("5e44110d6a9e3a270ce13fac"));
+    List<IntegrityVO> integritiesVO = new ArrayList<>();
+    integritiesVO.add(integrityVO);
+    List<IntegritySchema> integrities = new ArrayList<>();
+    IntegritySchema integrity = new IntegritySchema();
+    integrity.setId(new ObjectId());
+    integrity.setOriginDatasetSchemaId(new ObjectId());
+    integrity.setReferencedDatasetSchemaId(new ObjectId());
+    integrities.add(integrity);
+    when(integrityMapper.classListToEntity(Mockito.any())).thenReturn(integrities);
+
+    rulesServiceImpl.insertIntegritySchemas(integritiesVO);
+    Mockito.verify(integritySchemaRepository, times(1)).save(Mockito.any());
   }
 
 

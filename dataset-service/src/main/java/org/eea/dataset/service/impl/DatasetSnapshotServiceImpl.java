@@ -715,8 +715,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (listIntegrityVO != null && !listIntegrityVO.isEmpty()) {
         rulesControllerZuul.insertIntegritySchema(listIntegrityVO);
       }
-
-
       LOG.info("Schema Integrity class recovered");
 
 

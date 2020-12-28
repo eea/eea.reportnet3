@@ -267,5 +267,10 @@ public interface RulesService {
    */
   List<IntegrityVO> getIntegritySchemas(String datasetSchemaId);
 
+  /**
+   * Insert integrity schemas.
+   *
+   * @param integritiesVO the integrities VO
+   */
   void insertIntegritySchemas(List<IntegrityVO> integritiesVO);
 }

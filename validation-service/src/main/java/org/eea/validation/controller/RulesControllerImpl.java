@@ -566,13 +566,21 @@ public class RulesControllerImpl implements RulesController {
    * @return the integrity rules by dataset schema id
    */
   @Override
+  @HystrixCommand
   @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
   public List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
       @PathVariable("datasetSchemaId") String datasetSchemaId) {
     return rulesService.getIntegritySchemas(datasetSchemaId);
   }
 
+
+  /**
+   * Insert integrity schema.
+   *
+   * @param integritiesVO the integrities VO
+   */
   @Override
+  @HystrixCommand
   @PostMapping("/private/insertIntegrities")
   public void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO) {
     rulesService.insertIntegritySchemas(integritiesVO);
