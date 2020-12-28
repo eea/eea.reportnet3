@@ -89,6 +89,9 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The import executor service. */
   private ExecutorService importExecutorService;
 
+  /** The batch size. */
+  private int batchSize = 1000;
+
   /**
    * Inits the.
    */
@@ -153,7 +156,9 @@ public class FileTreatmentHelper implements DisposableBean {
       String saveLocationPath = folder.getCanonicalPath();
       folder.mkdirs();
 
-      if ("zip".equalsIgnoreCase(datasetService.getMimetype(fileName))) {
+      String multipartFileMimeType = datasetService.getMimetype(fileName);
+
+      if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
 
@@ -200,11 +205,10 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       } else {
 
-        String mimeType = datasetService.getMimetype(fileName);
         File file = new File(folder, fileName);
 
         // Look for an integration for the given kind of file.
-        IntegrationVO integrationVO = getIntegrationVO(schema, mimeType);
+        IntegrationVO integrationVO = getIntegrationVO(schema, multipartFileMimeType);
 
         // Store the file in the persistence volume
         try (FileOutputStream output = new FileOutputStream(file)) {
@@ -254,6 +258,9 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param user the user
    */
   private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO, String user) {
+
+    String error = null;
+
     try (InputStream inputStream = new FileInputStream(file)) {
 
       // TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
@@ -266,15 +273,13 @@ public class FileTreatmentHelper implements DisposableBean {
 
       integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
           IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO);
-
-      releaseFmeImportCompletedEvent(datasetId, file.getName(), user);
     } catch (IOException e) {
-      releaseFmeImportFailedEvent(datasetId, file.getName(), user, e.getMessage());
       LOG.error("Error starting FME-Import process: datasetId={}, file={}", datasetId,
           file.getName(), e);
-    } finally {
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      error = e.getMessage();
     }
+
+    finishImportProcessConditionally(datasetId, null, file, user, error, integrationVO);
   }
 
   /**
@@ -290,6 +295,7 @@ public class FileTreatmentHelper implements DisposableBean {
       String user) {
 
     String fileName = file.getName();
+    String error = null;
 
     try (InputStream inputStream = new FileInputStream(file)) {
 
@@ -325,11 +331,11 @@ public class FileTreatmentHelper implements DisposableBean {
           .forEach(recordValues -> datasetService.saveAllRecords(datasetId, recordValues));
 
       LOG.info("File {} processed and saved into DB for dataset {}", fileName, datasetId);
-      finishImportProcessConditionally(datasetId, tableSchemaId, file, user, null);
     } catch (Exception e) {
       LOG_ERROR.error("Error loading file: {}", fileName, e);
-      finishImportProcessConditionally(datasetId, tableSchemaId, file, user, e.getMessage());
+      error = e.getMessage();
     }
+    finishImportProcessConditionally(datasetId, tableSchemaId, file, user, error, null);
   }
 
   /**
@@ -361,9 +367,10 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param user the user
    * @param error the error
+   * @param integrationVO the integration VO
    */
   private void finishImportProcessConditionally(Long datasetId, String tableSchemaId, File file,
-      String user, String error) {
+      String user, String error, IntegrationVO integrationVO) {
 
     Path parentPath = file.getParentFile().toPath();
     try (Stream<Path> entries = Files.list(parentPath)) {
@@ -377,10 +384,18 @@ public class FileTreatmentHelper implements DisposableBean {
         // Remove the folder
         Files.delete(parentPath);
 
-        if (null != error) {
-          releaseRn3ImportFailedEvent(datasetId, tableSchemaId, file.getName(), user, error);
+        if (null == integrationVO) {
+          if (null != error) {
+            releaseRn3ImportFailedEvent(datasetId, tableSchemaId, file.getName(), user, error);
+          } else {
+            releaseRn3ImportCompletedEvent(datasetId, tableSchemaId, file.getName(), user);
+          }
         } else {
-          releaseRn3ImportCompletedEvent(datasetId, tableSchemaId, file.getName(), user);
+          if (null != error) {
+            releaseFmeImportFailedEvent(datasetId, file.getName(), user, error);
+          } else {
+            releaseFmeImportCompletedEvent(datasetId, file.getName(), user);
+          }
         }
 
         datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
@@ -577,17 +592,16 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
     List<List<RecordValue>> generalList = new ArrayList<>();
-    // lists size
-    final int BATCH = 1000;
 
     // dividing the number of records in different lists
-    int nLists = (int) Math.ceil(allRecords.size() / (double) BATCH);
+    int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
     if (nLists > 1) {
       for (int i = 0; i < (nLists - 1); i++) {
-        generalList.add(new ArrayList<>(allRecords.subList(BATCH * i, BATCH * (i + 1))));
+        generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
       }
     }
-    generalList.add(new ArrayList<>(allRecords.subList(BATCH * (nLists - 1), allRecords.size())));
+    generalList
+        .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
 
     return generalList;
   }
