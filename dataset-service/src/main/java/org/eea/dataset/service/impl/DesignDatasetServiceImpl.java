@@ -191,9 +191,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    *
    * @throws EEAException the EEA exception
    *
-   *     We've got the list of design datasets from the dataflow to copy and the dataflow
-   *     destination. The idea is create a new design dataset copied from the original and change
-   *     the schema's objectId (dataset, table, record and field level)
+   *         We've got the list of design datasets from the dataflow to copy and the dataflow
+   *         destination. The idea is create a new design dataset copied from the original and
+   *         change the schema's objectId (dataset, table, record and field level)
    */
   @Async
   @Override
@@ -246,19 +246,19 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
               dataschemaService.createEmptyDataSetSchema(idDataflowDestination).toString();
           // fill the dictionary of origin and news object id created. This will be done during all
           // the process
-          DataSetSchemaVO targetDatasetSchema = dataschemaService
-              .getDataSchemaById(newIdDatasetSchema);
+          DataSetSchemaVO targetDatasetSchema =
+              dataschemaService.getDataSchemaById(newIdDatasetSchema);
           dictionaryOriginTargetObjectId.put(schemaVO.getIdDataSetSchema(), newIdDatasetSchema);
-          //adding to the dictionary mapping schema id's the mapping among tables
+          // adding to the dictionary mapping schema id's the mapping among tables
           final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
           targetDatasetSchema.getTableSchemas().forEach(table -> {
             for (TableSchemaVO tableSchemaVO : schemaVO.getTableSchemas()) {
               if (table.getNameTableSchema().equals(tableSchemaVO.getNameTableSchema())) {
-                dictionaryOriginTargetTableObjectId
-                    .put(tableSchemaVO.getIdTableSchema(), table.getIdTableSchema());
-                dictionaryOriginTargetTableObjectId
-                    .put(tableSchemaVO.getRecordSchema().getIdRecordSchema(),
-                        table.getRecordSchema().getIdRecordSchema());
+                dictionaryOriginTargetTableObjectId.put(tableSchemaVO.getIdTableSchema(),
+                    table.getIdTableSchema());
+                dictionaryOriginTargetTableObjectId.put(
+                    tableSchemaVO.getRecordSchema().getIdRecordSchema(),
+                    table.getRecordSchema().getIdRecordSchema());
               }
             }
           });
@@ -311,13 +311,14 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // created)
         integrationControllerZuul.copyIntegrations(copy);
 
-        // Copy the data inside the design datasets, but only the tables that are prefilled
-        datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
-
         // Create the views necessary to the validation in the new datasets created
         dictionaryOriginTargetDatasetsId
             .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
                 .createUpdateQueryView(datasetDestination, false));
+
+        // Copy the data inside the design datasets, but only the tables that are prefilled
+        datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
+
 
         // Release the notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
