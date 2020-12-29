@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.annotation.PostConstruct;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -48,6 +49,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import feign.FeignException;
 
 /**
  * The Class FileTreatmentHelper.
@@ -65,9 +67,9 @@ public class FileTreatmentHelper implements DisposableBean {
   @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
 
-  /** The path import. */
-  @Value("${pathImport}")
-  private String pathImport;
+  /** The import path. */
+  @Value("${importPath}")
+  private String importPath;
 
   /** The dataset service. */
   @Autowired
@@ -126,8 +128,8 @@ public class FileTreatmentHelper implements DisposableBean {
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
     if (null == schema) {
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
-      LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getName());
+      LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
+          datasetId, tableSchemaId, file.getName());
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
@@ -150,11 +152,14 @@ public class FileTreatmentHelper implements DisposableBean {
     try (InputStream input = multipartFile.getInputStream()) {
 
       // Prepare the folder where files will be stored
-      File root = new File(pathImport);
+      File root = new File(importPath);
       File folder = new File(root, datasetId.toString());
       String fileName = multipartFile.getOriginalFilename();
       String saveLocationPath = folder.getCanonicalPath();
-      folder.mkdirs();
+
+      if (!folder.mkdirs()) {
+        throw new EEAException("Folder for dataset " + datasetId + " already exists");
+      }
 
       String multipartFileMimeType = datasetService.getMimetype(fileName);
 
@@ -179,7 +184,7 @@ public class FileTreatmentHelper implements DisposableBean {
             // Prevent Zip Slip attack or skip if the entry is a directory
             if (!"csv".equalsIgnoreCase(mimeType) || entry.isDirectory()
                 || !filePath.startsWith(saveLocationPath + File.separator)) {
-              LOG.error("Ignored file from ZIP: {}", entryName);
+              LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
               entry = zip.getNextEntry();
               continue;
             }
@@ -222,9 +227,9 @@ public class FileTreatmentHelper implements DisposableBean {
       }
 
     } catch (IOException e) {
-      LOG.error("Unexpected exception importing file data: datasetId={}, file={}", datasetId,
+      LOG_ERROR.error("Unexpected exception importing file data: datasetId={}, file={}", datasetId,
           multipartFile.getName(), e);
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      finishImportProcessConditionally(datasetId, tableSchemaId, null, null, null, true);
       throw new EEAException(e);
     }
   }
@@ -237,12 +242,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param file the file
    * @param integrationVO the integration VO
+   * @throws EEAException the EEA exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      File file, IntegrationVO integrationVO) {
+      File file, IntegrationVO integrationVO) throws EEAException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     if (null != integrationVO) {
-      importExecutorService.submit(() -> fmeFileProcess(datasetId, file, integrationVO, user));
+      fmeFileProcess(datasetId, file, integrationVO);
     } else {
       importExecutorService
           .submit(() -> rn3FileProcess(datasetId, tableSchemaId, schema, file, user));
@@ -255,14 +261,14 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
-   * @param user the user
+   * @throws EEAException the EEA exception
    */
-  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO, String user) {
+  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO)
+      throws EEAException {
 
-    String error = null;
+    LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
 
     try (InputStream inputStream = new FileInputStream(file)) {
-
       // TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
       // file in memory. To solve it, the FME connector should be redesigned.
       byte[] byteArray = IOUtils.toByteArray(inputStream);
@@ -273,13 +279,11 @@ public class FileTreatmentHelper implements DisposableBean {
 
       integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
           IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO);
-    } catch (IOException e) {
-      LOG.error("Error starting FME-Import process: datasetId={}, file={}", datasetId,
+    } catch (FeignException | IOException e) {
+      LOG_ERROR.error("Error starting FME-Import process: datasetId={}, file={}", datasetId,
           file.getName(), e);
-      error = e.getMessage();
+      throw new EEAException(e);
     }
-
-    finishImportProcessConditionally(datasetId, null, file, user, error, integrationVO);
   }
 
   /**
@@ -293,6 +297,8 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema schema, File file,
       String user) {
+
+    LOG.info("Start RN3-Import process: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
 
     String fileName = file.getName();
     String error = null;
@@ -335,7 +341,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error loading file: {}", fileName, e);
       error = e.getMessage();
     }
-    finishImportProcessConditionally(datasetId, tableSchemaId, file, user, error, null);
+    finishImportProcessConditionally(datasetId, tableSchemaId, file, user, error, false);
   }
 
   /**
@@ -367,41 +373,40 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param user the user
    * @param error the error
-   * @param integrationVO the integration VO
+   * @param finishAll the finish all
    */
   private void finishImportProcessConditionally(Long datasetId, String tableSchemaId, File file,
-      String user, String error, IntegrationVO integrationVO) {
+      String user, String error, boolean finishAll) {
+    try {
+      if (finishAll) {
+        LOG_ERROR.error("Exception handler: deleting directory for dataset {}", datasetId);
+        FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+        datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      } else {
+        Path parentPath = file.getParentFile().toPath();
+        try (Stream<Path> entries = Files.list(parentPath)) {
 
-    Path parentPath = file.getParentFile().toPath();
-    try (Stream<Path> entries = Files.list(parentPath)) {
+          // Remove the file
+          Files.delete(file.toPath());
 
-      // Remove the file
-      Files.delete(file.toPath());
+          // Check if the folder is empty
+          if (!entries.findFirst().isPresent()) {
 
-      // Check if the folder is empty
-      if (!entries.findFirst().isPresent()) {
+            // Remove the folder
+            Files.delete(parentPath);
 
-        // Remove the folder
-        Files.delete(parentPath);
+            if (null != error) {
+              releaseRn3ImportFailedEvent(datasetId, tableSchemaId, file.getName(), user, error);
+            } else {
+              releaseRn3ImportCompletedEvent(datasetId, tableSchemaId, file.getName(), user);
+            }
 
-        if (null == integrationVO) {
-          if (null != error) {
-            releaseRn3ImportFailedEvent(datasetId, tableSchemaId, file.getName(), user, error);
-          } else {
-            releaseRn3ImportCompletedEvent(datasetId, tableSchemaId, file.getName(), user);
-          }
-        } else {
-          if (null != error) {
-            releaseFmeImportFailedEvent(datasetId, file.getName(), user, error);
-          } else {
-            releaseFmeImportCompletedEvent(datasetId, file.getName(), user);
+            datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
           }
         }
-
-        datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
       }
     } catch (IOException ex) {
-      LOG.error("RN3-Import file error", ex);
+      LOG_ERROR.error("RN3-Import file error", ex);
     }
   }
 
@@ -485,54 +490,6 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Release fme import completed event.
-   *
-   * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param user the user
-   */
-  private void releaseFmeImportCompletedEvent(Long datasetId, String fileName, String user) {
-    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
-        ? EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT
-        : EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
-    Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
-    value.put(LiteralConstants.USER, user);
-    NotificationVO notificationVO =
-        NotificationVO.builder().user(user).datasetId(datasetId).fileName(fileName).build();
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
-    } catch (EEAException e) {
-      LOG.error("Error realeasing event: notificationVO={}", notificationVO, e);
-    }
-  }
-
-  /**
-   * Release fme import failed event.
-   *
-   * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param user the user
-   * @param error the error
-   */
-  private void releaseFmeImportFailedEvent(Long datasetId, String fileName, String user,
-      String error) {
-    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
-        ? EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT
-        : EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
-    Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
-    value.put(LiteralConstants.USER, user);
-    NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
-        .fileName(fileName).error(error).build();
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
-    } catch (EEAException e) {
-      LOG.error("Error realeasing fail event: notificationVO={}", notificationVO, e);
-    }
-  }
-
-  /**
    * Release rn 3 import completed event.
    *
    * @param datasetId the dataset id
@@ -554,7 +511,7 @@ public class FileTreatmentHelper implements DisposableBean {
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
-      LOG.error("Error realeasing event: notificationVO={}", notificationVO, e);
+      LOG_ERROR.error("Error realeasing event: notificationVO={}", notificationVO, e);
     }
   }
 
@@ -580,7 +537,7 @@ public class FileTreatmentHelper implements DisposableBean {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
-      LOG.error("Error realeasing fail event: notificationVO={}", notificationVO, e);
+      LOG_ERROR.error("Error realeasing fail event: notificationVO={}", notificationVO, e);
     }
   }
 

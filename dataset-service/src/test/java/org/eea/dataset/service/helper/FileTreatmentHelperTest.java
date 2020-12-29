@@ -2,6 +2,7 @@ package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -71,7 +73,7 @@ public class FileTreatmentHelperTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
-    ReflectionTestUtils.setField(fileTreatmentHelper, "pathImport",
+    ReflectionTestUtils.setField(fileTreatmentHelper, "importPath",
         this.getClass().getClassLoader().getResource("").getPath());
     ReflectionTestUtils.setField(fileTreatmentHelper, "importExecutorService",
         new CurrentThreadExecutor());
@@ -132,6 +134,8 @@ public class FileTreatmentHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+    FileUtils
+        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.verify(datasetService, times(1)).releaseLock(Mockito.any(), Mockito.any());
@@ -209,6 +213,8 @@ public class FileTreatmentHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    FileUtils
+        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.verify(datasetService, times(1)).releaseLock(Mockito.any(), Mockito.any());
@@ -254,6 +260,8 @@ public class FileTreatmentHelperTest {
         .thenReturn(integrationVOs);
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+    FileUtils
+        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
     Mockito.verify(datasetService, times(1)).getMimetype(Mockito.anyString());
   }
@@ -284,19 +292,16 @@ public class FileTreatmentHelperTest {
         .thenReturn(integrationVOs);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(null);
-    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
+    FileUtils
+        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    Mockito.verify(datasetService, times(1)).releaseLock(Mockito.any(), Mockito.any());
+    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 }
 

@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.executor.fme.service;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,9 +64,14 @@ public class FMECommunicationServiceTest {
   @Mock
   private FMEJobRepository fmeJobRepository;
 
+  @Mock
+  private LockService lockService;
+
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
+    ReflectionTestUtils.setField(fmeCommunicationService, "importPath",
+        this.getClass().getClassLoader().getResource("").getPath());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -234,9 +241,14 @@ public class FMECommunicationServiceTest {
 
   @Test
   public void releaseNotificationsImportReportingCompletedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeJob.setFileName("Test.csv");
     fmeCommunicationService.releaseNotifications(fmeJob, 0L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -244,29 +256,44 @@ public class FMECommunicationServiceTest {
 
   @Test
   public void releaseNotificationsImportReportingFailedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
-    fmeJob.setProviderId(null);
-    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-  }
-
-  @Test
-  public void releaseNotificationsImportDesignCompletedTest() throws EEAException {
-    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeJob.setFileName("Test.csv");
     fmeCommunicationService.releaseNotifications(fmeJob, 1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
   @Test
-  public void releaseNotificationsImportDesignFailedTest() throws EEAException {
+  public void releaseNotificationsImportDesignCompletedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeJob.setFileName("Test.csv");
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsImportDesignFailedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeJob.setFileName("Test.csv");
     fmeCommunicationService.releaseNotifications(fmeJob, 1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

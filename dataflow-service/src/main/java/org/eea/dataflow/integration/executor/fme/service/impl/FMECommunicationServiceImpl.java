@@ -1,12 +1,18 @@
 package org.eea.dataflow.integration.executor.fme.service.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
@@ -22,10 +28,12 @@ import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
@@ -89,6 +97,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Value("${integration.fme.token}")
   private String fmeToken;
 
+  /** The import path. */
+  @Value("${importPath}")
+  private String importPath;
+
   /** The fme collection mapper. */
   @Autowired
   private FMECollectionMapper fmeCollectionMapper;
@@ -108,6 +120,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   /** The fme job repository. */
   @Autowired
   private FMEJobRepository fmeJobRepository;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * Submit async job.
@@ -401,7 +417,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   public void releaseNotifications(FMEJob fmeJob, long statusNumber) {
 
     // Build the major notification
-    EventType eventType;
+    EventType eventType = null;
     boolean isReporting = null != fmeJob.getProviderId();
     boolean isStatusCompleted = statusNumber == 0L;
     NotificationVO notificationVO = NotificationVO.builder().user(fmeJob.getUserName())
@@ -412,7 +428,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     switch (fmeJob.getOperation()) {
       case IMPORT:
         eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId(),
-            fmeJob.getUserName());
+            fmeJob.getFileName(), fmeJob.getUserName());
         break;
       case EXPORT:
         eventType = exportNotification(isReporting, isStatusCompleted);
@@ -430,7 +446,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
 
     // Release the notification
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+      if (null != eventType) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error realeasing event: FMEJob={}", fmeJob, e);
     }
@@ -483,34 +501,56 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     return headers;
   }
 
-
-
   /**
    * Import notification.
    *
    * @param isReporting the is reporting
    * @param isStatusCompleted the is status completed
    * @param datasetId the dataset id
+   * @param fileName the file name
    * @param userName the user name
    * @return the event type
    */
   private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
-      Long datasetId, String userName) {
-    EventType eventType;
-    if (isStatusCompleted) {
-      if (isReporting) {
-        eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
-      } else {
-        eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+      Long datasetId, String fileName, String userName) {
+
+    EventType eventType = null;
+    File folder = new File(importPath, datasetId.toString());
+    File file = new File(folder, fileName);
+
+    try (Stream<Path> entries = Files.list(folder.toPath())) {
+
+      // Remove the file
+      Files.delete(file.toPath());
+
+      // Check if the folder is empty
+      if (!entries.findFirst().isPresent()) {
+
+        // Remove the folder
+        Files.delete(folder.toPath());
+
+        if (isStatusCompleted) {
+          if (isReporting) {
+            eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
+          } else {
+            eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+          }
+          launchValidationProcess(datasetId, userName);
+        } else {
+          if (isReporting) {
+            eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
+          } else {
+            eventType = EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
+          }
+        }
+
+        lockService.removeLockByCriteria(
+            Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
       }
-      launchValidationProcess(datasetId, userName);
-    } else {
-      if (isReporting) {
-        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
-      } else {
-        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
-      }
+    } catch (IOException e) {
+      LOG.error("File system exception", e);
     }
+
     return eventType;
   }
 
