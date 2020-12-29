@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.junit.Assert;
@@ -294,8 +295,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void deleteRulesSchemaTest() throws EEAException {
-    rulesControllerImpl.deleteRulesSchema("5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesService, times(1)).deleteEmptyRulesSchema(Mockito.any());
+    rulesControllerImpl.deleteRulesSchema("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(rulesService, times(1)).deleteEmptyRulesSchema(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -306,7 +307,7 @@ public class RulesControllerImplTest {
   @Test
   public void deleteRulesSchemaNoschemaIDTest() throws EEAException {
     try {
-      rulesControllerImpl.deleteRulesSchema(null);
+      rulesControllerImpl.deleteRulesSchema(null, 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
@@ -592,4 +593,56 @@ public class RulesControllerImplTest {
     Mockito.verify(sqlRulesService, times(1)).validateSQLRuleFromDatacollection(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
+
+  @Test
+  public void insertIntegrityTest() throws EEAException {
+    rulesControllerImpl.insertIntegritySchema(Mockito.any());
+    Mockito.verify(rulesService, times(1)).insertIntegritySchemas(Mockito.any());
+  }
+
+  @Test
+  public void getIntegrityRulesByDatasetSchemaIdTest() throws EEAException {
+    rulesControllerImpl.getIntegrityRulesByDatasetSchemaId(Mockito.any());
+    Mockito.verify(rulesService, times(1)).getIntegritySchemas(Mockito.any());
+  }
+
+
+  @Test
+  public void validateSqlRuleTest() throws EEAException {
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+    rulesControllerImpl.validateSqlRule(1L, "5e44110d6a9e3a270ce13fac", new RuleVO());
+    Mockito.verify(sqlRulesService, times(1)).validateSQLRule(Mockito.anyLong(),
+        Mockito.anyString(), Mockito.any());
+  }
+
+
+  @Test
+  public void validateSqlRulesTest() throws EEAException {
+    rulesControllerImpl.validateSqlRules(Mockito.anyLong(), Mockito.anyString());
+    Mockito.verify(sqlRulesService, times(1)).validateSQLRules(Mockito.anyLong(),
+        Mockito.anyString());
+  }
+
+
+
+  @Test
+  public void getAllDisabledRulesTest() throws EEAException {
+    rulesControllerImpl.getAllDisabledRules(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).getAllDisabledRules(Mockito.anyLong(), Mockito.any());
+  }
+
+
+  @Test
+  public void getAllUncheckedRulesTest() throws EEAException {
+    rulesControllerImpl.getAllUncheckedRules(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).getAllUncheckedRules(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test
+  public void deleteAutomaticRuleByReferenceIdTest() {
+    rulesControllerImpl.deleteAutomaticRuleByReferenceId(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, times(1)).deleteAutomaticRuleByReferenceId(Mockito.any(),
+        Mockito.any());
+  }
+
 }
