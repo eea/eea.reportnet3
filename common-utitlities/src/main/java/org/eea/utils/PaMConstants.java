@@ -32,12 +32,17 @@ public final class PaMConstants {
   /** The Constant OBJECTIVES: {@value}. */
   public static final String OBJECTIVES = "Objectives";
 
+  /** The Constant SECTOR: {@value}. */
+  public static final String SECTOR = "Sector";
+
+  /** The Constant OBJECTIVE_PK: {@value}. */
   public static final String OBJECTIVE_PK = "OBJECTIVE_PK";
 
-  public static final String OBJECTIVE_OBJECTIVES = "OBJECTIVE_OBJECTIVES";
+  /** The Constant SECTOR_PK: {@value}. */
+  public static final String SECTOR_PK = "SECTOR_PK";
 
-  /** The Constant SECTORS: {@value}. */
-  public static final String SECTORS = "Sectors";
+  /** The Constant OBJECTIVE_OBJECTIVES: {@value}. */
+  public static final String OBJECTIVE_OBJECTIVES = "OBJECTIVE_OBJECTIVES";
 
   /** The Constant ID: {@value}. */
   public static final String ID = "Id";
@@ -83,6 +88,9 @@ public final class PaMConstants {
 
   /** The Constant UNION_POLICY_LIST: {@value}. */
   public static final String UNION_POLICY_LIST = "UnionPolicyList";
+
+  /** The Constant OTHER_POLICY_INSTRUMENT: {@value}. */
+  public static final String OTHER_POLICY_INSTRUMENT = "OtherPolicyInstrument";
 
   /** The Constant TYPE: {@value}. */
   public static final String TYPE = "Type";

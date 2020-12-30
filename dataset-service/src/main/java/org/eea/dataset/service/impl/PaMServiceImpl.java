@@ -15,13 +15,13 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.pams.EntityPaMVO;
 import org.eea.interfaces.vo.pams.SectorVO;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
-import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.PaMConstants;
@@ -47,9 +47,11 @@ public class PaMServiceImpl implements PaMService {
   @Autowired
   private DatasetService datasetService;
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The dataset schema service. */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
@@ -62,8 +64,7 @@ public class PaMServiceImpl implements PaMService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<SinglePaMVO> getListSinglePaM(@DatasetId Long datasetId, String groupPaMId)
-      throws EEAException {
+  public List<SinglePaMVO> getListSinglePaM(Long datasetId, String groupPaMId) throws EEAException {
 
     // get dataflowId
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -81,25 +82,55 @@ public class PaMServiceImpl implements PaMService {
         getValue(hasRecordsAndFields(fieldPams), schemaIds.get(PaMConstants.LIST_OF_SINGLE_PAMS));
     List<SinglePaMVO> listSinglePaM = new ArrayList<>();
     if (singlePamsValue != null) {
-      String[] singlePams = singlePamsValue.split(PaMConstants.SEPARATOR);
-      for (int i = 0; i < singlePams.length; i++) {
-        FieldValue single = fieldRepository
-            .findFirstByIdFieldSchemaAndValue(schemaIds.get(PaMConstants.ID), singlePams[i]);
+      String[] singlePamsIds = singlePamsValue.split(PaMConstants.SEPARATOR);
+      List<String> singlePamsIdsList = Arrays.asList(singlePamsIds);
+      List<FieldValue> singleFields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.ID), singlePamsIdsList, datasetId);
+      List<FieldValue> table1Fields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.FK_PAMS_TABLE_1), singlePamsIdsList, datasetId);
+      List<FieldValue> entitiesFields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.FK_PAMS_ENTITIES), singlePamsIdsList, datasetId);
+      List<FieldValue> table2Fields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.FK_PAMS_TABLE_2), singlePamsIdsList, datasetId);
+      List<FieldValue> sectorObjectivesFields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.FK_PAMS_SECTOR_OBJECTIVES), singlePamsIdsList, datasetId);
+      List<FieldValue> otherObjectivesFields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.FK_PAMS_OTHER_OBJECTIVES), singlePamsIdsList, datasetId);
+      List<FieldValue> unionPolicyOtherFields = fieldRepository.queryFindByFieldSchemaAndValue(
+          schemaIds.get(PaMConstants.FK_PAMS_UNION_POLICY_OTHER), singlePamsIdsList, datasetId);
+      List<String> sectorAffectedList = new ArrayList<>();
+      List<String> objectiveList = new ArrayList<>();
+      for (FieldValue fieldValue : sectorObjectivesFields) {
+        List<FieldValue> fields = hasRecordsAndFields(fieldValue);
+        sectorAffectedList.add(getValue(fields, schemaIds.get(PaMConstants.SECTOR_AFFECTED)));
+        String objectiveToList = getValue(fields, schemaIds.get(PaMConstants.OBJECTIVE));
+        objectiveList.addAll(getListSplit(objectiveToList));
+      }
+      List<FieldVO> sectorAffected = fieldRepository.queryFindValue(
+          schemaIds.get(PaMConstants.SECTOR_PK), schemaIds.get(PaMConstants.SECTOR),
+          schemaIds.get(PaMConstants.DATASET_ID_PK), sectorAffectedList);
+      List<FieldVO> objectiveValues =
+          fieldRepository.queryFindValue(schemaIds.get(PaMConstants.OBJECTIVE_PK),
+              schemaIds.get(PaMConstants.OBJECTIVE_OBJECTIVES),
+              schemaIds.get(PaMConstants.DATASET_ID_PK), objectiveList);
+
+
+      for (int i = 0; i < singlePamsIds.length; i++) {
         SinglePaMVO singlePaMVO = new SinglePaMVO();
-        singlePaMVO.setId(singlePams[i]);
-        singlePaMVO
-            .setPaMName(getValue(hasRecordsAndFields(single), schemaIds.get(PaMConstants.TITLE)));
+        singlePaMVO.setId(singlePamsIds[i]);
+        singlePaMVO.setPaMName(getPaMNameValue(schemaIds, singlePamsIds[i], singleFields));
         // set attributes of table1
-        setAttributesTable1(schemaIds, singlePams[i], singlePaMVO);
+        setAttributesTable1(schemaIds, singlePamsIds[i], singlePaMVO, table1Fields);
         // set attributes entities
-        setAttributesEntities(schemaIds, singlePams[i], singlePaMVO);
+        setAttributesEntities(schemaIds, singlePamsIds[i], singlePaMVO, entitiesFields);
         // set attributes table2
-        setAttributesTable2(schemaIds, singlePams[i], singlePaMVO);
+        setAttributesTable2(schemaIds, singlePamsIds[i], singlePaMVO, table2Fields);
         // set attributes sectors
-        setAttributesSectors(schemaIds, singlePams[i], singlePaMVO);
-        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+        setAttributesSectors(schemaIds, singlePamsIds[i], singlePaMVO, sectorObjectivesFields,
+            otherObjectivesFields, sectorAffected, objectiveValues);
         // set union policy other
-        setAttributesUnionPolicyOther(schemaIds, singlePams[i], singlePaMVO);
+        setAttributesUnionPolicyOther(schemaIds, singlePamsIds[i], singlePaMVO,
+            unionPolicyOtherFields);
 
         listSinglePaM.add(singlePaMVO);
       }
@@ -110,38 +141,62 @@ public class PaMServiceImpl implements PaMService {
 
 
   /**
+   * Gets the pa M name value.
+   *
+   * @param schemaIds the schema ids
+   * @param singlePamId the single pam id
+   * @param singleFields the single fields
+   * @return the pa M name value
+   */
+  private String getPaMNameValue(Map<String, String> schemaIds, String singlePamId,
+      List<FieldValue> singleFields) {
+    String value = null;
+    for (FieldValue fieldValue : singleFields) {
+      if (singlePamId.equals(fieldValue.getValue())) {
+        value = getValue(hasRecordsAndFields(fieldValue), schemaIds.get(PaMConstants.TITLE));
+        break;
+      }
+    }
+    return value;
+  }
+
+
+  /**
    * Sets the attributes sectors.
    *
    * @param schemaIds the schema ids
    * @param singlePamId the single pam id
    * @param singlePaMVO the single pa MVO
+   * @param sectorObjectivesFields the sector objectives fields
+   * @param otherObjectivesFields the other objectives fields
+   * @param sectorAffected the sector affected
+   * @param objectiveValues the objective values
    */
   private void setAttributesSectors(Map<String, String> schemaIds, String singlePamId,
-      SinglePaMVO singlePaMVO) {
+      SinglePaMVO singlePaMVO, List<FieldValue> sectorObjectivesFields,
+      List<FieldValue> otherObjectivesFields, List<FieldVO> sectorAffected,
+      List<FieldVO> objectiveValues) {
     List<SectorVO> sectors = new ArrayList<>();
-    List<FieldValue> fkSectorObjectives = fieldRepository.findByIdFieldSchemaAndValue(
-        schemaIds.get(PaMConstants.FK_PAMS_SECTOR_OBJECTIVES), singlePamId);
-    List<FieldValue> fkOtherObjectives = fieldRepository.findByIdFieldSchemaAndValue(
-        schemaIds.get(PaMConstants.FK_PAMS_OTHER_OBJECTIVES), singlePamId);
-    if (fkSectorObjectives != null) {
-      for (FieldValue fieldValue : fkSectorObjectives) {
-        SectorVO sectorPaMs = new SectorVO();
-        List<FieldValue> fields = hasRecordsAndFields(fieldValue);
-        // add attributes sectorObjectives
-        sectorPaMs.setOtherSectors(getValue(fields, schemaIds.get(PaMConstants.OTHER_SECTORS)));
-        sectorPaMs.setSectorAffected(getValue(fields, schemaIds.get(PaMConstants.SECTOR_AFFECTED)));
-        String objectiveList = getValue(fields, schemaIds.get(PaMConstants.OBJECTIVE));
+    if (sectorObjectivesFields != null) {
+      for (FieldValue fieldValue : sectorObjectivesFields) {
+        if (fieldValue != null && singlePamId.equals(fieldValue.getValue())) {
+          SectorVO sectorPaMs = new SectorVO();
+          List<FieldValue> fields = hasRecordsAndFields(fieldValue);
+          // add attributes sectorObjectives
+          sectorPaMs.setOtherSectors(getValue(fields, schemaIds.get(PaMConstants.OTHER_SECTORS)));
+          sectorPaMs.setSectorAffected(getValueOtherTable(sectorAffected,
+              getValue(fields, schemaIds.get(PaMConstants.SECTOR_AFFECTED))));
+          String objectiveList = getValue(fields, schemaIds.get(PaMConstants.OBJECTIVE));
 
-        sectorPaMs.setObjectives(getObjectivesValue(
-            objectiveList != null ? Arrays.asList(objectiveList.split(PaMConstants.SEPARATOR))
-                : null,
-            schemaIds));
-        String pkSectorObjective = getValue(fields, schemaIds.get(PaMConstants.PK));
-        // add attributes otherObjectives
-        List<String> objectives =
-            buildOtherObjective(schemaIds, fkOtherObjectives, pkSectorObjective);
-        sectorPaMs.setOtherObjectives(objectives);
-        sectors.add(sectorPaMs);
+          sectorPaMs.setObjectives(
+              getObjectivesValue(getListSplit(objectiveList), schemaIds, objectiveValues));
+          String pkSectorObjective = getValue(fields, schemaIds.get(PaMConstants.PK));
+          // add attributes otherObjectives
+          List<String> objectives = buildOtherObjective(schemaIds, otherObjectivesFields,
+              pkSectorObjective, fieldValue.getValue());
+          sectorPaMs.setOtherObjectives(objectives);
+          sectors.add(sectorPaMs);
+        }
       }
     }
     singlePaMVO.setSectors(sectors);
@@ -149,20 +204,45 @@ public class PaMServiceImpl implements PaMService {
 
   }
 
+  /**
+   * Gets the value other table.
+   *
+   * @param objectiveList the objective list
+   * @param id the id
+   * @return the value other table
+   */
+  private String getValueOtherTable(List<FieldVO> objectiveList, String id) {
+    String value = null;
+    for (FieldVO valueId : objectiveList) {
+      if (id.equals(valueId.getId())) {
+        value = valueId.getValue();
+        break;
+      }
+    }
+    return value;
 
-  private List<String> getObjectivesValue(List<String> objectiveIds,
-      Map<String, String> schemaIds) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME,
-        schemaIds.get(PaMConstants.DATASET_ID_PK)));
-    System.out.println(TenantResolver.getTenantName());
+  }
+
+
+  /**
+   * Gets the objectives value.
+   *
+   * @param objectiveIds the objective ids
+   * @param schemaIds the schema ids
+   * @param objectiveValues the objective values
+   * @return the objectives value
+   */
+  private List<String> getObjectivesValue(List<String> objectiveIds, Map<String, String> schemaIds,
+      List<FieldVO> objectiveValues) {
     List<String> objectivesValue = new ArrayList<>();
     if (null != objectiveIds) {
       for (String objective : objectiveIds) {
-        FieldValue fkSectorObjectives = datasetService.getFieldValueByValue(
-            Long.valueOf(schemaIds.get(PaMConstants.DATASET_ID_PK)),
-            schemaIds.get(PaMConstants.OBJECTIVE_PK), objective);
-        objectivesValue.add(getValue(hasRecordsAndFields(fkSectorObjectives),
-            schemaIds.get(PaMConstants.OBJECTIVE_OBJECTIVES)));
+        for (FieldVO field : objectiveValues) {
+          if (objective.equals(field.getId())) {
+            objectivesValue.add(field.getValue());
+            break;
+          }
+        }
       }
     }
     return objectivesValue;
@@ -175,19 +255,22 @@ public class PaMServiceImpl implements PaMService {
    * @param schemaIds the schema ids
    * @param fkOtherObjectives the fk other objectives
    * @param pkSectorObjective the pk sector objective
+   * @param SingleId the single id
    * @return the list
    */
   private List<String> buildOtherObjective(Map<String, String> schemaIds,
-      List<FieldValue> fkOtherObjectives, String pkSectorObjective) {
+      List<FieldValue> fkOtherObjectives, String pkSectorObjective, String SingleId) {
     List<String> objectives = new ArrayList<>();
     if (fkOtherObjectives != null) {
       for (FieldValue fieldValue2 : fkOtherObjectives) {
-        List<FieldValue> fieldsOtherObjective = hasRecordsAndFields(fieldValue2);
-        if (fieldsOtherObjective != null) {
-          String otherObjective =
-              getOtherObjectiveValue(schemaIds, pkSectorObjective, fieldsOtherObjective);
-          if (otherObjective != null) {
-            objectives.add(otherObjective);
+        if (SingleId.equals(fieldValue2.getValue())) {
+          List<FieldValue> fieldsOtherObjective = hasRecordsAndFields(fieldValue2);
+          if (fieldsOtherObjective != null) {
+            String otherObjective =
+                getOtherObjectiveValue(schemaIds, pkSectorObjective, fieldsOtherObjective);
+            if (otherObjective != null) {
+              objectives.add(otherObjective);
+            }
           }
         }
       }
@@ -222,16 +305,18 @@ public class PaMServiceImpl implements PaMService {
    * @param schemaIds the schema ids
    * @param singlePamId the single pam id
    * @param singlePaMVO the single pa MVO
+   * @param table2Fields the table 2 fields
    */
   private void setAttributesTable2(Map<String, String> schemaIds, String singlePamId,
-      SinglePaMVO singlePaMVO) {
-    FieldValue fkPamsTable2 = fieldRepository
-        .findFirstByIdFieldSchemaAndValue(schemaIds.get(PaMConstants.FK_PAMS_TABLE_2), singlePamId);
-    if (fkPamsTable2 != null) {
-      List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
-      singlePaMVO
-          .setPolicyImpacting(getValue(fields, schemaIds.get(PaMConstants.POLICY_IMPACTING)));
+      SinglePaMVO singlePaMVO, List<FieldValue> table2Fields) {
+    for (FieldValue fkPamsTable2 : table2Fields) {
+      if (fkPamsTable2 != null && singlePamId.equals(fkPamsTable2.getValue())) {
+        List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
+        singlePaMVO
+            .setPolicyImpacting(getValue(fields, schemaIds.get(PaMConstants.POLICY_IMPACTING)));
+      }
     }
+
   }
 
   /**
@@ -240,15 +325,16 @@ public class PaMServiceImpl implements PaMService {
    * @param schemaIds the schema ids
    * @param singlePamId the single pam id
    * @param singlePaMVO the single pa MVO
+   * @param otherUnionPolicyFields the other union policy fields
    */
   private void setAttributesUnionPolicyOther(Map<String, String> schemaIds, String singlePamId,
-      SinglePaMVO singlePaMVO) {
-    FieldValue fkPamsTable2 = fieldRepository.findFirstByIdFieldSchemaAndValue(
-        schemaIds.get(PaMConstants.FK_PAMS_UNION_POLICY_OTHER), singlePamId);
-    if (fkPamsTable2 != null) {
-      List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
-      singlePaMVO
-          .setOtherUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.OTHER_UNION_POLICY)));
+      SinglePaMVO singlePaMVO, List<FieldValue> otherUnionPolicyFields) {
+    for (FieldValue fkPamsTable2 : otherUnionPolicyFields) {
+      if (fkPamsTable2 != null && singlePamId.equals(fkPamsTable2.getValue())) {
+        List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
+        singlePaMVO
+            .setOtherUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.OTHER_UNION_POLICY)));
+      }
     }
   }
 
@@ -258,19 +344,20 @@ public class PaMServiceImpl implements PaMService {
    * @param schemaIds the schema ids
    * @param singlePamId the single pam id
    * @param singlePaMVO the single pa MVO
+   * @param entitiesFields the entities fields
    */
   private void setAttributesEntities(Map<String, String> schemaIds, String singlePamId,
-      SinglePaMVO singlePaMVO) {
+      SinglePaMVO singlePaMVO, List<FieldValue> entitiesFields) {
     List<EntityPaMVO> entitiesPams = new ArrayList<>();
-    List<FieldValue> fkPaMsEntities = fieldRepository
-        .findByIdFieldSchemaAndValue(schemaIds.get(PaMConstants.FK_PAMS_ENTITIES), singlePamId);
-    if (fkPaMsEntities != null) {
-      for (FieldValue fieldValue : fkPaMsEntities) {
-        List<FieldValue> fields = hasRecordsAndFields(fieldValue);
-        EntityPaMVO entityPaMVO = new EntityPaMVO();
-        entityPaMVO.setName(getValue(fields, schemaIds.get(PaMConstants.NAME)));
-        entityPaMVO.setType(getValue(fields, schemaIds.get(PaMConstants.TYPE)));
-        entitiesPams.add(entityPaMVO);
+    if (entitiesFields != null) {
+      for (FieldValue fieldValue : entitiesFields) {
+        if (fieldValue != null && singlePamId.equals(fieldValue.getValue())) {
+          List<FieldValue> fields = hasRecordsAndFields(fieldValue);
+          EntityPaMVO entityPaMVO = new EntityPaMVO();
+          entityPaMVO.setName(getValue(fields, schemaIds.get(PaMConstants.NAME)));
+          entityPaMVO.setType(getValue(fields, schemaIds.get(PaMConstants.TYPE)));
+          entitiesPams.add(entityPaMVO);
+        }
       }
     }
     singlePaMVO.setEntities(entitiesPams);
@@ -283,39 +370,50 @@ public class PaMServiceImpl implements PaMService {
    * @param schemaIds the schema ids
    * @param singlePamId the single pam id
    * @param singlePaMVO the single pa MVO
+   * @param table1Fields the table 1 fields
    */
   private void setAttributesTable1(Map<String, String> schemaIds, String singlePamId,
-      SinglePaMVO singlePaMVO) {
-    FieldValue fkPamsTable1 = fieldRepository
-        .findFirstByIdFieldSchemaAndValue(schemaIds.get(PaMConstants.FK_PAMS_TABLE_1), singlePamId);
-    if (fkPamsTable1 != null) {
-      List<FieldValue> fields = hasRecordsAndFields(fkPamsTable1);
-      singlePaMVO.setImplementationPeriodStart(
-          getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_START)));
-      singlePaMVO.setImplementationPeriodFinish(
-          getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_FINISH)));
-      singlePaMVO.setImplementationPeriodComment(
-          getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_COMMENT)));
-      singlePaMVO.setStatusImplementation(
-          getValue(fields, schemaIds.get(PaMConstants.STATUS_IMPLEMENTATION)));
-      singlePaMVO.setIsPolicyMeasureEnvisaged(
-          getValue(fields, schemaIds.get(PaMConstants.IS_POLICY_MEASURE_ENVISAGED)));
-      singlePaMVO.setProjectionsScenario(
-          getValue(fields, schemaIds.get(PaMConstants.PROJECTIONS_SCENARIO)));
-      String unionPolicyList = getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_LIST));
-      String typePolicyInstrumentList =
-          getValue(fields, schemaIds.get(PaMConstants.TYPE_POLICY_INSTRUMENT));
-      String ghgAffectedList = getValue(fields, schemaIds.get(PaMConstants.GHG_AFFECTED));
-      singlePaMVO.setUnionPolicyList(
-          unionPolicyList != null ? Arrays.asList(unionPolicyList.split(PaMConstants.SEPARATOR))
-              : null);
-      singlePaMVO.setTypePolicyInstrument(typePolicyInstrumentList != null
-          ? Arrays.asList(typePolicyInstrumentList.split(PaMConstants.SEPARATOR))
-          : null);
-      singlePaMVO.setGhgAffected(
-          ghgAffectedList != null ? Arrays.asList(ghgAffectedList.split(PaMConstants.SEPARATOR))
-              : null);
+      SinglePaMVO singlePaMVO, List<FieldValue> table1Fields) {
+    if (table1Fields != null) {
+      for (FieldValue fkPamsTable1 : table1Fields) {
+        if (fkPamsTable1 != null && singlePamId.equals(fkPamsTable1.getValue())) {
+          List<FieldValue> fields = hasRecordsAndFields(fkPamsTable1);
+          singlePaMVO.setImplementationPeriodStart(
+              getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_START)));
+          singlePaMVO.setImplementationPeriodFinish(
+              getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_FINISH)));
+          singlePaMVO.setImplementationPeriodComment(
+              getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_COMMENT)));
+          singlePaMVO.setStatusImplementation(
+              getValue(fields, schemaIds.get(PaMConstants.STATUS_IMPLEMENTATION)));
+          singlePaMVO.setIsPolicyMeasureEnvisaged(
+              getValue(fields, schemaIds.get(PaMConstants.IS_POLICY_MEASURE_ENVISAGED)));
+          singlePaMVO.setProjectionsScenario(
+              getValue(fields, schemaIds.get(PaMConstants.PROJECTIONS_SCENARIO)));
+          singlePaMVO.setOtherPolicyInstrument(
+              getValue(fields, schemaIds.get(PaMConstants.OTHER_POLICY_INSTRUMENT)));
+          String unionPolicyList = getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_LIST));
+          String typePolicyInstrumentList =
+              getValue(fields, schemaIds.get(PaMConstants.TYPE_POLICY_INSTRUMENT));
+          String ghgAffectedList = getValue(fields, schemaIds.get(PaMConstants.GHG_AFFECTED));
+          singlePaMVO.setUnionPolicyList(getListSplit(unionPolicyList));
+          singlePaMVO.setTypePolicyInstrument(getListSplit(typePolicyInstrumentList));
+          singlePaMVO.setGhgAffected(getListSplit(ghgAffectedList));
+        }
+      }
     }
+
+  }
+
+
+  /**
+   * Gets the list split.
+   *
+   * @param valueList the value list
+   * @return the list split
+   */
+  private List<String> getListSplit(String valueList) {
+    return valueList != null ? Arrays.asList(valueList.split(PaMConstants.SEPARATOR)) : null;
   }
 
 
@@ -343,6 +441,7 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.getIdTableSchema(PaMConstants.OTHER_OBJECTIVES, schema);
     String unionPolicyOtherId =
         fileCommonUtils.getIdTableSchema(PaMConstants.UNION_POLICY_OTHER, schema);
+
 
     // PAMS
     schemaIds.put(PaMConstants.LIST_OF_SINGLE_PAMS, isFieldSchemaNull(
@@ -373,6 +472,8 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.TYPE_POLICY_INSTRUMENT, table1Id, schema)));
     schemaIds.put(PaMConstants.GHG_AFFECTED, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.GHG_AFFECTED, table1Id, schema)));
+    schemaIds.put(PaMConstants.OTHER_POLICY_INSTRUMENT, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER_POLICY_INSTRUMENT, table1Id, schema)));
 
     // ENTITIES
     schemaIds.put(PaMConstants.FK_PAMS_ENTITIES, isFieldSchemaNull(
@@ -399,15 +500,7 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER_SECTORS, sectorObjectivesId, schema)));
     schemaIds.put(PaMConstants.OBJECTIVE, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.OBJECTIVE, sectorObjectivesId, schema)));
-    // GET PKS OTHER SCHEMA
-    DataSetSchemaVO schemaPKs =
-        getSchemaPK(datasetId, schemaIds.get(PaMConstants.SECTOR_AFFECTED), schema, schemaIds);
-    String objectivesId = fileCommonUtils.getIdTableSchema(PaMConstants.OBJECTIVES, schemaPKs);
-    String sectorsId = fileCommonUtils.getIdTableSchema(PaMConstants.OBJECTIVES, schemaPKs);
-    schemaIds.put(PaMConstants.OBJECTIVE_OBJECTIVES, isFieldSchemaNull(
-        fileCommonUtils.findIdFieldSchema(PaMConstants.OBJECTIVE, objectivesId, schemaPKs)));
-    schemaIds.put(PaMConstants.OBJECTIVE_PK, isFieldSchemaNull(
-        fileCommonUtils.findIdFieldSchema(PaMConstants.ID, objectivesId, schemaPKs)));
+
 
     // OTHER OBJECTIVES
     schemaIds.put(PaMConstants.FK_PAMS_OTHER_OBJECTIVES, isFieldSchemaNull(
@@ -422,6 +515,23 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.FK_PAMS, unionPolicyOtherId, schema)));
     schemaIds.put(PaMConstants.OTHER_UNION_POLICY, isFieldSchemaNull(fileCommonUtils
         .findIdFieldSchema(PaMConstants.OTHER_UNION_POLICY, unionPolicyOtherId, schema)));
+
+
+    // GET PKS OTHER SCHEMA
+    DataSetSchemaVO schemaPKs =
+        getSchemaPK(datasetId, schemaIds.get(PaMConstants.SECTOR_AFFECTED), schema, schemaIds);
+    String objectivesId = fileCommonUtils.getIdTableSchema(PaMConstants.OBJECTIVES, schemaPKs);
+    String sectorsId = fileCommonUtils.getIdTableSchema(PaMConstants.SECTOR, schemaPKs);
+
+
+    schemaIds.put(PaMConstants.OBJECTIVE_OBJECTIVES, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.OBJECTIVE, objectivesId, schemaPKs)));
+    schemaIds.put(PaMConstants.OBJECTIVE_PK, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.ID, objectivesId, schemaPKs)));
+    schemaIds.put(PaMConstants.SECTOR_PK, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.ID, sectorsId, schemaPKs)));
+    schemaIds.put(PaMConstants.SECTOR, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.SECTOR, sectorsId, schemaPKs)));
 
 
 
@@ -594,6 +704,15 @@ public class PaMServiceImpl implements PaMService {
         && fieldValue.getRecord().getFields() != null ? fieldValue.getRecord().getFields() : null;
   }
 
+  /**
+   * Gets the schema PK.
+   *
+   * @param datasetIdReference the dataset id reference
+   * @param idFieldSchemaFK the id field schema FK
+   * @param schemaFK the schema FK
+   * @param schemaIds the schema ids
+   * @return the schema PK
+   */
   private DataSetSchemaVO getSchemaPK(Long datasetIdReference, String idFieldSchemaFK,
       DataSetSchemaVO schemaFK, Map<String, String> schemaIds) {
     String idFieldSchemaPKString = getIdFieldSchemaPK(idFieldSchemaFK, schemaFK);

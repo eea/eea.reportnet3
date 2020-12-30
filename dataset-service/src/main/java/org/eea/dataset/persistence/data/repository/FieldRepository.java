@@ -14,7 +14,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface FieldRepository.
  */
-public interface FieldRepository extends PagingAndSortingRepository<FieldValue, Integer> {
+public interface FieldRepository
+    extends PagingAndSortingRepository<FieldValue, Integer>, FieldExtendedRepository {
 
 
   /**
@@ -166,12 +167,11 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @return the list
    */
   @Query(
-      value =
-          "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
-              + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
-              + "AND fv.value <> '' "
-              + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
-              + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
+      value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
+          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
+          + "AND fv.value <> '' "
+          + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
+          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
   List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(
       @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
       @Param("conditionalId") String conditionalId,
@@ -190,11 +190,10 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @return the list
    */
   @Query(
-      value =
-          "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
-              + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
-              + "AND fv.value <> '' "
-              + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
+      value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
+          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
+          + "AND fv.value <> '' "
+          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
   List<FieldValueWithLabelProjection> findByIdFieldSchemaWithTag(
       @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
       @Param("searchText") String searchValueText, Pageable pageable);
@@ -238,4 +237,5 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    */
   @Query
   FieldValue findOneByIdFieldSchemaAndValue(String idFieldSchema, String value);
+
 }

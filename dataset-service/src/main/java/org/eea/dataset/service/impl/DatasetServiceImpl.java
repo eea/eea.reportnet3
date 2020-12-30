@@ -3127,11 +3127,4 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
-  @Override
-  public FieldValue getFieldValueByValue(@DatasetId Long datasetId, String schemaId,
-      String ojective) {
-    TenantResolver
-        .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId.toString()));
-    return fieldRepository.findFirstByIdFieldSchemaAndValue(schemaId, ojective);
-  }
 }
