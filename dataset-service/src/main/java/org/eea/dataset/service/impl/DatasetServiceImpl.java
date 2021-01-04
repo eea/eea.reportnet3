@@ -812,7 +812,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -1115,6 +1115,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteFieldValues(Long datasetId, String fieldSchemaId) {
+    LOG.info(
+        "Deleting the related field values from the datasetId {} due to deleting the fieldSchema {}",
+        datasetId, fieldSchemaId);
     fieldRepository.deleteByIdFieldSchemaNative(fieldSchemaId);
   }
 
@@ -1860,8 +1863,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void spreadDataPrefill(DesignDataset originDatasetDesign, Long targetDatasetId) {
     // get tables from schema
-    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(
-        originDatasetDesign.getDatasetSchema());
+    List<TableSchema> listOfTablesFiltered =
+        getTablesFromSchema(originDatasetDesign.getDatasetSchema());
     // get the data from designs datasets
     if (!listOfTablesFiltered.isEmpty()) {
 
@@ -1906,8 +1909,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param attachments the attachments
    */
   private void recordDesingAssignation(Long targetDatasetId, DesignDataset originDatasetDesign,
-      List<RecordValue> targetRecords,
-      Long datasetPartitionId, List<AttachmentValue> attachments,
+      List<RecordValue> targetRecords, Long datasetPartitionId, List<AttachmentValue> attachments,
       List<TableSchema> listOfTablesFiltered) {
 
     Map<String, AttachmentValue> dictionaryIdFieldAttachment = new HashMap<>();
@@ -1917,8 +1919,8 @@ public class DatasetServiceImpl implements DatasetService {
       }
     });
 
-    Long dataProviderId = datasetMetabaseService.findDatasetMetabase(targetDatasetId)
-        .getDataProviderId();
+    Long dataProviderId =
+        datasetMetabaseService.findDatasetMetabase(targetDatasetId).getDataProviderId();
     final DataProviderVO dataproviderVO =
         null != dataProviderId ? representativeControllerZuul.findDataProviderById(dataProviderId)
             : new DataProviderVO();
@@ -1930,14 +1932,11 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
       Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
-      TableValue targetTable = tableRepository
-          .findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-      while ((pagedFieldValues =
-          fieldRepository
-              .findByRecord_IdRecordSchema(
-                  tableSchema.getRecordSchema().getIdRecordSchema().toString(),
-                  fieldValuePage))
-          .size() > 0) {
+      TableValue targetTable =
+          tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+      while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+          tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
+              .size() > 0) {
         // make list of field vaues grouped by their record id. The field values will be set with
         // the taget schemas id so they can be inserted
         pagedFieldValues.stream().forEach(field -> {
@@ -1946,7 +1945,7 @@ public class DatasetServiceImpl implements DatasetService {
           auxField.setIdFieldSchema(field.getIdFieldSchema());
           auxField.setType(field.getType());
 
-          //transform the grouping record in the target one. Do it only once
+          // transform the grouping record in the target one. Do it only once
           String targetIdRecordSchema = field.getRecord().getIdRecordSchema();
           String originRecordId = field.getRecord().getId();
           if (!mapTargetRecordValues.containsKey(originRecordId)) {
@@ -1957,7 +1956,8 @@ public class DatasetServiceImpl implements DatasetService {
             targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
             targetRecordValue.setTableValue(targetTable);
             targetRecordValue.setFields(new ArrayList<>());
-            //using temporary recordId as grouping criteria, then it will be removed before giving back
+            // using temporary recordId as grouping criteria, then it will be removed before giving
+            // back
             mapTargetRecordValues.put(originRecordId, targetRecordValue);
             targetRecords.add(targetRecordValue);
           }
@@ -1973,9 +1973,10 @@ public class DatasetServiceImpl implements DatasetService {
           }
           auxField.setGeometry(field.getGeometry());
           mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
-          //when the record has reached the number of fields per record then remove from the map to avoid rehashing
-          if (mapTargetRecordValues.get(originRecordId).getFields().size()
-              == numberOfFieldsInRecord) {
+          // when the record has reached the number of fields per record then remove from the map to
+          // avoid rehashing
+          if (mapTargetRecordValues.get(originRecordId).getFields()
+              .size() == numberOfFieldsInRecord) {
             mapTargetRecordValues.remove(originRecordId);
           }
         });
@@ -2795,7 +2796,7 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-          .size() > 0) {
+              .size() > 0) {
 
         // For this, the best is getting fields in big completed sets and assign them to the records
         // to avoid excessive queries to bd
