@@ -327,8 +327,6 @@ public class FileTreatmentHelper implements DisposableBean {
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema schema, File file,
       String user, Long externalJobId) {
 
-    LOG.info("Start RN3-Import process: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
-
     String fileName = file.getName();
     String error = null;
 
@@ -337,6 +335,9 @@ public class FileTreatmentHelper implements DisposableBean {
       if (null == tableSchemaId && "csv".equalsIgnoreCase(datasetService.getMimetype(fileName))) {
         tableSchemaId = getTableSchemaIdFromFileName(schema, fileName);
       }
+
+      LOG.info("Start RN3-Import process: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
+          tableSchemaId, fileName);
 
       DataSetVO datasetVO =
           datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
