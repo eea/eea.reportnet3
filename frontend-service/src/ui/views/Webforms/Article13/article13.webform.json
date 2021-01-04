@@ -150,7 +150,7 @@
               "type": "FIELD",
               "name": "Objective",
               "title": "Select Objective(s)",
-              "tooltip": "Objective means ‘initial statement of the outcomes (including resultsand impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
+              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
               "calculatedWhenGroup": true
             },
             {

@@ -1,0 +1,34 @@
+{
+  "tables": [
+    {
+      "name": "Table_1",
+      "title": "Table 1",
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "TextBlock",
+          "titleSource": "SectionTitle",
+          "tooltipSource": "Information"
+        },
+        {
+          "type": "FIELD",
+          "name": "UploadFile",
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)",
+          "tooltip": "tooltip for the new thingy"
+        }
+      ]
+    },
+    {
+      "name": "Table_2",
+      "title": "Table 2",
+      "elements": [
+        {
+          "type": "FIELD",
+          "name": "UploadFile",
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)",
+          "tooltip": "tooltip for the new thingy"
+        }
+      ]
+    }
+  ]
+}
