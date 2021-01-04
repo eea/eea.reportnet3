@@ -22,11 +22,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) => {
-  const { getWebformTabs, mergeArrays, onParseWebformData } = WebformsUtils;
   const { datasetSchema } = state;
-
-  // console.log('tables', tables);
-  // console.log('datasetSchema', datasetSchema.tables);
 
   const nationalSystemsReducer = (state, { type, payload }) => {
     switch (type) {
@@ -44,7 +40,7 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
   });
 
   useEffect(() => {
-    initialLoad();
+    // initialLoad();
   }, []);
 
   const initialLoad = () => {
@@ -87,6 +83,8 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
       <NationalSystemsTable
         data={nationalSystemsState.data}
         datasetId={datasetId}
+        schemaTables={datasetSchema.tables[0]}
+        tables={tables[0]}
         tableSchemaId={datasetSchema.tables[0].tableSchemaId}
       />
     </div>
