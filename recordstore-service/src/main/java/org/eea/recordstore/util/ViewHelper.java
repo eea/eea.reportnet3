@@ -1,14 +1,12 @@
 package org.eea.recordstore.util;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.lock.service.LockService;
-import org.eea.recordstore.util.model.ManageViewProcessVO;
+import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -45,7 +43,7 @@ public class ViewHelper implements DisposableBean {
   private ExecutorService viewExecutorService;
 
   /** The processes map. */
-  private Map<String, ManageViewProcessVO> processesMap;
+  private List<Long> processesList;
 
   /** The kafka admin utils. */
   @Autowired
@@ -55,11 +53,9 @@ public class ViewHelper implements DisposableBean {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The lock service. */
+  /** The record store service. */
   @Autowired
-  private LockService lockService;
-
-  private String selfUUID;
+  private RecordStoreService recordStoreService;
 
   /**
    * Inits the.
@@ -67,39 +63,78 @@ public class ViewHelper implements DisposableBean {
   @PostConstruct
   private void init() {
     viewExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
-    selfUUID = UUID.randomUUID().toString();
+  }
+
+
+  /**
+   * Insert view procces.
+   *
+   * @param datasetId the dataset id
+   */
+  public void insertViewProcces(Long datasetId) {
+    // 1º
+    // inicio el proceso
+    checkProccesList(datasetId);
   }
 
   /**
-   * Initialize create update materialized query view.
-   * 
+   * Check procces list.
+   *
    * @param datasetId the dataset id
-   * @param user the user
-   * @param released the released
-   * @param idProcess the id process
    */
-  public void executeCreateUpdateMaterializedQueryView(Long datasetId, boolean isMaterialized) {
-    // TODO Lanza mensaje kafka con insertar en la lista el proceso
-
-
-  }
-
-  public void insertProccesList(Long datasetId, String uuid) {
+  private void checkProccesList(Long datasetId) {
     // TODO comprobar si se puede insertar en la lista de procesos
-    // TODO caso 1 = no hay nada inserto, y compruebo si soy el dueño, (uuid recibida y asignada son
-    // la misma) si son la misma ejecuto el proceso.
-
+    // TODO caso 1 = no hay nada inserto,y ejecuto el proceso.
+    // Launch Broadcast - insert in list
     // TODO caso 2 = hay uno e inserto
+    // Launch Broadcast - insert in list
     // TODO caso 3 = hay dos no hago nada
-
   }
 
-  public void deleteProccesList(Long datasetId, String uuid) {
-    // TODO Borrar el proceso terminado.
-    // TODO hay mas peticiones para este dataset id?
-    // TODO caso 2 = hay alguno, compruebo si me pertenece(UUID) y ejecuto.
-
+  /**
+   * Insert procces list.
+   *
+   * @param datasetId the dataset id
+   */
+  public void insertProccesList(Long datasetId) {
+    // recibo broadcast
+    // apunta id en la lista.
   }
+
+  /**
+   * Finish procces.
+   *
+   * @param datasetId the dataset id
+   */
+  public void finishProcces(Long datasetId) {
+    // recibo he terminado de trabajar
+    // TODO = hay 2
+    // ejecuto.
+    // Lanzo borrado en broadcast.
+  }
+
+  /**
+   * Delete procces list.
+   *
+   * @param datasetId the dataset id
+   */
+  public void deleteProccesList(Long datasetId) {
+    // recibo broadcast de borrado.
+    // borro proceso el primero que encuentre.
+  }
+
+
+
+  /**
+   * Initialize create update materialized query view.
+   *
+   * @param datasetId the dataset id
+   */
+  public void executeCreateUpdateMaterializedQueryView(Long datasetId) {
+    // TODO llama al service
+    recordStoreService.createUpdateQueryView(datasetId, false);
+  }
+
 
   /**
    * Destroy.
