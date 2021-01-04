@@ -138,4 +138,17 @@ public class FMEControllerImpl implements FMEController {
 
     return new ResponseEntity<>(stream, httpHeaders, HttpStatus.OK);
   }
+
+  /**
+   * Update job status by id.
+   *
+   * @param jobId the job id
+   * @param status the status
+   */
+  @Override
+  @GetMapping("/private/updateJobStatusById")
+  public void updateJobStatusById(@RequestParam("jobId") Long jobId,
+      @RequestParam("status") Long status) {
+    fmeCommunicationService.updateJobStatusById(jobId, status);
+  }
 }

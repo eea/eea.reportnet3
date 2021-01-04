@@ -359,6 +359,7 @@ public interface DatasetController {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   * @param externalJobId the external job id
    */
   @PostMapping("/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
@@ -366,5 +367,6 @@ public interface DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace);
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "externalJobId", required = false) Long externalJobId);
 }

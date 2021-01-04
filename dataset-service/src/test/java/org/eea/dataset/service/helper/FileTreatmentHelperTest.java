@@ -113,8 +113,8 @@ public class FileTreatmentHelperTest {
         .thenReturn(datasetSchema);
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
-    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(integrationVOs);
+    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+    // .thenReturn(integrationVOs);
     Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.anyString(),
         Mockito.anyLong());
     Mockito.when(
@@ -133,7 +133,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -193,8 +193,8 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
         .thenReturn("csv").thenReturn("txt").thenReturn("csv");
-    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(integrationVOs);
+    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+    // .thenReturn(integrationVOs);
     Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong());
     Mockito.when(
         datasetService.processFile(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -212,7 +212,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -256,10 +256,10 @@ public class FileTreatmentHelperTest {
         .thenReturn(datasetSchema);
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip");
-    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(integrationVOs);
+    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+    // .thenReturn(integrationVOs);
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -296,7 +296,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 

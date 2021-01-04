@@ -197,9 +197,10 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "externalJobId", required = false) Long externalJobId) {
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, externalJobId);
     } catch (EEAException e) {
       LOG.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
           tableSchemaId, file.getName());
@@ -234,7 +235,7 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace);
+      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace, null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -266,7 +267,7 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, null, file, replace);
+      importFileData(datasetId, dataflowId, providerId, null, file, replace, null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }

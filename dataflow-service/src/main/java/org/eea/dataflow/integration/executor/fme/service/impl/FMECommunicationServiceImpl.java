@@ -639,4 +639,18 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 
+  /**
+   * Update job status by id.
+   *
+   * @param jobId the job id
+   * @param status the status
+   */
+  @Override
+  @Transactional
+  public void updateJobStatusById(Long jobId, Long status) {
+    FMEJob fmeJob = fmeJobRepository.findById(jobId).orElse(null);
+    if (null != fmeJob) {
+      updateJobStatus(fmeJob, status);
+    }
+  }
 }
