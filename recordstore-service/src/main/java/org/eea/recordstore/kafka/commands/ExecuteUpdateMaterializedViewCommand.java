@@ -5,6 +5,7 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.util.ViewHelper;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,11 +16,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandlerCommand {
 
-
   /** The database management service. */
   @Autowired
   private RecordStoreService recordStoreService;
 
+  /** The view helper. */
+  @Autowired
+  private ViewHelper viewHelper;
 
   /**
    * Gets the event type.
@@ -43,8 +46,9 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
         Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
     String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
     Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
+    // recordStoreService.updateMaterializedQueryView(datasetId, user, released);
+    viewHelper.initializeCreateUpdateMaterializedQueryView(datasetId, user);
 
-    recordStoreService.updateMaterializedQueryView(datasetId, user, released);
   }
 
 }
