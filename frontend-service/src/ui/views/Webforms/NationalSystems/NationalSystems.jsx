@@ -81,7 +81,7 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
         <div className="p-toolbar-group-left">{renderHeaders()}</div>
       </Toolbar>
       <NationalSystemsTable
-        data={nationalSystemsState.data}
+        // data={nationalSystemsState.data}
         datasetId={datasetId}
         schemaTables={datasetSchema.tables[0]}
         tables={tables[0]}

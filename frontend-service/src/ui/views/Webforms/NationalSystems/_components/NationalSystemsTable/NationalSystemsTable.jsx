@@ -1,14 +1,15 @@
+import React, { useEffect, useState } from 'react';
+
 import isNil from 'lodash/isNil';
-import React, { useEffect, useReducer, useState } from 'react';
+
+import { NationalSystemsRecord } from './_components/NationalSystemsRecord';
 
 import { DatasetService } from 'core/services/Dataset';
-import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
-import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
-import { isEmpty } from 'lodash';
-import { Fragment } from 'react';
 
-export const NationalSystemsTable = ({ data, datasetId, schemaTables, tables, tableSchemaId }) => {
-  const [nationalData, setNationalData] = useState([]);
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
+export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSchemaId }) => {
+  const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export const NationalSystemsTable = ({ data, datasetId, schemaTables, tables, ta
         'BLOCKER'
       ]);
 
-      setNationalData(parseData(response.records));
+      setData(parseData(response.records));
     } catch (error) {
       console.log('error', error);
     } finally {
@@ -92,20 +93,9 @@ export const NationalSystemsTable = ({ data, datasetId, schemaTables, tables, ta
 
   if (isLoading) return 'haha';
 
-  return nationalData.map((dat, index) => (
+  return data.map((record, index) => (
     <div style={{ margin: '1rem' }}>
-      TABLE: {index}
-      {dat.elements.map(element => {
-        console.log('element', element);
-        const { titleSource, tooltipSource, name } = element;
-        return (
-          <Fragment>
-            <div> title: {titleSource ? titleSource.value : ''}</div>
-            <div> tooltip: {tooltipSource ? tooltipSource.value : ''}</div>
-            <div> data: {name ? name.value : ''}</div>
-          </Fragment>
-        );
-      })}
+      <NationalSystemsRecord record={record} index={index} />
     </div>
   ));
 };
