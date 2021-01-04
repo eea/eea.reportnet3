@@ -1,12 +1,16 @@
 package org.eea.dataset.io.kafka.commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -50,6 +54,10 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
+
   /**
    * The field batch size.
    */
@@ -78,16 +86,16 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
-    String idFieldSchema = (String) eeaEventVO.getData().get("idFieldSchema");
+    String fieldSchemaId = (String) eeaEventVO.getData().get("idFieldSchema");
     DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
     final String uuid = (String) eeaEventVO.getData().get("uuId");
 
     try {
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-      datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, idFieldSchema,
+      datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, fieldSchemaId,
           typeField);
-      LOG.info("field {} propagated", idFieldSchema);
+      LOG.info("field {} propagated", fieldSchemaId);
     } catch (Exception e) {
       LOG_ERROR.error("Error processing propagations for new field column in dataset {}", datasetId,
           e);
@@ -99,6 +107,15 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
       synchronized (processMap) {
         if (processMap.containsKey(uuid)) {
           processMap.merge(uuid, -1, Integer::sum);
+          // Release the delete field schema lock
+          if (processMap.get(uuid) == 0) {
+            List<Object> criteria = new ArrayList<>();
+            criteria.add(LockSignature.DELETE_FIELD_SCHEMA.getValue());
+            criteria.add(datasetId);
+            criteria.add(fieldSchemaId);
+            lockService.removeLockByCriteria(criteria);
+          }
+
         }
       }
     }

@@ -533,10 +533,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @DeleteMapping("/{datasetId}/fieldSchema/{fieldSchemaId}")
-  public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldSchemaId") String fieldSchemaId) {
+  public void deleteFieldSchema(
+      @PathVariable("datasetId") @LockCriteria(name = "datasetId") Long datasetId,
+      @PathVariable("fieldSchemaId") @LockCriteria(name = "fieldSchemaId") String fieldSchemaId) {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       FieldSchemaVO fieldVO = dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
