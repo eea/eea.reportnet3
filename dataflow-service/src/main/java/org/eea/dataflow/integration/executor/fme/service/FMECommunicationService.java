@@ -101,4 +101,11 @@ public interface FMECommunicationService {
    */
   void updateJobStatus(FMEJob fmeJob, long statusNumber);
 
+  /**
+   * Update job status by id.
+   *
+   * @param jobId the job id
+   * @param status the status
+   */
+  void updateJobStatusById(Long jobId, Long status);
 }
