@@ -5,11 +5,11 @@ import { DatasetService } from 'core/services/Dataset';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 import { isEmpty } from 'lodash';
+import { Fragment } from 'react';
 
 export const NationalSystemsTable = ({ data, datasetId, schemaTables, tables, tableSchemaId }) => {
-  console.log('tables', tables);
   const [nationalData, setNationalData] = useState([]);
-  console.log('nationalData', nationalData);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     onLoadTableData();
@@ -25,10 +25,11 @@ export const NationalSystemsTable = ({ data, datasetId, schemaTables, tables, ta
         'BLOCKER'
       ]);
 
-      console.log('response', response);
       setNationalData(parseData(response.records));
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,14 +90,22 @@ export const NationalSystemsTable = ({ data, datasetId, schemaTables, tables, ta
     });
   };
 
-  if (isNil(nationalData.elements)) return 'haha';
+  if (isLoading) return 'haha';
 
-  return nationalData.elements.map((dat, index) => (
+  return nationalData.map((dat, index) => (
     <div style={{ margin: '1rem' }}>
       TABLE: {index}
-      <div> title: {dat.titleSource.value}</div>
-      <div> tooltip: {dat.tooltipSource.value}</div>
-      <div> data: {dat.name.value}</div>
+      {dat.elements.map(element => {
+        console.log('element', element);
+        const { titleSource, tooltipSource, name } = element;
+        return (
+          <Fragment>
+            <div> title: {titleSource ? titleSource.value : ''}</div>
+            <div> tooltip: {tooltipSource ? tooltipSource.value : ''}</div>
+            <div> data: {name ? name.value : ''}</div>
+          </Fragment>
+        );
+      })}
     </div>
   ));
 };
