@@ -340,7 +340,17 @@ public enum EventType {
       "update_materialized_view_event", true),
 
   /** The create update view event. */
-  CREATE_UPDATE_VIEW_EVENT(LiteralConstants.BROADCAST_TOPIC, "create_update_view_event", true),
+  CREATE_UPDATE_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_view_event", true),
+
+  /** The delete view procces event. */
+  DELETE_VIEW_PROCCES_EVENT(LiteralConstants.BROADCAST_TOPIC, "delete_view_procces_event", true),
+
+  /** The finish view procces event. */
+  FINISH_VIEW_PROCCES_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "finish_view_procces_event",
+      true),
+
+  /** The insert view procces event. */
+  INSERT_VIEW_PROCCES_EVENT(LiteralConstants.BROADCAST_TOPIC, "insert_view_procces_event", true),
 
   /** The datacollection national coordinator event. */
   DATACOLLECTION_NATIONAL_COORDINATOR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

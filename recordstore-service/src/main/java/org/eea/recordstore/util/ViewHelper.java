@@ -1,12 +1,16 @@
 package org.eea.recordstore.util;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
+import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -111,6 +115,7 @@ public class ViewHelper implements DisposableBean {
     // TODO = hay 2
     // ejecuto.
     // Lanzo borrado en broadcast.
+    releaseDeleteViewProccesEvent(datasetId, "");
   }
 
   /**
@@ -134,6 +139,15 @@ public class ViewHelper implements DisposableBean {
     // TODO llama al service
     recordStoreService.createUpdateQueryView(datasetId, false);
   }
+
+
+  private void releaseDeleteViewProccesEvent(Long datasetId, String user) {
+    Map<String, Object> result = new HashMap<>();
+    result.put(LiteralConstants.DATASET_ID, datasetId);
+    result.put(LiteralConstants.USER, user);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.DELETE_VIEW_PROCCES_EVENT, result);
+  }
+
 
 
   /**
