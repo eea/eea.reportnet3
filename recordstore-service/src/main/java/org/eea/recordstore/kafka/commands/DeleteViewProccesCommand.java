@@ -39,7 +39,12 @@ public class DeleteViewProccesCommand extends AbstractEEAEventHandlerCommand {
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId =
         Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-    viewHelper.deleteProccesList(datasetId);
+    String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
+    Boolean isMaterialized =
+        Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isMaterialized")));
+    Boolean checkSQL = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("checkSQL")));
+
+    viewHelper.finishProcces(datasetId, isMaterialized, user, checkSQL);
   }
 
 }

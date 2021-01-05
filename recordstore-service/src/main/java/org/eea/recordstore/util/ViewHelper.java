@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
@@ -30,29 +29,14 @@ public class ViewHelper implements DisposableBean {
   @Value("${recordstore.tasks.parallelism}")
   private int maxRunningTasks;
 
-  /** The initial tax. */
-  @Value("${validation.tasks.initial.tax}")
-  private int initialTax;
-
-  /** The task released tax. */
-  @Value("${validation.tasks.release.tax}")
-  private int taskReleasedTax;
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ViewHelper.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The view executor service. */
   private ExecutorService viewExecutorService;
 
   /** The processes map. */
   private List<Long> processesList;
-
-  /** The kafka admin utils. */
-  @Autowired
-  private KafkaAdminUtils kafkaAdminUtils;
 
   /** The kafka sender utils. */
   @Autowired
@@ -73,18 +57,23 @@ public class ViewHelper implements DisposableBean {
 
   /**
    * Insert view procces.
-   *
+   * 
    * @param datasetId the dataset id
+   * @param checkSQL
+   * @param user
+   * @param isMaterialized
    */
-  public void insertViewProcces(Long datasetId) {
+  public void insertViewProcces(Long datasetId, Boolean isMaterialized, String user,
+      Boolean checkSQL) {
     switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
         .toString()) {
       case "0":
-        viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId));
-        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+        viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
+            isMaterialized, user, checkSQL));
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
-        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       default:
         break;
@@ -97,7 +86,6 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   public void insertProccesList(Long datasetId) {
-    // recibo broadcast
     processesList.add(datasetId);
   }
 
@@ -106,14 +94,13 @@ public class ViewHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    */
-  public void finishProcces(Long datasetId) {
-    // recibo he terminado de trabajar
+  public void finishProcces(Long datasetId, Boolean isMaterialized, String user, Boolean checkSQL) {
     if (2 == processesList.stream().filter(x -> datasetId.equals(x))
         .collect(Collectors.counting())) {
-      // ejecuto.
-      viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId));
+      viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
+          isMaterialized, user, checkSQL));
     }
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+    releaseDeleteViewProccesEvent(datasetId);
   }
 
   /**
@@ -122,7 +109,6 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   public void deleteProccesList(Long datasetId) {
-    // recibo broadcast de borrado.
     processesList.remove(datasetId);
   }
 
@@ -132,19 +118,59 @@ public class ViewHelper implements DisposableBean {
    * Initialize create update materialized query view.
    *
    * @param datasetId the dataset id
+   * @param isMaterialized
+   * @param checkSQL
+   * @param user
    */
-  public void executeCreateUpdateMaterializedQueryView(Long datasetId) {
-    recordStoreService.createUpdateQueryView(datasetId, false);
+  public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
+      String user, Boolean checkSQL) {
+    recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    if (checkSQL) {
+      releaseValidateManualQCEvent(datasetId, user, true);
+    }
+    releaseFinishViewProcessEvent(datasetId, isMaterialized, user, checkSQL);
   }
 
 
-  private void releaseDeleteViewProccesEvent(Long datasetId, String user) {
+  private void releaseDeleteViewProccesEvent(Long datasetId) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
-    result.put(LiteralConstants.USER, user);
     kafkaSenderUtils.releaseKafkaEvent(EventType.DELETE_VIEW_PROCCES_EVENT, result);
   }
 
+
+  /**
+   * Release validate manual QC event.
+   *
+   * @param datasetId the dataset id
+   * @param checkNoSQL the check no SQL
+   */
+  private void releaseValidateManualQCEvent(Long datasetId, String user, boolean checkNoSQL) {
+    Map<String, Object> result = new HashMap<>();
+    result.put(LiteralConstants.DATASET_ID, datasetId);
+    result.put("checkNoSQL", checkNoSQL);
+    result.put(LiteralConstants.USER, user);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATE_MANUAL_QC_COMMAND, result);
+  }
+
+
+  /**
+   * Release finish view process event.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   * @param user the user
+   * @param checkNoSQL the check no SQL
+   */
+  private void releaseFinishViewProcessEvent(Long datasetId, Boolean isMaterialized, String user,
+      boolean checkNoSQL) {
+    Map<String, Object> result = new HashMap<>();
+    result.put(LiteralConstants.DATASET_ID, datasetId);
+    result.put("isMaterialized", isMaterialized);
+    result.put("checkNoSQL", checkNoSQL);
+    result.put(LiteralConstants.USER, user);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.FINISH_VIEW_PROCCES_EVENT, result);
+  }
 
 
   /**
