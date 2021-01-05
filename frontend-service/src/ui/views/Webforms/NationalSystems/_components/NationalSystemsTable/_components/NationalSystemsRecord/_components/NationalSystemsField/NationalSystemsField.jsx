@@ -1,5 +1,4 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
-import ReactTooltip from 'react-tooltip';
 
 import isNil from 'lodash/isNil';
 
@@ -19,21 +18,51 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSystemsFieldReducer';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
-export const NationalSystemsField = ({ field, key, title, tooltip }) => {
+export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) => {
   const resources = useContext(ResourcesContext);
-  // console.log('field', field);
 
-  console.log('title', title);
-  console.log('tooltip', tooltip);
+  const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
+    isDialogVisible: { deleteAttachment: false, uploadFile: false },
+    selected: { validExtensions: [] },
+    selectedValidExtensions: []
+  });
 
-  const onFillField = () => {};
+  const { isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
+
+  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
+    .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
+    .flat()
+    .join(', ');
+
+  const handleDialogs = (dialog, value) => {
+    nationalSystemsFieldDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const onEditorSubmitValue = async (field, option, value) => {
+    const parsedValue =
+      field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
+        ? value.join(',')
+        : value;
+
+    try {
+      await DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
+    } catch (error) {
+      console.error('error', error);
+    }
+  };
+
+  const onFillField = (field, option, value) => {
+    nationalSystemsFieldDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
+  };
 
   const renderTemplate = () => {
-    const { type } = field;
+    const { fieldSchemaId, type } = field;
 
     switch (type) {
       case 'EMAIL':
@@ -49,7 +78,7 @@ export const NationalSystemsField = ({ field, key, title, tooltip }) => {
             // id={field.fieldId}
             // maxLength={getInputMaxLength[type]}
             onBlur={event => {}}
-            // onChange={event => onFillField(field, option, event.target.value)}
+            onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
             // onKeyDown={event => onEditorKeyChange(event, field, option)}
             // value={field.value}
           />
@@ -107,7 +136,10 @@ export const NationalSystemsField = ({ field, key, title, tooltip }) => {
             <Button
               className={`p-button-animated-blink p-button-primary-transparent`}
               icon="trash"
-              // onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
+              onClick={() => {
+                // onFileDeleteVisible(field.fieldId, field.fieldSchemaId);
+                handleDialogs('deleteAttachment', true);
+              }}
             />
           </div>
         );
@@ -129,6 +161,42 @@ export const NationalSystemsField = ({ field, key, title, tooltip }) => {
         />
       </div>
       {renderTemplate()}
+
+      {isDialogVisible.uploadFile && (
+        <CustomFileUpload
+          accept={getAttachExtensions || '*'}
+          chooseLabel={resources.messages['selectFile']}
+          // className={styles.fileUpload}
+          // dialogClassName={styles.dialog}
+          // dialogHeader={resources.messages['uploadAttachment']}
+          // dialogOnHide={() => onToggleDialogVisible(false)}
+          // dialogVisible={uploadFile}
+          // fileLimit={1}
+          // invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          // isDialog={true}
+          // mode="advanced"
+          // multiple={false}
+          // name="file"
+          // onUpload={onAttach}
+          // operation="PUT"
+          // url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
+          //   datasetId,
+          //   fieldId: selectedFieldId
+          // })}`}
+        />
+      )}
+      {isDialogVisible.deleteAttachment && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['deleteAttachmentHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          // onConfirm={onConfirmDeleteAttachment}
+          onHide={() => handleDialogs('deleteAttachment', false)}
+          visible={isDialogVisible.deleteAttachment}>
+          {resources.messages['deleteAttachmentConfirm']}
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };

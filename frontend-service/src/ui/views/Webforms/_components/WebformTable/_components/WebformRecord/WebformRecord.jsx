@@ -60,6 +60,8 @@ export const WebformRecord = ({
     selectedRecordId: null
   });
 
+  console.log('webformRecordState', webformRecordState);
+
   const { isConditionalChanged, isDialogVisible, selectedRecordId } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
