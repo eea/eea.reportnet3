@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -230,10 +231,13 @@ public class ValidationHelperTest {
     consumerGroups.setMembers(members);
     Mockito.when(kafkaAdminUtils.getConsumerGroupInfo()).thenReturn(consumerGroups);
 
+    Mockito.when(datasetMetabaseControllerZuul.getType(Mockito.anyLong()))
+        .thenReturn(DatasetTypeEnum.REPORTING);
+
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
     Mockito.when(validationService.countFieldsDataset(Mockito.eq(1l))).thenReturn(1);
 
-    validationHelper.executeValidation(1l, "1", false);
+    validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
     Mockito.verify(kafkaSenderUtils, Mockito.times(2))
         .releaseKafkaEvent(Mockito.any(EEAEventVO.class));

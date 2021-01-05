@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,7 @@ public class DataCollectionNationalCoordinatorCommandTest {
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The resource management controller zull. */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
@@ -72,6 +74,18 @@ public class DataCollectionNationalCoordinatorCommandTest {
     MockitoAnnotations.initMocks(this);
   }
 
+
+  /**
+   * Gets the event type test.
+   *
+   * @return the event type test
+   */
+  @Test
+  public void getEventTypeTest() {
+    Assert.assertEquals(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT,
+        dataCollectionNationalCoordinatorCommand.getEventType());
+  }
+
   /**
    * Test execute.
    *
@@ -83,7 +97,7 @@ public class DataCollectionNationalCoordinatorCommandTest {
     data.put("dataflowId", 1L);
     data.put("isCreation", "true");
     eeaEventVO.setData(data);
-    List<RepresentativeVO> representativesList = new ArrayList();
+    List<RepresentativeVO> representativesList = new ArrayList<>();
     RepresentativeVO representativeVO = new RepresentativeVO();
     representativeVO.setId(1L);
     representativeVO.setDataProviderId(1L);
@@ -91,7 +105,7 @@ public class DataCollectionNationalCoordinatorCommandTest {
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(1L))
         .thenReturn(representativesList);
 
-    List<DataProviderVO> dataproviderList = new ArrayList();
+    List<DataProviderVO> dataproviderList = new ArrayList<>();
     DataProviderVO dataProviderVO = new DataProviderVO();
     dataProviderVO.setId(1L);
     dataproviderList.add(dataProviderVO);
@@ -106,7 +120,10 @@ public class DataCollectionNationalCoordinatorCommandTest {
     usersRepresentationList.add(userRepresentationVO);
     Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
         .thenReturn(usersRepresentationList);
-
+    List<Long> datasetIds = new ArrayList<>();
+    datasetIds.add(1L);
+    Mockito.when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(Mockito.any(),
+        Mockito.any())).thenReturn(datasetIds);
     doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
 
     dataCollectionNationalCoordinatorCommand.execute(eeaEventVO);
@@ -114,6 +131,5 @@ public class DataCollectionNationalCoordinatorCommandTest {
         .addContributorsToResources(Mockito.any());
 
   }
-
 
 }

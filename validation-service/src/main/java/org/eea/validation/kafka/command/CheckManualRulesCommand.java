@@ -25,14 +25,12 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.exception.EEAInvalidSQLException;
-import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RuleExpressionService;
-import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
@@ -56,7 +54,7 @@ import org.springframework.stereotype.Component;
 public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CheckManualRulesCommand.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -131,40 +129,9 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
     List<Rule> rulesSQLSchema = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
 
     if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
-      rulesSchema.getRules().stream().forEach(rule -> {
-        if (checkNoSQL && rule.isAutomatic() == Boolean.FALSE && null == rule.getSqlSentence()) {
-          boolean valid = validateRule(datasetSchemaId, rule);
-          if (valid) {
-            rule.setVerified(true);
-          } else {
-            if (rule.getVerified().equals(Boolean.FALSE) && valid == Boolean.FALSE) {
-              rule.setVerified(false);
-              rule.setEnabled(false);
-            } else {
-              rule.setVerified(false);
-              rule.setEnabled(false);
-              errorRulesList.add(rule);
-            }
-          }
-          rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-        }
-        if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()
-            && rule.isAutomatic() == Boolean.FALSE) {
-          boolean valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
-          if (valid) {
-            rule.setVerified(true);
-          } else {
-            if (rule.getVerified().equals(Boolean.FALSE) && valid == Boolean.FALSE) {
-              rule.setVerified(false);
-              rule.setEnabled(false);
-            } else {
-              rule.setVerified(false);
-              rule.setEnabled(false);
-              errorRulesList.add(rule);
-            }
-          }
-          rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-        }
+      rulesSchema.getRules().stream().filter(rule -> !rule.isAutomatic()).forEach(rule -> {
+        updateRuleState(errorRulesList, datasetId, checkNoSQL, datasetSchemaId, rulesSQLSchema,
+            rule);
       });
     }
 
@@ -181,6 +148,41 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       LOG.info("SQL rules contains errors");
       releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
     }
+  }
+
+  /**
+   * Update rule state.
+   *
+   * @param errorRulesList the error rules list
+   * @param datasetId the dataset id
+   * @param checkNoSQL the check no SQL
+   * @param datasetSchemaId the dataset schema id
+   * @param rulesSQLSchema the rules SQL schema
+   * @param rule the rule
+   */
+  private void updateRuleState(List<Rule> errorRulesList, Long datasetId, boolean checkNoSQL,
+      String datasetSchemaId, List<Rule> rulesSQLSchema, Rule rule) {
+    Boolean valid = null;
+    if (checkNoSQL && null == rule.getSqlSentence()) {
+      valid = validateRule(datasetSchemaId, rule);
+    }
+    if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()) {
+      valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
+    }
+
+    if (Boolean.TRUE.equals(valid)) {
+      rule.setVerified(true);
+    }
+    if (Boolean.FALSE.equals(valid)) {
+      if (rule.getVerified().equals(Boolean.TRUE)) {
+        rule.setVerified(false);
+        rule.setEnabled(false);
+        errorRulesList.add(rule);
+      } else {
+        rule.setEnabled(false);
+      }
+    }
+    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
   }
 
   /**
@@ -213,7 +215,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
         dataTypeMap.put("VALUE", DataType.valueOf(fieldSchema.get(TYPE_DATA).toString()));
         break;
       default:
-        return validateWithKiebase(datasetSchemaId, rule);
+        return validateWithKiebase(rule);
 
     }
     if (ruleExpressionService.isDataTypeCompatible(ruleExpressionString, ruleType, dataTypeMap)) {
@@ -233,7 +235,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @param rule the rule
    * @return the boolean
    */
-  private Boolean validateWithKiebase(String datasetSchemaId, Rule rule) {
+  private Boolean validateWithKiebase(Rule rule) {
     boolean isCorrect = false;
     if (EntityTypeEnum.TABLE.equals(rule.getType())) {
       KieServices kieServices = KieServices.Factory.get();
@@ -336,30 +338,26 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @return the boolean
    */
   private Boolean validateSQLRule(String query, Long datasetId, Rule rule) {
-    Boolean isSQLCorrect = Boolean.TRUE;
+    boolean isSQLCorrect = true;
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
         try {
-          String preparedquery = "";
-          if (query.contains(";")) {
-            preparedquery = query.replace(";", "") + " limit 5";
-          } else {
-            preparedquery = query + " limit 5";
-          }
-          retrieveTableData(preparedquery, datasetId, rule);
+          String preparedquery =
+              query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
+          launchValidationQuery(preparedquery, datasetId, rule);
         } catch (EEAInvalidSQLException e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
-          isSQLCorrect = Boolean.FALSE;
+          isSQLCorrect = false;
         }
       } else {
-        isSQLCorrect = Boolean.FALSE;
+        isSQLCorrect = false;
       }
     } else {
-      isSQLCorrect = Boolean.FALSE;
+      isSQLCorrect = false;
     }
-    if (isSQLCorrect.equals(Boolean.FALSE)) {
+    if (!isSQLCorrect) {
       LOG.info("Rule validation not passed: {}", rule);
     } else {
       LOG.info("Rule validation passed: {}", rule);
@@ -373,12 +371,12 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @param query the query
    * @return the boolean
    */
-  private Boolean checkQuerySyntax(String query) {
-    Boolean queryContainsKeyword = Boolean.TRUE;
+  private boolean checkQuerySyntax(String query) {
+    boolean queryContainsKeyword = true;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
       if (query.toLowerCase().contains(word.toLowerCase())) {
-        queryContainsKeyword = Boolean.FALSE;
+        queryContainsKeyword = false;
         break;
       }
     }
@@ -396,7 +394,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @throws PSQLException the PSQL exception
    * @throws EEAInvalidSQLException
    */
-  private TableValue retrieveTableData(String query, Long datasetId, Rule rule)
+  private void launchValidationQuery(String query, Long datasetId, Rule rule)
       throws EEAInvalidSQLException {
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     String entityName = "";
@@ -408,7 +406,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       case FIELD:
         entityName = retriveFieldName(schema, rule.getReferenceId().toString());
         idTable =
-            retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(), datasetId);
+            getTableId(schema, rule.getReferenceId().toString(), datasetId);
         break;
       case TABLE:
         entityName = retriveTableName(schema, rule.getReferenceId().toString());
@@ -418,16 +416,13 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
         idTable =
             retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString(), datasetId);
         break;
-      case DATASET:
+      default:
         break;
     }
-    TableValue table = new TableValue();
 
     LOG.info("Query to be executed: {}", newQuery);
-    table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId,
-        idTable);
 
-    return table;
+    datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName, datasetId, idTable);
   }
 
   /**
@@ -439,7 +434,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @return the long
    */
   @Transactional
-  private Long retriveIsTableFromFieldSchema(DataSetSchemaVO schema, String fieldSchemaId,
+  private Long getTableId(DataSetSchemaVO schema, String fieldSchemaId,
       Long datasetId) {
     String tableSchemaId = "";
     for (TableSchemaVO table : schema.getTableSchemas()) {
@@ -524,8 +519,4 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
     }
   }
 
-
-
 }
-
-

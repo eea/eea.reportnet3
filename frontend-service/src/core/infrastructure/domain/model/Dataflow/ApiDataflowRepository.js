@@ -94,6 +94,9 @@ const all = async userData => {
 
     for (let i = 0; i < pendingDataflowsDTO.length; i++) {
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+      if (pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN']) {
+        pendingDataflowsDTO[i].status = 'OPEN';
+      }
       dataflows.push({
         ...pendingDataflowsDTO[i],
         ...(isDuplicated ? getUserRoles(userRoles) : userRoles).find(item => item.id === pendingDataflowsDTO[i].id)

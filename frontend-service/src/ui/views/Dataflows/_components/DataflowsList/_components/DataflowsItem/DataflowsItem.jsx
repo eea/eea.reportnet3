@@ -114,7 +114,7 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
       </div>
 
       <div className={`${styles.status}  dataflowList-status-help-step`}>
-        {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'DRAFT' && (
+        {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'OPEN' && (
           <p>
             <span>{`${resources.messages['deliveryStatus']}:`}</span>{' '}
             {itemContent.reportingDatasetsStatus === 'PENDING'
@@ -123,8 +123,7 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
           </p>
         )}
         <p>
-          <span>{`${resources.messages['dataflowStatus']}:`}</span>{' '}
-          {itemContent.status === 'DRAFT' ? resources.messages['open'].toUpperCase() : itemContent.status}
+          <span>{`${resources.messages['dataflowStatus']}:`}</span> {itemContent.status}
         </p>
       </div>
       <div className={`${styles.role}  dataflowList-role-help-step`}>

@@ -47,6 +47,10 @@ public class RulesControllerImpl implements RulesController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesControllerImpl.class);
 
+  /** The Constant DELETE_RULES_SUCCESSFULLY: {@value}. */
+  private static final String DELETE_RULES_SUCCESSFULLY =
+      "Delete the rules with referenceId {} in datasetSchema {} successfully";
+
   /** The rules service. */
   @Autowired
   private RulesService rulesService;
@@ -147,8 +151,7 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleByReferenceId(datasetSchemaId, referenceId);
-    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
-        datasetSchemaId);
+    LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
   }
 
   /**
@@ -164,8 +167,7 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceFieldSchemaPKId") String referenceFieldSchemaPKId) {
     rulesService.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, referenceFieldSchemaPKId);
-    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully",
-        referenceFieldSchemaPKId, datasetSchemaId);
+    LOG.info(DELETE_RULES_SUCCESSFULLY, referenceFieldSchemaPKId, datasetSchemaId);
   }
 
   /**
@@ -551,8 +553,7 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteAutomaticRuleByReferenceId(datasetSchemaId, referenceId);
-    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
-        datasetSchemaId);
+    LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
   }
 
 

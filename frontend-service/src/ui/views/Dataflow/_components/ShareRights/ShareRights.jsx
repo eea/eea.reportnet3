@@ -100,8 +100,8 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       }
     });
 
-    if (!contributor.isNew) {
-      isPermissionChanged(contributor) && onUpdateContributor(contributor);
+    if (!contributor.isNew && isPermissionChanged(contributor)) {
+       onUpdateContributor(contributor);
     } else {
       if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
         onUpdateContributor(contributor);
@@ -136,14 +136,15 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
   };
 
   const onEnterKey = (key, contributor) => {
-    if (key === 'Enter') {
-      isValidEmail(contributor.account) && isPermissionChanged(contributor) && onUpdateContributor(contributor);
+    if (key === 'Enter' && isValidEmail(contributor.account) && isPermissionChanged(contributor)) {
+      onUpdateContributor(contributor);
     }
   };
 
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
       const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+      contributor.account = contributor.account.toLowerCase();
       setIsLoading(true);
       try {
         const response = await ContributorService.update(contributor, dataflowId, dataProvider);
@@ -249,7 +250,6 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           disabled={!contributor.isNew}
           className={!contributor.isNew ? styles.disabledInput : ''}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
-          inputId={'contributorAccount'}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}

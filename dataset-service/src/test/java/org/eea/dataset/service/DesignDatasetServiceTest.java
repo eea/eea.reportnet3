@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -194,6 +195,7 @@ public class DesignDatasetServiceTest {
     recordVO.setIdRecordSchema("5ce524fad31fc52540abae73");
     tableVO.setRecordSchema(recordVO);
     tableVO.setIdTableSchema("5ce524fad31fc52540abae73");
+    tableVO.setNameTableSchema("table1");
     schemaVO.setTableSchemas(Arrays.asList(tableVO));
     DataSetSchema schema = new DataSetSchema();
     TableSchema table = new TableSchema();
@@ -215,7 +217,7 @@ public class DesignDatasetServiceTest {
     when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong())).thenReturn(new ObjectId());
     when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(CompletableFuture.completedFuture(1L));
+        .thenReturn(CompletableFuture.completedFuture(1L));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(table);
@@ -223,7 +225,8 @@ public class DesignDatasetServiceTest {
         .thenReturn(field);
     // when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(Arrays.asList(dataset));
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(Arrays.asList(dataset));
-    Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any());
+    Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
+        Mockito.anyBoolean());
 
     designDatasetService.copyDesignDatasets(1L, 2L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),

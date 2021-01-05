@@ -205,8 +205,7 @@ public class SnapshotHelper implements DisposableBean {
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
             restorationTask.isSchemaSnapshot, restorationTask.deleteData);
       } catch (SQLException | IOException | RecordStoreAccessException e) {
-        LOG_ERROR.error("Error restoring snapshot for dataset {} due to exception {}",
-            restorationTask.datasetId, e);
+        LOG_ERROR.error("Error restoring snapshot for dataset {}", restorationTask.datasetId, e);
       } finally {
         Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Restoration task for snapshot {} finished, it has taken taken {} seconds",

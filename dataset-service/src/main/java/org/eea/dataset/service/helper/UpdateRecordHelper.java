@@ -8,6 +8,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -57,11 +58,12 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
-  public void executeUpdateProcess(final Long datasetId, List<RecordVO> records)
-      throws EEAException {
-    datasetService.updateRecords(datasetId, records);
+  public void executeUpdateProcess(final Long datasetId, List<RecordVO> records,
+      boolean updateCascadePK) throws EEAException {
+    datasetService.updateRecords(datasetId, records, updateCascadePK);
     LOG.info("Records have been modified");
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);
@@ -73,6 +75,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * @param datasetId the dataset id
    * @param records the records
    * @param tableSchemaId the id table schema
+   * @throws EEAException the EEA exception
    */
   public void executeCreateProcess(final Long datasetId, List<RecordVO> records,
       String tableSchemaId) throws EEAException {
@@ -82,6 +85,22 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
 
+  /**
+   * Execute multi create process.
+   *
+   * @param datasetId the dataset id
+   * @param tableRecords the table records
+   * @throws EEAException the EEA exception
+   */
+  public void executeMultiCreateProcess(final Long datasetId, List<TableVO> tableRecords)
+      throws EEAException {
+    for (TableVO tableVO : tableRecords) {
+      datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
+    }
+    LOG.info("Records have been created");
+    // after the records have been saved, an event is sent to notify it
+    releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
+  }
 
   /**
    * Execute delete process.
@@ -105,10 +124,12 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    *
    * @param datasetId the dataset id
    * @param field the field
+   * @param updateCascadePK the update cascade PK
    * @throws EEAException the EEA exception
    */
-  public void executeFieldUpdateProcess(Long datasetId, FieldVO field) throws EEAException {
-    datasetService.updateField(datasetId, field);
+  public void executeFieldUpdateProcess(Long datasetId, FieldVO field, boolean updateCascadePK)
+      throws EEAException {
+    datasetService.updateField(datasetId, field, updateCascadePK);
     LOG.info("Field is modified");
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);

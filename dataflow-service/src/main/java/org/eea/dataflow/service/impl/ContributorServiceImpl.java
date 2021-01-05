@@ -195,6 +195,7 @@ public class ContributorServiceImpl implements ContributorService {
    * @param contributorVO the contributor VO
    * @param role the role
    * @param dataProviderId the data provider id
+   * @param persistDataflowPermission the persist dataflow permission
    * @throws EEAException the EEA exception
    */
   @Override
@@ -205,6 +206,7 @@ public class ContributorServiceImpl implements ContributorService {
     ResourceGroupEnum resourceGroupEnumDataflow = null;
     ResourceGroupEnum resourceGroupEnumDataset = null;
 
+    contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
     switch (role) {
       case EDITOR:
         securityRoleEnum =
@@ -232,6 +234,33 @@ public class ContributorServiceImpl implements ContributorService {
       default:
         break;
     }
+    List<ResourceAssignationVO> resourceAssignationVOList = fillResourceAssignationList(dataflowId,
+        contributorVO, role, dataProviderId, persistDataflowPermission, securityRoleEnum,
+        resourceGroupEnum, resourceGroupEnumDataflow, resourceGroupEnumDataset);
+
+    // we add data to contributor
+    userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
+  }
+
+  /**
+   * Fill resource assignation list.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param role the role
+   * @param dataProviderId the data provider id
+   * @param persistDataflowPermission the persist dataflow permission
+   * @param securityRoleEnum the security role enum
+   * @param resourceGroupEnum the resource group enum
+   * @param resourceGroupEnumDataflow the resource group enum dataflow
+   * @param resourceGroupEnumDataset the resource group enum dataset
+   * @return the list
+   */
+  private List<ResourceAssignationVO> fillResourceAssignationList(Long dataflowId,
+      ContributorVO contributorVO, String role, Long dataProviderId,
+      Boolean persistDataflowPermission, SecurityRoleEnum securityRoleEnum,
+      ResourceGroupEnum resourceGroupEnum, ResourceGroupEnum resourceGroupEnumDataflow,
+      ResourceGroupEnum resourceGroupEnumDataset) {
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
     List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
     if (EDITOR.equals(role)) {
@@ -249,9 +278,7 @@ public class ContributorServiceImpl implements ContributorService {
           resourceAssignationVOList, resourceInfoVOs, persistDataflowPermission);
 
     }
-
-    // we add data to contributor
-    userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
+    return resourceAssignationVOList;
   }
 
   /**
@@ -266,12 +293,16 @@ public class ContributorServiceImpl implements ContributorService {
    * @param resourceGroupEnumDataset the resource group enum dataset
    * @param resourceAssignationVOList the resource assignation VO list
    * @param resourceInfoVOs the resource info V os
+   * @param persistDataflowPermission the persist dataflow permission
    */
   private void createReporterGroupsResources(Long dataflowId, ContributorVO contributorVO,
       Long dataProviderId, SecurityRoleEnum securityRoleEnum, ResourceGroupEnum resourceGroupEnum,
       ResourceGroupEnum resourceGroupEnumDataflow, ResourceGroupEnum resourceGroupEnumDataset,
       final List<ResourceAssignationVO> resourceAssignationVOList,
       List<ResourceInfoVO> resourceInfoVOs, Boolean persistDataflowPermission) {
+
+    contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
+
     ResourceInfoVO resourceDataflow =
         resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
     if (null == resourceDataflow.getName()) {
@@ -355,6 +386,7 @@ public class ContributorServiceImpl implements ContributorService {
 
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
+      contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
       Boolean persistDataflowPermission = null;
       // avoid delete if it's a new contributor
       List<ResourceAccessVO> resourceAccessVOs =
@@ -367,14 +399,7 @@ public class ContributorServiceImpl implements ContributorService {
                 .findAny().orElse(null);
         if (resourceAccess != null) {
           persistDataflowPermission =
-              checkDataflowPrevPermission(role, contributorVO.getWritePermission(), resourceAccess);
-          try {
-            deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
-                contributorVO.getAccount(), dataflowId);
-            throw new EEAException(e);
-          }
+              deleteContributor(dataflowId, contributorVO, role, dataProviderId, resourceAccess);
         }
       }
       try {
@@ -396,12 +421,37 @@ public class ContributorServiceImpl implements ContributorService {
   }
 
   /**
-   * Check dataflow prev permission.
+   * Delete contributor.
    *
    * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param role the role
+   * @param dataProviderId the data provider id
+   * @param resourceAccess the resource access
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  private Boolean deleteContributor(Long dataflowId, ContributorVO contributorVO, String role,
+      Long dataProviderId, ResourceAccessVO resourceAccess) throws EEAException {
+    Boolean persistDataflowPermission;
+    persistDataflowPermission =
+        checkDataflowPrevPermission(role, contributorVO.getWritePermission(), resourceAccess);
+    try {
+      deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
+          contributorVO.getAccount(), dataflowId);
+      throw new EEAException(e);
+    }
+    return persistDataflowPermission;
+  }
+
+  /**
+   * Check dataflow prev permission.
+   *
    * @param role the role
    * @param writePermission the write permission
-   * @param resourceAccessVOs the resource access V os
+   * @param resourceAccess the resource access
    * @return the boolean
    */
   private Boolean checkDataflowPrevPermission(String role, Boolean writePermission,

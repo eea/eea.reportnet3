@@ -239,7 +239,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             records.add(record);
             tableValue.setRecords(records);
             break;
-          case DATASET:
+          default:
             break;
         }
       }

@@ -131,8 +131,9 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
     // Release the notification to end the process
     Boolean isCreation =
         Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isCreation")));
-    EventType successEvent = isCreation ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
+    EventType successEvent =
+        Boolean.TRUE.equals(isCreation) ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
+            : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))

@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
+import uuid from 'uuid';
 
 import styles from './FieldEditor.module.scss';
 
@@ -52,7 +53,6 @@ const FieldEditor = ({
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
-
   const [currentCRS, setCurrentCRS] = useState(
     ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
       RecordUtils.getCellInfo(colsSchema, cells.field).type
@@ -64,6 +64,8 @@ const FieldEditor = ({
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+  const [isFilledDateValue, setIsFilledDateValue] = useState(false);
   const [isMapDisabled, setIsMapDisabled] = useState(
     RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
       ? !MapUtils.checkValidCoordinates(
@@ -75,6 +77,10 @@ const FieldEditor = ({
   );
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
+
+  const { areEquals } = TextUtils;
+
+  const calendarId = uuid.v4();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
@@ -177,12 +183,42 @@ const FieldEditor = ({
 
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
-    codelistsItems.sort();
+    codelistsItems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
     codelistsItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
     });
     return codelistsItems;
+  };
+
+  const saveFieldOnBlurOnKeyDown = e => {
+    const dateValue = isEmpty(e.target.value) ? '' : RecordUtils.formatDate(e.target.value, isNil(e.target.value));
+    const isCorrectDateFormatedValue = getisCorrectDateFormatedValue(dateValue);
+    if (isCorrectDateFormatedValue || isEmpty(dateValue)) {
+      onEditorValueChange(cells, dateValue, record);
+      onEditorSubmitValue(cells, dateValue, record);
+      if (e.key === 'Enter') {
+        e.target.blur();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isCalendarVisible) {
+      const elementToCapture = document.getElementById(calendarId);
+      !isNil(elementToCapture) &&
+        elementToCapture.addEventListener('keydown', event => {
+          const keyName = event.key;
+          if (keyName === 'Tab' || keyName === 'Enter') {
+            saveFieldOnBlurOnKeyDown(event);
+          }
+        });
+    }
+  }, [isCalendarVisible]);
+
+  const getisCorrectDateFormatedValue = date => {
+    const year = date.split('-')[0];
+    return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
@@ -426,7 +462,7 @@ const FieldEditor = ({
         const value = RecordUtils.getCellValue(cells, cells.field);
         let differentTypes = false;
         if (!isNil(value) && value !== '') {
-          differentTypes = !TextUtils.areEquals(JSON.parse(value).geometry.type, type);
+          differentTypes = !areEquals(JSON.parse(value).geometry.type, type);
         }
         let isValidJSON = false;
         if (!differentTypes) {
@@ -485,11 +521,24 @@ const FieldEditor = ({
           //   value={RecordUtils.getCellValue(cells, cells.field)}
           // />
           <Calendar
-            onChange={e => {
-              onEditorValueChange(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), record);
-              onEditorSubmitValue(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), record);
+            inputId={calendarId}
+            onBlur={e => {
+              if (!isFilledDateValue) {
+                saveFieldOnBlurOnKeyDown(e);
+                setIsCalendarVisible(false);
+              } else {
+                setIsFilledDateValue(false);
+              }
             }}
-            onFocus={e => onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)))}
+            onFocus={e => {
+              setIsCalendarVisible(true);
+              onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
+              !isNil(isFilledDateValue) && setIsFilledDateValue(true);
+            }}
+            onSelect={e => {
+              onEditorValueChange(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
+              onEditorSubmitValue(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
+            }}
             appendTo={document.body}
             dateFormat="yy-mm-dd"
             // keepInvalid={true}
@@ -552,6 +601,7 @@ const FieldEditor = ({
           return (
             <MultiSelect
               // onChange={e => onChangeForm(field, e.value)}
+              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               filter={true}
@@ -561,7 +611,11 @@ const FieldEditor = ({
                 try {
                   setLinkItemsValue(e.value);
                   onEditorValueChange(cells, e.value);
-                  onEditorSubmitValue(cells, e.value, record);
+                  onEditorSubmitValue(
+                    cells,
+                    e.value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })),
+                    record
+                  );
                 } catch (error) {
                   console.error(error);
                 }
@@ -623,13 +677,18 @@ const FieldEditor = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
+            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {
               try {
                 setCodelistItemValue(e.value);
                 onEditorValueChange(cells, e.value);
-                onEditorSubmitValue(cells, e.value, record);
+                onEditorSubmitValue(
+                  cells,
+                  e.value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })),
+                  record
+                );
               } catch (error) {
                 console.error(error);
               }
@@ -663,11 +722,40 @@ const FieldEditor = ({
     }
   };
 
-  return !isEmpty(fieldType) && !isReadOnlyField
-    ? renderField(fieldType)
-    : !reporting
-    ? renderField(fieldType)
-    : RecordUtils.getCellValue(cells, cells.field);
+  const renderFieldAsLabel = (value, type) => {
+    if (cells && cells.field && !isEmpty(type)) {
+      if (
+        ['POINT', 'POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type.toUpperCase())
+      ) {
+        if (value !== '') {
+          const parsedJSON = JSON.parse(value);
+          return `${parsedJSON.geometry.coordinates.join(', ')} - ${parsedJSON.properties.srid}`;
+        } else {
+          return '';
+        }
+      } else {
+        return value;
+      }
+    } else {
+      return '';
+    }
+  };
+
+  return !isEmpty(fieldType) && !isReadOnlyField ? (
+    renderField(fieldType)
+  ) : !reporting ? (
+    renderField(fieldType)
+  ) : (
+    <span
+      style={{
+        whiteSpace: cells && cells.field && fieldType === 'TEXTAREA' ? 'pre-wrap' : 'none'
+      }}>
+      {renderFieldAsLabel(
+        RecordUtils.getCellValue(cells, cells.field),
+        RecordUtils.getCellInfo(colsSchema, cells.field).type
+      )}
+    </span>
+  );
 };
 
 export { FieldEditor };

@@ -3,6 +3,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { TextUtils } from 'ui/views/_functions/Utils';
+
 const formatDate = (date, isInvalidDate) => {
   if (isInvalidDate) return '';
 
@@ -32,12 +34,22 @@ const getInputType = {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
+    const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)
-    );
+    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   }
+};
+
+const getSingleRecordOption = singleRecord => {
+  if (singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))] === '') {
+    return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
+  }
+
+  return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]} - ${
+    singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))]
+  }`;
 };
 
 const parseMultiselect = record => {
@@ -53,10 +65,9 @@ const parseMultiselect = record => {
         if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
           field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
         } else {
-          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
-            .split(',')
-            .map(item => item.trim())
-            .join(',');
+          field.fieldData[field.fieldData.fieldSchemaId] = TextUtils.removeCommaSeparatedWhiteSpaces(
+            field.fieldData[field.fieldData.fieldSchemaId]
+          );
         }
       }
     }
@@ -106,11 +117,27 @@ const parseNewRecordData = (columnsSchema, data) => {
   }
 };
 
+const parseListOfSinglePams = (records = []) => {
+  const options = [];
+  records.forEach(record => {
+    if (
+      record.elements.find(el => TextUtils.areEquals(el.name, 'IsGroup')).value === 'Single' &&
+      record.elements.find(el => TextUtils.areEquals(el.name, 'Id')) &&
+      record.elements.find(el => TextUtils.areEquals(el.name, 'Title'))
+    ) {
+      options.push(getSingleRecordOption(record));
+    }
+  });
+
+  return options.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+};
+
 export const WebformRecordUtils = {
   formatDate,
   getInputMaxLength,
   getInputType,
   getMultiselectValues,
+  parseListOfSinglePams,
   parseMultiselect,
   parseNewRecordData
 };

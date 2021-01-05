@@ -124,6 +124,9 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
 
+  /** The Constant DATASET: {@value}. */
+  private static final String DATASET = "dataset_";
+
   /**
    * Gets the rules schema by dataset id.
    *
@@ -384,11 +387,11 @@ public class RulesServiceImpl implements RulesService {
 
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       if (rule.getSqlSentence().contains("!=")) {
-        rule.setSqlSentence(rule.getSqlSentence().replaceAll("!=", "<>"));
+        rule.setSqlSentence(rule.getSqlSentence().replace("!=", "<>"));
       }
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
           .append(rule.getRuleId().toString()).append("')").toString());
-      recordStoreController.createUpdateQueryView(datasetId);
+      recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
 
@@ -665,7 +668,7 @@ public class RulesServiceImpl implements RulesService {
       }
       rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
           .append(rule.getRuleId().toString()).append("')").toString());
-      recordStoreController.createUpdateQueryView(datasetId);
+      recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
@@ -996,7 +999,9 @@ public class RulesServiceImpl implements RulesService {
     if (StringUtils.isNotBlank(rule.getWhenCondition())
         && !rule.getWhenCondition().contains("isfieldFK")) {
 
-      LOG.info("A new rule is going to be created in the copy schema process");
+      LOG.info(
+          "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
+          rule.getRuleName(), rule.getReferenceId());
       // Here we change the fields of the rule involved with the help of the dictionary
       fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
 
@@ -1062,36 +1067,31 @@ public class RulesServiceImpl implements RulesService {
     // modify the when condition
     if (StringUtils.isNotBlank(rule.getWhenCondition())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
-        if (rule.getWhenCondition().contains(oldObjectId)) {
-          String newWhenCondition = rule.getWhenCondition();
-          newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
-          rule.setWhenCondition(newWhenCondition);
-        }
+        String newWhenCondition = rule.getWhenCondition();
+        newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
+        rule.setWhenCondition(newWhenCondition);
       });
+
       // Special case for SQL Sentences
       if (rule.getWhenCondition().contains("isSQLSentence")) {
         dictionaryOriginTargetDatasetsId.forEach((Long oldDatasetId, Long newDatasetId) -> {
+
           // Change the datasetId in "isSQLSentence(xxx,...."
-          if (rule.getWhenCondition().contains("(" + oldDatasetId.toString())) {
-            String newWhenCondition = rule.getWhenCondition();
-            newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
-                "(" + newDatasetId.toString());
-            rule.setWhenCondition(newWhenCondition);
-          }
+          String newWhenCondition = rule.getWhenCondition();
+          newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
+              "(" + newDatasetId.toString());
+
           // Change the dataset_X in the sentence itself if necessary, like
           // select * from table_one t1 inner join dataset_256.table_two....
-          if (rule.getWhenCondition().contains("dataset_")) {
-            String newWhenCondition = rule.getWhenCondition();
-            newWhenCondition = newWhenCondition.replace("dataset_" + oldDatasetId.toString(),
-                "dataset_" + newDatasetId.toString());
-            rule.setWhenCondition(newWhenCondition);
-          }
+          newWhenCondition = newWhenCondition.replace(DATASET + oldDatasetId.toString(),
+              DATASET + newDatasetId.toString());
+          rule.setWhenCondition(newWhenCondition);
+
           // Do the same in the property SqlSentence
-          if (StringUtils.isNotBlank(rule.getSqlSentence())
-              && rule.getSqlSentence().contains("dataset_")) {
+          if (StringUtils.isNotBlank(rule.getSqlSentence())) {
             String newSqlSentence = rule.getSqlSentence();
-            newSqlSentence = newSqlSentence.replace("dataset_" + oldDatasetId.toString(),
-                "dataset_" + newDatasetId.toString());
+            newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
+                DATASET + newDatasetId.toString());
             rule.setSqlSentence(newSqlSentence);
           }
 
