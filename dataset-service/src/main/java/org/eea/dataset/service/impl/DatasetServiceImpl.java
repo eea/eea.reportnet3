@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -325,9 +323,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
 
+  /** The field extended repository. */
   @Autowired
   private FieldExtendedRepository fieldExtendedRepository;
 
@@ -1899,6 +1896,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param targetRecords the record design values list
    * @param datasetPartitionId the dataset partition id
    * @param attachments the attachments
+   * @param listOfTablesFiltered the list of tables filtered
    */
   private void recordDesingAssignation(Long targetDatasetId, DesignDataset originDatasetDesign,
       List<RecordValue> targetRecords, Long datasetPartitionId, List<AttachmentValue> attachments,
