@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaAdminUtils;
@@ -76,23 +77,18 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   public void insertViewProcces(Long datasetId) {
-    // 1º
-    // inicio el proceso
-    checkProccesList(datasetId);
-  }
-
-  /**
-   * Check procces list.
-   *
-   * @param datasetId the dataset id
-   */
-  private void checkProccesList(Long datasetId) {
-    // TODO comprobar si se puede insertar en la lista de procesos
-    // TODO caso 1 = no hay nada inserto,y ejecuto el proceso.
-    // Launch Broadcast - insert in list
-    // TODO caso 2 = hay uno e inserto
-    // Launch Broadcast - insert in list
-    // TODO caso 3 = hay dos no hago nada
+    switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
+        .toString()) {
+      case "0":
+        viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId));
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+        break;
+      case "1":
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+        break;
+      default:
+        break;
+    }
   }
 
   /**
@@ -102,7 +98,7 @@ public class ViewHelper implements DisposableBean {
    */
   public void insertProccesList(Long datasetId) {
     // recibo broadcast
-    // apunta id en la lista.
+    processesList.add(datasetId);
   }
 
   /**
@@ -112,10 +108,12 @@ public class ViewHelper implements DisposableBean {
    */
   public void finishProcces(Long datasetId) {
     // recibo he terminado de trabajar
-    // TODO = hay 2
-    // ejecuto.
-    // Lanzo borrado en broadcast.
-    releaseDeleteViewProccesEvent(datasetId, "");
+    if (2 == processesList.stream().filter(x -> datasetId.equals(x))
+        .collect(Collectors.counting())) {
+      // ejecuto.
+      viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId));
+    }
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
   }
 
   /**
@@ -125,7 +123,7 @@ public class ViewHelper implements DisposableBean {
    */
   public void deleteProccesList(Long datasetId) {
     // recibo broadcast de borrado.
-    // borro proceso el primero que encuentre.
+    processesList.remove(datasetId);
   }
 
 
@@ -136,7 +134,6 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   public void executeCreateUpdateMaterializedQueryView(Long datasetId) {
-    // TODO llama al service
     recordStoreService.createUpdateQueryView(datasetId, false);
   }
 
