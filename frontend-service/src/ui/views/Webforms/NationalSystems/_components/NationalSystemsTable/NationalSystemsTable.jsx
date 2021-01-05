@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
+import styles from './NationalSystemsTable.module.scss';
+
 import { NationalSystemsRecord } from './_components/NationalSystemsRecord';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -93,9 +95,11 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
 
   if (isLoading) return 'haha';
 
-  return data.map((record, index) => (
-    <div style={{ margin: '1rem' }}>
-      <NationalSystemsRecord record={record} index={index} />
+  return (
+    <div className={styles.content}>
+      {data.map((record, index) => (
+        <NationalSystemsRecord record={record} index={index} />
+      ))}
     </div>
-  ));
+  );
 };

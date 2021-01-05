@@ -150,7 +150,7 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
   };
 
   return (
-    <Fragment key={key}>
+    <div className={styles.content} key={key}>
       <div className={styles.titleWrapper}>
         <h4>{title.value || title}</h4>
         <Button
@@ -197,6 +197,6 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
           {resources.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
-    </Fragment>
+    </div>
   );
 };
