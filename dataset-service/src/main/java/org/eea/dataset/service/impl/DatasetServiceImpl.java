@@ -3027,7 +3027,7 @@ public class DatasetServiceImpl implements DatasetService {
     // we took the both fields, database and filled in new record
     String idFieldSchema = fieldSchemaDocument.get(LiteralConstants.ID).toString();
     FieldValue fieldValueInRecord = fieldValues.stream()
-        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().get();
+        .filter(field -> field.getIdFieldSchema().equals(idFieldSchema)).findFirst().orElse(null);
 
     // we find if exist for this pk the same value in pk(in another field) and throw a error if
     // exist
