@@ -480,13 +480,13 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param processId the processId
-   * @param Tablenum the tablenum
+   * @param tablenum the tablenum
    */
-  private void releaseTableValidation(final Long datasetId, final String processId, Long Tablenum) {
+  private void releaseTableValidation(final Long datasetId, final String processId, Long tablenum) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
-    value.put("idTable", Tablenum);
+    value.put("idTable", tablenum);
     value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
 
