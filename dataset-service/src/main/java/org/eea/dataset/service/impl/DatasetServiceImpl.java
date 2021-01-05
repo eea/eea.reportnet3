@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +36,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldExtendedRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
@@ -65,7 +68,6 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
-import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -108,7 +110,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -323,6 +324,14 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
+
+  @Autowired
+  private FieldExtendedRepository fieldExtendedRepository;
+
+
 
   /**
    * The Constant DATASET_ID.
@@ -1297,33 +1306,16 @@ public class DatasetServiceImpl implements DatasetService {
         resultsNumber = 100;
       }
 
-      List<FieldValueWithLabelProjection> fields = null;
-      // If there is no conditional, execute a easier query. Due to perform issues, better split the
-      // original sql into two queries
-      // one with conditional and the other without it
-      if (StringUtils.isNotBlank(conditionalSchemaId)) {
-        fields = fieldRepository.findByIdFieldSchemaAndConditionalWithTag(idPk, labelSchemaId,
-            conditionalSchemaId, conditionalValue, searchValue,
-            PageRequest.of(0, resultsNumber, Sort.by("value")));
-      } else {
-        fields = fieldRepository.findByIdFieldSchemaWithTag(idPk, labelSchemaId, searchValue,
-            PageRequest.of(0, resultsNumber, Sort.by("value")));
-      }
+      // The query returns the list of fieldsVO ordered by it's type and considering the possible
+      // label and conditional values
+      fieldsVO = fieldExtendedRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId,
+          searchValue, conditionalSchemaId, conditionalValue, resultsNumber);
 
-      fields.stream().forEach(fExtended -> {
-        if (fExtended != null) {
-          FieldVO fieldVO = fieldNoValidationMapper.entityToClass(fExtended.getFieldValue());
-          fieldVO.setLabel(fExtended.getLabel().getValue());
-          fieldsVO.add(fieldVO);
-        }
-      });
-
-      // Remove the duplicate values
-      HashSet<String> seen = new HashSet<>();
-      fieldsVO.removeIf(e -> !seen.add(e.getValue()));
     }
     return fieldsVO;
   }
+
+
 
   /**
    * Gets the referenced dataset id.
@@ -3180,4 +3172,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     return schema;
   }
+
+
+
 }
