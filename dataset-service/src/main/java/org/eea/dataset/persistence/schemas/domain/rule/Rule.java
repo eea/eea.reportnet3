@@ -77,6 +77,10 @@ public class Rule {
   @Field(value = "uniqueConstraintId")
   private ObjectId uniqueConstraintId;
 
+  /** The integrity constraint id. */
+  @Field(value = "integrityConstraintId")
+  private ObjectId integrityConstraintId;
+
   /** The SQLSentence. */
   @Field(value = "sqlSentence")
   private String sqlSentence;

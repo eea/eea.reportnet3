@@ -36,19 +36,24 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           Object recordSchema = ((Document) tableSchema).get("recordSchema");
           if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
-            Object fieldSchemas = ((Document) recordSchema).get("fieldSchemas");
-            if (fieldSchemas != null && fieldSchemas.getClass().equals(ArrayList.class)) {
-              return (Document) ((ArrayList<?>) fieldSchemas).stream()
-                  .filter(fieldSchema -> ((Document) fieldSchema).get("_id").toString()
-                      .equals(fieldSchemaId))
-                  .findFirst().orElse(null);
-            }
+            return filterFields(fieldSchemaId, ((Document) recordSchema).get("fieldSchemas"));
           }
         }
       }
     }
 
     return null;
+  }
+
+  private Document filterFields(String fieldSchemaId, Object fieldSchemas) {
+    Document fields = null;
+    if (fieldSchemas != null && fieldSchemas.getClass().equals(ArrayList.class)) {
+      fields = (Document) ((ArrayList<?>) fieldSchemas).stream()
+          .filter(
+              fieldSchema -> ((Document) fieldSchema).get("_id").toString().equals(fieldSchemaId))
+          .findFirst().orElse(null);
+    }
+    return fields;
   }
 
   @Override

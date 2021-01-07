@@ -30,9 +30,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class RecordStoreControllerImplTest.
@@ -99,12 +101,17 @@ public class RecordStoreControllerImplTest {
    *
    * @throws RecordStoreAccessException the docker access exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testCreateEmptyDataSetException() throws RecordStoreAccessException {
-    doThrow(new RecordStoreAccessException()).when(recordStoreService).createEmptyDataSet(TEST,
-        TEST);
-    recordStoreControllerImpl.createEmptyDataset(TEST, TEST);
-    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any(), Mockito.any());
+    doThrow(new RecordStoreAccessException("error")).when(recordStoreService)
+        .createEmptyDataSet(TEST, TEST);
+    try {
+      recordStoreControllerImpl.createEmptyDataset(TEST, TEST);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format("error"), e.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
   }
 
   /**

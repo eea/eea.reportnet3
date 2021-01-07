@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
@@ -47,6 +48,10 @@ public class RulesControllerImpl implements RulesController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesControllerImpl.class);
 
+  /** The Constant DELETE_RULES_SUCCESSFULLY: {@value}. */
+  private static final String DELETE_RULES_SUCCESSFULLY =
+      "Delete the rules with referenceId {} in datasetSchema {} successfully";
+
   /** The rules service. */
   @Autowired
   private RulesService rulesService;
@@ -55,6 +60,7 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
 
@@ -107,12 +113,13 @@ public class RulesControllerImpl implements RulesController {
    * Delete rules schema.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @Override
   @HystrixCommand
   @DeleteMapping("/private/deleteRulesSchema")
-  public void deleteRulesSchema(String datasetSchemaId) {
-    rulesService.deleteEmptyRulesSchema(datasetSchemaId);
+  public void deleteRulesSchema(String datasetSchemaId, Long datasetId) {
+    rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
   }
 
   /**
@@ -147,8 +154,7 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleByReferenceId(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleByReferenceId(datasetSchemaId, referenceId);
-    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
-        datasetSchemaId);
+    LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
   }
 
   /**
@@ -164,8 +170,7 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceFieldSchemaPKId") String referenceFieldSchemaPKId) {
     rulesService.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, referenceFieldSchemaPKId);
-    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully",
-        referenceFieldSchemaPKId, datasetSchemaId);
+    LOG.info(DELETE_RULES_SUCCESSFULLY, referenceFieldSchemaPKId, datasetSchemaId);
   }
 
   /**
@@ -551,9 +556,35 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteAutomaticRuleByReferenceId(datasetSchemaId, referenceId);
-    LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully", referenceId,
-        datasetSchemaId);
+    LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
   }
 
+
+  /**
+   * Gets the integrity rules by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity rules by dataset schema id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
+  public List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.getIntegritySchemas(datasetSchemaId);
+  }
+
+
+  /**
+   * Insert integrity schema.
+   *
+   * @param integritiesVO the integrities VO
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/private/insertIntegrities")
+  public void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO) {
+    rulesService.insertIntegritySchemas(integritiesVO);
+  }
 
 }

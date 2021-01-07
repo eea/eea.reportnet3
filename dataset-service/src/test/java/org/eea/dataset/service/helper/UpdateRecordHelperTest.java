@@ -11,6 +11,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -54,9 +55,10 @@ public class UpdateRecordHelperTest {
 
   @Test
   public void executeUpdateProcessTest() throws EEAException, IOException, InterruptedException {
-    doNothing().when(datasetService).updateRecords(Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).updateRecords(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeUpdateProcess(1L, records);
+    updateRecordHelper.executeUpdateProcess(1L, records, false);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
@@ -64,6 +66,16 @@ public class UpdateRecordHelperTest {
   public void executeCreateProcessTest() throws EEAException, IOException, InterruptedException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     updateRecordHelper.executeCreateProcess(1L, records, "");
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+  }
+
+  @Test
+  public void executeMultiCreateProcessTest()
+      throws EEAException, IOException, InterruptedException {
+    List<TableVO> tables = new ArrayList<>();
+    tables.add(new TableVO());
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    updateRecordHelper.executeMultiCreateProcess(1L, tables);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
@@ -79,9 +91,10 @@ public class UpdateRecordHelperTest {
   @Test
   public void executeUpdateFieldProcessTest()
       throws EEAException, IOException, InterruptedException {
-    doNothing().when(datasetService).updateField(Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).updateField(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeFieldUpdateProcess(1L, new FieldVO());
+    updateRecordHelper.executeFieldUpdateProcess(1L, new FieldVO(), false);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 

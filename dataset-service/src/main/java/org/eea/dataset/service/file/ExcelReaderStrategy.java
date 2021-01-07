@@ -51,7 +51,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ExcelReaderStrategy.class);
 
   /**
    * the provider Code

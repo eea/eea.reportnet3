@@ -89,9 +89,8 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
           typeField);
       LOG.info("field {} propagated", idFieldSchema);
     } catch (Exception e) {
-      LOG_ERROR.error(
-          "Error processing propagations for new field column in dataset {} due to exception {}",
-          datasetId, e);
+      LOG_ERROR.error("Error processing propagations for new field column in dataset {}", datasetId,
+          e);
       eeaEventVO.getData().put("error", e);
     } finally {
       // if this is the coordinator propagation instance, then no need to send message, just updates

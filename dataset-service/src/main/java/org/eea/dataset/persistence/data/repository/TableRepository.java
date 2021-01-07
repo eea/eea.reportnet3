@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface TableRepository extends JpaRepository<TableValue, Long> {
 
 
-
   /**
    * Find all tables.
    *
@@ -26,6 +25,7 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * Count records by id table.
    *
    * @param id the id
+   *
    * @return the long
    */
   @Query("SELECT COUNT(rv) FROM TableValue tv INNER JOIN tv.records rv WHERE tv.id=?1")
@@ -36,11 +36,11 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * Count records by id table schema.
    *
    * @param idTableSchema the id table schema
+   *
    * @return the long
    */
   @Query("SELECT COUNT(rv) FROM TableValue tv INNER JOIN tv.records rv WHERE tv.idTableSchema=?1")
   Long countRecordsByIdTableSchema(String idTableSchema);
-
 
 
   /**
@@ -48,6 +48,7 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    *
    * @param id the id
    * @param idDataset the id dataset
+   *
    * @return the table value
    */
   TableValue findByIdAndDatasetId_Id(Long id, Long idDataset);
@@ -57,10 +58,12 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * Find table validations by id dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the list
    */
-  @Query("SELECT tval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.tableValidations tval "
-      + "WHERE dat.id=?1")
+  @Query(
+      "SELECT tval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.tableValidations tval "
+          + "WHERE dat.id=?1")
   List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
 
 
@@ -68,11 +71,20 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * Find id by id table schema.
    *
    * @param idTableSchema the id table schema
+   *
    * @return the long
    */
   @Query("SELECT DISTINCT TV.id FROM TableValue TV WHERE TV.idTableSchema=?1 ")
   Long findIdByIdTableSchema(String idTableSchema);
 
+  /**
+   * Find by id table schema table value.
+   *
+   * @param idTableSchema the id table schema
+   *
+   * @return the table value
+   */
+  TableValue findByIdTableSchema(String idTableSchema);
 
   /**
    * Delete by id table schema.

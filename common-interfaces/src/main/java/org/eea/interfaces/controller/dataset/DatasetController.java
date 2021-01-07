@@ -72,24 +72,35 @@ public interface DatasetController {
    * Load table data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
    */
+  @Deprecated
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema,
+  void loadTableData(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
       @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
    * Load dataset data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param file the file
    * @param replace the replace
    */
+  @Deprecated
   @PostMapping("{id}/loadDatasetData")
-  void loadDatasetData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
+  void loadDatasetData(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
@@ -146,9 +157,11 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param records the records
+   * @param updateCascadePK the update cascade PK
    */
   @PutMapping("/{id}/updateRecord")
-  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
+  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records,
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
 
   /**
    * Delete record.
@@ -159,7 +172,7 @@ public interface DatasetController {
    */
   @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
-      @RequestParam("deleteCascadePK") boolean deleteCascadePK);
+      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
 
   /**
    * Delete import table.
@@ -209,9 +222,11 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param field the field
+   * @param updateCascadePK the update cascade PK
    */
   @PutMapping("/{id}/updateField")
-  void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
+  void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field,
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
 
   /**
    * Gets the field values referenced.
@@ -221,6 +236,7 @@ public interface DatasetController {
    * @param fieldSchemaId the field schema id
    * @param conditionalValue the conditional value
    * @param searchValue the search value
+   * @param resultsNumber the results number
    * @return the field values referenced
    */
   @GetMapping("/{id}/datasetSchemaId/{datasetSchemaId}/fieldSchemaId/{fieldSchemaId}/getFieldsValuesReferenced")
@@ -228,7 +244,8 @@ public interface DatasetController {
       @PathVariable("datasetSchemaId") String datasetSchemaId,
       @PathVariable("fieldSchemaId") String fieldSchemaId,
       @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
-      @RequestParam(value = "searchValue", required = false) String searchValue);
+      @RequestParam(value = "searchValue", required = false) String searchValue,
+      @RequestParam(value = "resultsNumber", required = false) Integer resultsNumber);
 
   /**
    * Gets the referenced dataset id.
@@ -296,7 +313,7 @@ public interface DatasetController {
    * @param file the file
    */
   @PutMapping("/{datasetId}/field/{fieldId}/attachment")
-  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+  void updateAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
 
   /**
@@ -306,7 +323,7 @@ public interface DatasetController {
    * @param idField the id field
    */
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
-  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+  void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField);
 
 
@@ -322,4 +339,32 @@ public interface DatasetController {
   void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
       @RequestParam("integrationId") Long integrationId,
       @RequestParam("operation") IntegrationOperationTypeEnum operation);
+
+  /**
+   * Insert records multi table.
+   *
+   * @param datasetId the dataset id
+   * @param tableRecords the table records
+   */
+  @PostMapping("/{datasetId}/insertRecordsMultiTable")
+  void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
+      @RequestBody List<TableVO> tableRecords);
+
+  /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   */
+  @PostMapping("/{datasetId}/importFileData")
+  void importFileData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace);
 }
