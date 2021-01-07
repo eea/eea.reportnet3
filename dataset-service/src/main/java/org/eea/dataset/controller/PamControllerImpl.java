@@ -23,7 +23,6 @@ public class PamControllerImpl implements PamController {
 
   /** The pa M service. */
   @Autowired
-  // @Qualifier("proxyDatasetService")
   private PaMService paMService;
 
   /**

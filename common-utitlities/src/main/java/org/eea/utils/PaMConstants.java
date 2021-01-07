@@ -137,6 +137,9 @@ public final class PaMConstants {
   /** The Constant DATASET_ID_PK: {@value}. */
   public static final String DATASET_ID_PK = "DATASET_ID_PK";
 
+  /** The Constant SINGLES: {@value}. */
+  public static final String SINGLES = "SINGLES";
+
 
 
   /**
