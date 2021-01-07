@@ -946,7 +946,6 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
-          entity={'DATASET'}
           hasWritePermissions={hasWritePermissions}
           isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -966,7 +965,6 @@ export const Dataset = withRouter(({ match, history }) => {
           tableSchemaId={dataViewerOptions.tableSchemaId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
-          webform={webformData}
         />
       ) : (
         <Webforms

@@ -28,7 +28,7 @@ export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
   datasetSchemaId,
-  datasetSchemas
+  datasetSchemas,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,

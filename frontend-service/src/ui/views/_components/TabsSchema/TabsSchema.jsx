@@ -19,7 +19,6 @@ export const TabsSchema = ({
   buttonsList = undefined,
   hasWritePermissions = false,
   hasCountryCode,
-  entity,
   isDatasetDeleted,
   isExportable = true,
   isFilterable,
@@ -40,8 +39,7 @@ export const TabsSchema = ({
   showWriteButtons = true,
   tableSchemaId,
   tables,
-  tableSchemaColumns,
-  webform
+  tableSchemaColumns
 }) => {
   let tabs =
     tables && tableSchemaColumns
@@ -51,7 +49,6 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
-                  entity={entity}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
                   isDatasetDeleted={isDatasetDeleted}
@@ -84,7 +81,6 @@ export const TabsSchema = ({
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
-                  webform={webform}
                 />
               </div>
             </TabPanel>
