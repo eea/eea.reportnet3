@@ -1183,7 +1183,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWritePermissions && !tableReadOnly && !isEditing
+              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);
