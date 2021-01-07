@@ -43,12 +43,13 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
       return { fields: parseFields(fields), recordId, recordSchemaId, validations };
     });
 
-    return records.map(tes => {
-      return { ...tes, elements: parseElements(tables.elements, tes.fields) };
+    return records.map(rec => {
+      return { ...rec, elements: parseElements(tables.elements, rec.fields) };
     });
   };
 
   const parseElements = (elements = [], fields = []) => {
+    console.log('fields', fields);
     elements.map(element => {
       Object.keys(element).forEach(key => {
         const value = fields.find(field => TextUtils.areEquals(field['name'], element[key]));

@@ -27,6 +27,8 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 export const NationalSystemsField = ({ datasetId, key, nationalField, title, tooltip }) => {
+  const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
+
   const resources = useContext(ResourcesContext);
 
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
@@ -45,6 +47,20 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
 
   const handleDialogs = (dialog, value) => {
     nationalSystemsFieldDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const onAttachFile = async value => {
+    onFillField(field, field.fieldSchemaId, `${value.files[0].name}`);
+    handleDialogs('uploadFile', false);
+  };
+
+  const onConfirmDeleteAttachment = async () => {
+    const isFileDeleted = await DatasetService.deleteFileData(datasetId, field.fieldId);
+
+    if (isFileDeleted) {
+      onFillField(field, field.fieldSchemaId, '');
+      handleDialogs('deleteAttachment', false);
+    }
   };
 
   const onEditorKeyChange = (event, field, option) => {
@@ -66,6 +82,12 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
     }
   };
 
+  const onFileDownload = async (fileName, fieldId) => {
+    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+
+    DownloadFile(fileContent, fileName);
+  };
+
   const onFillField = (field, option, value) => {
     nationalSystemsFieldDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
   };
@@ -84,21 +106,21 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
-            // id={field.fieldId}
-            // maxLength={getInputMaxLength[type]}
+            id={field.fieldId}
+            maxLength={getInputMaxLength[type]}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
-            // value={field.value}
+            value={field.value}
           />
         );
 
       case 'TEXTAREA':
         return (
           <InputTextarea
-            // className={field.required ? styles.required : undefined}
-            // id={field.fieldId}
-            // maxLength={getInputMaxLength[type]}
+            className={field.required ? styles.required : undefined}
+            id={field.fieldId}
+            maxLength={getInputMaxLength[type]}
             collapsedHeight={150}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
@@ -118,7 +140,7 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
                 icon="export"
                 iconPos="right"
                 label={field.value}
-                // onClick={() => onFileDownload(field.value, field.fieldId)}
+                onClick={() => onFileDownload(field.value, field.fieldId)}
               />
             )}
             {
@@ -132,7 +154,6 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
                 }
                 onClick={() => {
                   handleDialogs('uploadFile', true);
-                  // onToggleDialogVisible(true);
                   // onFileUploadVisible(
                   //   field.fieldId,
                   //   field.fieldSchemaId,
@@ -187,7 +208,7 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
           mode="advanced"
           multiple={false}
           name="file"
-          // onUpload={onAttach}
+          onUpload={onAttachFile}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
             datasetId,
@@ -201,7 +222,7 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
           header={resources.messages['deleteAttachmentHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          // onConfirm={onConfirmDeleteAttachment}
+          onConfirm={onConfirmDeleteAttachment}
           onHide={() => handleDialogs('deleteAttachment', false)}
           visible={isDialogVisible.deleteAttachment}>
           {resources.messages['deleteAttachmentConfirm']}

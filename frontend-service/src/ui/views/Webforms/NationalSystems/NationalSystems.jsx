@@ -1,10 +1,8 @@
 import React, { Fragment, useEffect, useReducer } from 'react';
-import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
-import pickBy from 'lodash/pickBy';
 
 import styles from './NationalSystems.module.scss';
 

@@ -8,8 +8,7 @@ export const NationalSystemsRecord = ({ datasetId, index, record }) => {
   return (
     <div className={styles.record} key={index}>
       {record.elements.map((element, i) => {
-        const { name, title, titleSource, tooltip, tooltipSource, information } = element;
-        console.log('information', tooltipSource);
+        const { name, title, titleSource, tooltip, tooltipSource } = element;
 
         return (
           <NationalSystemsField
