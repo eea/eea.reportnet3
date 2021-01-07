@@ -439,7 +439,7 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue]);
+  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue, hasWebformWritePermissions]);
 
   return {
     columns,
