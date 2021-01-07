@@ -29,6 +29,7 @@ export const FieldsDesigner = ({
   datasetId,
   datasetSchemaId,
   datasetSchemas,
+  entity,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -336,6 +337,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(table) && !isNil(table.records)) {
       return (
         <DataViewer
+          entity={entity}
           hasWritePermissions={true}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}

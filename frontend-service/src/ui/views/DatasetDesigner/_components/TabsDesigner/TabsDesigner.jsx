@@ -33,6 +33,7 @@ export const TabsDesigner = withRouter(
     datasetSchemas,
     datasetStatistics,
     editable = false,
+    entity,
     history,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
@@ -412,6 +413,7 @@ export const TabsDesigner = withRouter(
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
+                        entity={entity}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}

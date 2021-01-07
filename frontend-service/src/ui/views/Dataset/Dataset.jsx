@@ -90,7 +90,6 @@ export const Dataset = withRouter(({ match, history }) => {
     import: [],
     importOtherSystems: []
   });
-  const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
@@ -149,13 +148,6 @@ export const Dataset = withRouter(({ match, history }) => {
       }
     }
   }, [userContext, dataset]);
-
-  useEffect(() => {
-    if (!isNil(webformData)) {
-      const webformsValues = config.webforms.map(webform => webform.value);
-      setHasWebformWritePermissions(!webformsValues.includes(webformData));
-    }
-  }, [webformData]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -954,7 +946,7 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
-          hasWebformWritePermissions={hasWebformWritePermissions}
+          entity={'DATASET'}
           hasWritePermissions={hasWritePermissions}
           isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}

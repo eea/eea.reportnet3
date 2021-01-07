@@ -59,8 +59,8 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 const DataViewer = withRouter(
   ({
     hasCountryCode,
-    hasWebformWritePermissions,
     hasWritePermissions,
+    entity,
     isDatasetDeleted = false,
     isExportable,
     isFilterable,
@@ -92,6 +92,7 @@ const DataViewer = withRouter(
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+    const [isCustodian, setIsCustodian] = useState(false);
     const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -100,6 +101,7 @@ const DataViewer = withRouter(
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
+    const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -175,6 +177,7 @@ const DataViewer = withRouter(
     const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
+
     const { menu } = useContextMenu(
       resources,
       records,
@@ -183,6 +186,23 @@ const DataViewer = withRouter(
       setEditDialogVisible,
       setConfirmDeleteVisible
     );
+
+    useEffect(() => {
+      const entityDatasetId = `${config.permissions[entity]}${datasetId}`;
+
+      const userRoles = userContext.getUserRole(entityDatasetId);
+
+      setIsCustodian(userRoles.includes(config.permissions['DATA_CUSTODIAN']));
+
+      getHasWebformWritePermissions();
+    }, [webform, isCustodian]);
+
+    const getHasWebformWritePermissions = () => {
+      if (!isNil(webform)) {
+        const webformsValues = config.webforms.map(webform => webform.value);
+        setHasWebformWritePermissions(!webformsValues.includes(webform) || isCustodian);
+      }
+    };
 
     const cellDataEditor = (cells, record) => {
       return (

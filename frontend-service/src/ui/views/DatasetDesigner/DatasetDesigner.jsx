@@ -1203,6 +1203,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
             editable={true}
+            entity={'DATASCHEMA'}
             history={history}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
