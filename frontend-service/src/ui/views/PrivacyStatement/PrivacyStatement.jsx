@@ -188,12 +188,8 @@ const PrivacyStatement = withRouter(() => {
               <h3>How can you access or rectify your information</h3>
               <p>
                 For authenticated users: if you wish to access, modify any of your personal data please log in with your
-                EU login account and click on the profile icon in the top left navigation.
-              </p>
-              <p>
-                If you wish to modify any of your uploaded content you should be able to do it just by logging in and
-                re-editing your uploaded content to the site. In some cases, you are also able to delete the content you
-                have uploaded yourself.
+                EU login account and click on the profile icon in the top left navigation and modify some of your
+                personal data.
               </p>
               <p>
                 You can receive a copy of your personal data that has been submitted to the Reportnet 3.0 platform by

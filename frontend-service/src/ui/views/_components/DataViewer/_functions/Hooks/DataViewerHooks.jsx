@@ -87,6 +87,7 @@ export const useSetColumns = (
   colsSchema,
   columnOptions,
   hasCountryCode,
+  hasWebformWritePermissions,
   hasWritePermissions,
   initialCellValue,
   onFileDeleteVisible,
@@ -350,7 +351,7 @@ export const useSetColumns = (
           body={dataTemplate}
           className={`${invisibleColumn} ${readOnlyColumn}`}
           editor={
-            hasWritePermissions && column.type !== 'ATTACHMENT'
+            hasWebformWritePermissions && hasWritePermissions && column.type !== 'ATTACHMENT'
               ? row => cellDataEditor(row, records.selectedRecord)
               : null
           }
@@ -429,6 +430,10 @@ export const useSetColumns = (
 
     if (hasCountryCode) {
       columnsArr.unshift(providerCode);
+    }
+
+    if (!hasWebformWritePermissions) {
+      columnsArr.splice(columnsArr.indexOf(editCol), 1);
     }
 
     setColumns(columnsArr);

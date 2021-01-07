@@ -479,7 +479,7 @@
               "type": "FIELD",
               "name": "Total_1",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -511,7 +511,7 @@
               "type": "FIELD",
               "name": "Total_2",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -543,7 +543,7 @@
               "type": "FIELD",
               "name": "Total_3",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -575,7 +575,7 @@
               "type": "FIELD",
               "name": "Total_4",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -646,7 +646,8 @@
                 {
                   "type": "FIELD",
                   "name": "Value_Total",
-                  "title": "Total"
+                  "title": "Total",
+                  "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
                 }
               ]
             }
