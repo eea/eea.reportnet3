@@ -85,7 +85,8 @@ const DataViewer = withRouter(
     tableId,
     tableName,
     tableReadOnly,
-    tableSchemaColumns
+    tableSchemaColumns,
+    webform
   }) => {
     const userContext = useContext(UserContext);
     const [addAnotherOne, setAddAnotherOne] = useState(false);

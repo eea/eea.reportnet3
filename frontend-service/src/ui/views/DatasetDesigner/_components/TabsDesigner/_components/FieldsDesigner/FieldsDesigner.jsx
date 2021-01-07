@@ -45,7 +45,8 @@ export const FieldsDesigner = ({
   selectedRuleLevelError,
   selectedRuleMessage,
   table,
-  viewType
+  viewType,
+  webform
 }) => {
   const validationContext = useContext(ValidationContext);
   const resources = useContext(ResourcesContext);
@@ -357,6 +358,7 @@ export const FieldsDesigner = ({
           tableReadOnly={false}
           tableSchemaColumns={tableSchemaColumns}
           viewType={viewType}
+          webform={webform}
         />
       );
     }

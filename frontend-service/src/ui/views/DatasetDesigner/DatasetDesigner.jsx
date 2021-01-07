@@ -1230,6 +1230,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             }
             tableSchemaId={designerState.dataViewerOptions.tableSchemaId}
             viewType={designerState.viewType}
+            webform={designerState.webform?.value}
           />
         )}
         <Snapshots

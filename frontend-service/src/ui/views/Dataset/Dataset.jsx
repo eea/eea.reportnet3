@@ -974,6 +974,7 @@ export const Dataset = withRouter(({ match, history }) => {
           tableSchemaId={dataViewerOptions.tableSchemaId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
+          webform={webformData}
         />
       ) : (
         <Webforms

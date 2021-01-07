@@ -40,7 +40,8 @@ export const TabsSchema = ({
   showWriteButtons = true,
   tableSchemaId,
   tables,
-  tableSchemaColumns
+  tableSchemaColumns,
+  webform
 }) => {
   let tabs =
     tables && tableSchemaColumns
@@ -83,6 +84,7 @@ export const TabsSchema = ({
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
+                  webform={webform}
                 />
               </div>
             </TabPanel>

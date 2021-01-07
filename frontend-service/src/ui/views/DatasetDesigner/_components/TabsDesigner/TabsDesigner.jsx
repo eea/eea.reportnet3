@@ -55,7 +55,8 @@ export const TabsDesigner = withRouter(
     selectedRuleMessage,
     setActiveTableSchemaId,
     tableSchemaId,
-    viewType
+    viewType,
+    webform
   }) => {
     const {
       params: { dataflowId, datasetId }
@@ -430,6 +431,7 @@ export const TabsDesigner = withRouter(
                         onChangeIsValidationSelected={onChangeIsValidationSelected}
                         table={tabs[i]}
                         viewType={viewType}
+                        webform={webform}
                       />
                     ) : (
                       <h3>{`${resources.messages['datasetDesignerAddTable']}`}</h3>
