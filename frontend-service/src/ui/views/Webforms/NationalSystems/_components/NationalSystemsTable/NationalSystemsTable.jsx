@@ -37,13 +37,13 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
   };
 
   const parseData = (dataRecords = []) => {
-    const test = dataRecords.map(record => {
+    const records = dataRecords.map(record => {
       const { fields, recordId, recordSchemaId, validations } = record;
 
       return { fields: parseFields(fields), recordId, recordSchemaId, validations };
     });
 
-    return test.map(tes => {
+    return records.map(tes => {
       return { ...tes, elements: parseElements(tables.elements, tes.fields) };
     });
   };
@@ -93,12 +93,12 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
     });
   };
 
-  if (isLoading) return 'haha';
+  if (isLoading) return 'SPINNER';
 
   return (
     <div className={styles.content}>
       {data.map((record, index) => (
-        <NationalSystemsRecord record={record} index={index} />
+        <NationalSystemsRecord record={record} index={index} datasetId={datasetId} />
       ))}
     </div>
   );

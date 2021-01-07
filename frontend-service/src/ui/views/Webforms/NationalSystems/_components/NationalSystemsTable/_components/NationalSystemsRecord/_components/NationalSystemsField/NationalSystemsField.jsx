@@ -2,6 +2,8 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isNil from 'lodash/isNil';
 
+import { DatasetConfig } from 'conf/domain/model/Dataset';
+
 import styles from './NationalSystemsField.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -24,16 +26,17 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
-export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) => {
+export const NationalSystemsField = ({ datasetId, key, nationalField, title, tooltip }) => {
   const resources = useContext(ResourcesContext);
 
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
+    field: nationalField,
     isDialogVisible: { deleteAttachment: false, uploadFile: false },
     selected: { validExtensions: [] },
     selectedValidExtensions: []
   });
 
-  const { isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
+  const { field, isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
 
   const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
@@ -42,6 +45,12 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
 
   const handleDialogs = (dialog, value) => {
     nationalSystemsFieldDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const onEditorKeyChange = (event, field, option) => {
+    if (event.key === 'Enter') onEditorSubmitValue(field, option, event.target.value);
+
+    if (event.key === 'Tab') onEditorSubmitValue(field, option, event.target.value);
   };
 
   const onEditorSubmitValue = async (field, option, value) => {
@@ -77,9 +86,9 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
             keyfilter={RecordUtils.getFilter(type)}
             // id={field.fieldId}
             // maxLength={getInputMaxLength[type]}
-            onBlur={event => {}}
+            onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
-            // onKeyDown={event => onEditorKeyChange(event, field, option)}
+            onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
             // value={field.value}
           />
         );
@@ -91,9 +100,9 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
             // id={field.fieldId}
             // maxLength={getInputMaxLength[type]}
             collapsedHeight={150}
-            onBlur={event => {}}
-            // onChange={event => onFillField(field, option, event.target.value)}
-            // onKeyDown={event => onEditorKeyChange(event, field, option)}
+            onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
+            onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
+            onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
             value={field.value}
           />
         );
@@ -117,11 +126,12 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
                 className={`p-button-animated-blink p-button-primary-transparent`}
                 icon="import"
                 label={
-                  !isNil(field.value) && field.value !== ''
-                    ? resources.messages['uploadReplaceAttachment']
-                    : resources.messages['uploadAttachment']
+                  resources.messages[
+                    !isNil(field.value) && field.value !== '' ? 'uploadReplaceAttachment' : 'uploadAttachment'
+                  ]
                 }
                 onClick={() => {
+                  handleDialogs('uploadFile', true);
                   // onToggleDialogVisible(true);
                   // onFileUploadVisible(
                   //   field.fieldId,
@@ -156,7 +166,7 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
         <Button
           className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
           icon="infoCircle"
-          tooltip={tooltip || tooltip.value}
+          tooltip={tooltip.value || tooltip}
           tooltipOptions={{ position: 'top' }}
         />
       </div>
@@ -166,23 +176,23 @@ export const NationalSystemsField = ({ datasetId, field, key, title, tooltip }) 
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
           chooseLabel={resources.messages['selectFile']}
-          // className={styles.fileUpload}
-          // dialogClassName={styles.dialog}
-          // dialogHeader={resources.messages['uploadAttachment']}
-          // dialogOnHide={() => onToggleDialogVisible(false)}
-          // dialogVisible={uploadFile}
-          // fileLimit={1}
-          // invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-          // isDialog={true}
-          // mode="advanced"
-          // multiple={false}
-          // name="file"
+          className={styles.fileUpload}
+          dialogClassName={styles.dialog}
+          dialogHeader={resources.messages['uploadAttachment']}
+          dialogOnHide={() => handleDialogs('uploadFile', false)}
+          dialogVisible={isDialogVisible.uploadFile}
+          fileLimit={1}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          isDialog={true}
+          mode="advanced"
+          multiple={false}
+          name="file"
           // onUpload={onAttach}
-          // operation="PUT"
-          // url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
-          //   datasetId,
-          //   fieldId: selectedFieldId
-          // })}`}
+          operation="PUT"
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
+            datasetId,
+            fieldId: field.fieldId
+          })}`}
         />
       )}
       {isDialogVisible.deleteAttachment && (
