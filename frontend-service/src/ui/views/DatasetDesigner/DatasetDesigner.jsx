@@ -1203,7 +1203,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
             editable={true}
-            entity={'DATASCHEMA'}
             history={history}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
@@ -1231,7 +1230,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             }
             tableSchemaId={designerState.dataViewerOptions.tableSchemaId}
             viewType={designerState.viewType}
-            webform={designerState.webform?.value}
           />
         )}
         <Snapshots

@@ -28,8 +28,7 @@ export const FieldsDesigner = ({
   //activeIndex,
   datasetId,
   datasetSchemaId,
-  datasetSchemas,
-  entity,
+  datasetSchemas
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -46,8 +45,7 @@ export const FieldsDesigner = ({
   selectedRuleLevelError,
   selectedRuleMessage,
   table,
-  viewType,
-  webform
+  viewType
 }) => {
   const validationContext = useContext(ValidationContext);
   const resources = useContext(ResourcesContext);
@@ -337,7 +335,6 @@ export const FieldsDesigner = ({
     if (!isUndefined(table) && !isNil(table.records)) {
       return (
         <DataViewer
-          entity={entity}
           hasWritePermissions={true}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
@@ -360,7 +357,6 @@ export const FieldsDesigner = ({
           tableReadOnly={false}
           tableSchemaColumns={tableSchemaColumns}
           viewType={viewType}
-          webform={webform}
         />
       );
     }

@@ -33,7 +33,6 @@ export const TabsDesigner = withRouter(
     datasetSchemas,
     datasetStatistics,
     editable = false,
-    entity,
     history,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
@@ -56,8 +55,7 @@ export const TabsDesigner = withRouter(
     selectedRuleMessage,
     setActiveTableSchemaId,
     tableSchemaId,
-    viewType,
-    webform
+    viewType
   }) => {
     const {
       params: { dataflowId, datasetId }
@@ -413,7 +411,6 @@ export const TabsDesigner = withRouter(
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
-                        entity={entity}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}
@@ -433,7 +430,6 @@ export const TabsDesigner = withRouter(
                         onChangeIsValidationSelected={onChangeIsValidationSelected}
                         table={tabs[i]}
                         viewType={viewType}
-                        webform={webform}
                       />
                     ) : (
                       <h3>{`${resources.messages['datasetDesignerAddTable']}`}</h3>
