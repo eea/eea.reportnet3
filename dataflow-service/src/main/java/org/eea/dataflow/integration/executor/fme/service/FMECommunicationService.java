@@ -90,8 +90,9 @@ public interface FMECommunicationService {
    *
    * @param fmeJob the fme job
    * @param statusNumber the status number
+   * @param notificationRequired the notification required
    */
-  void releaseNotifications(FMEJob fmeJob, long statusNumber);
+  void releaseNotifications(FMEJob fmeJob, long statusNumber, boolean notificationRequired);
 
   /**
    * Update job status.

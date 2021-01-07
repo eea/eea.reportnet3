@@ -403,9 +403,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    *
    * @param fmeJob the fme job
    * @param statusNumber the status number
+   * @param notificationRequired the notification required
    */
   @Override
-  public void releaseNotifications(FMEJob fmeJob, long statusNumber) {
+  public void releaseNotifications(FMEJob fmeJob, long statusNumber, boolean notificationRequired) {
 
     // Build the major notification
     EventType eventType = null;
@@ -419,7 +420,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     switch (fmeJob.getOperation()) {
       case IMPORT:
         eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId(),
-            fmeJob.getUserName());
+            fmeJob.getUserName(), notificationRequired);
         break;
       case EXPORT:
         eventType = exportNotification(isReporting, isStatusCompleted);
@@ -499,18 +500,21 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param isStatusCompleted the is status completed
    * @param datasetId the dataset id
    * @param userName the user name
+   * @param notificationRequired the notification required
    * @return the event type
    */
   private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
-      Long datasetId, String userName) {
+      Long datasetId, String userName, boolean notificationRequired) {
 
     EventType eventType = null;
 
     if (isStatusCompleted) {
-      if (isReporting) {
-        eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
-      } else {
-        eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+      if (notificationRequired) {
+        if (isReporting) {
+          eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
+        } else {
+          eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+        }
       }
       launchValidationProcess(datasetId, userName);
     } else {
