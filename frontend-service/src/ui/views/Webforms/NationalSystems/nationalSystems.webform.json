@@ -13,8 +13,7 @@
         {
           "type": "FIELD",
           "name": "UploadFile",
-          "title": "If necessary, you can upload here an additional document (max. 2 MB)",
-          "tooltip": "tooltip for the new thingy"
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)"
         }
       ]
     },
@@ -25,8 +24,7 @@
         {
           "type": "FIELD",
           "name": "UploadFile",
-          "title": "If necessary, you can upload here an additional document (max. 2 MB)",
-          "tooltip": "tooltip for the new thingy"
+          "title": "If necessary, you can upload here an additional document (max. 2 MB)"
         }
       ]
     }

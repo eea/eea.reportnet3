@@ -184,12 +184,14 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
     <div className={styles.content} key={key}>
       <div className={styles.titleWrapper}>
         <h4>{title.value || title}</h4>
-        <Button
-          className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-          icon="infoCircle"
-          tooltip={tooltip.value || tooltip}
-          tooltipOptions={{ position: 'top' }}
-        />
+        {!isNil(tooltip) && (
+          <Button
+            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+            icon="infoCircle"
+            tooltip={tooltip.value}
+            tooltipOptions={{ position: 'top' }}
+          />
+        )}
       </div>
       {renderTemplate()}
 
