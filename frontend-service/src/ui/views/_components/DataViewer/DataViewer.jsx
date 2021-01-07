@@ -342,7 +342,9 @@ const DataViewer = withRouter(
     }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
 
     useEffect(() => {
-      isReportingWebform && setHasWebformWritePermissions(!isReportingWebform);
+      if (isReportingWebform) {
+        setHasWebformWritePermissions(false);
+      }
     }, [isReportingWebform]);
 
     const getMetadata = async () => {
