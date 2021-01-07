@@ -93,6 +93,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [isCustodian, setIsCustodian] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
@@ -101,6 +102,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
+  const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
@@ -145,9 +147,22 @@ export const Dataset = withRouter(({ match, history }) => {
           userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
             userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
         );
+
+        const entity = `${config.permissions['DATASET']}${datasetId}`;
+
+        const userRoles = userContext.getUserRole(entity);
+
+        setIsCustodian(userRoles.includes(config.permissions['DATA_CUSTODIAN']));
       }
     }
   }, [userContext, dataset]);
+
+  useEffect(() => {
+    if (!isNil(webformData)) {
+      const webformsValues = config.webforms.map(webform => webformData.value);
+      setIsReportingWebform(!webformsValues.includes(webformData) || isCustodian);
+    }
+  }, [webformData, isCustodian]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -946,6 +961,7 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
+          isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
           isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}

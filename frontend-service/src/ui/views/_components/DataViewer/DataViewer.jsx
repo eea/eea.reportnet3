@@ -65,6 +65,7 @@ const DataViewer = withRouter(
     isFilterable,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
+    isReportingWebform,
     isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
@@ -183,7 +184,6 @@ const DataViewer = withRouter(
       setEditDialogVisible,
       setConfirmDeleteVisible
     );
-
 
     const cellDataEditor = (cells, record) => {
       return (
@@ -340,6 +340,10 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
     }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
+
+    useEffect(() => {
+      isReportingWebform && setHasWebformWritePermissions(!isReportingWebform);
+    }, [isReportingWebform]);
 
     const getMetadata = async () => {
       try {
