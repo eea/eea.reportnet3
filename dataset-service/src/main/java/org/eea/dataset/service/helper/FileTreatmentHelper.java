@@ -162,14 +162,13 @@ public class FileTreatmentHelper implements DisposableBean {
       File folder = new File(root, datasetId.toString());
       String fileName = multipartFile.getOriginalFilename();
       String saveLocationPath = folder.getCanonicalPath();
+      String multipartFileMimeType = datasetService.getMimetype(fileName);
 
       if (!folder.mkdirs()) {
         finishImportProcessConditionally(datasetId, tableSchemaId, externalJobId, null, null, null,
             true);
         throw new EEAException("Folder for dataset " + datasetId + " already exists");
       }
-
-      String multipartFileMimeType = datasetService.getMimetype(fileName);
 
       if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
 
@@ -179,8 +178,8 @@ public class FileTreatmentHelper implements DisposableBean {
           ZipEntry entry = zip.getNextEntry();
 
           /*
-           * Since ZIP and CSV files are temporally disabled to be imported from FME, we do not need
-           * to look for a matching integration.
+           * TODO. Since ZIP and CSV files are temporally disabled to be imported from FME, we do
+           * not need to look for a matching integration.
            */
 
           // IntegrationVO integrationVO = getIntegrationVO(schema, "csv");
@@ -226,8 +225,8 @@ public class FileTreatmentHelper implements DisposableBean {
         File file = new File(folder, fileName);
 
         /*
-         * Since ZIP and CSV files are temporally disabled to be imported from FME, we do not need
-         * to look for a matching integration.
+         * TOOD. Since ZIP and CSV files are temporally disabled to be imported from FME, we do not
+         * need to look for a matching integration.
          */
 
         IntegrationVO integrationVO;
