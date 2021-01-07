@@ -70,8 +70,6 @@ public class FMECommunicationServiceTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
-    ReflectionTestUtils.setField(fmeCommunicationService, "importPath",
-        this.getClass().getClassLoader().getResource("").getPath());
     MockitoAnnotations.initMocks(this);
   }
 
