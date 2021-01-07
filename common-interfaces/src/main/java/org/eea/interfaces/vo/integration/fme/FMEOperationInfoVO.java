@@ -19,6 +19,9 @@ public class FMEOperationInfoVO implements Serializable {
   /** The rn 3 job id. */
   private Long rn3JobId;
 
+  /** The notification required. */
+  private boolean notificationRequired;
+
   /** The fme job status. */
   @JsonProperty("StatusNumber")
   private Long statusNumber;
