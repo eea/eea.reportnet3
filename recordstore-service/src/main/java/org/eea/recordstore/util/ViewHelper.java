@@ -1,5 +1,6 @@
 package org.eea.recordstore.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ public class ViewHelper implements DisposableBean {
   @PostConstruct
   private void init() {
     viewExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    processesList = new ArrayList<>();
   }
 
 
@@ -86,7 +88,10 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   public void insertProccesList(Long datasetId) {
-    processesList.add(datasetId);
+    synchronized (processesList) {
+      processesList.add(datasetId);
+      LOG.info("Add process create Query views from dataset: {} ", datasetId);
+    }
   }
 
   /**
@@ -109,7 +114,10 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   public void deleteProccesList(Long datasetId) {
-    processesList.remove(datasetId);
+    synchronized (processesList) {
+      processesList.remove(datasetId);
+      LOG.info("Delete process create Query views from dataset: {} ", datasetId);
+    }
   }
 
 
@@ -132,6 +140,11 @@ public class ViewHelper implements DisposableBean {
   }
 
 
+  /**
+   * Release delete view procces event.
+   *
+   * @param datasetId the dataset id
+   */
   private void releaseDeleteViewProccesEvent(Long datasetId) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);

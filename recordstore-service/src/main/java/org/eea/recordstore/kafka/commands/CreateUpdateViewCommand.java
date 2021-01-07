@@ -19,7 +19,6 @@ public class CreateUpdateViewCommand extends AbstractEEAEventHandlerCommand {
   @Autowired
   private ViewHelper viewHelper;
 
-
   /**
    * Gets the event type.
    *
@@ -29,7 +28,6 @@ public class CreateUpdateViewCommand extends AbstractEEAEventHandlerCommand {
   public EventType getEventType() {
     return EventType.CREATE_UPDATE_VIEW_EVENT;
   }
-
 
   /**
    * Execute.
