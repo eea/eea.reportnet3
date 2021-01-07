@@ -93,7 +93,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
-  const [isCustodian, setIsCustodian] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
@@ -147,12 +146,6 @@ export const Dataset = withRouter(({ match, history }) => {
           userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
             userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
         );
-
-        const entity = `${config.permissions['DATASET']}${datasetId}`;
-
-        const userRoles = userContext.getUserRole(entity);
-
-        setIsCustodian(userRoles.includes(config.permissions['DATA_CUSTODIAN']));
       }
     }
   }, [userContext, dataset]);
@@ -160,9 +153,9 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isNil(webformData)) {
       const webformsValues = config.webforms.map(webform => webformData.value);
-      setIsReportingWebform(!webformsValues.includes(webformData) || isCustodian);
+      setIsReportingWebform(!webformsValues.includes(webformData));
     }
-  }, [webformData, isCustodian]);
+  }, [webformData]);
 
   useEffect(() => {
     onLoadDatasetSchema();
