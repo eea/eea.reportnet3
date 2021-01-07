@@ -77,6 +77,7 @@ export const BigButtonList = ({
   const [historicReleasesDialogHeader, setHistoricReleasesDialogHeader] = useState([]);
   const [historicReleasesView, setHistoricReleasesView] = useState('');
   const [isActiveButton, setIsActiveButton] = useState(true);
+  const [isCloningDataflow, setIsCloningDataflow] = useState(false);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isCopyDataCollectionToEuDatasetDialogVisible, setIsCopyDataCollectionToEuDatasetDialogVisible] = useState(
     false
@@ -123,6 +124,11 @@ export const BigButtonList = ({
     setIsExportEuDatasetLoading,
     false
   );
+  useCheckNotifications(
+    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_FAILED_EVENT'],
+    setIsCloningDataflow,
+    false
+  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -143,6 +149,7 @@ export const BigButtonList = ({
       type: 'CLONE_DATASET_SCHEMAS_INIT',
       content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName }
     });
+    setIsCloningDataflow(true);
 
     try {
       await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
@@ -150,6 +157,8 @@ export const BigButtonList = ({
       console.error(error);
     }
   };
+
+  console.log('setIsCloningDataflow', isCloningDataflow);
 
   const downloadPdf = response => {
     if (!isNil(response)) {
@@ -467,6 +476,7 @@ export const BigButtonList = ({
       handleExportEuDataset,
       handleRedirect,
       isActiveButton,
+      isCloningDataflow,
       isLeadReporterOfCountry,
       onCloneDataflow,
       onLoadEuDatasetIntegration,

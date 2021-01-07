@@ -500,6 +500,9 @@
         },
         {
           "key": "EDIT_ADD_DATA_RELEASING_ERROR"
+        },
+        {
+          "key": "COPY_DATASET_SCHEMA_FAILED_EVENT"
         }
       ]
     },
@@ -702,7 +705,10 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
-        { "key": "VALIDATED_QC_RULE_EVENT" }
+        { "key": "VALIDATED_QC_RULE_EVENT" },
+        {
+          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+        }
       ]
     },
     {

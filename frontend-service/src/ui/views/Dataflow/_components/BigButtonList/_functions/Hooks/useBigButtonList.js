@@ -23,6 +23,7 @@ const useBigButtonList = ({
   handleExportEuDataset,
   handleRedirect,
   isActiveButton,
+  isCloningDataflow,
   isLeadReporterOfCountry,
   onCloneDataflow,
   onLoadEuDatasetIntegration,
@@ -152,8 +153,8 @@ const useBigButtonList = ({
   const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
-      buttonIcon: 'plus',
-      buttonIconClass: 'newItemCross',
+      buttonIcon: isCloningDataflow ? 'spinner' : 'plus',
+      buttonIconClass: isCloningDataflow ? 'spinner' : 'newItemCross',
       caption: resources.messages['newSchema'],
       handleRedirect: () => onShowNewSchemaDialog(),
       helpClassName: 'dataflow-new-schema-help-step',
