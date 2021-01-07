@@ -1,18 +1,13 @@
 package org.eea.dataflow.integration.executor.fme.service.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
@@ -96,10 +91,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   /** The fme token. */
   @Value("${integration.fme.token}")
   private String fmeToken;
-
-  /** The import path. */
-  @Value("${importPath}")
-  private String importPath;
 
   /** The fme collection mapper. */
   @Autowired
@@ -428,7 +419,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     switch (fmeJob.getOperation()) {
       case IMPORT:
         eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId(),
-            fmeJob.getFileName(), fmeJob.getUserName());
+            fmeJob.getUserName());
         break;
       case EXPORT:
         eventType = exportNotification(isReporting, isStatusCompleted);
@@ -507,49 +498,31 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param isReporting the is reporting
    * @param isStatusCompleted the is status completed
    * @param datasetId the dataset id
-   * @param fileName the file name
    * @param userName the user name
    * @return the event type
    */
   private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
-      Long datasetId, String fileName, String userName) {
+      Long datasetId, String userName) {
 
     EventType eventType = null;
-    File folder = new File(importPath, datasetId.toString());
-    File file = new File(folder, fileName);
 
-    try (Stream<Path> entries = Files.list(folder.toPath())) {
-
-      // Remove the file
-      Files.delete(file.toPath());
-
-      // Check if the folder is empty
-      if (!entries.findFirst().isPresent()) {
-
-        // Remove the folder
-        Files.delete(folder.toPath());
-
-        if (isStatusCompleted) {
-          if (isReporting) {
-            eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
-          } else {
-            eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
-          }
-          launchValidationProcess(datasetId, userName);
-        } else {
-          if (isReporting) {
-            eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
-          } else {
-            eventType = EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
-          }
-        }
-
-        lockService.removeLockByCriteria(
-            Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
+    if (isStatusCompleted) {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
       }
-    } catch (IOException e) {
-      LOG.error("File system exception", e);
+      launchValidationProcess(datasetId, userName);
+    } else {
+      if (isReporting) {
+        eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
+      } else {
+        eventType = EventType.EXTERNAL_IMPORT_DESIGN_FAILED_EVENT;
+      }
     }
+
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
 
     return eventType;
   }

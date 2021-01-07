@@ -307,11 +307,13 @@ public class FileTreatmentHelper implements DisposableBean {
 
       integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
           IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO);
-    } catch (FeignException | IOException e) {
-      LOG_ERROR.error("Error starting FME-Import process: datasetId={}, file={}", datasetId,
-          file.getName(), e);
-      throw e;
     }
+
+    // Remove the file
+    Files.delete(file.toPath());
+
+    // Remove the folder
+    Files.delete(file.getParentFile().toPath());
   }
 
   /**
