@@ -627,15 +627,15 @@ const ValidationViewer = React.memo(
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
     };
 
-    // if (isLoading) {
-    //   return (
-    //     <div>
-    //       <div className={styles.spinner}>
-    //         <Spinner className={styles.spinnerPosition} />
-    //       </div>
-    //     </div>
-    //   );
-    // }
+    if (isLoading) {
+      return (
+        <div>
+          <div className={styles.spinner}>
+            <Spinner className={styles.spinnerPosition} />
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className={styles.validationWrapper}>
