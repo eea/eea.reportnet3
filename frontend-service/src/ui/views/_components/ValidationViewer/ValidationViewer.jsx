@@ -597,18 +597,31 @@ const ValidationViewer = React.memo(
         }
       }
     };
+    // const getPaginatorRecordsCount = () => (
+    //   <Fragment>
+    //     {areActiveFilters && totalRecords !== totalFilteredRecords
+    //       ? `${resources.messages['filtered']}: ${!grouped ? totalFilteredRecords : totalFilteredGroupedRecords} | `
+    //       : ''}
+    //     {resources.messages['totalRecords']} {totalRecords}{' '}
+    //     {`${resources.messages['records'].toLowerCase()}${
+    //       grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
+    //     }`}
+    //     {areActiveFilters && totalRecords === totalFilteredRecords
+    //       ? ` (${resources.messages['filtered'].toLowerCase()})`
+    //       : ''}
+    //   </Fragment>
+    // );
+
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {areActiveFilters && totalRecords !== totalFilteredRecords
-          ? `${resources.messages['filtered']}: ${!grouped ? totalFilteredRecords : totalFilteredGroupedRecords} | `
+        {filtered && totalRecords !== fetchedData.length
+          ? `${resources.messages['filtered']}: ${fetchedData.length} | `
           : ''}
         {resources.messages['totalRecords']} {totalRecords}{' '}
         {`${resources.messages['records'].toLowerCase()}${
           grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
         }`}
-        {areActiveFilters && totalRecords === totalFilteredRecords
-          ? ` (${resources.messages['filtered'].toLowerCase()})`
-          : ''}
+        {filtered && totalRecords === fetchedData.length ? ` (${resources.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
 
