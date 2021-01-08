@@ -942,6 +942,7 @@
     "sectorAffected": "Sector affected",
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
-    "otherObjectives": "Other objectives"
+    "otherObjectives": "Other objectives",
+    "createCloneNewSchemaError": "Error. The process is already running."
   }
 }

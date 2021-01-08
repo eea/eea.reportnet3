@@ -158,8 +158,6 @@ export const BigButtonList = ({
     }
   };
 
-  console.log('setIsCloningDataflow', isCloningDataflow);
-
   const downloadPdf = response => {
     if (!isNil(response)) {
       DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
@@ -238,6 +236,12 @@ export const BigButtonList = ({
     } finally {
       setDataCollectionDialog(false);
     }
+  };
+
+  const onShowCloningNotification = () => {
+    notificationContext.add({
+      type: 'CREATE_CLONE_NEW_SCHEMA_ERROR'
+    });
   };
 
   const onShowManualTechnicalAcceptanceDialog = () => setIsManualTechnicalAcceptanceDialogVisible(true);
@@ -482,6 +486,7 @@ export const BigButtonList = ({
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
       onSaveName,
+      onShowCloningNotification,
       onShowCopyDataCollectionToEuDatasetModal,
       onShowDataCollectionModal,
       onShowExportEuDatasetModal,

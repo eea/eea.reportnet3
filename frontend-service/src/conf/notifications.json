@@ -503,6 +503,9 @@
         },
         {
           "key": "COPY_DATASET_SCHEMA_FAILED_EVENT"
+        },
+        {
+          "key": "CREATE_CLONE_NEW_SCHEMA_ERROR"
         }
       ]
     },
