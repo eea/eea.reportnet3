@@ -2823,50 +2823,6 @@ public class DatasetServiceImpl implements DatasetService {
         processRecordPage(pagedFieldValues, result, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, null,
             datasetPartitionId, dictionaryOriginTargetObjectId);
-        // make list of field vaues grouped by their record id. The field values will be set with
-        // the taget schemas id so they can be inserted
-        pagedFieldValues.stream().forEach(field -> {
-          FieldValue auxField = new FieldValue();
-          auxField.setValue(field.getValue());
-          auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
-          auxField.setType(field.getType());
-
-          // transform the grouping record in the target one. Do it only once
-          String targetIdRecordSchema =
-              dictionaryOriginTargetObjectId.get(field.getRecord().getIdRecordSchema());
-          String originRecordId = field.getRecord().getId();
-          if (!mapTargetRecordValues.containsKey(originRecordId)) {
-
-            RecordValue targetRecordValue = new RecordValue();
-
-            targetRecordValue.setDatasetPartitionId(datasetPartitionId);
-            targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
-            targetRecordValue.setTableValue(targetTable);
-            targetRecordValue.setFields(new ArrayList<>());
-            // using temporary recordId as grouping criteria, then it will be removed before giving
-            // back
-            mapTargetRecordValues.put(originRecordId, targetRecordValue);
-            result.add(targetRecordValue);
-          }
-
-          auxField.setRecord(mapTargetRecordValues.get(originRecordId));
-
-          if (DataType.ATTACHMENT.equals(field.getType())) {
-            if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
-              dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
-              dictionaryIdFieldAttachment.get(field.getId()).setId(null);
-            }
-
-          }
-          auxField.setGeometry(field.getGeometry());
-          mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
-          // when the record has reached the number of fields per record then remove from the map to
-          // avoid rehashing
-          if (mapTargetRecordValues.get(originRecordId).getFields()
-              .size() == numberOfFieldsInRecord) {
-            mapTargetRecordValues.remove(originRecordId);
-          }
-        });
 
         fieldValuePage = fieldValuePage.next();
       }
