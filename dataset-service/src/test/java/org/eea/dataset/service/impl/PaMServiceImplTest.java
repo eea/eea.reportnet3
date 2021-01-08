@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -7,9 +8,17 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.utils.LiteralConstants;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +53,17 @@ public class PaMServiceImplTest {
   @Mock
   private DatasetService datasetService;
 
+  /** The file common utils. */
   @Mock
   private FileCommonUtils fileCommonUtils;
+
+  /** The dataset metabase service. */
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The dataset schema service. */
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * Inits the mocks.
@@ -91,32 +109,45 @@ public class PaMServiceImplTest {
     Mockito.verify(fieldRepository, times(1)).save(Mockito.any());
   }
 
-  // /**
-  // * Gets the simple pam list test.
-  // *
-  // * @return the simple pam list test
-  // * @throws EEAException the EEA exception
-  // */
-  // @Test
-  // public void getSimplePamListTest() throws EEAException {
-  // FieldSchemaVO fieldSchema = new FieldSchemaVO();
-  // String idSchema = new ObjectId().toString();
-  // fieldSchema.setId(idSchema);
-  // RecordValue record = new RecordValue();
-  // fieldValueList = new ArrayList<>();
-  // FieldValue fieldValue = new FieldValue();
-  // fieldValue.setRecord(record);
-  // fieldValue.setValue("1, 2");
-  // fieldValue.setIdFieldSchema(idSchema);
-  // fieldValueList.add(fieldValue);
-  // record.setFields(fieldValueList);
-  // when(fileCommonUtils.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
-  // .thenReturn(fieldSchema);
-  // when(fieldRepository.findFirstByIdFieldSchemaAndValue(Mockito.any(), Mockito.any()))
-  // .thenReturn(fieldValue);
-  // when(fieldRepository.findByIdFieldSchemaAndValue(Mockito.any(), Mockito.any()))
-  // .thenReturn(fieldValueList);
-  // assertNotNull(paMServiceImpl.getListSinglePaM(1L, "1"));
-  // }
+  /**
+   * Gets the simple pam list test.
+   *
+   * @return the simple pam list test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getSimplePamListTest() throws EEAException {
+    FieldSchemaVO fieldSchema = new FieldSchemaVO();
+    String idSchema = new ObjectId().toString();
+    fieldSchema.setId(idSchema);
+    RecordValue record = new RecordValue();
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    TableSchemaVO tableSchema = new TableSchemaVO();
+    RecordSchemaVO recordSchema = new RecordSchemaVO();
+    List<TableSchemaVO> tablesSchema = new ArrayList<>();
+    List<FieldSchemaVO> fieldsSchemas = new ArrayList<>();
+    fieldsSchemas.add(fieldSchema);
+    tablesSchema.add(tableSchema);
+    recordSchema.setFieldSchema(fieldsSchemas);
+    tableSchema.setRecordSchema(recordSchema);
+    schema.setTableSchemas(tablesSchema);
+
+    fieldValueList = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setRecord(record);
+    fieldValue.setValue("1");
+    fieldValue.setIdFieldSchema(idSchema);
+    fieldValueList.add(fieldValue);
+    record.setFields(fieldValueList);
+    when(fileCommonUtils.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(schema);
+    when(fileCommonUtils.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    when(fieldRepository.findFirstByIdFieldSchemaAndValue(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldValue);
+    when(
+        fieldRepository.queryFindByFieldSchemaAndValue(Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(fieldValueList);
+    assertNotNull(paMServiceImpl.getListSinglePaM(1L, "1"));
+  }
 
 }

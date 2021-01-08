@@ -251,10 +251,12 @@ public class PaMServiceImpl implements PaMService {
    */
   private String getValueOtherTable(List<FieldVO> objectiveList, String id) {
     String value = null;
-    for (FieldVO valueId : objectiveList) {
-      if (id.equals(valueId.getId())) {
-        value = valueId.getValue();
-        break;
+    if (objectiveList != null) {
+      for (FieldVO valueId : objectiveList) {
+        if (id.equals(valueId.getId())) {
+          value = valueId.getValue();
+          break;
+        }
       }
     }
     return value;
@@ -792,17 +794,18 @@ public class PaMServiceImpl implements PaMService {
 
     FieldSchemaVO pkField = null;
     Boolean locatedPK = false;
-
-    for (TableSchemaVO table : schema.getTableSchemas()) {
-      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getId().equals(idFieldSchema)) {
-          pkField = field;
-          locatedPK = Boolean.TRUE;
+    if (schema != null && schema.getTableSchemas() != null) {
+      for (TableSchemaVO table : schema.getTableSchemas()) {
+        for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getId().equals(idFieldSchema)) {
+            pkField = field;
+            locatedPK = Boolean.TRUE;
+            break;
+          }
+        }
+        if (locatedPK.equals(Boolean.TRUE)) {
           break;
         }
-      }
-      if (locatedPK.equals(Boolean.TRUE)) {
-        break;
       }
     }
     return pkField;
