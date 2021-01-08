@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isNil from 'lodash/isNil';
 
 import styles from './NationalSystemsTable.module.scss';
@@ -49,15 +50,17 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
   };
 
   const parseElements = (elements = [], fields = []) => {
-    console.log('fields', fields);
-    elements.map(element => {
+    const result = cloneDeep(elements);
+
+    elements.map((element, index) => {
       Object.keys(element).forEach(key => {
         const value = fields.find(field => TextUtils.areEquals(field['name'], element[key]));
-        element[key] = value ? value : element[key];
+
+        result[index][key] = value ? value : element[key];
       });
     });
 
-    return elements || [];
+    return result || [];
   };
 
   const parseFields = (dataFields = []) => {
