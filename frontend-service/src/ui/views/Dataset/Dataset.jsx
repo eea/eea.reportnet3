@@ -101,6 +101,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
+  const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
@@ -148,6 +149,13 @@ export const Dataset = withRouter(({ match, history }) => {
       }
     }
   }, [userContext, dataset]);
+
+  useEffect(() => {
+    if (!isNil(webformData)) {
+      const webformsValues = config.webforms.map(webform => webformData.value);
+      setIsReportingWebform(!webformsValues.includes(webformData));
+    }
+  }, [webformData]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -946,6 +954,7 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
+          isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
           isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}

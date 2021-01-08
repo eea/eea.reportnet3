@@ -59,6 +59,9 @@ public class IntegrationParams {
   /** The Constant COUNTRY_CODE: {@value}. */
   public static final String COUNTRY_CODE = "countryCode";
 
+  /** The Constant NOTIFICATION_REQUIRED: {@value}. */
+  public static final String NOTIFICATION_REQUIRED = "notificationRequired";
+
   /**
    * Instantiates a new integration params.
    */

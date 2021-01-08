@@ -36,6 +36,7 @@ import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.DatasetValidationRepository;
+import org.eea.dataset.persistence.data.repository.FieldExtendedRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
@@ -67,7 +68,6 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
-import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -384,6 +384,13 @@ public class DatasetServiceTest {
   private PkCatalogueRepository pkCatalogueRepository;
 
   /**
+   * The field extended repository.
+   */
+  @Mock
+  private FieldExtendedRepository fieldExtendedRepository;
+
+
+  /**
    * The field value.
    */
   private FieldValue fieldValue;
@@ -443,10 +450,6 @@ public class DatasetServiceTest {
    */
   private FieldValue field;
 
-  /**
-   * The field with label.
-   */
-  public FieldValueWithLabelProjection fieldWithLabel;
 
   /**
    * Inits the mocks.
@@ -492,19 +495,6 @@ public class DatasetServiceTest {
 
     sortedList.add(field);
     fieldList.add(field);
-
-    fieldWithLabel = new FieldValueWithLabelProjection() {
-
-      @Override
-      public FieldValue getLabel() {
-        return field;
-      }
-
-      @Override
-      public FieldValue getFieldValue() {
-        return field;
-      }
-    };
 
     MockitoAnnotations.initMocks(this);
   }
@@ -1420,6 +1410,10 @@ public class DatasetServiceTest {
    */
   @Test
   public void updateFieldMultiSelectTest() throws EEAException {
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.PK_HAS_MULTIPLE_VALUES, Boolean.TRUE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
     FieldVO multiselectField = new FieldVO();
     multiselectField.setType(DataType.MULTISELECT_CODELIST);
     multiselectField.setValue("");
@@ -1686,9 +1680,11 @@ public class DatasetServiceTest {
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
-    Mockito.when(fieldRepository.findByIdFieldSchemaWithTag(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(fieldWithLabel));
-    when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+    Mockito
+        .when(fieldExtendedRepository.findByIdFieldSchemaWithTagOrdered(Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(fieldVO));
+
     Assert.assertEquals(Arrays.asList(fieldVO),
         datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));
   }
@@ -1712,10 +1708,10 @@ public class DatasetServiceTest {
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
     Mockito
-        .when(fieldRepository.findByIdFieldSchemaAndConditionalWithTag(Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(Arrays.asList(fieldWithLabel));
-    when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+        .when(fieldExtendedRepository.findByIdFieldSchemaWithTagOrdered(Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(fieldVO));
+
     Assert.assertEquals(Arrays.asList(fieldVO),
         datasetService.getFieldValuesReferenced(1L, "", "", "", "", 50));
   }
@@ -2317,8 +2313,8 @@ public class DatasetServiceTest {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
     dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
     dictionaryOriginTargetObjectId.put("5fe06162f81da02a7cddaea5", "5fe06162f81da02a7cddaea5");
-    dictionaryOriginTargetObjectId
-        .put("0A07FD45F1CD7965A2B0F13E57948A12", "0A07FD45F1CD7965A2B0F13E57948A12");
+    dictionaryOriginTargetObjectId.put("0A07FD45F1CD7965A2B0F13E57948A12",
+        "0A07FD45F1CD7965A2B0F13E57948A12");
     Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
     dictionaryOriginTargetDatasetsId.put(1L, 2L);
 
@@ -2369,21 +2365,20 @@ public class DatasetServiceTest {
     field.setRecord(record);
     fieldValues.add(field);
 
-    when(fieldRepository
-        .findByRecord_IdRecordSchema(Mockito.anyString(), Mockito.any(Pageable.class)))
-        .then(new Answer<List<FieldValue>>() {
+    when(fieldRepository.findByRecord_IdRecordSchema(Mockito.anyString(),
+        Mockito.any(Pageable.class))).then(new Answer<List<FieldValue>>() {
 
-          @Override
-          public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
-            List<FieldValue> result;
-            if (((Pageable) invocation.getArgument(1)).getPageNumber() == 0) {
-              result = fieldValues;
-            } else {
-              result = new ArrayList<>();
-            }
-            return result;
-          }
-        });
+      @Override
+      public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
+        List<FieldValue> result;
+        if (((Pageable) invocation.getArgument(1)).getPageNumber() == 0) {
+          result = fieldValues;
+        } else {
+          result = new ArrayList<>();
+        }
+        return result;
+      }
+    });
     AttachmentValue attachment = new AttachmentValue();
     attachment.setFieldValue(field);
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
@@ -2606,18 +2601,17 @@ public class DatasetServiceTest {
     fieldValues.add(field);
     AttachmentValue attachment = new AttachmentValue();
     attachment.setFieldValue(field);
-    when(fieldRepository
-        .findByRecord_IdRecordSchema(Mockito.anyString(), Mockito.any(Pageable.class)))
-        .then(new Answer<List<FieldValue>>() {
-          @Override
-          public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
-            List<FieldValue> result = new ArrayList<>();
-            if (0 == ((Pageable) invocation.getArgument(1)).getPageNumber()) {
-              result = fieldValues;
-            }
-            return result;
-          }
-        });
+    when(fieldRepository.findByRecord_IdRecordSchema(Mockito.anyString(),
+        Mockito.any(Pageable.class))).then(new Answer<List<FieldValue>>() {
+      @Override
+      public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
+        List<FieldValue> result = new ArrayList<>();
+        if (0 == ((Pageable) invocation.getArgument(1)).getPageNumber()) {
+          result = fieldValues;
+        }
+        return result;
+      }
+    });
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));

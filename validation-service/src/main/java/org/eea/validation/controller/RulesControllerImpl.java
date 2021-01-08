@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
@@ -59,6 +60,7 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private SqlRulesService sqlRulesService;
 
+  /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
 
@@ -111,12 +113,13 @@ public class RulesControllerImpl implements RulesController {
    * Delete rules schema.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @Override
   @HystrixCommand
   @DeleteMapping("/private/deleteRulesSchema")
-  public void deleteRulesSchema(String datasetSchemaId) {
-    rulesService.deleteEmptyRulesSchema(datasetSchemaId);
+  public void deleteRulesSchema(String datasetSchemaId, Long datasetId) {
+    rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
   }
 
   /**
@@ -556,5 +559,32 @@ public class RulesControllerImpl implements RulesController {
     LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
   }
 
+
+  /**
+   * Gets the integrity rules by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the integrity rules by dataset schema id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
+  public List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.getIntegritySchemas(datasetSchemaId);
+  }
+
+
+  /**
+   * Insert integrity schema.
+   *
+   * @param integritiesVO the integrities VO
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/private/insertIntegrities")
+  public void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO) {
+    rulesService.insertIntegritySchemas(integritiesVO);
+  }
 
 }

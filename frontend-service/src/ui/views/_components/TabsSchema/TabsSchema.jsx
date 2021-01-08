@@ -24,6 +24,7 @@ export const TabsSchema = ({
   isFilterable,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
+  isReportingWebform,
   isValidationSelected,
   levelErrorTypes,
   onChangeIsValidationSelected,
@@ -56,6 +57,7 @@ export const TabsSchema = ({
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
                   isGroupedValidationSelected={isGroupedValidationSelected}
+                  isReportingWebform={isReportingWebform}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
