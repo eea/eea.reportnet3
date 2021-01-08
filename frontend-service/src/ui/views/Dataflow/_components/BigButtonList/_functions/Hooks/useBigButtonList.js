@@ -156,10 +156,10 @@ const useBigButtonList = ({
       buttonIcon: isCloningDataflow ? 'spinner' : 'plus',
       buttonIconClass: isCloningDataflow ? 'spinner' : 'newItemCross',
       caption: resources.messages['newSchema'],
-      handleRedirect: () => onShowNewSchemaDialog(),
+      handleRedirect: !isCloningDataflow ? () => onShowNewSchemaDialog() : () => {},
       helpClassName: 'dataflow-new-schema-help-step',
-      layout: buttonsVisibility.cloneSchemasFromDataflow ? 'menuBigButton' : 'defaultBigButton',
-      model: buttonsVisibility.cloneSchemasFromDataflow ? newSchemaModel : [],
+      layout: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? 'menuBigButton' : 'defaultBigButton',
+      model: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema
     }
   ];
