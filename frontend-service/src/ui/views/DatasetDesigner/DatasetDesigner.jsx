@@ -118,6 +118,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isLoadingFile: false,
     isManageUniqueConstraintDialogVisible: false,
     isRefreshHighlighted: false,
+    isTableCreated: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -387,6 +388,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const getUniqueConstraintsList = data => designerDispatch({ type: 'GET_UNIQUES', payload: { data } });
+
+  const setIsTableCreated = isTableCreated => {
+    designerDispatch({ type: 'SET_IS_TABLE_CREATED', payload: { isTableCreated } });
+  };
 
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getImportExtensions.split(', ')
@@ -851,6 +856,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     return (
       <TabularSwitch
         elements={Object.keys(designerState.viewType).map(view => resources.messages[`${view}View`])}
+        getIsTableCreated={setIsTableCreated}
+        isTableCreated={designerState.isTableCreated}
         onChange={switchView => {
           const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
           onChangeView(views[camelCase(switchView)]);
@@ -899,6 +906,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       // </Fragment>
       <TabularSwitch
         elements={[resources.messages['designView'], resources.messages['tabularDataView']]}
+        getIsTableCreated={setIsTableCreated}
+        isTableCreated={designerState.isTableCreated}
         onChange={switchView =>
           designerDispatch({
             type: 'SET_VIEW_MODE',
@@ -1203,6 +1212,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
             editable={true}
+            getIsTableCreated={setIsTableCreated}
             history={history}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
@@ -1348,7 +1358,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             name="file"
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
               datasetId: datasetId
             })}`}
           />

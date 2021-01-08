@@ -12,9 +12,9 @@ import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
-import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.joda.time.LocalDateTime;
@@ -80,6 +81,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The FME job repository. */
   @Autowired
   private FMEJobRepository fmeJobRepository;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Gets the executor type.
@@ -182,6 +187,9 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Long dataflowId = integrationOperationParams.get(IntegrationParams.DATAFLOW_ID);
     Long providerId = integrationOperationParams.get(IntegrationParams.PROVIDER_ID);
     String paramDataProvider = null != providerId ? providerId.toString() : "design";
+    String countryCode =
+        null != providerId ? representativeControllerZuul.findDataProviderById(providerId).getCode()
+            : "XX";
 
     FMEJob fmeJob = new FMEJob();
     fmeJob.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
@@ -215,6 +223,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         integrationOperationParams.get(IntegrationParams.DATASET_ID)));
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
+    parameters.add(saveParameter(IntegrationParams.COUNTRY_CODE, countryCode));
 
     Integer fmeJobId = null;
     switch (operation) {

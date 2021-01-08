@@ -16,12 +16,14 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -93,6 +95,12 @@ public class RulesServiceImplTest {
   /** The integrity mapper. */
   @Mock
   private IntegrityMapper integrityMapper;
+
+  /**
+   * The kafka sender utils.
+   */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Delete rule by id.
@@ -231,7 +239,6 @@ public class RulesServiceImplTest {
     List<RuleVO> rulesVO = new ArrayList<>();
     List<IntegrityVO> listIntegrityVO = new ArrayList<>();
     ObjectId id = new ObjectId();
-    new RulesSchemaVO();
     Rule rule = new Rule();
     RuleVO ruleVO = new RuleVO();
     ruleVO.setRuleId(id.toString());
@@ -298,11 +305,11 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesPKTest() throws EEAException {
     DataSetSchema datasetSchema = new DataSetSchema();
-    List<TableSchema> tableSchemaList = new ArrayList();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
     TableSchema tableSchema = new TableSchema();
     RecordSchema recordSchema = new RecordSchema();
     FieldSchema fieldSchema = new FieldSchema();
-    List<FieldSchema> fieldSchemaList = new ArrayList();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
     fieldSchema.setIdFieldSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
     fieldSchemaList.add(fieldSchema);
     recordSchema.setFieldSchema(fieldSchemaList);
@@ -605,7 +612,7 @@ public class RulesServiceImplTest {
   @Test
   public void deleteEmptyRulesSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(new RulesSchema());
-    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac", 1L);
     Mockito.verify(rulesRepository, times(1)).deleteByIdDatasetSchema(Mockito.any());
   }
 
@@ -615,7 +622,7 @@ public class RulesServiceImplTest {
   @Test
   public void deleteEmptyRulesScehmaNoSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
-    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac", 1L);
     Mockito.verify(rulesRepository, times(1)).findByIdDatasetSchema(Mockito.any());
   }
 
@@ -1569,11 +1576,79 @@ public class RulesServiceImplTest {
    */
   @Test
   public void findSqlSentencesByDatasetSchemaIdTest() {
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(new ArrayList());
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(new ArrayList<>());
     rulesServiceImpl.findSqlSentencesByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1))
         .findSqlRules(new ObjectId("5e44110d6a9e3a270ce13fac"));
   }
 
+  @Test
+  public void getIntegritySchemasTest() {
+    Mockito.when(integritySchemaRepository.findByOriginDatasetSchemaId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    rulesServiceImpl.getIntegritySchemas("5e44110d6a9e3a270ce13fac");
+    Mockito.verify(integritySchemaRepository, times(1))
+        .findByOriginDatasetSchemaId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+  }
+
+
+  @Test
+  public void insertIntegritySchemasTest() {
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId("1");
+    integrityVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setOriginDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setReferencedDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setIsDoubleReferenced(false);
+    integrityVO.setOriginFields(Arrays.asList("5e44110d6a9e3a270ce13fac"));
+    integrityVO.setReferencedFields(Arrays.asList("5e44110d6a9e3a270ce13fac"));
+    List<IntegrityVO> integritiesVO = new ArrayList<>();
+    integritiesVO.add(integrityVO);
+    List<IntegritySchema> integrities = new ArrayList<>();
+    IntegritySchema integrity = new IntegritySchema();
+    integrity.setId(new ObjectId());
+    integrity.setOriginDatasetSchemaId(new ObjectId());
+    integrity.setReferencedDatasetSchemaId(new ObjectId());
+    integrities.add(integrity);
+    when(integrityMapper.classListToEntity(Mockito.any())).thenReturn(integrities);
+
+    rulesServiceImpl.insertIntegritySchemas(integritiesVO);
+    Mockito.verify(integritySchemaRepository, times(1)).save(Mockito.any());
+  }
+
+
+  @Test
+  public void getAllDisabledRulesTest() {
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    design.setDatasetSchema("5e44110d6a9e3a270ce13fac");
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    designs.add(design);
+    Rule rule = new Rule();
+    rule.setRuleId(new ObjectId());
+    List<Rule> rules = new ArrayList<>();
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
+    Assert.assertEquals(Integer.valueOf(1), rulesServiceImpl.getAllDisabledRules(1L, designs));
+  }
+
+  @Test
+  public void getAllUncheckedRulesTest() {
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    design.setDatasetSchema("5e44110d6a9e3a270ce13fac");
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    designs.add(design);
+    Rule rule = new Rule();
+    rule.setRuleId(new ObjectId());
+    List<Rule> rules = new ArrayList<>();
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Assert.assertEquals(Integer.valueOf(1), rulesServiceImpl.getAllUncheckedRules(1L, designs));
+  }
 
 }

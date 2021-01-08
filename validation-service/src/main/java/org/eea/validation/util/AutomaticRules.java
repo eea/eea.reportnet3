@@ -207,7 +207,7 @@ public class AutomaticRules {
    */
   public static Rule createFKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description, String tableSchemaId,
-      Boolean pkMustBeUsed) {
+      boolean pkMustBeUsed) {
     String errorMsg = null;
     if (pkMustBeUsed) {
       errorMsg = "Omission - does not contain an expected record based on set criteria.";
@@ -220,7 +220,7 @@ public class AutomaticRules {
     // we add the rule data to take the message if the user edit the rule
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("',")
-        .append(pkMustBeUsed.toString()).append(")");
+        .append(String.valueOf(pkMustBeUsed)).append(")");
     rule.setWhenCondition(whenCondition.toString());
     rule.setReferenceFieldSchemaPKId(new ObjectId(referenceId));
     return rule;

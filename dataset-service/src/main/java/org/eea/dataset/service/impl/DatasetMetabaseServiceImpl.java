@@ -350,9 +350,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     // Dataset level stats
     Class<?> clazzStats = stats.getClass();
     Object instance = clazzStats.newInstance();
-    statisticsDataset.stream().forEach(s -> {
-      setEntityProperty(instance, s.getStatName(), s.getValue());
-    });
+    statisticsDataset.stream()
+        .forEach(s -> setEntityProperty(instance, s.getStatName(), s.getValue()));
     stats = (StatisticsVO) instance;
 
     // Table statistics
@@ -360,9 +359,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     for (List<Statistics> listStats : tablesMap.values()) {
       Class<?> clazzTable = TableStatisticsVO.class;
       Object instanceTable = clazzTable.newInstance();
-      listStats.stream().forEach(s -> {
-        setEntityProperty(instanceTable, s.getStatName(), s.getValue());
-      });
+      listStats.stream()
+          .forEach(s -> setEntityProperty(instanceTable, s.getStatName(), s.getValue()));
       stats.getTables().add((TableStatisticsVO) instanceTable);
     }
 
@@ -912,7 +910,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   public Long getLastDatasetValidationForRelease(Long datasetId) {
-    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).get();
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
     List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
         dataset.getDataflowId(), dataset.getDataProviderId());
     Collections.sort(datasets);

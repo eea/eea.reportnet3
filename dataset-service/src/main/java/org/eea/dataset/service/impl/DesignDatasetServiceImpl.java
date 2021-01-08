@@ -56,89 +56,124 @@ import org.springframework.stereotype.Service;
 public class DesignDatasetServiceImpl implements DesignDatasetService {
 
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
 
-  /** The design dataset mapper. */
+  /**
+   * The design dataset mapper.
+   */
   @Autowired
   private DesignDatasetMapper designDatasetMapper;
 
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The table schema mapper. */
+  /**
+   * The table schema mapper.
+   */
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The field schema no rules mapper. */
+  /**
+   * The field schema no rules mapper.
+   */
   @Autowired
   FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /** The dataschema controller. */
+  /**
+   * The dataschema controller.
+   */
   @Autowired
   private DatasetSchemaController dataschemaController;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
 
-  /** The integration controller zuul. */
+  /**
+   * The integration controller zuul.
+   */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /** The contributor controller zuul. */
+  /**
+   * The contributor controller zuul.
+   */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
-  /** The webform mapper. */
+  /**
+   * The webform mapper.
+   */
   @Autowired
   private WebFormMapper webformMapper;
 
-  /** The record store controller zuul. */
+  /**
+   * The record store controller zuul.
+   */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
 
-  /** The time to wait before continue copy. */
+  /**
+   * The time to wait before continue copy.
+   */
   @Value("${wait.continue.copy.ms}")
   private Long timeToWaitBeforeContinueCopy;
 
 
-
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DesignDatasetServiceImpl.class);
-
 
 
   /**
    * Gets the design data set id by dataflow id.
    *
    * @param idFlow the id flow
+   *
    * @return the design data set id by dataflow id
    */
   @Override
@@ -153,8 +188,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    *
    * @param idDataflowOrigin the id dataflow origin
    * @param idDataflowDestination the id dataflow destination
+   *
    * @throws EEAException the EEA exception
-   * 
+   *
    *         We've got the list of design datasets from the dataflow to copy and the dataflow
    *         destination. The idea is create a new design dataset copied from the original and
    *         change the schema's objectId (dataset, table, record and field level)
@@ -210,7 +246,23 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
               dataschemaService.createEmptyDataSetSchema(idDataflowDestination).toString();
           // fill the dictionary of origin and news object id created. This will be done during all
           // the process
+          DataSetSchemaVO targetDatasetSchema =
+              dataschemaService.getDataSchemaById(newIdDatasetSchema);
           dictionaryOriginTargetObjectId.put(schemaVO.getIdDataSetSchema(), newIdDatasetSchema);
+          // adding to the dictionary mapping schema id's the mapping among tables
+          final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
+          targetDatasetSchema.getTableSchemas().forEach(table -> {
+            for (TableSchemaVO tableSchemaVO : schemaVO.getTableSchemas()) {
+              if (table.getNameTableSchema().equals(tableSchemaVO.getNameTableSchema())) {
+                dictionaryOriginTargetTableObjectId.put(tableSchemaVO.getIdTableSchema(),
+                    table.getIdTableSchema());
+                dictionaryOriginTargetTableObjectId.put(
+                    tableSchemaVO.getRecordSchema().getIdRecordSchema(),
+                    table.getRecordSchema().getIdRecordSchema());
+              }
+            }
+          });
+          dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
           // Create the schema into the metabase
           Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
               nameToClone(schemaVO.getNameDatasetSchema(), idDataflowDestination),
@@ -237,8 +289,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
         }
 
-
-
         // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
         // the correct ones
         processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
@@ -261,13 +311,13 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // created)
         integrationControllerZuul.copyIntegrations(copy);
 
-        // Copy the data inside the design datasets, but only the tables that are prefilled
-        datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
-
         // Create the views necessary to the validation in the new datasets created
         dictionaryOriginTargetDatasetsId
             .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
-                .createUpdateQueryView(datasetDestination));
+                .createUpdateQueryView(datasetDestination, false));
+
+        // Copy the data inside the design datasets, but only the tables that are prefilled
+        datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
 
 
         // Release the notification
@@ -297,7 +347,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   }
 
 
-
   /**
    * Fill and update design dataset copied.
    *
@@ -306,7 +355,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param datasetId the dataset id
    * @param mapDatasetIdFKRelations the map dataset id FK relations
+   *
    * @return the map
+   *
    * @throws EEAException the EEA exception
    */
   private Map<String, String> fillAndUpdateDesignDatasetCopied(DataSetSchemaVO schemaOrigin,
@@ -342,6 +393,11 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           FieldSchema field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
           field.setIdFieldSchema(newFieldId);
           field.setIdRecord(newRecordId);
+          // check if the field has referencedField, but the type is no LINK, set the referenced
+          // part as null
+          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+            field.setReferencedField(null);
+          }
           record.getFieldSchema().add(field);
 
           // if the type is Link we store to later modify the schema id's with the proper fk
@@ -383,7 +439,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   }
 
 
-
   /**
    * Process to modify the FK.
    *
@@ -403,7 +458,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord())) {
           field.setIdRecord(dictionaryOriginTargetObjectId.get(field.getIdRecord()));
         }
-        if (field.getReferencedField() != null) {
+        if (field.getReferencedField() != null && DataType.LINK.equals(field.getType())) {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to
@@ -449,12 +504,12 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   }
 
 
-
   /**
    * Name to clone.
    *
    * @param nameDesign the name design
    * @param dataflowIdDestination the dataflow id destination
+   *
    * @return the string
    */
   private String nameToClone(String nameDesign, Long dataflowIdDestination) {
@@ -476,7 +531,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     }
     return result;
   }
-
 
 
 }

@@ -33,6 +33,9 @@ public class IntegrityVO {
   /** The referenced dataset schema id. */
   private String referencedDatasetSchemaId;
 
+  /** The rule id. */
+  private String ruleId;
+
 
   /**
    * Hash code.

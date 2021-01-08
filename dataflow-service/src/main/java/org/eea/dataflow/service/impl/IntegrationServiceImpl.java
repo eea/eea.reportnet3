@@ -10,7 +10,6 @@ import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
-import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
@@ -22,6 +21,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;

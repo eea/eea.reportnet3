@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
-import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
@@ -84,20 +84,21 @@ export const WebformView = ({
   };
 
   const calculateSingle = field => {
+    let fields = [];
     switch (field.name.toLowerCase()) {
+      case 'unionpolicyother':
+        fields = combinationFieldRender('otherUnionPolicy');
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'ghgaffected':
       case 'sectoraffected':
       case 'policyinstrument':
       case 'policyimpacting':
       case 'unionpolicylist':
-        const fields = combinationFieldRender(field.name);
-        return (
-          <ul>
-            {fields?.map(field => (
-              <li>{field}</li>
-            ))}
-          </ul>
-        );
+        fields = combinationFieldRender(field.name);
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
+      case 'pamnames':
+        fields = combinationFieldRender('paMName', 'id');
+        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'ispolicymeasureenvisaged':
         return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
       case 'statusimplementation':
@@ -112,6 +113,8 @@ export const WebformView = ({
         return combinationTableRender('entities');
       case 'sectorobjectives':
         return combinationTableRender('sectors');
+      // case 'unionpolicyother':
+      //   return combinationTableRender('otherUnionPolicy');
       default:
         break;
     }
@@ -138,13 +141,26 @@ export const WebformView = ({
     return containsValue ? valueToCheck : fieldValue;
   };
 
-  const combinationFieldRender = fieldName => {
+  const combinationFieldRender = (fieldName, previousField = '', separator = '-') => {
     const combinatedValues = [];
     singlesCalculatedData.forEach(singleRecord => {
+      let previousFieldValue = '';
+      if (previousField !== '') {
+        previousFieldValue =
+          singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === previousField.toLowerCase())];
+      }
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
       if (!isNil(singleRecordValue)) {
-        combinatedValues.push(Array.isArray(singleRecordValue) ? singleRecordValue.join(', ') : singleRecordValue);
+        combinatedValues.push(
+          Array.isArray(singleRecordValue)
+            ? singleRecordValue
+                .map(value => (previousFieldValue !== '' ? `${previousFieldValue} ${separator} ${value}` : value))
+                .join(', ')
+            : previousFieldValue !== ''
+            ? `${previousFieldValue} ${separator} ${singleRecordValue}`
+            : singleRecordValue
+        );
       }
     });
 
@@ -192,7 +208,11 @@ export const WebformView = ({
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
       if (!isNil(singleRecordValue)) {
-        const columnFieldsValues = { pamsId: singleRecord['id'], [fieldName]: singleRecordValue };
+        const columnFieldsValues = {
+          pamsId: singleRecord['id'],
+          pamName: singleRecord['paMName'],
+          [fieldName]: singleRecordValue
+        };
         columnFields.forEach(columnField => {
           const columnFieldValue =
             singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === columnField.toLowerCase())];

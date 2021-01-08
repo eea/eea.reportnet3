@@ -87,6 +87,7 @@ export const useSetColumns = (
   colsSchema,
   columnOptions,
   hasCountryCode,
+  hasWebformWritePermissions,
   hasWritePermissions,
   initialCellValue,
   onFileDeleteVisible,
@@ -231,6 +232,7 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
+
       return (
         <div
           style={{
@@ -251,10 +253,14 @@ export const useSetColumns = (
               (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData.type === 'LINK' &&
-                  !Array.isArray(field.fieldData[column.field]))
-              ? splitByComma(field.fieldData[column.field]).join(', ')
+                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+              ? !Array.isArray(field.fieldData[column.field])
+                ? splitByComma(field.fieldData[column.field])
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
+                : field.fieldData[column.field]
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
@@ -289,10 +295,14 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData.type === 'LINK' &&
-                  !Array.isArray(field.fieldData[column.field]))
-              ? splitByComma(field.fieldData[column.field]).join(', ')
+                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+              ? !Array.isArray(field.fieldData[column.field])
+                ? splitByComma(field.fieldData[column.field])
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
+                : field.fieldData[column.field]
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+                    .join(', ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
@@ -341,7 +351,7 @@ export const useSetColumns = (
           body={dataTemplate}
           className={`${invisibleColumn} ${readOnlyColumn}`}
           editor={
-            hasWritePermissions && column.type !== 'ATTACHMENT'
+            hasWebformWritePermissions && hasWritePermissions && column.type !== 'ATTACHMENT'
               ? row => cellDataEditor(row, records.selectedRecord)
               : null
           }
@@ -422,10 +432,14 @@ export const useSetColumns = (
       columnsArr.unshift(providerCode);
     }
 
+    if (!hasWebformWritePermissions) {
+      columnsArr.splice(columnsArr.indexOf(editCol), 1);
+    }
+
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue]);
+  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue, hasWebformWritePermissions]);
 
   return {
     columns,

@@ -109,10 +109,15 @@ export const WebformTable = ({
     });
 
     if (!isEmpty(webformData.elementsRecords)) {
-      const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
-        element => element.tableSchemaId === tableSchemaId
-      )[0];
-      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId);
+      let sectorObjectivesTable;
+      const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
+        if (element.name === 'SectorObjectives') {
+          sectorObjectivesTable = element;
+        }
+        return element.tableSchemaId === tableSchemaId;
+      })[0];
+
+      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);

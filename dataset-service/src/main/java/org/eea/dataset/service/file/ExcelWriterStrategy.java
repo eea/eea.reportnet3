@@ -30,7 +30,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(CSVWriterStrategy.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ExcelWriterStrategy.class);
 
   /** The parse common. */
   private FileCommonUtils fileCommon;

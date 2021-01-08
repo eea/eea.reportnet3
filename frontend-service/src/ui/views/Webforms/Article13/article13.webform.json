@@ -185,7 +185,7 @@
         },
         {
           "type": "FIELD",
-          "name": "TypePolicyInstrumen",
+          "name": "TypePolicyInstrument",
           "title": "Type of policy Instrument"
         },
         {
@@ -229,11 +229,13 @@
             "value": ["Other (Union policy not listed above or additional Union policy)"]
           },
           "multipleRecords": true,
+          "hasCalculatedFields": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "OtherUnionPolicy",
-              "title": "Other Union Policy"
+              "title": "Other Union Policy",
+              "calculatedWhenGroup": true
             }
           ]
         },
@@ -427,6 +429,13 @@
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
               "customType": "READ_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "paMNames",
+              "title": "Group of policies and measures",
+              "calculatedWhenGroup": true,
+              "hideWhenSingle": true
             }
           ]
         },
@@ -470,7 +479,7 @@
               "type": "FIELD",
               "name": "Total_1",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -502,7 +511,7 @@
               "type": "FIELD",
               "name": "Total_2",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -534,7 +543,7 @@
               "type": "FIELD",
               "name": "Total_3",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -566,7 +575,7 @@
               "type": "FIELD",
               "name": "Total_4",
               "title": "Total",
-              "tooltip": "In this field, the total of the EU ETS andESR sectors shall be entered if the split between EU ETS and ESR is not available"
+              "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
             }
           ]
         },
@@ -637,7 +646,8 @@
                 {
                   "type": "FIELD",
                   "name": "Value_Total",
-                  "title": "Total"
+                  "title": "Total",
+                  "tooltip": "In this field, the total of the EU ETS and ESR sectors shall be entered if the split between EU ETS and ESR is not available"
                 }
               ]
             }
@@ -702,6 +712,13 @@
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
               "customType": "READ_ONLY"
+            },
+            {
+              "type": "FIELD",
+              "name": "paMNames",
+              "title": "Group of policies and measures",
+              "calculatedWhenGroup": true,
+              "hideWhenSingle": true
             }
           ]
         },
