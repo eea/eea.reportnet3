@@ -53,7 +53,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, isDuplicatedToManageUnique: payload.value };
 
     case 'INITIAL_DATASET_DESCRIPTION':
-      return { ...state, initialDatasetDescription: payload.value };
+      return { ...state, initialDatasetDescription: payload.value };    
 
     case 'SET_IS_LOADING':
       return { ...state, isLoading: payload.value };
@@ -63,6 +63,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_REPLACE_DATA':
       return { ...state, replaceData: payload.value };
+
+    case 'SET_IS_TABLE_CREATED':
+      return { ...state, isTableCreated: payload.isTableCreated };
 
     case 'SET_VIEW_MODE':
       const inmViewType = { ...state.viewType };
