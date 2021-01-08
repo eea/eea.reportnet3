@@ -33,6 +33,8 @@ export const TabsDesigner = withRouter(
     datasetSchemas,
     datasetStatistics,
     editable = false,
+    getIsTableCreated,
+    getUpdatedTabs,
     history,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
@@ -47,7 +49,6 @@ export const TabsDesigner = withRouter(
     onTabChange,
     onUpdateTable,
     onUpdateSchema,
-    getUpdatedTabs,
     recordPositionId,
     selectedRecordErrorId,
     selectedRuleId,
@@ -256,6 +257,7 @@ export const TabsDesigner = withRouter(
           inmTabs[tabIndex].showContextMenu = false;
           setActiveTableSchemaId(response.data.idTableSchema);
           setTabs(inmTabs);
+          getIsTableCreated(true);
         }
       } catch (error) {
         console.error('Error during field Add: ', error);

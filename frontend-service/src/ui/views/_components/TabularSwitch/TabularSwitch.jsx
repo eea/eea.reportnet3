@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 
 import styles from './TabularSwitch.module.scss';
 
@@ -6,7 +6,15 @@ import { tabularSwitchReducer } from './_functions/Reducers/tabularSwitchReducer
 
 import { TabularSwitchUtils } from './_functions/Utils/TabularSwitchUtils';
 
-const TabularSwitch = ({ className = '', elements = [], id, onChange, value = '' }) => {
+const TabularSwitch = ({
+  className = '',
+  elements = [],
+  id,
+  getIsTableCreated,
+  isTableCreated,
+  onChange,
+  value = ''
+}) => {
   const { onSwitchAnimate, parseViews } = TabularSwitchUtils;
 
   const [tabularSwitchState, tabularSwitchDispatch] = useReducer(tabularSwitchReducer, {
@@ -14,6 +22,12 @@ const TabularSwitch = ({ className = '', elements = [], id, onChange, value = ''
   });
 
   const { views } = tabularSwitchState;
+
+  useEffect(() => {
+    if (isTableCreated) {
+      onSwitchView(value);
+    }
+  }, [isTableCreated]);
 
   const onSwitchView = element => {
     const viewType = { ...views };
@@ -24,6 +38,7 @@ const TabularSwitch = ({ className = '', elements = [], id, onChange, value = ''
 
     onChange(element);
     tabularSwitchDispatch({ type: 'ON_CHANGE_VIEW', payload: { viewType } });
+    getIsTableCreated(false);
   };
 
   return (
