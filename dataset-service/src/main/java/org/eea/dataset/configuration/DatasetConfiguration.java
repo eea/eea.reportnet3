@@ -194,11 +194,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Primary
   public PlatformTransactionManager dataSetsTransactionManager(
-      @Autowired @Qualifier("dataSetsEntityManagerFactory") EntityManagerFactory emf) {
+      @Autowired @Qualifier("dataSetsEntityManagerFactory") LocalContainerEntityManagerFactoryBean emf) {
 
     final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
     schemastransactionManager
-        .setEntityManagerFactory(((LocalContainerEntityManagerFactoryBean) emf).getObject());
+        .setEntityManagerFactory(emf.getObject());
     return schemastransactionManager;
   }
 
