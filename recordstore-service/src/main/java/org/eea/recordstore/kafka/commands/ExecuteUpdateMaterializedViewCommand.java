@@ -5,7 +5,6 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.recordstore.service.RecordStoreService;
-import org.eea.recordstore.util.ViewHelper;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,10 +18,6 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
   /** The database management service. */
   @Autowired
   private RecordStoreService recordStoreService;
-
-  /** The view helper. */
-  @Autowired
-  private ViewHelper viewHelper;
 
   /**
    * Gets the event type.
