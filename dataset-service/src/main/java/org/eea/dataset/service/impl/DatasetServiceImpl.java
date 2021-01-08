@@ -122,6 +122,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final String USER = "root";
 
+  private static final String HEADER_NAME = "headerName";
+
   /**
    * The Constant LOG.
    */
@@ -324,10 +326,11 @@ public class DatasetServiceImpl implements DatasetService {
   private PkCatalogueRepository pkCatalogueRepository;
 
 
-  /** The field extended repository. */
+  /**
+   * The field extended repository.
+   */
   @Autowired
   private FieldExtendedRepository fieldExtendedRepository;
-
 
 
   /**
@@ -818,7 +821,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -1017,15 +1020,21 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
     }
-    Boolean isLinkMultiselect = Boolean.FALSE;
+
     String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     Document fieldSchema =
         schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
+
+    if (fieldSchema == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+    }
+
+    Boolean isLinkMultiselect = Boolean.FALSE;
     if (DataType.LINK.equals(field.getType())) {
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
           && fieldSchema.getBoolean(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
     }
-    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+    if (fieldSchema.get(LiteralConstants.READ_ONLY) != null
         && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
         && !DatasetTypeEnum.DESIGN.equals(getDatasetType(datasetId))) {
       throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
@@ -1311,7 +1320,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return fieldsVO;
   }
-
 
 
   /**
@@ -1926,51 +1934,11 @@ public class DatasetServiceImpl implements DatasetService {
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
-        // make list of field vaues grouped by their record id. The field values will be set with
-        // the taget schemas id so they can be inserted
-        pagedFieldValues.stream().forEach(field -> {
-          FieldValue auxField = new FieldValue();
-          auxField.setValue(field.getValue());
-          auxField.setIdFieldSchema(field.getIdFieldSchema());
-          auxField.setType(field.getType());
+          .size() > 0) {
 
-          // transform the grouping record in the target one. Do it only once
-          String targetIdRecordSchema = field.getRecord().getIdRecordSchema();
-          String originRecordId = field.getRecord().getId();
-          if (!mapTargetRecordValues.containsKey(originRecordId)) {
-
-            RecordValue targetRecordValue = new RecordValue();
-            targetRecordValue.setDataProviderCode(dataproviderVO.getCode());
-            targetRecordValue.setDatasetPartitionId(datasetPartitionId);
-            targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
-            targetRecordValue.setTableValue(targetTable);
-            targetRecordValue.setFields(new ArrayList<>());
-            // using temporary recordId as grouping criteria, then it will be removed before giving
-            // back
-            mapTargetRecordValues.put(originRecordId, targetRecordValue);
-            targetRecords.add(targetRecordValue);
-          }
-
-          auxField.setRecord(mapTargetRecordValues.get(originRecordId));
-
-          if (DataType.ATTACHMENT.equals(field.getType())) {
-            if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
-              dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
-              dictionaryIdFieldAttachment.get(field.getId()).setId(null);
-            }
-
-          }
-          auxField.setGeometry(field.getGeometry());
-          mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
-          // when the record has reached the number of fields per record then remove from the map to
-          // avoid rehashing
-          if (mapTargetRecordValues.get(originRecordId).getFields()
-              .size() == numberOfFieldsInRecord) {
-            mapTargetRecordValues.remove(originRecordId);
-          }
-        });
-
+        processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
+            dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
+            datasetPartitionId, null);
         fieldValuePage = fieldValuePage.next();
       }
 
@@ -1979,6 +1947,67 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  //Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code and Cognitive Complexity
+  private void processRecordPage(List<FieldValue> pagedFieldValues, List<RecordValue> targetRecords,
+      Map<String, RecordValue> mapTargetRecordValues,
+      Map<String, AttachmentValue> dictionaryIdFieldAttachment, TableValue targetTable,
+      Integer numberOfFieldsInRecord, DataProviderVO dataproviderVO, Long datasetPartitionId,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+    // make list of field vaues grouped by their record id. The field values will be set with
+    // the taget schemas id so they can be inserted
+    pagedFieldValues.stream().forEach(field -> {
+      FieldValue auxField = new FieldValue();
+      auxField.setValue(field.getValue());
+      String targetIdRecordSchema = null;
+
+      if (null == dictionaryOriginTargetObjectId) {//called from recordDesingAssignation
+        auxField.setIdFieldSchema(field.getIdFieldSchema());
+        targetIdRecordSchema = field.getRecord().getIdRecordSchema();
+      } else {//called from replaceData
+        auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+        // transform the grouping record in the target one. Do it only once
+        targetIdRecordSchema = dictionaryOriginTargetObjectId
+            .get(field.getRecord().getIdRecordSchema());
+      }
+
+      auxField.setType(field.getType());
+
+      String originRecordId = field.getRecord().getId();
+      if (!mapTargetRecordValues.containsKey(originRecordId)) {
+
+        RecordValue targetRecordValue = new RecordValue();
+        if (null != dataproviderVO) { //called from recordDesingAssignation
+          targetRecordValue.setDataProviderCode(dataproviderVO.getCode());
+        }
+        targetRecordValue.setDatasetPartitionId(datasetPartitionId);
+        targetRecordValue.setIdRecordSchema(targetIdRecordSchema);
+        targetRecordValue.setTableValue(targetTable);
+        targetRecordValue.setFields(new ArrayList<>());
+        // using temporary recordId as grouping criteria, then it will be removed before giving
+        // back
+        mapTargetRecordValues.put(originRecordId, targetRecordValue);
+        targetRecords.add(targetRecordValue);
+      }
+
+      auxField.setRecord(mapTargetRecordValues.get(originRecordId));
+
+      if (DataType.ATTACHMENT.equals(field.getType())) {
+        if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
+          dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
+          dictionaryIdFieldAttachment.get(field.getId()).setId(null);
+        }
+
+      }
+      auxField.setGeometry(field.getGeometry());
+      mapTargetRecordValues.get(originRecordId).getFields().add(auxField);
+      // when the record has reached the number of fields per record then remove from the map to
+      // avoid rehashing
+      if (mapTargetRecordValues.get(originRecordId).getFields()
+          .size() == numberOfFieldsInRecord) {
+        mapTargetRecordValues.remove(originRecordId);
+      }
+    });
+  }
 
   /**
    * Gets the tables from schema.
@@ -2786,11 +2815,14 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+          .size() > 0) {
 
         // For this, the best is getting fields in big completed sets and assign them to the records
         // to avoid excessive queries to bd
 
+        processRecordPage(pagedFieldValues, result, mapTargetRecordValues,
+            dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, null,
+            datasetPartitionId, dictionaryOriginTargetObjectId);
         // make list of field vaues grouped by their record id. The field values will be set with
         // the taget schemas id so they can be inserted
         pagedFieldValues.stream().forEach(field -> {
@@ -3001,8 +3033,8 @@ public class DatasetServiceImpl implements DatasetService {
             && ((Document) document).getBoolean(LiteralConstants.PK)) {
           fieldSchemaDocument = (Document) document;
         }
-        if (((Document) document).get("headerName") != null
-            && ((Document) document).getString("headerName").equals("ListOfSinglePams")) {
+        if (((Document) document).get(HEADER_NAME) != null
+            && ((Document) document).getString(HEADER_NAME).equals("ListOfSinglePams")) {
           idListOfSinglePamsField = ((Document) document).get("_id").toString();
         }
       }
@@ -3114,8 +3146,8 @@ public class DatasetServiceImpl implements DatasetService {
         // we took the list of single pams value
         String idListOfSinglePamsField = null;
         for (Object document : fieldSchemasList) {
-          if (((Document) document).get("headerName") != null
-              && ((Document) document).getString("headerName").equals("ListOfSinglePams")) {
+          if (((Document) document).get(HEADER_NAME) != null
+              && ((Document) document).getString(HEADER_NAME).equals("ListOfSinglePams")) {
             idListOfSinglePamsField = ((Document) document).get("_id").toString();
             break;
           }
@@ -3170,7 +3202,6 @@ public class DatasetServiceImpl implements DatasetService {
 
     return schema;
   }
-
 
 
 }
