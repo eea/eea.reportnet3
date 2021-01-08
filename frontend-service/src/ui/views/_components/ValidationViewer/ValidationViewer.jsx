@@ -310,7 +310,7 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFieldsTypes = () => {
-      const tablesWithRecords = tables.filter(table => !isUndefined(table.records));
+      const tablesWithRecords = !isNil(tables) && tables.filter(table => !isUndefined(table.records));
 
       const fields = [];
       tablesWithRecords.forEach(table => {

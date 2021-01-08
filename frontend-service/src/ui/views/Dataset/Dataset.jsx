@@ -1000,6 +1000,7 @@ export const Dataset = withRouter(({ match, history }) => {
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             schemaTables={schemaTables}
+            tables={datasetSchemaAllTables}
             visible={validationsVisible}
           />
         </Dialog>
