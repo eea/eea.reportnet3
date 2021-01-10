@@ -24,7 +24,7 @@
         {
           "type": "FIELD",
           "name": "UploadFile",
-          "title": "If necessary, you can upload here an additional document (max. 2 MB)"
+          "title": "Description of the alignment with the national inventory system"
         }
       ]
     }

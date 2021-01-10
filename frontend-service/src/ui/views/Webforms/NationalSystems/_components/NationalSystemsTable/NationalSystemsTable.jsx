@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './NationalSystemsTable.module.scss';
 
 import { NationalSystemsRecord } from './_components/NationalSystemsRecord';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSchemaId }) => {
+export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, tables, tableSchemaId }) => {
   const [data, setData] = useState([]);
+  const [schemaData, setSchemaData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -30,6 +33,7 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
       ]);
 
       setData(parseData(response.records));
+      setSchemaData(response);
     } catch (error) {
       console.log('error', error);
     } finally {
@@ -97,13 +101,35 @@ export const NationalSystemsTable = ({ datasetId, schemaTables, tables, tableSch
     });
   };
 
-  if (isLoading) return 'SPINNER';
+  const renderErrors = () => {
+    const errors = errorMessages(schemaData, tables.name);
+
+    return (
+      <ul>
+        {errors.map((error, index) => (
+          <li key={index}>{error}</li>
+        ))}
+      </ul>
+    );
+  };
+
+  const renderRecords = () => {
+    if (!isEmpty(errorMessages(schemaData, tables.name))) return renderErrors();
+
+    return data.map((record, index) => (
+      <Fragment key={index}>
+        <NationalSystemsRecord datasetId={datasetId} record={record} />
+      </Fragment>
+    ));
+  };
+
+  if (isLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
     <div className={styles.content}>
-      {data.map((record, index) => (
-        <NationalSystemsRecord record={record} index={index} datasetId={datasetId} />
-      ))}
+      <h2>{tables.title}</h2>
+
+      {renderRecords()}
     </div>
   );
 };

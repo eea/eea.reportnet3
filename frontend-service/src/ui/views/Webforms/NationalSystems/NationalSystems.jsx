@@ -1,90 +1,74 @@
-import React, { Fragment, useEffect, useReducer } from 'react';
-
-import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
-import keys from 'lodash/keys';
-
-import styles from './NationalSystems.module.scss';
+import React, { Fragment, useContext } from 'react';
 
 import { tables } from './nationalSystems.webform.json';
 
-import { Button } from 'ui/views/_components/Button';
-import { Spinner } from 'ui/views/_components/Spinner';
-import { Toolbar } from 'ui/views/_components/Toolbar';
-import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 import { NationalSystemsTable } from './_components/NationalSystemsTable';
 
-import { DatasetService } from 'core/services/Dataset';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
-import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) => {
   const { datasetSchema } = state;
 
-  const nationalSystemsReducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'INITIAL_LOAD':
-        return { ...state, ...payload };
+  const resources = useContext(ResourcesContext);
+
+  const getErrorMessages = (data, tableName) => {
+    switch (tableName) {
+      case 'Table_1':
+        return renderTableErrors(data);
+
+      case 'Table_2':
+        return renderFileErrors(data);
 
       default:
-        return state;
+        break;
     }
   };
 
-  const [nationalSystemsState, nationalSystemsDispatch] = useReducer(nationalSystemsReducer, {
-    data: [],
-    isVisible: {}
-  });
+  const renderFileErrors = data => {
+    const errorMessages = [];
 
-  useEffect(() => {
-    // initialLoad();
-  }, []);
-
-  const initialLoad = () => {
-    // const data = mergeArrays(tables, datasetSchema.tables, 'name', 'tableSchemaName');
-
-    const result = [];
-    for (let i = 0; i < tables.length; i++) {
-      result.push({
-        ...tables[i],
-        ...datasetSchema.tables.find(
-          element =>
-            !isNil(element['tableSchemaName']) &&
-            !isNil(tables[i]['name']) &&
-            TextUtils.areEquals(element['tableSchemaName'], tables[i]['name'])
-        )
-      });
+    if (data?.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
     }
-    console.log('result', result);
 
-    // nationalSystemsDispatch({ type: 'INITIAL_LOAD', payload: { data } });
+    if (data?.totalRecords > 1) {
+      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
+    }
+
+    if (!TextUtils.areEquals(data?.records[0]?.fields[0].type, 'ATTACHMENT')) {
+      errorMessages.push('goodf');
+    }
+
+    return errorMessages;
   };
 
-  const renderHeaders = () => {
-    return (
-      <Button
-        className={`${styles.headerButton}`}
-        icon={'table'}
-        // label={webform.label}
-        // onClick={() => onChangeWebformTab(webform.name)}
-        // style={{ display: isReporting && !isCreated ? 'none' : '' }}
-      />
-    );
+  const renderTableErrors = data => {
+    const errorMessages = [];
+
+    if (data?.totalRecords === 0) {
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+    }
+
+    return errorMessages;
   };
 
-  return (
-    <div>
-      <Toolbar className={styles.toolbar}>
-        <div className="p-toolbar-group-left">{renderHeaders()}</div>
-      </Toolbar>
-      <NationalSystemsTable
-        // data={nationalSystemsState.data}
-        datasetId={datasetId}
-        schemaTables={datasetSchema.tables[0]}
-        tables={tables[0]}
-        tableSchemaId={datasetSchema.tables[0].tableSchemaId}
-      />
-    </div>
-  );
+  return datasetSchema.tables
+    .filter(tab => tab.tableSchemaId)
+    .map((table, index) => {
+      const configTables = tables.filter(tab => TextUtils.areEquals(tab['name'], table['tableSchemaName']))[0];
+
+      return (
+        <Fragment key={index}>
+          <NationalSystemsTable
+            datasetId={datasetId}
+            errorMessages={getErrorMessages}
+            schemaTables={table}
+            tables={configTables}
+            tableSchemaId={table.tableSchemaId}
+          />
+        </Fragment>
+      );
+    });
 };

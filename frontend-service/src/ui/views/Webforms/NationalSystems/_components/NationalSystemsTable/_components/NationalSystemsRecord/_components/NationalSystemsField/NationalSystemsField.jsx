@@ -137,8 +137,8 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
             {!isNil(field.value) && field.value !== '' && (
               <Button
                 className={`${field.value === '' && 'p-button-animated-blink'} p-button-primary-transparent`}
-                icon="export"
-                iconPos="right"
+                icon={'export'}
+                iconPos={'right'}
                 label={field.value}
                 onClick={() => onFileDownload(field.value, field.fieldId)}
               />
@@ -146,7 +146,7 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
             {
               <Button
                 className={`p-button-animated-blink p-button-primary-transparent`}
-                icon="import"
+                icon={'import'}
                 label={
                   resources.messages[
                     !isNil(field.value) && field.value !== '' ? 'uploadReplaceAttachment' : 'uploadAttachment'
@@ -166,7 +166,7 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
 
             <Button
               className={`p-button-animated-blink p-button-primary-transparent`}
-              icon="trash"
+              icon={'trash'}
               onClick={() => {
                 // onFileDeleteVisible(field.fieldId, field.fieldSchemaId);
                 handleDialogs('deleteAttachment', true);
@@ -183,11 +183,11 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
   return (
     <div className={styles.content} key={key}>
       <div className={styles.titleWrapper}>
-        <h4>{title.value || title}</h4>
+        <h4>{!isNil(title.value) ? title.value : title}</h4>
         {!isNil(tooltip) && (
           <Button
             className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-            icon="infoCircle"
+            icon={'infoCircle'}
             tooltip={tooltip.value}
             tooltipOptions={{ position: 'top' }}
           />
@@ -207,11 +207,11 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
           fileLimit={1}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
-          mode="advanced"
+          mode={'advanced'}
           multiple={false}
-          name="file"
+          name={'file'}
           onUpload={onAttachFile}
-          operation="PUT"
+          operation={'PUT'}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
             datasetId,
             fieldId: field.fieldId
