@@ -10,7 +10,7 @@ const TabularSwitch = ({
   className = '',
   elements = [],
   id,
-  getIsTableCreated,
+  getIsTableCreated = () => {},
   isTableCreated,
   onChange,
   value = ''
