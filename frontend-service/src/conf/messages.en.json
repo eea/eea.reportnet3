@@ -946,6 +946,7 @@
     "webformShouldBeAttachment": "The field type should be attachment",
     "cloneNewSchemaError": "Error. The cloning process is already running.",
     "updateWebformFieldInCascadeByIdError": "Failed updating webform field. Check that the PaM Id does not already exist",
-    "updateWebformFieldByIdError": "Failed updating webform field"
+    "updateWebformFieldByIdError": "Failed updating webform field",
+    "updateRecordsInCascadeByIdError": "Failed updating record. Check that the PaM Id does not already exist"
   }
 }

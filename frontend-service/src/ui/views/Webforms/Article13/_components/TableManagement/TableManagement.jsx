@@ -273,10 +273,16 @@ export const TableManagement = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'UPDATE_RECORDS_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      if (updateInCascade) {
+        notificationContext.add({
+          type: 'UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'UPDATE_RECORDS_BY_ID_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName }
+        });
+      }
     } finally {
       tableManagementDispatch({ type: 'ON_SAVE_RECORD' });
       onRefresh();
