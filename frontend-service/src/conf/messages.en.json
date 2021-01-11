@@ -943,6 +943,6 @@
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
     "otherObjectives": "Other objectives",
-    "createCloneNewSchemaError": "Error. The process is already running."
+    "cloneNewSchemaError": "Error. The cloning process is already running."
   }
 }

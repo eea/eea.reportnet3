@@ -155,6 +155,9 @@ export const BigButtonList = ({
       await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
       console.error(error);
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
+      }
     }
   };
 
@@ -236,12 +239,6 @@ export const BigButtonList = ({
     } finally {
       setDataCollectionDialog(false);
     }
-  };
-
-  const onShowCloningNotification = () => {
-    notificationContext.add({
-      type: 'CREATE_CLONE_NEW_SCHEMA_ERROR'
-    });
   };
 
   const onShowManualTechnicalAcceptanceDialog = () => setIsManualTechnicalAcceptanceDialogVisible(true);
@@ -486,7 +483,6 @@ export const BigButtonList = ({
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
       onSaveName,
-      onShowCloningNotification,
       onShowCopyDataCollectionToEuDatasetModal,
       onShowDataCollectionModal,
       onShowExportEuDatasetModal,
