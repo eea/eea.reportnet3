@@ -1,8 +1,14 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -12,6 +18,10 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.service.model.FieldValueWithLabel;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +40,8 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final Logger LOG = LoggerFactory.getLogger(FieldExtendedRepositoryImpl.class);
 
-  /**
-   * The entity manager.
-   */
-  @PersistenceContext
+  /** The entity manager. */
+  @PersistenceContext(name = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
 
   /**
@@ -42,11 +50,17 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /**
-   * The field repository.
-   */
-  @Autowired
-  private FieldRepository fieldRepository;
+
+  /** The Constant QUERY_FIELD_SCHEMA_AND_VALUE: {@value}. */
+  private static final String QUERY_FIELD_SCHEMA_AND_VALUE =
+      "select * from dataset_%s.field_value where id_field_schema='%s' and value IN (%s)";
+
+  /** The Constant QUERY_FIND_VALUE: {@value}. */
+  private static final String QUERY_FIND_VALUE =
+      "select table2.valuet2 as id,fv.value as value from dataset_%s.field_value fv "
+          + "inner join (select fv2.id_record as idrecordt2,fv2.value as valuet2  from dataset_%s.field_value fv2 where "
+          + "fv2.id_field_schema ='%s' and fv2.value IN(%s)) as table2 "
+          + "on table2.idrecordt2 = fv.id_record where fv.id_field_schema ='%s'";
 
   /**
    * The Constant SORT_NUMBER_QUERY.
@@ -108,13 +122,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param searchValue the search value
    * @param conditionalSchemaId the conditional schema id
    * @param conditionalValue the conditional value
+   * @param dataTypePk the data type pk
    * @param resultsNumber the results number
-   *
    * @return the list
    */
   @Override
   public List<FieldVO> findByIdFieldSchemaWithTagOrdered(String idPk, String labelSchemaId,
-      String searchValue, String conditionalSchemaId, String conditionalValue,
+      String searchValue, String conditionalSchemaId, String conditionalValue, DataType dataTypePk,
       Integer resultsNumber) {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
@@ -122,11 +136,10 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder.append(QUERY_1);
-    FieldValue typeField = fieldRepository.findFirstTypeByIdFieldSchema(idPk);
-    if (typeField != null && (DataType.NUMBER_DECIMAL.equals(typeField.getType())
-        || DataType.NUMBER_INTEGER.equals(typeField.getType()))) {
+    if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
+        || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
       queryBuilder.append(SORT_NUMBER_QUERY);
-    } else if (typeField != null && DataType.DATE.equals(typeField.getType())) {
+    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
       queryBuilder.append(SORT_DATE_QUERY);
     } else {
       queryBuilder.append(SORT_STRING_QUERY);
@@ -171,4 +184,73 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
     return fieldsVO;
   }
+
+
+  /**
+   * Query execution record.
+   *
+   * @param idFieldSchema the id field schema
+   * @param idsList the ids list
+   * @param datasetId the dataset id
+   * @return the list
+   */
+  @Override
+  public List<FieldValue> queryFindByFieldSchemaAndValue(String idFieldSchema, List<String> idsList,
+      Long datasetId) {
+    String result = listToString(datasetId.toString(), idsList);
+    String finalQuery =
+        String.format(QUERY_FIELD_SCHEMA_AND_VALUE, datasetId.toString(), idFieldSchema, result);
+    Query query = entityManager.createNativeQuery(finalQuery, FieldValue.class);
+    return query.getResultList();
+  }
+
+
+  /**
+   * Query find value.
+   *
+   * @param idFieldSchema1 the id field schema 1
+   * @param idFieldSchema2 the id field schema 2
+   * @param datasetId the dataset id
+   * @param idsList the ids list
+   * @return the list
+   */
+  @Override
+  public List<FieldVO> queryFindValue(String idFieldSchema1, String idFieldSchema2,
+      String datasetId, List<String> idsList) {
+    String result = listToString(datasetId, idsList);
+    String finalQuery = String.format(QUERY_FIND_VALUE, datasetId, datasetId, idFieldSchema1,
+        result, idFieldSchema2);
+    Session session = (Session) entityManager.getDelegate();
+    return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
+      @Override
+      public List<FieldVO> execute(Connection conn) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(finalQuery);
+            ResultSet rs = stmt.executeQuery();) {
+          List<FieldVO> fields = new ArrayList<>();
+          while (rs.next()) {
+            FieldVO field = new FieldVO();
+            field.setId(rs.getString(1));
+            field.setValue(rs.getString(2));
+            fields.add(field);
+          }
+          return fields;
+        }
+      }
+    });
+  }
+
+  /**
+   * List to string.
+   *
+   * @param datasetId the dataset id
+   * @param idsList the ids list
+   * @return the string
+   */
+  private String listToString(String datasetId, List<String> idsList) {
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+    UnaryOperator<String> addQuotes = s -> "'" + s + "'";
+    return idsList.stream().map(addQuotes).collect(Collectors.joining(", "));
+  }
+
+
 }
