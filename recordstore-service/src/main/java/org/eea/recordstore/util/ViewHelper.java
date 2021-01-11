@@ -61,23 +61,28 @@ public class ViewHelper implements DisposableBean {
    * Insert view procces.
    *
    * @param datasetId the dataset id
-   * @param checkSQL
-   * @param user
    * @param isMaterialized
+   * @param user the username
+   * @param checkSQL the check SQL
    */
   public void insertViewProcces(Long datasetId, Boolean isMaterialized, String user,
       Boolean checkSQL) {
+    // Check the number of views per dataset in this moment queued
     switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
         .toString()) {
       case "0":
+        // no processes running, then we should queue it
         viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
             isMaterialized, user, checkSQL));
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
+        // one process already queued so, we notify to every instance
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       default:
+        // if there are 2 processes, one active, one in queue, no need to add more as the last
+        // process will take all the changes happened before the second process starts
         break;
     }
   }
@@ -98,13 +103,18 @@ public class ViewHelper implements DisposableBean {
    * Finish procces.
    *
    * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   * @param user the user
+   * @param checkSQL the check SQL
    */
   public void finishProcces(Long datasetId, Boolean isMaterialized, String user, Boolean checkSQL) {
+    // If we hace two dataset view generating process we have to execute it again
     if (2 == processesList.stream().filter(x -> datasetId.equals(x))
         .collect(Collectors.counting())) {
       viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
           isMaterialized, user, checkSQL));
     }
+    // update the proesses list in every recordstore instance
     releaseDeleteViewProccesEvent(datasetId);
   }
 
@@ -126,9 +136,9 @@ public class ViewHelper implements DisposableBean {
    * Initialize create update materialized query view.
    *
    * @param datasetId the dataset id
-   * @param isMaterialized
-   * @param checkSQL
-   * @param user
+   * @param isMaterialized the is materialized
+   * @param user the user
+   * @param checkSQL the check SQL
    */
   public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
       String user, Boolean checkSQL) {
@@ -154,6 +164,7 @@ public class ViewHelper implements DisposableBean {
    * Release validate manual QC event.
    *
    * @param datasetId the dataset id
+   * @param user the user
    * @param checkNoSQL the check no SQL
    */
   private void releaseValidateManualQCEvent(Long datasetId, String user, boolean checkNoSQL) {
