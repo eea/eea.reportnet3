@@ -24,11 +24,13 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -133,7 +135,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, null);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -212,7 +214,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, null);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -259,7 +261,7 @@ public class FileTreatmentHelperTest {
     // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
     // .thenReturn(integrationVOs);
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, null);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -281,6 +283,11 @@ public class FileTreatmentHelperTest {
     List<IntegrationVO> integrationVOs = new ArrayList<>();
     integrationVOs.add(integrationVO);
 
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", 1);
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    executionResultVO.setExecutionResultParams(executionResultParams);
+
     MultipartFile multipartFile =
         new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
 
@@ -291,17 +298,62 @@ public class FileTreatmentHelperTest {
     Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
         .thenReturn(integrationVOs);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(null);
+        Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, null);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
     Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void importFileDataExceptionTest() throws EEAException {
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(null);
+    try {
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
+    } catch (EEAException e) {
+      Mockito.verify(datasetService, times(1)).releaseLock(Mockito.anyString(), Mockito.anyLong());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void importFileDataFolderExceptionTest() throws EEAException {
+    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn(new DataSetSchema());
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
+    File folder = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    folder.mkdirs();
+    try {
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+    } catch (EEAException e) {
+      Assert.assertEquals(e.getMessage(), "Folder for dataset 1 already exists");
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void importFileDataIOExceptionTest() throws IOException, EEAException {
+    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn(new DataSetSchema());
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.when(file.getInputStream()).thenThrow(IOException.class);
+    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    try {
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
+    } catch (EEAException e) {
+      Mockito.verify(datasetService, times(1)).releaseLock(Mockito.anyString(), Mockito.anyLong());
+      throw e;
+    }
   }
 }
 
