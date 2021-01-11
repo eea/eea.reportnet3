@@ -5,24 +5,40 @@
     align-items: center;
     display: flex;
 
-    .infoButton {
-      background-color: var(--white) !important;
-      border-radius: 50% !important;
-      color: var(--datatable-header-info-button-color) !important;
-      font-size: 12pt !important;
-      height: 0.7em !important;
-      margin-left: 0.4rem !important;
-      width: 0.7em !important;
+    .sectionTitle {
+      width: 90%;
+      display: flex;
+      align-items: center;
 
-      > span {
-        left: 46% !important;
-        margin-left: -0.48em !important;
-        margin-top: -0.5em !important;
-      }
+      .infoButton {
+        margin: 0 1rem;
+        background-color: var(--white) !important;
+        border-radius: 50% !important;
+        color: var(--datatable-header-info-button-color) !important;
+        font-size: 12pt !important;
+        height: 0.7em !important;
+        margin-left: 0.4rem !important;
+        width: 0.7em !important;
 
-      &:focus {
-        box-shadow: none !important;
+        > span {
+          left: 46% !important;
+          margin-left: -0.48em !important;
+          margin-top: -0.5em !important;
+        }
+
+        &:focus {
+          box-shadow: none !important;
+        }
       }
+    }
+  }
+
+  .fieldWrapper {
+    align-items: center;
+    display: flex;
+
+    .template {
+      width: 90%;
     }
   }
 }
