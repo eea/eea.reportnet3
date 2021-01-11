@@ -59,7 +59,7 @@ public class ViewHelper implements DisposableBean {
 
   /**
    * Insert view procces.
-   * 
+   *
    * @param datasetId the dataset id
    * @param checkSQL
    * @param user
@@ -133,7 +133,7 @@ public class ViewHelper implements DisposableBean {
   public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
       String user, Boolean checkSQL) {
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
-    if (checkSQL) {
+    if (Boolean.TRUE.equals(checkSQL)) {
       releaseValidateManualQCEvent(datasetId, user, true);
     }
     releaseFinishViewProcessEvent(datasetId, isMaterialized, user, checkSQL);
@@ -146,9 +146,7 @@ public class ViewHelper implements DisposableBean {
    * @param datasetId the dataset id
    */
   private void releaseDeleteViewProccesEvent(Long datasetId) {
-    Map<String, Object> result = new HashMap<>();
-    result.put(LiteralConstants.DATASET_ID, datasetId);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.DELETE_VIEW_PROCCES_EVENT, result);
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.DELETE_VIEW_PROCCES_EVENT, datasetId);
   }
 
 

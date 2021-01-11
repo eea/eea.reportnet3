@@ -3,6 +3,7 @@ package org.eea.dataset.io.kafka.commands;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -10,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +20,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class SaveStatisticsCommandTest.
@@ -41,11 +46,31 @@ public class PropagateNewFieldCommandTest {
   /** The data. */
   private Map<String, Object> data;
 
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
+
+  /**
+   * The security context.
+   */
+  private SecurityContext securityContext;
+
+  /**
+   * The authentication.
+   */
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
     MockitoAnnotations.initMocks(this);
   }
 
@@ -68,6 +93,8 @@ public class PropagateNewFieldCommandTest {
     data.put("typeField", DataType.TEXT);
     eeaEventVO.setData(data);
 
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("user");
     doNothing().when(updateRecordHelper).propagateNewFieldDesign(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     propagateCommand.execute(eeaEventVO);

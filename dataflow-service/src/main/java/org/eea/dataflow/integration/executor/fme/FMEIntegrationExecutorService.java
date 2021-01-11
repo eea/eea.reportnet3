@@ -82,6 +82,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   @Autowired
   private FMEJobRepository fmeJobRepository;
 
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
@@ -206,12 +207,17 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Directive rn3JobId = new Directive();
     rn3JobId.setName(IntegrationParams.RN3_JOB_ID);
     rn3JobId.setValue(fmeJob.getId().toString());
+    Directive notificationRequired = new Directive();
+    notificationRequired.setName(IntegrationParams.NOTIFICATION_REQUIRED);
+    notificationRequired.setValue("true".equals(
+        integration.getInternalParameters().get(IntegrationParams.NOTIFICATION_REQUIRED)) ? "true"
+            : "false");
 
     List<String> topics = Arrays.asList(topic);
     NMDirectives nmDirectives = new NMDirectives();
     nmDirectives.setSuccessTopics(topics);
     nmDirectives.setFailureTopics(topics);
-    nmDirectives.setDirectives(Arrays.asList(apiKeyDirective, rn3JobId));
+    nmDirectives.setDirectives(Arrays.asList(apiKeyDirective, rn3JobId, notificationRequired));
 
     fmeAsyncJob.setNmDirectives(nmDirectives);
 
@@ -296,7 +302,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       fmeJob.setStatus(FMEJobstatus.QUEUED);
     } else {
       fmeJob.setStatus(FMEJobstatus.ABORTED);
-      fmeCommunicationService.releaseNotifications(fmeJob, -1L);
+      fmeCommunicationService.releaseNotifications(fmeJob, -1L, true);
     }
     fmeJobRepository.save(fmeJob);
     return executionResultVO;

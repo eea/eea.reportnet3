@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.executor.fme.service;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
@@ -61,6 +63,9 @@ public class FMECommunicationServiceTest {
 
   @Mock
   private FMEJobRepository fmeJobRepository;
+
+  @Mock
+  private LockService lockService;
 
   @Before
   public void initMocks() {
@@ -234,40 +239,60 @@ public class FMECommunicationServiceTest {
 
   @Test
   public void releaseNotificationsImportReportingCompletedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    fmeJob.setFileName("Test.csv");
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
   @Test
   public void releaseNotificationsImportReportingFailedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
-    fmeJob.setProviderId(null);
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    fmeJob.setFileName("Test.csv");
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
   @Test
   public void releaseNotificationsImportDesignCompletedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
-    fmeJob.setProviderId(1L);
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    fmeJob.setFileName("Test.csv");
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
   @Test
   public void releaseNotificationsImportDesignFailedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
     FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    fmeJob.setFileName("Test.csv");
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -277,7 +302,7 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -287,7 +312,7 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -297,7 +322,7 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -307,7 +332,7 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -317,7 +342,7 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
-    fmeCommunicationService.releaseNotifications(fmeJob, 0L);
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -327,7 +352,7 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
-    fmeCommunicationService.releaseNotifications(fmeJob, 1L);
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
