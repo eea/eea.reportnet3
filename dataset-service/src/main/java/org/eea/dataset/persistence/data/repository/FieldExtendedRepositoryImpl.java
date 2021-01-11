@@ -50,11 +50,11 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /**
-   * The field repository.
-   */
-  @Autowired
-  private FieldRepository fieldRepository;
+  // /**
+  // * The field repository.
+  // */
+  // @Autowired
+  // private FieldRepository fieldRepository;
 
 
   /** The Constant QUERY_FIELD_SCHEMA_AND_VALUE: {@value}. */
@@ -142,7 +142,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder.append(QUERY_1);
-    FieldValue typeField = fieldRepository.findFirstTypeByIdFieldSchema(idPk);
+    FieldValue typeField = null;// fieldRepository.findFirstTypeByIdFieldSchema(idPk);
     if (typeField != null && (DataType.NUMBER_DECIMAL.equals(typeField.getType())
         || DataType.NUMBER_INTEGER.equals(typeField.getType()))) {
       queryBuilder.append(SORT_NUMBER_QUERY);
