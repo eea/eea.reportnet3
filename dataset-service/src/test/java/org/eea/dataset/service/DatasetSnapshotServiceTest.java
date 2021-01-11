@@ -637,7 +637,8 @@ public class DatasetSnapshotServiceTest {
         objectMapper.writeValueAsBytes(schema), objectMapper2.writeValueAsBytes(rule),
         objectMapper3.writeValueAsBytes(listUnique));
 
-    Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString());
+    Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString(),
+        Mockito.anyLong());
     when(rulesRepository.save(Mockito.any())).thenReturn(new RulesSchema());
 
     when(uniqueConstraintRepository.deleteByDatasetSchemaId(Mockito.any())).thenReturn(0L);
@@ -680,7 +681,8 @@ public class DatasetSnapshotServiceTest {
           objectMapper.writeValueAsBytes(schema), objectMapper2.writeValueAsBytes(rule),
           objectMapper3.writeValueAsBytes(listUnique));
 
-      Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString());
+      Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString(),
+          Mockito.anyLong());
       when(rulesRepository.save(Mockito.any())).thenReturn(new RulesSchema());
 
       when(uniqueConstraintRepository.deleteByDatasetSchemaId(Mockito.any())).thenReturn(0L);

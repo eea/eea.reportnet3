@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformRecord.module.scss';
 
@@ -25,6 +26,7 @@ import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
   addingOnTableSchemaId,
+  calculateSingle,
   columnsSchema,
   dataflowId,
   datasetId,
@@ -32,11 +34,15 @@ export const WebformRecord = ({
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
+  isGroup,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
+  onUpdateSinglesList,
+  onUpdatePamsId,
+  pamsRecords,
   record,
   tableId,
   tableName,
@@ -101,15 +107,76 @@ export const WebformRecord = ({
   };
 
   const onToggleFieldVisibility = (dependency, fields = []) => {
+    if (!isNil(isGroup) && isGroup()) return true;
     if (isNil(dependency)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
-      .map(filtered => (Array.isArray(filtered.value) ? filtered.value : filtered.value.split(', ')));
+      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split(', ')));
 
     return filteredDependency
       .flat()
       .map(field => dependency.value.includes(field))
       .includes(true);
+  };
+
+  const checkAddButtonVisibility = el => {
+    if (isNil(isGroup)) {
+      return true;
+    } else {
+      if (isGroup() && !isNil(el.hasCalculatedFields)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
+  const checkCalculatedFieldVisibility = el => {
+    if (isNil(isGroup)) {
+      return false;
+    } else {
+      if (isGroup() && el.calculatedWhenGroup && !el.hideWhenCalculated) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
+  const checkCalculatedTableVisibility = el => {
+    if (isNil(isGroup)) {
+      return false;
+    } else {
+      if (isGroup() && !isNil(el.hasCalculatedFields)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
+  const checkLabelVisibility = el => {
+    if (isNil(isGroup)) {
+      return true;
+    } else {
+      if ((isGroup() && el.hideWhenCalculated) || (!isGroup() && el.hideWhenSingle)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
+  const checkRequiredLabelVisibility = el => {
+    if (isNil(isGroup)) {
+      return true;
+    } else {
+      if (isGroup() && el.calculatedWhenGroup) {
+        return false;
+      } else {
+        return true;
+      }
+    }
   };
 
   const handleDialogs = (dialog, value) => {
@@ -133,13 +200,16 @@ export const WebformRecord = ({
 
       if (element.type === 'FIELD') {
         return (
+          checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div key={i} className={styles.field}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
-                  <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
+                  {checkRequiredLabelVisibility(element) && (
+                    <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
+                  )}
                 </label>
               )}
 
@@ -153,28 +223,37 @@ export const WebformRecord = ({
               )}
               <div className={styles.fieldWrapper}>
                 <div className={styles.template}>
-                  <WebformField
-                    columnsSchema={columnsSchema}
-                    datasetId={datasetId}
-                    datasetSchemaId={datasetSchemaId}
-                    element={element}
-                    isConditional={
-                      !isNil(webformRecordState.record) &&
-                      webformRecordState.record.elements.filter(
-                        col =>
-                          !isNil(col.referencedField) &&
-                          col.referencedField.masterConditionalFieldId === element.fieldSchemaId
-                      ).length > 0
-                    }
-                    isConditionalChanged={isConditionalChanged}
-                    onFillField={onFillField}
-                    onSaveField={onSaveField}
-                    record={record}
-                  />
+                  {checkCalculatedFieldVisibility(element) ? (
+                    calculateSingle(element)
+                  ) : (
+                    <WebformField
+                      columnsSchema={columnsSchema}
+                      datasetId={datasetId}
+                      datasetSchemaId={datasetSchemaId}
+                      element={element}
+                      isConditional={
+                        !isNil(webformRecordState.record) &&
+                        webformRecordState.record.elements.filter(
+                          col =>
+                            !isNil(col.referencedField) &&
+                            col.referencedField.masterConditionalFieldId === element.fieldSchemaId
+                        ).length > 0
+                      }
+                      isConditionalChanged={isConditionalChanged}
+                      onFillField={onFillField}
+                      onSaveField={onSaveField}
+                      onUpdateSinglesList={onUpdateSinglesList}
+                      onUpdatePamsId={onUpdatePamsId}
+                      pamsRecords={pamsRecords}
+                      record={record}
+                    />
+                  )}
                   {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
                 {element.validations &&
-                  element.validations.map((validation, index) => (
+                  uniqBy(element.validations, element => {
+                    return [element.message, element.errorLevel].join();
+                  }).map((validation, index) => (
                     <IconTooltip
                       className={'webform-validationErrors'}
                       key={index}
@@ -188,11 +267,21 @@ export const WebformRecord = ({
         );
       } else if (element.type === 'LABEL') {
         return (
-          <Fragment>
-            {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
-            {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
-            {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
-          </Fragment>
+          checkLabelVisibility(element) && (
+            <Fragment>
+              {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+              {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+              {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+              {element.tooltip && isNil(element.customType) && (
+                <Button
+                  className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                  icon="infoCircle"
+                  tooltip={element.tooltip}
+                  tooltipOptions={{ position: 'top' }}
+                />
+              )}
+            </Fragment>
+          )
         );
       } else {
         return (
@@ -208,7 +297,7 @@ export const WebformRecord = ({
                     )}
                   </h3>
 
-                  {element.multipleRecords && (
+                  {checkAddButtonVisibility(element) && element.multipleRecords && (
                     <Button
                       disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
                       icon={
@@ -229,25 +318,32 @@ export const WebformRecord = ({
                   }}
                 />
               )}
-              {element.elementsRecords.map((record, i) => {
-                return (
-                  <WebformRecord
-                    columnsSchema={columnsSchema}
-                    dataflowId={dataflowId}
-                    datasetId={datasetId}
-                    datasetSchemaId={datasetSchemaId}
-                    key={i}
-                    multipleRecords={element.multipleRecords}
-                    onAddMultipleWebform={onAddMultipleWebform}
-                    onRefresh={onRefresh}
-                    onTabChange={onTabChange}
-                    newRecord={webformRecordState.newRecord}
-                    record={record}
-                    tableId={tableId}
-                    tableName={element.title}
-                  />
-                );
-              })}
+              {checkCalculatedTableVisibility(element)
+                ? calculateSingle(element)
+                : element.elementsRecords.map((record, i) => {
+                    return (
+                      <WebformRecord
+                        calculateSingle={calculateSingle}
+                        columnsSchema={columnsSchema}
+                        dataflowId={dataflowId}
+                        datasetId={datasetId}
+                        datasetSchemaId={datasetSchemaId}
+                        isGroup={isGroup}
+                        key={i}
+                        multipleRecords={element.multipleRecords}
+                        newRecord={webformRecordState.newRecord}
+                        onAddMultipleWebform={onAddMultipleWebform}
+                        onRefresh={onRefresh}
+                        onTabChange={onTabChange}
+                        onUpdateSinglesList={onUpdateSinglesList}
+                        onUpdatePamsId={onUpdatePamsId}
+                        pamsRecords={pamsRecords}
+                        record={record}
+                        tableId={tableId}
+                        tableName={element.title}
+                      />
+                    );
+                  })}
             </div>
           )
         );

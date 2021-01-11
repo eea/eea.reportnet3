@@ -27,6 +27,7 @@ import org.eea.utils.LiteralConstants;
 import org.eea.utils.PaMConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 
 /**
@@ -35,15 +36,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaMServiceImpl implements PaMService {
 
-  /** The field repository. */
+  private static final String HEADER_NAME = "headerName";
+  /**
+   * The field repository.
+   */
   @Autowired
   private FieldRepository fieldRepository;
 
-  /** The file common utils. */
+  /**
+   * The file common utils.
+   */
   @Autowired
   private FileCommonUtils fileCommonUtils;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   private DatasetService datasetService;
 
@@ -60,7 +68,9 @@ public class PaMServiceImpl implements PaMService {
    *
    * @param datasetId the dataset id
    * @param groupPaMId the group paM id
+   *
    * @return the list single paM
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -325,6 +335,7 @@ public class PaMServiceImpl implements PaMService {
    * @param schemaIds the schema ids
    * @param pkSectorObjective the pk sector objective
    * @param fieldsOtherObjective the fields other objective
+   *
    * @return the other objective value
    */
   private String getOtherObjectiveValue(Map<String, String> schemaIds, String pkSectorObjective,
@@ -369,13 +380,14 @@ public class PaMServiceImpl implements PaMService {
    */
   private void setAttributesUnionPolicyOther(Map<String, String> schemaIds, String singlePamId,
       SinglePaMVO singlePaMVO, List<FieldValue> otherUnionPolicyFields) {
+    List<String> otherUnionPolicy = new ArrayList<>();
     for (FieldValue fkPamsTable2 : otherUnionPolicyFields) {
       if (fkPamsTable2 != null && singlePamId.equals(fkPamsTable2.getValue())) {
         List<FieldValue> fields = hasRecordsAndFields(fkPamsTable2);
-        singlePaMVO
-            .setOtherUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.OTHER_UNION_POLICY)));
+        otherUnionPolicy.add(getValue(fields, schemaIds.get(PaMConstants.OTHER_UNION_POLICY)));
       }
     }
+    singlePaMVO.setOtherUnionPolicy(otherUnionPolicy);
   }
 
   /**
@@ -463,7 +475,9 @@ public class PaMServiceImpl implements PaMService {
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
+   *
    * @return the pa ms schema ids
+   *
    * @throws EEAException the EEA exception
    */
   private Map<String, String> getPaMsSchemaIds(Long datasetId, Long dataflowId)
@@ -596,7 +610,6 @@ public class PaMServiceImpl implements PaMService {
     // if we find atleast one listofsingle filled we transform it
     if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
 
-
       for (FieldValue fieldValue : fieldValuesWithData) {
         // we split and separate any , value
         List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
@@ -629,8 +642,8 @@ public class PaMServiceImpl implements PaMService {
     // we find the id of list of single pams to delte the part
     String idListOfSinglePamsField = null;
     for (Object documentFieldList : fieldSchemasList) {
-      if (null != ((Document) documentFieldList).get("headerName")
-          && "ListOfSinglePams".equals(((Document) documentFieldList).getString("headerName"))) {
+      if (null != ((Document) documentFieldList).get(HEADER_NAME)
+          && "ListOfSinglePams".equals(((Document) documentFieldList).getString(HEADER_NAME))) {
         idListOfSinglePamsField = ((Document) documentFieldList).get("_id").toString();
       }
     }
@@ -640,7 +653,7 @@ public class PaMServiceImpl implements PaMService {
         fieldRepository.findAllCascadeListOfSinglePams(idListOfSinglePamsField, fieldValuePk);
 
     // if we find atleast one listofsingle filled we transform it
-    if (null != fieldValuesWithData && !fieldValuesWithData.isEmpty()) {
+    if (!CollectionUtils.isEmpty(fieldValuesWithData)) {
 
       for (FieldValue fieldValue : fieldValuesWithData) {
         // we split and separate any , value
@@ -669,6 +682,7 @@ public class PaMServiceImpl implements PaMService {
    *
    * @param itemsLong the items long
    * @param composeListSinglesPams the compose list singles pams
+   *
    * @return the string
    */
   private String cleanAndComposeString(List<Long> itemsLong, String composeListSinglesPams) {
@@ -707,6 +721,7 @@ public class PaMServiceImpl implements PaMService {
    *
    * @param fields the fields
    * @param schemaId the schema id
+   *
    * @return the value
    */
   private String getValue(List<FieldValue> fields, String schemaId) {
@@ -726,6 +741,7 @@ public class PaMServiceImpl implements PaMService {
    * Checks if is field schema null.
    *
    * @param fieldSchema the field schema
+   *
    * @return the string
    */
   private String isFieldSchemaNull(FieldSchemaVO fieldSchema) {
@@ -736,6 +752,7 @@ public class PaMServiceImpl implements PaMService {
    * Checks for records and fields.
    *
    * @param fieldValue the field value
+   *
    * @return the list
    */
   private List<FieldValue> hasRecordsAndFields(FieldValue fieldValue) {

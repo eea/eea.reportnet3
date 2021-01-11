@@ -4,7 +4,6 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.service.model.FieldValueWithLabelProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -42,6 +41,7 @@ public interface FieldRepository
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return the list
    */
   FieldValue findFirstByIdFieldSchemaAndValue(String idFieldSchema, String value);
@@ -51,6 +51,7 @@ public interface FieldRepository
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return the list
    */
   List<FieldValue> findByIdFieldSchemaAndValue(String idFieldSchema, String value);
@@ -74,14 +75,19 @@ public interface FieldRepository
   List<FieldValue> findByRecord(RecordValue record);
 
   /**
-   * Find by record.
+   * Find FieldValues by record Id.
    *
-   * @param tableId the table id
+   * @param recordIdSchema the record id schema
    * @param pageable the pageable
    *
    * @return the list
    */
-  List<FieldValue> findByRecord_TableValue_Id(Long tableId, Pageable pageable);
+  @Query(
+      value = "with records as(select rv.id  from record_value rv  where rv.id_record_schema=:recordIdSchema )"
+          + "select fv.* from field_value fv join records on records.id=fv.id_record ",
+      nativeQuery = true)
+  List<FieldValue> findByRecord_IdRecordSchema(@Param("recordIdSchema") String recordIdSchema,
+      Pageable pageable);
 
   /**
    * Find first type by id field schema.
@@ -154,49 +160,6 @@ public interface FieldRepository
   void clearFieldValue(@Param("fieldSchemaId") String fieldSchemaId);
 
 
-  /**
-   * Find by id field schema and conditional with tag.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param labelId the label id
-   * @param conditionalId the conditional id
-   * @param conditionalValue the conditional value
-   * @param searchValueText the search value text
-   * @param pageable the pageable
-   *
-   * @return the list
-   */
-  @Query(
-      value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag, FieldValue cond WHERE fv.idFieldSchema = :fieldSchemaId "
-          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
-          + "AND fv.value <> '' "
-          + "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) "
-          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
-  List<FieldValueWithLabelProjection> findByIdFieldSchemaAndConditionalWithTag(
-      @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
-      @Param("conditionalId") String conditionalId,
-      @Param("conditionalValue") String conditionalValue,
-      @Param("searchText") String searchValueText, Pageable pageable);
-
-
-  /**
-   * Find by id field schema with tag.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param labelId the label id
-   * @param searchValueText the search value text
-   * @param pageable the pageable
-   *
-   * @return the list
-   */
-  @Query(
-      value = "SELECT DISTINCT fv as fieldValue, tag as label FROM FieldValue fv, FieldValue tag WHERE fv.idFieldSchema = :fieldSchemaId "
-          + "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id "
-          + "AND fv.value <> '' "
-          + "AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ")
-  List<FieldValueWithLabelProjection> findByIdFieldSchemaWithTag(
-      @Param("fieldSchemaId") String fieldSchemaId, @Param("labelId") String labelId,
-      @Param("searchText") String searchValueText, Pageable pageable);
 
   /**
    * Find all cascade list of single pams.
@@ -223,6 +186,7 @@ public interface FieldRepository
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return true, if successful
    */
   @Query
@@ -233,9 +197,11 @@ public interface FieldRepository
    *
    * @param idFieldSchema the id field schema
    * @param value the value
+   *
    * @return the field value
    */
   @Query
   FieldValue findOneByIdFieldSchemaAndValue(String idFieldSchema, String value);
+
 
 }

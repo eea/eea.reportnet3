@@ -8,6 +8,8 @@ const addPamsRecords = async (datasetId, tables, pamId, type) => {
   return await apiWebform.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
 };
 
+const singlePamData = async (datasetId, groupPaMId) => await apiWebform.singlePamData(datasetId, groupPaMId);
+
 const parsePamTables = (tables, pamId, type) => {
   return tables.map(table => ({
     idTableSchema: table.tableSchemaId,
@@ -34,8 +36,9 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   if (TextUtils.areEquals(fieldName, 'id')) return pamId;
   if (TextUtils.areEquals(fieldName, 'fk_pams')) return pamId;
   if (TextUtils.areEquals(fieldName, 'isGroup')) return type;
+  if (TextUtils.areEquals(fieldName, 'Id_SectorObjectives')) return `${pamId}_1`;
 
   return null;
 };
 
-export const ApiWebformRepository = { addPamsRecords };
+export const ApiWebformRepository = { addPamsRecords, singlePamData };

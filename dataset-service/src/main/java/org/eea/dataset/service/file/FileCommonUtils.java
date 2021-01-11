@@ -168,7 +168,6 @@ public class FileCommonUtils {
    * @throws EEAException the EEA exception
    */
   public DataSetSchemaVO getDataSetSchema(Long dataflowId, Long datasetId) throws EEAException {
-    LOG.info("Getting DataSchema from Mongo DB");
     DataSetSchemaVO dataSetSchema = null;
     // get dataset schema from mongo DB
     if (null != dataflowId) {

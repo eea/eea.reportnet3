@@ -1354,5 +1354,25 @@
   {
     "key": "config/collaboration/spring.jpa.hibernate.flushMode",
     "value": "JHtGTFVTSF9NT0RFOmNvbW1pdH0="
+  },
+  {
+    "key": "config/dataset/dataset.task.parallelism",
+    "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/dataset/importPath",
+    "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.pam.path",
+    "value": "L3BhbS8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.pam.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.pam.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

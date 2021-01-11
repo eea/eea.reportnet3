@@ -11,6 +11,7 @@ import publicFrontpage from './publicFrontpage.json';
 import storage from './storage.config.json';
 import theme from './theme.config.json';
 import validations from './validation.config.json';
+import webforms from './webforms.config.json';
 
 const config = {};
 const { countries } = countryCode;
@@ -36,5 +37,6 @@ config.publicFrontpage = publicFrontpage;
 config.validations = validations;
 config.storage = storage;
 config.theme = theme;
+config.webforms = webforms;
 
 export { config };

@@ -78,7 +78,9 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
-      if (type === 'LINK') onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
+      if (type === 'LINK' && editing) {
+        onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
+      }
       if (type === 'POINT') {
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',
@@ -249,13 +251,16 @@ const DataFormFieldEditor = ({
   const renderMultiselectCodelist = (field, fieldValue) => {
     return (
       <MultiSelect
+        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={column.readOnly && reporting}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value, isConditional)}
-        options={column.codelistItems.sort().map(codelistItem => {
-          return { itemType: codelistItem, value: codelistItem };
-        })}
+        options={column.codelistItems
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+          .map(codelistItem => {
+            return { itemType: codelistItem, value: codelistItem };
+          })}
         optionLabel="itemType"
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
@@ -361,6 +366,7 @@ const DataFormFieldEditor = ({
     if (column.pkHasMultipleValues) {
       return (
         <MultiSelect
+          addSpaceCommaSeparator={true}
           appendTo={document.body}
           clearButton={false}
           disabled={column.readOnly && reporting}

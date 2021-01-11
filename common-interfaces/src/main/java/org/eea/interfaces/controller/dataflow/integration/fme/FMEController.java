@@ -62,4 +62,13 @@ public interface FMEController {
       @RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("fileName") String fileName);
+
+  /**
+   * Update job status by id.
+   *
+   * @param jobId the job id
+   * @param status the status
+   */
+  @GetMapping("/private/updateJobStatusById")
+  void updateJobStatusById(@RequestParam("jobId") Long jobId, @RequestParam("status") Long status);
 }

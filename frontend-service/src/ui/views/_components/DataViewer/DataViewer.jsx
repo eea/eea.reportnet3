@@ -65,6 +65,7 @@ const DataViewer = withRouter(
     isFilterable,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
+    isReportingWebform,
     isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
@@ -98,6 +99,7 @@ const DataViewer = withRouter(
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
+    const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -173,6 +175,7 @@ const DataViewer = withRouter(
     const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
+
     const { menu } = useContextMenu(
       resources,
       records,
@@ -249,6 +252,7 @@ const DataViewer = withRouter(
       colsSchema,
       columnOptions,
       hasCountryCode,
+      hasWebformWritePermissions,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       onFileDeleteVisible,
@@ -336,6 +340,12 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
     }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
+
+    useEffect(() => {
+      if (isReportingWebform) {
+        setHasWebformWritePermissions(false);
+      }
+    }, [isReportingWebform]);
 
     const getMetadata = async () => {
       try {
@@ -1146,7 +1156,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
+              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
@@ -1160,7 +1170,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWritePermissions && !tableReadOnly && !isEditing
+              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);
@@ -1265,9 +1275,9 @@ const DataViewer = withRouter(
             onError={onImportTableError}
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
-              tableId: tableId
+              tableSchemaId: tableId
             })}`}
           />
         )}
@@ -1295,7 +1305,7 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
               datasetId,
               fieldId: records.selectedFieldId
             })}`}

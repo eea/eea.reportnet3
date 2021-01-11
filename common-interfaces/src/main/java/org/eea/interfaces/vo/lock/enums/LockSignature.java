@@ -6,14 +6,14 @@ public enum LockSignature {
   /** The empty. */
   EMPTY(""),
 
+  /** DataSetControllerImpl.importFileData(..) */
+  IMPORT_FILE_DATA("DataSetControllerImpl.importFileData(..)"),
+
   /** DataSetSnapshotControllerImpl.createSnapshot(..) */
   CREATE_SNAPSHOT("DataSetSnapshotControllerImpl.createSnapshot(..)"),
 
   /** DataSetSnapshotControllerImpl.restoreSnapshot(..) */
   RESTORE_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSnapshot(..)"),
-
-  /** DataSetControllerImpl.loadTableData(..) */
-  LOAD_TABLE("DataSetControllerImpl.loadTableData(..)"),
 
   /** ValidationHelper.executeValidation(..) */
   EXECUTE_VALIDATION("ValidationHelper.executeValidation(..)"),
@@ -51,9 +51,6 @@ public enum LockSignature {
   /** EUDatasetControllerImpl.populateDataFromDataCollection(..) */
   POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)"),
 
-  /** DataSetControllerImpl.loadDatasetData(..) */
-  LOAD_DATASET_DATA("DataSetControllerImpl.loadDatasetData(..)"),
-
   /** IntegrationControllerImpl.executeEUDatasetExport(..) */
   EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)"),
 
@@ -70,7 +67,10 @@ public enum LockSignature {
   UPDATE_FIELD("DataSetControllerImpl.updateField(..)"),
 
   /** The import etl. */
-  IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)");
+  IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)"),
+
+  /** The delete field schema. */
+  DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)");
 
 
 

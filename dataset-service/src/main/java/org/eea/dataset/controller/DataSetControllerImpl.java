@@ -2,8 +2,11 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -26,8 +29,10 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +77,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The file treatment helper. */
-  @Autowired
-  private FileTreatmentHelper fileTreatmentHelper;
-
   /** The update record helper. */
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
@@ -83,7 +84,6 @@ public class DataSetControllerImpl implements DatasetController {
   /** The delete helper. */
   @Autowired
   private DeleteHelper deleteHelper;
-
 
   /** The dataset metabase service. */
   @Autowired
@@ -93,6 +93,14 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The file treatment helper. */
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
+
+  /** The lock service. */
+  @Deprecated
+  @Autowired
+  private LockService lockService;
 
   /**
    * Gets the data tables values.
@@ -169,72 +177,67 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   */
+  @Override
+  @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
+  @PostMapping("/{datasetId}/importFileData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR') OR checkApiKey(#dataflowId,#providerId)")
+  public void importFileData(
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "externalJobId", required = false) Long externalJobId) {
+    try {
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, externalJobId);
+    } catch (EEAException e) {
+      LOG.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
+          tableSchemaId, file.getName());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+    }
+  }
+
+  /**
    * Load table data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
    */
   @Override
   @HystrixCommand
-  @LockMethod(removeWhenFinish = false)
+  @Deprecated
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
-  public void loadTableData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file,
-      @LockCriteria(name = "tableSchemaId") @PathVariable("idTableSchema") String idTableSchema,
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR') OR checkApiKey(#dataflowId,#providerId)")
+  public void loadTableData(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
       @RequestParam(value = "replace", required = false) boolean replace) {
-    // Set the user name on the thread
-    ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-
-    // check if dataset is reportable
-    if (!datasetService.isDatasetReportable(datasetId)) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
-    }
-
-    // filter if the file is empty
-    if (file == null || file.isEmpty()) {
-      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
-      LOG_ERROR.error(
-          "Error importing a file into a table of the datasetId {}. The file is null or empty",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-    }
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE.equals(
-            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
-      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
-      LOG_ERROR.error(
-          "Error importing the file {} into a table of the dataset {}. The table is read only",
-          file.getOriginalFilename(), datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-    }
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, idTableSchema,
-            EntityTypeEnum.TABLE))) {
-      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
-      LOG_ERROR.error(
-          "Error importing the file {} into a table of the dataset {}. The table has a fixed number of records",
-          file.getOriginalFilename(), datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
-    }
-
-    // extract the filename
-    String fileName = file.getOriginalFilename();
-
-    // extract the file content
+    String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+    Map<String, Object> lockCriteria = new HashMap<>();
+    lockCriteria.put("signature", LockSignature.IMPORT_FILE_DATA.getValue());
+    lockCriteria.put("datasetId", datasetId);
     try {
-      InputStream is = file.getInputStream();
-      // This method will release the lock
-      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema, replace);
-    } catch (IOException e) {
-      LOG_ERROR.error("Error importing a file into a table of the dataset {}. Message: {}",
-          datasetId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
+      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace, null);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
   }
 
@@ -242,47 +245,31 @@ public class DataSetControllerImpl implements DatasetController {
    * Load dataset data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param file the file
    * @param replace the replace
    */
   @Override
   @HystrixCommand
-  @LockMethod(removeWhenFinish = false)
+  @Deprecated
   @PostMapping("{id}/loadDatasetData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR')")
-  public void loadDatasetData(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR') OR checkApiKey(#dataflowId,#providerId)")
+  public void loadDatasetData(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace) {
-
-    // check if dataset is reportable
-    if (!datasetService.isDatasetReportable(datasetId)) {
-      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
-    }
-
-    // filter if the file is empty
-    if (file == null || file.isEmpty()) {
-      LOG_ERROR.error(
-          "Error importing a file into a table of the datasetId {}. The file is null or empty",
-          datasetId);
-      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-    }
-
-    // extract the filename
-    String fileName = file.getOriginalFilename();
-
-    // extract the file content
+    String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+    Map<String, Object> lockCriteria = new HashMap<>();
+    lockCriteria.put("signature", LockSignature.IMPORT_FILE_DATA.getValue());
+    lockCriteria.put("datasetId", datasetId);
     try {
-      // this method would release the lock
-      fileTreatmentHelper.executeExternalIntegrationFileProcess(datasetId, fileName,
-          file.getInputStream(), replace);
-    } catch (IOException e) {
-      LOG_ERROR.error("Error importing a file into dataset {}. Message: {}", datasetId,
-          e.getMessage());
-      datasetService.releaseLock(LockSignature.LOAD_DATASET_DATA.getValue(), datasetId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
+      importFileData(datasetId, dataflowId, providerId, null, file, replace, null);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
   }
 

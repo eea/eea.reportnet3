@@ -37,4 +37,18 @@ public interface FieldExtendedRepository {
 
 
 
+  /**
+   * Find by id field schema with tag ordered.
+   *
+   * @param idPk the id pk
+   * @param labelSchemaId the label schema id
+   * @param searchValue the search value
+   * @param conditionalSchemaId the conditional schema id
+   * @param conditionalValue the conditional value
+   * @param resultsNumber the results number
+   * @return the list
+   */
+  List<FieldVO> findByIdFieldSchemaWithTagOrdered(String idPk, String labelSchemaId,
+      String searchValue, String conditionalSchemaId, String conditionalValue,
+      Integer resultsNumber);
 }

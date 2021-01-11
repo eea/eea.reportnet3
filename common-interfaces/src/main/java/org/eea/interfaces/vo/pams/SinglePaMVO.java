@@ -53,7 +53,7 @@ public class SinglePaMVO {
   private List<String> ghgAffected;
 
   /** The other union policy. */
-  private String otherUnionPolicy;
+  private List<String> otherUnionPolicy;
 
   /** The other policy instrument. */
   private String otherPolicyInstrument;

@@ -22,13 +22,18 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
 export const WebformTable = ({
+  calculateSingle,
   dataflowId,
   datasetId,
   datasetSchemaId,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
+  isGroup,
   isRefresh,
   isReporting,
   onTabChange,
+  onUpdateSinglesList,
+  onUpdatePamsId,
+  pamsRecords,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
   setIsLoading = () => {},
   webform,
@@ -104,10 +109,15 @@ export const WebformTable = ({
     });
 
     if (!isEmpty(webformData.elementsRecords)) {
-      const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
-        element => element.tableSchemaId === tableSchemaId
-      )[0];
-      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId);
+      let sectorObjectivesTable;
+      const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
+        if (element.name === 'SectorObjectives') {
+          sectorObjectivesTable = element;
+        }
+        return element.tableSchemaId === tableSchemaId;
+      })[0];
+
+      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
@@ -207,6 +217,7 @@ export const WebformTable = ({
   const renderWebformRecord = (record, index) => (
     <WebformRecord
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
+      calculateSingle={calculateSingle}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
       datasetId={datasetId}
@@ -214,12 +225,16 @@ export const WebformTable = ({
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
       isAddingMultiple={webformTableState.isAddingMultiple}
       isFixedNumber={webformData.fixedNumber || null}
+      isGroup={isGroup}
       isReporting={isReporting}
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
+      onUpdateSinglesList={onUpdateSinglesList}
+      onUpdatePamsId={onUpdatePamsId}
+      pamsRecords={pamsRecords}
       record={record}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}

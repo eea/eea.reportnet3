@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-
 /**
  * The Interface DatasetController.
  */
@@ -73,24 +72,35 @@ public interface DatasetController {
    * Load table data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
    */
+  @Deprecated
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema,
+  void loadTableData(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
       @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
    * Load dataset data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param file the file
    * @param replace the replace
    */
+  @Deprecated
   @PostMapping("{id}/loadDatasetData")
-  void loadDatasetData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
+  void loadDatasetData(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
@@ -339,4 +349,24 @@ public interface DatasetController {
   @PostMapping("/{datasetId}/insertRecordsMultiTable")
   void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
       @RequestBody List<TableVO> tableRecords);
+
+  /**
+   * Import file data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param externalJobId the external job id
+   */
+  @PostMapping("/{datasetId}/importFileData")
+  void importFileData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "externalJobId", required = false) Long externalJobId);
 }

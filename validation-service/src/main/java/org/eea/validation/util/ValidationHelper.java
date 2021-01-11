@@ -5,6 +5,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
@@ -133,11 +134,15 @@ public class ValidationHelper implements DisposableBean {
   private ExecutorService validationExecutorService;
 
 
-  /** The dataset metabase controller zuul. */
+  /**
+   * The dataset metabase controller zuul.
+   */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
-  /** The validation controller. */
+  /**
+   * The validation controller.
+   */
   @Autowired
   private ValidationController validationController;
 
@@ -274,7 +279,6 @@ public class ValidationHelper implements DisposableBean {
     releaseFieldsValidation(datasetId, processId);
     startProcess(processId);
   }
-
 
 
   /**
@@ -570,14 +574,14 @@ public class ValidationHelper implements DisposableBean {
             pendingValidations, processId);
       }
 
-      boolean isRelease = processesMap.get(processId).isReleased() ? true : false;
+      boolean isRelease = processesMap.get(processId).isReleased();
       this.finishProcess(processId);
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       if (isRelease) {
         Long nextData = datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
         if (null != nextData) {
-          validationController.validateDataSetData(nextData, true);
+          this.executeValidation(datasetId, UUID.randomUUID().toString(), true, true);
         } else {
           kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
         }
@@ -586,7 +590,6 @@ public class ValidationHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
             NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
       }
-
 
       isFinished = true;
     }
@@ -637,18 +640,8 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
-  /**
-   * Instantiates a new validation task.
-   *
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
-   * @param notificationEventType the notification event type
-   */
   @AllArgsConstructor
-  private class ValidationTask {
+  private static class ValidationTask {
 
     /**
      * The Eea event vo.
@@ -683,7 +676,9 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
-    /** The Constant MILISECONDS. */
+    /**
+     * The Constant MILISECONDS.
+     */
     private static final double MILISECONDS = 1000.0;
     /**
      * The validation task.
