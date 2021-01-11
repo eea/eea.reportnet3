@@ -1307,8 +1307,9 @@ public class DatasetServiceImpl implements DatasetService {
 
       // The query returns the list of fieldsVO ordered by it's type and considering the possible
       // label and conditional values
+      FieldValue fvPk = fieldRepository.findFirstTypeByIdFieldSchema(idPk);
       fieldsVO = fieldRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId, searchValue,
-          conditionalSchemaId, conditionalValue, resultsNumber);
+          conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
 
     }
     return fieldsVO;

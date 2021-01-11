@@ -50,12 +50,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  // /**
-  // * The field repository.
-  // */
-  // @Autowired
-  // private FieldRepository fieldRepository;
-
 
   /** The Constant QUERY_FIELD_SCHEMA_AND_VALUE: {@value}. */
   private static final String QUERY_FIELD_SCHEMA_AND_VALUE =
@@ -128,13 +122,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param searchValue the search value
    * @param conditionalSchemaId the conditional schema id
    * @param conditionalValue the conditional value
+   * @param dataTypePk the data type pk
    * @param resultsNumber the results number
-   *
    * @return the list
    */
   @Override
   public List<FieldVO> findByIdFieldSchemaWithTagOrdered(String idPk, String labelSchemaId,
-      String searchValue, String conditionalSchemaId, String conditionalValue,
+      String searchValue, String conditionalSchemaId, String conditionalValue, DataType dataTypePk,
       Integer resultsNumber) {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
@@ -142,11 +136,10 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder.append(QUERY_1);
-    FieldValue typeField = null;// fieldRepository.findFirstTypeByIdFieldSchema(idPk);
-    if (typeField != null && (DataType.NUMBER_DECIMAL.equals(typeField.getType())
-        || DataType.NUMBER_INTEGER.equals(typeField.getType()))) {
+    if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
+        || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
       queryBuilder.append(SORT_NUMBER_QUERY);
-    } else if (typeField != null && DataType.DATE.equals(typeField.getType())) {
+    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
       queryBuilder.append(SORT_DATE_QUERY);
     } else {
       queryBuilder.append(SORT_STRING_QUERY);
