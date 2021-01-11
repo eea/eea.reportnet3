@@ -152,8 +152,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isNil(webformData)) {
-      const webformsValues = config.webforms.map(webform => webformData.value);
-      setIsReportingWebform(!webformsValues.includes(webformData));
+      setIsReportingWebform(webformData === 'MMR-ART13');
     }
   }, [webformData]);
 
