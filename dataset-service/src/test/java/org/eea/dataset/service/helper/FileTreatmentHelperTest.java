@@ -329,8 +329,6 @@ public class FileTreatmentHelperTest {
   public void importFileDataFolderExceptionTest() throws EEAException {
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn(new DataSetSchema());
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     MultipartFile multipartFile =
         new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
     File folder = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
@@ -350,8 +348,6 @@ public class FileTreatmentHelperTest {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.when(file.getInputStream()).thenThrow(IOException.class);
     Mockito.when(file.getName()).thenReturn("fileName.csv");
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (EEAException e) {
