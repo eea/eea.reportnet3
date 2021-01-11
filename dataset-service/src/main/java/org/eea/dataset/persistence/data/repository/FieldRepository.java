@@ -13,7 +13,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface FieldRepository.
  */
-public interface FieldRepository extends PagingAndSortingRepository<FieldValue, Integer> {
+public interface FieldRepository
+    extends PagingAndSortingRepository<FieldValue, Integer>, FieldExtendedRepository {
 
 
   /**
