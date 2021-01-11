@@ -478,4 +478,14 @@ public interface DatasetSchemaService {
    * @return the table schema
    */
   TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId);
+
+
+  /**
+   * Release create update view.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @param checkSQL the check SQL
+   */
+  void releaseCreateUpdateView(Long datasetId, String user, boolean checkSQL);
 }
