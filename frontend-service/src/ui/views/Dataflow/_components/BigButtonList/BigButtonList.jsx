@@ -125,7 +125,7 @@ export const BigButtonList = ({
     false
   );
   useCheckNotifications(
-    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_FAILED_EVENT'],
+    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_FAILED_EVENT', 'COPY_DATASET_SCHEMA_NOT_FOUND_EVENT'],
     setIsCloningDataflow,
     false
   );
