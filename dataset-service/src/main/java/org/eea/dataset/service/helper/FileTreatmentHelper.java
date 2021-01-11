@@ -126,6 +126,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   * @param externalJobId the external job id
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
@@ -138,11 +139,11 @@ public class FileTreatmentHelper implements DisposableBean {
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
-    fileDataImportManagement(datasetId, tableSchemaId, schema, file, replace, externalJobId);
+    fileManagement(datasetId, tableSchemaId, schema, file, replace, externalJobId);
   }
 
   /**
-   * File data import management.
+   * File management.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
@@ -152,7 +153,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param externalJobId the external job id
    * @throws EEAException the EEA exception
    */
-  private void fileDataImportManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
       MultipartFile multipartFile, boolean delete, Long externalJobId) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
@@ -174,9 +175,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
 
-          List<File> files = new ArrayList<>();
-          ZipEntry entry = zip.getNextEntry();
-
           /*
            * TODO. Since ZIP and CSV files are temporally disabled to be imported from FME, we do
            * not need to look for a matching integration.
@@ -185,30 +183,7 @@ public class FileTreatmentHelper implements DisposableBean {
           // IntegrationVO integrationVO = getIntegrationVO(schema, "csv");
           IntegrationVO integrationVO = null;
 
-          // Uncompress and store
-          while (null != entry) {
-            String entryName = entry.getName();
-            String mimeType = datasetService.getMimetype(entryName);
-            File file = new File(folder, entryName);
-            String filePath = file.getCanonicalPath();
-
-            // Prevent Zip Slip attack or skip if the entry is a directory
-            if (!"csv".equalsIgnoreCase(mimeType) || entry.isDirectory()
-                || !filePath.startsWith(saveLocationPath + File.separator)) {
-              LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
-              entry = zip.getNextEntry();
-              continue;
-            }
-
-            // Store the file in the persistence volume
-            try (FileOutputStream output = new FileOutputStream(file)) {
-              IOUtils.copyLarge(zip, output);
-              LOG.info("Stored file {}", file.getPath());
-            }
-
-            files.add(file);
-            entry = zip.getNextEntry();
-          }
+          List<File> files = unzipAndStore(folder, saveLocationPath, zip);
 
           // Queue import tasks for stored files
           if (!files.isEmpty()) {
@@ -255,6 +230,49 @@ public class FileTreatmentHelper implements DisposableBean {
           true);
       throw new EEAException(e);
     }
+  }
+
+  /**
+   * Unzip and store.
+   *
+   * @param folder the folder
+   * @param saveLocationPath the save location path
+   * @param zip the zip
+   * @return the list
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private List<File> unzipAndStore(File folder, String saveLocationPath, ZipInputStream zip)
+      throws EEAException, IOException {
+
+    List<File> files = new ArrayList<>();
+    ZipEntry entry = zip.getNextEntry();
+
+    while (null != entry) {
+      String entryName = entry.getName();
+      String mimeType = datasetService.getMimetype(entryName);
+      File file = new File(folder, entryName);
+      String filePath = file.getCanonicalPath();
+
+      // Prevent Zip Slip attack or skip if the entry is a directory
+      if (!"csv".equalsIgnoreCase(mimeType) || entry.isDirectory()
+          || !filePath.startsWith(saveLocationPath + File.separator)) {
+        LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
+        entry = zip.getNextEntry();
+        continue;
+      }
+
+      // Store the file in the persistence volume
+      try (FileOutputStream output = new FileOutputStream(file)) {
+        IOUtils.copyLarge(zip, output);
+        LOG.info("Stored file {}", file.getPath());
+      }
+
+      files.add(file);
+      entry = zip.getNextEntry();
+    }
+
+    return files;
   }
 
   /**
