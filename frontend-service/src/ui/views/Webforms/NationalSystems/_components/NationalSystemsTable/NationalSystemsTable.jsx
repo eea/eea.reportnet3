@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 
 import styles from './NationalSystemsTable.module.scss';
 
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { NationalSystemsRecord } from './_components/NationalSystemsRecord';
 import { Spinner } from 'ui/views/_components/Spinner';
 
@@ -23,12 +24,15 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
   const resources = useContext(ResourcesContext);
 
   const [data, setData] = useState([]);
+  const [hasErrors, setHasErrors] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [schemaData, setSchemaData] = useState({});
 
   useEffect(() => {
     onLoadTableData();
   }, []);
+
+  const getTableErrors = errors => setHasErrors(errors);
 
   const onLoadTableData = async () => {
     try {
@@ -61,21 +65,19 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
     );
   };
 
+  const renderMissingTables = tableName => (
+    <h4 dangerouslySetInnerHTML={{ __html: parseText(resources.messages['tableIsNotCreated'], { tableName }) }} />
+  );
+
   const renderRecords = () => {
     if (!isEmpty(errorMessages(schemaData, tables.name))) return renderErrors();
 
     return data.map((record, index) => (
       <Fragment key={index}>
-        <NationalSystemsRecord datasetId={datasetId} record={record} />
+        <NationalSystemsRecord datasetId={datasetId} record={record} getTableErrors={getTableErrors} />
       </Fragment>
     ));
   };
-
-  const renderMissingTables = tableName => (
-    <h4 dangerouslySetInnerHTML={{ __html: parseText(resources.messages['tableIsNotCreated'], { tableName }) }} />
-  );
-
-  if (isLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
     <div className={styles.content}>
@@ -83,9 +85,12 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
         renderMissingTables(tables.name)
       ) : (
         <Fragment>
-          <h2>{tables.title}</h2>
+          <div className={styles.titleWrapper}>
+            <h2>{tables.title}</h2>
+            {hasErrors && <IconTooltip className={`webform-validationErrors `} levelError={'ERROR'} />}
+          </div>
 
-          {renderRecords()}
+          {isLoading ? <Spinner style={{ top: 0 }} /> : renderRecords()}
         </Fragment>
       )}
     </div>

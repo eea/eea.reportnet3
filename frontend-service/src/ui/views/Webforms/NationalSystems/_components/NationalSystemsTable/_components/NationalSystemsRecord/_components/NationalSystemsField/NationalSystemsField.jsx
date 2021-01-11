@@ -1,8 +1,10 @@
-import React, { useContext, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import intersection from 'lodash/intersection';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import uniqBy from 'lodash/uniqBy';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
@@ -14,6 +16,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
@@ -27,7 +30,14 @@ import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSyste
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
-export const NationalSystemsField = ({ datasetId, key, nationalField, title, tooltip }) => {
+export const NationalSystemsField = ({
+  datasetId,
+  getTableErrors,
+  nationalField,
+  recordValidations,
+  title,
+  tooltip
+}) => {
   const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
   const resources = useContext(ResourcesContext);
@@ -35,11 +45,14 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
     field: nationalField,
     isDialogVisible: { deleteAttachment: false, uploadFile: false },
-    selected: { validExtensions: [] },
     selectedValidExtensions: []
   });
 
   const { field, isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
+
+  useEffect(() => {
+    getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
+  }, []);
 
   const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
@@ -130,8 +143,8 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
       case 'URL':
         return (
           <InputText
-            keyfilter={RecordUtils.getFilter(type)}
             id={field.fieldId}
+            keyfilter={RecordUtils.getFilter(type)}
             maxLength={getInputMaxLength[type]}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
@@ -144,9 +157,9 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
         return (
           <InputTextarea
             className={field.required ? styles.required : undefined}
+            collapsedHeight={150}
             id={field.fieldId}
             maxLength={getInputMaxLength[type]}
-            collapsedHeight={150}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
@@ -192,8 +205,8 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
           <MultiSelect
             addSpaceCommaSeparator={true}
             appendTo={document.body}
-            maxSelectedLabels={10}
             id={field.fieldId}
+            maxSelectedLabels={10}
             onChange={event => {
               onFillField(field, fieldSchemaId, event.target.value);
               onEditorSubmitValue(field, fieldSchemaId, event.target.value);
@@ -257,20 +270,39 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
     }
   };
 
+  const renderValidations = validations =>
+    validations &&
+    uniqBy(validations, element => [element.message, element.errorLevel].join()).map((validation, index) => (
+      <IconTooltip
+        className={`webform-validationErrors ${styles.validation}`}
+        key={index}
+        levelError={validation.levelError}
+        message={validation.message}
+      />
+    ));
+
   return (
-    <div className={styles.content} key={key}>
+    <div className={styles.content}>
       <div className={styles.titleWrapper}>
-        <h4>{!isNil(title?.value) ? title.value : title}</h4>
-        {!isNil(tooltip) && (
-          <Button
-            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-            icon={'infoCircle'}
-            tooltip={tooltip.value}
-            tooltipOptions={{ position: 'top' }}
-          />
-        )}
+        <span className={styles.sectionTitle}>
+          <h4 className={styles.title}>
+            {!isNil(title?.value) ? title.value : title}
+            {!isNil(tooltip) && (
+              <Button
+                className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+                icon={'infoCircle'}
+                tooltip={tooltip.value || tooltip}
+                tooltipOptions={{ position: 'top' }}
+              />
+            )}
+          </h4>
+        </span>
+        {renderValidations(recordValidations)}
       </div>
-      {renderTemplate()}
+      <div className={styles.fieldWrapper}>
+        <div className={styles.template}>{renderTemplate()}</div>
+        {renderValidations(field.validations)}
+      </div>
 
       {isDialogVisible.uploadFile && (
         <CustomFileUpload
