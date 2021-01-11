@@ -176,14 +176,18 @@ public class PaMServiceImpl implements PaMService {
         String objectiveToList = getValue(fields, schemaIds.get(PaMConstants.OBJECTIVE));
         objectiveList.addAll(getListSplit(objectiveToList));
       }
-      tablesFields.put(PaMConstants.SECTOR,
-          fieldRepository.queryFindValue(schemaIds.get(PaMConstants.SECTOR_PK),
-              schemaIds.get(PaMConstants.SECTOR), schemaIds.get(PaMConstants.DATASET_ID_PK),
-              sectorAffectedList));
-      tablesFields.put(PaMConstants.OTHER_OBJECTIVES,
-          fieldRepository.queryFindValue(schemaIds.get(PaMConstants.OBJECTIVE_PK),
-              schemaIds.get(PaMConstants.OBJECTIVE_OBJECTIVES),
-              schemaIds.get(PaMConstants.DATASET_ID_PK), objectiveList));
+      if (!sectorAffectedList.isEmpty()) {
+        tablesFields.put(PaMConstants.SECTOR,
+            fieldRepository.queryFindValue(schemaIds.get(PaMConstants.SECTOR_PK),
+                schemaIds.get(PaMConstants.SECTOR), schemaIds.get(PaMConstants.DATASET_ID_PK),
+                sectorAffectedList));
+      }
+      if (!objectiveList.isEmpty()) {
+        tablesFields.put(PaMConstants.OTHER_OBJECTIVES,
+            fieldRepository.queryFindValue(schemaIds.get(PaMConstants.OBJECTIVE_PK),
+                schemaIds.get(PaMConstants.OBJECTIVE_OBJECTIVES),
+                schemaIds.get(PaMConstants.DATASET_ID_PK), objectiveList));
+      }
     }
     return tablesFields;
   }
