@@ -942,6 +942,7 @@
     "sectorAffected": "Sector affected",
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
-    "otherObjectives": "Other objectives"
+    "otherObjectives": "Other objectives",
+    "webformShouldBeAttachment": "The field type should be attachment"
   }
 }

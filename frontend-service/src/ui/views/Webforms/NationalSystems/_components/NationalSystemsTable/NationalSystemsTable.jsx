@@ -43,7 +43,7 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
       setData(parseData(response.records, tables, schemaTables));
       setSchemaData(response);
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       setIsLoading(false);
     }

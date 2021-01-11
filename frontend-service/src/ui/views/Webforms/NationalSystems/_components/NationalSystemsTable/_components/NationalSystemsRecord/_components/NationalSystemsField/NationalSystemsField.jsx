@@ -1,6 +1,8 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
 
+import intersection from 'lodash/intersection';
 import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
@@ -23,7 +25,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSystemsFieldReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 export const NationalSystemsField = ({ datasetId, key, nationalField, title, tooltip }) => {
@@ -44,6 +45,16 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
+
+  const getMultiselectValues = (multiselectItemsOptions, value) => {
+    if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
+      const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
+      return intersection(
+        splittedValue,
+        multiselectItemsOptions.map(item => item.value)
+      ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+    }
+  };
 
   const handleDialogs = (dialog, value) => {
     nationalSystemsFieldDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
@@ -92,6 +103,20 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
     nationalSystemsFieldDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
   };
 
+  const onFormatDate = (date, isInvalidDate) => {
+    if (isInvalidDate) return '';
+
+    let d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  };
+
   const renderTemplate = () => {
     const { fieldSchemaId, type } = field;
 
@@ -126,6 +151,58 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
             value={field.value}
+          />
+        );
+
+      case 'CODELIST':
+        return (
+          <Dropdown
+            appendTo={document.body}
+            className={styles.dropdown}
+            id={field.fieldId}
+            onChange={event => {
+              onFillField(field, fieldSchemaId, event.target.value);
+              onEditorSubmitValue(field, fieldSchemaId, event.target.value);
+            }}
+            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
+            showFilterClear={true}
+            value={field.value}
+          />
+        );
+
+      case 'DATE':
+        return (
+          <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
+            id={field.fieldId}
+            monthNavigator={true}
+            onChange={event => {
+              onFillField(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)));
+              onEditorSubmitValue(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)));
+            }}
+            value={new Date(field.value)}
+            yearNavigator={true}
+            yearRange="2010:2030"
+          />
+        );
+
+      case 'MULTISELECT_CODELIST':
+        return (
+          <MultiSelect
+            addSpaceCommaSeparator={true}
+            appendTo={document.body}
+            maxSelectedLabels={10}
+            id={field.fieldId}
+            onChange={event => {
+              onFillField(field, fieldSchemaId, event.target.value);
+              onEditorSubmitValue(field, fieldSchemaId, event.target.value);
+            }}
+            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
+            value={getMultiselectValues(
+              field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
+              field.value
+            )}
           />
         );
 
