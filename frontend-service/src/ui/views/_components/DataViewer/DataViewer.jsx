@@ -59,13 +59,13 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 const DataViewer = withRouter(
   ({
     hasCountryCode,
-    hasWebformWritePermissions,
     hasWritePermissions,
     isDatasetDeleted = false,
     isExportable,
     isFilterable,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
+    isReportingWebform,
     isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
@@ -99,6 +99,7 @@ const DataViewer = withRouter(
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
+    const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -174,6 +175,7 @@ const DataViewer = withRouter(
     const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
+
     const { menu } = useContextMenu(
       resources,
       records,
@@ -338,6 +340,12 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
     }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
+
+    useEffect(() => {
+      if (isReportingWebform) {
+        setHasWebformWritePermissions(false);
+      }
+    }, [isReportingWebform]);
 
     const getMetadata = async () => {
       try {
@@ -1162,7 +1170,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWritePermissions && !tableReadOnly && !isEditing
+              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

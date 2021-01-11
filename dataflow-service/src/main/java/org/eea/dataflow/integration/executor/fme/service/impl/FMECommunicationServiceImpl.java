@@ -59,60 +59,92 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class FMECommunicationServiceImpl implements FMECommunicationService {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationServiceImpl.class);
 
-  /** The Constant APPLICATION_JSON: {@value}. */
+  /**
+   * The Constant APPLICATION_JSON: {@value}.
+   */
   private static final String APPLICATION_JSON = "application/json";
 
-  /** The Constant CONTENT_TYPE: {@value}. */
+  /**
+   * The Constant CONTENT_TYPE: {@value}.
+   */
   private static final String CONTENT_TYPE = "Content-Type";
 
-  /** The Constant ACCEPT: {@value}. */
+  /**
+   * The Constant ACCEPT: {@value}.
+   */
   private static final String ACCEPT = "Accept";
 
-  /** The Constant DATASETID: {@value}. */
+  /**
+   * The Constant DATASETID: {@value}.
+   */
   private static final String DATASETID = "datasetId";
 
-  /** The Constant PROVIDERID: {@value}. */
+  /**
+   * The Constant PROVIDERID: {@value}.
+   */
   private static final String PROVIDERID = "providerId";
 
-  /** The fme host. */
+  /**
+   * The fme host.
+   */
   @Value("${integration.fme.host}")
   private String fmeHost;
 
-  /** The fme scheme. */
+  /**
+   * The fme scheme.
+   */
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
-  /** The fme token. */
+  /**
+   * The fme token.
+   */
   @Value("${integration.fme.token}")
   private String fmeToken;
 
-  /** The fme collection mapper. */
+  /**
+   * The fme collection mapper.
+   */
   @Autowired
   private FMECollectionMapper fmeCollectionMapper;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The rest template. */
+  /**
+   * The rest template.
+   */
   @Autowired
   private RestTemplate restTemplate;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The fme job repository. */
+  /**
+   * The fme job repository.
+   */
   @Autowired
   private FMEJobRepository fmeJobRepository;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
@@ -145,11 +177,15 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
-      if (null != checkResult && checkResult.getBody() != null
-          && checkResult.getBody().getId() != null) {
+
+      if (null != checkResult && null != checkResult.getBody()
+          && null != checkResult.getBody().getId()) {
         LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
         result = checkResult.getBody().getId();
+      } else {
+        throw new IllegalStateException("Error submitting job to FME, no result retrieved");
       }
+
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage(), exception);
@@ -206,6 +242,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    *
    * @param idDataset the id dataset
    * @param idProvider the id provider
+   *
    * @return the http status
    */
   @Override
@@ -248,6 +285,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param idDataset the id dataset
    * @param providerId the provider id
    * @param fileName the file name
+   *
    * @return the file submit result
    */
   @Override
@@ -271,18 +309,19 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     HttpEntity<MultiValueMap<String, Object>> request =
         createHttpRequest(null, uriParams, headerInfo);
 
-
     ResponseEntity<byte[]> checkResult = null;
     try {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-          .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+              .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
           byte[].class);
     } catch (HttpClientErrorException e) {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
-    InputStream stream = new ByteArrayInputStream(new byte[0]);
-    if (null != checkResult && checkResult.getBody() != null) {
+    InputStream stream = null;
+    if (null != checkResult && null != checkResult.getBody()) {
       stream = new ByteArrayInputStream(checkResult.getBody());
+    } else {
+      stream = new ByteArrayInputStream(new byte[0]);
     }
     return stream;
   }
@@ -351,7 +390,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    *
    * @param apiKey the api key
    * @param rn3JobId the rn 3 job id
+   *
    * @return the FME job
+   *
    * @throws EEAForbiddenException the EEA forbidden exception
    * @throws EEAUnauthorizedException the EEA unauthorized exception
    */
@@ -501,6 +542,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param datasetId the dataset id
    * @param userName the user name
    * @param notificationRequired the notification required
+   *
    * @return the event type
    */
   private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
@@ -536,6 +578,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    *
    * @param isReporting the is provider
    * @param isStatusCompleted the is status completed
+   *
    * @return the event type
    */
   private EventType exportNotification(boolean isReporting, boolean isStatusCompleted) {
@@ -560,6 +603,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * Export EU dataset notification.
    *
    * @param isStatusCompleted the is status completed
+   *
    * @return the event type
    */
   private EventType exportEUDatasetNotification(boolean isStatusCompleted) {
@@ -573,7 +617,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   }
 
 
-
   /**
    * Import from other system notification.
    *
@@ -581,6 +624,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param isStatusCompleted the is status completed
    * @param datasetId the dataset id
    * @param userName the user name
+   *
    * @return the event type
    */
   private EventType importFromOtherSystemNotification(boolean isReporting,
