@@ -247,8 +247,9 @@ export const FieldsDesigner = ({
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
-      const fieldDeleted = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
-      if (fieldDeleted) {
+      const response = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
+
+      if (response.status >= 200 && response.status <= 299) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
         onChangeFields(inmFields, TextUtils.areEquals(deletedFieldType, 'LINK'), table.tableSchemaId);

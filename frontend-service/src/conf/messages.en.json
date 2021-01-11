@@ -943,7 +943,7 @@
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
     "otherObjectives": "Other objectives",
-    "fieldDeleteBlockedError": "Failure in the field delete process. Please wait until the end of the previous operation",
+    "fieldDeleteBlockedError": "Failure in the Field delete process. Please wait until the end of the previous operation",
     "webformShouldBeAttachment": "The field type should be attachment",
     "cloneNewSchemaError": "Error. The cloning process is already running."
   }
