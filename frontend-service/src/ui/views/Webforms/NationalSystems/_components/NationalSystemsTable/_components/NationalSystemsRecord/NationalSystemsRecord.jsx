@@ -15,6 +15,7 @@ export const NationalSystemsRecord = ({ datasetId, record }) => {
             <NationalSystemsField
               datasetId={datasetId}
               nationalField={name}
+              recordValidations={record.validations}
               title={titleSource || title}
               tooltip={tooltipSource}
             />

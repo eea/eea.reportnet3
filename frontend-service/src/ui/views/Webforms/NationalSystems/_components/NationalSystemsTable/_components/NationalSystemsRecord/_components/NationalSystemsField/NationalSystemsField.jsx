@@ -3,6 +3,7 @@ import React, { useContext, useReducer } from 'react';
 import intersection from 'lodash/intersection';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import uniqBy from 'lodash/uniqBy';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
@@ -14,6 +15,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
@@ -27,7 +29,7 @@ import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSyste
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
-export const NationalSystemsField = ({ datasetId, key, nationalField, title, tooltip }) => {
+export const NationalSystemsField = ({ datasetId, key, nationalField, recordValidations, title, tooltip }) => {
   const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
   const resources = useContext(ResourcesContext);
@@ -257,6 +259,17 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
     }
   };
 
+  const renderValidations = validations =>
+    validations &&
+    uniqBy(validations, element => [element.message, element.errorLevel].join()).map((validation, index) => (
+      <IconTooltip
+        className={'webform-validationErrors'}
+        key={index}
+        levelError={validation.levelError}
+        message={validation.message}
+      />
+    ));
+
   return (
     <div className={styles.content} key={key}>
       <div className={styles.titleWrapper}>
@@ -269,8 +282,12 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
             tooltipOptions={{ position: 'top' }}
           />
         )}
+        {renderValidations(recordValidations)}
       </div>
-      {renderTemplate()}
+      <div className={styles.fieldWrapper}>
+        {renderTemplate()}
+        {renderValidations(field.validations)}
+      </div>
 
       {isDialogVisible.uploadFile && (
         <CustomFileUpload
