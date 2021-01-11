@@ -154,8 +154,8 @@ public class FileTreatmentHelper implements DisposableBean {
       // Prepare the folder where files will be stored
       File root = new File(importPath);
       File folder = new File(root, datasetId.toString());
-      String fileName = multipartFile.getOriginalFilename();
       String saveLocationPath = folder.getCanonicalPath();
+      String fileName = multipartFile.getOriginalFilename();
       String multipartFileMimeType = datasetService.getMimetype(fileName);
 
       if (!folder.mkdirs()) {
@@ -273,11 +273,12 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param file the file
    * @param integrationVO the integration VO
-   * @throws FeignException the feign exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      File file, IntegrationVO integrationVO) throws FeignException, IOException {
+      File file, IntegrationVO integrationVO) throws IOException, EEAException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, file, integrationVO);
@@ -293,13 +294,15 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
-   * @throws FeignException the feign exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   * @throws FeignException the feign exception
    */
   private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO)
-      throws FeignException, IOException {
+      throws IOException, EEAException {
 
     LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
+    boolean error = false;
 
     try (InputStream inputStream = new FileInputStream(file)) {
       // TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
@@ -310,15 +313,26 @@ public class FileTreatmentHelper implements DisposableBean {
       externalParameters.put("fileIS", encodedString);
       integrationVO.setExternalParameters(externalParameters);
 
-      integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-          IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO);
+      if ((Integer) integrationController
+          .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+              IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO)
+          .getExecutionResultParams().get("id") == 0) {
+        error = true;
+      }
     }
 
-    // Remove the file
-    Files.delete(file.toPath());
+    if (error) {
+      LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
+          datasetId, file.getName(), integrationVO);
+      finishImportProcessConditionally(datasetId, null, null, null, null, true);
+      throw new EEAException("Error executing integration");
+    } else {
+      // Remove the file
+      Files.delete(file.toPath());
 
-    // Remove the folder
-    Files.delete(file.getParentFile().toPath());
+      // Remove the folder
+      Files.delete(file.getParentFile().toPath());
+    }
   }
 
   /**
@@ -459,8 +473,9 @@ public class FileTreatmentHelper implements DisposableBean {
     if (null != integrationVO) {
       Map<String, String> oldInternalParameters = integrationVO.getInternalParameters();
       Map<String, String> newInternalParameters = new HashMap<>();
-      newInternalParameters.put("datasetSchemaId", oldInternalParameters.get("datasetSchemaId"));
-      newInternalParameters.put("dataflowId", oldInternalParameters.get("dataflowId"));
+      for (Map.Entry<String, String> entry : oldInternalParameters.entrySet()) {
+        newInternalParameters.put(entry.getKey(), entry.getValue());
+      }
 
       rtn = new IntegrationVO();
       rtn.setId(integrationVO.getId());
