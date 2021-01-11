@@ -18,6 +18,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -47,6 +48,7 @@ export const FieldsDesigner = ({
   table,
   viewType
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const validationContext = useContext(ValidationContext);
   const resources = useContext(ResourcesContext);
 
@@ -256,6 +258,11 @@ export const FieldsDesigner = ({
       }
     } catch (error) {
       console.error('Error during field delete');
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'FIELD_DELETE_BLOCKED_ERROR'
+        });
+      }
     } finally {
     }
   };

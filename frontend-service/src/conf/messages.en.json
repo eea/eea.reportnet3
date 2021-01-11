@@ -942,6 +942,7 @@
     "sectorAffected": "Sector affected",
     "otherSectors": "Other sectors",
     "objectives": "Objectives",
-    "otherObjectives": "Other objectives"
+    "otherObjectives": "Other objectives",
+    "fieldDeleteBlockedError": "Failure in the field delete process. Please wait until the end of the previous operation"
   }
 }
