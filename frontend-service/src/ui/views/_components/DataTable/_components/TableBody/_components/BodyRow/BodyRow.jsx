@@ -103,7 +103,7 @@ export class BodyRow extends Component {
   }
 
   onKeyDown(event) {
-    if (this.props.selectionMode) {
+    if (this.props.selectionMode && this.props.editMode !== 'cell') {
       const row = event.target;
 
       switch (event.which) {
