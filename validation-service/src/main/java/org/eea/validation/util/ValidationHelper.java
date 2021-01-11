@@ -480,7 +480,7 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param processId the processId
-   * @param idTable the tablenum
+   * @param idTable the idTable
    */
   private void releaseTableValidation(final Long datasetId, final String processId, Long idTable) {
     Map<String, Object> value = new HashMap<>();
