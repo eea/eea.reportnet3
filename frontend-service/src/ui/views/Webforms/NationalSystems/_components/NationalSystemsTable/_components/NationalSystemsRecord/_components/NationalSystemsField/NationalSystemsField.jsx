@@ -183,7 +183,7 @@ export const NationalSystemsField = ({ datasetId, key, nationalField, title, too
   return (
     <div className={styles.content} key={key}>
       <div className={styles.titleWrapper}>
-        <h4>{!isNil(title.value) ? title.value : title}</h4>
+        <h4>{!isNil(title?.value) ? title.value : title}</h4>
         {!isNil(tooltip) && (
           <Button
             className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}

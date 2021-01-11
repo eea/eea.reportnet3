@@ -9,9 +9,12 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) => {
+  const resources = useContext(ResourcesContext);
+
+  const { areEquals } = TextUtils;
   const { datasetSchema } = state;
 
-  const resources = useContext(ResourcesContext);
+  const schemaTables = datasetSchema.tables.filter(tab => tab.tableSchemaId);
 
   const getErrorMessages = (data, tableName) => {
     switch (tableName) {
@@ -37,7 +40,7 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
       errorMessages.push(resources.messages['webformTableWithMoreRecords']);
     }
 
-    if (!TextUtils.areEquals(data?.records[0]?.fields[0].type, 'ATTACHMENT')) {
+    if (!areEquals(data?.records[0]?.fields[0].type, 'ATTACHMENT')) {
       errorMessages.push('goodf');
     }
 
@@ -54,21 +57,22 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
     return errorMessages;
   };
 
-  return datasetSchema.tables
-    .filter(tab => tab.tableSchemaId)
-    .map((table, index) => {
-      const configTables = tables.filter(tab => TextUtils.areEquals(tab['name'], table['tableSchemaName']))[0];
+  return (
+    <Fragment>
+      {tables.map((table, index) => {
+        const schemaTable = schemaTables.filter(tab => areEquals(tab['tableSchemaName'], table['name']))[0];
 
-      return (
-        <Fragment key={index}>
-          <NationalSystemsTable
-            datasetId={datasetId}
-            errorMessages={getErrorMessages}
-            schemaTables={table}
-            tables={configTables}
-            tableSchemaId={table.tableSchemaId}
-          />
-        </Fragment>
-      );
-    });
+        return (
+          <Fragment key={index}>
+            <NationalSystemsTable
+              datasetId={datasetId}
+              errorMessages={getErrorMessages}
+              schemaTables={schemaTable}
+              tables={table}
+            />
+          </Fragment>
+        );
+      })}
+    </Fragment>
+  );
 };
