@@ -214,6 +214,9 @@ public class FKValidationUtils {
 
       List<String> ifFKs = createAndExecuteQuery(query);
       List<FieldValue> fieldsToValidate = fieldRepository.findByIds(ifFKs);
+      FieldValue auxField = new FieldValue();
+      auxField.setValue("");
+      fieldsToValidate.add(auxField);
 
       if (!pkMustBeUsed && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
@@ -228,6 +231,7 @@ public class FKValidationUtils {
     } else {
       // Retrieve PK List
       List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
+      pkList.add("");
       // Get list of Fields to validate
       List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
       if (!pkMustBeUsed) {
@@ -300,6 +304,9 @@ public class FKValidationUtils {
           findFKs(fkFieldSchema, datasetIdFK, fkConditionalMasterFieldSchemaId, pkMap, pkMapAux);
       if (!ifFKs.isEmpty()) {
         List<FieldValue> fieldsToValidate = fieldRepository.findByIds(new ArrayList<>(ifFKs));
+        FieldValue auxField = new FieldValue();
+        auxField.setValue("");
+        fieldsToValidate.add(auxField);
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
         if (pkMustBeUsed.equals(Boolean.FALSE)) {
           saveFieldValidations(errorFields);
