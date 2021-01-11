@@ -29,7 +29,6 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataflow.integration.fme.FMEController.FMEControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
@@ -81,10 +80,6 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The fme controller zuul. */
-  @Autowired
-  private FMEControllerZuul fmeControllerZuul;
-
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -126,11 +121,10 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
-   * @param externalJobId the external job id
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
-      boolean replace, Long externalJobId) throws EEAException {
+      boolean replace) throws EEAException {
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
     if (null == schema) {
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
@@ -139,7 +133,7 @@ public class FileTreatmentHelper implements DisposableBean {
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
-    fileManagement(datasetId, tableSchemaId, schema, file, replace, externalJobId);
+    fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
 
   /**
@@ -150,11 +144,10 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param multipartFile the multipart file
    * @param delete the delete
-   * @param externalJobId the external job id
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean delete, Long externalJobId) throws EEAException {
+      MultipartFile multipartFile, boolean delete) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
@@ -166,8 +159,7 @@ public class FileTreatmentHelper implements DisposableBean {
       String multipartFileMimeType = datasetService.getMimetype(fileName);
 
       if (!folder.mkdirs()) {
-        finishImportProcessConditionally(datasetId, tableSchemaId, externalJobId, null, null, null,
-            true);
+        finishImportProcessConditionally(datasetId, tableSchemaId, null, null, null, true);
         throw new EEAException("Folder for dataset " + datasetId + " already exists");
       }
 
@@ -190,8 +182,7 @@ public class FileTreatmentHelper implements DisposableBean {
             wipeData(datasetId, tableSchemaId, delete);
             for (File file : files) {
               IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-              queueImportProcess(datasetId, tableSchemaId, schema, file, copyIntegrationVO,
-                  externalJobId);
+              queueImportProcess(datasetId, tableSchemaId, schema, file, copyIntegrationVO);
             }
           }
         }
@@ -220,14 +211,13 @@ public class FileTreatmentHelper implements DisposableBean {
 
         // Queue import task for the stored file
         wipeData(datasetId, tableSchemaId, delete);
-        queueImportProcess(datasetId, tableSchemaId, schema, file, integrationVO, externalJobId);
+        queueImportProcess(datasetId, tableSchemaId, schema, file, integrationVO);
       }
 
     } catch (FeignException | IOException e) {
       LOG_ERROR.error("Unexpected exception importing file data: datasetId={}, file={}", datasetId,
           multipartFile.getName(), e);
-      finishImportProcessConditionally(datasetId, tableSchemaId, externalJobId, null, null, null,
-          true);
+      finishImportProcessConditionally(datasetId, tableSchemaId, null, null, null, true);
       throw new EEAException(e);
     }
   }
@@ -283,19 +273,17 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param file the file
    * @param integrationVO the integration VO
-   * @param externalJobId the external job id
    * @throws FeignException the feign exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      File file, IntegrationVO integrationVO, Long externalJobId)
-      throws FeignException, IOException {
+      File file, IntegrationVO integrationVO) throws FeignException, IOException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, file, integrationVO);
     } else {
-      importExecutorService.submit(
-          () -> rn3FileProcess(datasetId, tableSchemaId, schema, file, user, externalJobId));
+      importExecutorService
+          .submit(() -> rn3FileProcess(datasetId, tableSchemaId, schema, file, user));
     }
   }
 
@@ -341,10 +329,9 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param file the file
    * @param user the user
-   * @param externalJobId the external job id
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema schema, File file,
-      String user, Long externalJobId) {
+      String user) {
 
     String fileName = file.getName();
     String error = null;
@@ -390,8 +377,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error loading file: {}", fileName, e);
       error = e.getMessage();
     }
-    finishImportProcessConditionally(datasetId, tableSchemaId, externalJobId, file, user, error,
-        false);
+    finishImportProcessConditionally(datasetId, tableSchemaId, file, user, error, false);
   }
 
   /**
@@ -420,20 +406,13 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
-   * @param externalJobId the external job id
    * @param file the file
    * @param user the user
    * @param error the error
    * @param finishAll the finish all
    */
-  private void finishImportProcessConditionally(Long datasetId, String tableSchemaId,
-      Long externalJobId, File file, String user, String error, boolean finishAll) {
-
-    if (null != externalJobId) {
-      // Status 0 -> FMEJobstatus.SUCCESS
-      fmeControllerZuul.updateJobStatusById(externalJobId, 0L);
-    }
-
+  private void finishImportProcessConditionally(Long datasetId, String tableSchemaId, File file,
+      String user, String error, boolean finishAll) {
     try {
       if (finishAll) {
         LOG_ERROR.error("Exception handler: deleting directory for dataset {}", datasetId);
