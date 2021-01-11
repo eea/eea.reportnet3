@@ -639,6 +639,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void createFieldSchemaTest3() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn("FieldId");
@@ -806,6 +809,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void deleteFieldSchemaTest1() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -888,6 +894,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void createTableSchemaTest1() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     TableSchemaVO tableSchemaVO = new TableSchemaVO();
     tableSchemaVO.setIdTableSchema("id");
     when(dataschemaService.createTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -904,6 +913,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createTableSchemaTest2() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     when(dataschemaService.createTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new TableSchemaVO());
     Mockito.doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
