@@ -657,7 +657,7 @@ const ValidationViewer = React.memo(
           buttonsList
         ) : (
           <Toolbar className={styles.validationToolbar}>
-            <div className="p-toolbar-group-left">
+            {/* <div className="p-toolbar-group-left">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
@@ -737,7 +737,7 @@ const ValidationViewer = React.memo(
                   setAreActiveFilters(false);
                 }}
               />
-            </div>
+            </div> */}
             <div>
               <Filters
                 data={fetchedData}
