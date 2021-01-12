@@ -373,7 +373,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
-    if (Boolean.TRUE.equals(snapshotRepository.findById(idSnapshot).get().getAutomatic())) {
+    Snapshot snap = snapshotRepository.findById(idSnapshot).orElse(new Snapshot());
+    if (snap.getAutomatic() != null && Boolean.TRUE.equals(snap.getAutomatic())) {
       LOG_ERROR.error("Error deleting snapshot, the snapshot is automatic");
       throw new EEAException(EEAErrorMessage.ERROR_DELETING_SNAPSHOT);
     }
@@ -383,6 +384,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
 
     LOG.info("Snapshot {} removed", idSnapshot);
+
   }
 
   /**
@@ -1056,10 +1058,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<Long> datasets = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
-    // List of the representatives
-    List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
-            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
+
 
     // We have to lock all the dataset operations (insert, delete, update...)
     for (Long datasetId : datasets) {
