@@ -228,6 +228,7 @@ public class FKValidationUtils {
     } else {
       // Retrieve PK List
       List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
+      pkList.add("");
       // Get list of Fields to validate
       List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
       if (!pkMustBeUsed) {
@@ -289,17 +290,23 @@ public class FKValidationUtils {
       List<Object[]> pkList = fieldRepository.queryPKExecution(queryPks);
       Map<String, String> pkMap = new HashMap<>();
       Map<String, String> pkMapAux = new HashMap<>();
-      for (int i = 0; i < pkList.size(); i++) {
-        pkMap.put(pkList.get(i)[0].toString(),
-            pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
-        pkMapAux.put(pkList.get(i)[0].toString(),
-            pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
+      if (null != pkList) {
+        for (int i = 0; i < pkList.size(); i++) {
+          if (null != pkList.get(i) && null != pkList.get(i)[0] && null != pkList.get(i)[1]) {
+            pkMap.put(pkList.get(i)[0].toString(),
+                pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
+            pkMapAux.put(pkList.get(i)[0].toString(),
+                pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
+          }
+        }
       }
-
       Set<String> ifFKs =
           findFKs(fkFieldSchema, datasetIdFK, fkConditionalMasterFieldSchemaId, pkMap, pkMapAux);
       if (!ifFKs.isEmpty()) {
         List<FieldValue> fieldsToValidate = fieldRepository.findByIds(new ArrayList<>(ifFKs));
+        FieldValue auxField = new FieldValue();
+        auxField.setValue("");
+        fieldsToValidate.add(auxField);
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
         if (pkMustBeUsed.equals(Boolean.FALSE)) {
           saveFieldValidations(errorFields);
@@ -396,7 +403,9 @@ public class FKValidationUtils {
       fieldValidation.setFieldValue(fieldValue);
       fieldValidationList.add(fieldValidation);
       field.setFieldValidations(fieldValidationList);
-      errorFields.add(field);
+      if (!field.getValue().equals("")) {
+        errorFields.add(field);
+      }
     }
   }
 
