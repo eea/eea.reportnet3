@@ -211,7 +211,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
       for (int i = 0; i < typeEntitiesFilter.size(); i++) {
-        stringBuilder.append(group ? " and v.type_entity !='" : " and v.typeEntity !='")
+        stringBuilder.append(group ? " and v.type_entity ='" : " and v.typeEntity ='")
             .append(typeEntitiesFilter.get(i).getValue()).append("' ");
       }
     }
@@ -229,7 +229,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
       for (int i = 0; i < levelErrorsFilter.size(); i++) {
-        stringBuilder.append(group ? " and v.level_error !='" : " and v.levelError !='")
+        stringBuilder.append(group ? " and v.level_error ='" : " and v.levelError ='")
             .append(levelErrorsFilter.get(i).getValue()).append("' ");
       }
     }
