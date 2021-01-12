@@ -28,8 +28,8 @@ public interface ValidationRepositoryPaginated {
    * @return the page
    */
   Page<Validation> findAllRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
-      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter, Pageable pageable,
-      String headerField, Boolean asc);
+      List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter,
+      Pageable pageable, String headerField, Boolean asc);
 
   /**
    * Count records by filter.
@@ -41,7 +41,7 @@ public interface ValidationRepositoryPaginated {
    * @return the long
    */
   Long countRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
-      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter);
+      List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter);
 
 
   /**
@@ -59,5 +59,6 @@ public interface ValidationRepositoryPaginated {
    */
   List<GroupValidationVO> findGroupRecordsByFilter(Long datasetId,
       List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
-      String originsFilter, Pageable pageable, String headerField, Boolean asc, boolean paged);
+      String tableFilter, String fieldValueFilter, Pageable pageable, String headerField,
+      Boolean asc, boolean paged);
 }
