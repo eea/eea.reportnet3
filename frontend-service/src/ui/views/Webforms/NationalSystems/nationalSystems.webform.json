@@ -2,7 +2,7 @@
   "tables": [
     {
       "name": "Table_1",
-      "title": "Table 1",
+      "title": "National System for policies and measures and projections",
       "elements": [
         {
           "type": "FIELD",
@@ -19,12 +19,11 @@
     },
     {
       "name": "Table_2",
-      "title": "Table 2",
+      "title": "Additional information",
       "elements": [
         {
           "type": "FIELD",
-          "name": "UploadFile",
-          "title": "Description of the alignment with the national inventory system"
+          "name": "UploadFile"
         }
       ]
     }
