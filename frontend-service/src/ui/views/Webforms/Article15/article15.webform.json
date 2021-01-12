@@ -628,38 +628,38 @@
         {
           "type": "FIELD",
           "name": "AdaptationPriorities",
-          "title": "Please describe the adaptation priorities (max. 750 characters)"
+          "title": "Adaptation priorities (max. 750 characters)",
+          "tooltip": "Annex I: 3.1"
         },
         {
           "type": "FIELD",
           "name": "Challenges",
-          "title": "Please describe challenges, gaps and barriers to adaptation, including those institutional, governance-related and other barriers that restrict the adaptive capacity as identified in the vulnerability assessment (see Chapter 2 of this reporting) (max. 2000 characters)"
+          "title": "Challenges, gaps and barriers to adaptation  (max. 2000 characters)",
+          "tooltip": "Including those institutional, governance-related and other barriers that restrict the adaptive capacity as identified in the vulnerability assessment. Annex I: 3.2"
         },
         {
           "type": "FIELD",
           "name": "SummaryNationalStrategies",
-          "title": "Please provide a summary of national strategies, policies, plans and efforts, with a focus on goals and objectives (max. 5000 characters)"
-        },
-        {
-          "type": "FIELD",
-          "name": "SummaryForeseenActions",
-          "title": "Please provide a summary of foreseen actions, budget and timeline. This should include nature-based solutions and actions leading to mitigation co-benefits and other relevant co-benefits. The summaries shall also cover efforts to build resilience and avert, minimise and address the adverse consequences of climate change, and include an explanation how gender perspectives have been taken into account. (max. 10 000 characters)Consider also the following optional reporting to provide details on actions and (programmes of) measures"
+          "title": "Summaries of national strategies, policies, plans and efforts, with a focus on goals and objectives, foreseen actions, budget and timeline (max. 5000 characters)",
+          "tooltip": "Including nature-based solutions and actions leading to mitigation co-benefits and other relevant co-benefits. The summaries shall cover also efforts to build resilience and avert, minimise and address the adverse consequences of climate change, and include an explanation how gender perspectives have been taken into account. Annex I: 3.3"
         },
         {
           "type": "TABLE",
           "name": "ActionsMeasures",
-          "title": "Selection of actions and (programmes of) measures",
+          "title": "Selection of actions and (programmes of) measures (optional)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "Title",
-              "title": "Title of the measure or action (preferably translated into English)"
+              "title": "Title of the measure or action",
+              "tooltip": "Preferably translated into English, see Dataflow Help for additional explanation"
             },
             {
               "type": "FIELD",
               "name": "KeyTypeMeasure",
-              "title": "Key Type Measure (KTM)"
+              "title": "Key Type Measure (KTM)",
+              "tooltip": "See Dataflow Help for definitions and examples"
             },
             {
               "type": "FIELD",
@@ -668,8 +668,8 @@
             },
             {
               "type": "FIELD",
-              "name": "Atribute",
-              "title": "Atribute"
+              "name": "Specification",
+              "title": "Specification"
             },
             {
               "type": "FIELD",
@@ -709,34 +709,40 @@
             {
               "type": "FIELD",
               "name": "Examples",
-              "title": "Examples (websites)"
+              "title": "Examples (websites)",
+              "tooltip": "Provide an url for more information about the action/measure (use ';' in between different urls if more than 1 is provided, additional information not available online can be attached in the file under this table"
             }
           ]
         },
         {
           "type": "FIELD",
           "name": "AditionalDocument",
-          "title": "If necessary, you can upload here an additional document on the actions and (programmes of measures) (max. 2 MB)"
+          "title": "If necessary, you can upload here an additional document on the actions and (programmes of) measures reported in the optional table above (max. 2 MB)",
+          "tooltip": "Accepted file formats are PDF files, MS Word files and JPG figures"
         },
         {
           "type": "FIELD",
           "name": "OverviewContent",
-          "title": "Please give an overview of the content of sub-national strategies, policies, plans and efforts (max. 10 000 characters)"
+          "title": "Overview of the content of sub-national strategies, policies, plans and efforts (max. 10 000 characters)",
+          "tooltip": "Annex I: 3.4"
         },
         {
           "type": "FIELD",
           "name": "OverviewEffortsClimate",
-          "title": "Please give an overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs, including disaster risk management strategies and action plans (max. 5000 characters)"
+          "title": "Overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs, including disaster risk management strategies and action plans  (max. 5000 characters)",
+          "tooltip": "Annex I: 3.5"
         },
         {
           "type": "FIELD",
           "name": "OverviewMeasures",
-          "title": "Please provide an overview of measures in adaptation policy at all governance levels to engage with stakeholders particularly vulnerable to climate change impacts (max 10 000 characters)"
+          "title": "Overview of measures in adaptation policy at the national level and good practice examples from the sub-national levels to engage with stakeholders particularly vulnerable to climate change impacts (max 10 000 characters)",
+          "tooltip": "Annex I: 3.6a"
         },
         {
           "type": "FIELD",
           "name": "OverviewPrivateSector",
-          "title": "Please provide an overview of available information on private sector plans, priorities, actions and programmes, public/private partnerships, and other relevant private adaptation initiatives and/or projects (max. 5000 characters)"
+          "title": "Overview of measures in adaptation policy at the national level and good practice examples from the sub-national levels to engage with the private sector (max 5000 characters)",
+          "tooltip": "Member States shall provide an overview of available information on private sector plans, priorities, actions and programmes, public/private partnerships, and other relevant private adaptation initiatives and/or projects. Annex I: 3.6b"
         }
       ]
     },
@@ -749,17 +755,19 @@
         {
           "type": "FIELD",
           "name": "DescribeMonitoringReportingEvaluation",
-          "title": "Please describe the monitoring, reporting and evaluation (MRE) methodology related to reducing climate impacts, vulnerabilities, risks, and increasing adaptive capacity. Report on approaches, systems used, transparency and indicators (max. 3000 characters)"
+          "title": "Monitoring, reporting and evaluation (MRE) methodology related to reducing climate impacts, vulnerabilities, risks, and increasing adaptive capacity (max. 3000 characters)",
+          "tooltip": "Member States shall report on approaches, systems used, transparency and indicators. Annex I: 4.1a"
         },
         {
           "type": "FIELD",
           "name": "DescribeMREMethodology",
-          "title": "Please describe the MRE methodology related to the implementation of adaptation actions (max. 2000 characters)"
+          "title": "MRE methodology related to the implementation of adaptation actions (max. 2000 characters)",
+          "tooltip": "Member States shall report on approaches, systems used, transparency and indicators. Annex I: 4.1b"
         },
         {
           "type": "TABLE",
           "name": "MonitoringIndicatorsMethodologies",
-          "title": "Sources for MRE indicators and methodologies - sources",
+          "title": "Sources for monitoring, reporting and evaluation (MRE) indicators and methodologies (optional)",
           "multipleRecords": true,
           "elements": [
             {
@@ -775,69 +783,69 @@
             {
               "type": "FIELD",
               "name": "Link",
-              "title": "Provide a link to the MRE indicators and/or methodologies"
+              "title": "Link to the MRE indicators and/or methodologies"
             }
           ]
         },
         {
           "type": "FIELD",
           "name": "DescribeStatePlay",
-          "title": "Please describe the state of play of the implementation of measures, including an overview of the subnational level and the disbursement of funding to increase climate resilience. (max. 5000 characters)The information can also be provided in the detailed reporting on actions and measures in Chapter 3."
+          "title": "State of play of the implementation of measures planned under 'Strategies and Plans', including an overview of the subnational level and the disbursement of funding to increase climate resilience (max. 5000 characters)",
+          "tooltip": "This field refers to the information provided in the webform 'Strategies and plans', including the detailed information in the optional table 'Selection of actions and (programmes of) measures'. Annex I: 4.2"
         },
         {
           "type": "FIELD",
           "name": "SummaryClimateAdaptation",
-          "title": "Please provide the state of play of the implementation of measures planned under points 3.3 to 3.6, including an overview of the subnational level and the disbursement of funding to increase climate resilience. The reporting on funding shall cover spending earmarked for climate adaptation including in disaster risk management (max. 1500 characters)"
+          "title": "State of play of the implementation of measures planned under 'Strategies and Plans': spending earmarked for climate adaptation including in disaster risk management (max. 1500 characters)",
+          "tooltip": "This field refers to the information provided in the webform 'Strategies and plans', including the detailed information in the optional table 'Selection of actions and (programmes of) measures'. Annex I: 4.2a"
         },
         {
           "type": "FIELD",
           "name": "SummarySpendingShare",
-          "title": "Please provide the state of play of the implementation of measures planned under points 3.3 to 3.6, including an overview of the subnational level and the disbursement of funding to increase climate resilience. The reporting on funding shall cover, to the extent possible, the share of spending used to support climate adaptation (being the additional investment that makes a project (that would have been realised anyway) climate resilient) in each sector (for an overview see 'affected sectors' in the table 'National circumstances, impacts, vulnerabilities, risks and adaptive capacity') (max. 3000 characters)"
-        },
-        {
-          "type": "LABEL",
-          "level": 2,
-          "title": "Share spending"
-        },
-        {
-          "type": "FIELD",
-          "name": "ProvideShareSpendingSupport",
-          "title": "Please provide, to the extent possible, the share of spending used to support climate adaptation in each sector (max. 1500 characters)"
+          "title": "To the extent possible, state of play of the implementation of measures planned under 'Strategies and Plans': the share of spending used to support climate adaptation in each sector (max. 3000 characters)",
+          "tooltip": "Share of spending used to support climate adaptation as the additional investment that makes a project (that would have been realised anyway) climate resilient. For an overview of sectors see 'Affected sectors' in the 'National Circumstances' webform, or in the optional table 'Selection of actions and (programmes of) measures'. Annex I: 4.2b"
         },
         {
           "type": "FIELD",
           "name": "DescribeReducingClimateImpacts",
-          "title": "Please describe the evaluation progress towards reducing climate impacts, vulnerabilities and risks (max. 3000 characters)"
+          "title": "Progress towards reducing climate impacts, vulnerabilities and risks (max. 3000 characters)",
+          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3a"
         },
         {
           "type": "FIELD",
           "name": "DescribeIncreasingAdaptiveCapacity",
-          "title": "Please describe the evaluation progress towards increasing adaptive capacity (max. 3000 characters)"
+          "title": "Please describe the evaluation progress towards increasing adaptive capacity (max. 3000 characters)",
+          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3b"
         },
         {
           "type": "FIELD",
           "name": "DescribeMeetingAdaptationPriorities",
-          "title": "Please describe the evaluation progress towards meeting adaptation priorities (max. 3000 characters)"
+          "title": "Please describe the evaluation progress towards meeting adaptation priorities (max. 3000 characters)",
+          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3c"
         },
         {
           "type": "FIELD",
           "name": "DescribeProgressTowardsAddressing",
-          "title": "Please describe the evaluation progress towards addressing barriers to adaptation (max. 3000 characters)"
+          "title": "Please describe the evaluation progress towards addressing barriers to adaptation (max. 3000 characters)",
+          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3d"
         },
         {
           "type": "FIELD",
           "name": "DescribeVulnerability",
-          "title": "Please describe the steps taken to review and update vulnerability and risk assessments (max. 3000 characters)"
+          "title": "Please describe the steps taken to review and update vulnerability and risk assessments (max. 3000 characters)",
+          "tooltip": "Annex I: 4.4a"
         },
         {
           "type": "FIELD",
           "name": "DescribeNationalAdaptation",
-          "title": "Please describe the steps taken to review and update national adaptation policies, strategies, plans and measures (max. 3000 characters)"
+          "title": "Please describe the steps taken to review and update national adaptation policies, strategies, plans and measures (max. 3000 characters)",
+          "tooltip": "Annex I: 4.4b"
         },
         {
           "type": "FIELD",
           "name": "DescribeSubnationalAdaptation",
-          "title": "Please describe the steps taken to review and update subnational adaptation policies, strategies, plans and measures (max. 2000 characters)"
+          "title": "Please describe the steps taken to review and update subnational adaptation policies, strategies, plans and measures (max. 2000 characters)",
+          "tooltip": "Annex I: 4.5"
         }
       ]
     },
