@@ -319,10 +319,11 @@ const ValidationViewer = React.memo(
         });
       });
 
+      const uniquesFields = uniq(fields);
+
       const allFieldsFilterList = [];
 
-      uniq(fields);
-      fields.forEach(field => {
+      uniquesFields.forEach(field => {
         if (!isNil(field)) {
           allFieldsFilterList.push({ type: 'fieldSchemaName', value: `${field.toString()}` });
         }
