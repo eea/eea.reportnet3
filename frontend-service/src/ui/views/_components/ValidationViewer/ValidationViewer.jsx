@@ -39,12 +39,19 @@ const ValidationViewer = React.memo(
     visible
   }) => {
     const resources = useContext(ResourcesContext);
-    const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
-    const [allOriginsFilter, setAllOriginsFilter] = useState([]);
-    const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
-    const [areActiveFilters, setAreActiveFilters] = useState(false);
+
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
+    const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
+    const [filterBy, setFilterBy] = useState({
+      entityType: [],
+      tableSchemaName: [],
+      fieldSchemaName: [],
+      levelError: []
+    });
+    const [filtered, setFiltered] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
+
     const [firstRow, setFirstRow] = useState(0);
     const [grouped, setGrouped] = useState(true);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
@@ -52,25 +59,15 @@ const ValidationViewer = React.memo(
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
+    const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
     const [numberRows, setNumberRows] = useState(10);
     const [originsFilter, setOriginsFilter] = useState([]);
+    const [originsTypesFilter, setOriginsTypesFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
-    const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
-    const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
-    const [originsTypesFilter, setOriginsTypesFilter] = useState([]);
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
-    const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
-    const [allFieldsFilter, setAllFieldsFilter] = useState([]);
-    const [filtered, setFiltered] = useState(false);
-    const [filteredData, setFilteredData] = useState([]);
-    const [filterBy, setFilterBy] = useState({
-      entityType: [],
-      tableSchemaName: [],
-      fieldSchemaName: [],
-      levelError: []
-    });
+    const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
 
     const [validationState, validationDispatch] = useReducer(validationReducer, {
       totalErrors: 0,
@@ -79,11 +76,7 @@ const ValidationViewer = React.memo(
       totalRecords: 0
     });
 
-    const { totalErrors, totalFilteredGroupedRecords, totalFilteredRecords, totalRecords } = validationState;
-
-    let dropdownLevelErrorsFilterRef = useRef();
-    let dropdownTypeEntitiesFilterRef = useRef();
-    let dropdownOriginsFilterRef = useRef();
+    const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
     useEffect(() => {
       const allTypesFilter = concat(
@@ -260,10 +253,6 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilters = async () => {
-      onLoadLevelErrorsFilter();
-      onLoadTypeEntitiesFilter();
-      onLoadOriginsFilter();
-      ///////////////////////////////////////////////////////////////////////////////////////////////Filters Component
       onLoadLevelErrorsTypes();
       onLoadTablesTypes();
       onLoadFieldsTypes();
@@ -334,63 +323,9 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilteredValidations = filterData => {
-      // Changed selected filters
-      // const selectedEntitiesValues = filterData.entityType;
-      // const entitiesValues = allTypeEntitiesFilter.map(entityFilter => entityFilter.value);
-
-      // entitiesValues.forEach(tableName => {
-      //   selectedEntitiesValues.forEach(selectedTable => {
-      //     if (tableName === selectedTable) {
-      //       entitiesValues.splice(entitiesValues.indexOf(selectedTable), 1);
-      //     }
-      //   });
-      // });
-
-      // console.log('selectedEntitiesValues', selectedEntitiesValues);
-      // console.log('entitiesValues', entitiesValues);
-
-      // const selectedTablesNamesValues = filterData.tableSchemaName;
-      // const tablesNamesValues = allOriginsFilter.map(tableNameFilter => tableNameFilter.value);
-
-      // tablesNamesValues.forEach(tableName => {
-      //   selectedTablesNamesValues.forEach(selectedTable => {
-      //     if (tableName === selectedTable) {
-      //       tablesNamesValues.splice(tablesNamesValues.indexOf(selectedTable), 1);
-      //     }
-      //   });
-      // });
-
-      // console.log('tablesNamesValues', tablesNamesValues);
-
-      // const selectedFieldsValues = uniq(filterData.fieldSchemaName);
-      // const fieldsValues = allFieldsFilter.map(fieldFilter => fieldFilter.value);
-
-      // fieldsValues.forEach(field => {
-      //   selectedFieldsValues.forEach(selectedField => {
-      //     if (field === selectedField) {
-      //       fieldsValues.splice(fieldsValues.indexOf(selectedField), 1);
-      //     }
-      //   });
-      // });
-      // console.log('selectedFieldsValues', selectedFieldsValues);
-      // console.log('fieldsValues', fieldsValues);
-
-      // const selectedErrorsTypes = filterData.levelError;
-      // const errorsValues = allLevelErrorsFilter.map(errorsFilter => errorsFilter.value);
-      // errorsValues.forEach(error => {
-      //   selectedErrorsTypes.forEach(selectedError => {
-      //     if (error === selectedError) {
-      //       errorsValues.splice(errorsValues.indexOf(selectedError), 1);
-      //     }
-      //   });
-      // });
-      // console.log('selectedErrorsTypes', selectedErrorsTypes);
-      // console.log('errorsValues', errorsValues);
-
       onLoadErrors(
         firstRow,
         numberRows,
-        // sortField,
         filterData.fieldSchemaName,
         sortOrder,
         filterData.levelError,
@@ -398,103 +333,6 @@ const ValidationViewer = React.memo(
         filterData.tableSchemaName
       );
       setFilterBy(filterData);
-    };
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    const onLoadLevelErrorsFilter = () => {
-      const allLevelErrorsFilterList = [];
-
-      levelErrorTypes.forEach(filter => {
-        allLevelErrorsFilterList.push({
-          label: capitalize(filter),
-          key: `${filter.toString()}`
-        });
-      });
-
-      setAllLevelErrorsFilter(allLevelErrorsFilterList);
-    };
-
-    const onLoadTypeEntitiesFilter = () => {
-      const allTypeEntitiesFilterList = [
-        { label: resources.messages['dataset'], key: 'Dataset' },
-        { label: resources.messages['validationViewerTable'], key: 'Table' },
-        { label: resources.messages['record'], key: 'Record' },
-        { label: resources.messages['validationViewerField'], key: 'Field' }
-      ];
-      setAllTypeEntitiesFilter(allTypeEntitiesFilterList);
-    };
-
-    const onLoadOriginsFilter = () => {
-      const allOriginsFilterList = [];
-
-      allOriginsFilterList.push({
-        label: datasetName.toString(),
-        key: `${datasetName.toString()}`
-      });
-      schemaTables.forEach(table => {
-        if (!isNil(table.name)) {
-          allOriginsFilterList.push({ label: table.name.toString(), key: `${table.name.toString()}` });
-        }
-      });
-
-      setAllOriginsFilter(allOriginsFilterList);
-    };
-
-    const removeSelectAllFromList = filters => {
-      if (!isEmpty(filters)) {
-        filters.shift();
-      }
-    };
-
-    const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
-      levelErrorsDeselected = levelErrorsDeselected.map(filter => filter.toString().toUpperCase());
-
-      removeSelectAllFromList(levelErrorsDeselected);
-
-      setLevelErrorsFilter(levelErrorsDeselected);
-
-      setIsFilteredLevelErrors(levelErrorsDeselected.length > 0);
-
-      if (levelErrorsDeselected.length <= 0) {
-        checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
-      } else {
-        setAreActiveFilters(true);
-      }
-
-      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsDeselected, typeEntitiesFilter, originsFilter);
-
-      setFirstRow(0);
-    };
-
-    const onLoadErrorsWithEntityFilter = typeEntitiesDeselected => {
-      typeEntitiesDeselected = typeEntitiesDeselected.map(filter => filter.toString().toUpperCase());
-
-      removeSelectAllFromList(typeEntitiesDeselected);
-
-      if (typeEntitiesDeselected.length <= 0) {
-        checkActiveFilters(isFilteredOrigins, isFilteredLevelErrors, false);
-      } else {
-        setAreActiveFilters(true);
-      }
-
-      setTypeEntitiesFilter(typeEntitiesDeselected);
-      setIsFilteredTypeEntities(typeEntitiesDeselected.length > 0);
-      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
-      setFirstRow(0);
-    };
-
-    const onLoadErrorsWithOriginsFilter = originsDeselected => {
-      setOriginsFilter(originsDeselected);
-
-      if (originsDeselected.length <= 0) {
-        checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
-      } else {
-        setAreActiveFilters(true);
-      }
-      setIsFilteredOrigins(originsDeselected.length > 0);
-      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsDeselected);
-      setFirstRow(0);
     };
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
@@ -528,24 +366,6 @@ const ValidationViewer = React.memo(
       originsFilter
     ) => {
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
-    };
-
-    const checkActiveFilters = (originsFilter, levelErrorsFilter, typeEntitiesFilter) => {
-      if (originsFilter || levelErrorsFilter || typeEntitiesFilter) {
-        setAreActiveFilters(true);
-      } else {
-        setAreActiveFilters(false);
-      }
-    };
-
-    const getExportButtonPosition = e => {
-      const exportButton = e.currentTarget;
-      const left = `${exportButton.offsetLeft}px`;
-      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
-      const top = `${topValue}px `;
-      const menu = exportButton.nextElementSibling;
-      menu.style.top = top;
-      menu.style.left = left;
     };
 
     const onRowSelect = async event => {
@@ -599,20 +419,6 @@ const ValidationViewer = React.memo(
         }
       }
     };
-    // const getPaginatorRecordsCount = () => (
-    //   <Fragment>
-    //     {areActiveFilters && totalRecords !== totalFilteredRecords
-    //       ? `${resources.messages['filtered']}: ${!grouped ? totalFilteredRecords : totalFilteredGroupedRecords} | `
-    //       : ''}
-    //     {resources.messages['totalRecords']} {totalRecords}{' '}
-    //     {`${resources.messages['records'].toLowerCase()}${
-    //       grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
-    //     }`}
-    //     {areActiveFilters && totalRecords === totalFilteredRecords
-    //       ? ` (${resources.messages['filtered'].toLowerCase()})`
-    //       : ''}
-    //   </Fragment>
-    // );
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
@@ -634,7 +440,6 @@ const ValidationViewer = React.memo(
       setIsFilteredOrigins(false);
       setIsFilteredTypeEntities(false);
       setIsFilteredLevelErrors(false);
-      setAreActiveFilters(false);
       onLoadFilters();
     };
 
@@ -658,87 +463,6 @@ const ValidationViewer = React.memo(
           buttonsList
         ) : (
           <Toolbar className={styles.validationToolbar}>
-            {/* <div className="p-toolbar-group-left">
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['entity']}
-                onClick={event => {
-                  dropdownTypeEntitiesFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allTypeEntitiesFilter}
-                popup={true}
-                ref={dropdownTypeEntitiesFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithEntityFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
-              />
-
-              <Button
-                className={`${styles.origin} p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['table']}
-                onClick={event => {
-                  dropdownOriginsFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredOrigins ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allOriginsFilter}
-                popup={true}
-                ref={dropdownOriginsFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithOriginsFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
-              />
-
-              <Button
-                className={`${styles.level} p-button-rounded p-button-secondary-transparent`}
-                icon={'filter'}
-                label={resources.messages['levelError']}
-                onClick={event => {
-                  dropdownLevelErrorsFilterRef.current.show(event);
-                }}
-                iconClasses={isFilteredLevelErrors ? styles.filterActive : styles.filterInactive}
-              />
-
-              <DropdownFilter
-                disabled={isLoading}
-                filters={allLevelErrorsFilter}
-                popup={true}
-                ref={dropdownLevelErrorsFilterRef}
-                id="exportTableMenu"
-                showNotCheckedFilters={onLoadErrorsWithErrorLevelFilter}
-                onShow={e => {
-                  getExportButtonPosition(e);
-                }}
-                showLevelErrorIcons={true}
-              />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
-                disabled={!areActiveFilters}
-                icon={'cross'}
-                label={resources.messages['cleanFilters']}
-                onClick={() => {
-                  resetFilters();
-                  fetchData('', sortOrder, 0, numberRows, [], [], []);
-                  setFirstRow(0);
-                  setAreActiveFilters(false);
-                }}
-              />
-            </div> */}
             <div>
               <Filters
                 data={fetchedData}
