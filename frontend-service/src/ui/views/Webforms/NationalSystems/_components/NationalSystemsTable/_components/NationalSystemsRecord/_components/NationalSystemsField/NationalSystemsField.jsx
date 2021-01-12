@@ -284,20 +284,22 @@ export const NationalSystemsField = ({
   return (
     <div className={styles.content}>
       <div className={styles.titleWrapper}>
-        <span className={styles.sectionTitle}>
-          <h4 className={styles.title}>
-            {!isNil(title?.value) ? title.value : title}
-            <span className={styles.requiredMark}>{field.required ? '*' : ''}</span>
-            {!isNil(tooltip) && (
-              <Button
-                className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-                icon={'infoCircle'}
-                tooltip={tooltip.value || tooltip}
-                tooltipOptions={{ position: 'top' }}
-              />
-            )}
-          </h4>
-        </span>
+        {title && (
+          <span className={styles.sectionTitle}>
+            <h4 className={styles.title}>
+              {!isNil(title?.value) ? title.value : title}
+              <span className={styles.requiredMark}>{field.required ? '*' : ''}</span>
+              {!isNil(tooltip) && (
+                <Button
+                  className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+                  icon={'infoCircle'}
+                  tooltip={tooltip.value || tooltip}
+                  tooltipOptions={{ position: 'top' }}
+                />
+              )}
+            </h4>
+          </span>
+        )}
         {renderValidations(recordValidations)}
       </div>
       <div className={styles.fieldWrapper}>
