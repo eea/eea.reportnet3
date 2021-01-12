@@ -277,12 +277,13 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadLevelErrorsTypes = () => {
-      const allLevelErrorsFilterList = [
-        { type: 'levelError', value: 'BLOCKER' },
-        { type: 'levelError', value: 'ERROR' },
-        { type: 'levelError', value: 'INFO' },
-        { type: 'levelError', value: 'WARNING' }
-      ];
+      const allLevelErrorsFilterList = [];
+
+      levelErrorTypes.forEach(levelError => {
+        if (!isNil(levelError)) {
+          allLevelErrorsFilterList.push({ type: 'levelError', value: `${levelError}` });
+        }
+      });
 
       setLevelErrorsTypesFilter(allLevelErrorsFilterList);
     };
