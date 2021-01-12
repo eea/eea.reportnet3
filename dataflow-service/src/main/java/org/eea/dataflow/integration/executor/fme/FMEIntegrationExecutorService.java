@@ -187,9 +187,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Long dataflowId = integrationOperationParams.get(IntegrationParams.DATAFLOW_ID);
     Long providerId = integrationOperationParams.get(IntegrationParams.PROVIDER_ID);
     String paramDataProvider = null != providerId ? providerId.toString() : "design";
-    String countryCode =
-        null != providerId ? representativeControllerZuul.findDataProviderById(providerId).getCode()
-            : "XX";
+
 
     FMEJob fmeJob = new FMEJob();
     fmeJob.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
@@ -228,7 +226,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         integrationOperationParams.get(IntegrationParams.DATASET_ID)));
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
-    parameters.add(saveParameter(IntegrationParams.COUNTRY_CODE, countryCode));
+
 
     Integer fmeJobId = null;
     switch (operation) {
@@ -272,6 +270,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
+        String countryCode = null != providerId
+            ? representativeControllerZuul.findDataProviderById(providerId).getCode()
+            : "XX";
+        parameters.add(saveParameter(IntegrationParams.COUNTRY_CODE, countryCode));
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Import to other system");
