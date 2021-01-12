@@ -178,7 +178,7 @@ const ValidationViewer = React.memo(
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
           resetFilters();
           setFirstRow(0);
-          fetchData('', sortOrder, 0, numberRows, [], [], []);
+          fetchData('', sortOrder, 0, numberRows, [], [], [], []);
         }
       }
     }, [visible, grouped]);
