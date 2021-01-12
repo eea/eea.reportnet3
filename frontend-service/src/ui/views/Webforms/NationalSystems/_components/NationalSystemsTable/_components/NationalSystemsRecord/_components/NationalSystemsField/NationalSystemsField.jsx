@@ -287,6 +287,7 @@ export const NationalSystemsField = ({
         <span className={styles.sectionTitle}>
           <h4 className={styles.title}>
             {!isNil(title?.value) ? title.value : title}
+            <span className={styles.requiredMark}>{field.required ? '*' : ''}</span>
             {!isNil(tooltip) && (
               <Button
                 className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
