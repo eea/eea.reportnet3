@@ -101,6 +101,7 @@ const errorsById = async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
   tablesFilter
@@ -111,6 +112,7 @@ const errorsById = async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
     tablesFilter
@@ -292,6 +294,7 @@ const groupedErrorsById = async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
   tablesFilter
@@ -302,6 +305,7 @@ const groupedErrorsById = async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
     tablesFilter

@@ -186,6 +186,7 @@ export const apiDataset = {
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
     tablesFilter
@@ -200,6 +201,7 @@ export const apiDataset = {
         pageSize: pageSize,
         sortField: sortField,
         asc: asc,
+        fieldValueFilter: fieldValueFilter,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
         tableFilter: tablesFilter
@@ -280,6 +282,7 @@ export const apiDataset = {
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
     tablesFilter
@@ -294,6 +297,7 @@ export const apiDataset = {
         pageSize: pageSize,
         sortField: sortField,
         asc: asc,
+        fieldValueFilter: fieldValueFilter,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
         tableFilter: tablesFilter

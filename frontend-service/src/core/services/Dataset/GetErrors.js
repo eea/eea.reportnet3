@@ -4,6 +4,7 @@ export const GetErrors = ({ datasetRepository }) => async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
   tablesFilter
@@ -14,6 +15,7 @@ export const GetErrors = ({ datasetRepository }) => async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
     tablesFilter

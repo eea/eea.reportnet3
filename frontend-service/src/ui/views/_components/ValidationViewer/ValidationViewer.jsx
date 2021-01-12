@@ -57,6 +57,7 @@ const ValidationViewer = React.memo(
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [fieldValueFilter, setFieldValueFilter] = useState([]);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
     const [numberRows, setNumberRows] = useState(10);
@@ -163,7 +164,16 @@ const ValidationViewer = React.memo(
     useEffect(() => {
       if (visible) {
         onLoadFilters();
-        fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
+        fetchData(
+          '',
+          sortOrder,
+          firstRow,
+          numberRows,
+          fieldValueFilter,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          tablesFilter
+        );
       } else {
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
           resetFilters();
@@ -192,7 +202,16 @@ const ValidationViewer = React.memo(
     const onChangePage = event => {
       setNumberRows(event.rows);
       setFirstRow(event.first);
-      fetchData(sortField, sortOrder, event.first, event.rows, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
+      fetchData(
+        sortField,
+        sortOrder,
+        event.first,
+        event.rows,
+        fieldValueFilter,
+        levelErrorsFilter,
+        typeEntitiesFilter,
+        tablesFilter
+      );
     };
 
     const onLoadErrors = async (
@@ -200,6 +219,7 @@ const ValidationViewer = React.memo(
       numberRows,
       sortField,
       sortOrder,
+      fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
       tablesFilter
@@ -215,6 +235,7 @@ const ValidationViewer = React.memo(
           numberRows,
           sortField,
           sortOrder,
+          fieldValueFilter,
           levelErrorsFilter,
           typeEntitiesFilter,
           tablesFilter
@@ -234,6 +255,7 @@ const ValidationViewer = React.memo(
           numberRows,
           sortField,
           sortOrder,
+          fieldValueFilter,
           levelErrorsFilter,
           typeEntitiesFilter,
           tablesFilter
@@ -322,11 +344,17 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilteredValidations = filterData => {
+      setFieldValueFilter(filterData.fieldSchemaName);
+      setLevelErrorsFilter(filterData.levelError);
+      setTypeEntitiesFilter(filterData.entityType);
+      setTablesFilter(filterData.tableSchemaName);
+
       onLoadErrors(
         firstRow,
         numberRows,
-        filterData.fieldSchemaName,
+        sortField,
         sortOrder,
+        filterData.fieldSchemaName,
         filterData.levelError,
         filterData.entityType,
         filterData.tableSchemaName
@@ -349,6 +377,7 @@ const ValidationViewer = React.memo(
         event.sortOrder,
         firstRow,
         numberRows,
+        fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
         tablesFilter
@@ -360,11 +389,21 @@ const ValidationViewer = React.memo(
       sortOrder,
       firstRow,
       numberRows,
+      fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
       tablesFilter
     ) => {
-      onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
+      onLoadErrors(
+        firstRow,
+        numberRows,
+        sortField,
+        sortOrder,
+        fieldValueFilter,
+        levelErrorsFilter,
+        typeEntitiesFilter,
+        tablesFilter
+      );
     };
 
     const onRowSelect = async event => {
@@ -443,7 +482,16 @@ const ValidationViewer = React.memo(
     };
 
     const refreshData = () => {
-      onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
+      onLoadErrors(
+        firstRow,
+        numberRows,
+        sortField,
+        sortOrder,
+        fieldValueFilter,
+        levelErrorsFilter,
+        typeEntitiesFilter,
+        tablesFilter
+      );
     };
 
     if (isLoading) {
