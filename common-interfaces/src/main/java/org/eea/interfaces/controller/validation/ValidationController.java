@@ -45,7 +45,8 @@ public interface ValidationController {
    * @param asc the asc
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the failed validations by id dataset
    */
   @GetMapping(value = "/listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,12 +54,13 @@ public interface ValidationController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestParam(value = "levelErrorsFilter",
           required = false) List<ErrorTypeEnum> levelErrorsFilter,
       @RequestParam(value = "typeEntitiesFilter",
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
-      @RequestParam(value = "originsFilter", required = false) String originsFilter);
+      @RequestParam(value = "tableFilter", required = false) String tableFilter,
+      @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
 
   /**
    * Gets the group failed validations by id dataset.
@@ -70,7 +72,8 @@ public interface ValidationController {
    * @param asc the asc
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the group failed validations by id dataset
    */
   @GetMapping(value = "/listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -79,10 +82,11 @@ public interface ValidationController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestParam(value = "levelErrorsFilter",
           required = false) List<ErrorTypeEnum> levelErrorsFilter,
       @RequestParam(value = "typeEntitiesFilter",
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
-      @RequestParam(value = "originsFilter", required = false) String originsFilter);
+      @RequestParam(value = "tableFilter", required = false) String tableFilter,
+      @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
 }
