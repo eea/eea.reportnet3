@@ -502,6 +502,9 @@
           "key": "EDIT_ADD_DATA_RELEASING_ERROR"
         },
         {
+          "key": "FIELD_DELETE_BLOCKED_ERROR"
+        },
+        {
           "key": "COPY_DATASET_SCHEMA_FAILED_EVENT"
         },
         {

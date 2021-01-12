@@ -1,5 +1,7 @@
 import React, { Fragment, useContext } from 'react';
 
+import styles from './NationalSystems.module.scss';
+
 import { tables } from './nationalSystems.webform.json';
 
 import { NationalSystemsTable } from './_components/NationalSystemsTable';
@@ -8,7 +10,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) => {
+export const NationalSystems = ({ datasetId, state }) => {
   const resources = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;
@@ -58,7 +60,7 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
   };
 
   return (
-    <Fragment>
+    <div className={styles.nationalSystems}>
       {tables.map((table, index) => {
         const schemaTable = schemaTables.filter(tab => areEquals(tab['tableSchemaName'], table['name']))[0];
 
@@ -73,6 +75,6 @@ export const NationalSystems = ({ dataflowId, datasetId, isReporting, state }) =
           </Fragment>
         );
       })}
-    </Fragment>
+    </div>
   );
 };
