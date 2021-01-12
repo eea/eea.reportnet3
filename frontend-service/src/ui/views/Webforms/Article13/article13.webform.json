@@ -186,7 +186,8 @@
         {
           "type": "FIELD",
           "name": "TypePolicyInstrument",
-          "title": "Type of policy Instrument"
+          "title": "Type of policy Instrument",
+          "calculatedWhenGroup": true
         },
         {
           "type": "FIELD",
