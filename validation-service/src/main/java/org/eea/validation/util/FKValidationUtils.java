@@ -214,9 +214,6 @@ public class FKValidationUtils {
 
       List<String> ifFKs = createAndExecuteQuery(query);
       List<FieldValue> fieldsToValidate = fieldRepository.findByIds(ifFKs);
-      FieldValue auxField = new FieldValue();
-      auxField.setValue("");
-      fieldsToValidate.add(auxField);
 
       if (!pkMustBeUsed && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
@@ -293,13 +290,16 @@ public class FKValidationUtils {
       List<Object[]> pkList = fieldRepository.queryPKExecution(queryPks);
       Map<String, String> pkMap = new HashMap<>();
       Map<String, String> pkMapAux = new HashMap<>();
-      for (int i = 0; i < pkList.size(); i++) {
-        pkMap.put(pkList.get(i)[0].toString(),
-            pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
-        pkMapAux.put(pkList.get(i)[0].toString(),
-            pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
+      if (null != pkList) {
+        for (int i = 0; i < pkList.size(); i++) {
+          if (null != pkList.get(i) && null != pkList.get(i)[0] && null != pkList.get(i)[1]) {
+            pkMap.put(pkList.get(i)[0].toString(),
+                pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
+            pkMapAux.put(pkList.get(i)[0].toString(),
+                pkList.get(i)[1].toString().replace("{", "").replace("}", ""));
+          }
+        }
       }
-
       Set<String> ifFKs =
           findFKs(fkFieldSchema, datasetIdFK, fkConditionalMasterFieldSchemaId, pkMap, pkMapAux);
       if (!ifFKs.isEmpty()) {
@@ -403,7 +403,9 @@ public class FKValidationUtils {
       fieldValidation.setFieldValue(fieldValue);
       fieldValidationList.add(fieldValidation);
       field.setFieldValidations(fieldValidationList);
-      errorFields.add(field);
+      if (!field.getValue().equals("")) {
+        errorFields.add(field);
+      }
     }
   }
 
