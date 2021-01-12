@@ -244,7 +244,6 @@ export const WebformView = ({
   const renderWebFormHeaders = () => {
     const filteredTabs = data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
-
     return data
       .filter(table => table.isVisible)
       .map((webform, i) => {
@@ -252,15 +251,30 @@ export const WebformView = ({
         const childHasErrors = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
           .map(table => table.hasErrors);
-
-        const hasErrors = [webform.hasErrors].concat(childHasErrors);
+        const {
+          datasetStatistics: { tables }
+        } = state;
+        const tablesStatistics = tables.filter(table => table.tableSchemaId === webform.tableSchemaId);
+        const [tableStatistics] = tablesStatistics;
+        console.log('tableStatistics', tableStatistics);
+        // const hasErrors = [webform.hasErrors].concat(childHasErrors);
+        const { hasErrors } = tableStatistics;
+        console.log('hasErrors', hasErrors);
+        // console.log();
+        // console.log('*'.repeat(60));
+        // console.log('webform', webform);
+        // console.log('webform.label', webform.label);
+        // console.log('hasErrors', hasErrors);
+        // console.log('*'.repeat(60));
+        // console.log();
         return (
           <Button
             className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
-            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            // icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
+            icon={!isCreated ? 'info' : hasErrors ? 'warning' : 'table'}
+            iconClasses={!isVisible[webform.title] ? (hasErrors ? 'warning' : 'info') : ''}
+            iconPos={!isCreated || hasErrors ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}

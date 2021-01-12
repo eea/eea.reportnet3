@@ -5,6 +5,7 @@ import { Article15 } from './Article15';
 import { NationalSystems } from './NationalSystems';
 
 export const Webforms = ({ dataflowId, datasetId, isReporting = false, state, webformType }) => {
+  console.log('designerState', state);
   switch (webformType) {
     case 'MMR-ART13':
       return <Article13 dataflowId={dataflowId} datasetId={datasetId} state={state} isReporting={isReporting} />;
