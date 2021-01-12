@@ -671,7 +671,7 @@
         {
           "type": "FIELD",
           "name": "ExplanationMitigation",
-          "title": "Explanation of the basis for the mitigation"
+          "title": "Explanation of the basis for the mitigation estimates"
         },
         {
           "type": "FIELD",
