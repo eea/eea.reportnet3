@@ -51,7 +51,6 @@ const ValidationViewer = React.memo(
     });
     const [filtered, setFiltered] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
-
     const [firstRow, setFirstRow] = useState(0);
     const [grouped, setGrouped] = useState(true);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
@@ -487,17 +486,17 @@ const ValidationViewer = React.memo(
                     tooltipOptions={{ position: 'bottom' }}
                   />
                   <span className={styles.switchTextInput}>{resources.messages['grouped']}</span>
+                  <Button
+                    className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
+                      isLoading ? 'p-button-animated-spin' : ''
+                    }`}
+                    disabled={false}
+                    icon={'refresh'}
+                    label={resources.messages['refresh']}
+                    onClick={refreshData}
+                  />
                 </div>
               </div>
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-                  isLoading ? 'p-button-animated-spin' : ''
-                }`}
-                disabled={false}
-                icon={'refresh'}
-                label={resources.messages['refresh']}
-                onClick={refreshData}
-              />
             </div>
           </Toolbar>
         )}
