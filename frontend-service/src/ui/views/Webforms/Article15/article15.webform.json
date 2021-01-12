@@ -710,7 +710,7 @@
               "type": "FIELD",
               "name": "Examples",
               "title": "Examples (websites)",
-              "tooltip": "Provide an url for more information about the action/measure (use ';' in between different urls if more than 1 is provided, additional information not available online can be attached in the file under this table"
+              "tooltip": "Provide an url for more information about the action/measure (use ';' in between different urls if more than 1 is provided), additional information not available online can be attached in the file under this table"
             }
           ]
         },
