@@ -202,7 +202,7 @@ export const apiDataset = {
         asc: asc,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        tablesFilter: tablesFilter
+        tableFilter: tablesFilter
       })
     });
     return response.data;
