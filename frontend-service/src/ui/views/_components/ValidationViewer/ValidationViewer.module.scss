@@ -2,23 +2,11 @@
   min-height: 60vh !important;
 }
 
-// .validationWrapper {
-//   min-height: 200px;
-// }
-
 .invisibleHeader {
   display: none;
 }
 
 .validationToolbar {
-  // border-top: 1px solid var(--c-custom-gray) !important;
-  // border-left: 1px solid var(--c-custom-gray) !important;
-  // border-right: 1px solid var(--c-custom-gray) !important;
-  // border-bottom: 0px !important;
-  // border-top-left-radius: 3px !important;
-  // border-top-right-radius: 3px !important;
-  // border-bottom-left-radius: 0px !important;
-  // border-bottom-right-radius: 0px !important;
   border: none !important;
 }
 
@@ -44,10 +32,8 @@
 
 .switchDivInput {
   float: left;
-  // display: flex;
-  // align-items: center;
-  // justify-items: flex-end;
-  // flex-direction: row;
+  // margin-bottom: -3em !important;
+  margin-bottom: 0.5em !important;
 }
 .switchDiv {
   display: flex;

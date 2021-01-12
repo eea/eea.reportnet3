@@ -462,18 +462,16 @@ const ValidationViewer = React.memo(
           buttonsList
         ) : (
           <Toolbar className={styles.validationToolbar}>
-            <div>
-              <Filters
-                data={fetchedData}
-                filterByList={filterBy}
-                getFilteredData={onLoadFilteredData}
-                getFilteredSearched={getFilteredState}
-                sendData={onLoadFilteredValidations}
-                selectOptions={['entityType', 'tableSchemaName', 'fieldSchemaName', 'levelError']}
-                validationsAllTypesFilters={validationsAllTypesFilters}
-                validations
-              />
-            </div>
+            <Filters
+              data={fetchedData}
+              filterByList={filterBy}
+              getFilteredData={onLoadFilteredData}
+              getFilteredSearched={getFilteredState}
+              sendData={onLoadFilteredValidations}
+              selectOptions={['entityType', 'tableSchemaName', 'fieldSchemaName', 'levelError']}
+              validationsAllTypesFilters={validationsAllTypesFilters}
+              validations
+            />
 
             <div className="p-toolbar-group-right">
               <div className={styles.switchDivInput}>
