@@ -123,11 +123,11 @@ export const WebformField = ({
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
-          itemType: `${referencedField.value}${
+          itemType: `${
             !isNil(referencedField.label) &&
             referencedField.label !== '' &&
             referencedField.label !== referencedField.value
-              ? ` - ${referencedField.label}`
+              ? `${referencedField.label}`
               : ''
           }`,
           value: referencedField.value
