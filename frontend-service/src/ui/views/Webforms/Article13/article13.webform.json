@@ -51,6 +51,7 @@
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
+      "subtitle": "Sectors, gases and type of policy instrument",
       "isVisible": true,
       "multipleRecords": false,
       "elements": [
@@ -405,6 +406,7 @@
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
+      "subtitle": "Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change",
       "isVisible": true,
       "multipleRecords": false,
       "elements": [
@@ -688,6 +690,7 @@
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",
+      "subtitle": "Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change",
       "isVisible": true,
       "multipleRecords": false,
       "elements": [

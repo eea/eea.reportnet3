@@ -279,7 +279,9 @@ export const WebformTable = ({
     <div className={styles.contentWrap}>
       <h3 className={styles.title}>
         <div>
-          {webformData.title ? webformData.title : webformData.name}
+          {webformData.title
+            ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
+            : webformData.name}
           {hasErrors.includes(true) && (
             <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
           )}
