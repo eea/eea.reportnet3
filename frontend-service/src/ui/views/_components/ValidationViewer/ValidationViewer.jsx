@@ -60,7 +60,7 @@ const ValidationViewer = React.memo(
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
     const [numberRows, setNumberRows] = useState(10);
-    const [originsFilter, setOriginsFilter] = useState([]);
+    const [tablesFilter, setTablesFilter] = useState([]);
     const [originsTypesFilter, setOriginsTypesFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
@@ -163,7 +163,7 @@ const ValidationViewer = React.memo(
     useEffect(() => {
       if (visible) {
         onLoadFilters();
-        fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+        fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
       } else {
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
           resetFilters();
@@ -192,7 +192,7 @@ const ValidationViewer = React.memo(
     const onChangePage = event => {
       setNumberRows(event.rows);
       setFirstRow(event.first);
-      fetchData(sortField, sortOrder, event.first, event.rows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+      fetchData(sortField, sortOrder, event.first, event.rows, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
     };
 
     const onLoadErrors = async (
@@ -202,7 +202,7 @@ const ValidationViewer = React.memo(
       sortOrder,
       levelErrorsFilter,
       typeEntitiesFilter,
-      originsFilter
+      tablesFilter
     ) => {
       setIsLoading(true);
 
@@ -217,7 +217,7 @@ const ValidationViewer = React.memo(
           sortOrder,
           levelErrorsFilter,
           typeEntitiesFilter,
-          originsFilter
+          tablesFilter
         );
         addTableSchemaId(datasetErrors.errors);
         validationDispatch({
@@ -236,7 +236,7 @@ const ValidationViewer = React.memo(
           sortOrder,
           levelErrorsFilter,
           typeEntitiesFilter,
-          originsFilter
+          tablesFilter
         );
       }
 
@@ -287,15 +287,15 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadTablesTypes = () => {
-      const allOriginsFilterList = [];
+      const allTablesFilterList = [];
 
       schemaTables.forEach(table => {
         if (!isNil(table.name)) {
-          allOriginsFilterList.push({ type: 'tableSchemaName', value: `${table.name.toString()}` });
+          allTablesFilterList.push({ type: 'tableSchemaName', value: `${table.name.toString()}` });
         }
       });
 
-      setOriginsTypesFilter(allOriginsFilterList);
+      setOriginsTypesFilter(allTablesFilterList);
     };
 
     const onLoadFieldsTypes = () => {
@@ -351,7 +351,7 @@ const ValidationViewer = React.memo(
         numberRows,
         levelErrorsFilter,
         typeEntitiesFilter,
-        originsFilter
+        tablesFilter
       );
     };
 
@@ -362,9 +362,9 @@ const ValidationViewer = React.memo(
       numberRows,
       levelErrorsFilter,
       typeEntitiesFilter,
-      originsFilter
+      tablesFilter
     ) => {
-      onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+      onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
     };
 
     const onRowSelect = async event => {
@@ -433,7 +433,7 @@ const ValidationViewer = React.memo(
     );
 
     const resetFilters = () => {
-      setOriginsFilter([]);
+      setTablesFilter([]);
       setTypeEntitiesFilter([]);
       setLevelErrorsFilter([]);
       setIsFilteredOrigins(false);
@@ -443,7 +443,7 @@ const ValidationViewer = React.memo(
     };
 
     const refreshData = () => {
-      onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+      onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, tablesFilter);
     };
 
     if (isLoading) {

@@ -188,7 +188,7 @@ export const apiDataset = {
     asc,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -202,7 +202,7 @@ export const apiDataset = {
         asc: asc,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
+        tablesFilter: tablesFilter
       })
     });
     return response.data;
@@ -282,7 +282,7 @@ export const apiDataset = {
     asc,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -296,7 +296,7 @@ export const apiDataset = {
         asc: asc,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
+        tableFilter: tablesFilter
       })
     });
     return response.data;

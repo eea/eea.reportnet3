@@ -103,7 +103,7 @@ const errorsById = async (
   asc,
   levelErrorsFilter,
   typeEntitiesFilter,
-  originsFilter
+  tablesFilter
 ) => {
   const datasetErrorsDTO = await apiDataset.errorsById(
     datasetId,
@@ -113,7 +113,7 @@ const errorsById = async (
     asc,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   );
   const dataset = new Dataset({
     datasetId: datasetErrorsDTO.idDataset,
@@ -294,7 +294,7 @@ const groupedErrorsById = async (
   asc,
   levelErrorsFilter,
   typeEntitiesFilter,
-  originsFilter
+  tablesFilter
 ) => {
   const datasetErrorsDTO = await apiDataset.groupedErrorsById(
     datasetId,
@@ -304,7 +304,7 @@ const groupedErrorsById = async (
     asc,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   );
   const dataset = new Dataset({
     datasetId: datasetErrorsDTO.idDataset,
