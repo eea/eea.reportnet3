@@ -1360,7 +1360,7 @@
     "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
   },
   {
-    "key": "config/dataset/pathImport",
+    "key": "config/dataset/importPath",
     "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   },
   {
@@ -1374,5 +1374,9 @@
   {
     "key": "config/apiGateway/zuul.routes.pam.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/recordstore/recordstore.tasks.parallelism",
+    "value": "JHtSRUNPUkRTVE9SRV9UQVNLX1BBUkFMTEVMSVNNOjR9"
   }
 ]

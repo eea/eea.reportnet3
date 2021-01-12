@@ -1,18 +1,13 @@
 package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class ExecuteFieldValidationCommandTest.
@@ -36,18 +30,6 @@ public class ExecuteFieldValidationCommandTest {
    */
   @InjectMocks
   private ExecuteFieldValidationCommand executeFieldValidationCommand;
-
-  /**
-   * The kafka sender utils.
-   */
-  @Mock
-  private KafkaSenderUtils kafkaSenderUtils;
-
-  /**
-   * The validation service.
-   */
-  @Mock
-  private ValidationService validationService;
 
   /**
    * The validation helper

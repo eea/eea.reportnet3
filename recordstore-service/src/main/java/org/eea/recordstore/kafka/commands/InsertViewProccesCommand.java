@@ -4,20 +4,20 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.util.ViewHelper;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class ExecuteUpdateMaterialicedViewCommand.
+ * The Class InsertViewProccesCommand.
  */
 @Component
-public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandlerCommand {
+public class InsertViewProccesCommand extends AbstractEEAEventHandlerCommand {
 
-  /** The database management service. */
+  /** The view helper. */
   @Autowired
-  private RecordStoreService recordStoreService;
+  private ViewHelper viewHelper;
 
   /**
    * Gets the event type.
@@ -26,7 +26,7 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.UPDATE_MATERIALIZED_VIEW_EVENT;
+    return EventType.INSERT_VIEW_PROCCES_EVENT;
   }
 
   /**
@@ -39,9 +39,7 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId =
         Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-    String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
-    Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
-    recordStoreService.updateMaterializedQueryView(datasetId, user, released);
+    viewHelper.insertProccesList(datasetId);
   }
 
 }

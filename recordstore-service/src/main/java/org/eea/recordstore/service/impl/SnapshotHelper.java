@@ -114,20 +114,8 @@ public class SnapshotHelper implements DisposableBean {
    * The Class RestorationTask.
    */
 
-  /**
-   * Instantiates a new restoration task.
-   *
-   * @param datasetId the dataset id
-   * @param idSnapshot the id snapshot
-   * @param idPartition the id partition
-   * @param datasetType the dataset type
-   * @param user the user
-   * @param isSchemaSnapshot the is schema snapshot
-   * @param deleteData the delete data
-   */
-
   @AllArgsConstructor
-  private class RestorationTask {
+  private static class RestorationTask {
 
     /**
      * The dataset id.

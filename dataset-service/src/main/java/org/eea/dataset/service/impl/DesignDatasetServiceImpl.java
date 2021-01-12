@@ -191,9 +191,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    *
    * @throws EEAException the EEA exception
    *
-   *         We've got the list of design datasets from the dataflow to copy and the dataflow
-   *         destination. The idea is create a new design dataset copied from the original and
-   *         change the schema's objectId (dataset, table, record and field level)
+   *     We've got the list of design datasets from the dataflow to copy and the dataflow
+   *     destination. The idea is create a new design dataset copied from the original and change
+   *     the schema's objectId (dataset, table, record and field level)
    */
   @Async
   @Override
@@ -234,116 +234,115 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
           idDataflowDestination);
       throw new EEAException(String.format(EEAErrorMessage.NO_DESIGNS_TO_COPY, idDataflowOrigin));
-    } else {
-      try {
-        for (DesignDatasetVO design : designs) {
+    }
+    try {
+      for (DesignDatasetVO design : designs) {
 
-          DataSetSchemaVO schemaVO = dataschemaService.getDataSchemaById(design.getDatasetSchema());
-          originDatasetSchemaIds.add(design.getDatasetSchema());
+        DataSetSchemaVO schemaVO = dataschemaService.getDataSchemaById(design.getDatasetSchema());
+        originDatasetSchemaIds.add(design.getDatasetSchema());
 
-          // Create the schema
-          String newIdDatasetSchema =
-              dataschemaService.createEmptyDataSetSchema(idDataflowDestination).toString();
-          // fill the dictionary of origin and news object id created. This will be done during all
-          // the process
-          DataSetSchemaVO targetDatasetSchema =
-              dataschemaService.getDataSchemaById(newIdDatasetSchema);
-          dictionaryOriginTargetObjectId.put(schemaVO.getIdDataSetSchema(), newIdDatasetSchema);
-          // adding to the dictionary mapping schema id's the mapping among tables
-          final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
-          targetDatasetSchema.getTableSchemas().forEach(table -> {
-            for (TableSchemaVO tableSchemaVO : schemaVO.getTableSchemas()) {
-              if (table.getNameTableSchema().equals(tableSchemaVO.getNameTableSchema())) {
-                dictionaryOriginTargetTableObjectId.put(tableSchemaVO.getIdTableSchema(),
-                    table.getIdTableSchema());
-                dictionaryOriginTargetTableObjectId.put(
-                    tableSchemaVO.getRecordSchema().getIdRecordSchema(),
-                    table.getRecordSchema().getIdRecordSchema());
-              }
+        // Create the schema
+        String newIdDatasetSchema =
+            dataschemaService.createEmptyDataSetSchema(idDataflowDestination).toString();
+        // fill the dictionary of origin and news object id created. This will be done during all
+        // the process
+        DataSetSchemaVO targetDatasetSchema =
+            dataschemaService.getDataSchemaById(newIdDatasetSchema);
+        dictionaryOriginTargetObjectId.put(schemaVO.getIdDataSetSchema(), newIdDatasetSchema);
+        // adding to the dictionary mapping schema id's the mapping among tables
+        final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
+        targetDatasetSchema.getTableSchemas().forEach(table -> {
+          for (TableSchemaVO tableSchemaVO : schemaVO.getTableSchemas()) {
+            if (table.getNameTableSchema().equals(tableSchemaVO.getNameTableSchema())) {
+              dictionaryOriginTargetTableObjectId.put(tableSchemaVO.getIdTableSchema(),
+                  table.getIdTableSchema());
+              dictionaryOriginTargetTableObjectId.put(
+                  tableSchemaVO.getRecordSchema().getIdRecordSchema(),
+                  table.getRecordSchema().getIdRecordSchema());
             }
-          });
-          dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
-          // Create the schema into the metabase
-          Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-              nameToClone(schemaVO.getNameDatasetSchema(), idDataflowDestination),
-              newIdDatasetSchema, idDataflowDestination, null, null, 0);
-          // Fill the new schema dataset with the data of the original schema dataset
-          LOG.info("Design dataset created in the copy process with id {}", datasetId.get());
-          dictionaryOriginTargetDatasetsId.put(design.getId(), datasetId.get());
-          mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schemaVO);
-          // Time to wait before continuing the process. If the process goes too fast, it won't find
-          // the
-          // dataset schema created and the process will fail. By default 3000ms
-          Thread.sleep(timeToWaitBeforeContinueCopy);
-        }
-        // After creating the datasets schemas on the DB, fill them and create the permissions
-        for (Map.Entry<Long, DataSetSchemaVO> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
-            .entrySet()) {
-          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
-              itemNewDatasetAndSchema.getKey());
-          fillAndUpdateDesignDatasetCopied(itemNewDatasetAndSchema.getValue(),
-              dictionaryOriginTargetObjectId
-                  .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema()),
-              dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
-              mapDatasetIdFKRelations);
+          }
+        });
+        dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
+        // Create the schema into the metabase
+        Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
+            nameToClone(schemaVO.getNameDatasetSchema(), idDataflowDestination),
+            newIdDatasetSchema, idDataflowDestination, null, null, 0);
+        // Fill the new schema dataset with the data of the original schema dataset
+        LOG.info("Design dataset created in the copy process with id {}", datasetId.get());
+        dictionaryOriginTargetDatasetsId.put(design.getId(), datasetId.get());
+        mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schemaVO);
+        // Time to wait before continuing the process. If the process goes too fast, it won't find
+        // the
+        // dataset schema created and the process will fail. By default 3000ms
+        Thread.sleep(timeToWaitBeforeContinueCopy);
+      }
+      // After creating the datasets schemas on the DB, fill them and create the permissions
+      for (Map.Entry<Long, DataSetSchemaVO> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
+          .entrySet()) {
+        contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
+            itemNewDatasetAndSchema.getKey());
+        fillAndUpdateDesignDatasetCopied(itemNewDatasetAndSchema.getValue(),
+            dictionaryOriginTargetObjectId
+                .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema()),
+            dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
+            mapDatasetIdFKRelations);
 
-        }
-
-        // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
-        // the correct ones
-        processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
-
-        // We use an auxiliary bean to store all the data we need to continue the process. The
-        // dictionarys and the dataflowIds involved
-        CopySchemaVO copy = new CopySchemaVO();
-        copy.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
-        copy.setOriginDatasetSchemaIds(originDatasetSchemaIds);
-        copy.setDataflowIdDestination(idDataflowDestination);
-        copy.setDictionaryOriginTargetDatasetsId(dictionaryOriginTargetDatasetsId);
-        // Copy the rules
-        dictionaryOriginTargetObjectId = rulesControllerZuul.copyRulesSchema(copy);
-
-        // Copy the unique catalogue (in case there are Links in the schemas involved)
-        dataschemaService.copyUniqueConstraintsCatalogue(originDatasetSchemaIds,
-            dictionaryOriginTargetObjectId);
-
-        // Copy the integrations (in case the design datasets have integrations (to use with FME)
-        // created)
-        integrationControllerZuul.copyIntegrations(copy);
-
-        // Create the views necessary to the validation in the new datasets created
-        dictionaryOriginTargetDatasetsId
-            .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
-                .createUpdateQueryView(datasetDestination, false));
-
-        // Copy the data inside the design datasets, but only the tables that are prefilled
-        datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
-
-
-        // Release the notification
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
-            null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .dataflowId(idDataflowDestination).build());
-
-        // Release the lock
-        datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
-            idDataflowDestination);
-
-      } catch (Exception e) {
-        LOG_ERROR.error("Error during the copy. Message: {}", e.getMessage(), e);
-        // Release the error notification
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_EVENT,
-            null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .dataflowId(idDataflowDestination).error("Error copying the schemas").build());
-        datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
-            idDataflowDestination);
-        throw new EEAException(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS,
-            idDataflowOrigin, idDataflowDestination), e);
       }
 
+      // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
+      // the correct ones
+      processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
+
+      // We use an auxiliary bean to store all the data we need to continue the process. The
+      // dictionarys and the dataflowIds involved
+      CopySchemaVO copy = new CopySchemaVO();
+      copy.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+      copy.setOriginDatasetSchemaIds(originDatasetSchemaIds);
+      copy.setDataflowIdDestination(idDataflowDestination);
+      copy.setDictionaryOriginTargetDatasetsId(dictionaryOriginTargetDatasetsId);
+      // Copy the rules
+      dictionaryOriginTargetObjectId = rulesControllerZuul.copyRulesSchema(copy);
+
+      // Copy the unique catalogue (in case there are Links in the schemas involved)
+      dataschemaService.copyUniqueConstraintsCatalogue(originDatasetSchemaIds,
+          dictionaryOriginTargetObjectId);
+
+      // Copy the integrations (in case the design datasets have integrations (to use with FME)
+      // created)
+      integrationControllerZuul.copyIntegrations(copy);
+
+      // Create the views necessary to the validation in the new datasets created
+      dictionaryOriginTargetDatasetsId
+          .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
+              .createUpdateQueryView(datasetDestination, false));
+
+      // Copy the data inside the design datasets, but only the tables that are prefilled
+      datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
+
+      // Release the notification
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
+          null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(idDataflowDestination).build());
+
+      // Release the lock
+      datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
+          idDataflowDestination);
+
+    } catch (Exception e) {
+      LOG_ERROR.error("Error during the copy. Message: {}", e.getMessage(), e);
+      // Release the error notification
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_EVENT,
+          null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(idDataflowDestination).error("Error copying the schemas").build());
+      datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
+          idDataflowDestination);
+      throw new EEAException(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS,
+          idDataflowOrigin, idDataflowDestination), e);
     }
+
+
   }
 
 

@@ -2,6 +2,7 @@ package org.eea.dataset.configuration;
 
 import java.util.List;
 import java.util.Properties;
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.eea.dataset.configuration.util.EeaDataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -37,57 +38,77 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 public class DatasetConfiguration implements WebMvcConfigurer {
 
-  /** The dll. */
+  /**
+   * The dll.
+   */
   @Value("${spring.jpa.hibernate.ddl-auto}")
   private String dll;
 
-  /** The dialect. */
+  /**
+   * The dialect.
+   */
   @Value("${spring.jpa.properties.hibernate.dialect}")
   private String dialect;
 
-  /** The create clob propertie. */
+  /**
+   * The create clob propertie.
+   */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
-  /** The batch size. */
+  /**
+   * The batch size.
+   */
   @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
   private String batchSize;
 
-  /** The flush mode. */
+  /**
+   * The flush mode.
+   */
   @Value("${spring.jpa.hibernate.flushMode}")
   private String flushMode;
 
-  /** The show sql. */
+  /**
+   * The show sql.
+   */
   @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
 
-  /** The order updates. */
+  /**
+   * The order updates.
+   */
   @Value("${spring.jpa.properties.hibernate.order_updates}")
   private String orderUpdates;
 
-  /** The order inserts. */
+  /**
+   * The order inserts.
+   */
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 
-  /** The max file size. */
+  /**
+   * The max file size.
+   */
   @Value("${spring.servlet.multipart.max-file-size}")
   private Long maxFileSize;
 
-  /** The max request size. */
+  /**
+   * The max request size.
+   */
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
 
-  /** The username. */
+  /**
+   * The username.
+   */
   @Value("${spring.datasource.dataset.username}")
   private String username;
 
-  /** The password. */
+  /**
+   * The password.
+   */
   @Value("${spring.datasource.dataset.password}")
   private String password;
-
-  /** The record store controller zuul. */
-  @Autowired
-  private RecordStoreControllerZuul recordStoreControllerZuul;
 
 
   /**
@@ -97,7 +118,8 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Bean
   @Qualifier("datasetDataSource")
-  public DataSource datasetDataSource() {
+  public DataSource datasetDataSource(
+      @Autowired RecordStoreControllerZuul recordStoreControllerZuul) {
     final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
     DataSource dataSource = null;
     if (null != connections && !connections.isEmpty()) {
@@ -110,6 +132,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * Data sets data source.
    *
    * @param connectionDataVO the connection data VO
+   *
    * @return the data source
    */
   private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
@@ -132,10 +155,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Primary
   @Qualifier("dataSetsEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
+  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory(
+      @Autowired @Qualifier("datasetDataSource") DataSource dataSource) {
     final LocalContainerEntityManagerFactoryBean dataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
-    dataSetsEM.setDataSource(datasetDataSource());
+    dataSetsEM.setDataSource(dataSource);
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
@@ -169,10 +193,12 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Bean
   @Primary
-  public PlatformTransactionManager dataSetsTransactionManager() {
+  public PlatformTransactionManager dataSetsTransactionManager(
+      @Autowired @Qualifier("dataSetsEntityManagerFactory") LocalContainerEntityManagerFactoryBean emf) {
 
     final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
-    schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
+    schemastransactionManager
+        .setEntityManagerFactory(emf.getObject());
     return schemastransactionManager;
   }
 
