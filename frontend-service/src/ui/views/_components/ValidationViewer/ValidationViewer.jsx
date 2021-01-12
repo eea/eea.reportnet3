@@ -421,14 +421,14 @@ const ValidationViewer = React.memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {filtered && totalRecords !== fetchedData.length
-          ? `${resources.messages['filtered']}: ${fetchedData.length} | `
+        {filtered && totalRecords !== totalFilteredRecords
+          ? `${resources.messages['filtered']}: ${totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {totalRecords}{' '}
         {`${resources.messages['records'].toLowerCase()}${
           grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
         }`}
-        {filtered && totalRecords === fetchedData.length ? ` (${resources.messages['filtered'].toLowerCase()})` : ''}
+        {filtered && totalRecords === totalFilteredRecords ? ` (${resources.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
 
