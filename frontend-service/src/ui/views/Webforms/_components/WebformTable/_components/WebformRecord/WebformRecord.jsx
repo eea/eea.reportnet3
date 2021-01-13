@@ -310,9 +310,11 @@ export const WebformRecord = ({
                       onClick={() => {
                         let filteredRecordId = null;
                         if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
-                          filteredRecordId = elements.filter(element =>
+                          const filteredTable = elements.filter(element =>
                             TextUtils.areEquals(element.name, 'SectorAffected')
-                          )[0].recordId;
+                          );
+
+                          if (!isEmpty(filteredTable)) filteredRecordId = filteredTable[0].recordId;
                         }
                         onAddMultipleWebform(element.tableSchemaId, filteredRecordId);
                       }}

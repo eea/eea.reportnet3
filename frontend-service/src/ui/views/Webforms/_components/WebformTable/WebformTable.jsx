@@ -2,7 +2,6 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebformTable.module.scss';
 
@@ -32,15 +31,15 @@ export const WebformTable = ({
   isRefresh,
   isReporting,
   onTabChange,
-  onUpdateSinglesList,
   onUpdatePamsId,
+  onUpdateSinglesList,
   pamsRecords,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
   setIsLoading = () => {},
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
+  const { onParseWebformRecords, parseNewTableRecord, parseOtherObjectivesRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -103,41 +102,6 @@ export const WebformTable = ({
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const parseObjectiveRecord = (table, parentTable, pamsId, filteredRecordId) => {
-    if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
-      let fields;
-      const sectorSchemaId = WebformsUtils.getSchemaIdForIdSectorObjectivesField(parentTable.records);
-      const filteredSectorAffectedRecord = parentTable.elementsRecords.filter(
-        table => table.recordId === filteredRecordId
-      )[0];
-      const fieldss = filteredSectorAffectedRecord.fields.filter(field => field.fieldSchemaId === sectorSchemaId);
-
-      const value = fieldss[0].value;
-
-      if (!isUndefined(table)) {
-        fields = table.records[0].fields.map(field => {
-          const fieldValue = TextUtils.areEquals(field.name, 'Fk_SectorObjectives')
-            ? value
-            : TextUtils.areEquals(field.name, 'FK_PAMS')
-            ? pamsId
-            : null;
-          return {
-            fieldData: {
-              [field.fieldSchema || field.fieldId]: fieldValue,
-              fieldSchemaId: field.fieldSchema || field.fieldId,
-              type: field.type
-            }
-          };
-        });
-      }
-
-      const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
-
-      obj.datasetPartitionId = null;
-      return obj;
-    }
-  };
-
   const onAddMultipleWebform = async (tableSchemaId, filteredRecordId = null) => {
     webformTableDispatch({
       type: 'SET_IS_ADDING_MULTIPLE',
@@ -154,7 +118,7 @@ export const WebformTable = ({
       })[0];
 
       const newEmptyRecord = TextUtils.areEquals(filteredTable.name, 'OtherObjectives')
-        ? parseObjectiveRecord(filteredTable, sectorObjectivesTable, selectedTable.pamsId, filteredRecordId)
+        ? parseOtherObjectivesRecord(filteredTable, sectorObjectivesTable, selectedTable.pamsId, filteredRecordId)
         : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
