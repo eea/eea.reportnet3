@@ -250,23 +250,23 @@ export const WebformView = ({
   const renderWebFormHeaders = () => {
     const filteredTabs = data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
-
     return data
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const childHasErrors = webform.elements
-          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-          .map(table => table.hasErrors);
-
-        const hasErrors = [webform.hasErrors].concat(childHasErrors);
+        const {
+          datasetStatistics: { tables }
+        } = state;
+        const tablesStatistics = tables.filter(table => table.tableSchemaId === webform.tableSchemaId);
+        const [tableStatistics] = tablesStatistics;
+        const { hasErrors } = tableStatistics;
         return (
           <Button
             className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
-            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            icon={!isCreated ? 'info' : hasErrors ? 'warning' : 'table'}
+            iconClasses={!isVisible[webform.title] ? (hasErrors ? 'warning' : 'info') : ''}
+            iconPos={!isCreated || hasErrors ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}

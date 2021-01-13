@@ -95,12 +95,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.datasource.dataset.password}")
   private String password;
 
-  /**
-   * The record store controller zuul.
-   */
-  @Autowired
-  private RecordStoreControllerZuul recordStoreControllerZuul;
-
 
   /**
    * Data source data source.
@@ -110,7 +104,8 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
 
   @Bean
-  public DataSource datasetDataSource() {
+  public DataSource datasetDataSource(
+      @Autowired RecordStoreControllerZuul recordStoreControllerZuul) {
     final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
     DataSource dataSource = null;
     if (null != connections && !connections.isEmpty()) {
@@ -147,10 +142,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Primary
   @Qualifier("dataSetsEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
+  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory(
+      @Autowired @Qualifier("datasetDataSource") DataSource dataSource) {
     final LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean =
         new LocalContainerEntityManagerFactoryBean();
-    localContainerEntityManagerFactoryBean.setDataSource(datasetDataSource());
+    localContainerEntityManagerFactoryBean.setDataSource(dataSource);
     localContainerEntityManagerFactoryBean
         .setPackagesToScan("org.eea.validation.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
@@ -185,10 +181,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Bean
   @Primary
-  public PlatformTransactionManager dataSetsTransactionManager() {
+  public PlatformTransactionManager dataSetsTransactionManager(
+      @Autowired @Qualifier("dataSetsEntityManagerFactory") LocalContainerEntityManagerFactoryBean emf) {
 
     final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
-    schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
+    schemastransactionManager.setEntityManagerFactory(emf.getObject());
     return schemastransactionManager;
   }
 

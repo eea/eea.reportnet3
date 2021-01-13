@@ -69,7 +69,7 @@ public class FMEControllerImplTest {
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(new FMEJob());
     Mockito.doNothing().when(fmeCommunicationService).releaseNotifications(Mockito.any(),
-        Mockito.anyLong());
+        Mockito.anyLong(), Mockito.anyBoolean());
     Mockito.doNothing().when(fmeCommunicationService).updateJobStatus(Mockito.any(),
         Mockito.anyLong());
     fmeControllerImpl.operationFinished(fmeOperationInfoVO);

@@ -67,7 +67,10 @@ public enum LockSignature {
   UPDATE_FIELD("DataSetControllerImpl.updateField(..)"),
 
   /** The import etl. */
-  IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)");
+  IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)"),
+
+  /** The delete field schema. */
+  DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)");
 
 
 

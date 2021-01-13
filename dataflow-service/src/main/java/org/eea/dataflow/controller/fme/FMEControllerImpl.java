@@ -97,7 +97,8 @@ public class FMEControllerImpl implements FMEController {
     try {
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(
           fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getRn3JobId());
-      fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber());
+      fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
+          fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
     } catch (EEAForbiddenException e) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
@@ -137,5 +138,18 @@ public class FMEControllerImpl implements FMEController {
     httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
     return new ResponseEntity<>(stream, httpHeaders, HttpStatus.OK);
+  }
+
+  /**
+   * Update job status by id.
+   *
+   * @param jobId the job id
+   * @param status the status
+   */
+  @Override
+  @GetMapping("/private/updateJobStatusById")
+  public void updateJobStatusById(@RequestParam("jobId") Long jobId,
+      @RequestParam("status") Long status) {
+    fmeCommunicationService.updateJobStatusById(jobId, status);
   }
 }
