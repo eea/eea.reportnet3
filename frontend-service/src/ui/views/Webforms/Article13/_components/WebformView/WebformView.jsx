@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformView.module.scss';
 
@@ -94,6 +95,8 @@ export const WebformView = ({
       case 'policyinstrument':
       case 'policyimpacting':
       case 'unionpolicylist':
+      case 'otherpolicyinstrument':
+      case 'typepolicyinstrument':
         fields = combinationFieldRender(field.name);
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'pamnames':
@@ -113,8 +116,6 @@ export const WebformView = ({
         return combinationTableRender('entities');
       case 'sectorobjectives':
         return combinationTableRender('sectors');
-      // case 'unionpolicyother':
-      //   return combinationTableRender('otherUnionPolicy');
       default:
         break;
     }
@@ -169,14 +170,16 @@ export const WebformView = ({
 
   const combinationTableRender = tableName => {
     const combinatedTableValues = [];
+
     singlesCalculatedData.forEach(singleRecord => {
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())];
-      if (!isNil(singleRecordValue)) {
+      if (!isNil(singleRecordValue) && !isEmpty(singleRecordValue)) {
         combinatedTableValues.push(...singleRecordValue);
       }
     });
-    return renderTable(combinatedTableValues);
+
+    return renderTable(uniqBy(combinatedTableValues, value => JSON.stringify(value)));
   };
 
   const isGroup = () => {
@@ -244,23 +247,23 @@ export const WebformView = ({
   const renderWebFormHeaders = () => {
     const filteredTabs = data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
-
     return data
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const childHasErrors = webform.elements
-          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-          .map(table => table.hasErrors);
-
-        const hasErrors = [webform.hasErrors].concat(childHasErrors);
+        const {
+          datasetStatistics: { tables }
+        } = state;
+        const tablesStatistics = tables.filter(table => table.tableSchemaId === webform.tableSchemaId);
+        const [tableStatistics] = tablesStatistics;
+        const { hasErrors } = tableStatistics;
         return (
           <Button
             className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
-            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            icon={!isCreated ? 'info' : hasErrors ? 'warning' : 'table'}
+            iconClasses={!isVisible[webform.title] ? (hasErrors ? 'warning' : 'info') : ''}
+            iconPos={!isCreated || hasErrors ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}

@@ -303,10 +303,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       tableSchemaVO = dataschemaService.createTableSchema(
           dataschemaService.getDatasetSchemaId(datasetId), tableSchemaVO, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
-      recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      dataschemaService.releaseCreateUpdateView(datasetId,
+          SecurityContextHolder.getContext().getAuthentication().getName(), false);
       return tableSchemaVO;
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -332,7 +336,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     try {
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
-      recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      dataschemaService.releaseCreateUpdateView(datasetId,
+          SecurityContextHolder.getContext().getAuthentication().getName(), false);
     } catch (EEAException e) {
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
@@ -462,7 +468,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
 
       // Create query view
-      recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      dataschemaService.releaseCreateUpdateView(datasetId,
+          SecurityContextHolder.getContext().getAuthentication().getName(), false);
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -502,7 +510,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
         // Create query view
-        recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+        // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
         dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
@@ -569,7 +577,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         dataschemaService.deleteForeignRelation(datasetId, fieldVO);
 
         // Create query view
-        recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+        dataschemaService.releaseCreateUpdateView(datasetId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), false);
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }

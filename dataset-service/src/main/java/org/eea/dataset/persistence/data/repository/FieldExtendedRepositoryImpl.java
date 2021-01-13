@@ -100,7 +100,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_3 =
       "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id " + " AND fv.value <> '' "
-          + " AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ";
+          + " AND (:searchText IS NULL or LOWER(fv.value) like LOWER(CONCAT('%',:searchText,'%')) or LOWER(tag.value) like LOWER(CONCAT('%',:searchText,'%')) ) ";
 
   /**
    * The Constant QUERY_3_CONDITIONAL.

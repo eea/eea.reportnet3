@@ -73,6 +73,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -228,11 +231,24 @@ public class DatasetSchemaServiceTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
+
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
     validationCommands.add(command);
@@ -712,6 +728,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     DataSetMetabase dataSetMetabase = new DataSetMetabase();
     dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
@@ -994,7 +1012,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void propagateRulesAfterUpdateTypeNullTest() throws EEAException {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -1011,7 +1030,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void propagateRulesAfterUpdateTypeNotNullTest() throws EEAException {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
@@ -1031,7 +1051,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void propagateRulesAfterUpdateTypeNullNotRequiredTest() throws EEAException {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
 
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -1051,7 +1072,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void propagateRulesAfterUpdateTypeNotNullNotRequiredTest() throws EEAException {
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(false);
     fieldSchemaVO.setId("fieldSchemaId");

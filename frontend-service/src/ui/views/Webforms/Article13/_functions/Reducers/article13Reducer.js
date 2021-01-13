@@ -60,6 +60,9 @@ export const article13Reducer = (state, { type, payload }) => {
         });
       });
 
+      inmTableList.group.sort((a, b) => a.id - b.id);
+      inmTableList.single.sort((a, b) => a.id - b.id);
+
       const inmPamsRecords = [...state.pamsRecords];
       inmPamsRecords.forEach(pamRecord => {
         if (pamRecord.recordId === payload.recordId) {

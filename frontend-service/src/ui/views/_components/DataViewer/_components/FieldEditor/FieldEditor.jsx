@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -191,32 +192,57 @@ const FieldEditor = ({
     return codelistsItems;
   };
 
-  const saveFieldOnBlurOnKeyDown = e => {
-    const dateValue = isEmpty(e.target.value) ? '' : RecordUtils.formatDate(e.target.value, isNil(e.target.value));
-    const isCorrectDateFormatedValue = getisCorrectDateFormatedValue(dateValue);
-    if (isCorrectDateFormatedValue || isEmpty(dateValue)) {
-      onEditorValueChange(cells, dateValue, record);
-      onEditorSubmitValue(cells, dateValue, record);
-      if (e.key === 'Enter') {
-        e.target.blur();
-      }
+  const onCalendarBlur = e => {
+    if (e.target.value != RecordUtils.getCellValue(cells, cells.field)) {
+      saveCalendarDate(e.target.value);
+      setIsCalendarVisible(false);
     }
+  };
+
+  const onCalendarFocus = e => {
+    setIsCalendarVisible(true);
+    onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
+  };
+
+  const saveCalendarDate = inputDateValue => {
+    const formattedDateValue = isEmpty(inputDateValue)
+      ? ''
+      : RecordUtils.formatDate(inputDateValue, isNil(inputDateValue));
+    const isCorrectDateFormattedValue = getIsCorrectDateFormatedValue(formattedDateValue);
+    if (isCorrectDateFormattedValue || isEmpty(formattedDateValue)) {
+      onEditorValueChange(cells, formattedDateValue, record);
+      onEditorSubmitValue(cells, formattedDateValue, record);
+    }
+  };
+
+  const saveCalendarFromKeys = inputDateValue => {
+    setIsCalendarVisible(false);
+    saveCalendarDate(inputDateValue);
+  };
+
+  const onSelectCalendar = e => {
+    saveCalendarDate(dayjs(e.value).format('YYYY-MM-DD'));
   };
 
   useEffect(() => {
     if (isCalendarVisible) {
-      const elementToCapture = document.getElementById(calendarId);
-      !isNil(elementToCapture) &&
-        elementToCapture.addEventListener('keydown', event => {
-          const keyName = event.key;
-          if (keyName === 'Tab' || keyName === 'Enter') {
-            saveFieldOnBlurOnKeyDown(event);
+      const calendarInput = document.getElementById(calendarId);
+      !isNil(calendarInput) &&
+        calendarInput.addEventListener('keydown', event => {
+          const {
+            key,
+            target: { value: inputValue }
+          } = event;
+          const storedValue = RecordUtils.getCellValue(cells, cells.field);
+
+          if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
+            saveCalendarFromKeys(inputValue);
           }
         });
     }
   }, [isCalendarVisible]);
 
-  const getisCorrectDateFormatedValue = date => {
+  const getIsCorrectDateFormatedValue = date => {
     const year = date.split('-')[0];
     return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
   };
@@ -522,23 +548,9 @@ const FieldEditor = ({
           // />
           <Calendar
             inputId={calendarId}
-            onBlur={e => {
-              if (!isFilledDateValue) {
-                saveFieldOnBlurOnKeyDown(e);
-                setIsCalendarVisible(false);
-              } else {
-                setIsFilledDateValue(false);
-              }
-            }}
-            onFocus={e => {
-              setIsCalendarVisible(true);
-              onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
-              !isNil(isFilledDateValue) && setIsFilledDateValue(true);
-            }}
-            onSelect={e => {
-              onEditorValueChange(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
-              onEditorSubmitValue(cells, RecordUtils.formatDate(e.value, isNil(e.value)), record);
-            }}
+            onBlur={onCalendarBlur}
+            onFocus={onCalendarFocus}
+            onSelect={onSelectCalendar}
             appendTo={document.body}
             dateFormat="yy-mm-dd"
             // keepInvalid={true}
