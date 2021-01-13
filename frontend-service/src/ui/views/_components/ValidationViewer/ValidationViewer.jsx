@@ -317,7 +317,7 @@ const ValidationViewer = React.memo(
         }
       });
 
-      setOriginsTypesFilter(allTablesFilterList);
+      setOriginsTypesFilter(sortBy(allTablesFilterList, 'value'));
     };
 
     const onLoadFieldsTypes = () => {
@@ -330,7 +330,7 @@ const ValidationViewer = React.memo(
         });
       });
 
-      const uniquesFields = uniq(fields);
+      const uniquesFields = uniq(fields).sort();
 
       const allFieldsFilterList = [];
 
