@@ -1,5 +1,6 @@
 package org.eea.validation.util;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +117,7 @@ public class FKValidationUtilsTest {
         .thenReturn(id.toString());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+    assertFalse(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
   /**
@@ -134,7 +135,7 @@ public class FKValidationUtilsTest {
         .thenReturn(id.toString());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+    assertFalse(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
   /**
@@ -152,7 +153,7 @@ public class FKValidationUtilsTest {
         .thenReturn(id.toString());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+    assertFalse(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
   /**
@@ -170,7 +171,7 @@ public class FKValidationUtilsTest {
         .thenReturn(id.toString());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+    assertFalse(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
   /**
@@ -188,7 +189,7 @@ public class FKValidationUtilsTest {
         .thenReturn(id.toString());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+    assertFalse(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
   /**
@@ -262,7 +263,7 @@ public class FKValidationUtilsTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(fieldRepository.findByIdFieldSchema(id.toString())).thenReturn(fields);
-    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+    assertFalse(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
   @Test

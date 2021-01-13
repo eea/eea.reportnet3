@@ -98,13 +98,33 @@ const getOptionTypes = (data, option, list, order) => {
         } else if (option === 'automatic' && !item) {
           template.push({ type: 'MANUAL', value: item });
         } else if (option === 'userRole') {
-          template.push({ type: item.toString().replace('_', ' ').toUpperCase(), value: item.toString().toUpperCase() });
+          template.push({
+            type: item.toString().replace('_', ' ').toUpperCase(),
+            value: item.toString().toUpperCase()
+          });
         } else {
           template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
         }
       });
       return template;
     }
+  }
+};
+
+const getValidationsOptionTypes = (data, option) => {
+  const optionsItems = data.filter(filterType => filterType.type === option);
+  const validOptions = optionsItems.map(optionItem => optionItem.value);
+
+  for (let i = 0; i < validOptions.length; i++) {
+    const template = [];
+    validOptions.forEach(item => {
+      if (option === 'fieldSchemaName' || option === 'tableSchemaName') {
+        !isNil(item) && template.push({ type: item, value: item });
+      } else {
+        !isNil(item) && template.push({ type: item.toUpperCase(), value: item.toUpperCase() });
+      }
+    });
+    return template;
   }
 };
 
@@ -119,5 +139,6 @@ export const FiltersUtils = {
   getFilterKeys,
   getLabelInitialState,
   getOptionTypes,
+  getValidationsOptionTypes,
   getSelectedKeys
 };

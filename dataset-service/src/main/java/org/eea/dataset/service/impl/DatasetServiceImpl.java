@@ -2819,6 +2819,8 @@ public class DatasetServiceImpl implements DatasetService {
             datasetPartitionId, dictionaryOriginTargetObjectId);
 
         fieldValuePage = fieldValuePage.next();
+        TenantResolver.setTenantName(
+            String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
       }
 
     }

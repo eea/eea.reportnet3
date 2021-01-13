@@ -186,9 +186,10 @@ export const apiDataset = {
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -200,9 +201,10 @@ export const apiDataset = {
         pageSize: pageSize,
         sortField: sortField,
         asc: asc,
+        fieldValueFilter: fieldValueFilter,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
+        tableFilter: tablesFilter
       })
     });
     return response.data;
@@ -280,9 +282,10 @@ export const apiDataset = {
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -294,9 +297,10 @@ export const apiDataset = {
         pageSize: pageSize,
         sortField: sortField,
         asc: asc,
+        fieldValueFilter: fieldValueFilter,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
+        tableFilter: tablesFilter
       })
     });
     return response.data;

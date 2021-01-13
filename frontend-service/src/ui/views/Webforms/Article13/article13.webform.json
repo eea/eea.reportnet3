@@ -154,7 +154,7 @@
               "type": "FIELD",
               "name": "Objective",
               "title": "Select Objective(s)",
-              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
+              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’. For Other a brief description of the objective shall be provided",
               "calculatedWhenGroup": true
             },
             {
@@ -181,7 +181,7 @@
           "type": "FIELD",
           "name": "QuantifiedObjective",
           "title": "Quantified Objective",
-          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base yearshall be included if the objective(s) is(are) quantified"
+          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base year shall be included if the objective(s) is(are) quantified"
         },
         {
           "type": "FIELD",
@@ -488,7 +488,7 @@
               "type": "FIELD",
               "name": "LULUCF_1",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -520,7 +520,7 @@
               "type": "FIELD",
               "name": "LULUCF_2",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -552,7 +552,7 @@
               "type": "FIELD",
               "name": "LULUCF_3",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -584,7 +584,7 @@
               "type": "FIELD",
               "name": "LULUCF_4",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",

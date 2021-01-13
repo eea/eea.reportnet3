@@ -4,9 +4,10 @@ export const GroupedErrors = ({ datasetRepository }) => async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
-  originsFilter
+  tablesFilter
 ) =>
   datasetRepository.groupedErrorsById(
     datasetId,
@@ -14,7 +15,8 @@ export const GroupedErrors = ({ datasetRepository }) => async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   );
