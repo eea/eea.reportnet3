@@ -184,7 +184,7 @@ const FieldEditor = ({
 
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
-    codelistsItems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+    codelistsItems.sort((a, b) => a.value.localeCompare(b.value, undefined, { numeric: true, sensitivity: 'base' }));
     codelistsItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''

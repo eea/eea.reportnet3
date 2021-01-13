@@ -35,6 +35,7 @@
           "type": "FIELD",
           "name": "ListOfSinglePams",
           "title": "Which policies or measures does it cover?",
+          "showRequiredCharacter": true,
           "dependency": {
             "field": "IsGroup",
             "value": ["Group"]
@@ -51,6 +52,7 @@
       "name": "Table_1",
       "label": "Table 1",
       "title": "Table 1",
+      "subtitle": "Sectors, gases and type of policy instrument",
       "isVisible": true,
       "multipleRecords": false,
       "elements": [
@@ -110,16 +112,10 @@
         },
         {
           "type": "FIELD",
-          "name": "IsPolicyMeasureEnvisaged",
-          "title": "Is the policy or measure envisaged with a view to limiting GHG emissions beyond the Member State commitments under Regulation (EU) 2018/842 and Regulation (EU) 2018/841",
-          "customInput": "RADIO_BUTTON",
-          "calculatedWhenGroup": true
-        },
-        {
-          "type": "FIELD",
           "name": "GHGAffected",
           "title": "Greenhouse gas(es) affected",
           "tooltip": "More than one GHG can be selected",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true
         },
         {
@@ -128,7 +124,15 @@
           "title": "Sector(s) affected and Objective(s)",
           "multipleRecords": true,
           "hasCalculatedFields": true,
+          "showRequiredCharacter": true,
           "elements": [
+            {
+              "type": "FIELD",
+              "name": "Id_SectorObjectives",
+              "title": "ID",
+              "hideWhenCalculated": true,
+              "hideWhenSingle": true
+            },
             {
               "type": "FIELD",
               "name": "SectorAffected",
@@ -150,13 +154,14 @@
               "type": "FIELD",
               "name": "Objective",
               "title": "Select Objective(s)",
-              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
+              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’. For Other a brief description of the objective shall be provided",
               "calculatedWhenGroup": true
             },
             {
               "type": "TABLE",
               "name": "OtherObjectives",
               "title": "Other Objective(s)",
+              "parentTable": true,
               "dependency": {
                 "field": "Objective",
                 "value": ["9", "15", "24", "29", "38", "45", "56", "57"]
@@ -176,7 +181,7 @@
           "type": "FIELD",
           "name": "QuantifiedObjective",
           "title": "Quantified Objective",
-          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base yearshall be included if the objective(s) is(are) quantified"
+          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base year shall be included if the objective(s) is(are) quantified"
         },
         {
           "type": "FIELD",
@@ -187,12 +192,14 @@
           "type": "FIELD",
           "name": "TypePolicyInstrument",
           "title": "Type of policy Instrument",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true
         },
         {
           "type": "FIELD",
           "name": "OtherPolicyInstrument",
           "title": "Describe the other policy Instrument",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true,
           "dependency": {
             "field": "TypePolicyInstrument",
@@ -215,6 +222,7 @@
           "type": "FIELD",
           "name": "UnionPolicyList",
           "title": "Select Union policy/policies",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true,
           "dependency": {
             "field": "UnionPolicy",
@@ -230,6 +238,7 @@
             "value": ["Other (Union policy not listed above or additional Union policy)"]
           },
           "multipleRecords": true,
+          "showRequiredCharacter": true,
           "hasCalculatedFields": true,
           "elements": [
             {
@@ -251,6 +260,7 @@
           "name": "StatusImplementation",
           "title": "Status of implementation",
           "tooltip": "Expired PaMs must be reported in the template only if they have an effect, or they are expected to continue to have an effect on GHG emissions",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true
         },
         {
@@ -285,6 +295,7 @@
           "type": "FIELD",
           "name": "ProjectionsScenario",
           "title": "Projections scenario in which the PaM is included",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true
         },
         {
@@ -292,6 +303,7 @@
           "name": "Entities",
           "title": "Entities responsible for implementing the policy",
           "multipleRecords": true,
+          "showRequiredCharacter": true,
           "hasCalculatedFields": true,
           "elements": [
             {
@@ -405,6 +417,7 @@
       "name": "Table_2",
       "label": "Table 2",
       "title": "Table 2",
+      "subtitle": "Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change",
       "isVisible": true,
       "multipleRecords": false,
       "elements": [
@@ -445,6 +458,7 @@
           "name": "PolicyImpacting",
           "title": "Policy impacting EU ETS, LULUCF and/or ESD/ESR emissions",
           "tooltip": "More than one can be selected",
+          "showRequiredCharacter": true,
           "calculatedWhenGroup": true
         },
         {
@@ -474,7 +488,7 @@
               "type": "FIELD",
               "name": "LULUCF_1",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -506,7 +520,7 @@
               "type": "FIELD",
               "name": "LULUCF_2",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -538,7 +552,7 @@
               "type": "FIELD",
               "name": "LULUCF_3",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -570,7 +584,7 @@
               "type": "FIELD",
               "name": "LULUCF_4",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -688,6 +702,7 @@
       "name": "Table_3",
       "label": "Table 3",
       "title": "Table 3",
+      "subtitle": "Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change",
       "isVisible": true,
       "multipleRecords": false,
       "elements": [

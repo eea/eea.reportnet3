@@ -53,6 +53,7 @@ public class ValidationControllerImpl implements ValidationController {
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
+  /** The validation helper. */
   @Autowired
   private ValidationHelper validationHelper;
 
@@ -65,6 +66,7 @@ public class ValidationControllerImpl implements ValidationController {
    * ValidationHelper.checkFinishedValidations(..)
    *
    * @param datasetId the dataset id
+   * @param released the released
    */
   @Override
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -89,11 +91,12 @@ public class ValidationControllerImpl implements ValidationController {
    * @param datasetId the dataset id
    * @param pageNum the page num
    * @param pageSize the page size
-   * @param fields the fields
+   * @param headers the headers
    * @param asc the asc
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the failed validations by id dataset
    */
   @Override
@@ -102,31 +105,33 @@ public class ValidationControllerImpl implements ValidationController {
       @PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc,
+      @RequestParam(value = "headers", required = false) String headers,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestParam(value = "levelErrorsFilter",
           required = false) List<ErrorTypeEnum> levelErrorsFilter,
       @RequestParam(value = "typeEntitiesFilter",
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
-      @RequestParam(value = "originsFilter", required = false) String originsFilter) {
+      @RequestParam(value = "tableFilter", required = false) String tableFilter,
+      @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
-    if (StringUtils.isNotBlank(fields)) {
-      fields = fields.replace("tableSchemaName", "tableName");
-      fields = fields.replace("entityType", "typeEntity");
-      Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
+    if (StringUtils.isNotBlank(headers)) {
+      headers = headers.replace("tableSchemaName", "tableName");
+      headers = headers.replace("fieldSchemaName", "fieldName");
+      headers = headers.replace("entityType", "typeEntity");
+      Sort order = asc ? Sort.by(headers).ascending() : Sort.by(headers).descending();
       PageRequest.of(pageNum, pageSize, order);
       pageable = PageRequest.of(pageNum, pageSize, order);
     } else {
       pageable = PageRequest.of(pageNum, pageSize);
     }
     try {
-      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc,
-          levelErrorsFilter, typeEntitiesFilter, originsFilter);
+      validations = loadValidationsHelper.getListValidations(datasetId, pageable, headers, asc,
+          levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -140,11 +145,12 @@ public class ValidationControllerImpl implements ValidationController {
    * @param datasetId the dataset id
    * @param pageNum the page num
    * @param pageSize the page size
-   * @param fields the fields
+   * @param headers the headers
    * @param asc the asc
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the group failed validations by id dataset
    */
   @Override
@@ -153,23 +159,25 @@ public class ValidationControllerImpl implements ValidationController {
       @PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc,
+      @RequestParam(value = "headers", required = false) String headers,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestParam(value = "levelErrorsFilter",
           required = false) List<ErrorTypeEnum> levelErrorsFilter,
       @RequestParam(value = "typeEntitiesFilter",
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
-      @RequestParam(value = "originsFilter", required = false) String originsFilter) {
+      @RequestParam(value = "tableFilter", required = false) String tableFilter,
+      @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
-    if (StringUtils.isNotBlank(fields)) {
-      fields = fields.replace("tableSchemaName", "tableName");
-      fields = fields.replace("entityType", "typeEntity");
-      Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
+    if (StringUtils.isNotBlank(headers)) {
+      headers = headers.replace("tableSchemaName", "tableName");
+      headers = headers.replace("fieldSchemaName", "fieldName");
+      headers = headers.replace("entityType", "typeEntity");
+      Sort order = asc ? Sort.by(headers).ascending() : Sort.by(headers).descending();
       PageRequest.of(pageNum, pageSize, order);
       pageable = PageRequest.of(pageNum, pageSize, order);
     } else {
@@ -177,7 +185,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     try {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
-          levelErrorsFilter, typeEntitiesFilter, originsFilter, fields, asc);
+          levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

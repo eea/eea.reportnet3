@@ -101,9 +101,10 @@ const errorsById = async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
-  originsFilter
+  tablesFilter
 ) => {
   const datasetErrorsDTO = await apiDataset.errorsById(
     datasetId,
@@ -111,9 +112,10 @@ const errorsById = async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   );
   const dataset = new Dataset({
     datasetId: datasetErrorsDTO.idDataset,
@@ -292,9 +294,10 @@ const groupedErrorsById = async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
-  originsFilter
+  tablesFilter
 ) => {
   const datasetErrorsDTO = await apiDataset.groupedErrorsById(
     datasetId,
@@ -302,9 +305,10 @@ const groupedErrorsById = async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   );
   const dataset = new Dataset({
     datasetId: datasetErrorsDTO.idDataset,
