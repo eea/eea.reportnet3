@@ -207,9 +207,11 @@ export const WebformRecord = ({
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
-                  {checkRequiredLabelVisibility(element) && (
-                    <span className={styles.requiredMark}>{element.required ? '*' : ''}</span>
-                  )}
+                  {
+                    <span className={styles.requiredMark}>
+                      {element.required || element.showRequiredCharacter ? ' *' : ''}
+                    </span>
+                  }
                 </label>
               )}
 
@@ -292,6 +294,7 @@ export const WebformRecord = ({
                 <div className={styles.title}>
                   <h3>
                     {element.title ? element.title : element.name}
+                    {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
                     {element.hasErrors && (
                       <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
                     )}
