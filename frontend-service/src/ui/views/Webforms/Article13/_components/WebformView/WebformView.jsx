@@ -12,6 +12,7 @@ import styles from './WebformView.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 
@@ -30,6 +31,7 @@ export const WebformView = ({
   datasetId,
   datasetSchemaId,
   getFieldSchemaId,
+  isAddingPamsId = false,
   isRefresh,
   isReporting,
   onUpdatePamsId,
@@ -102,8 +104,8 @@ export const WebformView = ({
       case 'pamnames':
         fields = combinationFieldRender('paMName', 'id');
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
-      case 'ispolicymeasureenvisaged':
-        return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
+      // case 'ispolicymeasureenvisaged':
+      //   return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
       case 'statusimplementation':
         return tableFieldRender(field.name, [
           'implementationperiodstart',
@@ -123,24 +125,24 @@ export const WebformView = ({
     return <span disabled={true}>{field.value}</span>;
   };
 
-  const checkValueFieldRender = (fieldName, valueToCheck) => {
-    let containsValue = false;
-    let fieldValue;
+  // const checkValueFieldRender = (fieldName, valueToCheck) => {
+  //   let containsValue = false;
+  //   let fieldValue;
 
-    singlesCalculatedData.forEach(singleRecord => {
-      const singleRecordValue =
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
-      if (!isNil(singleRecordValue)) {
-        if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
-          containsValue = true;
-        } else {
-          fieldValue = singleRecordValue;
-        }
-      }
-    });
+  //   singlesCalculatedData.forEach(singleRecord => {
+  //     const singleRecordValue =
+  //       singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+  //     if (!isNil(singleRecordValue)) {
+  //       if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
+  //         containsValue = true;
+  //       } else {
+  //         fieldValue = singleRecordValue;
+  //       }
+  //     }
+  //   });
 
-    return containsValue ? valueToCheck : fieldValue;
-  };
+  //   return containsValue ? valueToCheck : fieldValue;
+  // };
 
   const combinationFieldRender = (fieldName, previousField = '', separator = '-') => {
     const combinatedValues = [];
@@ -157,6 +159,7 @@ export const WebformView = ({
           Array.isArray(singleRecordValue)
             ? singleRecordValue
                 .map(value => (previousFieldValue !== '' ? `${previousFieldValue} ${separator} ${value}` : value))
+                .filter(value => !isNil(value))
                 .join(', ')
             : previousFieldValue !== ''
             ? `${previousFieldValue} ${separator} ${singleRecordValue}`
@@ -298,6 +301,8 @@ export const WebformView = ({
       />
     );
   };
+
+  if (isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
 
   return (
     <Fragment>
