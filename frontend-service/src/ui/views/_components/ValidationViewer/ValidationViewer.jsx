@@ -201,6 +201,7 @@ const ValidationViewer = React.memo(
     };
 
     const onChangePage = event => {
+      const isChangedPage = true;
       setNumberRows(event.rows);
       setFirstRow(event.first);
       fetchData(
@@ -211,7 +212,8 @@ const ValidationViewer = React.memo(
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
-        tablesFilter
+        tablesFilter,
+        isChangedPage
       );
     };
 
@@ -223,16 +225,19 @@ const ValidationViewer = React.memo(
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
-      tablesFilter
+      tablesFilter,
+      isChangedPage
     ) => {
       setIsLoading(true);
 
       let datasetErrors = {};
 
+      let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
+
       if (grouped) {
         datasetErrors = await DatasetService.groupedErrorsById(
           datasetId,
-          Math.floor(firstRow / numberRows),
+          pageNums,
           numberRows,
           sortField,
           sortOrder,
@@ -252,7 +257,7 @@ const ValidationViewer = React.memo(
       } else {
         datasetErrors = await DatasetService.errorsById(
           datasetId,
-          Math.floor(firstRow / numberRows),
+          pageNums,
           numberRows,
           sortField,
           sortOrder,
@@ -393,7 +398,8 @@ const ValidationViewer = React.memo(
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
-      tablesFilter
+      tablesFilter,
+      isChangedPage
     ) => {
       onLoadErrors(
         firstRow,
@@ -403,7 +409,8 @@ const ValidationViewer = React.memo(
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
-        tablesFilter
+        tablesFilter,
+        isChangedPage
       );
     };
 
