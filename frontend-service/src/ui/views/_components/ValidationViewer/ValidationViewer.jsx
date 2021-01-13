@@ -7,6 +7,7 @@ import concat from 'lodash/concat';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
 import styles from './ValidationViewer.module.scss';
