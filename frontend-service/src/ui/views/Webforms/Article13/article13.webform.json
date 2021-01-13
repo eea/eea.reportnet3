@@ -112,14 +112,6 @@
         },
         {
           "type": "FIELD",
-          "name": "IsPolicyMeasureEnvisaged",
-          "title": "Is the policy or measure envisaged with a view to limiting GHG emissions beyond the Member State commitments under Regulation (EU) 2018/842 and Regulation (EU) 2018/841",
-          "customInput": "RADIO_BUTTON",
-          "showRequiredCharacter": true,
-          "calculatedWhenGroup": true
-        },
-        {
-          "type": "FIELD",
           "name": "GHGAffected",
           "title": "Greenhouse gas(es) affected",
           "tooltip": "More than one GHG can be selected",

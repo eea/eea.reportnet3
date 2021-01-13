@@ -12,6 +12,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,10 @@ public class ExecutePropagateNewFieldCommandTest {
 
   /** The data. */
   private Map<String, Object> data;
+
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
 
   /**
    * Inits the mocks.

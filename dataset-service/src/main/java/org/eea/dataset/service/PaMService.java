@@ -5,7 +5,6 @@ import org.bson.Document;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
-import org.eea.multitenancy.DatasetId;
 
 
 /**
@@ -16,11 +15,12 @@ public interface PaMService {
   /**
    * Gets the list single paM.
    *
+   * @param datasetId the dataset id
+   * @param groupPaMId the group pa M id
    * @return the list single paM
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
-  List<SinglePaMVO> getListSinglePaM(@DatasetId Long datasetId, String groupPaMId)
-      throws EEAException;
+  List<SinglePaMVO> getListSinglePaM(Long datasetId, String groupPaMId) throws EEAException;
 
 
   /**

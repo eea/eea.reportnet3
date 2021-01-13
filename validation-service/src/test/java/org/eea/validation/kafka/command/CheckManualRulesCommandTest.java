@@ -1,6 +1,7 @@
 package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,42 +47,62 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RunWith(MockitoJUnitRunner.class)
 public class CheckManualRulesCommandTest {
 
-  /** The Check manual rules command. */
+  /**
+   * The Check manual rules command.
+   */
   @InjectMocks
   private CheckManualRulesCommand CheckManualRulesCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset metabase controller. */
+  /**
+   * The dataset metabase controller.
+   */
   @Mock
   private DatasetMetabaseController datasetMetabaseController;
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Mock
   private RulesRepository rulesRepository;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Mock
   private SchemasRepository schemasRepository;
 
-  /** The rule expression service. */
+  /**
+   * The rule expression service.
+   */
   @Mock
   private RuleExpressionService ruleExpressionService;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Mock
   private DatasetSchemaController datasetSchemaController;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Mock
   private DatasetRepository datasetRepository;
 
-  /** The security context. */
+  /**
+   * The security context.
+   */
   private SecurityContext securityContext;
 
-  /** The authentication. */
+  /**
+   * The authentication.
+   */
   private Authentication authentication;
 
 
@@ -274,7 +295,6 @@ public class CheckManualRulesCommandTest {
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
-
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),

@@ -31,6 +31,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 export const TableManagement = ({
   dataflowId,
   datasetId,
+  isAddingPamsId = false,
   loading,
   onAddTableRecord,
   onRefresh,
@@ -453,7 +454,7 @@ export const TableManagement = ({
     </DataTable>
   );
 
-  if (isLoading) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  if (isLoading || isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
 
   return (
     <Fragment>

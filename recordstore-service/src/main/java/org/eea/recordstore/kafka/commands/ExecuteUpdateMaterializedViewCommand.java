@@ -15,11 +15,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandlerCommand {
 
-
   /** The database management service. */
   @Autowired
   private RecordStoreService recordStoreService;
-
 
   /**
    * Gets the event type.
@@ -41,10 +39,8 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId =
         Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-
     String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
     Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
-
     recordStoreService.updateMaterializedQueryView(datasetId, user, released);
   }
 
