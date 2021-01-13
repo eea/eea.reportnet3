@@ -1334,6 +1334,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
               onSelectValidation={onSelectValidation}
               schemaTables={designerState.schemaTables}
+              tables={designerState.datasetSchema.tables}
               visible={designerState.isValidationViewerVisible}
             />
           </Dialog>
