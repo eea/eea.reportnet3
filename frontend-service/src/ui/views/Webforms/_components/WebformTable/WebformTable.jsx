@@ -181,6 +181,7 @@ export const WebformTable = ({
             selectedTable.pamsId
           );
           tableData[tableSchemaId] = tableChildData;
+          // 'tableChildData', tableChildData;
         }
         const records = onParseWebformRecords(
           parentTableData.records,
