@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -41,11 +40,11 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param datasetId the dataset id
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
-   *
    * @return the page
    */
   @Override
@@ -60,9 +59,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     String partTypeEntities = typeEntities(typeEntitiesFilter, false);
     String partTableFilter = originFilter(tableFilter, false, "table");
     String partFieldFilter = originFilter(fieldValueFilter, false, "field");
+    String orderPart = addOrderBy(headerField, asc);
 
-    String orderPart = "";
-    orderPart = addOrderBy(headerField, asc, orderPart);
     String FINAL_QUERY = QUERY_FILTER_BASIC + partLevelError + partTypeEntities + partTableFilter
         + partFieldFilter + orderPart;
 
@@ -80,7 +78,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param datasetId the dataset id
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
@@ -97,16 +96,16 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     String basicQuery = String.format(
         "select v.message as message, v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity,v.table_name as tableName,v.short_code as shortCode, v.field_name as fieldName, count(*) as numberOfRecords from dataset_%s.Validation v  where v.id is not null ",
         datasetId);
-    String orderPart = "";
-    orderPart = addOrderBy(headerField, asc, orderPart);
     String partLevelError = levelErrorFilter(levelErrorsFilter, true);
     String partTypeEntities = typeEntities(typeEntitiesFilter, true);
     String partTableFilter = originFilter(tableFilter, true, "table");
     String partFieldFilter = originFilter(fieldValueFilter, true, "field");
     String groupBy =
         "group by v.message,v.level_error, v.id_rule, v.type_entity,v.table_name,v.short_code,v.field_name ";
+    String orderPart = addOrderBy(headerField, asc);
     String page =
         paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
+
     String finalQuery = basicQuery + partLevelError + partTypeEntities + partTableFilter
         + partFieldFilter + groupBy + orderPart + page;
     return session.doReturningWork(new ReturningWork<List<GroupValidationVO>>() {
@@ -141,15 +140,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param orderPart the order part
    * @return the string
    */
-  private String addOrderBy(String headerField, Boolean asc, String orderPart) {
-    if (!StringUtils.isBlank(headerField)) {
-      String byDescAsc = " desc";
-      if (asc) {
-        byDescAsc = " asc";
-      }
-      orderPart = "order by " + headerField + byDescAsc;
-    }
-    return orderPart;
+  private String addOrderBy(String headerField, Boolean asc) {
+    return StringUtils.isBlank(headerField) ? ""
+        : "order by " + headerField + (asc ? " asc" : " desc");
   }
 
   /**
@@ -158,8 +151,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param datasetId the dataset id
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
-   *
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the long
    */
   @Override
@@ -185,19 +178,37 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @param originsFilter the origins filter
    * @param group the group
+   * @param entity the entity
    * @return the string
    */
   private String originFilter(String originsFilter, boolean group, String entity) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (!StringUtils.isBlank(originsFilter)) {
-      List<String> originsFilterList = Arrays.asList(originsFilter.split(","));
-      for (int i = 0; i < originsFilterList.size(); i++) {
-        stringBuilder
-            .append(group ? "and v." + entity + "_name ='" + originsFilterList.get(i) + "' "
-                : " and v." + entity + "Name  ='" + originsFilterList.get(i) + "' ");
-      }
+      stringBuilder
+          .append(group ? "and v." + entity + "_name in " : " and v." + entity + "Name  in ")
+          .append(composeListQuery(originsFilter));
     }
     return stringBuilder.toString();
+  }
+
+  /**
+   * Compose list query.
+   *
+   * @param originsFilter the origins filter
+   * @return the string
+   */
+  private String composeListQuery(String originsFilter) {
+    return "('" + originsFilter.replace(",", "','") + "')";
+  }
+
+  /**
+   * Removes the spaces generated with automatic toString.
+   *
+   * @param listFormatted the list formatted
+   * @return the string
+   */
+  private String removeSpacesEnum(String listFormatted) {
+    return listFormatted.replace(", ", ",").replace("[", "").replace("]", "");
   }
 
   /**
@@ -210,10 +221,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
   private String typeEntities(List<EntityTypeEnum> typeEntitiesFilter, boolean group) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
-      for (int i = 0; i < typeEntitiesFilter.size(); i++) {
-        stringBuilder.append(group ? " and v.type_entity ='" : " and v.typeEntity ='")
-            .append(typeEntitiesFilter.get(i).getValue()).append("' ");
-      }
+      stringBuilder.append(group ? " and v.type_entity in " : " and v.typeEntity in ")
+          .append(composeListQuery(removeSpacesEnum(typeEntitiesFilter.toString())));
     }
     return stringBuilder.toString();
   }
@@ -222,16 +231,14 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Level error filter.
    *
    * @param levelErrorsFilter the level errors filter
-   *
+   * @param group the group
    * @return the string
    */
   private String levelErrorFilter(List<ErrorTypeEnum> levelErrorsFilter, boolean group) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
-      for (int i = 0; i < levelErrorsFilter.size(); i++) {
-        stringBuilder.append(group ? " and v.level_error ='" : " and v.levelError ='")
-            .append(levelErrorsFilter.get(i).getValue()).append("' ");
-      }
+      stringBuilder.append(group ? " and v.level_error in " : " and v.levelError in ")
+          .append(composeListQuery(removeSpacesEnum(levelErrorsFilter.toString())));
     }
     return stringBuilder.toString();
   }
