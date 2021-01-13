@@ -71,7 +71,8 @@ public class LoadValidationsHelper {
    */
   public FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
       String headerField, Boolean asc, List<ErrorTypeEnum> levelErrorsFilter,
-      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter) throws EEAException {
+      List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter)
+      throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
     FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
@@ -79,8 +80,9 @@ public class LoadValidationsHelper {
     validation.setIdDatasetSchema(dataset.getIdDatasetSchema());
     validation.setIdDataset(datasetId);
 
-    Page<Validation> validationStream = validationRepository.findAllRecordsByFilter(datasetId,
-        levelErrorsFilter, typeEntitiesFilter, originsFilter, pageable, headerField, asc);
+    Page<Validation> validationStream =
+        validationRepository.findAllRecordsByFilter(datasetId, levelErrorsFilter,
+            typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc);
 
     List<Validation> validations = validationStream.get().collect(Collectors.toList());
     List<Long> idValidations =
@@ -116,7 +118,7 @@ public class LoadValidationsHelper {
     }
     validation.setTotalRecords(validationRepository.count());
     validation.setTotalFilteredRecords(validationRepository.countRecordsByFilter(datasetId,
-        levelErrorsFilter, typeEntitiesFilter, originsFilter));
+        levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter));
     LOG.info(
         "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
         datasetId, errors.size(), pageable.getPageNumber(), pageable.getPageSize());
@@ -140,8 +142,8 @@ public class LoadValidationsHelper {
    */
   public FailedValidationsDatasetVO getListGroupValidations(@DatasetId Long datasetId,
       Pageable pageable, List<ErrorTypeEnum> levelErrorsFilter,
-      List<EntityTypeEnum> typeEntitiesFilter, String originsFilter, String headerField,
-      Boolean asc) throws EEAException {
+      List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter,
+      String headerField, Boolean asc) throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
     FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
@@ -150,15 +152,16 @@ public class LoadValidationsHelper {
     validation.setIdDataset(datasetId);
 
     validation.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
-        typeEntitiesFilter, originsFilter, pageable, headerField, asc, true));
+        typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, true));
     validation.setTotalErrors(validationRepository.count());
 
     validation.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
-        new ArrayList(), new ArrayList(), "", pageable, "", asc, false).size()));
+        new ArrayList<>(), new ArrayList<>(), "", "", pageable, "", asc, false).size()));
 
     validation.setTotalFilteredRecords(
         Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
-            typeEntitiesFilter, originsFilter, pageable, headerField, asc, false).size()));
+            typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, false)
+            .size()));
     LOG.info(
         "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
         datasetId, validation.getErrors().size(), pageable.getPageNumber(), pageable.getPageSize());
