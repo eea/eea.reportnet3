@@ -856,24 +856,22 @@
       "multipleRecords": false,
       "elements": [
         {
-          "type": "LABEL",
-          "level": 2,
-          "title": "International dimension"
-        },
-        {
           "type": "FIELD",
           "name": "DescribeSynergiesAdaptation",
-          "title": "Please describe the synergies of implemented adaptation actions with other international frameworks and/or conventions, in particular the Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction (max. 3000 characters)"
+          "title": "Synergies of adaptation actions with other international frameworks and/or conventions (max. 3000 characters)",
+          "tooltip": "In particular the Sustainable Development Goals and the Sendai Framework for Disaster Risk Reduction, Annex I: 5.2"
         },
         {
           "type": "FIELD",
           "name": "DescribeDetailShareInformation",
-          "title": "Please describe the cooperation with EU Member States, international cooperation, and with regional and international organisations, and in particular the cooperation to share information and to strengthen science, institutions and adaptation knowledge (max. 3000 characters)"
+          "title": "Cooperation with Union Member States, international cooperation, and with regional and international organisations to share information and to strengthen science, institutions and adaptation knowledge  (max. 3000 characters)",
+          "tooltip": "Excluding information on support to developing countries referred to in Part 2 of Annex VIII of Regulation (EU) 2018/1999. Annex I: 5.3a"
         },
         {
           "type": "FIELD",
           "name": "DescribeDetailCooperationEnhance",
-          "title": "Please describe the cooperation with EU Member States, international cooperation, and with regional and international organisations, and in particular the cooperation to enhance adaptation action at the sub-national, national, macroregional and international level, including the area, scale and types of cooperation (max. 3000 characters)"
+          "title": "Cooperation with Union Member States, international cooperation, and with regional and international organisations to enhance adaptation action at the sub-national, national, macro-regional and international level (max. 3000 characters)",
+          "tooltip": "Including the area, scale and types of cooperation. Excluding information on support to developing countries referred to in Part 2 of Annex VIII of Regulation (EU) 2018/1999. Annex I: 5.3b"
         }
       ]
     },
