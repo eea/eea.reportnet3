@@ -12,6 +12,7 @@ import styles from './WebformView.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { WebformTable } from 'ui/views/Webforms/_components/WebformTable';
 
@@ -30,6 +31,7 @@ export const WebformView = ({
   datasetId,
   datasetSchemaId,
   getFieldSchemaId,
+  isAddingPamsId = false,
   isRefresh,
   isReporting,
   onUpdatePamsId,
@@ -298,6 +300,8 @@ export const WebformView = ({
       />
     );
   };
+
+  if (isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
 
   return (
     <Fragment>

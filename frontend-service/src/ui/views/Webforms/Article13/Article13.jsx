@@ -358,6 +358,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           getFieldSchemaId={getFieldSchemaId}
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
+          isAddingPamsId={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
           onUpdatePamsId={onUpdatePamsId}
           pamsRecords={pamsRecords}
           selectedTable={selectedTable}
@@ -370,6 +371,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         <TableManagement
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isAddingPamsId={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
           loading={isLoading}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}
