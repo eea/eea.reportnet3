@@ -945,6 +945,9 @@
     "otherObjectives": "Other objectives",
     "fieldDeleteBlockedError": "Failure in the delete process. Please wait until the end of the previous operation",
     "webformShouldBeAttachment": "The field type should be attachment",
-    "cloneNewSchemaError": "Error. The cloning process is already running."
+    "cloneNewSchemaError": "Error. The cloning process is already running.",
+    "updateWebformFieldInCascadeByIdError": "Failed updating webform field. Check that the PaM Id does not already exist",
+    "updateWebformFieldByIdError": "Failed updating webform field",
+    "updateRecordsInCascadeByIdError": "Failed updating record. Check that the PaM Id does not already exist"
   }
 }

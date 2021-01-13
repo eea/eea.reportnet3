@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformView.module.scss';
 
@@ -94,6 +95,8 @@ export const WebformView = ({
       case 'policyinstrument':
       case 'policyimpacting':
       case 'unionpolicylist':
+      case 'otherpolicyinstrument':
+      case 'typepolicyinstrument':
         fields = combinationFieldRender(field.name);
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'pamnames':
@@ -113,8 +116,6 @@ export const WebformView = ({
         return combinationTableRender('entities');
       case 'sectorobjectives':
         return combinationTableRender('sectors');
-      // case 'unionpolicyother':
-      //   return combinationTableRender('otherUnionPolicy');
       default:
         break;
     }
@@ -169,14 +170,16 @@ export const WebformView = ({
 
   const combinationTableRender = tableName => {
     const combinatedTableValues = [];
+
     singlesCalculatedData.forEach(singleRecord => {
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())];
-      if (!isNil(singleRecordValue)) {
+      if (!isNil(singleRecordValue) && !isEmpty(singleRecordValue)) {
         combinatedTableValues.push(...singleRecordValue);
       }
     });
-    return renderTable(combinatedTableValues);
+
+    return renderTable(uniqBy(combinatedTableValues, value => JSON.stringify(value)));
   };
 
   const isGroup = () => {

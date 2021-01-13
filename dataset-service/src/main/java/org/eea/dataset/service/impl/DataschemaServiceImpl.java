@@ -67,6 +67,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -443,7 +444,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throw new EEAException(e);
     }
 
-    releaseValidateManualQCEvent(datasetId, false);
+    releaseCreateUpdateView(datasetId,
+        SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
   }
 
@@ -1027,7 +1029,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
 
-      releaseValidateManualQCEvent(datasetId, true);
+      releaseCreateUpdateView(datasetId,
+          SecurityContextHolder.getContext().getAuthentication().getName(), true);
 
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
@@ -1048,7 +1051,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
 
-      releaseValidateManualQCEvent(datasetId, false);
+      releaseCreateUpdateView(datasetId,
+          SecurityContextHolder.getContext().getAuthentication().getName(), false);
     }
 
 
@@ -1983,10 +1987,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param checkNoSQL the check no SQL
    */
-  private void releaseValidateManualQCEvent(Long datasetId, boolean checkNoSQL) {
+  @Override
+  public void releaseCreateUpdateView(Long datasetId, String user, boolean checkSQL) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
-    result.put("checkNoSQL", checkNoSQL);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATE_MANUAL_QC_COMMAND, result);
+    result.put("isMaterialized", false);
+    result.put("checkSQL", checkSQL);
+    result.put(LiteralConstants.USER, user);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_VIEW_EVENT, result);
   }
 }
