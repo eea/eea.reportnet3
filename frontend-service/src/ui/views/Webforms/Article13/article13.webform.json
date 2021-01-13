@@ -129,7 +129,6 @@
             {
               "type": "FIELD",
               "name": "Id_SectorObjectives",
-              "title": "ID",
               "hideWhenCalculated": true,
               "hideWhenSingle": true
             },
@@ -172,6 +171,12 @@
                   "type": "FIELD",
                   "name": "Other",
                   "title": "Other Objective"
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Fk_SectorObjectives",
+                  "hideWhenCalculated": true,
+                  "hideWhenSingle": true
                 }
               ]
             }

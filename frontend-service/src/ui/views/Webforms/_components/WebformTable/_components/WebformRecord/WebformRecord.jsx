@@ -372,11 +372,14 @@ export const WebformRecord = ({
       return element.elementsRecords;
     }
     const filteredIdField = elements.filter(element => TextUtils.areEquals(element.name, 'Id_SectorObjectives'))[0];
+    const filteredIdSchema = element.elements.filter(element =>
+      TextUtils.areEquals(element.name, 'Fk_SectorObjectives')
+    )[0];
+
     const filtered = element.elementsRecords.filter(
       record =>
-        record.fields.filter(
-          field => field.fieldSchemaId === filteredIdField.fieldSchemaId || filteredIdField.fieldSchema
-        )[0].value === filteredIdField.value
+        record.fields.filter(field => field.fieldSchemaId === filteredIdSchema.fieldSchema)[0].value ===
+        filteredIdField.value
     );
 
     return filtered;
