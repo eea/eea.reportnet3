@@ -307,7 +307,17 @@ export const WebformRecord = ({
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
                       label={resources.messages['addRecord']}
-                      onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                      onClick={() => {
+                        let filteredRecordId = null;
+                        if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
+                          const filteredTable = elements.filter(element =>
+                            TextUtils.areEquals(element.name, 'SectorAffected')
+                          );
+
+                          if (!isEmpty(filteredTable)) filteredRecordId = filteredTable[0].recordId;
+                        }
+                        onAddMultipleWebform(element.tableSchemaId, filteredRecordId);
+                      }}
                     />
                   )}
                 </div>
@@ -321,9 +331,10 @@ export const WebformRecord = ({
                   }}
                 />
               )}
+
               {checkCalculatedTableVisibility(element)
                 ? calculateSingle(element)
-                : element.elementsRecords.map((record, i) => {
+                : filterRecords(element, elements).map((record, i) => {
                     return (
                       <WebformRecord
                         calculateSingle={calculateSingle}
@@ -352,6 +363,21 @@ export const WebformRecord = ({
         );
       }
     });
+  };
+
+  const filterRecords = (element, elements) => {
+    if (!TextUtils.areEquals(element.name, 'OtherObjectives')) {
+      return element.elementsRecords;
+    }
+    const filteredIdField = elements.filter(element => TextUtils.areEquals(element.name, 'Id_SectorObjectives'))[0];
+    const filtered = element.elementsRecords.filter(
+      record =>
+        record.fields.filter(
+          field => field.fieldSchemaId === filteredIdField.fieldSchemaId || filteredIdField.fieldSchema
+        )[0].value === filteredIdField.value
+    );
+
+    return filtered;
   };
 
   const renderWebformContent = content => {
