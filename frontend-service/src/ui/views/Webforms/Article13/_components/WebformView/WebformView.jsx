@@ -102,8 +102,8 @@ export const WebformView = ({
       case 'pamnames':
         fields = combinationFieldRender('paMName', 'id');
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
-      case 'ispolicymeasureenvisaged':
-        return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
+      // case 'ispolicymeasureenvisaged':
+      //   return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
       case 'statusimplementation':
         return tableFieldRender(field.name, [
           'implementationperiodstart',
