@@ -496,10 +496,8 @@ const ValidationViewer = React.memo(
 
     if (isLoading) {
       return (
-        <div>
-          <div className={styles.spinner}>
-            <Spinner className={styles.spinnerPosition} />
-          </div>
+        <div className={styles.spinner}>
+          <Spinner className={styles.spinnerPosition} />
         </div>
       );
     }
