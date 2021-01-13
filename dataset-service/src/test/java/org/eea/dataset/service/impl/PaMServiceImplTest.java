@@ -145,7 +145,7 @@ public class PaMServiceImplTest {
     when(fieldRepository.findFirstByIdFieldSchemaAndValue(Mockito.any(), Mockito.any()))
         .thenReturn(fieldValue);
     when(
-        fieldRepository.queryFindByFieldSchemaAndValue(Mockito.any(), Mockito.any(), Mockito.any()))
+        fieldRepository.findByFieldSchemaAndValue(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(fieldValueList);
     assertNotNull(paMServiceImpl.getListSinglePaM(1L, "1"));
   }
