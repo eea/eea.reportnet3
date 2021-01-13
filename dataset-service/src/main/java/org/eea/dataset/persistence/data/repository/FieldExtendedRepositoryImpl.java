@@ -100,7 +100,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_3 =
       "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id " + " AND fv.value <> '' "
-          + " AND (:searchText IS NULL or fv.value like CONCAT('%',:searchText,'%') or tag.value like CONCAT('%',:searchText,'%') ) ";
+          + " AND (:searchText IS NULL or LOWER(fv.value) like LOWER(CONCAT('%',:searchText,'%')) or LOWER(tag.value) like LOWER(CONCAT('%',:searchText,'%')) ) ";
 
   /**
    * The Constant QUERY_3_CONDITIONAL.
@@ -189,37 +189,37 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   /**
    * Query execution record.
    *
-   * @param idFieldSchema the id field schema
+   * @param fieldSchemaId the id field schema
    * @param idsList the ids list
    * @param datasetId the dataset id
    * @return the list
    */
   @Override
-  public List<FieldValue> queryFindByFieldSchemaAndValue(String idFieldSchema, List<String> idsList,
+  public List<FieldValue> findByFieldSchemaAndValue(String fieldSchemaId, List<String> idsList,
       Long datasetId) {
     String result = listToString(datasetId.toString(), idsList);
     String finalQuery =
-        String.format(QUERY_FIELD_SCHEMA_AND_VALUE, datasetId.toString(), idFieldSchema, result);
+        String.format(QUERY_FIELD_SCHEMA_AND_VALUE, datasetId.toString(), fieldSchemaId, result);
     Query query = entityManager.createNativeQuery(finalQuery, FieldValue.class);
     return query.getResultList();
   }
 
 
   /**
-   * Query find value.
+   * Query find value by other field.
    *
-   * @param idFieldSchema1 the id field schema 1
-   * @param idFieldSchema2 the id field schema 2
+   * @param fieldSchemaId1 the id field schema 1
+   * @param fieldSchemaId2 the id field schema 2
    * @param datasetId the dataset id
    * @param idsList the ids list
    * @return the list
    */
   @Override
-  public List<FieldVO> queryFindValue(String idFieldSchema1, String idFieldSchema2,
-      String datasetId, List<String> idsList) {
+  public List<FieldVO> findValue(String fieldSchemaId1, String fieldSchemaId2, String datasetId,
+      List<String> idsList) {
     String result = listToString(datasetId, idsList);
-    String finalQuery = String.format(QUERY_FIND_VALUE, datasetId, datasetId, idFieldSchema1,
-        result, idFieldSchema2);
+    String finalQuery = String.format(QUERY_FIND_VALUE, datasetId, datasetId, fieldSchemaId1,
+        result, fieldSchemaId2);
     Session session = (Session) entityManager.getDelegate();
     return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
       @Override

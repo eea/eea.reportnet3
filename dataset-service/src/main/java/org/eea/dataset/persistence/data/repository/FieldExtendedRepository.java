@@ -13,27 +13,28 @@ public interface FieldExtendedRepository {
 
 
   /**
-   * Query find by field schema and value.
+   * Find by field schema and value.
    *
-   * @param idFieldSchema the id field schema
+   * @param fieldSchemaId the field schema id
    * @param idsList the ids list
    * @param datasetId the dataset id
    * @return the list
    */
-  List<FieldValue> queryFindByFieldSchemaAndValue(String idFieldSchema, List<String> idsList,
+  List<FieldValue> findByFieldSchemaAndValue(String fieldSchemaId, List<String> idsList,
       Long datasetId);
 
 
+
   /**
-   * Query find value.
+   * Find value.
    *
-   * @param idFieldSchema1 the id field schema 1
-   * @param idFieldSchema2 the id field schema 2
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
    * @param datasetId the dataset id
    * @param idsList the ids list
    * @return the list
    */
-  List<FieldVO> queryFindValue(String idFieldSchema1, String idFieldSchema2, String datasetId,
+  List<FieldVO> findValue(String fieldSchemaId1, String fieldSchemaId2, String datasetId,
       List<String> idsList);
 
 

@@ -31,15 +31,15 @@ export const WebformTable = ({
   isRefresh,
   isReporting,
   onTabChange,
-  onUpdateSinglesList,
   onUpdatePamsId,
+  onUpdateSinglesList,
   pamsRecords,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
   setIsLoading = () => {},
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewTableRecord } = WebformsUtils;
+  const { onParseWebformRecords, parseNewTableRecord, parseOtherObjectivesRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -102,7 +102,7 @@ export const WebformTable = ({
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const onAddMultipleWebform = async tableSchemaId => {
+  const onAddMultipleWebform = async (tableSchemaId, filteredRecordId = null) => {
     webformTableDispatch({
       type: 'SET_IS_ADDING_MULTIPLE',
       payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
@@ -111,13 +111,15 @@ export const WebformTable = ({
     if (!isEmpty(webformData.elementsRecords)) {
       let sectorObjectivesTable;
       const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
-        if (element.name === 'SectorObjectives') {
+        if (TextUtils.areEquals(element.name, 'SectorObjectives')) {
           sectorObjectivesTable = element;
         }
         return element.tableSchemaId === tableSchemaId;
       })[0];
 
-      const newEmptyRecord = parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
+      const newEmptyRecord = TextUtils.areEquals(filteredTable.name, 'OtherObjectives')
+        ? parseOtherObjectivesRecord(filteredTable, sectorObjectivesTable, selectedTable.pamsId, filteredRecordId)
+        : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
         const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
@@ -179,6 +181,7 @@ export const WebformTable = ({
             selectedTable.pamsId
           );
           tableData[tableSchemaId] = tableChildData;
+          // 'tableChildData', tableChildData;
         }
         const records = onParseWebformRecords(
           parentTableData.records,

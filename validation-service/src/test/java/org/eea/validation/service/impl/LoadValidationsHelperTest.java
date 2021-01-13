@@ -135,7 +135,7 @@ public class LoadValidationsHelperTest {
     when(validationService.getDatasetValuebyId(Mockito.any())).thenReturn(datasetValue);
     Page<Validation> pageValidation = new PageImpl<>(validations);
     when(validationRepository.findAllRecordsByFilter(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), (Mockito.any(Pageable.class)), Mockito.any(), Mockito.any()))
+        Mockito.any(), Mockito.any(), (Mockito.any(Pageable.class)), Mockito.any(), Mockito.any()))
             .thenReturn(pageValidation);
     Map<Long, ErrorsValidationVO> mapAux = new HashMap<>();
     when(validationService.getDatasetErrors(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -147,7 +147,7 @@ public class LoadValidationsHelperTest {
     when(validationService.getFieldErrors(Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(mapAux));
 
-    loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false, null, null, "");
+    loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false, null, null, "", "");
     Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
 
   }
@@ -161,7 +161,7 @@ public class LoadValidationsHelperTest {
   @Test
   public void testGetGroupListValidations() throws Exception {
     when(validationService.getDatasetValuebyId(Mockito.any())).thenReturn(datasetValue);
-    loadValidationsHelper.getListGroupValidations(0L, pageable, null, null, "", "typeEntity",
+    loadValidationsHelper.getListGroupValidations(0L, pageable, null, null, "", "", "typeEntity",
         false);
     Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
   }

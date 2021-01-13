@@ -73,10 +73,10 @@ public class ValidationRepositoryPaginatedImplTest {
     Query mockedQuery = mock(Query.class);
     when(entityManager.createQuery(Mockito.anyString())).thenReturn(mockedQuery);
     validationRepositoryPaginatedImpl.findAllRecordsByFilter(1L, levelErrorsFilter, typeEntityEnum,
-        "Characterisation,SeasionalPeriod", pageable, "message", true);
+        "Characterisation,SeasionalPeriod", "", pageable, "message", true);
     assertNotEquals("", null,
         validationRepositoryPaginatedImpl.findAllRecordsByFilter(1L, levelErrorsFilter,
-            typeEntityEnum, "Characterisation,SeasionalPeriod", pageable, "message", true));
+            typeEntityEnum, "Characterisation,SeasionalPeriod", "", pageable, "message", true));
   }
 
   /**
@@ -90,9 +90,9 @@ public class ValidationRepositoryPaginatedImplTest {
     when(mockedQuery.getResultList()).thenReturn(list);
     when(entityManager.createQuery(Mockito.anyString())).thenReturn(mockedQuery);
     validationRepositoryPaginatedImpl.countRecordsByFilter(1L, levelErrorsFilter, typeEntityEnum,
-        "Characterisation,SeasionalPeriod");
+        "Characterisation,SeasionalPeriod", "");
     assertNotEquals("", null, validationRepositoryPaginatedImpl.countRecordsByFilter(1L,
-        levelErrorsFilter, typeEntityEnum, "Characterisation,SeasionalPeriod"));
+        levelErrorsFilter, typeEntityEnum, "Characterisation,SeasionalPeriod", ""));
 
   }
 
@@ -103,7 +103,7 @@ public class ValidationRepositoryPaginatedImplTest {
   public void findGroupRecordsByFilterTest() {
     Mockito.when(entityManager.getDelegate()).thenReturn(session);
     assertNull(validationRepositoryPaginatedImpl.findGroupRecordsByFilter(1L, levelErrorsFilter,
-        typeEntityEnum, "Characterisation,SeasionalPeriod", pageable, "message", true, true));
+        typeEntityEnum, "Characterisation,SeasionalPeriod", "", pageable, "message", true, true));
   }
 
 

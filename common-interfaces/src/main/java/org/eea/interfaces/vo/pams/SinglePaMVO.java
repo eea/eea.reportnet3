@@ -16,9 +16,6 @@ public class SinglePaMVO {
   /** The paM name. */
   private String paMName;
 
-  /** The is policy measure envisaged. */
-  private String isPolicyMeasureEnvisaged;
-
   /** The sectors. */
   private List<SectorVO> sectors;
 
