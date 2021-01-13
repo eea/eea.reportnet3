@@ -125,24 +125,24 @@ export const WebformView = ({
     return <span disabled={true}>{field.value}</span>;
   };
 
-  const checkValueFieldRender = (fieldName, valueToCheck) => {
-    let containsValue = false;
-    let fieldValue;
+  // const checkValueFieldRender = (fieldName, valueToCheck) => {
+  //   let containsValue = false;
+  //   let fieldValue;
 
-    singlesCalculatedData.forEach(singleRecord => {
-      const singleRecordValue =
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
-      if (!isNil(singleRecordValue)) {
-        if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
-          containsValue = true;
-        } else {
-          fieldValue = singleRecordValue;
-        }
-      }
-    });
+  //   singlesCalculatedData.forEach(singleRecord => {
+  //     const singleRecordValue =
+  //       singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+  //     if (!isNil(singleRecordValue)) {
+  //       if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
+  //         containsValue = true;
+  //       } else {
+  //         fieldValue = singleRecordValue;
+  //       }
+  //     }
+  //   });
 
-    return containsValue ? valueToCheck : fieldValue;
-  };
+  //   return containsValue ? valueToCheck : fieldValue;
+  // };
 
   const combinationFieldRender = (fieldName, previousField = '', separator = '-') => {
     const combinatedValues = [];
@@ -159,6 +159,7 @@ export const WebformView = ({
           Array.isArray(singleRecordValue)
             ? singleRecordValue
                 .map(value => (previousFieldValue !== '' ? `${previousFieldValue} ${separator} ${value}` : value))
+                .filter(value => !isNil(value))
                 .join(', ')
             : previousFieldValue !== ''
             ? `${previousFieldValue} ${separator} ${singleRecordValue}`

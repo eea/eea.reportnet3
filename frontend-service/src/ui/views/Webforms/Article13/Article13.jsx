@@ -83,6 +83,14 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     onSelectFieldSchemaId(fieldSchema || fieldId);
   }, [article13State.data, article13State.selectedTableSchemaId]);
 
+  useEffect(() => {
+    if (isDataUpdated)
+      article13Dispatch({
+        type: 'UPDATE_DATA',
+        payload: { data: onLoadData() }
+      });
+  }, [isDataUpdated]);
+
   const initialLoad = () => {
     if (!isDataUpdatedWithSingles) {
       article13Dispatch({
@@ -91,6 +99,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       });
     }
   };
+
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
   const generatePamId = () => {
@@ -178,7 +187,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           }
         })
       );
-
       return data;
     }
   };
