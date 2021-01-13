@@ -266,5 +266,6 @@ export const WebformsUtils = {
   onParseWebformData,
   onParseWebformRecords,
   parseNewTableRecord,
-  parsePamsRecords
+  parsePamsRecords,
+  getSchemaIdForIdSectorObjectivesField
 };

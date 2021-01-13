@@ -307,7 +307,15 @@ export const WebformRecord = ({
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
                       label={resources.messages['addRecord']}
-                      onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                      onClick={() => {
+                        let filteredRecordId = null;
+                        if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
+                          filteredRecordId = elements.filter(element =>
+                            TextUtils.areEquals(element.name, 'SectorAffected')
+                          )[0].recordId;
+                        }
+                        onAddMultipleWebform(element.tableSchemaId, filteredRecordId);
+                      }}
                     />
                   )}
                 </div>
