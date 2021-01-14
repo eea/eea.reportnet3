@@ -364,7 +364,10 @@ const ValidationViewer = React.memo(
         filterData.tableSchemaName
       );
       setFilterBy(filterData);
-      setFiltered(true);
+      if (!isNil(filterData)) {
+        const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
+        filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
+      }
     };
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
