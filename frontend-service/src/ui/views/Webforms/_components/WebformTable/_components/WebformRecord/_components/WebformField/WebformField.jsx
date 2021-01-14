@@ -18,6 +18,7 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { webformFieldReducer } from './_functions/Reducers/webformFieldReducer';
@@ -43,6 +44,7 @@ export const WebformField = ({
   pamsRecords,
   record
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
@@ -121,11 +123,11 @@ export const WebformField = ({
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
-          itemType: `${referencedField.value}${
+          itemType: `${
             !isNil(referencedField.label) &&
             referencedField.label !== '' &&
             referencedField.label !== referencedField.value
-              ? ` - ${referencedField.label}`
+              ? `${referencedField.label}`
               : ''
           }`,
           value: referencedField.value
@@ -174,6 +176,15 @@ export const WebformField = ({
       }
     } catch (error) {
       console.error('error', error);
+      if (updateInCascade) {
+        notificationContext.add({
+          type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR'
+        });
+      }
     }
   };
 

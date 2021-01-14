@@ -31,6 +31,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 export const TableManagement = ({
   dataflowId,
   datasetId,
+  isAddingPamsId = false,
   loading,
   onAddTableRecord,
   onRefresh,
@@ -273,10 +274,16 @@ export const TableManagement = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'UPDATE_RECORDS_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      if (updateInCascade) {
+        notificationContext.add({
+          type: 'UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'UPDATE_RECORDS_BY_ID_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName }
+        });
+      }
     } finally {
       tableManagementDispatch({ type: 'ON_SAVE_RECORD' });
       onRefresh();
@@ -447,7 +454,7 @@ export const TableManagement = ({
     </DataTable>
   );
 
-  if (isLoading) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  if (isLoading || isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
 
   return (
     <Fragment>

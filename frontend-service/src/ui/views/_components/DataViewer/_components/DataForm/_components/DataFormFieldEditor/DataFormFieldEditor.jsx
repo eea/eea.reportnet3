@@ -78,7 +78,9 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
-      if (type === 'LINK') onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
+      if (type === 'LINK' && editing) {
+        onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
+      }
       if (type === 'POINT') {
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',

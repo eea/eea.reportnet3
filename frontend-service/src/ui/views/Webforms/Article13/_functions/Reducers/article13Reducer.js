@@ -10,7 +10,8 @@ export const article13Reducer = (state, { type, payload }) => {
       return {
         ...state,
         pamsRecords: payload.records,
-        tableList: { ...state.tableList, single: payload.single, group: payload.group }
+        tableList: { ...state.tableList, single: payload.single, group: payload.group },
+        isDataUpdated: true
       };
 
     case 'ON_UPDATE_DATA':
@@ -60,6 +61,9 @@ export const article13Reducer = (state, { type, payload }) => {
         });
       });
 
+      inmTableList.group.sort((a, b) => a.id - b.id);
+      inmTableList.single.sort((a, b) => a.id - b.id);
+
       const inmPamsRecords = [...state.pamsRecords];
       inmPamsRecords.forEach(pamRecord => {
         if (pamRecord.recordId === payload.recordId) {
@@ -74,7 +78,15 @@ export const article13Reducer = (state, { type, payload }) => {
       const inmSelectedTable = { ...state.selectedTable };
       inmSelectedTable.pamsId = payload.pamsId;
 
-      return { ...state, pamsRecords: inmPamsRecords, tableList: inmTableList, selectedTable: inmSelectedTable };
+      return {
+        ...state,
+        pamsRecords: inmPamsRecords,
+        tableList: inmTableList,
+        selectedTable: inmSelectedTable
+      };
+
+    case 'UPDATE_DATA':
+      return { ...state, data: payload.data };
 
     default:
       return state;

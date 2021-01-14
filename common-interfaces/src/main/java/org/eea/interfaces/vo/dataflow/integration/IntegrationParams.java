@@ -56,6 +56,12 @@ public class IntegrationParams {
   /** The Constant RN3_JOB_ID: {@value}. */
   public static final String RN3_JOB_ID = "rn3JobId";
 
+  /** The Constant COUNTRY_CODE: {@value}. */
+  public static final String COUNTRY_CODE = "countryCode";
+
+  /** The Constant NOTIFICATION_REQUIRED: {@value}. */
+  public static final String NOTIFICATION_REQUIRED = "notificationRequired";
+
   /**
    * Instantiates a new integration params.
    */

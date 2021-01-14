@@ -87,19 +87,13 @@ export const apiDataset = {
     }
   },
   deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteRecordFieldDesign, {
-          datasetId,
-          fieldSchemaId
-        })
-      });
-
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset table design record: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteRecordFieldDesign, {
+        datasetId,
+        fieldSchemaId
+      })
+    });
+    return response;
   },
   deleteSchemaById: async datasetId => {
     const response = await HTTPRequester.delete({
@@ -192,9 +186,10 @@ export const apiDataset = {
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -206,9 +201,10 @@ export const apiDataset = {
         pageSize: pageSize,
         sortField: sortField,
         asc: asc,
+        fieldValueFilter: fieldValueFilter,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
+        tableFilter: tablesFilter
       })
     });
     return response.data;
@@ -286,9 +282,10 @@ export const apiDataset = {
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -300,9 +297,10 @@ export const apiDataset = {
         pageSize: pageSize,
         sortField: sortField,
         asc: asc,
+        fieldValueFilter: fieldValueFilter,
         levelErrorsFilter: levelErrorsFilter,
         typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
+        tableFilter: tablesFilter
       })
     });
     return response.data;

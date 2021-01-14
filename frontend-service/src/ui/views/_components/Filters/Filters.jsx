@@ -44,7 +44,9 @@ export const Filters = ({
   selectList,
   selectOptions,
   sendData,
-  sortable
+  sortable,
+  validationsAllTypesFilters,
+  validations
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -460,7 +462,11 @@ export const Filters = ({
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
-        options={FiltersUtils.getOptionTypes(data, property, selectList, ErrorUtils.orderLevelErrors)}
+        options={
+          validations
+            ? FiltersUtils.getValidationsOptionTypes(validationsAllTypesFilters, property)
+            : FiltersUtils.getOptionTypes(data, property, selectList, ErrorUtils.orderLevelErrors)
+        }
         value={filterState.filterBy[property]}
       />
     </span>

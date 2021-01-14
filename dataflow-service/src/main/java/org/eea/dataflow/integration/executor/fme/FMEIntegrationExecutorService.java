@@ -14,6 +14,7 @@ import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
@@ -80,6 +81,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The FME job repository. */
   @Autowired
   private FMEJobRepository fmeJobRepository;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Gets the executor type.
@@ -183,6 +188,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Long providerId = integrationOperationParams.get(IntegrationParams.PROVIDER_ID);
     String paramDataProvider = null != providerId ? providerId.toString() : "design";
 
+
     FMEJob fmeJob = new FMEJob();
     fmeJob.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
     fmeJob.setDataflowId(dataflowId);
@@ -199,12 +205,17 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Directive rn3JobId = new Directive();
     rn3JobId.setName(IntegrationParams.RN3_JOB_ID);
     rn3JobId.setValue(fmeJob.getId().toString());
+    Directive notificationRequired = new Directive();
+    notificationRequired.setName(IntegrationParams.NOTIFICATION_REQUIRED);
+    notificationRequired.setValue("true".equals(
+        integration.getInternalParameters().get(IntegrationParams.NOTIFICATION_REQUIRED)) ? "true"
+            : "false");
 
     List<String> topics = Arrays.asList(topic);
     NMDirectives nmDirectives = new NMDirectives();
     nmDirectives.setSuccessTopics(topics);
     nmDirectives.setFailureTopics(topics);
-    nmDirectives.setDirectives(Arrays.asList(apiKeyDirective, rn3JobId));
+    nmDirectives.setDirectives(Arrays.asList(apiKeyDirective, rn3JobId, notificationRequired));
 
     fmeAsyncJob.setNmDirectives(nmDirectives);
 
@@ -215,6 +226,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         integrationOperationParams.get(IntegrationParams.DATASET_ID)));
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
+
 
     Integer fmeJobId = null;
     switch (operation) {
@@ -258,6 +270,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
+        String countryCode = null != providerId
+            ? representativeControllerZuul.findDataProviderById(providerId).getCode()
+            : "XX";
+        parameters.add(saveParameter(IntegrationParams.COUNTRY_CODE, countryCode));
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Import to other system");
@@ -288,7 +304,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       fmeJob.setStatus(FMEJobstatus.QUEUED);
     } else {
       fmeJob.setStatus(FMEJobstatus.ABORTED);
-      fmeCommunicationService.releaseNotifications(fmeJob, -1L);
+      fmeCommunicationService.releaseNotifications(fmeJob, -1L, true);
     }
     fmeJobRepository.save(fmeJob);
     return executionResultVO;

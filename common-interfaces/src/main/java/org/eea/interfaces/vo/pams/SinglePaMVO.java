@@ -16,9 +16,6 @@ public class SinglePaMVO {
   /** The paM name. */
   private String paMName;
 
-  /** The is policy measure envisaged. */
-  private String isPolicyMeasureEnvisaged;
-
   /** The sectors. */
   private List<SectorVO> sectors;
 
@@ -53,7 +50,10 @@ public class SinglePaMVO {
   private List<String> ghgAffected;
 
   /** The other union policy. */
-  private String otherUnionPolicy;
+  private List<String> otherUnionPolicy;
+
+  /** The other policy instrument. */
+  private String otherPolicyInstrument;
 
 
 }

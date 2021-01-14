@@ -31,7 +31,8 @@ const WebformDataFormFieldEditor = ({
     }
   }, [inputRef.current]);
 
-  const getId = item => item.substring(item.indexOf('#') + 1, item.indexOf(' '));
+  const getId = item =>
+    item.substring(item.indexOf('#') + 1, item.indexOf(' ') !== -1 ? item.indexOf(' ') : item.length);
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;

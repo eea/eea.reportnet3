@@ -32,12 +32,20 @@ public final class PaMConstants {
   /** The Constant OBJECTIVES: {@value}. */
   public static final String OBJECTIVES = "Objectives";
 
+  /** The Constant SECTOR: {@value}. */
+  public static final String SECTOR = "Sector";
+
+  /** The Constant OBJECTIVE_PK: {@value}. */
   public static final String OBJECTIVE_PK = "OBJECTIVE_PK";
 
-  public static final String OBJECTIVE_OBJECTIVES = "OBJECTIVE_OBJECTIVES";
+  /** The Constant SECTOR_PK: {@value}. */
+  public static final String SECTOR_PK = "SECTOR_PK";
 
-  /** The Constant SECTORS: {@value}. */
-  public static final String SECTORS = "Sectors";
+  /** The Constant UNION_POLICIES_PK: {@value}. */
+  public static final String UNION_POLICIES_PK = "UNION_POLICIES_PK";
+
+  /** The Constant OBJECTIVE_OBJECTIVES: {@value}. */
+  public static final String OBJECTIVE_OBJECTIVES = "OBJECTIVE_OBJECTIVES";
 
   /** The Constant ID: {@value}. */
   public static final String ID = "Id";
@@ -47,6 +55,9 @@ public final class PaMConstants {
 
   /** The Constant FK_TABLE_1: {@value}. */
   public static final String FK_PAMS_TABLE_1 = "FK_PAMS_TABLE_1";
+
+  /** The Constant UNION_POLICIES: {@value}. */
+  public static final String UNION_POLICIES = "UnionPolicies";
 
   /** The Constant FK_ENTITIES: {@value}. */
   public static final String FK_PAMS_ENTITIES = "FK_PAMS_ENTITIES";
@@ -75,14 +86,17 @@ public final class PaMConstants {
   /** The Constant STATUS_IMPLEMENTATION: {@value}. */
   public static final String STATUS_IMPLEMENTATION = "StatusImplementation";
 
-  /** The Constant IS_POLICY_MEASURE_ENVISAGED: {@value}. */
-  public static final String IS_POLICY_MEASURE_ENVISAGED = "isPolicyMeasureEnvisaged";
-
   /** The Constant PROJECTIONS_SCENARIO: {@value}. */
   public static final String PROJECTIONS_SCENARIO = "ProjectionsScenario";
 
   /** The Constant UNION_POLICY_LIST: {@value}. */
   public static final String UNION_POLICY_LIST = "UnionPolicyList";
+
+  /** The Constant UNION_POLICY: {@value}. */
+  public static final String UNION_POLICY = "UnionPolicy";
+
+  /** The Constant OTHER_POLICY_INSTRUMENT: {@value}. */
+  public static final String OTHER_POLICY_INSTRUMENT = "OtherPolicyInstrument";
 
   /** The Constant TYPE: {@value}. */
   public static final String TYPE = "Type";
@@ -128,6 +142,9 @@ public final class PaMConstants {
 
   /** The Constant DATASET_ID_PK: {@value}. */
   public static final String DATASET_ID_PK = "DATASET_ID_PK";
+
+  /** The Constant SINGLES: {@value}. */
+  public static final String SINGLES = "SINGLES";
 
 
 
