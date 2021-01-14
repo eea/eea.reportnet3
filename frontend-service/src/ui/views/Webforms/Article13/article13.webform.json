@@ -18,7 +18,8 @@
           "type": "FIELD",
           "name": "Title",
           "title": "Name of PaM or group of PaMs",
-          "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs"
+          "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+          "updatesGroupInfo": true
         },
         {
           "type": "FIELD",
@@ -75,7 +76,8 @@
               "type": "FIELD",
               "name": "Title",
               "title": "Name of PaM or group of PaMs",
-              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs"
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "updatesGroupInfo": true
             },
             {
               "type": "FIELD",
@@ -447,7 +449,8 @@
               "name": "Title",
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-              "customType": "READ_ONLY"
+              "customType": "READ_ONLY",
+              "updatesGroupInfo": true
             },
             {
               "type": "FIELD",
@@ -732,7 +735,8 @@
               "name": "Title",
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-              "customType": "READ_ONLY"
+              "customType": "READ_ONLY",
+              "updatesGroupInfo": true
             },
             {
               "type": "FIELD",

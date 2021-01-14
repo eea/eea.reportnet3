@@ -226,8 +226,11 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     }
   };
 
-  const onUpdatePamsId = (recordId, pamsId, fieldId) =>
-    article13Dispatch({ type: 'UPDATE_PAMS_RECORDS', payload: { fieldId, pamsId, recordId } });
+  const onUpdatePamsValue = (recordId, pamsValue, fieldId, isPamTitle = false) =>
+    article13Dispatch({
+      type: 'UPDATE_PAMS_RECORDS',
+      payload: { fieldId, pamsValue, recordId, dataUpdated: !isDataUpdated, isPamTitle }
+    });
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
@@ -367,7 +370,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
           isAddingPamsId={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
-          onUpdatePamsId={onUpdatePamsId}
+          onUpdatePamsValue={onUpdatePamsValue}
           pamsRecords={pamsRecords}
           selectedTable={selectedTable}
           selectedTableName={selectedTableName}

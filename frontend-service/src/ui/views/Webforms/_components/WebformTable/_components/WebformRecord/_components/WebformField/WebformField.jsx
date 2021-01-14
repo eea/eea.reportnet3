@@ -40,7 +40,7 @@ export const WebformField = ({
   onFillField,
   onSaveField,
   onUpdateSinglesList,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   pamsRecords,
   record
 }) => {
@@ -153,7 +153,7 @@ export const WebformField = ({
     }
   };
 
-  const onEditorSubmitValue = async (field, option, value, updateInCascade = false) => {
+  const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
@@ -168,9 +168,10 @@ export const WebformField = ({
         parsedValue,
         updateInCascade
       );
-      if (!isNil(onUpdatePamsId) && updateInCascade) {
-        onUpdatePamsId(field.recordId, field.value, field.fieldId);
+      if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
+        onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
       }
+
       if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
         onUpdateSinglesList();
       }
@@ -363,7 +364,7 @@ export const WebformField = ({
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary);
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
