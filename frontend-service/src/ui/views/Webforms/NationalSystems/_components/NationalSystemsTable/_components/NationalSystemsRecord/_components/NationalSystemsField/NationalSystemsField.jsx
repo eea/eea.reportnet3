@@ -306,7 +306,6 @@ export const NationalSystemsField = ({
         <div className={styles.template}>{renderTemplate()}</div>
         {renderValidations(field.validations)}
       </div>
-
       {isDialogVisible.uploadFile && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
@@ -319,6 +318,9 @@ export const NationalSystemsField = ({
           fileLimit={1}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
+          maxFileSize={
+            !isNil(field.maxSize) && field.maxSize.toString() !== '0' ? field.maxSize * 1000 * 1024 : 20 * 1000 * 1024
+          }
           mode={'advanced'}
           multiple={false}
           name={'file'}

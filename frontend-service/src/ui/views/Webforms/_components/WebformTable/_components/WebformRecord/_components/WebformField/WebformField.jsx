@@ -491,6 +491,11 @@ export const WebformField = ({
           fileLimit={1}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
+          maxFileSize={
+            !isNil(element.maxSize) && element.maxSize.toString() !== '0'
+              ? element.maxSize * 1000 * 1024
+              : 20 * 1000 * 1024
+          }
           mode="advanced"
           multiple={false}
           name="file"
