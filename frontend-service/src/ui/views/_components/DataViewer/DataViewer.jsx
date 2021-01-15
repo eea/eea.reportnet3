@@ -1300,7 +1300,7 @@ const DataViewer = withRouter(
             maxFileSize={
               !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
                 ? records.selectedMaxSize * 1000 * 1024
-                : 20 * 1000 * 1024
+                : config.MAX_ATTACHMENT_SIZE
             }
             name="file"
             onUpload={onAttach}
