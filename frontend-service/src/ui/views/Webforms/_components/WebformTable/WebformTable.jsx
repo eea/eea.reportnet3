@@ -31,7 +31,7 @@ export const WebformTable = ({
   isRefresh,
   isReporting,
   onTabChange,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   onUpdateSinglesList,
   pamsRecords,
   selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
@@ -153,7 +153,7 @@ export const WebformTable = ({
         datasetId,
         webform.tableSchemaId,
         '',
-        100,
+        300,
         undefined,
         ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
         undefined,
@@ -227,7 +227,7 @@ export const WebformTable = ({
       datasetSchemaId={datasetSchemaId}
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
       isAddingMultiple={webformTableState.isAddingMultiple}
-      isFixedNumber={webformData.fixedNumber || null}
+      isFixedNumber={webformData.fixedNumber || webformData.tableSchemaFixedNumber || null}
       isGroup={isGroup}
       isReporting={isReporting}
       key={index}
@@ -236,7 +236,7 @@ export const WebformTable = ({
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
       onUpdateSinglesList={onUpdateSinglesList}
-      onUpdatePamsId={onUpdatePamsId}
+      onUpdatePamsValue={onUpdatePamsValue}
       pamsRecords={pamsRecords}
       record={record}
       tableId={webformData.tableSchemaId}

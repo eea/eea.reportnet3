@@ -1045,6 +1045,11 @@ public class DatasetServiceImpl implements DatasetService {
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
     }
+
+    if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+      field.setValue(field.getValue().substring(0, fieldMaxLength));
+    }
+
     fieldRepository.saveValue(field.getId(), field.getValue());
   }
 
@@ -1498,6 +1503,9 @@ public class DatasetServiceImpl implements DatasetService {
             r.getFields().stream().forEach(f -> {
               if (DataType.ATTACHMENT.equals(f.getType())) {
                 f.setValue("");
+              }
+              if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
+                f.setValue(f.getValue().substring(0, fieldMaxLength));
               }
             });
           });

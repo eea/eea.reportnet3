@@ -34,7 +34,7 @@ export const WebformView = ({
   isAddingPamsId = false,
   isRefresh,
   isReporting,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   pamsRecords,
   selectedTable,
   selectedTableName,
@@ -254,9 +254,6 @@ export const WebformView = ({
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const {
-          datasetStatistics: { tables }
-        } = state;
         const childHasErrors = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
           .map(table => table.hasErrors);
@@ -294,7 +291,7 @@ export const WebformView = ({
         isReporting={isReporting}
         onTabChange={isVisible}
         onUpdateSinglesList={onUpdateSinglesList}
-        onUpdatePamsId={onUpdatePamsId}
+        onUpdatePamsValue={onUpdatePamsValue}
         pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
