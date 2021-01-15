@@ -34,7 +34,7 @@ export const WebformView = ({
   isAddingPamsId = false,
   isRefresh,
   isReporting,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   pamsRecords,
   selectedTable,
   selectedTableName,
@@ -294,7 +294,7 @@ export const WebformView = ({
         isReporting={isReporting}
         onTabChange={isVisible}
         onUpdateSinglesList={onUpdateSinglesList}
-        onUpdatePamsId={onUpdatePamsId}
+        onUpdatePamsValue={onUpdatePamsValue}
         pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}

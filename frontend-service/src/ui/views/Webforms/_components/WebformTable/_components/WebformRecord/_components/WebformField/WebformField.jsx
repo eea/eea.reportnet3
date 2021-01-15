@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './WebformField.module.scss';
@@ -40,7 +41,7 @@ export const WebformField = ({
   onFillField,
   onSaveField,
   onUpdateSinglesList,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   pamsRecords,
   record
 }) => {
@@ -153,7 +154,7 @@ export const WebformField = ({
     }
   };
 
-  const onEditorSubmitValue = async (field, option, value, updateInCascade = false) => {
+  const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
@@ -168,9 +169,10 @@ export const WebformField = ({
         parsedValue,
         updateInCascade
       );
-      if (!isNil(onUpdatePamsId) && updateInCascade) {
-        onUpdatePamsId(field.recordId, field.value, field.fieldId);
+      if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
+        onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
       }
+
       if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
         onUpdateSinglesList();
       }
@@ -363,7 +365,7 @@ export const WebformField = ({
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary);
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
@@ -490,6 +492,11 @@ export const WebformField = ({
           fileLimit={1}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
+          maxFileSize={
+            !isNil(element.maxSize) && element.maxSize.toString() !== '0'
+              ? element.maxSize * 1000 * 1024
+              : config.MAX_ATTACHMENT_SIZE
+          }
           mode="advanced"
           multiple={false}
           name="file"
