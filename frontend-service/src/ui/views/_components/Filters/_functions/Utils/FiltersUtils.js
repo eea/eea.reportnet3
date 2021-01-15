@@ -74,7 +74,7 @@ const getOptionTypes = (data, option, list, order) => {
       value: item.id
     }));
   } else {
-    const optionItems = uniq(data.map(item => item[option]));
+    const optionItems = uniq(data.map(item => item[option])).sort();
     const filteredOptionItems = optionItems.filter(option =>
       typeof option === 'boolean' ? option : !isNil(option) && !isEmpty(option)
     );
