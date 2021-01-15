@@ -64,9 +64,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private int fieldMaxLength;
 
 
-  /**
-   * the provider Code
-   */
+  /** the provider Code. */
   private String providerCode;
 
   /**
@@ -75,6 +73,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param delimiter the delimiter
    * @param fileCommon the parse common
    * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
    */
   public CSVReaderStrategy(final char delimiter, final FileCommonUtils fileCommon, Long datasetId,
       int fieldMaxLength) {
@@ -85,6 +84,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
     this.providerCode = "";
   }
 
+  /**
+   * Instantiates a new CSV reader strategy.
+   *
+   * @param delimiter the delimiter
+   * @param fileCommon the file common
+   * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
+   * @param providerCode the provider code
+   */
   public CSVReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
       int fieldMaxLength, String providerCode) {
     this.delimiter = delimiter;
@@ -152,14 +160,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // Get the headers
       List<FieldSchemaVO> headers = setHeaders(firstLine, idTableSchema, dataSetSchema);
       String idRecordSchema = fileCommon.findIdRecord(idTableSchema, dataSetSchema);
-      List<FieldSchemaVO> fieldSchemaVOS = fileCommon
-          .findFieldSchemas(idTableSchema, dataSetSchema);
+      List<FieldSchemaVO> fieldSchemaVOS =
+          fileCommon.findFieldSchemas(idTableSchema, dataSetSchema);
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
-        sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, dataSetSchema, headers,
-            idTableSchema, idRecordSchema, fieldSchemaVOS, isDesignDataset);
+        sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, headers, idTableSchema,
+            idRecordSchema, fieldSchemaVOS, isDesignDataset);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -195,21 +203,20 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param tableVO the table VO
    * @param tables the tables
    * @param values the values
-   * @param dataSetSchema the data set schema
    * @param headers the headers
    * @param idTableSchema the id table schema
-   *
-   * @throws InvalidFileException the invalid file exception
+   * @param idRecordSchema the id record schema
+   * @param fieldSchemaVOS the field schema VOS
+   * @param isDesignDataset the is design dataset
    */
   private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
-      final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
-      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset)
-      throws InvalidFileException {
+      final List<TableVO> tables, final List<String> values, List<FieldSchemaVO> headers,
+      final String idTableSchema, final String idRecordSchema,
+      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
-      addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema,
-          idRecordSchema, fieldSchemaVOS, isDesignDataset);
+      addRecordToTable(tableVO, tables, values, partitionId, headers, idTableSchema, idRecordSchema,
+          fieldSchemaVOS, isDesignDataset);
     }
   }
 
@@ -264,27 +271,27 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param tables the tables
    * @param values the values
    * @param partitionId the partition id
-   * @param dataSetSchema the data set schema
    * @param headers the headers
    * @param idTableSchema the id table schema
+   * @param idRecordSchema the id record schema
+   * @param fieldSchemaVOS the field schema VOS
+   * @param isDesignDataset the is design dataset
    */
   private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
-      final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers, final String idTableSchema, final String idRecordSchema,
-      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
+      final List<String> values, final Long partitionId, List<FieldSchemaVO> headers,
+      final String idTableSchema, final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS,
+      boolean isDesignDataset) {
     // Create object Table and set the attributes
     if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
-      tableVO.setRecords(
-          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
-              idRecordSchema, fieldSchemaVOS, isDesignDataset));
+      tableVO.setRecords(createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), headers,
+          idRecordSchema, fieldSchemaVOS, isDesignDataset));
       tables.add(tableVO);
 
     } else {
-      tableVO.getRecords().addAll(
-          createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers,
-              idRecordSchema, fieldSchemaVOS, isDesignDataset));
+      tableVO.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdTableSchema(),
+          headers, idRecordSchema, fieldSchemaVOS, isDesignDataset));
     }
   }
 
@@ -294,21 +301,21 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param values the values
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
-   * @param dataSetSchema the data set schema
    * @param headers the headers
-   *
+   * @param idRecordSchema the id record schema
+   * @param fieldSchemaVOS the field schema VOS
+   * @param isDesignDataset the is design dataset
    * @return the list
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
-      final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers,
-      final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
+      final String idTableSchema, List<FieldSchemaVO> headers, final String idRecordSchema,
+      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
       record.setIdRecordSchema(idRecordSchema);
     }
-    record.setFields(
-        createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset));
+    record.setFields(createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset));
     record.setDatasetPartitionId(partitionId);
     record.setDataProviderCode(this.providerCode);
     records.add(record);
@@ -321,7 +328,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param values the values
    * @param headers the headers
    * @param headersSchema the headers schema
-   *
+   * @param isDesignDataset the is design dataset
    * @return the list
    */
   private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers,
@@ -342,8 +349,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
         field.setType(fieldSchemaVO.getType());
         field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
 
-        if ((field.getIdFieldSchema() != null && !fieldSchemaVO.getReadOnly()
-            && !isDesignDataset) || (field.getIdFieldSchema() != null && isDesignDataset)) {
+        if ((field.getIdFieldSchema() != null && !fieldSchemaVO.getReadOnly() && !isDesignDataset)
+            || (field.getIdFieldSchema() != null && isDesignDataset)) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
         }

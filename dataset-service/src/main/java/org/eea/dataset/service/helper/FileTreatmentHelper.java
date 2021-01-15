@@ -22,7 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -71,10 +70,6 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
-
-  /** The field max length. */
-  @Value("${dataset.fieldMaxLength}")
-  private int fieldMaxLength;
 
   /** The dataset service. */
   @Autowired
@@ -375,14 +370,6 @@ public class FileTreatmentHelper implements DisposableBean {
       // Save empty table
       List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
       dataset.getTableValues().get(0).setRecords(new ArrayList<>());
-
-      for (RecordValue recordValue : allRecords) {
-        for (FieldValue fieldValue : recordValue.getFields()) {
-          if (null != fieldValue.getValue() && fieldValue.getValue().length() >= fieldMaxLength) {
-            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
-          }
-        }
-      }
 
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
