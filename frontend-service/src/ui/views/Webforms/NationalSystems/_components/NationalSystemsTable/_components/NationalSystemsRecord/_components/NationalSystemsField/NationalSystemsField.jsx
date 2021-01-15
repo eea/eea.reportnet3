@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqBy from 'lodash/uniqBy';
 
+import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './NationalSystemsField.module.scss';
@@ -319,7 +320,9 @@ export const NationalSystemsField = ({
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
-            !isNil(field.maxSize) && field.maxSize.toString() !== '0' ? field.maxSize * 1000 * 1024 : 20 * 1000 * 1024
+            !isNil(field.maxSize) && field.maxSize.toString() !== '0'
+              ? field.maxSize * 1000 * 1024
+              : config.MAX_ATTACHMENT_SIZE
           }
           mode={'advanced'}
           multiple={false}
