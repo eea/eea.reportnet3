@@ -153,7 +153,7 @@ export const WebformTable = ({
         datasetId,
         webform.tableSchemaId,
         '',
-        100,
+        300,
         undefined,
         ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
         undefined,
