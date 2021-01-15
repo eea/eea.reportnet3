@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ReportingObligations.module.scss';
 
@@ -32,7 +33,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     filterBy: { expirationDate: [], countries: {}, issues: {}, organizations: {} },
     filteredData: [],
     filteredSearched: false,
+    isFiltered: false,
     isLoading: false,
+    isSearched: false,
     issues: [],
     oblChoosed: {},
     organizations: [],
@@ -51,11 +54,39 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     if (getObligation) getObligation(reportingObligationState.oblChoosed);
   }, [reportingObligationState.oblChoosed]);
 
+  useEffect(() => {
+    if (!isNil(reportingObligationState.filterBy)) {
+      if (
+        !isEmpty(reportingObligationState.filterBy.countries) ||
+        !isEmpty(reportingObligationState.filterBy.issues) ||
+        !isEmpty(reportingObligationState.filterBy.organizations) ||
+        reportingObligationState.filterBy.expirationDate.length !== 0
+      ) {
+        reportingObligationDispatch({ type: 'IS_SEARCHED', payload: { value: true } });
+      } else {
+        reportingObligationDispatch({ type: 'IS_SEARCHED', payload: { value: false } });
+      }
+    }
+  }, [reportingObligationState.filterBy]);
+
+  useEffect(() => {
+    if (reportingObligationState.isSearched || reportingObligationState.isFiltered) {
+      getFilteredSeearched(true);
+    } else {
+      getFilteredSeearched(false);
+    }
+  }, [reportingObligationState.isSearched, reportingObligationState.isFiltered]);
+
+  const getFiltered = value => reportingObligationDispatch({ type: 'IS_FILTERED', payload: { value } });
+
+  const getFilteredSeearched = value =>
+    reportingObligationDispatch({ type: 'IS_FILTERED_SEARCHED', payload: { value } });
+
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {reportingObligationState.filteredSearched &&
       reportingObligationState.searchedData.length !== reportingObligationState.filteredData.length
-        ? `${resources.messages['filtered']} : ${reportingObligationState.searchedData.length} | `
+        ? `${resources.messages['filtered']}: ${reportingObligationState.searchedData.length} | `
         : ''}
       {resources.messages['totalRecords']} {reportingObligationState.data.length}{' '}
       {resources.messages['records'].toLowerCase()}
@@ -66,8 +97,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     </Fragment>
   );
 
-  const getFilteredSearched = value =>
-    reportingObligationDispatch({ type: 'IS_FILTERED_SEARCHED', payload: { value } });
 
   const isFiltered = ReportingObligationUtils.isFiltered(reportingObligationState.filterBy);
 
@@ -181,7 +210,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         <Filters
           data={reportingObligationState.filteredData}
           getFilteredData={onLoadSearchedData}
-          getFilteredSearched={getFilteredSearched}
+          getFilteredSearched={getFiltered}
           searchAll
         />
         <div className={styles.switchDiv}>
@@ -198,7 +227,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           dropDownList={parsedFilterList}
           dropdownOptions={['countries', 'issues', 'organizations']}
           filterByList={reportingObligationState.filterBy}
-          getFilteredSearched={getFilteredSearched}
           sendData={onLoadReportingObligations}
         />
       </div>
