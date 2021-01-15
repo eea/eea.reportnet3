@@ -231,10 +231,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       {reportingObligationState.isLoading ? (
         <Spinner className={styles.spinner} />
       ) : isEmpty(reportingObligationState.data) ? (
-        isFiltered ? (
-          <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
-        ) : (
+        reportingObligationState.filteredSearched ? (
           <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+        ) : (
+          <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
         )
       ) : (
         renderData()
