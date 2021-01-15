@@ -246,7 +246,7 @@ export const TableManagement = ({
       return {
         tableSchemaId: parentTable.tableSchemaId,
         tableSchemaName: parentTable.tableSchemaName,
-        data: await DatasetService.tableDataById(datasetId, parentTable.tableSchemaId, '', 100, undefined, [
+        data: await DatasetService.tableDataById(datasetId, parentTable.tableSchemaId, '', 300, undefined, [
           'CORRECT',
           'INFO',
           'WARNING',
@@ -431,14 +431,15 @@ export const TableManagement = ({
   );
 
   const renderTableColumns = () => {
+    console.log({ tableColumns });
     const data = tableColumns.map(col => (
       <Column
+        body={!['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate}
         className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
-        key={col.field}
         field={col.field}
         fieldSchemaId={col.fieldSchemaId}
         header={col.header}
-        body={!['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate}
+        key={col.field}
       />
     ));
 
