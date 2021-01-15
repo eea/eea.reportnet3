@@ -295,7 +295,7 @@ const ValidationViewer = React.memo(
     const onLoadLevelErrorsTypes = () => {
       const allLevelErrorsFilterList = [];
 
-      levelErrorTypes.forEach(levelError => {
+      levelErrorTypes.sort().forEach(levelError => {
         if (!isNil(levelError)) {
           allLevelErrorsFilterList.push({ type: 'levelError', value: `${levelError}` });
         }
@@ -307,9 +307,9 @@ const ValidationViewer = React.memo(
     const onLoadEntitiesTypes = () => {
       const allTypeEntitiesFilterList = [
         { type: 'entityType', value: 'DATASET' },
-        { type: 'entityType', value: 'TABLE' },
+        { type: 'entityType', value: 'FIELD' },
         { type: 'entityType', value: 'RECORD' },
-        { type: 'entityType', value: 'FIELD' }
+        { type: 'entityType', value: 'TABLE' }
       ];
       setTypeEntitiesTypesFilter(allTypeEntitiesFilterList);
     };
