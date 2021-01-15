@@ -431,7 +431,6 @@ export const TableManagement = ({
   );
 
   const renderTableColumns = () => {
-    console.log({ tableColumns });
     const data = tableColumns.map(col => (
       <Column
         body={!['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate}
