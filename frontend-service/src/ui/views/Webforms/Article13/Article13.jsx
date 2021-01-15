@@ -41,7 +41,6 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     isAddingSingleRecord: false,
     isAddingGroupRecord: false,
     isDataUpdated: false,
-    isDataUpdatedWithSingles: false,
     isLoading: true,
     isRefresh: false,
     pamsRecords: [],
@@ -52,18 +51,9 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     view: resources.messages['overview']
   });
 
-  const {
-    isDataUpdated,
-    isDataUpdatedWithSingles,
-    isLoading,
-    pamsRecords,
-    selectedTable,
-    selectedTableName,
-    tableList,
-    view
-  } = article13State;
+  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
 
-  useEffect(() => initialLoad(), [pamsRecords]);
+  useEffect(() => initialLoad(), []);
 
   useEffect(() => {
     if (!isEmpty(article13State.data)) {
@@ -92,12 +82,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   }, [isDataUpdated]);
 
   const initialLoad = () => {
-    if (!isDataUpdatedWithSingles) {
-      article13Dispatch({
-        type: 'INITIAL_LOAD',
-        payload: { data: onLoadData(), isDataUpdatedWithSingles: !isEmpty(pamsRecords) }
-      });
-    }
+    article13Dispatch({
+      type: 'INITIAL_LOAD',
+      payload: { data: onLoadData() }
+    });
   };
 
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
@@ -195,7 +183,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
-        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
+        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
           'CORRECT',
           'INFO',
           'WARNING',
@@ -226,8 +214,12 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     }
   };
 
-  const onUpdatePamsId = (recordId, pamsId, fieldId) =>
-    article13Dispatch({ type: 'UPDATE_PAMS_RECORDS', payload: { fieldId, pamsId, recordId } });
+  const onUpdatePamsValue = (recordId, pamsValue, fieldId, isPamTitle = false) => {
+    article13Dispatch({
+      type: 'UPDATE_PAMS_RECORDS',
+      payload: { fieldId, pamsValue, recordId, dataUpdated: !isDataUpdated, isPamTitle }
+    });
+  };
 
   const onSelectEditTable = (pamNumberId, tableName) => {
     const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
@@ -367,7 +359,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
           isRefresh={article13State.isRefresh}
           isReporting={isReporting}
           isAddingPamsId={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
-          onUpdatePamsId={onUpdatePamsId}
+          onUpdatePamsValue={onUpdatePamsValue}
           pamsRecords={pamsRecords}
           selectedTable={selectedTable}
           selectedTableName={selectedTableName}
