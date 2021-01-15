@@ -97,9 +97,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     </Fragment>
   );
 
-
-  const isFiltered = ReportingObligationUtils.isFiltered(reportingObligationState.filterBy);
-
   const isLoading = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onChangePagination = pagination => {
