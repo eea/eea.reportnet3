@@ -254,9 +254,9 @@ export const WebformView = ({
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const {
-          datasetStatistics: { tables }
-        } = state;
+        // const {
+        //   datasetStatistics: { tables }
+        // } = state;
         const childHasErrors = webform.elements
           .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
           .map(table => table.hasErrors);
