@@ -75,7 +75,11 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
 
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(
+        datasetId,
+        selectedRecordId,
+        webformRecordState.record?.elements?.filter(element => element.deleteInCascade).length > 0
+      );
       if (isDataDeleted) {
         onRefresh();
         handleDialogs('deleteRow', false);
