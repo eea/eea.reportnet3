@@ -1,5 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
 const getCheckboxFilterInitialState = checkboxOptions => {
@@ -74,7 +75,8 @@ const getOptionTypes = (data, option, list, order) => {
       value: item.id
     }));
   } else {
-    const optionItems = uniq(data.map(item => item[option])).sort();
+    // const optionItems = uniq(data.map(item => item[option])).sort();
+    const optionItems = uniq(data.map(item => item[option]));
     const filteredOptionItems = optionItems.filter(option =>
       typeof option === 'boolean' ? option : !isNil(option) && !isEmpty(option)
     );
@@ -106,7 +108,7 @@ const getOptionTypes = (data, option, list, order) => {
           template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
         }
       });
-      return template;
+      return sortBy(template, 'type');
     }
   }
 };
@@ -124,7 +126,7 @@ const getValidationsOptionTypes = (data, option) => {
         !isNil(item) && template.push({ type: item.toUpperCase(), value: item.toUpperCase() });
       }
     });
-    return template;
+    return sortBy(template, 'type');
   }
 };
 

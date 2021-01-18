@@ -295,7 +295,7 @@ const ValidationViewer = React.memo(
     const onLoadLevelErrorsTypes = () => {
       const allLevelErrorsFilterList = [];
 
-      levelErrorTypes.sort().forEach(levelError => {
+      levelErrorTypes.forEach(levelError => {
         if (!isNil(levelError)) {
           allLevelErrorsFilterList.push({ type: 'levelError', value: `${levelError}` });
         }
@@ -323,7 +323,7 @@ const ValidationViewer = React.memo(
         }
       });
 
-      setOriginsTypesFilter(sortBy(allTablesFilterList, 'value'));
+      setOriginsTypesFilter(allTablesFilterList);
     };
 
     const onLoadFieldsTypes = () => {
@@ -336,7 +336,7 @@ const ValidationViewer = React.memo(
         });
       });
 
-      const uniquesFields = uniq(fields).sort();
+      const uniquesFields = uniq(fields);
 
       const allFieldsFilterList = [];
 
