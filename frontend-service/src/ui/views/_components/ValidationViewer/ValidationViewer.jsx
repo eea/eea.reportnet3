@@ -2,12 +2,10 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import capitalize from 'lodash/capitalize';
 import concat from 'lodash/concat';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
 import styles from './ValidationViewer.module.scss';
@@ -15,7 +13,6 @@ import styles from './ValidationViewer.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -28,17 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { validationReducer } from './_functions/Reducers/validationReducer';
 
 const ValidationViewer = React.memo(
-  ({
-    buttonsList = undefined,
-    datasetId,
-    datasetName,
-    hasWritePermissions,
-    levelErrorTypes,
-    onSelectValidation,
-    schemaTables,
-    tables,
-    visible
-  }) => {
+  ({ buttonsList = undefined, datasetId, levelErrorTypes, onSelectValidation, schemaTables, tables, visible }) => {
     const resources = useContext(ResourcesContext);
 
     const [columns, setColumns] = useState([]);
@@ -305,9 +292,9 @@ const ValidationViewer = React.memo(
     const onLoadEntitiesTypes = () => {
       const allTypeEntitiesFilterList = [
         { type: 'entityType', value: 'DATASET' },
-        { type: 'entityType', value: 'TABLE' },
+        { type: 'entityType', value: 'FIELD' },
         { type: 'entityType', value: 'RECORD' },
-        { type: 'entityType', value: 'FIELD' }
+        { type: 'entityType', value: 'TABLE' }
       ];
       setTypeEntitiesTypesFilter(allTypeEntitiesFilterList);
     };
@@ -321,7 +308,7 @@ const ValidationViewer = React.memo(
         }
       });
 
-      setOriginsTypesFilter(sortBy(allTablesFilterList, 'value'));
+      setOriginsTypesFilter(allTablesFilterList);
     };
 
     const onLoadFieldsTypes = () => {
@@ -334,7 +321,7 @@ const ValidationViewer = React.memo(
         });
       });
 
-      const uniquesFields = uniq(fields).sort();
+      const uniquesFields = uniq(fields);
 
       const allFieldsFilterList = [];
 
