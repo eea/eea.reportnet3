@@ -192,7 +192,9 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.fieldsBlock}>
-              {renderElements(element.elementsRecords[0].elements)}
+              {element.elementsRecords
+                .filter(record => elements[0].recordId === record.recordId)
+                .map(record => renderElements(record.elements))}
             </div>
           )
         );

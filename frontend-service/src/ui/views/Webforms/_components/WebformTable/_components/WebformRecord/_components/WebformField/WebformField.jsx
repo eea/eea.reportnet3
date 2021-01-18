@@ -231,10 +231,12 @@ export const WebformField = ({
             dateFormat="yy-mm-dd"
             id={field.fieldId}
             monthNavigator={true}
-            onChange={event => {
-              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            }}
+            onChange={event => {
+              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
             value={new Date(field.value)}
             yearNavigator={true}
