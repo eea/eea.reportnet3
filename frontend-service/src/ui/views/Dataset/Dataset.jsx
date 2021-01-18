@@ -882,7 +882,7 @@ export const Dataset = withRouter(({ match, history }) => {
               className={`p-button-rounded p-button-secondary-transparent dataset-validate-help-step ${
                 !hasWritePermissions || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
-              disabled={!hasWritePermissions || !datasetHasData}
+              disabled={!hasWritePermissions}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
