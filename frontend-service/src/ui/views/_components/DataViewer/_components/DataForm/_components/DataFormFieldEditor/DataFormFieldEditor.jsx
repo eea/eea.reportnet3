@@ -342,14 +342,14 @@ const DataFormFieldEditor = ({
   const renderCalendar = (field, fieldValue) => {
     return (
       <Calendar
-        onChange={e =>
-          onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
-        }
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         disabled={column.readOnly && reporting}
         monthNavigator={true}
+        onChange={e =>
+          onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
+        }
         style={{ width: '60px' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}

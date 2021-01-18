@@ -273,8 +273,6 @@ const ValidationViewer = React.memo(
       onLoadEntitiesTypes();
     };
 
-    const getFilteredState = value => setFiltered(value);
-
     const onLoadFilteredData = fetchedData => {
       setFilteredData(fetchedData);
     };
@@ -353,6 +351,10 @@ const ValidationViewer = React.memo(
         filterData.tableSchemaName
       );
       setFilterBy(filterData);
+      if (!isNil(filterData)) {
+        const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
+        filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
+      }
     };
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
@@ -507,7 +509,6 @@ const ValidationViewer = React.memo(
               data={fetchedData}
               filterByList={filterBy}
               getFilteredData={onLoadFilteredData}
-              getFilteredSearched={getFilteredState}
               sendData={onLoadFilteredValidations}
               selectOptions={['entityType', 'tableSchemaName', 'fieldSchemaName', 'levelError']}
               validationsAllTypesFilters={validationsAllTypesFilters}
