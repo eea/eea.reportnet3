@@ -36,7 +36,7 @@ export const Filters = ({
   dropdownOptions,
   filterByList,
   getFilteredData,
-  getFilteredSearched,
+  getFilteredSearched = () => {},
   inputOptions,
   matchMode,
   searchAll,
