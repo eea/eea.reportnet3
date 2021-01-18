@@ -113,6 +113,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [isTableView, setIsTableView] = useState(true);
   const [webformData, setWebformData] = useState(null);
+  const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -560,6 +561,7 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
+      setDatasetStatisticsInState({ ...datasetStatistics });
       setDatasetName(datasetStatistics.datasetSchemaName);
       const tableSchemaList = [];
       setTableSchema(
@@ -979,7 +981,11 @@ export const Dataset = withRouter(({ match, history }) => {
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReporting
-          state={{ datasetSchema: { tables: datasetSchemaAllTables }, schemaTables }}
+          state={{
+            datasetSchema: { tables: datasetSchemaAllTables },
+            schemaTables,
+            datasetStatistics: datasetStatisticsInState
+          }}
           webformType={webformData}
         />
       )}

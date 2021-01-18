@@ -30,7 +30,8 @@ export const webformFieldReducer = (state, { type, payload }) => {
       return { ...state, linkItemsOptions: payload };
     case 'SET_SECTOR_AFFECTED':
       return { ...state, sectorAffectedValue: payload.value };
-
+    case 'SET_INITIAL_FIELD_VALUE':
+      return { ...state, initialFieldValue: payload };
     default:
       return state;
   }
