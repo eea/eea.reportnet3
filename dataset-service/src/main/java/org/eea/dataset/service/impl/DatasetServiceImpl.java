@@ -121,6 +121,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final String USER = "root";
 
+  /** The Constant HEADER_NAME. */
   private static final String HEADER_NAME = "headerName";
 
   /**
@@ -509,7 +510,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Check if we need to put all the records without pagination
     pageable = calculatePageable(pageable, totalRecords);
 
-    result = calculatedErrorsAndRecordsToSee(idTableSchema, pageable, fields, levelError,
+    result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields, levelError,
         commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules, fieldSchema,
         fieldValue);
 
@@ -1950,6 +1951,19 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
+  /**
+   * Process record page.
+   *
+   * @param pagedFieldValues the paged field values
+   * @param targetRecords the target records
+   * @param mapTargetRecordValues the map target record values
+   * @param dictionaryIdFieldAttachment the dictionary id field attachment
+   * @param targetTable the target table
+   * @param numberOfFieldsInRecord the number of fields in record
+   * @param dataproviderVO the dataprovider VO
+   * @param datasetPartitionId the dataset partition id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
   // and Cognitive Complexity
   private void processRecordPage(List<FieldValue> pagedFieldValues, List<RecordValue> targetRecords,
       Map<String, RecordValue> mapTargetRecordValues,
@@ -2173,6 +2187,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Calculated errors and records to see.
    *
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param pageable the pageable
    * @param fields the fields
@@ -2185,13 +2200,13 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
-   *
    * @return the table VO
    */
-  private TableVO calculatedErrorsAndRecordsToSee(final String idTableSchema, Pageable pageable,
-      final String fields, ErrorTypeEnum[] levelError, List<String> commonShortFields,
-      Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
-      TableVO result, String[] idRules, String fieldSchema, String fieldValue) {
+  private TableVO calculatedErrorsAndRecordsToSee(final Long datasetId, final String idTableSchema,
+      Pageable pageable, final String fields, ErrorTypeEnum[] levelError,
+      List<String> commonShortFields, Map<String, Integer> mapFields,
+      List<SortField> sortFieldsArray, SortField[] newFields, TableVO result, String[] idRules,
+      String fieldSchema, String fieldValue) {
     List<RecordValue> records;
     if (null == fields && (null == levelError || levelError.length == 5)
         && (idRules == null || idRules.length == 0) && fieldSchema == null && fieldValue == null) {
@@ -2200,8 +2215,8 @@ public class DatasetServiceImpl implements DatasetService {
       result.setTotalFilteredRecords(0L);
       result.setRecords(recordVOs);
     } else {
-      result = fieldsMap(idTableSchema, pageable, fields, levelError, commonShortFields, mapFields,
-          sortFieldsArray, newFields, idRules, fieldSchema, fieldValue);
+      result = fieldsMap(datasetId, idTableSchema, pageable, fields, levelError, commonShortFields,
+          mapFields, sortFieldsArray, newFields, idRules, fieldSchema, fieldValue);
     }
     return result;
   }
@@ -2209,6 +2224,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Fields map.
    *
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param pageable the pageable
    * @param fields the fields
@@ -2220,13 +2236,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
-   *
    * @return the table VO
    */
-  private TableVO fieldsMap(final String idTableSchema, Pageable pageable, final String fields,
-      ErrorTypeEnum[] levelError, List<String> commonShortFields, Map<String, Integer> mapFields,
-      List<SortField> sortFieldsArray, SortField[] newFields, String[] idRules, String fieldSchema,
-      String fieldValue) {
+  private TableVO fieldsMap(final Long datasetId, final String idTableSchema, Pageable pageable,
+      final String fields, ErrorTypeEnum[] levelError, List<String> commonShortFields,
+      Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
+      String[] idRules, String fieldSchema, String fieldValue) {
     TableVO result;
     if (null != fields) {
 
@@ -2254,9 +2269,9 @@ public class DatasetServiceImpl implements DatasetService {
       newFields = sortFieldsArray.stream().toArray(SortField[]::new);
     }
 
-    result = recordRepository.findByTableValueWithOrder(idTableSchema, Arrays.asList(levelError),
-        pageable, idRules != null ? Arrays.asList(idRules) : null, fieldSchema, fieldValue,
-        newFields);
+    result = recordRepository.findByTableValueWithOrder(datasetId, idTableSchema,
+        Arrays.asList(levelError), pageable, idRules != null ? Arrays.asList(idRules) : null,
+        fieldSchema, fieldValue, newFields);
     return result;
   }
 
