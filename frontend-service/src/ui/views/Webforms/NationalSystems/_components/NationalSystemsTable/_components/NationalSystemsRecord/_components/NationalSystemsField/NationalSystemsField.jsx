@@ -191,10 +191,12 @@ export const NationalSystemsField = ({
             dateFormat="yy-mm-dd"
             id={field.fieldId}
             monthNavigator={true}
-            onChange={event => {
-              onFillField(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)));
-              onEditorSubmitValue(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)));
-            }}
+            onBlur={event =>
+              onEditorSubmitValue(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)))
+            }
+            onChange={event =>
+              onFillField(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)))
+            }
             value={new Date(field.value)}
             yearNavigator={true}
             yearRange="2010:2030"
