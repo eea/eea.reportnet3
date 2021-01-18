@@ -10,6 +10,7 @@ import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -63,6 +64,7 @@ export const ManageIntegrations = ({
     isLoading: true,
     isUpdatedVisible: false,
     name: '',
+    notificationRequired: false,
     operation: {},
     parameterKey: '',
     parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
@@ -156,6 +158,10 @@ export const ManageIntegrations = ({
     !isDuplicatedParameter(id, externalParameters, event.target.value)
       ? onUpdateSingleParameter(id, option, event)
       : onToggleDialogError('duplicated', option, true);
+  };
+
+  const onChangeNotificationRequiredCheckboxEvent = (data, name) => {
+    manageIntegrationsDispatch({ type: 'IS_NOTIFICATION_REQUIRED', payload: { data, name } });
   };
 
   const onChangeParameter = (value, option, id) => {
@@ -310,6 +316,28 @@ export const ManageIntegrations = ({
   const renderDialogFooterTooltipContent = () => {
     if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
     return 'fcSubmitButtonDisabled';
+  };
+
+  const renderCheckboxLayout = options => {
+    return options.map((option, index) => (
+      <div className={`${styles.field} ${styles[option]} formField `} key={index}>
+        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
+        <Checkbox
+          id={'notificationRequired'}
+          inputId={'notificationRequired'}
+          isChecked={manageIntegrationsState.notificationRequired}
+          label={'notificationRequired'}
+          onChange={event => {
+            onChangeNotificationRequiredCheckboxEvent(event.checked, option);
+          }}
+          // style={{ marginRight: '50px' }}
+          value={manageIntegrationsState[option]}
+        />
+        {/* <label htmlFor={'notificationRequired'} className="srOnly">
+          {resources.messages['notificationRequired']}
+        </label> */}
+      </div>
+    ));
   };
 
   const renderDialogFooter = (
@@ -495,6 +523,9 @@ export const ManageIntegrations = ({
             {!isNil(manageIntegrationsState.operation) &&
             operationsWithFileExtension.includes(manageIntegrationsState.operation.value)
               ? renderInputLayout(['fileExtension'])
+              : null}
+            {!isNil(manageIntegrationsState.operation) && manageIntegrationsState.operation.value === 'IMPORT'
+              ? renderCheckboxLayout(['notificationRequired'])
               : null}
           </div>
         )}
