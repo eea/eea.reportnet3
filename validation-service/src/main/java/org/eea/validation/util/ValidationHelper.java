@@ -579,9 +579,10 @@ public class ValidationHelper implements DisposableBean {
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       if (isRelease) {
-        Long nextData = datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
-        if (null != nextData) {
-          this.executeValidation(datasetId, UUID.randomUUID().toString(), true, true);
+        Long nextDatasetId =
+            datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
+        if (null != nextDatasetId) {
+          this.executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, true);
         } else {
           kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
         }
