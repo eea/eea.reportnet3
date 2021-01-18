@@ -78,7 +78,7 @@ export const WebformRecord = ({
       const isDataDeleted = await DatasetService.deleteRecordById(
         datasetId,
         selectedRecordId,
-        webformRecordState.record?.elements?.any(element => element.deleteInCascade)
+        webformRecordState.record?.elements?.some(element => element.deleteInCascade)
       );
       if (isDataDeleted) {
         onRefresh();
