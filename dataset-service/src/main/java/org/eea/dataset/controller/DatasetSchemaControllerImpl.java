@@ -63,54 +63,80 @@ import io.netty.util.internal.StringUtil;
 @RequestMapping("/dataschema")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The record store controller zuul. */
+  /**
+   * The record store controller zuul.
+   */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The contributor controller zuul. */
+  /**
+   * The contributor controller zuul.
+   */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
-  /** The integration controller zuul. */
+  /**
+   * The integration controller zuul.
+   */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
@@ -342,7 +368,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
-              tableSchemaVO.getIdTableSchema(), datasetId))) {
+          tableSchemaVO.getIdTableSchema(), datasetId))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
                 tableSchemaVO.getIdTableSchema(), datasetId),
@@ -627,9 +653,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (null != datasetSchemaVO.getDescription())
+      if (null != datasetSchemaVO.getDescription()) {
         dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
             datasetSchemaVO.getDescription());
+      }
       if (null != datasetSchemaVO.getWebform()) {
         dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
       }
@@ -648,6 +675,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
   public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId) {
     return dataschemaService.validateSchema(datasetSchemaId);
   }
@@ -662,6 +690,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId) {
     // Recover the designs datasets of the dataflowId given. And then, for each design dataset
     // executes a validation.
@@ -709,6 +738,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetSchemaId the dataset schema id
    * @param dataflowId the dataflow id
+   *
    * @return the unique constraints
    */
   @Override
@@ -729,6 +759,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * Gets the unique constraints.
    *
    * @param uniqueId the unique id
+   *
    * @return the unique constraints
    */
   @Override
@@ -830,8 +861,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param dataflowIdOrigin the dataflow id origin
    * @param dataflowIdDestination the dataflow id destination
    *
-   *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
-   *        an async call. It sends a notification when all the process it's done
+   *     Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's an
+   *     async call. It sends a notification when all the process it's done
    */
   @Override
   @HystrixCommand
@@ -859,6 +890,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the simple schema
    */
   @Override
