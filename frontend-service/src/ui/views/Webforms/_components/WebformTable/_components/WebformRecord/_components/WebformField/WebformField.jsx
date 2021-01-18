@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './WebformField.module.scss';
@@ -230,10 +231,12 @@ export const WebformField = ({
             dateFormat="yy-mm-dd"
             id={field.fieldId}
             monthNavigator={true}
-            onChange={event => {
-              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            }}
+            onChange={event => {
+              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
             value={new Date(field.value)}
             yearNavigator={true}
@@ -494,7 +497,7 @@ export const WebformField = ({
           maxFileSize={
             !isNil(element.maxSize) && element.maxSize.toString() !== '0'
               ? element.maxSize * 1000 * 1024
-              : 20 * 1000 * 1024
+              : config.MAX_ATTACHMENT_SIZE
           }
           mode="advanced"
           multiple={false}

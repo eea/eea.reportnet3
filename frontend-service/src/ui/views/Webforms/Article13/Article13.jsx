@@ -183,7 +183,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
-        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 100, undefined, [
+        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
           'CORRECT',
           'INFO',
           'WARNING',

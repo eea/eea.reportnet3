@@ -814,37 +814,37 @@
         {
           "type": "FIELD",
           "name": "DescribeIncreasingAdaptiveCapacity",
-          "title": "Please describe the evaluation progress towards increasing adaptive capacity (max. 3000 characters)",
+          "title": "Progress towards increasing adaptive capacity (max. 3000 characters)",
           "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3b"
         },
         {
           "type": "FIELD",
           "name": "DescribeMeetingAdaptationPriorities",
-          "title": "Please describe the evaluation progress towards meeting adaptation priorities (max. 3000 characters)",
+          "title": "Progress towards meeting adaptation priorities (max. 3000 characters)",
           "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3c"
         },
         {
           "type": "FIELD",
           "name": "DescribeProgressTowardsAddressing",
-          "title": "Please describe the evaluation progress towards addressing barriers to adaptation (max. 3000 characters)",
+          "title": "Progress towards addressing barriers to adaptation (max. 3000 characters)",
           "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3d"
         },
         {
           "type": "FIELD",
           "name": "DescribeVulnerability",
-          "title": "Please describe the steps taken to review and update vulnerability and risk assessments (max. 3000 characters)",
+          "title": "Steps taken to review and update vulnerability and risk assessments (max. 3000 characters)",
           "tooltip": "Annex I: 4.4a"
         },
         {
           "type": "FIELD",
           "name": "DescribeNationalAdaptation",
-          "title": "Please describe the steps taken to review and update national adaptation policies, strategies, plans and measures (max. 3000 characters)",
+          "title": "Steps taken to review and update national adaptation policies, strategies, plans, and measures (max. 3000 characters)",
           "tooltip": "Annex I: 4.4b"
         },
         {
           "type": "FIELD",
           "name": "DescribeSubnationalAdaptation",
-          "title": "Please describe the steps taken to review and update subnational adaptation policies, strategies, plans and measures (max. 2000 characters)",
+          "title": "Overview of good practice with regard to steps taken to review and update subnational adaptation plans, policies, strategies and measures (max. 3000 characters)",
           "tooltip": "Annex I: 4.5"
         }
       ]

@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqBy from 'lodash/uniqBy';
 
+import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './NationalSystemsField.module.scss';
@@ -190,10 +191,12 @@ export const NationalSystemsField = ({
             dateFormat="yy-mm-dd"
             id={field.fieldId}
             monthNavigator={true}
-            onChange={event => {
-              onFillField(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)));
-              onEditorSubmitValue(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)));
-            }}
+            onBlur={event =>
+              onEditorSubmitValue(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)))
+            }
+            onChange={event =>
+              onFillField(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)))
+            }
             value={new Date(field.value)}
             yearNavigator={true}
             yearRange="2010:2030"
@@ -319,7 +322,9 @@ export const NationalSystemsField = ({
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
-            !isNil(field.maxSize) && field.maxSize.toString() !== '0' ? field.maxSize * 1000 * 1024 : 20 * 1000 * 1024
+            !isNil(field.maxSize) && field.maxSize.toString() !== '0'
+              ? field.maxSize * 1000 * 1024
+              : config.MAX_ATTACHMENT_SIZE
           }
           mode={'advanced'}
           multiple={false}
