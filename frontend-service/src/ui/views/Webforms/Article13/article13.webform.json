@@ -132,7 +132,8 @@
               "type": "FIELD",
               "name": "Id_SectorObjectives",
               "hideWhenCalculated": true,
-              "hideWhenSingle": true
+              "hideWhenSingle": true,
+              "deleteInCascade": true
             },
             {
               "type": "FIELD",
