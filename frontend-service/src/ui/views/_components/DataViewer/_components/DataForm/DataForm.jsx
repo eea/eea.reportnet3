@@ -39,7 +39,7 @@ const DataForm = ({
         !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(col.type)
     )
     .filter(col => col.field !== 'id' && col.field !== 'datasetPartitionId');
-  console.log({ nonAttachmentsOrComplexGeomTypes });
+
   useEffect(() => {
     onShowCoordinateError(fieldsWithError.length);
   }, [fieldsWithError]);
