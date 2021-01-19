@@ -322,16 +322,18 @@ export const ManageIntegrations = ({
     return options.map((option, index) => (
       <div className={`${styles.field} ${styles[option]} formField `} key={index}>
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
-        <Checkbox
-          id={'notificationRequired'}
-          inputId={'notificationRequired'}
-          isChecked={manageIntegrationsState.notificationRequired}
-          label={'notificationRequired'}
-          onChange={event => {
-            onChangeNotificationRequiredCheckboxEvent(event.checked, option);
-          }}
-          value={manageIntegrationsState[option]}
-        />
+        <div className={styles.checkboxWrapper}>
+          <Checkbox
+            id={'notificationRequired'}
+            inputId={'notificationRequired'}
+            isChecked={manageIntegrationsState.notificationRequired}
+            label={'notificationRequired'}
+            onChange={event => {
+              onChangeNotificationRequiredCheckboxEvent(event.checked, option);
+            }}
+            value={manageIntegrationsState[option]}
+          />
+        </div>
         {/* <label htmlFor={'notificationRequired'} className="srOnly">
           {resources.messages['notificationRequired']}
         </label> */}
@@ -453,7 +455,7 @@ export const ManageIntegrations = ({
           // className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
           className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
             manageIntegrationsState.operation.value === 'IMPORT' && option === 'fileExtension'
-              ? 'fileExtensionNotification'
+              ? styles.fileExtensionNotification
               : styles[option]
           }`}
           key={index}>
