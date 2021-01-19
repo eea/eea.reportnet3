@@ -373,6 +373,7 @@ public class DatasetServiceTest {
   @Mock
   private AttachmentRepository attachmentRepository;
 
+  /** The pa M service. */
   @Mock
   private PaMService paMService;
   /**
@@ -725,7 +726,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById2() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -766,7 +768,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById3() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -806,7 +809,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById4() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -846,7 +850,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById5() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -885,7 +890,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById6() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -929,7 +935,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById7() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -968,7 +975,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById8() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -1007,7 +1015,8 @@ public class DatasetServiceTest {
   public void testGetTableValuesById9() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tableVO);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(tableVO);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     FieldValue fieldValue = new FieldValue();
@@ -1262,6 +1271,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
+  /**
+   * Update records cascade test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRecordsCascadeTest() throws EEAException {
     List<Document> fieldSchemas = new ArrayList<>();
@@ -1337,6 +1351,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field PK test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldPKTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1685,6 +1704,11 @@ public class DatasetServiceTest {
         datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));
   }
 
+  /**
+   * Gets the field values referenced label test.
+   *
+   * @return the field values referenced label test
+   */
   @Test
   public void getFieldValuesReferencedLabelTest() {
 
@@ -2112,6 +2136,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
+  /**
+   * Update record no value test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRecordNoValueTest() throws EEAException {
     FieldValue fieldValue = new FieldValue();
@@ -2627,12 +2656,22 @@ public class DatasetServiceTest {
 
   }
 
+  /**
+   * Gets the dataset type reporting test.
+   *
+   * @return the dataset type reporting test
+   */
   @Test
   public void getDatasetTypeReportingTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     assertEquals(DatasetTypeEnum.REPORTING, datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type design test.
+   *
+   * @return the dataset type design test
+   */
   @Test
   public void getDatasetTypeDesignTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -2640,6 +2679,11 @@ public class DatasetServiceTest {
     assertEquals(DatasetTypeEnum.DESIGN, datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type DC test.
+   *
+   * @return the dataset type DC test
+   */
   @Test
   public void getDatasetTypeDCTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -2648,6 +2692,11 @@ public class DatasetServiceTest {
     assertEquals(DatasetTypeEnum.COLLECTION, datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type EU test.
+   *
+   * @return the dataset type EU test
+   */
   @Test
   public void getDatasetTypeEUTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -2657,6 +2706,11 @@ public class DatasetServiceTest {
     assertEquals(DatasetTypeEnum.EUDATASET, datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Insert records null record required exeption test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void insertRecordsNullRecordRequiredExeptionTest() throws EEAException {
     try {
@@ -2667,6 +2721,11 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Insert records record required exeption test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void insertRecordsRecordRequiredExeptionTest() throws EEAException {
     try {
@@ -2677,6 +2736,11 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Insert records read only exeption test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void insertRecordsReadOnlyExeptionTest() throws EEAException {
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
@@ -2697,6 +2761,11 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Insert records fixed records exeption test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void insertRecordsFixedRecordsExeptionTest() throws EEAException {
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
@@ -2720,6 +2789,11 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Insert records table not found exeption test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void insertRecordsTableNotFoundExeptionTest() throws EEAException {
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
@@ -2734,6 +2808,11 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Inser records design test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void inserRecordsDesignTest() throws EEAException {
     FieldVO fieldVO1 = new FieldVO();
@@ -2808,6 +2887,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.anyIterable());
   }
 
+  /**
+   * Inser records reporting test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void inserRecordsReportingTest() throws EEAException {
     FieldVO fieldVO1 = new FieldVO();

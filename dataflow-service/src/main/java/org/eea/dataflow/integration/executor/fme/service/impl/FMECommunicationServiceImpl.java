@@ -179,9 +179,11 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
 
       if (null != checkResult && null != checkResult.getBody()
-          && null != checkResult.getBody().getId()) {
+          && null != checkResult.getBody()
+          .getId()) { //NOPMD check result and body are verified not to be null. false positive
         LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-        result = checkResult.getBody().getId();
+        result = checkResult.getBody()
+            .getId(); //NOPMD check result and body are verified not to be null. false positive
       } else {
         throw new IllegalStateException("Error submitting job to FME, no result retrieved");
       }
@@ -319,7 +321,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     }
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
-      stream = new ByteArrayInputStream(checkResult.getBody());
+      stream = new ByteArrayInputStream(checkResult
+          .getBody()); //NOPMD check result and body are verified not to be null. false positive
     } else {
       stream = new ByteArrayInputStream(new byte[0]);
     }
@@ -557,8 +560,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         } else {
           eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
         }
+        launchValidationProcess(datasetId, userName);
       }
-      launchValidationProcess(datasetId, userName);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FAILED_EVENT;
