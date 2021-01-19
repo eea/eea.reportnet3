@@ -334,9 +334,6 @@ export const ManageIntegrations = ({
             value={manageIntegrationsState[option]}
           />
         </div>
-        {/* <label htmlFor={'notificationRequired'} className="srOnly">
-          {resources.messages['notificationRequired']}
-        </label> */}
       </div>
     ));
   };
@@ -452,7 +449,6 @@ export const ManageIntegrations = ({
     return options.map((option, index) => {
       return (
         <div
-          // className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
           className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
             manageIntegrationsState.operation.value === 'IMPORT' && option === 'fileExtension'
               ? styles.fileExtensionNotification
