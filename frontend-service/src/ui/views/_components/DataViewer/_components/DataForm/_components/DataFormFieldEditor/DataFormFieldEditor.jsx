@@ -107,7 +107,7 @@ const DataFormFieldEditor = ({
     if (inputRef.current && isVisible && autoFocus) {
       inputRef.current.element.focus();
     }
-  }, [inputRef.current, isVisible]);
+  }, [inputRef.current, isVisible, records.totalRecords]);
 
   useEffect(() => {
     if (areEquals('LINK', type)) {
