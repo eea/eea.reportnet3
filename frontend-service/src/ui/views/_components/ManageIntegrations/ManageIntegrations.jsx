@@ -330,7 +330,6 @@ export const ManageIntegrations = ({
           onChange={event => {
             onChangeNotificationRequiredCheckboxEvent(event.checked, option);
           }}
-          // style={{ marginRight: '50px' }}
           value={manageIntegrationsState[option]}
         />
         {/* <label htmlFor={'notificationRequired'} className="srOnly">
@@ -448,29 +447,36 @@ export const ManageIntegrations = ({
   );
 
   const renderInputLayout = (options = []) => {
-    return options.map((option, index) => (
-      <div
-        className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
-        key={index}>
-        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
-        <InputText
-          id={`${componentName}__${option}`}
-          maxLength={
-            option === 'fileExtension'
-              ? config.MAX_FILE_EXTENSION_LENGTH
-              : option === 'name'
-              ? config.MAX_INTEGRATION_NAME_LENGTH
-              : 255
-          }
-          onChange={event => onFillField(event.target.value, option)}
-          onKeyDown={event => onSaveKeyDown(event)}
-          placeholder={resources.messages[option]}
-          ref={inputRefs[option]}
-          type="search"
-          value={manageIntegrationsState[option]}
-        />
-      </div>
-    ));
+    return options.map((option, index) => {
+      return (
+        <div
+          // className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
+          className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
+            manageIntegrationsState.operation.value === 'IMPORT' && option === 'fileExtension'
+              ? 'fileExtensionNotification'
+              : styles[option]
+          }`}
+          key={index}>
+          <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
+          <InputText
+            id={`${componentName}__${option}`}
+            maxLength={
+              option === 'fileExtension'
+                ? config.MAX_FILE_EXTENSION_LENGTH
+                : option === 'name'
+                ? config.MAX_INTEGRATION_NAME_LENGTH
+                : 255
+            }
+            onChange={event => onFillField(event.target.value, option)}
+            onKeyDown={event => onSaveKeyDown(event)}
+            placeholder={resources.messages[option]}
+            ref={inputRefs[option]}
+            type="search"
+            value={manageIntegrationsState[option]}
+          />
+        </div>
+      );
+    });
   };
 
   const renderParametersLayout = () => {

@@ -48,10 +48,22 @@
       &.operation {
         width: 49%;
       }
-      &.fileExtension,
       &.repository,
+      &.fileExtension,
       &.processName {
         width: 49%;
+      }
+
+      &.fileExtensionNotification {
+        width: 32% !important;
+      }
+
+      &.notificationRequired {
+        width: 15%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
       }
 
       &.description,
