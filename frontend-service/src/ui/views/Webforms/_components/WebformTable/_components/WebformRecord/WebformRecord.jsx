@@ -276,7 +276,7 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           checkLabelVisibility(element) && (
-            <Fragment>
+            <Fragment key={element.title}>
               {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
               {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
               {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
