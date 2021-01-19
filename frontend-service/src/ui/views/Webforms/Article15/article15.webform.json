@@ -1026,11 +1026,6 @@
             },
             {
               "type": "FIELD",
-              "name": "TitleOriginal",
-              "title": "Title of the report (original language)"
-            },
-            {
-              "type": "FIELD",
               "name": "Year",
               "title": "Year of publication"
             },
