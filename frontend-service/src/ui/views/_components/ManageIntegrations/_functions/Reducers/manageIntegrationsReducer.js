@@ -12,6 +12,9 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
+    case 'IS_NOTIFICATION_REQUIRED':
+      return { ...state, [payload.name]: payload.data };
+
     case 'MANAGE_PARAMETERS':
       return { ...state, externalParameters: payload.data, parameterKey: '', parameterValue: '' };
 
