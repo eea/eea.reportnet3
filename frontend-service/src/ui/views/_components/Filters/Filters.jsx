@@ -54,6 +54,7 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
+    clearedFilters: false,
     checkboxes: [],
     data: data,
     filterBy: {},
@@ -96,6 +97,13 @@ export const Filters = ({
     getChangedCheckboxes(filterState.property);
   }, [JSON.stringify(filterState.checkboxes), filterState.property]);
 
+  useEffect(() => {
+    if (sendData) {
+      if (filterState.clearedFilters) {
+        sendData(filterState.filterBy);
+      }
+    }
+  }, [filterState.clearedFilters]);
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
   const getCheckboxFilterState = property => {
@@ -218,7 +226,8 @@ export const Filters = ({
         searchBy: '',
         checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
         filtered: false,
-        filteredSearched: false
+        filteredSearched: false,
+        clearedFilters: true
       }
     });
   };
