@@ -322,7 +322,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
       stream = new ByteArrayInputStream(checkResult
-          .getBody()); //NOSONAR check result and body are verified not to be null. false positive
+          .getBody()); //NOSONAR  check result and body are verified not to be null. false positive
     } else {
       stream = new ByteArrayInputStream(new byte[0]);
     }
