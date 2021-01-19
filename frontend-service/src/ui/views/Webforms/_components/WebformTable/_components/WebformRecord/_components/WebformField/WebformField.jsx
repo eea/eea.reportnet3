@@ -55,7 +55,7 @@ export const WebformField = ({
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     linkItemsOptions: [],
-    record,
+    record: record,
     sectorAffectedValue: null,
     selectedFieldId: '',
     selectedFieldSchemaId: '',
@@ -103,7 +103,8 @@ export const WebformField = ({
     if (isNil(field) || isNil(field.referencedField)) {
       return;
     }
-    const conditionalField = webformFieldState.record.elements.find(
+
+    const conditionalField = record.elements.find(
       element => element.fieldSchemaId === field.referencedField.masterConditionalFieldId
     );
 
@@ -142,6 +143,7 @@ export const WebformField = ({
         value: ''
       });
     }
+
     webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
   };
 
