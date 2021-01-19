@@ -1543,7 +1543,7 @@ public class RulesServiceImplTest {
         .thenReturn(integritySchemaList);
 
     rulesServiceImpl.copyRulesSchema(copy);
-    Mockito.verify(rulesRepository, times(1)).getRulesWithActiveCriteria(Mockito.any(),
+    Mockito.verify(rulesRepository, times(2)).getRulesWithActiveCriteria(Mockito.any(),
         Mockito.anyBoolean());
   }
 
