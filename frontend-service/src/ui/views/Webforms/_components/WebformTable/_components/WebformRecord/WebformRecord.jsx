@@ -336,7 +336,7 @@ export const WebformRecord = ({
 
               {checkCalculatedTableVisibility(element)
                 ? calculateSingle(element)
-                : filterRecords(element, elements).map((record, i) => {
+                : filterRecords(element, elements).map(record => {
                     return (
                       <WebformRecord
                         calculateSingle={calculateSingle}
@@ -346,7 +346,7 @@ export const WebformRecord = ({
                         datasetSchemaId={datasetSchemaId}
                         isAddingMultiple={isAddingMultiple}
                         isGroup={isGroup}
-                        key={i}
+                        key={record.recordId}
                         addingOnTableSchemaId={addingOnTableSchemaId}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
