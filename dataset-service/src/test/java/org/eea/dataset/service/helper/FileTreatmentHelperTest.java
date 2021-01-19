@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -85,7 +86,13 @@ public class FileTreatmentHelperTest {
   @Test
   public void importFileDataCsvTest() throws EEAException, IOException {
 
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setValue("value");
+    List<FieldValue> fieldValues = new ArrayList<>();
+    fieldValues.add(fieldValue);
+
     RecordValue recordValue = new RecordValue();
+    recordValue.setFields(fieldValues);
     List<RecordValue> recordValues = new ArrayList<>();
     recordValues.add(recordValue);
     recordValues.add(recordValue);
@@ -146,7 +153,13 @@ public class FileTreatmentHelperTest {
   @Test
   public void importFileDataZipTest() throws EEAException, IOException {
 
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setValue("value");
+    List<FieldValue> fieldValues = new ArrayList<>();
+    fieldValues.add(fieldValue);
+
     RecordValue recordValue = new RecordValue();
+    recordValue.setFields(fieldValues);
     List<RecordValue> recordValues = new ArrayList<>();
     recordValues.add(recordValue);
     recordValues.add(recordValue);

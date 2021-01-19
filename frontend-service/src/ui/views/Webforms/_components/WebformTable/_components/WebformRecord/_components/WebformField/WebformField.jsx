@@ -49,6 +49,7 @@ export const WebformField = ({
   const resources = useContext(ResourcesContext);
 
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
+    initialFieldValue: '',
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
     isDeletingRow: false,
@@ -64,6 +65,7 @@ export const WebformField = ({
   });
 
   const {
+    initialFieldValue,
     isDeleteAttachmentVisible,
     isFileDialogVisible,
     linkItemsOptions,
@@ -147,6 +149,10 @@ export const WebformField = ({
     webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
   };
 
+  const onFocusField = value => {
+    webformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: value });
+  };
+
   const onEditorKeyChange = (event, field, option) => {
     if (event.key === 'Escape') {
     } else if (event.key === 'Enter') {
@@ -163,20 +169,22 @@ export const WebformField = ({
         : value;
 
     try {
-      await DatasetService.updateFieldById(
-        datasetId,
-        option,
-        field.fieldId,
-        field.fieldType,
-        parsedValue,
-        updateInCascade
-      );
-      if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
-        onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
-      }
+      if (initialFieldValue !== parsedValue) {
+        await DatasetService.updateFieldById(
+          datasetId,
+          option,
+          field.fieldId,
+          field.fieldType,
+          parsedValue,
+          updateInCascade
+        );
+        if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
+          onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
+        }
 
-      if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
-        onUpdateSinglesList();
+        if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
+          onUpdateSinglesList();
+        }
       }
     } catch (error) {
       console.error('error', error);
@@ -239,6 +247,9 @@ export const WebformField = ({
             }}
             onChange={event => {
               onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            }}
+            onFocus={event => {
+              onFocusField(event.target.value);
             }}
             value={new Date(field.value)}
             yearNavigator={true}
@@ -372,6 +383,9 @@ export const WebformField = ({
               else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
+            onFocus={event => {
+              onFocusField(event.target.value);
+            }}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
             value={field.value}
           />
@@ -388,6 +402,9 @@ export const WebformField = ({
               else onEditorSubmitValue(field, option, event.target.value);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
+            onFocus={event => {
+              onFocusField(event.target.value);
+            }}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
             value={field.value}
           />

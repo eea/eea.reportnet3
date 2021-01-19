@@ -1167,7 +1167,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String updateQuery = "refresh materialized view dataset_";
 
     for (String view : viewList) {
-      executeQueryViewCommands(updateQuery + datasetId + "." + view);
+      executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
     }
     LOG.info("These views: {} have been deleted.", viewList);
   }

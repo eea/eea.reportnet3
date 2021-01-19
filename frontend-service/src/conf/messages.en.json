@@ -948,6 +948,7 @@
     "writeMessagePlaceholder": "Write your message",
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "yes": "Yes"
+    "yes": "Yes",
+    "notificationRequired": "Notification Required"
   }
 }
