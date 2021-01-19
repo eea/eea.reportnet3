@@ -27,6 +27,8 @@ import org.springframework.data.domain.Pageable;
  */
 public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPaginated {
 
+  private static final String TABLE = "table";
+  private static final String FIELD = "field";
 
   /**
    * The entity manager.
@@ -45,6 +47,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
+   *
    * @return the page
    */
   @Override
@@ -57,8 +60,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     String QUERY_FILTER_BASIC = "select v  from Validation v  where v.idRule is not null ";
     String partLevelError = levelErrorFilter(levelErrorsFilter, false);
     String partTypeEntities = typeEntities(typeEntitiesFilter, false);
-    String partTableFilter = originFilter(tableFilter, false, "table");
-    String partFieldFilter = originFilter(fieldValueFilter, false, "field");
+    String partTableFilter = originFilter(tableFilter, false, TABLE);
+    String partFieldFilter = originFilter(fieldValueFilter, false, FIELD);
     String orderPart = addOrderBy(headerField, asc);
 
     String FINAL_QUERY = QUERY_FILTER_BASIC + partLevelError + partTypeEntities + partTableFilter
@@ -84,6 +87,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param headerField the header field
    * @param asc the asc
    * @param paged the paged
+   *
    * @return the list
    */
   @Transactional
@@ -98,8 +102,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
         datasetId);
     String partLevelError = levelErrorFilter(levelErrorsFilter, true);
     String partTypeEntities = typeEntities(typeEntitiesFilter, true);
-    String partTableFilter = originFilter(tableFilter, true, "table");
-    String partFieldFilter = originFilter(fieldValueFilter, true, "field");
+    String partTableFilter = originFilter(tableFilter, true, TABLE);
+    String partFieldFilter = originFilter(fieldValueFilter, true, FIELD);
     String groupBy =
         "group by v.message,v.level_error, v.id_rule, v.type_entity,v.table_name,v.short_code,v.field_name ";
     String orderPart = addOrderBy(headerField, asc);
@@ -113,7 +117,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
       public List<GroupValidationVO> execute(Connection conn) throws SQLException {
         List<GroupValidationVO> groupsValidations = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(finalQuery);
-            ResultSet rs = stmt.executeQuery();) {
+            ResultSet rs = stmt.executeQuery()) {
           while (rs.next()) {
             GroupValidationVO validation = new GroupValidationVO();
             validation.setMessage(rs.getString("message"));
@@ -138,6 +142,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param headerField the header field
    * @param asc the asc
    * @param orderPart the order part
+   *
    * @return the string
    */
   private String addOrderBy(String headerField, Boolean asc) {
@@ -153,6 +158,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param typeEntitiesFilter the type entities filter
    * @param tableFilter the table filter
    * @param fieldValueFilter the field value filter
+   *
    * @return the long
    */
   @Override
@@ -163,8 +169,8 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     String QUERY_FILTER_BASIC = "select count(v)  from Validation v  where v.idRule is not null ";
     String partLevelError = levelErrorFilter(levelErrorsFilter, false);
     String partTypeEntities = typeEntities(typeEntitiesFilter, false);
-    String partTableFilter = originFilter(tableFilter, false, "table");
-    String partFieldFilter = originFilter(fieldValueFilter, false, "field");
+    String partTableFilter = originFilter(tableFilter, false, TABLE);
+    String partFieldFilter = originFilter(fieldValueFilter, false, FIELD);
 
     String FINAL_QUERY =
         QUERY_FILTER_BASIC + partLevelError + partTypeEntities + partTableFilter + partFieldFilter;
@@ -179,6 +185,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param originsFilter the origins filter
    * @param group the group
    * @param entity the entity
+   *
    * @return the string
    */
   private String originFilter(String originsFilter, boolean group, String entity) {
@@ -195,6 +202,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Compose list query.
    *
    * @param originsFilter the origins filter
+   *
    * @return the string
    */
   private String composeListQuery(String originsFilter) {
@@ -205,6 +213,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Removes the spaces generated with automatic toString.
    *
    * @param listFormatted the list formatted
+   *
    * @return the string
    */
   private String removeSpacesEnum(String listFormatted) {
@@ -216,6 +225,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @param typeEntitiesFilter the type entities filter
    * @param group the group
+   *
    * @return the string
    */
   private String typeEntities(List<EntityTypeEnum> typeEntitiesFilter, boolean group) {
@@ -232,6 +242,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @param levelErrorsFilter the level errors filter
    * @param group the group
+   *
    * @return the string
    */
   private String levelErrorFilter(List<ErrorTypeEnum> levelErrorsFilter, boolean group) {
