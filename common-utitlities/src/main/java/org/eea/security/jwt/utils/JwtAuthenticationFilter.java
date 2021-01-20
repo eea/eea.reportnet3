@@ -83,8 +83,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {
         LOG_ERROR.error(
-            "Could not set user authentication in security context for token {} and user ", jwt,
-            request.getHeader("FeignInvocationUser"), e);
+            "Could not set authentication security context: uri={}, token={}, feignInvocationUser={}",
+            request.getRequestURI(), jwt, request.getHeader("FeignInvocationUser"), e);
       }
     }
 

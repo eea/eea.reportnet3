@@ -41,7 +41,7 @@ export const WebformRecord = ({
   onRefresh,
   onTabChange,
   onUpdateSinglesList,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   pamsRecords,
   record,
   tableId,
@@ -75,7 +75,11 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
 
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(
+        datasetId,
+        selectedRecordId,
+        webformRecordState.record?.elements?.some(element => element.deleteInCascade)
+      );
       if (isDataDeleted) {
         onRefresh();
         handleDialogs('deleteRow', false);
@@ -192,7 +196,9 @@ export const WebformRecord = ({
         return (
           !isFieldVisible && (
             <div key={i} className={styles.fieldsBlock}>
-              {renderElements(element.elementsRecords[0].elements)}
+              {element.elementsRecords
+                .filter(record => elements[0].recordId === record.recordId)
+                .map(record => renderElements(record.elements))}
             </div>
           )
         );
@@ -245,7 +251,7 @@ export const WebformRecord = ({
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdateSinglesList={onUpdateSinglesList}
-                      onUpdatePamsId={onUpdatePamsId}
+                      onUpdatePamsValue={onUpdatePamsValue}
                       pamsRecords={pamsRecords}
                       record={record}
                     />
@@ -270,7 +276,7 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           checkLabelVisibility(element) && (
-            <Fragment>
+            <Fragment key={element.title}>
               {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
               {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
               {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
@@ -307,7 +313,17 @@ export const WebformRecord = ({
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
                       label={resources.messages['addRecord']}
-                      onClick={() => onAddMultipleWebform(element.tableSchemaId)}
+                      onClick={() => {
+                        let filteredRecordId = null;
+                        if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
+                          const filteredTable = elements.filter(element =>
+                            TextUtils.areEquals(element.name, 'SectorAffected')
+                          );
+
+                          if (!isEmpty(filteredTable)) filteredRecordId = filteredTable[0].recordId;
+                        }
+                        onAddMultipleWebform(element.tableSchemaId, filteredRecordId);
+                      }}
                     />
                   )}
                 </div>
@@ -321,9 +337,10 @@ export const WebformRecord = ({
                   }}
                 />
               )}
+
               {checkCalculatedTableVisibility(element)
                 ? calculateSingle(element)
-                : element.elementsRecords.map((record, i) => {
+                : filterRecords(element, elements).map(record => {
                     return (
                       <WebformRecord
                         calculateSingle={calculateSingle}
@@ -331,15 +348,17 @@ export const WebformRecord = ({
                         dataflowId={dataflowId}
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchemaId}
+                        isAddingMultiple={isAddingMultiple}
                         isGroup={isGroup}
-                        key={i}
+                        key={record.recordId}
+                        addingOnTableSchemaId={addingOnTableSchemaId}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
                         onRefresh={onRefresh}
                         onTabChange={onTabChange}
+                        onUpdatePamsValue={onUpdatePamsValue}
                         onUpdateSinglesList={onUpdateSinglesList}
-                        onUpdatePamsId={onUpdatePamsId}
                         pamsRecords={pamsRecords}
                         record={record}
                         tableId={tableId}
@@ -352,6 +371,24 @@ export const WebformRecord = ({
         );
       }
     });
+  };
+
+  const filterRecords = (element, elements) => {
+    if (!TextUtils.areEquals(element.name, 'OtherObjectives')) {
+      return element.elementsRecords;
+    }
+    const filteredIdField = elements.filter(element => TextUtils.areEquals(element.name, 'Id_SectorObjectives'))[0];
+    const filteredIdSchema = element.elements.filter(element =>
+      TextUtils.areEquals(element.name, 'Fk_SectorObjectives')
+    )[0];
+
+    const filtered = element.elementsRecords.filter(
+      record =>
+        record.fields.filter(field => field.fieldSchemaId === filteredIdSchema.fieldSchema)[0].value ===
+        filteredIdField.value
+    );
+
+    return filtered;
   };
 
   const renderWebformContent = content => {
@@ -442,7 +479,9 @@ export const WebformRecord = ({
       {isDialogVisible.deleteRow && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={webformRecordState.isDeleting}
           header={resources.messages['deleteRow']}
+          iconConfirm={webformRecordState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}

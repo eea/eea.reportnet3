@@ -74,6 +74,15 @@ const getSchemaIdForIdSectorObjectivesField = records => {
   return id_SectorObjectives_FieldSchemaId;
 };
 
+const getSectorObjectivesFKValue = (filteredRecordId, parentTable) => {
+  const sectorObjectivesId = getSchemaIdForIdSectorObjectivesField(parentTable.records);
+  const filteredRecord = parentTable.elementsRecords.filter(table => table.recordId === filteredRecordId);
+
+  if (isEmpty(filteredRecord)) return null;
+
+  return filteredRecord[0].fields.filter(field => field.fieldSchemaId === sectorObjectivesId)[0].value;
+};
+
 const findMaximumIdValue = (records, SectorObjectivesTable) => {
   let fieldsIds = [];
 
@@ -118,6 +127,37 @@ const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
               : null,
             type: field.type,
             fieldSchemaId: field.fieldSchema || field.fieldId
+          }
+        };
+      });
+    }
+
+    const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
+
+    obj.datasetPartitionId = null;
+    return obj;
+  }
+};
+
+const parseOtherObjectivesRecord = (table, parentTable, pamsId, filteredRecordId) => {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
+    let fields;
+
+    const value = getSectorObjectivesFKValue(filteredRecordId, parentTable);
+
+    if (!isUndefined(table)) {
+      fields = table.records[0].fields.map(field => {
+        const fieldValue = TextUtils.areEquals(field.name, 'FK_PAMS')
+          ? pamsId
+          : TextUtils.areEquals(field.name, 'Fk_SectorObjectives')
+          ? value
+          : null;
+
+        return {
+          fieldData: {
+            [field.fieldSchema || field.fieldId]: fieldValue,
+            fieldSchemaId: field.fieldSchema || field.fieldId,
+            type: field.type
           }
         };
       });
@@ -184,10 +224,17 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
   });
 };
 
-const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
+const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStatistics) => {
   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
 
   data.map(table => {
+    table.hasErrors =
+      !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+        ? {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasErrors
+        : false;
+
     if (table.records) {
       table.records[0].fields = table.records[0].fields.map(field => {
         const { fieldId, recordId, type } = field;
@@ -266,5 +313,6 @@ export const WebformsUtils = {
   onParseWebformData,
   onParseWebformRecords,
   parseNewTableRecord,
-  parsePamsRecords
+  parsePamsRecords,
+  parseOtherObjectivesRecord
 };

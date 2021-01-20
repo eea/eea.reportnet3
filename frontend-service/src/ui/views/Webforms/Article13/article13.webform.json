@@ -18,7 +18,8 @@
           "type": "FIELD",
           "name": "Title",
           "title": "Name of PaM or group of PaMs",
-          "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs"
+          "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+          "updatesGroupInfo": true
         },
         {
           "type": "FIELD",
@@ -75,7 +76,8 @@
               "type": "FIELD",
               "name": "Title",
               "title": "Name of PaM or group of PaMs",
-              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs"
+              "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
+              "updatesGroupInfo": true
             },
             {
               "type": "FIELD",
@@ -128,6 +130,13 @@
           "elements": [
             {
               "type": "FIELD",
+              "name": "Id_SectorObjectives",
+              "hideWhenCalculated": true,
+              "hideWhenSingle": true,
+              "deleteInCascade": true
+            },
+            {
+              "type": "FIELD",
               "name": "SectorAffected",
               "title": "Sector affected",
               "readOnly": true,
@@ -147,13 +156,14 @@
               "type": "FIELD",
               "name": "Objective",
               "title": "Select Objective(s)",
-              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’ For Other a briefdescription of the objective shall be provided",
+              "tooltip": "Objective means ‘initial statement of the outcomes (including results and impacts) intended to be achieved by the intervention’. More than one objective can be selected, additional objectives could be added and specified under ‘other’. For Other a brief description of the objective shall be provided",
               "calculatedWhenGroup": true
             },
             {
               "type": "TABLE",
               "name": "OtherObjectives",
               "title": "Other Objective(s)",
+              "parentTable": true,
               "dependency": {
                 "field": "Objective",
                 "value": ["9", "15", "24", "29", "38", "45", "56", "57"]
@@ -164,6 +174,12 @@
                   "type": "FIELD",
                   "name": "Other",
                   "title": "Other Objective"
+                },
+                {
+                  "type": "FIELD",
+                  "name": "Fk_SectorObjectives",
+                  "hideWhenCalculated": true,
+                  "hideWhenSingle": true
                 }
               ]
             }
@@ -173,7 +189,7 @@
           "type": "FIELD",
           "name": "QuantifiedObjective",
           "title": "Quantified Objective",
-          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base yearshall be included if the objective(s) is(are) quantified"
+          "tooltip": "Quantified objectives shall be specific, measurable, achievable,relevant and time-related. As a minimum, the figure(s), unit(s), end year and base year shall be included if the objective(s) is(are) quantified"
         },
         {
           "type": "FIELD",
@@ -434,7 +450,8 @@
               "name": "Title",
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-              "customType": "READ_ONLY"
+              "customType": "READ_ONLY",
+              "updatesGroupInfo": true
             },
             {
               "type": "FIELD",
@@ -480,7 +497,7 @@
               "type": "FIELD",
               "name": "LULUCF_1",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -512,7 +529,7 @@
               "type": "FIELD",
               "name": "LULUCF_2",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -544,7 +561,7 @@
               "type": "FIELD",
               "name": "LULUCF_3",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -576,7 +593,7 @@
               "type": "FIELD",
               "name": "LULUCF_4",
               "title": "LULUCF",
-              "tooltip": "Enhanced removals or decreasedemissions of GHG shall be expressed as a positive number. Decreased removals orincreased emissions shall be expressed as a negative number"
+              "tooltip": "Enhanced removals or decreased emissions of GHG shall be expressed as a positive number. Decreased removals or increased emissions shall be expressed as a negative number"
             },
             {
               "type": "FIELD",
@@ -719,7 +736,8 @@
               "name": "Title",
               "title": "Name of PaM or group of PaMs",
               "tooltip": "A group of PaMs consists of other single PaMs or another group of PaMs",
-              "customType": "READ_ONLY"
+              "customType": "READ_ONLY",
+              "updatesGroupInfo": true
             },
             {
               "type": "FIELD",

@@ -4,9 +4,10 @@ export const GetErrors = ({ datasetRepository }) => async (
   pageSize,
   sortField,
   asc,
+  fieldValueFilter,
   levelErrorsFilter,
   typeEntitiesFilter,
-  originsFilter
+  tablesFilter
 ) =>
   datasetRepository.errorsById(
     datasetId,
@@ -14,7 +15,8 @@ export const GetErrors = ({ datasetRepository }) => async (
     pageSize,
     sortField,
     asc,
+    fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    originsFilter
+    tablesFilter
   );

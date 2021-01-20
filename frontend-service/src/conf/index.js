@@ -14,15 +14,17 @@ import validations from './validation.config.json';
 import webforms from './webforms.config.json';
 
 const config = {};
-const { countries } = countryCode;
-const { exportTypes } = exportTypeCode;
-const { icons } = primeIcons;
-const { images } = avatarImages;
-const { languages } = languageCode;
+const {countries} = countryCode;
+const {exportTypes} = exportTypeCode;
+const {icons} = primeIcons;
+const {images} = avatarImages;
+const {languages} = languageCode;
 
 config.MAX_FILE_EXTENSION_LENGTH = 10;
 config.MAX_FILE_SIZE = 100000000;
 config.MAX_INTEGRATION_NAME_LENGTH = 50;
+
+config.MAX_ATTACHMENT_SIZE = 20 * 1000 * 1024;
 
 config.avatars = images;
 config.countries = countries;
@@ -39,4 +41,4 @@ config.storage = storage;
 config.theme = theme;
 config.webforms = webforms;
 
-export { config };
+export {config};

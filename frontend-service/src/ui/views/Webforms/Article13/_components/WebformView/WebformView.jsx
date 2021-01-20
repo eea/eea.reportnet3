@@ -34,7 +34,7 @@ export const WebformView = ({
   isAddingPamsId = false,
   isRefresh,
   isReporting,
-  onUpdatePamsId,
+  onUpdatePamsValue,
   pamsRecords,
   selectedTable,
   selectedTableName,
@@ -254,19 +254,18 @@ export const WebformView = ({
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const {
-          datasetStatistics: { tables }
-        } = state;
-        const tablesStatistics = tables.filter(table => table.tableSchemaId === webform.tableSchemaId);
-        const [tableStatistics] = tablesStatistics;
-        const { hasErrors } = tableStatistics;
+        const childHasErrors = webform.elements
+          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
+          .map(table => table.hasErrors);
+        const hasErrors = [webform.hasErrors].concat(childHasErrors);
+
         return (
           <Button
             className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
-            icon={!isCreated ? 'info' : hasErrors ? 'warning' : 'table'}
-            iconClasses={!isVisible[webform.title] ? (hasErrors ? 'warning' : 'info') : ''}
-            iconPos={!isCreated || hasErrors ? 'right' : 'left'}
+            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
+            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
+            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
@@ -292,7 +291,7 @@ export const WebformView = ({
         isReporting={isReporting}
         onTabChange={isVisible}
         onUpdateSinglesList={onUpdateSinglesList}
-        onUpdatePamsId={onUpdatePamsId}
+        onUpdatePamsValue={onUpdatePamsValue}
         pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}

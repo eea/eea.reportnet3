@@ -1300,7 +1300,7 @@ const DataViewer = withRouter(
             maxFileSize={
               !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
                 ? records.selectedMaxSize * 1000 * 1024
-                : 20 * 1000 * 1024
+                : config.MAX_ATTACHMENT_SIZE
             }
             name="file"
             onUpload={onAttach}
@@ -1313,7 +1313,7 @@ const DataViewer = withRouter(
         )}
 
         {addDialogVisible && (
-          <div onKeyPress={!hasTextareas() && onKeyPress}>
+          <div onKeyPress={!hasTextareas() ? onKeyPress : undefined}>
             <Dialog
               blockScroll={false}
               className={`edit-table calendar-table ${styles.addEditRecordDialog}`}

@@ -13,14 +13,6 @@ const filteredInitialValues = (data, checkedId, format) => {
 
 const initialValues = (data, format) => parseObligationData(data, format);
 
-const isFiltered = filterByData => {
-  if (!isNil(filterByData)) {
-    const filteredValues = Object.values(filterByData);
-    return filteredValues.every(data => isEmpty(data));
-  }
-  return true;
-};
-
 const onOrderCheckedValue = (data, checkedId) => {
   for (let i = 0; i < data.length; i++) {
     if (data[i].obligationId === checkedId) {
@@ -40,4 +32,4 @@ const parseObligationData = (data, format) => {
   }));
 };
 
-export const ReportingObligationUtils = { filteredInitialValues, initialValues, isFiltered };
+export const ReportingObligationUtils = { filteredInitialValues, initialValues };

@@ -56,7 +56,11 @@ export const article13Reducer = (state, { type, payload }) => {
       Object.values(inmTableList).forEach(element => {
         element.forEach(pam => {
           if (pam.recordId === payload.recordId) {
-            pam.id = payload.pamsId;
+            if (!payload.isPamTitle) {
+              pam.id = payload.pamsValue;
+            } else {
+              pam.title = payload.pamsValue;
+            }
           }
         });
       });
@@ -69,20 +73,23 @@ export const article13Reducer = (state, { type, payload }) => {
         if (pamRecord.recordId === payload.recordId) {
           pamRecord.fields.forEach(field => {
             if (field.fieldId === payload.fieldId) {
-              field.value = payload.pamsId;
+              field.value = payload.pamsValue;
             }
           });
         }
       });
 
       const inmSelectedTable = { ...state.selectedTable };
-      inmSelectedTable.pamsId = payload.pamsId;
+      if (!payload.isPamTitle) {
+        inmSelectedTable.pamsId = payload.pamsValue;
+      }
 
       return {
         ...state,
         pamsRecords: inmPamsRecords,
         tableList: inmTableList,
-        selectedTable: inmSelectedTable
+        selectedTable: inmSelectedTable,
+        isDataUpdated: payload.dataUpdated
       };
 
     case 'UPDATE_DATA':
