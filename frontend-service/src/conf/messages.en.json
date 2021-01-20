@@ -949,7 +949,7 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "yes": "Yes",
-    "notificationRequired": "Straight to FME",
-    "StraightToFMETooltip": "- If data is inserted straight to FME has to be CHECKED. <br>- If data is inserted through a file has to be UNCHECKED."
+    "notificationRequired": "API POST used",
+    "notificationRequiredTooltip": "The workspace uses the Reportnet 3 API POST method to insert individual records directly into the dataset table(s)."
   }
 }

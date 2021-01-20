@@ -330,7 +330,7 @@ export const ManageIntegrations = ({
           <Button
             className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
             icon="infoCircle"
-            tooltip={resources.messages['StraightToFMETooltip']}
+            tooltip={resources.messages['notificationRequiredTooltip']}
             tooltipOptions={{ position: 'top' }}
           />
         </label>
