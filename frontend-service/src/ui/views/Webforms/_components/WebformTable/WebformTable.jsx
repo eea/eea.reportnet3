@@ -161,7 +161,6 @@ export const WebformTable = ({
         fieldSchema || fieldId,
         selectedTable.pamsId
       );
-      console.log('parentTableData', parentTableData);
       if (!isNil(parentTableData.records)) {
         const tables = getTableElements(webform);
         const tableSchemaIds = tables.map(table => table.tableSchemaId);
@@ -275,8 +274,6 @@ export const WebformTable = ({
   if (webformTableState.isLoading) {
     return <Spinner style={{ top: 0, margin: '1rem' }} />;
   }
-
-  console.log('webformData', webformData);
 
   const { elementsRecords } = webformData;
   const [currentRecord] = elementsRecords;

@@ -396,14 +396,12 @@ export const WebformRecord = ({
 
     return (
       <div className={styles.content}>
-        <div className={styles.actionButtons}>
-          {!isEmpty(content.validations) &&
-            content.validations.map((validation, index) => (
-              <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
-            ))}
-        </div>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
+            {!isEmpty(content.validations) &&
+              content.validations.map((validation, index) => (
+                <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+              ))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}
