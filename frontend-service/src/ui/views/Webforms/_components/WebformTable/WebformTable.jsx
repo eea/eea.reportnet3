@@ -270,13 +270,12 @@ export const WebformTable = ({
     }
   };
 
-  if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  if (webformTableState.isLoading) {
+    return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  }
 
-  const childHasErrors = getTableElements(webformData)
-    .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-    .map(table => table.hasErrors);
-
-  const hasErrors = [webformData.hasErrors].concat(childHasErrors);
+  const { elementsRecords } = webformData;
+  const [currentRecord] = elementsRecords;
 
   return (
     <div className={styles.contentWrap}>
@@ -285,9 +284,16 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-          {hasErrors.includes(true) && (
-            <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
-          )}
+          {currentRecord?.validations?.map(recordValidation => {
+            const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
+
+            return (
+              <IconTooltip
+                levelError={recordValidation.levelError}
+                message={resources.messages[`record${validationIcons[recordValidation.levelError]}`]}
+              />
+            );
+          })}
         </div>
         {webformData.multipleRecords && (
           <Button

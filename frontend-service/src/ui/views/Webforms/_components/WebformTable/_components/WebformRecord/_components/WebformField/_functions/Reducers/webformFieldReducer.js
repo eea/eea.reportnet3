@@ -1,5 +1,7 @@
 export const webformFieldReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'SET_IS_SUBMITING':
+      return { ...state, isSubmiting: payload };
     case 'ON_FILE_DELETE_OPENED':
       return {
         ...state,
