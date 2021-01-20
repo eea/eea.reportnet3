@@ -235,6 +235,10 @@ export const ManageIntegrations = ({
 
   const onFillOperation = (data, name) => {
     manageIntegrationsDispatch({ type: 'ON_FILL_OPERATION', payload: { data, name } });
+    manageIntegrationsDispatch({
+      type: 'CLEAR_FILE_EXTENSION_NOTIFICATION_REQUIRED',
+      payload: { fileExtension: '', notificationRequired: false }
+    });
   };
 
   const onResetParameterInput = () => {
@@ -321,7 +325,15 @@ export const ManageIntegrations = ({
   const renderCheckboxLayout = options => {
     return options.map((option, index) => (
       <div className={`${styles.field} ${styles[option]} formField `} key={index}>
-        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
+        <label htmlFor={`${componentName}__${option}`}>
+          {resources.messages[option]}
+          <Button
+            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+            icon="infoCircle"
+            tooltip={resources.messages['notificationRequiredTooltip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+        </label>
         <div className={styles.checkboxWrapper}>
           <Checkbox
             id={'notificationRequired'}
