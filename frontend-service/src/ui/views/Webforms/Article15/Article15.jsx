@@ -25,7 +25,11 @@ export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
-  const [article15State, article15Dispatch] = useReducer(article15Reducer, { data: [], isVisible: {} });
+  const [article15State, article15Dispatch] = useReducer(article15Reducer, {
+    data: [],
+    isLoading: false,
+    isVisible: {}
+  });
 
   useEffect(() => initialLoad(), []);
 
@@ -63,6 +67,8 @@ export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
     if (!isEmpty(datasetSchema)) return onParseWebformData(datasetSchema, tables, datasetSchema.tables);
   };
 
+  const setIsLoading = value => article15Dispatch({ type: 'SET_IS_LOADING', payload: { value } });
+
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(article15State.isVisible))[0];
     const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
@@ -73,6 +79,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
         datasetId={datasetId}
         isReporting={isReporting}
         onTabChange={article15State.isVisible}
+        setIsLoading={setIsLoading}
         webform={visibleContent}
         webformType={'ARTICLE_15'}
       />
@@ -96,6 +103,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
           <Button
             data-tip
             data-for={!isCreated ? 'TableNotExists' : ''}
+            disabled={article15State.isLoading}
             className={`${styles.headerButton} ${
               article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
             }`}

@@ -28,7 +28,7 @@
     "addRowConstraint": "Add row constraint",
     "addSingle": "Add single",
     "addUniqueConstraint": "Add unique constraint",
-    "allAttachmentOrComplexGeom": "There are only Attachment or Complex geometries field types. Press 'Save' to add a record with empty values. You can upload attachments afterwards.",
+    "allAttachmentOrComplexGeom": "There are only Attachment or Complex geometries field types in this table. Press 'Save' to add a record with empty values. You can upload attachments afterwards.",
     "allOfficialEuropeanUnionWebsiteAddresses": "All official European Union website addresses are in the europa.eu domain.",
     "allReporterError": "Error loading copies list",
     "amPmFormat": "Switch to AM/PM format",
