@@ -317,7 +317,7 @@ export const WebformField = ({
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
-            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : () => {}}
+            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             onChange={event => {
               onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
