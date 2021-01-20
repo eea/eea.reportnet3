@@ -20,7 +20,6 @@ import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
-import { Icon } from 'leaflet';
 
 export const WebformTable = ({
   calculateSingle,
