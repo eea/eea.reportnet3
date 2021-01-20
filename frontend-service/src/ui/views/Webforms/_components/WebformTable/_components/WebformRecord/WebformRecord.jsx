@@ -393,14 +393,20 @@ export const WebformRecord = ({
 
   const renderWebformContent = content => {
     const errorMessages = renderErrorMessages(content);
-
+    const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
     return (
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
             {!isEmpty(content.validations) &&
-              content.validations.map((validation, index) => (
-                <IconTooltip key={index} levelError={validation.levelError} message={validation.message} />
+              uniqBy(content.validations, validation => {
+                return [validation.levelError].join();
+              }).map((validation, index) => (
+                <IconTooltip
+                  key={index}
+                  levelError={validation.levelError}
+                  message={resources.messages[`record${validationIcons[validation.levelError]}`]}
+                />
               ))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
