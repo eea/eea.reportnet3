@@ -20,6 +20,7 @@ import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
+import { Icon } from 'leaflet';
 
 export const WebformTable = ({
   calculateSingle,
@@ -160,6 +161,7 @@ export const WebformTable = ({
         fieldSchema || fieldId,
         selectedTable.pamsId
       );
+      console.log('parentTableData', parentTableData);
       if (!isNil(parentTableData.records)) {
         const tables = getTableElements(webform);
         const tableSchemaIds = tables.map(table => table.tableSchemaId);
@@ -270,7 +272,14 @@ export const WebformTable = ({
     }
   };
 
-  if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  if (webformTableState.isLoading) {
+    return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  }
+
+  console.log('webformData', webformData);
+
+  const { elementsRecords } = webformData;
+  const [currentRecord] = elementsRecords;
 
   const childHasErrors = getTableElements(webformData)
     .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
@@ -285,9 +294,12 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-          {hasErrors.includes(true) && (
-            <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
-          )}
+          {currentRecord?.validations?.map(recordValidation => (
+            <IconTooltip
+              levelError={recordValidation.levelError}
+              message={resources.messages['tableWithErrorsTooltip']}
+            />
+          ))}
         </div>
         {webformData.multipleRecords && (
           <Button
