@@ -75,7 +75,11 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
 
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecordId);
+      const isDataDeleted = await DatasetService.deleteRecordById(
+        datasetId,
+        selectedRecordId,
+        webformRecordState.record?.elements?.some(element => element.deleteInCascade)
+      );
       if (isDataDeleted) {
         onRefresh();
         handleDialogs('deleteRow', false);
@@ -272,7 +276,7 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           checkLabelVisibility(element) && (
-            <Fragment>
+            <Fragment key={element.title}>
               {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
               {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
               {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
@@ -336,7 +340,7 @@ export const WebformRecord = ({
 
               {checkCalculatedTableVisibility(element)
                 ? calculateSingle(element)
-                : filterRecords(element, elements).map((record, i) => {
+                : filterRecords(element, elements).map(record => {
                     return (
                       <WebformRecord
                         calculateSingle={calculateSingle}
@@ -346,7 +350,7 @@ export const WebformRecord = ({
                         datasetSchemaId={datasetSchemaId}
                         isAddingMultiple={isAddingMultiple}
                         isGroup={isGroup}
-                        key={i}
+                        key={record.recordId}
                         addingOnTableSchemaId={addingOnTableSchemaId}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
@@ -475,7 +479,9 @@ export const WebformRecord = ({
       {isDialogVisible.deleteRow && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={webformRecordState.isDeleting}
           header={resources.messages['deleteRow']}
+          iconConfirm={webformRecordState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}

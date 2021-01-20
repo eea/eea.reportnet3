@@ -20,7 +20,7 @@ export const apiWebLink = {
         }),
         data: {
           description: weblink.description,
-          url: weblink.url.toString().toLowerCase()
+          url: weblink.url.toString()
         }
       });
       return response.status >= 200 && response.status <= 299;

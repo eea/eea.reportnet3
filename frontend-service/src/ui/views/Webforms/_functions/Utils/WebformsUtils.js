@@ -224,10 +224,17 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
   });
 };
 
-const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
+const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStatistics) => {
   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
 
   data.map(table => {
+    table.hasErrors =
+      !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+        ? {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasErrors
+        : false;
+
     if (table.records) {
       table.records[0].fields = table.records[0].fields.map(field => {
         const { fieldId, recordId, type } = field;
@@ -306,6 +313,6 @@ export const WebformsUtils = {
   onParseWebformData,
   onParseWebformRecords,
   parseNewTableRecord,
-  parsePamsRecords,
-  parseOtherObjectivesRecord
+  parseOtherObjectivesRecord,
+  parsePamsRecords
 };
