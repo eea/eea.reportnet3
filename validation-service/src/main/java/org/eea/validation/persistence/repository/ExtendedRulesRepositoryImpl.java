@@ -48,12 +48,27 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   /**
    * Delete by id dataset schema.
    *
-   * @param rulesSchemaId the rules schema id
+   * @param datasetSchemaId the dataset schema id
    */
   @Override
-  public void deleteByIdDatasetSchema(ObjectId rulesSchemaId) {
-    mongoTemplate.findAndRemove(new Query(Criteria.where("_id").is(rulesSchemaId)),
+  public void deleteByIdDatasetSchema(ObjectId datasetSchemaId) {
+    mongoTemplate.findAndRemove(
+        new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
         RulesSchema.class);
+  }
+
+
+  /**
+   * Empty rules of schema by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return true, if successful
+   */
+  @Override
+  public boolean emptyRulesOfSchemaByDatasetSchemaId(ObjectId datasetSchemaId) {
+    Update update = new Update().set(LiteralConstants.RULES, new ArrayList<>());
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
   /**
