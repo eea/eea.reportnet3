@@ -949,6 +949,7 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "yes": "Yes",
-    "notificationRequired": "Straight to FME"
+    "notificationRequired": "Straight to FME",
+    "StraightToFMETooltip": "- If data is inserted straight to FME has to be CHECKED. <br>- If data is inserted through a file has to be UNCHECKED."
   }
 }
