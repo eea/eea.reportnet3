@@ -864,6 +864,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
+   * Find users by group.
+   *
+   * @param group the group
+   * @return the list
+   */
+  private List<UserRepresentationVO> findUsersByGroup(String group) {
+    List<UserRepresentationVO> rtn = userManagementControllerZuul.getUsersByGroup(group);
+    return null != rtn ? rtn : new ArrayList<>();
+  }
+
+  /**
    * Creates the groups and assings.
    *
    * @param dataflowId the dataflow id
@@ -877,10 +888,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<Long> euDatasetIds, Map<Long, String> datasetIdsEmails, List<ResourceInfoVO> groups,
       List<ResourceAssignationVO> assignments) {
 
-    List<UserRepresentationVO> stewards = userManagementControllerZuul
-        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
-    List<UserRepresentationVO> custodians = userManagementControllerZuul
-        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
+    List<UserRepresentationVO> stewards =
+        findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
+    List<UserRepresentationVO> custodians =
+        findUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
 
     for (Long dataCollectionId : dataCollectionIds) {
 
