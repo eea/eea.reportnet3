@@ -157,15 +157,21 @@ export const WebLinks = ({
       try {
         setWeblinkItem(e);
 
-        const weblinkToEdit = await WebLinkService.update(dataflowId, e);
+        const response = await WebLinkService.update(dataflowId, e);
 
-        if (weblinkToEdit.isUpdated) {
+        if (response.isUpdated) {
           onLoadWebLinks();
         }
 
         onHideAddEditDialog();
       } catch (error) {
         console.error('Error on update new Weblink: ', error);
+
+        if (error.response.status === 400) {
+          notificationContext.add({
+            type: 'WRONG_WEB_LINK'
+          });
+        }
       }
     }
   };

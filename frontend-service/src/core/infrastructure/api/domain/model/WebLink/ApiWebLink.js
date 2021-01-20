@@ -41,21 +41,16 @@ export const apiWebLink = {
   },
 
   update: async (dataflowId, weblinkToEdit) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(WeblinkConfig.update, {
-          dataflowId
-        }),
-        data: {
-          description: weblinkToEdit.description,
-          id: weblinkToEdit.id,
-          url: weblinkToEdit.url
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error editing the weblink: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.update({
+      url: getUrl(WeblinkConfig.update, {
+        dataflowId
+      }),
+      data: {
+        description: weblinkToEdit.description,
+        id: weblinkToEdit.id,
+        url: weblinkToEdit.url
+      }
+    });
+    return response;
   }
 };
