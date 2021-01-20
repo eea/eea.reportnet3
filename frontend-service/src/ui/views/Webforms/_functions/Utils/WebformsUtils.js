@@ -40,16 +40,6 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selecte
   return initialValues;
 };
 
-const getWebformValidations = tables => {
-  const initialValues = {};
-
-  compact(tables).forEach(table => {
-    initialValues[table] = false;
-  });
-
-  return initialValues;
-};
-
 const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
   const result = [];
   for (let i = 0; i < array1.length; i++) {
@@ -319,7 +309,6 @@ const parsePamsRecords = records =>
 
 export const WebformsUtils = {
   getWebformTabs,
-  getWebformValidations,
   mergeArrays,
   onParseWebformData,
   onParseWebformRecords,

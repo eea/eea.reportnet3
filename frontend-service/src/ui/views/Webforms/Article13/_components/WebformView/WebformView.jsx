@@ -45,10 +45,9 @@ export const WebformView = ({
   const resources = useContext(ResourcesContext);
 
   const tableSchemaNames = state.schemaTables.map(table => table.name);
-  const { getWebformTabs, getWebformValidations } = WebformsUtils;
+  const { getWebformTabs } = WebformsUtils;
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
-    hasWebformErrors: getWebformValidations(tables.map(table => table.name)),
     isLoading: false,
     isVisible: getWebformTabs(
       tables.map(table => table.name),
@@ -59,7 +58,7 @@ export const WebformView = ({
     singlesCalculatedData: {}
   });
 
-  const { hasWebformErrors, isLoading, isVisible, singlesCalculatedData } = webformViewState;
+  const { isLoading, isVisible, singlesCalculatedData } = webformViewState;
 
   useEffect(() => {
     const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
@@ -77,10 +76,6 @@ export const WebformView = ({
   useEffect(() => {
     getSingleData();
   }, [datasetId, selectedTable.pamsId]);
-
-  const getValidations = validations => {
-    webformViewDispatch({ type: 'GET_VALIDATIONS', payload: validations });
-  };
 
   const getSingleData = async () => {
     try {
@@ -286,7 +281,6 @@ export const WebformView = ({
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
-        getValidations={getValidations}
         isGroup={isGroup}
         isRefresh={isRefresh}
         isReporting={isReporting}
