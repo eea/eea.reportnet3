@@ -1,5 +1,11 @@
 export const manageIntegrationsReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'NOT_CLEAR_FILE_EXTENSION_NOTIFICATION_REQUIRED':
+      return {
+        ...state,
+        fileExtension: payload.fileExtension,
+        notificationRequired: payload.notificationRequired
+      };
     case 'GET_PROCESSES':
       return { ...state, processes: payload.data };
 

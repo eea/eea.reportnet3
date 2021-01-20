@@ -235,6 +235,10 @@ export const ManageIntegrations = ({
 
   const onFillOperation = (data, name) => {
     manageIntegrationsDispatch({ type: 'ON_FILL_OPERATION', payload: { data, name } });
+    manageIntegrationsDispatch({
+      type: 'CLEAR_FILE_EXTENSION_NOTIFICATION_REQUIRED',
+      payload: { fileExtension: '', notificationRequired: false }
+    });
   };
 
   const onResetParameterInput = () => {
