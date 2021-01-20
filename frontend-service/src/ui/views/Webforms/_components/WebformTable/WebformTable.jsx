@@ -27,6 +27,7 @@ export const WebformTable = ({
   datasetId,
   datasetSchemaId,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
+  getValidations = () => {},
   isGroup,
   isRefresh,
   isReporting,
