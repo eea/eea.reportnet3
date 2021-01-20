@@ -132,7 +132,7 @@ export const WebformField = ({
             referencedField.label !== '' &&
             referencedField.label !== referencedField.value
               ? `${referencedField.label}`
-              : ''
+              : referencedField.value
           }`,
           value: referencedField.value
         };
