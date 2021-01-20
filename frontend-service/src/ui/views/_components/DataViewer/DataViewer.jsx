@@ -1313,7 +1313,7 @@ const DataViewer = withRouter(
         )}
 
         {addDialogVisible && (
-          <div onKeyPress={!hasTextareas() && onKeyPress}>
+          <div onKeyPress={!hasTextareas() ? onKeyPress : undefined}>
             <Dialog
               blockScroll={false}
               className={`edit-table calendar-table ${styles.addEditRecordDialog}`}

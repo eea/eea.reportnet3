@@ -479,7 +479,9 @@ export const WebformRecord = ({
       {isDialogVisible.deleteRow && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={webformRecordState.isDeleting}
           header={resources.messages['deleteRow']}
+          iconConfirm={webformRecordState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}

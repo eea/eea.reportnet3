@@ -1,35 +1,37 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 
-export const Calendar = ({
-  appendTo,
-  autoZIndex,
-  baseZIndex,
-  className,
-  dateFormat,
-  disabledDates,
-  inline,
-  inputClassName,
-  inputId,
-  keepInvalid,
-  key,
-  maxDate,
-  minDate,
-  monthNavigator,
-  onBlur,
-  onChange,
-  onFocus,
-  onSelect,
-  placeholder,
-  readOnlyInput,
-  selectionMode,
-  showWeek,
-  style,
-  value,
-  yearNavigator,
-  yearRange
-}) => {
+export const Calendar = forwardRef((props, _) => {
+  const {
+    appendTo,
+    autoZIndex,
+    baseZIndex,
+    className,
+    dateFormat,
+    disabledDates,
+    inline,
+    inputClassName,
+    inputId,
+    inputRef,
+    keepInvalid,
+    key,
+    maxDate,
+    minDate,
+    monthNavigator,
+    onBlur,
+    onChange,
+    onFocus,
+    onSelect,
+    placeholder,
+    readOnlyInput,
+    selectionMode,
+    showWeek,
+    style,
+    value,
+    yearNavigator,
+    yearRange
+  } = props;
   return (
     <PrimeCalendar
       appendTo={appendTo}
@@ -52,6 +54,7 @@ export const Calendar = ({
       onSelect={onSelect}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
+      ref={inputRef}
       selectionMode={selectionMode}
       showWeek={showWeek}
       style={style}
@@ -60,4 +63,4 @@ export const Calendar = ({
       yearRange={yearRange}
     />
   );
-};
+});
