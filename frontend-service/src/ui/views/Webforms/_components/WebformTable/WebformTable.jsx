@@ -281,12 +281,6 @@ export const WebformTable = ({
   const { elementsRecords } = webformData;
   const [currentRecord] = elementsRecords;
 
-  const childHasErrors = getTableElements(webformData)
-    .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-    .map(table => table.hasErrors);
-
-  const hasErrors = [webformData.hasErrors].concat(childHasErrors);
-
   return (
     <div className={styles.contentWrap}>
       <h3 className={styles.title}>
@@ -294,12 +288,16 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-          {currentRecord?.validations?.map(recordValidation => (
-            <IconTooltip
-              levelError={recordValidation.levelError}
-              message={resources.messages['tableWithErrorsTooltip']}
-            />
-          ))}
+          {currentRecord?.validations?.map(recordValidation => {
+            const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
+
+            return (
+              <IconTooltip
+                levelError={recordValidation.levelError}
+                message={resources.messages[`record${validationIcons[recordValidation.levelError]}`]}
+              />
+            );
+          })}
         </div>
         {webformData.multipleRecords && (
           <Button
