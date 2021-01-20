@@ -664,8 +664,8 @@
     "privacyPolicy": "Privacy policy",
     "privacyPolicySubtitle": "Specific privacy statement for Reportnet 3.0",
     "privacyPolicyTitle": "Privacy policy",
-    "processName": "Process Name",
-    "processNamePlaceHolder": "Select a process",
+    "processName": "Workspace name",
+    "processNamePlaceHolder": "Select a workspace",
     "ProjectionsScenario": "Type",
     "properties": "Properties",
     "qcDescription": "Description (optional)",
@@ -949,6 +949,7 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "yes": "Yes",
-    "notificationRequired": "Notification Required"
+    "notificationRequired": "API POST used",
+    "notificationRequiredTooltip": "The workspace uses the Reportnet 3 API POST method to insert individual records directly into the dataset table(s)."
   }
 }
