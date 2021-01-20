@@ -187,7 +187,7 @@ public class RulesServiceImpl implements RulesService {
     if (null != ruleSchema) {
       // Check first if the rule has an integrity type rule to delete the associated data
       deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
-      rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
+      rulesRepository.deleteByIdDatasetSchema(ruleSchema.getIdDatasetSchema());
       rulesSequenceRepository.deleteByDatasetSchemaId(ruleSchema.getIdDatasetSchema());
     }
   }
@@ -961,14 +961,11 @@ public class RulesServiceImpl implements RulesService {
       RulesSchema originRules =
           rulesRepository.getRulesWithActiveCriteria(new ObjectId(originDatasetSchemaId), false);
 
-      // Delete the FK rules created in the steps before on the new schema, we are going to copy
+      // Delete the the rules created in the steps before on the new schema, we are going to copy
       // them directly
       // from the original schema with properties like 'enabled'
-      RulesSchema destinationRules =
-          rulesRepository.getRulesWithActiveCriteria(new ObjectId(newDatasetSchemaId), false);
-      for (Rule ruleToBeDeleted : destinationRules.getRules()) {
-        deleteRuleByReferenceId(newDatasetSchemaId, ruleToBeDeleted.getReferenceId().toString());
-      }
+      rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+      rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
       for (Rule rule : originRules.getRules()) {
         // We copy only the rules that are not of type Link, because these one are created
