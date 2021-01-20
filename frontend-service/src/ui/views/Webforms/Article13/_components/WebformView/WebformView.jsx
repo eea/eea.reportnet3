@@ -254,18 +254,13 @@ export const WebformView = ({
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const childHasErrors = webform.elements
-          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-          .map(table => table.hasErrors);
-        const hasErrors = [webform.hasErrors].concat(childHasErrors);
-
         return (
           <Button
             className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
-            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            icon={!isCreated ? 'info' : 'table'}
+            iconClasses={!isVisible[webform.title] ? 'info' : ''}
+            iconPos={!isCreated ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
@@ -290,8 +285,8 @@ export const WebformView = ({
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
-        onUpdateSinglesList={onUpdateSinglesList}
         onUpdatePamsValue={onUpdatePamsValue}
+        onUpdateSinglesList={onUpdateSinglesList}
         pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
