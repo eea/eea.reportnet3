@@ -55,6 +55,7 @@ export const WebformField = ({
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
+    isSubmiting: false,
     linkItemsOptions: [],
     record: record,
     sectorAffectedValue: null,
@@ -68,6 +69,7 @@ export const WebformField = ({
     initialFieldValue,
     isDeleteAttachmentVisible,
     isFileDialogVisible,
+    isSubmiting,
     linkItemsOptions,
     sectorAffectedValue,
     selectedFieldId,
@@ -163,13 +165,14 @@ export const WebformField = ({
   };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+    webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
     try {
-      if (initialFieldValue !== parsedValue) {
+      if (!isSubmiting && initialFieldValue !== parsedValue) {
         await DatasetService.updateFieldById(
           datasetId,
           option,
@@ -197,6 +200,8 @@ export const WebformField = ({
           type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR'
         });
       }
+    } finally {
+      webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
   };
 
@@ -245,11 +250,11 @@ export const WebformField = ({
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
-            onChange={event => {
-              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
-            }}
-            onFocus={event => {
-              onFocusField(event.target.value);
+            onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
+            onFocus={event => onFocusField(event.target.value)}
+            onSelect={event => {
+              onFillField(field, option, formatDate(event.value, isNil(event.value)));
+              onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
             value={new Date(field.value)}
             yearNavigator={true}
