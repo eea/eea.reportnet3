@@ -18,6 +18,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { WebLinkService } from 'core/services/WebLink';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const WebLinks = ({
@@ -31,6 +32,7 @@ export const WebLinks = ({
   sortOrderWeblinks,
   webLinks
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
@@ -134,15 +136,22 @@ export const WebLinks = ({
       setWeblinkItem(e);
 
       try {
-        const newWeblink = await WebLinkService.create(dataflowId, e);
+        const response = await WebLinkService.create(dataflowId, e);
 
-        if (newWeblink.isCreated) {
+        console.log('response', response);
+        if (response.isCreated.status >= 200 && response.isCreated.status <= 299) {
           onLoadWebLinks();
         }
 
         onHideAddEditDialog();
       } catch (error) {
         console.error('Error on save new Weblink: ', error);
+
+        if (error.response.status === 400) {
+          notificationContext.add({
+            type: 'WRONG_WEB_LINK'
+          });
+        }
       }
     } else {
       try {

@@ -950,6 +950,7 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "yes": "Yes",
     "notificationRequired": "API POST used",
-    "notificationRequiredTooltip": "The workspace uses the Reportnet 3 API POST method to insert individual records directly into the dataset table(s)."
+    "notificationRequiredTooltip": "The workspace uses the Reportnet 3 API POST method to insert individual records directly into the dataset table(s).",
+    "wrongWebLink": "Wrong or incomplete web link. Pleas, check it"
   }
 }
