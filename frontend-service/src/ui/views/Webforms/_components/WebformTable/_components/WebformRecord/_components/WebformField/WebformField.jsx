@@ -56,7 +56,7 @@ export const WebformField = ({
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
     linkItemsOptions: [],
-    record,
+    record: record,
     sectorAffectedValue: null,
     selectedFieldId: '',
     selectedFieldSchemaId: '',
@@ -105,7 +105,8 @@ export const WebformField = ({
     if (isNil(field) || isNil(field.referencedField)) {
       return;
     }
-    const conditionalField = webformFieldState.record.elements.find(
+
+    const conditionalField = record.elements.find(
       element => element.fieldSchemaId === field.referencedField.masterConditionalFieldId
     );
 
@@ -131,7 +132,7 @@ export const WebformField = ({
             referencedField.label !== '' &&
             referencedField.label !== referencedField.value
               ? `${referencedField.label}`
-              : ''
+              : referencedField.value
           }`,
           value: referencedField.value
         };
@@ -144,6 +145,7 @@ export const WebformField = ({
         value: ''
       });
     }
+
     webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
   };
 
@@ -315,7 +317,7 @@ export const WebformField = ({
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
-            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') && renderSinglePamsTemplate}
+            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             onChange={event => {
               onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);

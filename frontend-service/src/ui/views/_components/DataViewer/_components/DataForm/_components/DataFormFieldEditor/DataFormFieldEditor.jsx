@@ -55,8 +55,13 @@ const DataFormFieldEditor = ({
 
   const resources = useContext(ResourcesContext);
 
+  const dropdownRef = useRef(null);
   const inputRef = useRef(null);
   const linkDropdownRef = useRef(null);
+  const multiDropdownRef = useRef(null);
+  const pointRef = useRef(null);
+  const refCalendar = useRef(null);
+  const textAreaRef = useRef(null);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
@@ -104,10 +109,34 @@ const DataFormFieldEditor = ({
   }, [records.editedRecord, records.newRecord, isConditionalChanged]);
 
   useEffect(() => {
-    if (inputRef.current && isVisible && autoFocus) {
-      inputRef.current.element.focus();
+    if (isVisible && autoFocus) {
+      if (inputRef.current) {
+        inputRef.current.element.focus();
+      } else if (textAreaRef.current) {
+        textAreaRef.current.element.focus();
+      } else if (refCalendar.current) {
+        refCalendar.current.inputElement.focus();
+      } else if (dropdownRef.current) {
+        dropdownRef.current.focusInput.focus();
+      } else if (multiDropdownRef.current) {
+        multiDropdownRef.current.focusInput.focus();
+      } else if (pointRef.current) {
+        pointRef.current.element.focus();
+      } else if (linkDropdownRef.current) {
+        linkDropdownRef.current.focusInput.focus();
+      }
     }
-  }, [inputRef.current, isVisible]);
+  }, [
+    linkDropdownRef.current,
+    multiDropdownRef.current,
+    pointRef.current,
+    dropdownRef.current,
+    refCalendar.current,
+    textAreaRef.current,
+    inputRef.current,
+    isVisible,
+    records.totalRecords
+  ]);
 
   useEffect(() => {
     if (areEquals('LINK', type)) {
@@ -243,6 +272,7 @@ const DataFormFieldEditor = ({
         }}
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
+        ref={dropdownRef}
         value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
       />
     );
@@ -262,6 +292,7 @@ const DataFormFieldEditor = ({
             return { itemType: codelistItem, value: codelistItem };
           })}
         optionLabel="itemType"
+        ref={multiDropdownRef}
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
       />
@@ -350,6 +381,7 @@ const DataFormFieldEditor = ({
         onChange={e =>
           onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
         }
+        inputRef={refCalendar}
         style={{ width: '60px' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
@@ -451,6 +483,7 @@ const DataFormFieldEditor = ({
               )
             )
           }
+          ref={pointRef}
           type="text"
           value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates : ''}
         />
@@ -499,6 +532,7 @@ const DataFormFieldEditor = ({
       keyfilter={RecordUtils.getFilter(type)}
       maxLength={getMaxCharactersByType(type)}
       onChange={e => onChangeForm(field, e.target.value, isConditional)}
+      ref={textAreaRef}
       style={{ width: '60%' }}
       value={fieldValue}
     />
