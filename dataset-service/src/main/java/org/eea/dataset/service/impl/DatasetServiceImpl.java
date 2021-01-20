@@ -2880,7 +2880,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-
+    recordRepository.findLastRecord();
     return recordValues;
   }
 

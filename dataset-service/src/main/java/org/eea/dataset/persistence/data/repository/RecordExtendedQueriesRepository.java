@@ -51,4 +51,5 @@ public interface RecordExtendedQueriesRepository {
    */
   List<RecordValue> findByTableValueAllRecords(String idTableSchema);
 
+  RecordValue findLastRecord();
 }

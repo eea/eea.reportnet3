@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -418,4 +419,23 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     return sanitizedRecords;
   }
+
+  @Override
+  public RecordValue findLastRecord() {
+    RecordValue result = null;
+    Query query2 = entityManager.createQuery("SELECT count(rv) from RecordValue rv");
+
+    int recordsCount = Integer.parseInt(query2.getResultList().get(0).toString());
+    recordsCount = recordsCount == 0 ? 0 : recordsCount - 1;
+    try {
+      Query query = entityManager.createQuery("select rv from RecordValue rv ");
+      query.setMaxResults(1);
+      query.setFirstResult(recordsCount);
+      result = (RecordValue) query.getSingleResult();
+    } catch (NoResultException e) {
+      LOG.info("no result, ignore message");
+    }
+    return result;
+  }
+
 }
