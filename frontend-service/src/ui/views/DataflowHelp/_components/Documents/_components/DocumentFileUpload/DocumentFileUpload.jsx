@@ -139,14 +139,6 @@ const DocumentFileUpload = ({
                 content: {}
               });
             }
-
-            console.log('error', error);
-
-            if (error.response.status === 400) {
-              notificationContext.add({
-                type: 'WRONG_DOCUMENT'
-              });
-            }
           } finally {
             setSubmitting(false);
           }
