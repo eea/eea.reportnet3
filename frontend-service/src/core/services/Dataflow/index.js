@@ -5,6 +5,7 @@ import { CreateDatasetSchema } from './CreateDatasetSchema';
 import { dataflowRepository } from 'core/domain/model/Dataflow/DataflowRepository';
 import { Delete } from './Delete';
 import { DatasetsFinalFeedback } from './DatasetsFinalFeedback';
+import { Download } from './Download';
 import { GetAccepted } from './GetAccepted';
 import { GetAll } from './GetAll';
 import { GetAllSchemas } from './GetAllSchemas';
@@ -32,6 +33,7 @@ export const DataflowService = {
   datasetsReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
   datasetsValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
   deleteById: Delete({ dataflowRepository }),
+  downloadById: Download({ dataflowRepository }),
   getAllSchemas: GetAllSchemas({ dataflowRepository }),
   getApiKey: GetApiKey({ dataflowRepository }),
   generateApiKey: GenerateApiKey({ dataflowRepository }),

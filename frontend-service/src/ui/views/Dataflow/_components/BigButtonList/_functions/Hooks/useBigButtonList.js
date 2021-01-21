@@ -26,6 +26,7 @@ const useBigButtonList = ({
   isCloningDataflow,
   isLeadReporterOfCountry,
   onCloneDataflow,
+  onImportSchema,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -145,8 +146,13 @@ const useBigButtonList = ({
     },
     {
       label: resources.messages['cloneSchemasFromDataflow'],
-      icon: 'add',
+      icon: 'clone',
       command: () => onCloneDataflow()
+    },
+    {
+      label: resources.messages['importSchema'],
+      icon: 'import',
+      command: () => onImportSchema()
     }
   ];
 

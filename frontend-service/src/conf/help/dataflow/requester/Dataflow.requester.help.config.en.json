@@ -9,6 +9,10 @@
       "target": ".dataflow-edit-help-step"
     },
     {
+      "content": "‘Export schema’ displays a dialog to confirm the dataflow schema download",
+      "target": ".dataflow-export-schema-help-step"
+    },
+    {
       "content": "The cog button displays the API key and other parameters for accessing Reportnet3 programmatically",
       "target": ".dataflow-api-key-help-step"
     },
