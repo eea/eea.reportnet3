@@ -98,10 +98,8 @@ export const Filters = ({
   }, [JSON.stringify(filterState.checkboxes), filterState.property]);
 
   useEffect(() => {
-    if (sendData) {
-      if (filterState.clearedFilters) {
-        sendData(filterState.filterBy);
-      }
+    if (sendData && filterState.clearedFilters) {
+      sendData(filterState.filterBy);
     }
   }, [filterState.clearedFilters]);
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
