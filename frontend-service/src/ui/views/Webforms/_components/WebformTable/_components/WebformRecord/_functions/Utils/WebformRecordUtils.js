@@ -6,7 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const formatDate = (date, isInvalidDate) => {
-  if (isInvalidDate) return '';
+  if (isInvalidDate || date === '') return '';
 
   let d = new Date(date),
     month = '' + (d.getMonth() + 1),

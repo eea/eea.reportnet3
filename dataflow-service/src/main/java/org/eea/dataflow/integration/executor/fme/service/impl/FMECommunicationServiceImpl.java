@@ -180,10 +180,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
 
       if (null != checkResult && null != checkResult.getBody()
           && null != checkResult.getBody()
-          .getId()) { //NOPMD check result and body are verified not to be null. false positive
+          .getId()) { //NOSONAR check result and body are verified not to be null. false positive
         LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
         result = checkResult.getBody()
-            .getId(); //NOPMD check result and body are verified not to be null. false positive
+            .getId(); //NOSONAR check result and body are verified not to be null. false positive
       } else {
         throw new IllegalStateException("Error submitting job to FME, no result retrieved");
       }
@@ -322,7 +322,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
       stream = new ByteArrayInputStream(checkResult
-          .getBody()); //NOPMD check result and body are verified not to be null. false positive
+          .getBody()); //NOSONAR  check result and body are verified not to be null. false positive
     } else {
       stream = new ByteArrayInputStream(new byte[0]);
     }
