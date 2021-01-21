@@ -156,9 +156,9 @@ export const WebLinks = ({
       try {
         setWeblinkItem(e);
 
-        const newWeblink = await WebLinkService.update(dataflowId, e);
+        const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
-        if (newWeblink.isUpdated.status >= 200 && newWeblink.isUpdated.status <= 299) {
+        if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
           onLoadWebLinks();
         }
 
