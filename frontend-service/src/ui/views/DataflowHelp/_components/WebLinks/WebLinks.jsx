@@ -149,7 +149,7 @@ export const WebLinks = ({
 
         if (error.response.status === 400) {
           notificationContext.add({
-            type: 'WRONG_WEB_LINK'
+            type: 'WRONG_WEB_LINK_ERROR'
           });
         }
       }
@@ -169,7 +169,7 @@ export const WebLinks = ({
 
         if (error.response.status === 400) {
           notificationContext.add({
-            type: 'WRONG_WEB_LINK'
+            type: 'WRONG_WEB_LINK_ERROR'
           });
         }
       }
