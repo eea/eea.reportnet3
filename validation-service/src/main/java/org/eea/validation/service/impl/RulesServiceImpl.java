@@ -187,7 +187,7 @@ public class RulesServiceImpl implements RulesService {
     if (null != ruleSchema) {
       // Check first if the rule has an integrity type rule to delete the associated data
       deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
-      rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
+      rulesRepository.deleteByIdDatasetSchema(ruleSchema.getIdDatasetSchema());
       rulesSequenceRepository.deleteByDatasetSchemaId(ruleSchema.getIdDatasetSchema());
     }
   }
@@ -961,6 +961,12 @@ public class RulesServiceImpl implements RulesService {
       RulesSchema originRules =
           rulesRepository.getRulesWithActiveCriteria(new ObjectId(originDatasetSchemaId), false);
 
+      // Delete the the rules created in the steps before on the new schema, we are going to copy
+      // them directly
+      // from the original schema with properties like 'enabled'
+      rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+      rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+
       for (Rule rule : originRules.getRules()) {
         // We copy only the rules that are not of type Link, because these one are created
         // automatically in the process when we update the fieldSchema in previous calls of the copy
@@ -999,29 +1005,26 @@ public class RulesServiceImpl implements RulesService {
   private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
       String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
       String newDatasetSchemaId, Rule rule) throws EEAException {
-    if (StringUtils.isNotBlank(rule.getWhenCondition())
-        && !rule.getWhenCondition().contains("isfieldFK")) {
 
-      LOG.info(
-          "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
-          rule.getRuleName(), rule.getReferenceId());
-      // Here we change the fields of the rule involved with the help of the dictionary
-      fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
+    // Here we change the fields of the rule involved with the help of the dictionary
+    fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
 
-      // If the rule is a Dataset type, we need to do the same process with the
-      // IntegritySchema
-      if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
-        copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
-      }
+    // If the rule is a Dataset type, we need to do the same process with the
+    // IntegritySchema
+    if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
+      copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
+    }
 
-      // Create the new rule
-      if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
-        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-      }
-
+    LOG.info(
+        "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
+        rule.getRuleName(), rule.getReferenceId());
+    if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    } else {
       // add the rules sequence
       rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
     }
+
     return dictionaryOriginTargetObjectId;
   }
 
