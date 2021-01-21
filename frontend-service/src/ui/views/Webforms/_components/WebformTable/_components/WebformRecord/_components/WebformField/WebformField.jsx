@@ -241,8 +241,11 @@ export const WebformField = ({
     switch (type) {
       case 'DATE':
         const changeDatePickerPosition = inputLeftPosition => {
-          const datePickerElement = document.querySelector('.p-datepicker');
-          datePickerElement.style.left = `${inputLeftPosition}px`;
+          const datePickerElements = document.getElementsByClassName('p-datepicker');
+          for (let index = 0; index < datePickerElements.length; index++) {
+            const datePicker = datePickerElements[index];
+            datePicker.style.left = `${inputLeftPosition}px`;
+          }
         };
         return (
           <Calendar
