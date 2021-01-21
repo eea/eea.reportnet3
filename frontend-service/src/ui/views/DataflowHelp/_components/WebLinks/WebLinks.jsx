@@ -136,10 +136,9 @@ export const WebLinks = ({
       setWeblinkItem(e);
 
       try {
-        const response = await WebLinkService.create(dataflowId, e);
+        const newWeblink = await WebLinkService.create(dataflowId, e);
 
-        console.log('response', response);
-        if (response.isCreated.status >= 200 && response.isCreated.status <= 299) {
+        if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
           onLoadWebLinks();
         }
 
@@ -157,9 +156,9 @@ export const WebLinks = ({
       try {
         setWeblinkItem(e);
 
-        const response = await WebLinkService.update(dataflowId, e);
+        const newWeblink = await WebLinkService.update(dataflowId, e);
 
-        if (response.isUpdated) {
+        if (newWeblink.isUpdated.status >= 200 && newWeblink.isUpdated.status <= 299) {
           onLoadWebLinks();
         }
 
