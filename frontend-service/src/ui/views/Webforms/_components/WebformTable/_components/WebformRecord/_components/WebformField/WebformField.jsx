@@ -240,6 +240,10 @@ export const WebformField = ({
   const renderTemplate = (field, option, type) => {
     switch (type) {
       case 'DATE':
+        const changeDatePickerPosition = inputLeftPosition => {
+          const datePickerElement = document.querySelector('.p-datepicker');
+          datePickerElement.style.left = `${inputLeftPosition}px`;
+        };
         return (
           <Calendar
             appendTo={document.body}
@@ -251,7 +255,10 @@ export const WebformField = ({
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
             onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
-            onFocus={event => onFocusField(event.target.value)}
+            onFocus={event => {
+              changeDatePickerPosition(event.target.getBoundingClientRect().left);
+              onFocusField(event.target.value);
+            }}
             onSelect={event => {
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));

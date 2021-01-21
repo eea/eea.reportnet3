@@ -34,3 +34,6 @@
     margin-right: 0.5rem;
   }
 }
+:global .p-datepicker {
+  min-width: auto !important;
+}
