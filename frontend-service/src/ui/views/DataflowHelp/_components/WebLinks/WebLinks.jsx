@@ -242,8 +242,6 @@ export const WebLinks = ({
           setSortOrderWeblinks(e.sortOrder);
         }}
         paginator={false}
-        rows={10}
-        rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
         sortField={sortFieldWeblinks}
         sortOrder={sortOrderWeblinks}
