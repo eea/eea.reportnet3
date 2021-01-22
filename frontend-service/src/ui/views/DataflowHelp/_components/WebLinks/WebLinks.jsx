@@ -40,6 +40,7 @@ export const WebLinks = ({
   const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
   const [webLinksColumns, setWebLinksColumns] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef(null);
@@ -114,12 +115,20 @@ export const WebLinks = ({
   const onResetValues = () => setWeblinkItem({ id: undefined, description: '', url: '' });
 
   const onDeleteWeblink = async () => {
-    const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
-    onResetValues();
-    if (weblinkToDelete.isDeleted) {
-      onLoadWebLinks();
+    setIsDeleting(true);
+    try {
+      const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+
+      if (weblinkToDelete.isDeleted) {
+        onLoadWebLinks();
+      }
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      onResetValues();
+      setIsConfirmDeleteVisible(false);
+      setIsDeleting(false);
     }
-    setIsConfirmDeleteVisible(false);
   };
 
   const onHideAddEditDialog = () => {
@@ -356,6 +365,8 @@ export const WebLinks = ({
           header={resources.messages['delete']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
+          iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+          disabledConfirm={isDeleting}
           onConfirm={e => onDeleteWeblink(e)}
           onHide={onHideDeleteDialog}
           visible={isConfirmDeleteVisible}>
