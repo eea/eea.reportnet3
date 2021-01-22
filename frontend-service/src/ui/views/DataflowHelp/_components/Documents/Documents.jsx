@@ -26,6 +26,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 const Documents = ({
   dataflowId,
   documents,
@@ -50,6 +52,7 @@ const Documents = ({
   const [isEditForm, setIsEditForm] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
+  const [fileDeletingId, setFileDeletingId] = useState('');
 
   useEffect(() => {
     setAllDocuments(documents);
@@ -106,6 +109,14 @@ const Documents = ({
     return result;
   };
 
+  const getAllDocuments = () => {
+    const inmAllDocuments = [...allDocuments];
+    const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== fileDeletingId);
+    setAllDocuments(filteredAllDocuments);
+  };
+
+  useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT'], getAllDocuments);
+
   const isPublicColumnTemplate = rowData => (
     <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>
   );
@@ -115,20 +126,19 @@ const Documents = ({
   };
 
   const onDeleteDocument = async documentData => {
-    setDeleteDialogVisible(false);
+    setFileDeletingId(documentData.id);
     notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
 
     try {
       await DocumentService.deleteDocument(documentData.id);
-      const inmAllDocuments = [...allDocuments];
-      const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== documentData.id);
-      setAllDocuments(filteredAllDocuments);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
       });
       setIsDeletingDocument(false);
+    } finally {
+      setDeleteDialogVisible(false);
     }
   };
 
@@ -303,6 +313,7 @@ const Documents = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           header={resources.messages['delete']}
+          isDeleting={isDeletingDocument}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => {
