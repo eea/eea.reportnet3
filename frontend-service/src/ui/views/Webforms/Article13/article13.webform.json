@@ -243,7 +243,7 @@
           "title": "Other Union Policy",
           "dependency": {
             "field": "UnionPolicyList",
-            "value": ["Other (Union policy not listed above or additional Union policy)"]
+            "value": ["46"]
           },
           "multipleRecords": true,
           "showRequiredCharacter": true,

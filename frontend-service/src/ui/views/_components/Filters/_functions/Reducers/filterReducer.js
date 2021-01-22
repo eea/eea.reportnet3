@@ -19,7 +19,8 @@ export const filterReducer = (state, { type, payload }) => {
         checkboxes: payload.checkboxes,
         filtered: payload.filtered,
         filteredSearched: payload.filteredSearched,
-        property: ''
+        property: '',
+        clearedFilters: payload.clearedFilters
       };
 
     case 'FILTERED':
