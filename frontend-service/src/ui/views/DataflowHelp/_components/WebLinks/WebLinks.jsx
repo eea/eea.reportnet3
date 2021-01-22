@@ -111,8 +111,11 @@ export const WebLinks = ({
     </a>
   );
 
+  const onResetValues = () => setWeblinkItem({ id: undefined, description: '', url: '' });
+
   const onDeleteWeblink = async () => {
     const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+    onResetValues();
     if (weblinkToDelete.isDeleted) {
       onLoadWebLinks();
     }
@@ -128,8 +131,6 @@ export const WebLinks = ({
     setIsConfirmDeleteVisible(false);
     onResetValues();
   };
-
-  const onResetValues = () => setWeblinkItem({ id: undefined, description: '', url: '' });
 
   const onSaveRecord = async e => {
     if (isNil(weblinkItem.id)) {
