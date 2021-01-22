@@ -8,6 +8,7 @@ const parseDataToFilter = data => {
     legalInstrument: !isNil(dataflow.obligation) ? dataflow.obligation.legalInstruments.alias : null,
     name: dataflow.name,
     obligationTitle: !isNil(dataflow.obligation) ? dataflow.obligation.title : null,
+    pinned: dataflow.pinned || false,
     reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
     status: dataflow.status,
     userRole: dataflow.userRole

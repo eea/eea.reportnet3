@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import orderBy from 'lodash/orderBy';
 
 import styles from './DataflowsList.module.scss';
 
@@ -19,14 +20,32 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   const [dataToFilter, setDataToFilter] = useState(content);
   const [filteredData, setFilteredData] = useState(dataToFilter);
   const [filteredState, setFilteredState] = useState(false);
-
+  console.log({ content });
   useEffect(() => {
-    setDataToFilter(DataflowsListUtils.parseDataToFilter(content));
+    setDataToFilter(
+      orderBy(
+        DataflowsListUtils.parseDataToFilter(content),
+        ['pinned', 'expirationDate', 'status'],
+        ['desc', 'asc', 'asc']
+      )
+    );
   }, [content]);
 
   const onLoadFiltredData = data => setFilteredData(data);
 
   const getFilteredSearched = value => setFilteredState(value);
+
+  const reorderDataflows = (pinnedItem, isPinned) => {
+    const inmfilteredData = [...filteredData];
+    const changedFilteredData = inmfilteredData.map(item => {
+      if (item.id === pinnedItem.id) {
+        item.pinned = isPinned;
+      }
+      return item;
+    });
+    console.log(orderBy(changedFilteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']));
+    setFilteredData(orderBy(changedFilteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']));
+  };
 
   return (
     <div className={`${styles.wrap} ${className}`}>
@@ -43,6 +62,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
           sortable={true}
         />
       </div>
+      {console.log(filteredData)}
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map(dataflow => (
@@ -51,6 +71,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
               isCustodian={isCustodian}
               itemContent={dataflow}
               key={dataflow.id}
+              reorderDataflows={reorderDataflows}
               type={type}
             />
           ))

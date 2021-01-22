@@ -769,6 +769,9 @@
         },
         {
           "key": "DATASET_IMPORT_INIT"
+        },
+        {
+          "key": "DATAFLOW_PINNED_INIT"
         }
       ]
     }

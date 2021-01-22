@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
@@ -16,15 +16,20 @@ import { Button } from 'ui/views/_components/Button';
 
 import { DataflowService } from 'core/services/Dataflow';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
+const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows = () => {}, type }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const [isPinned, setIsPinned] = useState(false);
+  const [isPinShowed, setIsPinShowed] = useState(false);
 
   const onAccept = async () => {
     try {
@@ -60,7 +65,9 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
                 styles[itemContent.status]
               } dataflowList-first-dataflow-help-step`
             : `${styles.container} ${styles[itemContent.status]}`
-        }>
+        }
+        onMouseEnter={() => setIsPinShowed(true)}
+        onMouseLeave={() => setIsPinShowed(false)}>
         {type === 'accepted' ? (
           <Link
             className={`${styles.containerLink}`}
@@ -76,6 +83,19 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
         ) : (
           <>{children}</>
         )}
+        <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
+          <FontAwesomeIcon
+            className={isPinned ? styles.pinned : styles.notPinned}
+            icon={AwesomeIcons('pin')}
+            onClick={() => {
+              reorderDataflows(itemContent, !isPinned);
+              setIsPinned(!isPinned);
+              if (!isPinned) {
+                notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
+              }
+            }}
+          />
+        </div>
       </div>
     );
   };
