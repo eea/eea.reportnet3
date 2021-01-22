@@ -256,8 +256,8 @@ export const WebLinks = ({
       )}
       {isAddOrEditWeblinkDialogVisible && (
         <Dialog
-          className={styles.dialog}
           blockScroll={false}
+          className={styles.dialog}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           header={isNil(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']}
           modal={true}
@@ -266,12 +266,12 @@ export const WebLinks = ({
           visible={isAddOrEditWeblinkDialogVisible}>
           <Formik
             enableReinitialize={true}
-            ref={form}
             initialValues={weblinkItem}
-            validationSchema={addWeblinkSchema}
             onSubmit={e => {
               onSaveRecord(e);
-            }}>
+            }}
+            ref={form}
+            validationSchema={addWeblinkSchema}>
             {({ isSubmitting, errors, touched, values }) => (
               <Form>
                 <fieldset>
@@ -282,8 +282,8 @@ export const WebLinks = ({
                       innerRef={inputRef}
                       maxLength={255}
                       name="description"
-                      type="text"
                       placeholder={resources.messages['description']}
+                      type="text"
                       value={values.description}
                     />
                     <label htmlFor="descriptionWebLinks" className="srOnly">
@@ -295,8 +295,8 @@ export const WebLinks = ({
                     <Field
                       id={`urlWebLinks`}
                       name="url"
-                      type="text"
                       placeholder={resources.messages['url']}
+                      type="text"
                       value={values.url}
                     />
                     <label htmlFor="urlWebLinks" className="srOnly">
