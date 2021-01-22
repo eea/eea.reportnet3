@@ -18,6 +18,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { WebLinkService } from 'core/services/WebLink';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const WebLinks = ({
@@ -31,6 +32,7 @@ export const WebLinks = ({
   sortOrderWeblinks,
   webLinks
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
@@ -136,13 +138,19 @@ export const WebLinks = ({
       try {
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
-        if (newWeblink.isCreated) {
+        if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
           onLoadWebLinks();
         }
 
         onHideAddEditDialog();
       } catch (error) {
         console.error('Error on save new Weblink: ', error);
+
+        if (error.response.status === 400) {
+          notificationContext.add({
+            type: 'WRONG_WEB_LINK_ERROR'
+          });
+        }
       }
     } else {
       try {
@@ -150,13 +158,19 @@ export const WebLinks = ({
 
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
-        if (weblinkToEdit.isUpdated) {
+        if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
           onLoadWebLinks();
         }
 
         onHideAddEditDialog();
       } catch (error) {
         console.error('Error on update new Weblink: ', error);
+
+        if (error.response.status === 400) {
+          notificationContext.add({
+            type: 'WRONG_WEB_LINK_ERROR'
+          });
+        }
       }
     }
   };

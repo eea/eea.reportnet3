@@ -520,6 +520,9 @@
           "key": "UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR"
         },
         {
+          "key": "WRONG_WEB_LINK_ERROR"
+        },
+        {
           "key": "IMPORT_DATASET_SCHEMA_FAILED_EVENT"
         },
         {
