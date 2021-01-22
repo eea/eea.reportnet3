@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.bson.types.ObjectId;
@@ -15,6 +16,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Interface DataschemaService.
@@ -488,4 +490,9 @@ public interface DatasetSchemaService {
    * @param checkSQL the check SQL
    */
   void releaseCreateUpdateView(Long datasetId, String user, boolean checkSQL);
+
+
+  byte[] exportSchemas(Long dataflowId) throws IOException;
+
+  void importSchemas(Long dataflowId, MultipartFile multipartFile) throws IOException, EEAException;
 }

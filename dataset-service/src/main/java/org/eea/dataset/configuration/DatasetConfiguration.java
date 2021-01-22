@@ -2,7 +2,6 @@ package org.eea.dataset.configuration;
 
 import java.util.List;
 import java.util.Properties;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.eea.dataset.configuration.util.EeaDataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;

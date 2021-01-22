@@ -1,11 +1,19 @@
 package org.eea.dataset.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -36,9 +44,11 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -67,8 +77,10 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -133,6 +145,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   /** The dataset service. */
   @Autowired
+  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /** The pk catalogue repository. */
@@ -166,6 +179,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private ContributorControllerZuul contributorControllerZuul;
+
+
 
   /** The Constant FIELDSCHEMAS: {@value}. */
   private static final String FIELDSCHEMAS = "fieldSchemas";
@@ -1996,4 +2014,254 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     result.put(LiteralConstants.USER, user);
     kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_VIEW_EVENT, result);
   }
+
+
+  @Override
+  public byte[] exportSchemas(Long dataflowId) throws IOException {
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    Map<String, String> schemaNames = new HashMap<>();
+    List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
+    try (ZipOutputStream zos = new ZipOutputStream(bos)) {
+      for (DataSetSchema schema : schemasRepository.findByIdDataFlow(dataflowId)) {
+
+        // Put the datasetSchemaId and the dataset name into a map to store later in the zip file
+        DesignDataset design = designs.stream()
+            .filter(d -> d.getDatasetSchema().equals(schema.getIdDataSetSchema().toString()))
+            .findFirst().orElse(new DesignDataset());
+        schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String nameFile = "schema_" + schema.getIdDataSetSchema() + ".schema";
+        InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
+        ZipEntry ze = new ZipEntry(nameFile);
+        zos.putNextEntry(ze);
+        byte[] bytes = new byte[1024];
+        int count = schemaStream.read(bytes);
+        while (count > -1) {
+          zos.write(bytes, 0, count);
+          count = schemaStream.read(bytes);
+        }
+        schemaStream.close();
+      }
+      // Store the dataset names
+      ObjectMapper objectMapper = new ObjectMapper();
+      InputStream schemaNamesStream =
+          new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaNames));
+      ZipEntry ze = new ZipEntry("datasetSchemaNames.names");
+      zos.putNextEntry(ze);
+      byte[] bytes = new byte[1024];
+      int count = schemaNamesStream.read(bytes);
+      while (count > -1) {
+        zos.write(bytes, 0, count);
+        count = schemaNamesStream.read(bytes);
+      }
+      schemaNamesStream.close();
+
+
+    } catch (Exception e) {
+      LOG.error("Error exporting schemas to a ZIP file {}", e.getMessage(), e);
+    }
+    return bos.toByteArray();
+  }
+
+
+  // @Async
+  @Override
+  public void importSchemas(Long dataflowId, MultipartFile multipartFile)
+      throws IOException, EEAException {
+
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
+    Map<Long, DataSetSchema> mapDatasetsDestinyAndSchemasOrigin = new HashMap<>();
+
+    try {
+      try (InputStream input = multipartFile.getInputStream()) {
+        String fileName = multipartFile.getOriginalFilename();
+        String multipartFileMimeType = datasetService.getMimetype(fileName);
+
+        if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
+          try (ZipInputStream zip = new ZipInputStream(input)) {
+
+            ImportSchemas importClasses = unZip(zip);
+
+
+            for (DataSetSchema schema : importClasses.getSchemas()) {
+              LOG.info("El schema es: {}", schema);
+
+
+              String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
+              DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
+              dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
+                  newIdDatasetSchema);
+
+              final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
+              targetDatasetSchema.getTableSchemas().forEach(table -> {
+                for (TableSchema tableSchema : schema.getTableSchemas()) {
+                  if (table.getNameTableSchema().equals(tableSchema.getNameTableSchema())) {
+                    dictionaryOriginTargetTableObjectId
+                        .put(tableSchema.getIdTableSchema().toString(), table.getIdTableSchema());
+                    dictionaryOriginTargetTableObjectId.put(
+                        tableSchema.getRecordSchema().getIdRecordSchema().toString(),
+                        table.getRecordSchema().getIdRecordSchema());
+                  }
+                }
+              });
+              dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
+
+              Future<Long> datasetId =
+                  datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
+                      "IMPORTED_" + schemaName(schema.getIdDataSetSchema().toString(),
+                          importClasses.getSchemaNames()),
+                      newIdDatasetSchema, dataflowId, null, null, 0);
+
+
+
+              LOG.info("New dataset created in the import process with id {}", datasetId.get());
+              mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
+              Thread.sleep(4000);
+
+              // dictionaryOriginTargetDatasetsId.put(design.getId(), datasetId.get());
+
+
+
+              // After creating the datasets schemas on the DB, fill them and create the permissions
+              for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
+                  .entrySet()) {
+                contributorControllerZuul.createAssociatedPermissions(dataflowId,
+                    itemNewDatasetAndSchema.getKey());
+
+                fillAndUpdateDesignDatasetCopied(itemNewDatasetAndSchema.getValue(),
+                    dictionaryOriginTargetObjectId
+                        .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
+                    dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey());
+
+              }
+
+
+            }
+          }
+        }
+      }
+
+      // kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
+      // null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+      // .dataflowId(dataflowId).build());
+
+    } catch (Exception e) {
+      LOG.error("An error in the import process happened. Message: {}", e.getMessage(), e);
+    }
+  }
+
+  private ImportSchemas unZip(ZipInputStream zip) throws EEAException, IOException {
+
+    List<DataSetSchema> schemas = new ArrayList<>();
+    Map<String, String> schemaNames = new HashMap<>();
+    for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
+
+      String entryName = entry.getName();
+      String mimeType = datasetService.getMimetype(entryName);
+      if ("schema".equalsIgnoreCase(mimeType)) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buf = new byte[1024];
+        int n;
+        while ((n = zip.read(buf, 0, 1024)) != -1) {
+          output.write(buf, 0, n);
+        }
+        byte[] content = output.toByteArray();
+        DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+        LOG.info("Schema class recovered from zip file");
+        schemas.add(schema);
+      }
+      if ("names".equalsIgnoreCase(mimeType)) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buf = new byte[1024];
+        int n;
+        while ((n = zip.read(buf, 0, 1024)) != -1) {
+          output.write(buf, 0, n);
+        }
+        byte[] content = output.toByteArray();
+        schemaNames = objectMapper.readValue(content, Map.class);
+        LOG.info("Schema names recovered from zip file");
+      }
+    }
+    zip.closeEntry();
+    zip.close();
+
+    ImportSchemas fileUnziped = new ImportSchemas();
+    fileUnziped.setSchemaNames(schemaNames);
+    fileUnziped.setSchemas(schemas);
+    return fileUnziped;
+  }
+
+
+
+  private Map<String, String> fillAndUpdateDesignDatasetCopied(DataSetSchema schemaOrigin,
+      String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId)
+      throws EEAException {
+
+    // We've got the new schema created during the copy process. Now using the dictionary we'll
+    // replace the objectIds of the schema, because at this moment the new schema has the origin
+    // values, so we'll change it to new ObjectIds and finally we'll update it
+    DataSetSchema schema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
+    schema.setDescription(schemaOrigin.getDescription());
+    schema.setWebform(schemaOrigin.getWebform());
+    // table level
+    for (TableSchema table : schemaOrigin.getTableSchemas()) {
+      ObjectId newTableId = new ObjectId();
+      dictionaryOriginTargetObjectId.put(table.getIdTableSchema().toString(),
+          newTableId.toString());
+
+      table.setIdTableSchema(newTableId);
+      // record level
+      RecordSchema record = new RecordSchema();
+      ObjectId newRecordId = new ObjectId();
+      record.setIdRecordSchema(newRecordId);
+      if (table.getRecordSchema() != null && table.getRecordSchema().getFieldSchema() != null) {
+        dictionaryOriginTargetObjectId.put(table.getRecordSchema().getIdRecordSchema().toString(),
+            newRecordId.toString());
+        record.setFieldSchema(new ArrayList<>());
+        record.setIdTableSchema(newTableId);
+        // field level
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          ObjectId newFieldId = new ObjectId();
+          dictionaryOriginTargetObjectId.put(field.getIdFieldSchema().toString(),
+              newFieldId.toString());
+          // FieldSchema field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
+          field.setIdFieldSchema(newFieldId);
+          field.setIdRecord(newRecordId);
+          // check if the field has referencedField, but the type is no LINK, set the referenced
+          // part as null
+          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+            field.setReferencedField(null);
+          }
+          record.getFieldSchema().add(field);
+
+          // if the type is Link we store to later modify the schema id's with the proper fk
+          // relations after all the process it's done
+          // mapLinkResult(datasetId, mapDatasetIdFKRelations, fieldVO, field);
+        }
+        table.setRecordSchema(record);
+      }
+      schema.getTableSchemas().add(table);
+
+      // propagate new table into the datasets schema
+      datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
+    }
+    // save the schema with the new values
+    schemasRepository.updateSchemaDocument(schema);
+
+    return dictionaryOriginTargetObjectId;
+  }
+
+  private String schemaName(String datasetSchemaId, Map<String, String> schemaNames) {
+    String name = schemaNames.get(datasetSchemaId);
+    return name;
+  }
+
 }
