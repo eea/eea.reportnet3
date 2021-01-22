@@ -37,10 +37,11 @@ export const WebLinks = ({
 
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
   const [webLinksColumns, setWebLinksColumns] = useState([]);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef(null);
@@ -73,7 +74,7 @@ export const WebLinks = ({
     if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
 
     setWebLinksColumns(webLinkColArray);
-  }, [webLinks]);
+  }, [webLinks, weblinkItem]);
 
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(' ').max(255, resources.messages['webLinkDescriptionValidationMax']),
@@ -116,6 +117,8 @@ export const WebLinks = ({
 
   const onDeleteWeblink = async () => {
     setIsDeleting(true);
+    setDeletingId(weblinkItem.id);
+
     try {
       const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
 
@@ -125,8 +128,8 @@ export const WebLinks = ({
     } catch (error) {
       console.log('error', error);
     } finally {
-      onResetValues();
       setIsConfirmDeleteVisible(false);
+      onResetValues();
       setIsDeleting(false);
     }
   };
@@ -200,7 +203,14 @@ export const WebLinks = ({
     return 'edit';
   };
 
-  const webLinkEditButtons = () => {
+  const webLinkEditButtons = weblink => {
+    const getDeleteButtonIcon = () => {
+      if (deletingId === weblink.id && isDeleting) {
+        return 'spinnerAnimate';
+      }
+      return 'trash';
+    };
+
     return (
       <div className={styles.webLinkEditButtons}>
         <Button
@@ -211,8 +221,9 @@ export const WebLinks = ({
         />
 
         <Button
+          disabled={deletingId === weblink.id && isDeleting}
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
-          icon="trash"
+          icon={getDeleteButtonIcon()}
           onClick={() => setIsConfirmDeleteVisible(true)}
           type="button"
         />
@@ -239,6 +250,7 @@ export const WebLinks = ({
               style={{ float: 'left' }}
             />
           </div>
+
           <div className="p-toolbar-group-right">
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
