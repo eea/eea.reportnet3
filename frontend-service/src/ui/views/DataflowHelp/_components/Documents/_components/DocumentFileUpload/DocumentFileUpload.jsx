@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -31,6 +31,8 @@ const DocumentFileUpload = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef(null);
@@ -101,6 +103,7 @@ const DocumentFileUpload = ({
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         if (!isEqual(initialValuesWithLangField, values)) {
+          setIsUploading(true);
           setSubmitting(true);
           notificationContext.add({
             type: 'DOCUMENT_UPLOADING_INIT_INFO',
@@ -108,7 +111,6 @@ const DocumentFileUpload = ({
           });
           try {
             if (isEditForm) {
-              onUpload();
               await DocumentService.editDocument(
                 dataflowId,
                 values.description,
@@ -117,8 +119,8 @@ const DocumentFileUpload = ({
                 values.isPublic,
                 values.id
               );
-            } else {
               onUpload();
+            } else {
               await DocumentService.uploadDocument(
                 dataflowId,
                 values.description,
@@ -126,6 +128,7 @@ const DocumentFileUpload = ({
                 values.uploadFile,
                 values.isPublic
               );
+              onUpload();
             }
           } catch (error) {
             if (isEditForm) {
@@ -139,11 +142,13 @@ const DocumentFileUpload = ({
                 content: {}
               });
             }
+            onUpload();
           } finally {
-            setSubmitting(false);
+            setIsUploading(false);
+            setIsUploadDialogVisible(false);
           }
         } else {
-          setIsUploadDialogVisible(false);
+          setSubmitting(false);
         }
       }}>
       {({ errors, isSubmitting, setFieldValue, touched, values }) => (
@@ -217,8 +222,8 @@ const DocumentFileUpload = ({
                       : styles.disabledButton
                     : styles.disabledButton
                 }
-                disabled={isSubmitting}
-                icon={isEditForm ? 'check' : 'add'}
+                disabled={isSubmitting || isUploading}
+                icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
                 label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 type={isSubmitting ? '' : 'submit'}
               />
