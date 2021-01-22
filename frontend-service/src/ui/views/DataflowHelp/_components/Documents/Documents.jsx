@@ -115,7 +115,6 @@ const Documents = ({
   };
 
   const onDeleteDocument = async documentData => {
-    setDeleteDialogVisible(false);
     notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
 
     try {
@@ -129,6 +128,8 @@ const Documents = ({
         content: {}
       });
       setIsDeletingDocument(false);
+    } finally {
+      setDeleteDialogVisible(false);
     }
   };
 
@@ -303,6 +304,7 @@ const Documents = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           header={resources.messages['delete']}
+          isDeleting={isDeletingDocument}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => {

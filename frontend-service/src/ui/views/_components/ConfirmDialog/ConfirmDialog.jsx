@@ -19,6 +19,7 @@ const ConfirmDialog = forwardRef((props, _) => {
     header,
     iconCancel,
     iconConfirm,
+    isDeleting,
     isPasting,
     disabledConfirm,
     labelCancel,
@@ -94,8 +95,8 @@ const ConfirmDialog = forwardRef((props, _) => {
             className={`${
               !isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary p-button-animated-blink'
             } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
-            disabled={disabledConfirm}
-            icon={iconConfirm ? iconConfirm : 'check'}
+            disabled={disabledConfirm || isDeleting}
+            icon={!isDeleting ? (iconConfirm ? iconConfirm : 'check') : 'spinnerAnimate'}
             label={labelConfirm}
             onClick={onConfirm}
           />
