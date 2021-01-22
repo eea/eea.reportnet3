@@ -132,10 +132,11 @@ export const WebLinks = ({
     onResetValues();
   };
 
-  const onSaveRecord = async e => {
-    if (isNil(weblinkItem.id)) {
-      setWeblinkItem(e);
+  const onSaveRecord = async (e, setSubmitting) => {
+    setWeblinkItem(e);
+    setSubmitting(true);
 
+    if (isNil(weblinkItem.id)) {
       try {
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
@@ -152,11 +153,11 @@ export const WebLinks = ({
             type: 'WRONG_WEB_LINK_ERROR'
           });
         }
+      } finally {
+        setSubmitting(false);
       }
     } else {
       try {
-        setWeblinkItem(e);
-
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
         if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
@@ -172,8 +173,22 @@ export const WebLinks = ({
             type: 'WRONG_WEB_LINK_ERROR'
           });
         }
+      } finally {
+        setSubmitting(false);
       }
     }
+  };
+
+  const getButtonIcon = isSubmitting => {
+    if (isSubmitting) {
+      return 'spinnerAnimate';
+    }
+
+    if (isNil(weblinkItem.id)) {
+      return 'add';
+    }
+
+    return 'edit';
   };
 
   const webLinkEditButtons = () => {
@@ -185,6 +200,7 @@ export const WebLinks = ({
           onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
           type="button"
         />
+
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           icon="trash"
@@ -266,8 +282,8 @@ export const WebLinks = ({
           <Formik
             enableReinitialize={true}
             initialValues={weblinkItem}
-            onSubmit={e => {
-              onSaveRecord(e);
+            onSubmit={(e, actions) => {
+              onSaveRecord(e, actions.setSubmitting);
             }}
             ref={form}
             validationSchema={addWeblinkSchema}>
@@ -290,6 +306,7 @@ export const WebLinks = ({
                     </label>
                     <ErrorMessage className="error" name="description" component="div" />
                   </div>
+
                   <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
                     <Field
                       id={`urlWebLinks`}
@@ -316,8 +333,8 @@ export const WebLinks = ({
                       }
                       label={isNil(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
                       disabled={isSubmitting}
-                      icon={isNil(weblinkItem.id) ? 'add' : 'edit'}
                       type={isSubmitting ? '' : 'submit'}
+                      icon={getButtonIcon(isSubmitting)}
                     />
                     <Button
                       className={`${styles.cancelButton} p-button-secondary`}
