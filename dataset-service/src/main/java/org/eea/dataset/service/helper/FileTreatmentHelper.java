@@ -309,9 +309,15 @@ public class FileTreatmentHelper implements DisposableBean {
       // file in memory. To solve it, the FME connector should be redesigned.
       byte[] byteArray = IOUtils.toByteArray(inputStream);
       String encodedString = Base64.getEncoder().encodeToString(byteArray);
+      Map<String, String> internalParameters = integrationVO.getInternalParameters();
       Map<String, String> externalParameters = new HashMap<>();
       externalParameters.put("fileIS", encodedString);
       integrationVO.setExternalParameters(externalParameters);
+
+      // Remove the lock so FME will not encounter it while calling back importFileData
+      if ("false".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
+        datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      }
 
       if ((Integer) integrationController
           .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
