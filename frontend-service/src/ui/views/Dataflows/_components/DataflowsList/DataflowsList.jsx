@@ -20,7 +20,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   const [dataToFilter, setDataToFilter] = useState(content);
   const [filteredData, setFilteredData] = useState(dataToFilter);
   const [filteredState, setFilteredState] = useState(false);
-  console.log({ content });
+  const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
+
   useEffect(() => {
     setDataToFilter(
       orderBy(
@@ -43,8 +44,15 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       }
       return item;
     });
-    console.log(orderBy(changedFilteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']));
-    setFilteredData(orderBy(changedFilteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']));
+    const orderedFilteredData = orderBy(
+      changedFilteredData,
+      ['pinned', 'expirationDate', 'status'],
+      ['desc', 'asc', 'asc']
+    );
+
+    const orderedPinned = orderedFilteredData.map(el => el.pinned);
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+    setFilteredData(orderedFilteredData);
   };
 
   return (
@@ -62,18 +70,21 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
           sortable={true}
         />
       </div>
-      {console.log(filteredData)}
+
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
-          filteredData.map(dataflow => (
-            <DataflowsItem
-              dataFetch={dataFetch}
-              isCustodian={isCustodian}
-              itemContent={dataflow}
-              key={dataflow.id}
-              reorderDataflows={reorderDataflows}
-              type={type}
-            />
+          filteredData.map((dataflow, i) => (
+            <>
+              <DataflowsItem
+                dataFetch={dataFetch}
+                isCustodian={isCustodian}
+                itemContent={dataflow}
+                key={dataflow.id}
+                reorderDataflows={reorderDataflows}
+                type={type}
+              />
+              {pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
+            </>
           ))
         ) : (
           <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>

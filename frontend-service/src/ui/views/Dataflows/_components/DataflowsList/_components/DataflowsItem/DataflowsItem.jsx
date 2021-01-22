@@ -28,7 +28,7 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [isPinned, setIsPinned] = useState(false);
+  const [isPinned, setIsPinned] = useState(itemContent.pinned);
   const [isPinShowed, setIsPinShowed] = useState(false);
 
   const onAccept = async () => {
