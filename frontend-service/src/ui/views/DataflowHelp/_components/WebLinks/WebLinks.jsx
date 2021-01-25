@@ -35,10 +35,12 @@ export const WebLinks = ({
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+  const [deletingId, setDeletingId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
   const [webLinksColumns, setWebLinksColumns] = useState([]);
@@ -169,6 +171,8 @@ export const WebLinks = ({
         setSubmitting(false);
       }
     } else {
+      setIsEditing(true);
+      setEditingId(e.id);
       try {
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
@@ -187,6 +191,7 @@ export const WebLinks = ({
         }
       } finally {
         setSubmitting(false);
+        setIsEditing(false);
       }
     }
   };
@@ -210,19 +215,26 @@ export const WebLinks = ({
       }
       return 'trash';
     };
+    const getEditButtonIcon = () => {
+      if (editingId === weblink.id && isEditing) {
+        return 'spinnerAnimate';
+      }
+      return 'edit';
+    };
 
     return (
       <div className={styles.webLinkEditButtons}>
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-          icon="edit"
+          disabled={(editingId === weblink.id && isEditing) || (deletingId === weblink.id && isDeleting)}
+          icon={getEditButtonIcon()}
           onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
           type="button"
         />
 
         <Button
-          disabled={deletingId === weblink.id && isDeleting}
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          disabled={(deletingId === weblink.id && isDeleting) || (editingId === weblink.id && isEditing)}
           icon={getDeleteButtonIcon()}
           onClick={() => setIsConfirmDeleteVisible(true)}
           type="button"
@@ -374,11 +386,11 @@ export const WebLinks = ({
       {isConfirmDeleteVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeleting}
           header={resources.messages['delete']}
+          iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
-          disabledConfirm={isDeleting}
           onConfirm={e => onDeleteWeblink(e)}
           onHide={onHideDeleteDialog}
           visible={isConfirmDeleteVisible}>
