@@ -81,12 +81,12 @@ export const apiDataflow = {
     });
     return response;
   },
-  downloadById: dataflowId => {
-    const response = HTTPRequester.download({
+  downloadById: async dataflowId => {
+    const response = await HTTPRequester.download({
       url: getUrl(DataflowConfig.exportSchema, { dataflowId })
     });
     console.log(response);
-    return response;
+    return response.data;
   },
   getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     let url = isCustodian
