@@ -75,6 +75,8 @@ const Documents = ({
           setRowDataState(rowData);
         }}
         onEditClick={() => onEditDocument()}
+        rowDataId={rowData.id}
+        rowDeletingId={fileDeletingId}
       />
     </div>
   );
@@ -117,6 +119,8 @@ const Documents = ({
 
   useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT'], getAllDocuments);
 
+  useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_FAILED_EVENT'], setFileDeletingId);
+
   const isPublicColumnTemplate = rowData => (
     <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>
   );
@@ -137,6 +141,7 @@ const Documents = ({
         content: {}
       });
       setIsDeletingDocument(false);
+      setFileDeletingId('');
     } finally {
       setDeleteDialogVisible(false);
     }

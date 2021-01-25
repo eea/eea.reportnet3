@@ -11,6 +11,8 @@ const ActionsColumn = ({
   hideDeletion = false,
   hideEdition = false,
   isDeletingDocument,
+  rowDeletingId,
+  rowDataId,
   onDeleteClick,
   onEditClick
 }) => {
@@ -29,7 +31,7 @@ const ActionsColumn = ({
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           disabled={isDeletingDocument || disabledButtons}
-          icon={!isDeletingDocument ? 'trash' : 'spinnerAnimate'}
+          icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={() => onDeleteClick()}
           type="button"
         />
