@@ -36,6 +36,10 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
   const getFilteredSearched = value => setFilteredState(value);
 
+  const isFilteredByPinned = () =>
+    filteredData.filter(dataflow => dataflow.pinned === true).length === filteredData.length ||
+    filteredData.filter(dataflow => dataflow.pinned === false).length === filteredData.length;
+
   const reorderDataflows = (pinnedItem, isPinned) => {
     const inmfilteredData = [...filteredData];
     const changedFilteredData = inmfilteredData.map(item => {
@@ -59,6 +63,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
     <div className={`${styles.wrap} ${className}`}>
       {title && <h2>{title}</h2>}
       <p>{description}</p>
+      {console.log(dataToFilter)}
       <div className="dataflowList-filters-help-step">
         <Filters
           data={dataToFilter}
@@ -83,7 +88,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
                 reorderDataflows={reorderDataflows}
                 type={type}
               />
-              {pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
+              {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
             </>
           ))
         ) : (

@@ -92,6 +92,8 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
               setIsPinned(!isPinned);
               if (!isPinned) {
                 notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
+              } else {
+                notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
               }
             }}
           />
