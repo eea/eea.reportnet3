@@ -88,7 +88,7 @@ const useBigButtonList = ({
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
       newSchema: isDesigner && isDesignStatus,
-      updateReporters: isDraftStatus,
+      updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
@@ -366,7 +366,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-updateNewRepresentatives-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: buttonsVisibility.updateReporters && dataflowState.hasRepresentativesWithoutDatasets
+      visibility: buttonsVisibility.updateDataCollection && dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 
