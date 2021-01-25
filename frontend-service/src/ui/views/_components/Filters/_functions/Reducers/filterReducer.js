@@ -76,6 +76,12 @@ export const filterReducer = (state, { type, payload }) => {
         orderBy: { ...payload.resetOrder, [payload.property]: -payload.orderBy }
       };
 
+    case 'SET_CLEARED_FILTERS':
+      return {
+        ...state,
+        clearedFilters: payload
+      };
+
     case 'TOGGLE_MATCH_MODE':
       return { ...state, matchMode: payload };
 
