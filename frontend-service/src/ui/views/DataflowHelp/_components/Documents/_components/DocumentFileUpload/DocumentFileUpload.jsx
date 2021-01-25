@@ -27,7 +27,9 @@ const DocumentFileUpload = ({
   isEditForm = false,
   isUploadDialogVisible,
   onUpload,
-  setIsUploadDialogVisible
+  setIsUploadDialogVisible,
+  setFileUpdatingId,
+  setIsUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -105,12 +107,14 @@ const DocumentFileUpload = ({
         if (!isEqual(initialValuesWithLangField, values)) {
           setIsUploading(true);
           setSubmitting(true);
+          setFileUpdatingId(values.id);
           notificationContext.add({
             type: 'DOCUMENT_UPLOADING_INIT_INFO',
             content: {}
           });
           try {
             if (isEditForm) {
+              setIsUpdating(true);
               await DocumentService.editDocument(
                 dataflowId,
                 values.description,
@@ -143,9 +147,10 @@ const DocumentFileUpload = ({
               });
             }
             onUpload();
+            setFileUpdatingId('');
+            setIsUpdating(true);
           } finally {
             setIsUploading(false);
-            setIsUploadDialogVisible(false);
           }
         } else {
           setSubmitting(false);

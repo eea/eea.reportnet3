@@ -46,13 +46,15 @@ const Documents = ({
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documentInitialValues, setDocumentInitialValues] = useState({});
+  const [downloadingId, setDownloadingId] = useState('');
+  const [fileDeletingId, setFileDeletingId] = useState('');
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [downloadingId, setDownloadingId] = useState('');
+  const [fileUpdatingId, setFileUpdatingId] = useState('');
   const [isEditForm, setIsEditForm] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
-  const [fileDeletingId, setFileDeletingId] = useState('');
 
   useEffect(() => {
     setAllDocuments(documents);
@@ -77,6 +79,8 @@ const Documents = ({
         onEditClick={() => onEditDocument()}
         rowDataId={rowData.id}
         rowDeletingId={fileDeletingId}
+        rowUpdatingId={fileUpdatingId}
+        isUpdating={isUpdating}
       />
     </div>
   );
@@ -120,6 +124,10 @@ const Documents = ({
   useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT'], getAllDocuments);
 
   useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_FAILED_EVENT'], setFileDeletingId);
+
+  useCheckNotifications(['UPDATED_DOCUMENT_COMPLETED_EVENT', 'UPDATED_DOCUMENT_FAILED_EVENT'], setFileUpdatingId);
+
+  useCheckNotifications(['UPDATED_DOCUMENT_COMPLETED_EVENT', 'UPDATED_DOCUMENT_FAILED_EVENT'], setIsUpdating, false);
 
   const isPublicColumnTemplate = rowData => (
     <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>
@@ -310,6 +318,8 @@ const Documents = ({
             isUploadDialogVisible={isUploadDialogVisible}
             onUpload={onUploadDocument}
             setIsUploadDialogVisible={setIsUploadDialogVisible}
+            setFileUpdatingId={setFileUpdatingId}
+            setIsUpdating={setIsUpdating}
           />
         </Dialog>
       )}
