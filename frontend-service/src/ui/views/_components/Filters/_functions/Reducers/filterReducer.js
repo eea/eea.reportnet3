@@ -23,12 +23,6 @@ export const filterReducer = (state, { type, payload }) => {
         clearedFilters: payload.clearedFilters
       };
 
-    case 'CLEARED_FILTERS':
-      return {
-        ...state,
-        clearedFilters: payload
-      };
-
     case 'FILTERED':
       return {
         ...state,
@@ -80,6 +74,12 @@ export const filterReducer = (state, { type, payload }) => {
         data: payload.sortedData,
         filteredData: payload.filteredSortedData,
         orderBy: { ...payload.resetOrder, [payload.property]: -payload.orderBy }
+      };
+
+    case 'SET_CLEARED_FILTERS':
+      return {
+        ...state,
+        clearedFilters: payload
       };
 
     case 'TOGGLE_MATCH_MODE':
