@@ -36,9 +36,11 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -50,6 +52,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -65,11 +68,14 @@ import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
@@ -78,6 +84,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -182,6 +189,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
+
+  @Autowired
+  private RulesRepository rulesRepository;
+
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
 
 
 
@@ -2031,11 +2044,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             .findFirst().orElse(new DesignDataset());
         schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
 
+        // Schemas
         ObjectMapper objectMapper = new ObjectMapper();
         String nameFile = "schema_" + schema.getIdDataSetSchema() + ".schema";
         InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
-        ZipEntry ze = new ZipEntry(nameFile);
-        zos.putNextEntry(ze);
+        ZipEntry zeSchem = new ZipEntry(nameFile);
+        zos.putNextEntry(zeSchem);
         byte[] bytes = new byte[1024];
         int count = schemaStream.read(bytes);
         while (count > -1) {
@@ -2043,6 +2057,80 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           count = schemaStream.read(bytes);
         }
         schemaStream.close();
+
+        // Rules
+        RulesSchema rules = rulesRepository.findByIdDatasetSchema(schema.getIdDataSetSchema());
+        ObjectMapper objectMapperRules = new ObjectMapper();
+        String nameFileRules = "schema_" + schema.getIdDataSetSchema() + ".qcrules";
+        InputStream rulesStream =
+            new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(rules));
+        ZipEntry zeRules = new ZipEntry(nameFileRules);
+        zos.putNextEntry(zeRules);
+        byte[] bytesRules = new byte[1024];
+        int countRules = rulesStream.read(bytesRules);
+        while (countRules > -1) {
+          zos.write(bytesRules, 0, countRules);
+          countRules = rulesStream.read(bytesRules);
+        }
+        rulesStream.close();
+
+        // Unique
+        List<UniqueConstraintSchema> listUnique =
+            uniqueConstraintRepository.findByDatasetSchemaId(schema.getIdDataSetSchema());
+        ObjectMapper objectMapperUnique = new ObjectMapper();
+        String nameFileUnique = "schema_" + schema.getIdDataSetSchema() + ".unique";
+        InputStream uniqueStream =
+            new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
+        ZipEntry zeUnique = new ZipEntry(nameFileUnique);
+        zos.putNextEntry(zeUnique);
+        byte[] bytesUnique = new byte[1024];
+        int countUnique = rulesStream.read(bytesUnique);
+        while (countUnique > -1) {
+          zos.write(bytesUnique, 0, countUnique);
+          countUnique = rulesStream.read(bytesUnique);
+        }
+        uniqueStream.close();
+
+        // Integrity
+        List<IntegrityVO> listIntegrity = rulesControllerZuul
+            .getIntegrityRulesByDatasetSchemaId(schema.getIdDataSetSchema().toString());
+        ObjectMapper objectMapperIntegrity = new ObjectMapper();
+        String nameFileIntegrity = "schema_" + schema.getIdDataSetSchema() + ".integrity";
+        InputStream integrityStream =
+            new ByteArrayInputStream(objectMapperIntegrity.writeValueAsBytes(listIntegrity));
+        ZipEntry zeIntegrity = new ZipEntry(nameFileIntegrity);
+        zos.putNextEntry(zeIntegrity);
+        byte[] bytesIntegrity = new byte[1024];
+        int countIntegrity = integrityStream.read(bytesIntegrity);
+        while (countIntegrity > -1) {
+          zos.write(bytesIntegrity, 0, countIntegrity);
+          countIntegrity = integrityStream.read(bytesIntegrity);
+        }
+        integrityStream.close();
+
+        // Store the external integration
+        IntegrationVO integration = new IntegrationVO();
+        Map<String, String> internalParameters = new HashMap<>();
+        internalParameters.put("dataflowId", dataflowId.toString());
+        internalParameters.put("datasetSchemaId", schema.getIdDataSetSchema().toString());
+        integration.setInternalParameters(internalParameters);
+        List<IntegrationVO> extIntegrations =
+            integrationControllerZuul.findAllIntegrationsByCriteria(integration);
+        ObjectMapper objectMapperIntegration = new ObjectMapper();
+        InputStream extIntegrationStream =
+            new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
+        String nameFileExtIntegrations =
+            "schema_" + schema.getIdDataSetSchema() + ".extintegrations";
+        ZipEntry zeIntegration = new ZipEntry(nameFileExtIntegrations);
+        zos.putNextEntry(zeIntegration);
+        byte[] bytesIntegration = new byte[1024];
+        int countIntegration = extIntegrationStream.read(bytesIntegration);
+        while (countIntegration > -1) {
+          zos.write(bytesIntegration, 0, countIntegration);
+          countIntegration = extIntegrationStream.read(bytesIntegration);
+        }
+        extIntegrationStream.close();
+
       }
       // Store the dataset names
       ObjectMapper objectMapper = new ObjectMapper();
@@ -2059,6 +2147,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       schemaNamesStream.close();
 
 
+
     } catch (Exception e) {
       LOG.error("Error exporting schemas to a ZIP file {}", e.getMessage(), e);
     }
@@ -2066,7 +2155,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
-  // @Async
+  @Async
   @Override
   public void importSchemas(Long dataflowId, MultipartFile multipartFile)
       throws IOException, EEAException {
@@ -2084,7 +2173,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           try (ZipInputStream zip = new ZipInputStream(input)) {
 
             ImportSchemas importClasses = unZip(zip);
-
 
             for (DataSetSchema schema : importClasses.getSchemas()) {
               LOG.info("El schema es: {}", schema);
@@ -2111,7 +2199,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
               Future<Long> datasetId =
                   datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-                      "IMPORTED_" + schemaName(schema.getIdDataSetSchema().toString(),
+                      schemaName(schema.getIdDataSetSchema().toString(),
                           importClasses.getSchemaNames()),
                       newIdDatasetSchema, dataflowId, null, null, 0);
 
@@ -2144,9 +2232,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       }
 
-      // kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
-      // null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-      // .dataflowId(dataflowId).build());
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).build());
 
     } catch (Exception e) {
       LOG.error("An error in the import process happened. Message: {}", e.getMessage(), e);
@@ -2261,7 +2349,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   private String schemaName(String datasetSchemaId, Map<String, String> schemaNames) {
     String name = schemaNames.get(datasetSchemaId);
-    return name;
+    return "IMPORTED_" + name;
+  }
+
+  private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchema>> mapDatasetIdFKRelations,
+      FieldSchema fieldCreated, FieldSchema field) {
+    if (DataType.LINK.equals(field.getType())) {
+      List<FieldSchema> listFK = new ArrayList<>();
+      if (mapDatasetIdFKRelations.containsKey(datasetId)) {
+        listFK = mapDatasetIdFKRelations.get(datasetId);
+      }
+      listFK.add(fieldCreated);
+      mapDatasetIdFKRelations.put(datasetId, listFK);
+    }
   }
 
 }
