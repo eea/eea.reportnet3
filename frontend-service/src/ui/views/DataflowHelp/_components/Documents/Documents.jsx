@@ -312,7 +312,9 @@ const Documents = ({
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeletingDocument}
           header={resources.messages['delete']}
+          iconConfirm={isDeletingDocument ? 'spinnerAnimate' : 'check'}
           isDeleting={isDeletingDocument}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
