@@ -23,6 +23,12 @@ export const filterReducer = (state, { type, payload }) => {
         clearedFilters: payload.clearedFilters
       };
 
+    case 'CLEARED_FILTERS':
+      return {
+        ...state,
+        clearedFilters: payload
+      };
+
     case 'FILTERED':
       return {
         ...state,

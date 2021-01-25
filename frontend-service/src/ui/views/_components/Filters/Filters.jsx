@@ -100,6 +100,7 @@ export const Filters = ({
   useEffect(() => {
     if (sendData && filterState.clearedFilters) {
       sendData(filterState.filterBy);
+      filterDispatch({ type: 'CLEARED_FILTERS', payload: false });
     }
   }, [filterState.clearedFilters]);
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
