@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import orderBy from 'lodash/orderBy';
+import pull from 'lodash/pull';
 
 import styles from './DataflowsList.module.scss';
 
@@ -10,12 +11,18 @@ import DataflowConf from 'conf/dataflow.config.json';
 import { DataflowsItem } from './_components/DataflowsItem';
 import { Filters } from 'ui/views/_components/Filters';
 
+import { UserService } from 'core/services/User';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
 
 const DataflowsList = ({ className, content = [], dataFetch, description, isCustodian, title, type }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [dataToFilter, setDataToFilter] = useState(content);
   const [filteredData, setFilteredData] = useState(dataToFilter);
@@ -25,7 +32,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   useEffect(() => {
     setDataToFilter(
       orderBy(
-        DataflowsListUtils.parseDataToFilter(content),
+        DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
         ['pinned', 'expirationDate', 'status'],
         ['desc', 'asc', 'asc']
       )
@@ -34,13 +41,38 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
   const onLoadFiltredData = data => setFilteredData(data);
 
+  const changeUserProperties = async userProperties => {
+    try {
+      const response = await UserService.updateAttributes(userProperties);
+      return response;
+    } catch (error) {
+      notificationContext.add({
+        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
+      });
+    }
+  };
+
   const getFilteredSearched = value => setFilteredState(value);
 
   const isFilteredByPinned = () =>
     filteredData.filter(dataflow => dataflow.pinned === true).length === filteredData.length ||
     filteredData.filter(dataflow => dataflow.pinned === false).length === filteredData.length;
 
-  const reorderDataflows = (pinnedItem, isPinned) => {
+  const reorderDataflows = async (pinnedItem, isPinned) => {
+    const inmUserProperties = { ...userContext.userProps };
+    const inmPinnedDataflows = inmUserProperties.pinnedDataflows;
+    console.log({ inmPinnedDataflows });
+    if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
+      pull(inmPinnedDataflows, pinnedItem.id.toString());
+    } else {
+      inmPinnedDataflows.push(pinnedItem.id.toString());
+    }
+    inmUserProperties.pinnedDataflows = inmPinnedDataflows;
+    const response = await changeUserProperties(inmUserProperties);
+    if (response.status >= 200 && response.status <= 299) {
+      userContext.onChangePinnedDataflows(inmPinnedDataflows);
+    }
+
     const inmfilteredData = [...filteredData];
     const changedFilteredData = inmfilteredData.map(item => {
       if (item.id === pinnedItem.id) {
@@ -48,6 +80,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       }
       return item;
     });
+    console.log('LLEGO');
     const orderedFilteredData = orderBy(
       changedFilteredData,
       ['pinned', 'expirationDate', 'status'],
@@ -63,7 +96,6 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
     <div className={`${styles.wrap} ${className}`}>
       {title && <h2>{title}</h2>}
       <p>{description}</p>
-      {console.log(dataToFilter)}
       <div className="dataflowList-filters-help-step">
         <Filters
           data={dataToFilter}

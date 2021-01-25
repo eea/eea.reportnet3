@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
@@ -27,9 +27,13 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-
+  console.log(itemContent.pinned);
   const [isPinned, setIsPinned] = useState(itemContent.pinned);
   const [isPinShowed, setIsPinShowed] = useState(false);
+
+  useEffect(() => {
+    setIsPinned(itemContent.pinned);
+  }, [itemContent]);
 
   const onAccept = async () => {
     try {
