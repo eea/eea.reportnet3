@@ -140,6 +140,7 @@ const DocumentFileUpload = ({
                 type: 'DOCUMENT_EDITING_ERROR',
                 content: {}
               });
+              setIsUpdating(false);
             } else {
               notificationContext.add({
                 type: 'DOCUMENT_UPLOADING_ERROR',
@@ -148,7 +149,6 @@ const DocumentFileUpload = ({
             }
             onUpload();
             setFileUpdatingId('');
-            setIsUpdating(true);
           } finally {
             setIsUploading(false);
           }
