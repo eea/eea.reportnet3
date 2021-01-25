@@ -123,10 +123,6 @@ const Documents = ({
 
   useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT'], getAllDocuments);
 
-  useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT', 'DELETE_DOCUMENT_FAILED_EVENT'], setFileDeletingId);
-
-  useCheckNotifications(['UPDATED_DOCUMENT_COMPLETED_EVENT', 'UPDATED_DOCUMENT_FAILED_EVENT'], setFileUpdatingId);
-
   useCheckNotifications(['UPDATED_DOCUMENT_COMPLETED_EVENT', 'UPDATED_DOCUMENT_FAILED_EVENT'], setIsUpdating, false);
 
   const isPublicColumnTemplate = rowData => (
