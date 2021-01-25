@@ -1,0 +1,12 @@
+{
+  "steps": [
+    {
+      "content": "In this area you can change different application settings",
+      "target": ".settings-change-settings-help-step"
+    },
+    {
+      "content": "You can also check your personal info, change your avatar image and read the Privacy policy",
+      "target": ".settings-change-avatar-help-step"
+    }
+  ]
+}
