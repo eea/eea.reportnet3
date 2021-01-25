@@ -1,6 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { SettingsHelpConfig } from 'conf/help/settings';
+
 import styles from './Settings.module.scss';
 
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -22,15 +24,16 @@ const Settings = withRouter(({ history }) => {
 
   useEffect(() => {
     leftSideBarContext.addModels([]);
+    leftSideBarContext.addHelpSteps(SettingsHelpConfig, 'settingsHelp');
   }, []);
 
   const renderUserOptions = () => {
     return (
       <>
-        <div className={styles.userConfiguration}>
+        <div className={`${styles.userConfiguration} settings-change-settings-help-step`}>
           <UserConfiguration />
         </div>
-        <div className={styles.userCard}>
+        <div className={`${styles.userCard} settings-change-avatar-help-step`}>
           <UserCard />
         </div>
       </>
