@@ -6,7 +6,7 @@ import isNil from 'lodash/isNil';
 import styles from './WebformTable.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { IconTooltip } from 'ui/views/_components/IconTooltip';
+import { GroupedRecordValidations } from 'ui/views/Webforms/_components/GroupedRecordValidations';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { WebformRecord } from './_components/WebformRecord';
 
@@ -39,7 +39,12 @@ export const WebformTable = ({
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewTableRecord, parseOtherObjectivesRecord } = WebformsUtils;
+  const {
+    onParseWebformRecords,
+    parseNewTableRecord,
+    parseOtherObjectivesRecord,
+    parseRecordsValidations
+  } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -274,9 +279,6 @@ export const WebformTable = ({
     return <Spinner style={{ top: 0, margin: '1rem' }} />;
   }
 
-  const { elementsRecords } = webformData;
-  const [currentRecord] = elementsRecords;
-
   return (
     <div className={styles.contentWrap}>
       <h3 className={styles.title}>
@@ -284,16 +286,8 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-          {currentRecord?.validations?.map(recordValidation => {
-            const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
 
-            return (
-              <IconTooltip
-                levelError={recordValidation.levelError}
-                message={resources.messages[`record${validationIcons[recordValidation.levelError]}`]}
-              />
-            );
-          })}
+          <GroupedRecordValidations parsedRecordData={parseRecordsValidations(webformData.elementsRecords)[0]} />
         </div>
         {webformData.multipleRecords && (
           <Button
