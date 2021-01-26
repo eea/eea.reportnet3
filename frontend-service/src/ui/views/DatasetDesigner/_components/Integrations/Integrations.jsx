@@ -17,6 +17,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
   const [integrationsList, setIntegrationsList] = useState([]);
   const [needsRefresh, setNeedsRefresh] = useState(true);
   const [updatedData, setUpdatedData] = useState({});
+  const [isIntegrationListUpdating, setIsIntegrationListUpdating] = useState(false);
 
   const getIntegrationsList = data => setIntegrationsList(data);
 
@@ -65,10 +66,12 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
             designerState={designerState}
             getUpdatedData={getUpdatedData}
             integrationsList={getIntegrationsList}
+            isIntegrationListUpdating={isIntegrationListUpdating}
             manageDialogs={manageDialogs}
             needsRefresh={needsRefresh}
             onUpdateDesignData={onUpdateData}
             refreshList={refreshList}
+            setIsIntegrationListUpdating={setIsIntegrationListUpdating}
           />
         </Dialog>
       )}
@@ -81,6 +84,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           manageDialogs={manageDialogs}
           onUpdateData={onUpdateData}
           refreshList={refreshList}
+          setIsIntegrationListUpdating={setIsIntegrationListUpdating}
           state={designerState}
           updatedData={updatedData}
         />

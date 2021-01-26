@@ -23,10 +23,12 @@ export const IntegrationsList = ({
   designerState,
   getUpdatedData,
   integrationsList,
+  isIntegrationListUpdating,
   manageDialogs,
   needsRefresh,
   onUpdateDesignData,
-  refreshList
+  refreshList,
+  setIsIntegrationListUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -118,6 +120,7 @@ export const IntegrationsList = ({
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
       isLoading(false);
+      setIsIntegrationListUpdating(false);
     }
   };
 

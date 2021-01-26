@@ -37,6 +37,7 @@ export const ManageIntegrations = ({
   manageDialogs,
   onUpdateData,
   refreshList,
+  setIsIntegrationListUpdating,
   state,
   updatedData
 }) => {
@@ -188,6 +189,7 @@ export const ManageIntegrations = ({
 
   const onCreateIntegration = async () => {
     setIsIntegrationManaging('isIntegrationCreating', true);
+    setIsIntegrationListUpdating(true);
     try {
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.create(manageIntegrationsState);
@@ -299,6 +301,7 @@ export const ManageIntegrations = ({
   const onUpdateIntegration = async () => {
     try {
       setIsIntegrationManaging('isIntegrationEditing', true);
+      setIsIntegrationListUpdating(true);
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.update(manageIntegrationsState);
 
