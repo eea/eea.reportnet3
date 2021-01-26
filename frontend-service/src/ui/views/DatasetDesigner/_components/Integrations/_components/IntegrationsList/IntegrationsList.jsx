@@ -89,6 +89,7 @@ export const IntegrationsList = ({
   const isDeleting = isDeletingValue => integrationListDispatch({ type: 'IS_DELETING', payload: { isDeletingValue } });
 
   const onDeleteIntegration = async () => {
+    setIsIntegrationListUpdating(true);
     try {
       isDeleting(true);
       const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
