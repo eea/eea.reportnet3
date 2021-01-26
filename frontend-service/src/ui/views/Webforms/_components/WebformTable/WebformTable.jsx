@@ -284,7 +284,6 @@ export const WebformTable = ({
       resources.messages['recordWarnings'],
       resources.messages['recordInfos']
     );
-    console.log('new validationsGroup', validationsGroup);
     return getIconsValidationsErrors(validationsGroup);
   };
 
@@ -305,9 +304,7 @@ export const WebformTable = ({
 
   const getIconsValidationsErrors = validations => {
     let icons = [];
-    if (isNull(validations)) {
-      return icons;
-    }
+    if (isNull(validations)) return icons;
 
     const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
     const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);

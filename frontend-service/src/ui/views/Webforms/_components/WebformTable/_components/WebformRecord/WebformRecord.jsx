@@ -189,9 +189,46 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
 
-  const validationsTemplate = recordData => {
+  const parseData = () => {
+    // return data.elementsRecords.map(record => {
+    const datasetPartitionId = webformRecordState.record.datasetPartitionId;
+    const providerCode = webformRecordState.record.providerCode;
+    const recordValidations = webformRecordState.record.validations;
+    const recordId = webformRecordState.record.recordId;
+    const recordSchemaId = webformRecordState.record.recordSchemaId;
+    const arrayDataFields = webformRecordState.record.fields.map(field => {
+      return {
+        fieldData: {
+          [field.fieldSchemaId]: field.value,
+          type: field.type,
+          id: field.fieldId,
+          fieldSchemaId: field.fieldSchemaId
+        },
+        fieldValidations: field.validations
+      };
+    });
+    arrayDataFields.push({ fieldData: { id: webformRecordState.recordrecordId }, fieldValidations: null });
+    arrayDataFields.push({
+      fieldData: { datasetPartitionId: webformRecordState.recorddatasetPartitionId },
+      fieldValidations: null
+    });
+    const arrayDataAndValidations = {
+      dataRow: arrayDataFields,
+      recordValidations,
+      recordId,
+      datasetPartitionId,
+      providerCode,
+      recordSchemaId
+    };
+    return arrayDataAndValidations;
+    // });
+  };
+
+  // console.log('record', parseData());
+
+  const validationsTemplate = () => {
     const validationsGroup = DataViewerUtils.groupValidations(
-      recordData,
+      parseData(),
       resources.messages['recordBlockers'],
       resources.messages['recordErrors'],
       resources.messages['recordWarnings'],
@@ -312,7 +349,7 @@ export const WebformRecord = ({
                       message={validation.message}
                     />
                   ))}
-                {!isEmpty(webformRecordState.newRecord) && validationsTemplate(webformRecordState.newRecord)}
+                {/* {validationsTemplate()} */}
               </div>
             </div>
           )
@@ -442,7 +479,7 @@ export const WebformRecord = ({
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
-            {!isEmpty(content.validations) &&
+            {/* {!isEmpty(content.validations) &&
               uniqBy(content.validations, validation => {
                 return [validation.levelError].join();
               }).map((validation, index) => (
@@ -451,7 +488,8 @@ export const WebformRecord = ({
                   levelError={validation.levelError}
                   message={resources.messages[`record${validationIcons[validation.levelError]}`]}
                 />
-              ))}
+              ))} */}
+            {validationsTemplate()}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}
