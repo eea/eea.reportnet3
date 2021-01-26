@@ -272,7 +272,6 @@ export const WebformRecord = ({
                       message={validation.message}
                     />
                   ))}
-                {/* {validationsTemplate()} */}
               </div>
             </div>
           )
