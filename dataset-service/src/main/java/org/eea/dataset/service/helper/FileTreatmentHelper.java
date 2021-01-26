@@ -315,7 +315,7 @@ public class FileTreatmentHelper implements DisposableBean {
       integrationVO.setExternalParameters(externalParameters);
 
       // Remove the lock so FME will not encounter it while calling back importFileData
-      if ("false".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
+      if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
         datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
       }
 
