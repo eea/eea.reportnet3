@@ -15,9 +15,11 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
   const resources = useContext(ResourcesContext);
 
   const [integrationsList, setIntegrationsList] = useState([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [isCreating, setIsCreating] = useState(false);
   const [needsRefresh, setNeedsRefresh] = useState(true);
   const [updatedData, setUpdatedData] = useState({});
-  const [isIntegrationListUpdating, setIsIntegrationListUpdating] = useState(false);
 
   const getIntegrationsList = data => setIntegrationsList(data);
 
@@ -25,8 +27,8 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
   const onCloseListModal = () => {
     manageDialogs('isIntegrationListDialogVisible', false);
-    refreshList(true)
-  }
+    refreshList(true);
+  };
 
   const refreshList = value => setNeedsRefresh(value);
 
@@ -66,12 +68,14 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
             designerState={designerState}
             getUpdatedData={getUpdatedData}
             integrationsList={getIntegrationsList}
-            isIntegrationListUpdating={isIntegrationListUpdating}
+            isCreating={isCreating}
+            isUpdating={isUpdating}
             manageDialogs={manageDialogs}
             needsRefresh={needsRefresh}
             onUpdateDesignData={onUpdateData}
             refreshList={refreshList}
-            setIsIntegrationListUpdating={setIsIntegrationListUpdating}
+            setIsCreating={setIsCreating}
+            setIsUpdating={setIsUpdating}
           />
         </Dialog>
       )}
@@ -84,7 +88,8 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           manageDialogs={manageDialogs}
           onUpdateData={onUpdateData}
           refreshList={refreshList}
-          setIsIntegrationListUpdating={setIsIntegrationListUpdating}
+          setIsCreating={setIsCreating}
+          setIsUpdating={setIsUpdating}
           state={designerState}
           updatedData={updatedData}
         />

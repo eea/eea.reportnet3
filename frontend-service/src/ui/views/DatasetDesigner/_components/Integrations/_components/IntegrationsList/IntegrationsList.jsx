@@ -23,12 +23,14 @@ export const IntegrationsList = ({
   designerState,
   getUpdatedData,
   integrationsList,
-  isIntegrationListUpdating,
+  isCreating,
+  isUpdating,
   manageDialogs,
   needsRefresh,
   onUpdateDesignData,
   refreshList,
-  setIsIntegrationListUpdating
+  setIsCreating,
+  setIsUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -40,6 +42,7 @@ export const IntegrationsList = ({
     integrationId: '',
     isDataUpdated: false,
     isDeleteDialogVisible: false,
+    isDeleting: false,
     isLoading: true
   });
 
@@ -51,6 +54,8 @@ export const IntegrationsList = ({
 
   const actionsTemplate = row => (
     <ActionsColumn
+      isDeletingDocument={integrationListState.isDeleting}
+      isUpdating={isUpdating}
       onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
         const filteredData = integrationListState.data.filter(
@@ -59,6 +64,9 @@ export const IntegrationsList = ({
         manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
+      rowDataId={row.integrationId}
+      rowDeletingId={integrationListState.integrationId}
+      rowUpdatingId={integrationListState.integrationId}
     />
   );
 
@@ -86,12 +94,9 @@ export const IntegrationsList = ({
 
   const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const isDeleting = isDeletingValue => integrationListDispatch({ type: 'IS_DELETING', payload: { isDeletingValue } });
-
   const onDeleteIntegration = async () => {
-    setIsIntegrationListUpdating(true);
     try {
-      isDeleting(true);
+      integrationListDispatch({ type: 'IS_DELETING', payload: true });
       const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
@@ -102,7 +107,7 @@ export const IntegrationsList = ({
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
     } finally {
       isDeleteDialogVisible(false);
-      isDeleting(false);
+      integrationListDispatch({ type: 'IS_DELETING', payload: false });
     }
   };
 
@@ -110,8 +115,8 @@ export const IntegrationsList = ({
 
   const onLoadIntegrations = async () => {
     try {
-      if (!isIntegrationListUpdating) {
-        isLoading(true);
+      if (isCreating || isUpdating || integrationsList.isDeleting) {
+        isLoading(false);
       }
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
@@ -121,7 +126,8 @@ export const IntegrationsList = ({
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
       isLoading(false);
-      setIsIntegrationListUpdating(false);
+      setIsUpdating(false);
+      setIsCreating(false);
     }
   };
 
