@@ -38,9 +38,9 @@ const ValidationsList = withRouter(
     const validationContext = useContext(ValidationContext);
 
     const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+      deletedRuleId: null,
       filtered: false,
       filteredData: [],
-      isDataFetching: false,
       isDataUpdated: false,
       isDeleteDialogVisible: false,
       isLoading: true,
@@ -88,6 +88,10 @@ const ValidationsList = withRouter(
     const isDataUpdated = value => tabsValidationsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
     const onDeleteValidation = async () => {
+      tabsValidationsDispatch({
+        type: 'IS_DELETING_RULE',
+        payload: { isDeletingRule: true }
+      });
       try {
         const response = await ValidationService.deleteById(dataset.datasetId, tabsValidationsState.validationId);
         if (response.status >= 200 && response.status <= 299) {
@@ -95,6 +99,7 @@ const ValidationsList = withRouter(
             type: 'SET_DELETED_RULE_ID',
             payload: { deletedRuleId: tabsValidationsState.validationId }
           });
+
           onUpdateData();
         }
       } catch (error) {
@@ -102,6 +107,10 @@ const ValidationsList = withRouter(
         validationId('');
       } finally {
         onHideDeleteDialog();
+        tabsValidationsDispatch({
+          type: 'IS_DELETING_RULE',
+          payload: { isDeletingRule: false }
+        });
       }
     };
 
@@ -298,7 +307,7 @@ const ValidationsList = withRouter(
       if (row.entityType === 'TABLE') rowType = 'dataset';
 
       const getDeleteBtnIcon = () => {
-        if (row.id === tabsValidationsState.deletedRuleId && tabsValidationsState.isFetchingData) {
+        if (row.id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData) {
           return 'spinnerAnimate';
         }
         return 'trash';
@@ -352,8 +361,8 @@ const ValidationsList = withRouter(
 
     const deleteValidationDialog = () => (
       <ConfirmDialog
-        disabledConfirm={validationContext.isDataFetching}
-        iconConfirm={validationContext.isDataFetching ? 'spinnerAnimate' : 'check'}
+        disabledConfirm={tabsValidationsState.isDeletingRule}
+        iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
         classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteValidationHeader']}
         labelCancel={resources.messages['no']}
