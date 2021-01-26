@@ -320,10 +320,7 @@ const ValidationsList = withRouter(
 
           <Button
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
-            disabled={
-              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
-              validationContext.isFetchingData
-            }
+            disabled={validationContext.isFetchingData}
             icon={getDeleteBtnIcon()}
             onClick={() => onShowDeleteDialog()}
             type="button"
