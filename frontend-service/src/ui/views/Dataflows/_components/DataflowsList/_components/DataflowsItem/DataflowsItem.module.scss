@@ -323,20 +323,3 @@
   max-width: 300px;
   word-break: break-all;
 }
-
-@keyframes rotatePin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(90deg);
-  }
-}
-@keyframes rotateNotPin {
-  from {
-    transform: rotate(90deg);
-  }
-  to {
-    transform: rotate(0deg);
-  }
-}

@@ -16,7 +16,6 @@ import { Button } from 'ui/views/_components/Button';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -24,16 +23,16 @@ import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows = () => {}, type }) => {
-  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-  console.log(itemContent.pinned);
+
   const [isPinned, setIsPinned] = useState(itemContent.pinned);
+  const [isPinning, setIsPinning] = useState(false);
   const [isPinShowed, setIsPinShowed] = useState(false);
 
   useEffect(() => {
     setIsPinned(itemContent.pinned);
-  }, [itemContent]);
+  }, [itemContent, isPinning]);
 
   const onAccept = async () => {
     try {
@@ -89,16 +88,12 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
         )}
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
-            className={isPinned ? styles.pinned : styles.notPinned}
-            icon={AwesomeIcons('pin')}
-            onClick={() => {
-              reorderDataflows(itemContent, !isPinned);
-              setIsPinned(!isPinned);
-              if (!isPinned) {
-                notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
-              } else {
-                notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
-              }
+            className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
+            icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
+            onClick={async () => {
+              setIsPinning(true);
+              await reorderDataflows(itemContent, !isPinned);
+              setIsPinning(false);
             }}
           />
         </div>

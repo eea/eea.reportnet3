@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
 import pull from 'lodash/pull';
 
@@ -30,13 +31,15 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
   useEffect(() => {
-    setDataToFilter(
-      orderBy(
-        DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
-        ['pinned', 'expirationDate', 'status'],
-        ['desc', 'asc', 'asc']
-      )
+    const parsedDataflows = orderBy(
+      DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
+      ['pinned', 'expirationDate', 'status'],
+      ['desc', 'asc', 'asc']
     );
+    setDataToFilter(parsedDataflows);
+    const orderedPinned = parsedDataflows.map(el => el.pinned);
+
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [content]);
 
   const onLoadFiltredData = data => setFilteredData(data);
@@ -61,7 +64,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   const reorderDataflows = async (pinnedItem, isPinned) => {
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = inmUserProperties.pinnedDataflows;
-    console.log({ inmPinnedDataflows });
+
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
     } else {
@@ -69,27 +72,33 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
     }
     inmUserProperties.pinnedDataflows = inmPinnedDataflows;
     const response = await changeUserProperties(inmUserProperties);
-    if (response.status >= 200 && response.status <= 299) {
+    if (!isNil(response) && response.status >= 200 && response.status <= 299) {
       userContext.onChangePinnedDataflows(inmPinnedDataflows);
-    }
 
-    const inmfilteredData = [...filteredData];
-    const changedFilteredData = inmfilteredData.map(item => {
-      if (item.id === pinnedItem.id) {
-        item.pinned = isPinned;
+      const inmfilteredData = [...filteredData];
+      const changedFilteredData = inmfilteredData.map(item => {
+        if (item.id === pinnedItem.id) {
+          item.pinned = isPinned;
+        }
+        return item;
+      });
+
+      if (isPinned) {
+        notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
+      } else {
+        notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
       }
-      return item;
-    });
-    console.log('LLEGO');
-    const orderedFilteredData = orderBy(
-      changedFilteredData,
-      ['pinned', 'expirationDate', 'status'],
-      ['desc', 'asc', 'asc']
-    );
 
-    const orderedPinned = orderedFilteredData.map(el => el.pinned);
-    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
-    setFilteredData(orderedFilteredData);
+      const orderedFilteredData = orderBy(
+        changedFilteredData,
+        ['pinned', 'expirationDate', 'status'],
+        ['desc', 'asc', 'asc']
+      );
+
+      const orderedPinned = orderedFilteredData.map(el => el.pinned);
+      setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+      setFilteredData(orderedFilteredData);
+    }
   };
 
   return (
