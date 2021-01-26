@@ -312,6 +312,7 @@ export const WebformRecord = ({
                       message={validation.message}
                     />
                   ))}
+                {!isEmpty(webformRecordState.newRecord) && validationsTemplate(webformRecordState.newRecord)}
               </div>
             </div>
           )

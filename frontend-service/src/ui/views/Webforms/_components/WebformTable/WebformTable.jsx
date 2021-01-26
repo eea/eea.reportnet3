@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
 
 import styles from './WebformTable.module.scss';
 
@@ -17,6 +18,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
+import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
@@ -274,8 +276,81 @@ export const WebformTable = ({
     return <Spinner style={{ top: 0, margin: '1rem' }} />;
   }
 
-  const { elementsRecords } = webformData;
-  const [currentRecord] = elementsRecords;
+  const validationsTemplate = recordData => {
+    const validationsGroup = DataViewerUtils.groupValidations(
+      parseData(webformData)[0],
+      resources.messages['recordBlockers'],
+      resources.messages['recordErrors'],
+      resources.messages['recordWarnings'],
+      resources.messages['recordInfos']
+    );
+    console.log('new validationsGroup', validationsGroup);
+    return getIconsValidationsErrors(validationsGroup);
+  };
+
+  const addIconLevelError = (validation, levelError, message) => {
+    let icon = [];
+    if (!isEmpty(validation)) {
+      icon.push(
+        <IconTooltip
+          className={styles.iconTooltipLevelError}
+          key={levelError}
+          levelError={levelError}
+          message={message}
+        />
+      );
+    }
+    return icon;
+  };
+
+  const getIconsValidationsErrors = validations => {
+    let icons = [];
+    if (isNull(validations)) {
+      return icons;
+    }
+
+    const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
+    const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
+    const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
+    const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
+
+    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
+    return icons;
+  };
+
+  const parseData = data => {
+    if (isNil(data.elementsRecords)) return [];
+
+    return data.elementsRecords.map(record => {
+      const datasetPartitionId = record.datasetPartitionId;
+      const providerCode = record.providerCode;
+      const recordValidations = record.validations;
+      const recordId = record.recordId;
+      const recordSchemaId = record.recordSchemaId;
+      const arrayDataFields = record.fields.map(field => {
+        return {
+          fieldData: {
+            [field.fieldSchemaId]: field.value,
+            type: field.type,
+            id: field.fieldId,
+            fieldSchemaId: field.fieldSchemaId
+          },
+          fieldValidations: field.validations
+        };
+      });
+      arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
+      arrayDataFields.push({ fieldData: { datasetPartitionId: record.datasetPartitionId }, fieldValidations: null });
+      const arrayDataAndValidations = {
+        dataRow: arrayDataFields,
+        recordValidations,
+        recordId,
+        datasetPartitionId,
+        providerCode,
+        recordSchemaId
+      };
+      return arrayDataAndValidations;
+    });
+  };
 
   return (
     <div className={styles.contentWrap}>
@@ -284,16 +359,8 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-          {currentRecord?.validations?.map(recordValidation => {
-            const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
 
-            return (
-              <IconTooltip
-                levelError={recordValidation.levelError}
-                message={resources.messages[`record${validationIcons[recordValidation.levelError]}`]}
-              />
-            );
-          })}
+          {validationsTemplate()}
         </div>
         {webformData.multipleRecords && (
           <Button
