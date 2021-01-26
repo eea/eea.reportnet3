@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformRecord.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { GroupedRecordValidations } from 'ui/views/Webforms/_components/GroupedRecordValidations';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 
 import { WebformField } from './_components/WebformField';
@@ -21,9 +21,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
-import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
@@ -65,6 +65,7 @@ export const WebformRecord = ({
   const { isConditionalChanged, isDialogVisible, selectedRecordId } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
+  const { parseRecordValidations } = WebformsUtils;
 
   useEffect(() => {
     webformRecordDispatch({
@@ -187,84 +188,6 @@ export const WebformRecord = ({
 
   const handleDialogs = (dialog, value) => {
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
-  };
-
-  const parseData = () => {
-    // return data.elementsRecords.map(record => {
-    const datasetPartitionId = webformRecordState.record.datasetPartitionId;
-    const providerCode = webformRecordState.record.providerCode;
-    const recordValidations = webformRecordState.record.validations;
-    const recordId = webformRecordState.record.recordId;
-    const recordSchemaId = webformRecordState.record.recordSchemaId;
-    const arrayDataFields = webformRecordState.record.fields.map(field => {
-      return {
-        fieldData: {
-          [field.fieldSchemaId]: field.value,
-          type: field.type,
-          id: field.fieldId,
-          fieldSchemaId: field.fieldSchemaId
-        },
-        fieldValidations: field.validations
-      };
-    });
-    arrayDataFields.push({ fieldData: { id: webformRecordState.recordrecordId }, fieldValidations: null });
-    arrayDataFields.push({
-      fieldData: { datasetPartitionId: webformRecordState.recorddatasetPartitionId },
-      fieldValidations: null
-    });
-    const arrayDataAndValidations = {
-      dataRow: arrayDataFields,
-      recordValidations,
-      recordId,
-      datasetPartitionId,
-      providerCode,
-      recordSchemaId
-    };
-    return arrayDataAndValidations;
-    // });
-  };
-
-  // console.log('record', parseData());
-
-  const validationsTemplate = () => {
-    const validationsGroup = DataViewerUtils.groupValidations(
-      parseData(),
-      resources.messages['recordBlockers'],
-      resources.messages['recordErrors'],
-      resources.messages['recordWarnings'],
-      resources.messages['recordInfos']
-    );
-    return getIconsValidationsErrors(validationsGroup);
-  };
-
-  const addIconLevelError = (validation, levelError, message) => {
-    let icon = [];
-    if (!isEmpty(validation)) {
-      icon.push(
-        <IconTooltip
-          className={styles.iconTooltipLevelError}
-          key={levelError}
-          levelError={levelError}
-          message={message}
-        />
-      );
-    }
-    return icon;
-  };
-
-  const getIconsValidationsErrors = validations => {
-    let icons = [];
-    if (isNull(validations)) {
-      return icons;
-    }
-
-    const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
-    const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
-    const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
-    const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
-
-    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
-    return <div className={styles.iconTooltipWrapper}>{icons}</div>;
   };
 
   const renderElements = (elements = []) => {
@@ -474,22 +397,12 @@ export const WebformRecord = ({
 
   const renderWebformContent = content => {
     const errorMessages = renderErrorMessages(content);
-    const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
+
     return (
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
-            {/* {!isEmpty(content.validations) &&
-              uniqBy(content.validations, validation => {
-                return [validation.levelError].join();
-              }).map((validation, index) => (
-                <IconTooltip
-                  key={index}
-                  levelError={validation.levelError}
-                  message={resources.messages[`record${validationIcons[validation.levelError]}`]}
-                />
-              ))} */}
-            {validationsTemplate()}
+            <GroupedRecordValidations parsedRecordData={parseRecordValidations(webformRecordState.record)} />
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}
