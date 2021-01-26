@@ -42,6 +42,14 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [content]);
 
+  useEffect(() => {
+    console.log({ filteredData });
+    const parsedDataflows = orderBy(filteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']);
+    const orderedPinned = parsedDataflows.map(el => el.pinned);
+
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+  }, [filteredData]);
+
   const onLoadFiltredData = data => setFilteredData(data);
 
   const changeUserProperties = async userProperties => {
