@@ -11,7 +11,6 @@ import styles from './ValidationsList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -284,6 +283,13 @@ const ValidationsList = withRouter(
 
     const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
 
+    const getEditBtnIcon = rowId => {
+      if (rowId === validationContext.updatedRuleId && validationContext.isFetchingData) {
+        return 'spinnerAnimate';
+      }
+      return 'edit';
+    };
+
     const editAndDeleteTemplate = row => {
       let rowType = 'field';
 
@@ -291,20 +297,12 @@ const ValidationsList = withRouter(
 
       if (row.entityType === 'TABLE') rowType = 'dataset';
 
-      const getEditBtnIcon = () => {
-        if (row.id === validationContext.updatedRuleId && validationContext.isFetchingData) {
-          return 'spinnerAnimate';
-        }
-        return 'edit';
-      };
-
       const getDeleteBtnIcon = () => {
         if (row.id === tabsValidationsState.deletedRuleId && tabsValidationsState.isFetchingData) {
           return 'spinnerAnimate';
         }
         return 'trash';
       };
-
       return (
         <div className={styles.actionTemplate}>
           <Button
@@ -313,7 +311,7 @@ const ValidationsList = withRouter(
               (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
               validationContext.isFetchingData
             }
-            icon={getEditBtnIcon()}
+            icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
             type="button"
           />
@@ -335,12 +333,20 @@ const ValidationsList = withRouter(
       if (row.entityType === 'RECORD') rowType = 'row';
 
       if (row.entityType === 'TABLE') rowType = 'dataset';
+
       return (
-        <ActionsColumn
-          onEditClick={() => {
-            validationContext.onOpenToEdit(row, rowType);
-          }}
-        />
+        <div className={styles.actionTemplate}>
+          <Button
+            className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+            disabled={
+              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
+              validationContext.isFetchingData
+            }
+            icon={getEditBtnIcon(row.id)}
+            onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            type="button"
+          />
+        </div>
       );
     };
 
