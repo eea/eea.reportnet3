@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
 import uniqBy from 'lodash/uniqBy';
 
 import styles from './WebformRecord.module.scss';
@@ -20,6 +21,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
+import { DataViewerUtils } from 'ui/views/_components/DataViewer/_functions/Utils/DataViewerUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
@@ -185,6 +187,47 @@ export const WebformRecord = ({
 
   const handleDialogs = (dialog, value) => {
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const validationsTemplate = recordData => {
+    const validationsGroup = DataViewerUtils.groupValidations(
+      recordData,
+      resources.messages['recordBlockers'],
+      resources.messages['recordErrors'],
+      resources.messages['recordWarnings'],
+      resources.messages['recordInfos']
+    );
+    return getIconsValidationsErrors(validationsGroup);
+  };
+
+  const addIconLevelError = (validation, levelError, message) => {
+    let icon = [];
+    if (!isEmpty(validation)) {
+      icon.push(
+        <IconTooltip
+          className={styles.iconTooltipLevelError}
+          key={levelError}
+          levelError={levelError}
+          message={message}
+        />
+      );
+    }
+    return icon;
+  };
+
+  const getIconsValidationsErrors = validations => {
+    let icons = [];
+    if (isNull(validations)) {
+      return icons;
+    }
+
+    const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
+    const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
+    const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
+    const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
+
+    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
+    return <div className={styles.iconTooltipWrapper}>{icons}</div>;
   };
 
   const renderElements = (elements = []) => {
