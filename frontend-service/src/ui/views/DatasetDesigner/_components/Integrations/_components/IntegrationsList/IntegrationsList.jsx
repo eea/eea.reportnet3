@@ -84,8 +84,11 @@ export const IntegrationsList = ({
 
   const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: { value } });
 
+  const isDeleting = isDeletingValue => integrationListDispatch({ type: 'IS_DELETING', payload: { isDeletingValue } });
+
   const onDeleteIntegration = async () => {
     try {
+      isDeleting(true);
       const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
@@ -96,6 +99,7 @@ export const IntegrationsList = ({
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
     } finally {
       isDeleteDialogVisible(false);
+      isDeleting(false);
     }
   };
 
@@ -103,7 +107,9 @@ export const IntegrationsList = ({
 
   const onLoadIntegrations = async () => {
     try {
-      isLoading(true);
+      if (!isIntegrationListUpdating) {
+        isLoading(true);
+      }
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
       integrationsList(response);
@@ -181,7 +187,9 @@ export const IntegrationsList = ({
       {integrationListState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={integrationListState.isDeleting}
           header={resources.messages['deleteIntegrationHeader']}
+          iconConfirm={integrationListState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteIntegration(integrationListState.integrationId)}
