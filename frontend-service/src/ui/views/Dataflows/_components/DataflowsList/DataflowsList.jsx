@@ -43,10 +43,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   }, [content]);
 
   useEffect(() => {
-    console.log({ filteredData });
     const parsedDataflows = orderBy(filteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']);
     const orderedPinned = parsedDataflows.map(el => el.pinned);
-
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [filteredData]);
 
@@ -105,7 +103,16 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
       const orderedPinned = orderedFilteredData.map(el => el.pinned);
       setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
-      setFilteredData(orderedFilteredData);
+
+      const inmDataToFilter = [...dataToFilter];
+      const changedInitialdData = inmDataToFilter.map(item => {
+        if (item.id === pinnedItem.id) {
+          item.pinned = isPinned;
+        }
+        return item;
+      });
+
+      setDataToFilter(orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']));
     }
   };
 
