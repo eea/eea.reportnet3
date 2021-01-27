@@ -11,7 +11,6 @@ import styles from './ValidationsList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -39,9 +38,9 @@ const ValidationsList = withRouter(
     const validationContext = useContext(ValidationContext);
 
     const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+      deletedRuleId: null,
       filtered: false,
       filteredData: [],
-      isDataFetching: false,
       isDataUpdated: false,
       isDeleteDialogVisible: false,
       isLoading: true,
@@ -89,6 +88,10 @@ const ValidationsList = withRouter(
     const isDataUpdated = value => tabsValidationsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
     const onDeleteValidation = async () => {
+      tabsValidationsDispatch({
+        type: 'IS_DELETING_RULE',
+        payload: { isDeletingRule: true }
+      });
       try {
         const response = await ValidationService.deleteById(dataset.datasetId, tabsValidationsState.validationId);
         if (response.status >= 200 && response.status <= 299) {
@@ -96,6 +99,7 @@ const ValidationsList = withRouter(
             type: 'SET_DELETED_RULE_ID',
             payload: { deletedRuleId: tabsValidationsState.validationId }
           });
+
           onUpdateData();
         }
       } catch (error) {
@@ -103,6 +107,10 @@ const ValidationsList = withRouter(
         validationId('');
       } finally {
         onHideDeleteDialog();
+        tabsValidationsDispatch({
+          type: 'IS_DELETING_RULE',
+          payload: { isDeletingRule: false }
+        });
       }
     };
 
@@ -284,6 +292,13 @@ const ValidationsList = withRouter(
 
     const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
 
+    const getEditBtnIcon = rowId => {
+      if (rowId === validationContext.updatedRuleId && validationContext.isFetchingData) {
+        return 'spinnerAnimate';
+      }
+      return 'edit';
+    };
+
     const editAndDeleteTemplate = row => {
       let rowType = 'field';
 
@@ -291,20 +306,12 @@ const ValidationsList = withRouter(
 
       if (row.entityType === 'TABLE') rowType = 'dataset';
 
-      const getEditBtnIcon = () => {
-        if (row.id === validationContext.updatedRuleId && validationContext.isFetchingData) {
-          return 'spinnerAnimate';
-        }
-        return 'edit';
-      };
-
       const getDeleteBtnIcon = () => {
-        if (row.id === tabsValidationsState.deletedRuleId && tabsValidationsState.isFetchingData) {
+        if (row.id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData) {
           return 'spinnerAnimate';
         }
         return 'trash';
       };
-
       return (
         <div className={styles.actionTemplate}>
           <Button
@@ -313,7 +320,7 @@ const ValidationsList = withRouter(
               (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
               validationContext.isFetchingData
             }
-            icon={getEditBtnIcon()}
+            icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
             type="button"
           />
@@ -335,19 +342,27 @@ const ValidationsList = withRouter(
       if (row.entityType === 'RECORD') rowType = 'row';
 
       if (row.entityType === 'TABLE') rowType = 'dataset';
+
       return (
-        <ActionsColumn
-          onEditClick={() => {
-            validationContext.onOpenToEdit(row, rowType);
-          }}
-        />
+        <div className={styles.actionTemplate}>
+          <Button
+            className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+            disabled={
+              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
+              validationContext.isFetchingData
+            }
+            icon={getEditBtnIcon(row.id)}
+            onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            type="button"
+          />
+        </div>
       );
     };
 
     const deleteValidationDialog = () => (
       <ConfirmDialog
-        disabledConfirm={validationContext.isDataFetching}
-        iconConfirm={validationContext.isDataFetching ? 'spinnerAnimate' : 'check'}
+        disabledConfirm={tabsValidationsState.isDeletingRule}
+        iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
         classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteValidationHeader']}
         labelCancel={resources.messages['no']}
