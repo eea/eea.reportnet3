@@ -798,16 +798,21 @@
           "tooltip": "A benefit shall be indicated in the template as a negative cost"
         },
         {
-          "type": "FIELD",
-          "name": "ProjectedBenefit",
-          "title": "Benefits in EUR per tonne CO2eq reduced/sequestered",
-          "tooltip": "A benefit shall be indicated in the template as a negative cost."
-        },
-        {
-          "type": "FIELD",
-          "name": "ProjectedAbsoluteBenefit",
-          "title": "Absolute benefit per year in EUR",
-          "tooltip": "A benefit shall be indicated in the template as a negative cost."
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "ProjectedBenefit",
+              "title": "Benefits in EUR per tonne CO2eq reduced/sequestered",
+              "tooltip": "A benefit shall be indicated in the template as a negative cost."
+            },
+            {
+              "type": "FIELD",
+              "name": "ProjectedAbsoluteBenefit",
+              "title": "Absolute benefit per year in EUR",
+              "tooltip": "A benefit shall be indicated in the template as a negative cost."
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -816,14 +821,19 @@
           "showRequiredCharacter": true
         },
         {
-          "type": "FIELD",
-          "name": "ProjectedNetCost",
-          "title": "Net costs in EUR per tonne CO2eq reduced/sequestered"
-        },
-        {
-          "type": "FIELD",
-          "name": "ProjectedAbsoluteNetCost",
-          "title": "Absolute net cost per year in EUR"
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "ProjectedNetCost",
+              "title": "Net costs in EUR per tonne CO2eq reduced/sequestered"
+            },
+            {
+              "type": "FIELD",
+              "name": "ProjectedAbsoluteNetCost",
+              "title": "Absolute net cost per year in EUR"
+            }
+          ]
         },
         {
           "type": "FIELD",
@@ -878,14 +888,19 @@
           "showRequiredCharacter": true
         },
         {
-          "type": "FIELD",
-          "name": "RealizedCost",
-          "title": "Gross costs in EUR per tonne CO2eq reduced/sequestered"
-        },
-        {
-          "type": "FIELD",
-          "name": "RealizedAbsoluteCost",
-          "title": "Absolute gross costs per year in EUR"
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "RealizedCost",
+              "title": "Gross costs in EUR per tonne CO2eq reduced/sequestered"
+            },
+            {
+              "type": "FIELD",
+              "name": "RealizedAbsoluteCost",
+              "title": "Absolute gross costs per year in EUR"
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -895,14 +910,19 @@
           "tooltip": "A benefit shall be indicated in the template as a negative cost"
         },
         {
-          "type": "FIELD",
-          "name": "RealizedBenefit",
-          "title": "Benefits in EUR per tonne CO2eq reduced/sequestered"
-        },
-        {
-          "type": "FIELD",
-          "name": "RealizedAbsoluteBenefit",
-          "title": "Absolute benefit per year in EUR"
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "RealizedBenefit",
+              "title": "Benefits in EUR per tonne CO2eq reduced/sequestered"
+            },
+            {
+              "type": "FIELD",
+              "name": "RealizedAbsoluteBenefit",
+              "title": "Absolute benefit per year in EUR"
+            }
+          ]
         },
         {
           "type": "LABEL",
@@ -911,14 +931,19 @@
           "showRequiredCharacter": true
         },
         {
-          "type": "FIELD",
-          "name": "RealizedNetCost",
-          "title": "Net costs in EUR per tonne CO2eq reduced/sequestered"
-        },
-        {
-          "type": "FIELD",
-          "name": "RealizedAbsoluteNetCost",
-          "title": "Absolute net cost per year in EUR"
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "RealizedNetCost",
+              "title": "Net costs in EUR per tonne CO2eq reduced/sequestered"
+            },
+            {
+              "type": "FIELD",
+              "name": "RealizedAbsoluteNetCost",
+              "title": "Absolute net cost per year in EUR"
+            }
+          ]
         },
         {
           "type": "FIELD",
