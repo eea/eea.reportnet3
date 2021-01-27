@@ -111,7 +111,6 @@ export const UniqueConstraints = ({
     } finally {
       isDeleteDialogVisible(false);
       getManageUniqueConstraint({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });
-      constraintsDispatch({ type: 'IS_DELETING', payload: false });
     }
   };
 
