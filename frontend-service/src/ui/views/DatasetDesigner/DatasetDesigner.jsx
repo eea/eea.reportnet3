@@ -79,6 +79,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
+    constraintManagingId: '',
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
@@ -119,8 +120,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isManageUniqueConstraintDialogVisible: false,
     isRefreshHighlighted: false,
     isTableCreated: false,
+    isUniqueConstraintCreating: false,
+    isUniqueConstraintUpdating: false,
     isUniqueConstraintsListDialogVisible: false,
-    isUniqueConstraintManaging: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
     manageUniqueConstraintData: {
@@ -946,11 +948,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             designerState={designerState}
             getManageUniqueConstraint={manageUniqueConstraint}
             getUniques={getUniqueConstraintsList}
-            isUniqueConstraintManaging={designerState.isUniqueConstraintManaging}
             manageDialogs={manageDialogs}
             needsRefresh={needsRefreshUnique}
             refreshList={refreshUniqueList}
             setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
+            setConstraintManagingId={setConstraintManagingId}
+            setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+            setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
           />
         </Dialog>
       )}
@@ -1008,8 +1012,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const setIsDuplicatedToManageUnique = value =>
     designerDispatch({ type: 'UPDATED_IS_DUPLICATED', payload: { value } });
 
-  const setIsUniqueConstraintManaging = isUniqueConstraintManagingValue =>
-    designerDispatch({ type: 'SET_IS_CONSTRAINT_MANAGING', payload: { isUniqueConstraintManagingValue } });
+  const setConstraintManagingId = constraintManagingId =>
+    designerDispatch({ type: 'SET_CONSTRAINT_MANAGING_ID', payload: { constraintManagingId } });
+
+  const setIsUniqueConstraintCreating = isUniqueConstraintCreatingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_CREATING', payload: { isUniqueConstraintCreatingValue } });
+
+  const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
@@ -1270,8 +1280,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
           refreshList={refreshUniqueList}
           resetUniques={manageUniqueConstraint}
-          setIsUniqueConstraintManaging={setIsUniqueConstraintManaging}
-          isUniqueConstraintManaging={designerState.isUniqueConstraintManaging}
+          setConstraintManagingId={setConstraintManagingId}
+          setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+          setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
 
         {designerState.validateDialogVisible && (

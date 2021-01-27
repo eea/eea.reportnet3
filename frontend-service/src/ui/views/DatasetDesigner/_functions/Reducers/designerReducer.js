@@ -55,8 +55,14 @@ export const designerReducer = (state, { type, payload }) => {
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 
-    case 'SET_IS_CONSTRAINT_MANAGING':
-      return { ...state, isUniqueConstraintManaging: payload.isUniqueConstraintManagingValue };
+    case 'SET_CONSTRAINT_MANAGING_ID':
+      return { ...state, constraintManagingId: payload.constraintManagingId };
+
+    case 'SET_IS_CONSTRAINT_CREATING':
+      return { ...state, isUniqueConstraintCreating: payload.isUniqueConstraintCreatingValue };
+
+    case 'SET_IS_CONSTRAINT_UPDATING':
+      return { ...state, isUniqueConstraintUpdating: payload.isUniqueConstraintUpdatingValue };
 
     case 'SET_IS_LOADING':
       return { ...state, isLoading: payload.value };
