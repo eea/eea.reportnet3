@@ -196,11 +196,23 @@ export const WebformRecord = ({
       const isSubTableVisible = element.tableNotCreated && isReporting;
 
       if (element.type === 'BLOCK') {
+        const isSubtable = () => {
+          return element.elementsRecords.length > 1;
+        };
+
+        if (isSubtable()) {
+          return (
+            <div key={i} className={styles.fieldsBlock}>
+              {element.elementsRecords
+                .filter(record => elements[0].recordId === record.recordId)
+                .map(record => renderElements(record.elements))}
+            </div>
+          );
+        }
+
         return (
           <div key={i} className={styles.fieldsBlock}>
-            {element.elementsRecords
-              .filter(record => elements[0].recordId === record.recordId)
-              .map(record => renderElements(record.elements))}
+            {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
       }
