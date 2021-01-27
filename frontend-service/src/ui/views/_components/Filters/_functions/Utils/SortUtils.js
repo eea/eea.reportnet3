@@ -1,3 +1,4 @@
+import isBoolean from 'lodash/isBoolean';
 import isNil from 'lodash/isNil';
 
 const getOrderIcon = order => {
@@ -22,7 +23,7 @@ const onResetOrderData = (input = [], select = [], date = [], check = []) => {
 const onSortData = (data, order, property) => {
   if (order !== 1) {
     return data.sort((a, b) => {
-      if (!isNil(a[property]) && !isNil(b[property])) {
+      if (!isNil(a[property]) && !isNil(b[property]) && !isBoolean(a[property]) && !isBoolean(b[property])) {
         const textA = a[property].toUpperCase();
         const textB = b[property].toUpperCase();
         return textA < textB ? -1 : textA > textB ? 1 : 0;
@@ -30,7 +31,7 @@ const onSortData = (data, order, property) => {
     });
   } else {
     return data.sort((a, b) => {
-      if (!isNil(a[property]) && !isNil(b[property])) {
+      if (!isNil(a[property]) && !isNil(b[property]) && !isBoolean(a[property]) && !isBoolean(b[property])) {
         const textA = a[property].toUpperCase();
         const textB = b[property].toUpperCase();
         return textA < textB ? 1 : textA > textB ? -1 : 0;
