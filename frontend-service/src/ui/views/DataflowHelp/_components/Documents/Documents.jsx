@@ -123,7 +123,16 @@ const Documents = ({
 
   useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT'], getAllDocuments);
 
-  useCheckNotifications(['UPDATED_DOCUMENT_COMPLETED_EVENT', 'UPDATED_DOCUMENT_FAILED_EVENT'], setIsUpdating, false);
+  useCheckNotifications(
+    [
+      'UPLOAD_DOCUMENT_COMPLETED_EVENT',
+      'UPLOAD_DOCUMENT_FAILED_EVENT',
+      'UPDATED_DOCUMENT_COMPLETED_EVENT',
+      'UPDATED_DOCUMENT_FAILED_EVENT'
+    ],
+    setIsUpdating,
+    false
+  );
 
   const isPublicColumnTemplate = rowData => (
     <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>

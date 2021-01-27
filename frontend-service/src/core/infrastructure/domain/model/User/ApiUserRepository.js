@@ -73,6 +73,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userDefaultConfiguration = {
     basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
+    pinnedDataflows: [],
     showLogoutConfirmation: true,
     rowsPerPage: 10,
     visualTheme: 'light',
@@ -89,10 +90,15 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.userImage = userDefaultConfiguration.userImage;
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
     userConfiguration.listView = userDefaultConfiguration.listView;
+    userConfiguration.pinnedDataflows = userDefaultConfiguration.pinnedDataflows;
   } else {
     userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer)
       ? userConfigurationDTO.basemapLayer[0]
       : userDefaultConfiguration.basemapLayer;
+
+    userConfiguration.pinnedDataflows = !isNil(userConfigurationDTO.pinnedDataflows)
+      ? userConfigurationDTO.pinnedDataflows
+      : userDefaultConfiguration.pinnedDataflows;
 
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
