@@ -106,7 +106,9 @@ export const UniqueConstraints = ({
 
   const onLoadConstraints = async () => {
     try {
-      isLoading(true);
+      if (isUniqueConstraintManaging || constraintsState.isDeleting) {
+        isLoading(false);
+      }
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
       const uniques = UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables);
       constraintsDispatch({
