@@ -120,6 +120,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isRefreshHighlighted: false,
     isTableCreated: false,
     isUniqueConstraintsListDialogVisible: false,
+    isUniqueConstraintManaging: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
     manageUniqueConstraintData: {
@@ -945,6 +946,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             designerState={designerState}
             getManageUniqueConstraint={manageUniqueConstraint}
             getUniques={getUniqueConstraintsList}
+            isUniqueConstraintManaging={designerState.isUniqueConstraintManaging}
             manageDialogs={manageDialogs}
             needsRefresh={needsRefreshUnique}
             refreshList={refreshUniqueList}
@@ -1005,6 +1007,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setIsDuplicatedToManageUnique = value =>
     designerDispatch({ type: 'UPDATED_IS_DUPLICATED', payload: { value } });
+
+  const setIsUniqueConstraintManaging = isUniqueConstraintManagingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_MANAGING', payload: { isUniqueConstraintManagingValue } });
 
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
@@ -1265,6 +1270,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
           refreshList={refreshUniqueList}
           resetUniques={manageUniqueConstraint}
+          setIsUniqueConstraintManaging={setIsUniqueConstraintManaging}
+          isUniqueConstraintManaging={designerState.isUniqueConstraintManaging}
         />
 
         {designerState.validateDialogVisible && (

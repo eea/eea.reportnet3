@@ -25,6 +25,7 @@ export const UniqueConstraints = ({
   designerState,
   getManageUniqueConstraint,
   getUniques,
+  isUniqueConstraintManaging,
   manageDialogs,
   needsRefresh = true,
   refreshList,
@@ -45,7 +46,8 @@ export const UniqueConstraints = ({
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isLoading: true
+    isLoading: true,
+    isDeleting: false
   });
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export const UniqueConstraints = ({
   const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteConstraint = async () => {
+    constraintsDispatch({ type: 'IS_DELETING', payload: true });
     try {
       const response = await UniqueConstraintsService.deleteById(dataflowId, uniqueId);
       if (response.status >= 200 && response.status <= 299) {
@@ -97,6 +100,7 @@ export const UniqueConstraints = ({
     } finally {
       isDeleteDialogVisible(false);
       getManageUniqueConstraint({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });
+      constraintsDispatch({ type: 'IS_DELETING', payload: false });
     }
   };
 
@@ -195,7 +199,9 @@ export const UniqueConstraints = ({
       {constraintsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={constraintsState.isDeleting}
           header={resources.messages['deleteUniqueConstraintHeader']}
+          iconConfirm={constraintsState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConstraint()}

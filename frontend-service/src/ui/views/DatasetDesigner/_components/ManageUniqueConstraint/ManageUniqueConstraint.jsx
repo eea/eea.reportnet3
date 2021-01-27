@@ -16,7 +16,15 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, refreshList, resetUniques }) => {
+export const ManageUniqueConstraint = ({
+  dataflowId,
+  designerState,
+  isUniqueConstraintManaging,
+  manageDialogs,
+  refreshList,
+  resetUniques,
+  setIsUniqueConstraintManaging
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -119,6 +127,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
 
   const onCreateConstraint = async () => {
     try {
+      setIsUniqueConstraintManaging(true);
       const response = await UniqueConstraintsService.create(
         dataflowId,
         datasetSchemaId,
@@ -132,6 +141,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
+    } finally {
+      setIsUniqueConstraintManaging(false);
     }
   };
 
@@ -144,6 +155,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
   };
 
   const onUpdateConstraint = async () => {
+    setIsUniqueConstraintManaging(true);
     const fieldsInUniqueConstraint = fieldData.map(field => field.fieldId);
     const selectedFieldsInUniqueConstraint = selectedFields.map(field => field.value);
 
@@ -168,6 +180,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         }
       } catch (error) {
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
+      } finally {
+        setIsUniqueConstraintManaging(false);
       }
     }
   };
@@ -202,8 +216,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       <span data-tip data-for="createTooltip">
         <Button
           className={`p-button-primary ${!isEmpty(selectedFields) && !isDuplicated ? 'p-button-animated-blink' : ''}`}
-          disabled={isEmpty(selectedFields) || isDuplicated}
-          icon={'check'}
+          disabled={isEmpty(selectedFields) || isDuplicated || isUniqueConstraintManaging}
+          icon={isUniqueConstraintManaging ? 'spinnerAnimate' : 'check'}
           label={!isNil(uniqueId) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
         />
