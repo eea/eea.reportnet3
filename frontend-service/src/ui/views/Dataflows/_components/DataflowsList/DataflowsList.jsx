@@ -34,17 +34,17 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
     const parsedDataflows = orderBy(
       DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
       ['pinned', 'expirationDate', 'status'],
-      ['desc', 'asc', 'asc']
+      ['asc', 'asc', 'asc']
     );
     setDataToFilter(parsedDataflows);
-    const orderedPinned = parsedDataflows.map(el => el.pinned);
+    const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [content]);
 
   useEffect(() => {
-    const parsedDataflows = orderBy(filteredData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']);
-    const orderedPinned = parsedDataflows.map(el => el.pinned);
+    const parsedDataflows = orderBy(filteredData, ['pinned', 'expirationDate', 'status'], ['asc', 'asc', 'asc']);
+    const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [filteredData]);
 
@@ -64,13 +64,12 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   const getFilteredSearched = value => setFilteredState(value);
 
   const isFilteredByPinned = () =>
-    filteredData.filter(dataflow => dataflow.pinned === true).length === filteredData.length ||
-    filteredData.filter(dataflow => dataflow.pinned === false).length === filteredData.length;
+    filteredData.filter(dataflow => dataflow.pinned === 'pinned').length === filteredData.length ||
+    filteredData.filter(dataflow => dataflow.pinned === 'unpinned').length === filteredData.length;
 
   const reorderDataflows = async (pinnedItem, isPinned) => {
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = inmUserProperties.pinnedDataflows;
-
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
     } else {
@@ -84,7 +83,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       const inmfilteredData = [...filteredData];
       const changedFilteredData = inmfilteredData.map(item => {
         if (item.id === pinnedItem.id) {
-          item.pinned = isPinned;
+          item.pinned = isPinned ? 'pinned' : 'unpinned';
         }
         return item;
       });
@@ -98,7 +97,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       const orderedFilteredData = orderBy(
         changedFilteredData,
         ['pinned', 'expirationDate', 'status'],
-        ['desc', 'asc', 'asc']
+        ['asc', 'asc', 'asc']
       );
 
       const orderedPinned = orderedFilteredData.map(el => el.pinned);
@@ -107,12 +106,12 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       const inmDataToFilter = [...dataToFilter];
       const changedInitialdData = inmDataToFilter.map(item => {
         if (item.id === pinnedItem.id) {
-          item.pinned = isPinned;
+          item.pinned = isPinned ? 'pinned' : 'unpinned';
         }
         return item;
       });
 
-      setDataToFilter(orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status'], ['desc', 'asc', 'asc']));
+      setDataToFilter(orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status'], ['asc', 'asc', 'asc']));
     }
   };
 
