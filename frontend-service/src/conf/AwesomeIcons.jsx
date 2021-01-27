@@ -76,6 +76,7 @@ import {
   faSquareRootAlt,
   faTasks,
   faThList,
+  faThumbtack,
   faTimes,
   faToggleOff,
   faTrashAlt,
@@ -308,6 +309,8 @@ export const AwesomeIcons = icon => {
       return faPencilRuler;
     case 'percentage':
       return faPercentage;
+    case 'pin':
+      return faThumbtack;
     case 'pkg':
       return faFileArchive;
     case 'plus':

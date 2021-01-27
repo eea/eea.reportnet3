@@ -784,6 +784,14 @@
           "key": "DATASET_IMPORT_INIT"
         },
         {
+          "key": "DATAFLOW_PINNED_INIT",
+          "lifeTime": 1500
+        },
+        {
+          "key": "DATAFLOW_UNPINNED_INIT",
+          "lifeTime": 1500
+        },
+        {
           "key": "IMPORT_DATASET_SCHEMA_INIT"
         }
       ]

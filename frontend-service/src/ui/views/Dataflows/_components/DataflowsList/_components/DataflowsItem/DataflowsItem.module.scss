@@ -81,6 +81,45 @@
     margin-bottom: 4rem;
   }
 }
+.pinContainer {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 50px 50px 0;
+  border-color: transparent var(--c-corporate-blue) transparent transparent;
+  border-radius: 0 20px 0 240px;
+  right: 0;
+  top: 0;
+  svg {
+    font-size: 14pt;
+    margin-left: 0.9rem;
+    margin-top: 0.7rem;
+    color: var(--white);
+    cursor: pointer;
+    &.pinned {
+      transform: rotate(0deg);
+      color: var(--c-corporate-yellow);
+      &:hover {
+        color: var(--c-corporate-yellow);
+      }
+    }
+    &.notPinned {
+      // animation: rotateNotPin 0.5s;
+      transform: rotate(90deg);
+      &:hover {
+        color: var(--c-corporate-yellow);
+      }
+    }
+  }
+}
+.pinShowed {
+  opacity: 1;
+}
+.pinHidden {
+  opacity: 0;
+}
+
 .wrap_card_component {
   &:last-child {
     margin-bottom: 5rem;
@@ -106,6 +145,7 @@
     color: var(--gray-110);
     font-size: 1rem;
     text-align: right;
+    margin-right: 1rem;
     span {
       font-weight: normal;
     }
