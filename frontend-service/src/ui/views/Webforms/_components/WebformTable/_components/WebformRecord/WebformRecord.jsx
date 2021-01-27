@@ -9,6 +9,7 @@ import styles from './WebformRecord.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { GroupedRecordValidations } from 'ui/views/Webforms/_components/GroupedRecordValidations';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 
 import { WebformField } from './_components/WebformField';
@@ -22,6 +23,7 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
@@ -63,6 +65,7 @@ export const WebformRecord = ({
   const { isConditionalChanged, isDialogVisible, selectedRecordId } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
+  const { parseRecordValidations } = WebformsUtils;
 
   useEffect(() => {
     webformRecordDispatch({
@@ -393,21 +396,12 @@ export const WebformRecord = ({
 
   const renderWebformContent = content => {
     const errorMessages = renderErrorMessages(content);
-    const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
+
     return (
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
-            {!isEmpty(content.validations) &&
-              uniqBy(content.validations, validation => {
-                return [validation.levelError].join();
-              }).map((validation, index) => (
-                <IconTooltip
-                  key={index}
-                  levelError={validation.levelError}
-                  message={resources.messages[`record${validationIcons[validation.levelError]}`]}
-                />
-              ))}
+            <GroupedRecordValidations parsedRecordData={parseRecordValidations(webformRecordState.record)} />
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}
