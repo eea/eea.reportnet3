@@ -197,13 +197,11 @@ export const WebformRecord = ({
 
       if (element.type === 'BLOCK') {
         return (
-          !isFieldVisible && (
-            <div key={i} className={styles.fieldsBlock}>
-              {element.elementsRecords
-                .filter(record => elements[0].recordId === record.recordId)
-                .map(record => renderElements(record.elements))}
-            </div>
-          )
+          <div key={i} className={styles.fieldsBlock}>
+            {element.elementsRecords
+              .filter(record => elements[0].recordId === record.recordId)
+              .map(record => renderElements(record.elements))}
+          </div>
         );
       }
 
@@ -279,10 +277,11 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           checkLabelVisibility(element) && (
-            <Fragment key={element.title}>
+            <div key={element.title}>
               {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
               {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
               {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+              {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
               {element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
@@ -291,7 +290,7 @@ export const WebformRecord = ({
                   tooltipOptions={{ position: 'top' }}
                 />
               )}
-            </Fragment>
+            </div>
           )
         );
       } else {

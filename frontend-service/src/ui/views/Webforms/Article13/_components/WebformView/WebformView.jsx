@@ -56,7 +56,7 @@ export const WebformView = ({
       tables,
       selectedTableName
     ),
-    singlesCalculatedData: {}
+    singlesCalculatedData: []
   });
 
   const { isLoading, isVisible, singlesCalculatedData } = webformViewState;

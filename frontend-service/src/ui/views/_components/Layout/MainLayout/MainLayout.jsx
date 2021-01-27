@@ -99,6 +99,7 @@ const MainLayout = ({ children, isPublic = false }) => {
       const userConfiguration = await UserService.getConfiguration();
       userContext.onChangeBasemapLayer(userConfiguration.basemapLayer);
       userContext.onChangeDateFormat(userConfiguration.dateFormat);
+      userContext.onChangePinnedDataflows(userConfiguration.pinnedDataflows);
       userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
       userContext.onToggleVisualTheme(userConfiguration.visualTheme);

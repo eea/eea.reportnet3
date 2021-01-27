@@ -128,7 +128,7 @@ export const WebLinks = ({
         onLoadWebLinks();
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       setIsConfirmDeleteVisible(false);
       onResetValues();
