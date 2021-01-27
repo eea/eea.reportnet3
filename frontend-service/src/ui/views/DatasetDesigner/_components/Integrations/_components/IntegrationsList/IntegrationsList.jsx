@@ -107,7 +107,6 @@ export const IntegrationsList = ({
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
     } finally {
       isDeleteDialogVisible(false);
-      integrationListDispatch({ type: 'IS_DELETING', payload: false });
     }
   };
 
@@ -128,6 +127,7 @@ export const IntegrationsList = ({
       isLoading(false);
       setIsUpdating(false);
       setIsCreating(false);
+      integrationListDispatch({ type: 'IS_DELETING', payload: false });
     }
   };
 
