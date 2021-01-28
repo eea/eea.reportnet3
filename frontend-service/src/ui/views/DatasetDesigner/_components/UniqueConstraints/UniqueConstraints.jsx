@@ -108,6 +108,7 @@ export const UniqueConstraints = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
+      constraintsDispatch({ type: 'IS_DELETING', payload: false });
     } finally {
       isDeleteDialogVisible(false);
       getManageUniqueConstraint({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });

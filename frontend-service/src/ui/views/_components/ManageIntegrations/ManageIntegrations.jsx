@@ -203,6 +203,7 @@ export const ManageIntegrations = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
+      setIsCreating(false);
     } finally {
       setIsIntegrationManaging('isIntegrationCreating', false);
     }
@@ -315,6 +316,7 @@ export const ManageIntegrations = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+      setIsUpdating(false);
     } finally {
       setIsIntegrationManaging('isIntegrationEditing', false);
     }
