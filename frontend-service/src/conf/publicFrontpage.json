@@ -1,36 +1,6 @@
 {
   "dataflows": [
     {
-      "id": 1,
-      "key": 1,
-      "legalInstrument": "Greenhouse gas Monitoring Mechanism Regulation (MMR)",
-      "dataflow": "Approximated Greenhouse gas inventories",
-      "dataFlowUrl": "http://rod.eionet.europa.eu/obligations/702",
-      "reportingFrequency": "Annual",
-      "targetDate": "30/09/2020",
-      "pilotScenarioAmbition": "Volunteer test only"
-    },
-    {
-      "id": 2,
-      "key": 2,
-      "legalInstrument": "Marine Strategy Framework Directive",
-      "dataflow": "MSFD monitoring programmes (Art. 11)",
-      "dataFlowUrl": "http://rod.eionet.europa.eu/obligations/611",
-      "reportingFrequency": "6-yearly",
-      "targetDate": "15/10/2020",
-      "pilotScenarioAmbition": "Volunteer test only"
-    },
-    {
-      "id": 3,
-      "key": 3,
-      "legalInstrument": "Bathing Water Directive",
-      "dataflow": "Bathing Water Directive - Monitoring and Classification of Bathing Waters",
-      "dataFlowUrl": "http://rod.eionet.europa.eu/obligations/531",
-      "reportingFrequency": "Annual",
-      "targetDate": "31/12/2020",
-      "pilotScenarioAmbition": "Volunteer test only"
-    },
-    {
       "id": 4,
       "key": 4,
       "legalInstrument": "EEA AWP",
