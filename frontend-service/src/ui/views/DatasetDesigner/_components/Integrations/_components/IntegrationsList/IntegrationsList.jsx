@@ -40,6 +40,7 @@ export const IntegrationsList = ({
     filtered: false,
     filteredData: [],
     integrationId: '',
+    integrationToDeleteId: '',
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isDeleting: false,
@@ -65,7 +66,7 @@ export const IntegrationsList = ({
         if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
       rowDataId={row.integrationId}
-      rowDeletingId={integrationListState.integrationId}
+      rowDeletingId={integrationListState.integrationToDeleteId}
       rowUpdatingId={integrationListState.integrationId}
     />
   );
@@ -96,6 +97,10 @@ export const IntegrationsList = ({
 
   const onDeleteIntegration = async () => {
     try {
+      integrationListDispatch({
+        type: 'SET_INTEGRATION_ID_TO_DELETE',
+        payload: { data: integrationListState.integrationId }
+      });
       integrationListDispatch({ type: 'IS_DELETING', payload: true });
       const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) {

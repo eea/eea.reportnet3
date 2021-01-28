@@ -24,6 +24,9 @@ export const integrationsListReducer = (state, { type, payload }) => {
     case 'ON_LOAD_INTEGRATION_ID':
       return { ...state, integrationId: payload.value };
 
+    case 'SET_INTEGRATION_ID_TO_DELETE':
+      return { ...state, integrationToDeleteId: payload.data };
+
     default:
       return state;
   }
