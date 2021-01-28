@@ -38,7 +38,7 @@ export const ManageIntegrations = ({
   onUpdateData,
   refreshList,
   setIsCreating,
-  setIsUpdating,
+  setIsUpdating = () => {},
   state,
   updatedData
 }) => {
