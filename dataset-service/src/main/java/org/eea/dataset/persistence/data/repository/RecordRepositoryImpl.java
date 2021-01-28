@@ -354,7 +354,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
           Document documentField =
               schemasRepository.findFieldSchema(datasetSchemaId, field.getFieldName());
-          Document documentReference = (Document) ((Document) documentField).get("referencedField");
+          Document documentReference = (Document) documentField.get("referencedField");
           Document documentFieldReferenced =
               schemasRepository.findFieldSchema(documentReference.get("idDatasetSchema").toString(),
                   documentReference.get("idPk").toString());
@@ -445,6 +445,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return sanitizedRecords;
   }
 
+  /**
+   * Find last record in the db table.
+   *
+   * @return the record value
+   */
   @Override
   public RecordValue findLastRecord() {
     RecordValue result = null;
