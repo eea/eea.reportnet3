@@ -26,6 +26,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 const Documents = ({
   dataflowId,
   documents,
@@ -44,10 +46,13 @@ const Documents = ({
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documentInitialValues, setDocumentInitialValues] = useState({});
+  const [downloadingId, setDownloadingId] = useState('');
+  const [fileDeletingId, setFileDeletingId] = useState(null);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [downloadingId, setDownloadingId] = useState('');
+  const [fileUpdatingId, setFileUpdatingId] = useState(null);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
 
@@ -72,6 +77,10 @@ const Documents = ({
           setRowDataState(rowData);
         }}
         onEditClick={() => onEditDocument()}
+        rowDataId={rowData.id}
+        rowDeletingId={fileDeletingId}
+        rowUpdatingId={fileUpdatingId}
+        isUpdating={isUpdating}
       />
     </div>
   );
@@ -106,6 +115,25 @@ const Documents = ({
     return result;
   };
 
+  const getAllDocuments = () => {
+    const inmAllDocuments = [...allDocuments];
+    const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== fileDeletingId);
+    setAllDocuments(filteredAllDocuments);
+  };
+
+  useCheckNotifications(['DELETE_DOCUMENT_COMPLETED_EVENT'], getAllDocuments);
+
+  useCheckNotifications(
+    [
+      'UPLOAD_DOCUMENT_COMPLETED_EVENT',
+      'UPLOAD_DOCUMENT_FAILED_EVENT',
+      'UPDATED_DOCUMENT_COMPLETED_EVENT',
+      'UPDATED_DOCUMENT_FAILED_EVENT'
+    ],
+    setIsUpdating,
+    false
+  );
+
   const isPublicColumnTemplate = rowData => (
     <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>
   );
@@ -115,20 +143,20 @@ const Documents = ({
   };
 
   const onDeleteDocument = async documentData => {
-    setDeleteDialogVisible(false);
+    setFileDeletingId(documentData.id);
     notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
 
     try {
       await DocumentService.deleteDocument(documentData.id);
-      const inmAllDocuments = [...allDocuments];
-      const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== documentData.id);
-      setAllDocuments(filteredAllDocuments);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
       });
       setIsDeletingDocument(false);
+      setFileDeletingId('');
+    } finally {
+      setDeleteDialogVisible(false);
     }
   };
 
@@ -295,6 +323,8 @@ const Documents = ({
             isUploadDialogVisible={isUploadDialogVisible}
             onUpload={onUploadDocument}
             setIsUploadDialogVisible={setIsUploadDialogVisible}
+            setFileUpdatingId={setFileUpdatingId}
+            setIsUpdating={setIsUpdating}
           />
         </Dialog>
       )}
@@ -302,7 +332,10 @@ const Documents = ({
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeletingDocument}
           header={resources.messages['delete']}
+          iconConfirm={isDeletingDocument ? 'spinnerAnimate' : 'check'}
+          isDeleting={isDeletingDocument}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => {

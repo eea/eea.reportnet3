@@ -55,6 +55,7 @@ export const WebformField = ({
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
+    isSubmiting: false,
     linkItemsOptions: [],
     record: record,
     sectorAffectedValue: null,
@@ -68,6 +69,7 @@ export const WebformField = ({
     initialFieldValue,
     isDeleteAttachmentVisible,
     isFileDialogVisible,
+    isSubmiting,
     linkItemsOptions,
     sectorAffectedValue,
     selectedFieldId,
@@ -163,13 +165,14 @@ export const WebformField = ({
   };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+    webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
         ? value.join(',')
         : value;
 
     try {
-      if (initialFieldValue !== parsedValue) {
+      if (!isSubmiting && initialFieldValue !== parsedValue) {
         await DatasetService.updateFieldById(
           datasetId,
           option,
@@ -197,6 +200,8 @@ export const WebformField = ({
           type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR'
         });
       }
+    } finally {
+      webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
   };
 
@@ -235,6 +240,13 @@ export const WebformField = ({
   const renderTemplate = (field, option, type) => {
     switch (type) {
       case 'DATE':
+        const changeDatePickerPosition = inputLeftPosition => {
+          const datePickerElements = document.getElementsByClassName('p-datepicker');
+          for (let index = 0; index < datePickerElements.length; index++) {
+            const datePicker = datePickerElements[index];
+            datePicker.style.left = `${inputLeftPosition}px`;
+          }
+        };
         return (
           <Calendar
             appendTo={document.body}
@@ -245,11 +257,14 @@ export const WebformField = ({
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
               else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
-            onChange={event => {
-              onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)));
-            }}
+            onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
             onFocus={event => {
+              changeDatePickerPosition(event.target.getBoundingClientRect().left);
               onFocusField(event.target.value);
+            }}
+            onSelect={event => {
+              onFillField(field, option, formatDate(event.value, isNil(event.value)));
+              onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
             value={new Date(field.value)}
             yearNavigator={true}

@@ -53,6 +53,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -218,7 +219,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Gets the data collection id by dataflow id.
    *
    * @param idFlow the id flow
-   *
    * @return the data collection id by dataflow id
    */
   @Override
@@ -228,7 +228,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
-   * Rollback data collection creation.
+   * Undo data collection creation.
    *
    * @param datasetIds the dataset ids
    * @param dataflowId the dataflow id
@@ -296,7 +296,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
-   * @param manualCheck enable the manual check for the custodian approval
+   * @param manualCheck the manual check
    */
   @Override
   @Async
@@ -312,7 +312,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param isCreation the is creation
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
-   * @param manualCheck enable the manual check for the custodian approval
+   * @param manualCheck the manual check
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck) {
@@ -508,8 +508,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
       // 10. Create schemas for each dataset
       // This method will release the lock
-          recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
-              true);
+      recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
     } catch (SQLException e) {
       LOG_ERROR.error("Error persisting changes. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);
@@ -593,7 +592,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
-
   /**
    * Prepare FK and integrity for E uand DC.
    *
@@ -624,8 +622,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         lIntegrityDataCollections.add(integrityDataCollection);
       }
     }
-
-
   }
 
   /**
@@ -653,10 +649,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
-   * Check if dataset has integrity rule.
+   * Find integrity VO.
    *
    * @param rulesSchemaVO the rules schema VO
-   * @return true, if successful
+   * @return the list
    */
   List<IntegrityVO> findIntegrityVO(RulesSchemaVO rulesSchemaVO) {
     List<IntegrityVO> integritiesVO = new ArrayList<>();
@@ -671,7 +667,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /**
    * Adds the dataset foreign relations.
    *
-   * @param lIntegrityDataCollections the list of integrity data collections
+   * @param lIntegrityDataCollections the l integrity data collections
    */
   private void addDatasetForeignRelations(List<IntegrityDataCollection> lIntegrityDataCollections) {
     List<ForeignRelations> foreignRelationsList = new ArrayList<>();
@@ -738,9 +734,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param time the time
    * @param dataflowId the dataflow id
    * @param dueDate the due date
-   *
    * @return the long
-   *
    * @throws SQLException the SQL exception
    */
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
@@ -755,7 +749,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       return datasetId;
     }
   }
-
 
   /**
    * Persist EU.
@@ -789,9 +782,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param time the time
    * @param dataflowId the dataflow id
    * @param dataProviderLabel the data provider label
-   *
    * @return the long
-   *
    * @throws SQLException the SQL exception
    */
   private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
@@ -808,7 +799,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
-
   /**
    * Creates the permissions.
    *
@@ -822,66 +812,28 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<Long> euDatasetIds, Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
-    List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
-    List<ResourceAssignationVO> custodianAssignments = new ArrayList<>();
+    List<ResourceAssignationVO> assignments = new ArrayList<>();
 
-    createGroupsAndAssings(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId, groups,
-        providerAssignments, custodianAssignments);
+    createGroupsAndAssings(dataflowId, dataCollectionIds, euDatasetIds, datasetIdsEmails, groups,
+        assignments);
 
     // Persist changes in KeyCloak guaranteeing transactionality
     // Insert in chunks to prevent Hystrix timeout
-    int chunks = 0;
     try {
+      persistGroups(groups);
+      LOG.info("Groups successfully created: dataflowId={}", dataflowId);
 
-      // Persist groups
-      int size = groups.size();
-      chunks = persistGroups(groups, chunks, size);
-
-      // Persist lead reporter assignments
-      size = providerAssignments.size();
-      persistLeadReporterAssignments(providerAssignments, size);
-
-      // Persist custodian assignments
-      size = custodianAssignments.size();
-      persistCustodianAssigments(custodianAssignments, size);
+      persistAssignments(assignments);
+      LOG.info("Users successfully assigned to groups: dataflowId={}", dataflowId);
     } catch (Exception e) {
-      // Undo group creation
-      int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
-      List<Long> rollback = groups.subList(0, size).stream().map(ResourceInfoVO::getResourceId)
-          .collect(Collectors.toList());
+      // Rollback group creation
+      int size = groups.size();
       for (int i = 0; i < size; i += 10) {
         resourceManagementControllerZuul
-            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
+            .deleteResourceByDatasetId(groups.subList(i, i + 10 > size ? size : i + 10).stream()
+                .map(ResourceInfoVO::getResourceId).collect(Collectors.toList()));
       }
       throw new EEAException(e);
-    }
-  }
-
-  /**
-   * Persist custodian assigments.
-   *
-   * @param custodianAssignments the custodian assignments
-   * @param size the size
-   */
-  private void persistCustodianAssigments(List<ResourceAssignationVO> custodianAssignments,
-      int size) {
-    for (int i = 0; i < size; i += 10) {
-      userManagementControllerZuul
-          .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
-    }
-  }
-
-  /**
-   * Persist lead reporter assignments.
-   *
-   * @param providerAssignments the provider assignments
-   * @param size the size
-   */
-  private void persistLeadReporterAssignments(List<ResourceAssignationVO> providerAssignments,
-      int size) {
-    for (int i = 0; i < size; i += 10) {
-      userManagementControllerZuul.addContributorsToResources(
-          providerAssignments.subList(i, i + 10 > size ? size : i + 10));
     }
   }
 
@@ -889,63 +841,137 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Persist groups.
    *
    * @param groups the groups
-   * @param chunks the chunks
-   * @param size the size
-   * @return the int
    */
-  private int persistGroups(List<ResourceInfoVO> groups, int chunks, int size) {
-    for (int i = 0; i < size; i += 10, chunks++) {
+  private void persistGroups(List<ResourceInfoVO> groups) {
+    int size = groups.size();
+    for (int i = 0; i < size; i += 10) {
       resourceManagementControllerZuul
           .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
     }
-    return chunks;
+  }
+
+  /**
+   * Persist assignments.
+   *
+   * @param providerAssignments the provider assignments
+   */
+  private void persistAssignments(List<ResourceAssignationVO> providerAssignments) {
+    int size = providerAssignments.size();
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul.addContributorsToResources(
+          providerAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  /**
+   * Find users by group.
+   *
+   * @param group the group
+   * @return the list
+   */
+  private List<UserRepresentationVO> findUsersByGroup(String group) {
+    List<UserRepresentationVO> rtn = userManagementControllerZuul.getUsersByGroup(group);
+    return null != rtn ? rtn : new ArrayList<>();
   }
 
   /**
    * Creates the groups and assings.
    *
-   * @param datasetIdsEmails the dataset ids emails
+   * @param dataflowId the dataflow id
    * @param dataCollectionIds the data collection ids
    * @param euDatasetIds the eu dataset ids
-   * @param dataflowId the dataflow id
+   * @param datasetIdsEmails the dataset ids emails
    * @param groups the groups
-   * @param providerAssignments the provider assignments
-   * @param custodianAssignments the custodian assignments
+   * @param assignments the assignments
    */
-  private void createGroupsAndAssings(Map<Long, String> datasetIdsEmails,
-      List<Long> dataCollectionIds, List<Long> euDatasetIds, Long dataflowId,
-      List<ResourceInfoVO> groups, List<ResourceAssignationVO> providerAssignments,
-      List<ResourceAssignationVO> custodianAssignments) {
-    // Create DataCollection groups and assign custodian to self user
+  private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
+      List<Long> euDatasetIds, Map<Long, String> datasetIdsEmails, List<ResourceInfoVO> groups,
+      List<ResourceAssignationVO> assignments) {
+
+    List<UserRepresentationVO> stewards =
+        findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
+    List<UserRepresentationVO> custodians =
+        findUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
+
     for (Long dataCollectionId : dataCollectionIds) {
+
+      // Create DataCollection-%s-DATA_STEWARD
+      groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
+          SecurityRoleEnum.DATA_STEWARD));
+
+      // Create DataCollection-%s-DATA_CUSTODIAN
       groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
           SecurityRoleEnum.DATA_CUSTODIAN));
-      custodianAssignments.add(
-          createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
+
+      // Assign DataCollection-%s-DATA_STEWARD
+      for (UserRepresentationVO steward : stewards) {
+        assignments.add(createAssignments(dataCollectionId, steward.getEmail(),
+            ResourceGroupEnum.DATACOLLECTION_STEWARD));
+      }
+
+      // Assign DataCollection-%s-DATA_CUSTODIAN
+      for (UserRepresentationVO custodian : custodians) {
+        assignments.add(createAssignments(dataCollectionId, custodian.getEmail(),
+            ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
+      }
     }
 
-    // Create EUDataset groups and assign custodian to self user
     for (Long euDatasetId : euDatasetIds) {
+
+      // Create EUDataset-%s-DATA_STEWARD
+      groups.add(
+          createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.DATA_STEWARD));
+
+      // Create EUDataset-%s-DATA_CUSTODIAN
       groups.add(
           createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
-      custodianAssignments
-          .add(createAssignments(euDatasetId, null, ResourceGroupEnum.EUDATASET_CUSTODIAN));
+
+      // Assign DataCollection-%s-DATA_STEWARD
+      for (UserRepresentationVO steward : stewards) {
+        assignments.add(createAssignments(euDatasetId, steward.getEmail(),
+            ResourceGroupEnum.EUDATASET_STEWARD));
+      }
+
+      // Assign EUDataset-%s-DATA_CUSTODIAN
+      for (UserRepresentationVO custodian : custodians) {
+        assignments.add(createAssignments(euDatasetId, custodian.getEmail(),
+            ResourceGroupEnum.EUDATASET_CUSTODIAN));
+      }
     }
 
-    // Create DATASET_LEAD_REPORTER and DATA_CUSTODIAN groups
-    // Assign DATAFLOW_LEAD_REPORTER and LEAD_REPORTER to representatives and DATA_CUSTODIAN to self
-    // user
     for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
+
+      // Create Dataset-%s-DATA_STEWARD
       groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
-      providerAssignments.add(createAssignments(entry.getKey(), entry.getValue(),
-          ResourceGroupEnum.DATASET_LEAD_REPORTER));
-      providerAssignments.add(createAssignments(dataflowId, entry.getValue(),
-          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_STEWARD));
+
+      // Create Dataset-%s-DATA_CUSTODIAN
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
-      custodianAssignments
-          .add(createAssignments(entry.getKey(), null, ResourceGroupEnum.DATASET_CUSTODIAN));
+
+      // Create Dataset-%s-LEAD_REPORTER
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
+
+      // Assign Dataset-%s-DATA_STEWARD
+      for (UserRepresentationVO steward : stewards) {
+        assignments.add(createAssignments(entry.getKey(), steward.getEmail(),
+            ResourceGroupEnum.DATASET_STEWARD));
+      }
+
+      // Assign Dataset-%s-DATA_CUSTODIAN
+      for (UserRepresentationVO custodian : custodians) {
+        assignments.add(createAssignments(entry.getKey(), custodian.getEmail(),
+            ResourceGroupEnum.DATASET_CUSTODIAN));
+      }
+
+      // Assign Dataset-%s-LEAD_REPORTER
+      assignments.add(createAssignments(entry.getKey(), entry.getValue(),
+          ResourceGroupEnum.DATASET_LEAD_REPORTER));
+
+      // Assign Dataflow-%s-LEAD_REPORTER
+      assignments.add(createAssignments(dataflowId, entry.getValue(),
+          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
     }
   }
 

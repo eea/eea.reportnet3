@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
@@ -22,9 +22,17 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
+const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows = () => {}, type }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const [isPinned, setIsPinned] = useState(itemContent.pinned === 'pinned');
+  const [isPinning, setIsPinning] = useState(false);
+  const [isPinShowed, setIsPinShowed] = useState(false);
+
+  useEffect(() => {
+    setIsPinned(itemContent.pinned === 'pinned');
+  }, [itemContent, isPinning]);
 
   const onAccept = async () => {
     try {
@@ -60,7 +68,9 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
                 styles[itemContent.status]
               } dataflowList-first-dataflow-help-step`
             : `${styles.container} ${styles[itemContent.status]}`
-        }>
+        }
+        onMouseEnter={() => setIsPinShowed(true)}
+        onMouseLeave={() => setIsPinShowed(false)}>
         {type === 'accepted' ? (
           <Link
             className={`${styles.containerLink}`}
@@ -76,6 +86,17 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, type }) => {
         ) : (
           <>{children}</>
         )}
+        <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
+          <FontAwesomeIcon
+            className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
+            icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
+            onClick={async () => {
+              setIsPinning(true);
+              await reorderDataflows(itemContent, !isPinned);
+              setIsPinning(false);
+            }}
+          />
+        </div>
       </div>
     );
   };

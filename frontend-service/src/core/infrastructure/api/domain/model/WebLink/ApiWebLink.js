@@ -13,21 +13,16 @@ export const apiWebLink = {
     return response.data.weblinks;
   },
   create: async (dataflowId, weblink) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(WeblinkConfig.create, {
-          dataflowId
-        }),
-        data: {
-          description: weblink.description,
-          url: weblink.url.toString().toLowerCase()
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error creating the weblink: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.post({
+      url: getUrl(WeblinkConfig.create, {
+        dataflowId
+      }),
+      data: {
+        description: weblink.description,
+        url: weblink.url.toString()
+      }
+    });
+    return response;
   },
 
   deleteWeblink: async weblinkToDelete => {
@@ -46,21 +41,16 @@ export const apiWebLink = {
   },
 
   update: async (dataflowId, weblinkToEdit) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(WeblinkConfig.update, {
-          dataflowId
-        }),
-        data: {
-          description: weblinkToEdit.description,
-          id: weblinkToEdit.id,
-          url: weblinkToEdit.url
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error editing the weblink: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.update({
+      url: getUrl(WeblinkConfig.update, {
+        dataflowId
+      }),
+      data: {
+        description: weblinkToEdit.description,
+        id: weblinkToEdit.id,
+        url: weblinkToEdit.url
+      }
+    });
+    return response;
   }
 };

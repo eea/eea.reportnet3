@@ -6,7 +6,7 @@ import isNil from 'lodash/isNil';
 import styles from './WebformTable.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { IconTooltip } from 'ui/views/_components/IconTooltip';
+import { GroupedRecordValidations } from 'ui/views/Webforms/_components/GroupedRecordValidations';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { WebformRecord } from './_components/WebformRecord';
 
@@ -39,7 +39,12 @@ export const WebformTable = ({
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewTableRecord, parseOtherObjectivesRecord } = WebformsUtils;
+  const {
+    onParseWebformRecords,
+    parseNewTableRecord,
+    parseOtherObjectivesRecord,
+    parseRecordsValidations
+  } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -270,13 +275,9 @@ export const WebformTable = ({
     }
   };
 
-  if (webformTableState.isLoading) return <Spinner style={{ top: 0, margin: '1rem' }} />;
-
-  const childHasErrors = getTableElements(webformData)
-    .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-    .map(table => table.hasErrors);
-
-  const hasErrors = [webformData.hasErrors].concat(childHasErrors);
+  if (webformTableState.isLoading) {
+    return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  }
 
   return (
     <div className={styles.contentWrap}>
@@ -285,9 +286,8 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-          {hasErrors.includes(true) && (
-            <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
-          )}
+
+          <GroupedRecordValidations parsedRecordData={parseRecordsValidations(webformData.elementsRecords)[0]} />
         </div>
         {webformData.multipleRecords && (
           <Button

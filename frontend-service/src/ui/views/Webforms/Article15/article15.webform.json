@@ -809,25 +809,25 @@
           "type": "FIELD",
           "name": "DescribeReducingClimateImpacts",
           "title": "Progress towards reducing climate impacts, vulnerabilities and risks (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3a"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3a"
         },
         {
           "type": "FIELD",
           "name": "DescribeIncreasingAdaptiveCapacity",
           "title": "Progress towards increasing adaptive capacity (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3b"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3b"
         },
         {
           "type": "FIELD",
           "name": "DescribeMeetingAdaptationPriorities",
           "title": "Progress towards meeting adaptation priorities (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3c"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3c"
         },
         {
           "type": "FIELD",
           "name": "DescribeProgressTowardsAddressing",
           "title": "Progress towards addressing barriers to adaptation (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3d"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3d"
         },
         {
           "type": "FIELD",
@@ -866,6 +866,12 @@
               "name": "Area",
               "title": "Area of good practices",
               "tooltip": "Select minimum 1 of the following areas of good practice (any combination of areas is possible). Annex I: footnote 19"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeGoodPractice",
+              "title": "Good practices and lessons learnt, including at sub-national level (max. 500 characters)",
+              "tooltip": "Annex I: 5.1"
             }
           ]
         },
@@ -886,12 +892,6 @@
           "name": "DescribeDetailCooperationEnhance",
           "title": "Cooperation with Union Member States, international cooperation, and with regional and international organisations to enhance adaptation action at the sub-national, national, macro-regional and international level (max. 3000 characters)",
           "tooltip": "Including the area, scale and types of cooperation. Excluding information on support to developing countries referred to in Part 2 of Annex VIII of Regulation (EU) 2018/1999. Annex I: 5.3b"
-        },
-        {
-          "type": "FIELD",
-          "name": "DescribeGoodPractice",
-          "title": "Good practices and lessons learnt, including at sub-national level (max. 500 characters)",
-          "tooltip": "Annex I: 5.1"
         }
       ]
     },
