@@ -130,7 +130,9 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     }
 
     if (IntegrationOperationTypeEnum.EXPORT.equals(integrationOperationTypeEnum)) {
-      fileName = LocalDateTime.now().toString("yyyyMMddhhmmss") + ".xlsx";
+      String extension = integration.getInternalParameters().get(IntegrationParams.FILE_EXTENSION);
+      extension = null != extension ? extension.toLowerCase() : "xlsx";
+      fileName = LocalDateTime.now().toString("yyyyMMddhhmmss") + "." + extension;
     }
 
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
