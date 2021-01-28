@@ -243,16 +243,18 @@ export const TableManagement = ({
       );
     });
     const parentTablesDataPromises = parentTables.map(async parentTable => {
+      const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
       return {
         tableSchemaId: parentTable.tableSchemaId,
         tableSchemaName: parentTable.tableSchemaName,
-        data: await DatasetService.tableDataById(datasetId, parentTable.tableSchemaId, '', 300, undefined, [
-          'CORRECT',
-          'INFO',
-          'WARNING',
-          'ERROR',
-          'BLOCKER'
-        ])
+        data: await DatasetService.tableDataById(
+          datasetId,
+          parentTable.tableSchemaId,
+          '',
+          300,
+          sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+          ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        )
       };
     });
     Promise.all(parentTablesDataPromises)
