@@ -5,7 +5,6 @@ import java.util.Map;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
-import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +22,6 @@ public class ImportSchemas {
   private Map<String, String> schemaNames;
   private List<IntegrationVO> externalIntegrations;
   private List<UniqueConstraintSchema> uniques;
-  private List<RulesSchemaVO> rules;
   private List<IntegrityVO> integrities;
   private List<byte[]> qcrulesBytes;
 

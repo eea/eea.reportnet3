@@ -1,5 +1,6 @@
 package org.eea.dataset.service.helper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -8,6 +9,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +28,10 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
+import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -34,6 +39,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -49,6 +55,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 
 /**
@@ -135,6 +143,158 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
+
+
+
+  public ImportSchemas unZipImportSchema(MultipartFile multipartFile)
+      throws EEAException, IOException {
+
+    ImportSchemas fileUnziped = new ImportSchemas();
+    try (InputStream input = multipartFile.getInputStream()) {
+      String fileName = multipartFile.getOriginalFilename();
+      String multipartFileMimeType = datasetService.getMimetype(fileName);
+
+      List<DataSetSchema> schemas = new ArrayList<>();
+      Map<String, String> schemaNames = new HashMap<>();
+      List<IntegrationVO> extIntegrations = new ArrayList<>();
+      List<UniqueConstraintSchema> uniques = new ArrayList<>();
+      List<RulesSchema> qcrules = new ArrayList<>();
+      List<IntegrityVO> integrities = new ArrayList<>();
+      List<byte[]> qcrulesBytes = new ArrayList<>();
+
+      if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
+        try (ZipInputStream zip = new ZipInputStream(input)) {
+
+          for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
+
+            String entryName = entry.getName();
+            String mimeType = datasetService.getMimetype(entryName);
+            if ("schema".equalsIgnoreCase(mimeType)) {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              ByteArrayOutputStream output = new ByteArrayOutputStream();
+              byte[] buf = new byte[1024];
+              int n;
+              while ((n = zip.read(buf, 0, 1024)) != -1) {
+                output.write(buf, 0, n);
+              }
+              byte[] content = output.toByteArray();
+              if (content != null && content.length > 0) {
+                DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+                LOG.info("Schema class recovered from zip file");
+                schemas.add(schema);
+              }
+            }
+            if ("qcrules".equalsIgnoreCase(mimeType)) {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              ByteArrayOutputStream output = new ByteArrayOutputStream();
+              byte[] buf = new byte[1024];
+              int n;
+              while ((n = zip.read(buf, 0, 1024)) != -1) {
+                output.write(buf, 0, n);
+              }
+              byte[] content = output.toByteArray();
+
+
+              if (content != null && content.length > 0) {
+                RulesSchema qcRule = objectMapper.readValue(content, RulesSchema.class);
+                LOG.info("QcRule class recovered from zip file");
+                qcrules.add(qcRule);
+                LOG.info("la qc rule es: {}", qcRule);
+                qcrulesBytes.add(content);
+                // qcrulesBytes = ArrayUtils.addAll(qcrulesBytes, qcRule.toString().getBytes());
+                // LOG.info("el byte[] tiene longitud de {}", qcrulesBytes.length);
+                // if (qcrulesBytes != null && qcrulesBytes.length > 0) {
+                // LOG.info("Hago un append de bytes");
+                // outputStream.write(qcrulesBytes);
+                // }
+                // qcrulesBytes = ArrayUtils.addAll(qcrulesBytes, content);
+                // qcrulesBytes = outputStream.toByteArray();
+
+              }
+            }
+            if ("unique".equalsIgnoreCase(mimeType)) {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              ByteArrayOutputStream output = new ByteArrayOutputStream();
+              byte[] buf = new byte[1024];
+              int n;
+              while ((n = zip.read(buf, 0, 1024)) != -1) {
+                output.write(buf, 0, n);
+              }
+              byte[] content = output.toByteArray();
+              if (content != null && content.length > 0) {
+                uniques.addAll(
+                    Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
+                LOG.info("Unique class recovered from zip file");
+              }
+            }
+            if ("names".equalsIgnoreCase(mimeType)) {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              ByteArrayOutputStream output = new ByteArrayOutputStream();
+              byte[] buf = new byte[1024];
+              int n;
+              while ((n = zip.read(buf, 0, 1024)) != -1) {
+                output.write(buf, 0, n);
+              }
+              byte[] content = output.toByteArray();
+              if (content != null && content.length > 0) {
+                schemaNames = objectMapper.readValue(content, Map.class);
+                LOG.info("Schema names recovered from zip file");
+              }
+            }
+            if ("extintegrations".equalsIgnoreCase(mimeType)) {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              ByteArrayOutputStream output = new ByteArrayOutputStream();
+              byte[] buf = new byte[1024];
+              int n;
+              while ((n = zip.read(buf, 0, 1024)) != -1) {
+                output.write(buf, 0, n);
+              }
+              byte[] content = output.toByteArray();
+              if (content != null && content.length > 0) {
+                extIntegrations
+                    .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
+                LOG.info("External integration recovered from zip file");
+              }
+            }
+            if ("integrity".equalsIgnoreCase(mimeType)) {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              ByteArrayOutputStream output = new ByteArrayOutputStream();
+              byte[] buf = new byte[1024];
+              int n;
+              while ((n = zip.read(buf, 0, 1024)) != -1) {
+                output.write(buf, 0, n);
+              }
+              byte[] content = output.toByteArray();
+              if (content != null && content.length > 0) {
+                integrities
+                    .addAll(Arrays.asList(objectMapper.readValue(content, IntegrityVO[].class)));
+                LOG.info("External integration recovered from zip file");
+              }
+            }
+          }
+          zip.closeEntry();
+
+          fileUnziped.setSchemaNames(schemaNames);
+          fileUnziped.setSchemas(schemas);
+          fileUnziped.setUniques(uniques);
+          fileUnziped.setExternalIntegrations(extIntegrations);
+          // fileUnziped.setRules(rulesSchemaMapper.entityListToClass(qcrules));
+          fileUnziped.setQcrulesBytes(qcrulesBytes);
+          fileUnziped.setIntegrities(integrities);
+
+        }
+      }
+    }
+    return fileUnziped;
+  }
+
+
 
   /**
    * File management.

@@ -10,7 +10,6 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
-import org.eea.validation.persistence.schemas.rule.RulesSchema;
 
 /**
  * The Class ValidationService.
@@ -276,7 +275,7 @@ public interface RulesService {
   void insertIntegritySchemas(List<IntegrityVO> integritiesVO);
 
 
-  Map<String, String> importRulesSchema(List<RulesSchema> schemaRules,
+  Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
       Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integrities)
       throws EEAException;
 }

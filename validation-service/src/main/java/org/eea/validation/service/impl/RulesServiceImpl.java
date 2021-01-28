@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class ValidationService.
@@ -1253,9 +1256,24 @@ public class RulesServiceImpl implements RulesService {
 
 
   @Override
-  public Map<String, String> importRulesSchema(List<RulesSchema> schemaRules,
+  public Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
       Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integritiesVo)
       throws EEAException {
+
+    List<RulesSchema> schemaRules = new ArrayList<>();
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    for (byte[] content : qcRulesBytes) {
+      if (content != null && content.length > 0) {
+        try {
+          schemaRules.add(objectMapper.readValue(content, RulesSchema.class));
+          LOG.info("QcRule class recovered from zip file");
+        } catch (IOException e) {
+          LOG_ERROR.error("Error convirtiendo el bytes[] a lista de rules", e.getMessage(), e);
+        }
+      }
+    }
 
     // We've got the dictionaries and the list of the origin dataset schemas involved to get the
     // rules of them, and with the help of the dictionary,

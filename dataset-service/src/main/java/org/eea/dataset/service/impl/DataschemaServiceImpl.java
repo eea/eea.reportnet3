@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +21,6 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
-import org.eea.dataset.mapper.RulesSchemaMapper;
 import org.eea.dataset.mapper.SimpleDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
@@ -47,6 +45,7 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
@@ -200,7 +199,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private IntegrationControllerZuul integrationControllerZuul;
 
   @Autowired
-  private RulesSchemaMapper rulesSchemaMapper;
+  private FileTreatmentHelper fileTreatmentHelper;
 
 
 
@@ -2172,88 +2171,75 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
 
     try {
-      try (InputStream input = multipartFile.getInputStream()) {
-        String fileName = multipartFile.getOriginalFilename();
-        String multipartFileMimeType = datasetService.getMimetype(fileName);
 
-        if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
-          try (ZipInputStream zip = new ZipInputStream(input)) {
+      ImportSchemas importClasses = fileTreatmentHelper.unZipImportSchema(multipartFile);
 
-            ImportSchemas importClasses = unZip(zip);
+      for (DataSetSchema schema : importClasses.getSchemas()) {
 
-            for (DataSetSchema schema : importClasses.getSchemas()) {
+        String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
+        DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
+        dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
+            newIdDatasetSchema);
 
-              String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
-              DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
-              dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
-                  newIdDatasetSchema);
-
-              final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
-              targetDatasetSchema.getTableSchemas().forEach(table -> {
-                for (TableSchema tableSchema : schema.getTableSchemas()) {
-                  if (table.getNameTableSchema().equals(tableSchema.getNameTableSchema())) {
-                    dictionaryOriginTargetTableObjectId
-                        .put(tableSchema.getIdTableSchema().toString(), table.getIdTableSchema());
-                    dictionaryOriginTargetTableObjectId.put(
-                        tableSchema.getRecordSchema().getIdRecordSchema().toString(),
-                        table.getRecordSchema().getIdRecordSchema());
-                  }
-                }
-              });
-              dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
-
-              Future<Long> datasetId =
-                  datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-                      schemaName(schema.getIdDataSetSchema().toString(),
-                          importClasses.getSchemaNames()),
-                      newIdDatasetSchema, dataflowId, null, null, 0);
-
-
-
-              LOG.info("New dataset created in the import process with id {}", datasetId.get());
-              mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
-              Thread.sleep(4000);
-
+        final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
+        targetDatasetSchema.getTableSchemas().forEach(table -> {
+          for (TableSchema tableSchema : schema.getTableSchemas()) {
+            if (table.getNameTableSchema().equals(tableSchema.getNameTableSchema())) {
+              dictionaryOriginTargetTableObjectId.put(tableSchema.getIdTableSchema().toString(),
+                  table.getIdTableSchema());
+              dictionaryOriginTargetTableObjectId.put(
+                  tableSchema.getRecordSchema().getIdRecordSchema().toString(),
+                  table.getRecordSchema().getIdRecordSchema());
             }
-
-            // After creating the datasets schemas on the DB, fill them and create the permissions
-            for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
-                .entrySet()) {
-              contributorControllerZuul.createAssociatedPermissions(dataflowId,
-                  itemNewDatasetAndSchema.getKey());
-
-              fillAndUpdateDesignDatasetImported(itemNewDatasetAndSchema.getValue(),
-                  dictionaryOriginTargetObjectId
-                      .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
-                  dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
-                  mapDatasetIdFKRelations);
-
-            }
-
-            // Modify the FK, if the schemas copied have fields of type Link, to update the
-            // relations to
-            // the correct ones
-            processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
-
-            importUniqueConstraintsCatalogue(importClasses.getUniques(),
-                dictionaryOriginTargetObjectId);
-
-            ImportSchemaVO importRules = new ImportSchemaVO();
-            importRules.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
-            importRules.setRulesSchemaVO(importClasses.getRules());
-            importRules.setIntegritiesVO(importClasses.getIntegrities());
-            importRules.setQcrulesbytes(importClasses.getQcrulesBytes());
-            // mapToImportRules.put(importClasses.getRules(), dictionaryOriginTargetObjectId);
-            // rulesControllerZuul.importRulesSchema(importClasses.getRules(),
-            // dictionaryOriginTargetObjectId);
-            rulesControllerZuul.importRulesSchema(importRules);
-
-            createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
-                dictionaryOriginTargetObjectId);
-
           }
-        }
+        });
+        dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
+
+        Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
+            schemaName(schema.getIdDataSetSchema().toString(), importClasses.getSchemaNames()),
+            newIdDatasetSchema, dataflowId, null, null, 0);
+
+
+
+        LOG.info("New dataset created in the import process with id {}", datasetId.get());
+        mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
+        Thread.sleep(4000);
+
       }
+
+      // After creating the datasets schemas on the DB, fill them and create the permissions
+      for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
+          .entrySet()) {
+        contributorControllerZuul.createAssociatedPermissions(dataflowId,
+            itemNewDatasetAndSchema.getKey());
+
+        fillAndUpdateDesignDatasetImported(itemNewDatasetAndSchema.getValue(),
+            dictionaryOriginTargetObjectId
+                .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
+            dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
+            mapDatasetIdFKRelations);
+
+      }
+
+      // Modify the FK, if the schemas copied have fields of type Link, to update the
+      // relations to
+      // the correct ones
+      processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
+
+      importUniqueConstraintsCatalogue(importClasses.getUniques(), dictionaryOriginTargetObjectId);
+
+      ImportSchemaVO importRules = new ImportSchemaVO();
+      importRules.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+      // importRules.setRulesSchemaVO(importClasses.getRules());
+      importRules.setIntegritiesVO(importClasses.getIntegrities());
+      importRules.setQcrulesbytes(importClasses.getQcrulesBytes());
+      // mapToImportRules.put(importClasses.getRules(), dictionaryOriginTargetObjectId);
+      // rulesControllerZuul.importRulesSchema(importClasses.getRules(),
+      // dictionaryOriginTargetObjectId);
+      rulesControllerZuul.importRulesSchema(importRules);
+
+      createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
+          dictionaryOriginTargetObjectId);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
           null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
@@ -2262,142 +2248,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } catch (Exception e) {
       LOG.error("An error in the import process happened. Message: {}", e.getMessage(), e);
     }
-  }
-
-  private ImportSchemas unZip(ZipInputStream zip) throws EEAException, IOException {
-
-    List<DataSetSchema> schemas = new ArrayList<>();
-    Map<String, String> schemaNames = new HashMap<>();
-    List<IntegrationVO> extIntegrations = new ArrayList<>();
-    List<UniqueConstraintSchema> uniques = new ArrayList<>();
-    List<RulesSchema> qcrules = new ArrayList<>();
-    List<IntegrityVO> integrities = new ArrayList<>();
-    List<byte[]> qcrulesBytes = new ArrayList<>();
-
-    for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
-
-      String entryName = entry.getName();
-      String mimeType = datasetService.getMimetype(entryName);
-      if ("schema".equalsIgnoreCase(mimeType)) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int n;
-        while ((n = zip.read(buf, 0, 1024)) != -1) {
-          output.write(buf, 0, n);
-        }
-        byte[] content = output.toByteArray();
-        if (content != null && content.length > 0) {
-          DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-          LOG.info("Schema class recovered from zip file");
-          schemas.add(schema);
-        }
-      }
-      if ("qcrules".equalsIgnoreCase(mimeType)) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int n;
-        while ((n = zip.read(buf, 0, 1024)) != -1) {
-          output.write(buf, 0, n);
-        }
-        byte[] content = output.toByteArray();
-
-
-        if (content != null && content.length > 0) {
-          RulesSchema qcRule = objectMapper.readValue(content, RulesSchema.class);
-          LOG.info("QcRule class recovered from zip file");
-          qcrules.add(qcRule);
-          LOG.info("la qc rule es: {}", qcRule);
-          qcrulesBytes.add(content);
-          // qcrulesBytes = ArrayUtils.addAll(qcrulesBytes, qcRule.toString().getBytes());
-          // LOG.info("el byte[] tiene longitud de {}", qcrulesBytes.length);
-          // if (qcrulesBytes != null && qcrulesBytes.length > 0) {
-          // LOG.info("Hago un append de bytes");
-          // outputStream.write(qcrulesBytes);
-          // }
-          // qcrulesBytes = ArrayUtils.addAll(qcrulesBytes, content);
-          // qcrulesBytes = outputStream.toByteArray();
-
-        }
-      }
-      if ("unique".equalsIgnoreCase(mimeType)) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int n;
-        while ((n = zip.read(buf, 0, 1024)) != -1) {
-          output.write(buf, 0, n);
-        }
-        byte[] content = output.toByteArray();
-        if (content != null && content.length > 0) {
-          uniques.addAll(
-              Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
-          LOG.info("Unique class recovered from zip file");
-        }
-      }
-      if ("names".equalsIgnoreCase(mimeType)) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int n;
-        while ((n = zip.read(buf, 0, 1024)) != -1) {
-          output.write(buf, 0, n);
-        }
-        byte[] content = output.toByteArray();
-        if (content != null && content.length > 0) {
-          schemaNames = objectMapper.readValue(content, Map.class);
-          LOG.info("Schema names recovered from zip file");
-        }
-      }
-      if ("extintegrations".equalsIgnoreCase(mimeType)) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int n;
-        while ((n = zip.read(buf, 0, 1024)) != -1) {
-          output.write(buf, 0, n);
-        }
-        byte[] content = output.toByteArray();
-        if (content != null && content.length > 0) {
-          extIntegrations
-              .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
-          LOG.info("External integration recovered from zip file");
-        }
-      }
-      if ("integrity".equalsIgnoreCase(mimeType)) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int n;
-        while ((n = zip.read(buf, 0, 1024)) != -1) {
-          output.write(buf, 0, n);
-        }
-        byte[] content = output.toByteArray();
-        if (content != null && content.length > 0) {
-          integrities.addAll(Arrays.asList(objectMapper.readValue(content, IntegrityVO[].class)));
-          LOG.info("External integration recovered from zip file");
-        }
-      }
-    }
-    zip.closeEntry();
-    zip.close();
-
-    ImportSchemas fileUnziped = new ImportSchemas();
-    fileUnziped.setSchemaNames(schemaNames);
-    fileUnziped.setSchemas(schemas);
-    fileUnziped.setUniques(uniques);
-    fileUnziped.setExternalIntegrations(extIntegrations);
-    // fileUnziped.setRules(rulesSchemaMapper.entityListToClass(qcrules));
-    fileUnziped.setQcrulesBytes(qcrulesBytes);
-    fileUnziped.setIntegrities(integrities);
-    return fileUnziped;
   }
 
 
