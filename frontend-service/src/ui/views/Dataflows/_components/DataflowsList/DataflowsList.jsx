@@ -133,6 +133,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
           inputOptions={DataflowConf.filterItems['input']}
           selectOptions={DataflowConf.filterItems['select']}
           sortable={true}
+          sortCategory={'pinned'}
         />
       </div>
 
