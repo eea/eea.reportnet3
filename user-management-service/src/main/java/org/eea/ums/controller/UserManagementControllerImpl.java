@@ -736,7 +736,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  // @PreAuthorize("isAuthenticated()") //TODO change to preauth lead reporter and nc
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/country/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
       responseContainer = "List")

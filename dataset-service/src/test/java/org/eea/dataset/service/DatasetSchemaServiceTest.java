@@ -463,6 +463,40 @@ public class DatasetSchemaServiceTest {
     Assert.assertNotEquals("", response);
   }
 
+  @Test(expected = EEAException.class)
+  public void createFieldSchemaNameExistTest() throws EEAException {
+    ReferencedFieldSchemaVO referencedField = new ReferencedFieldSchemaVO();
+    referencedField.setIdDatasetSchema("5eb4269d06390651aced7c93");
+    referencedField.setIdPk("5eb4269d06390651aced7c93");
+
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+
+    FieldSchemaVO field = new FieldSchemaVO();
+    field.setReferencedField(referencedField);
+    field.setCodelistItems(codelistItems);
+    field.setType(DataType.CODELIST);
+    field.setId("1");
+    field.setName("");
+
+    Document document = new Document();
+    Document documentField = new Document();
+    List<Document> documentsField = new ArrayList<>();
+    documentsField.add(documentField);
+    document.put("fieldSchemas", documentsField);
+    documentField.put("headerName", "");
+    documentField.put("_id", "");
+
+    Mockito.when(schemasRepository.findRecordSchemaByRecordSchemaId(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    try {
+      dataSchemaServiceImpl.createFieldSchema("5eb4269d06390651aced7c93", field);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, field.getName(),
+          field.getIdRecord(), "5eb4269d06390651aced7c93"), e.getMessage());
+      throw e;
+    }
+  }
+
   /**
    * Creates the field schema exception test.
    *
@@ -831,6 +865,40 @@ public class DatasetSchemaServiceTest {
         .thenReturn(new TableSchema());
     dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), tableSchemaVO, 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateFieldSchemaNameExistTest() throws EEAException {
+    ReferencedFieldSchemaVO referencedField = new ReferencedFieldSchemaVO();
+    referencedField.setIdDatasetSchema("5eb4269d06390651aced7c93");
+    referencedField.setIdPk("5eb4269d06390651aced7c93");
+
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+
+    FieldSchemaVO field = new FieldSchemaVO();
+    field.setReferencedField(referencedField);
+    field.setCodelistItems(codelistItems);
+    field.setType(DataType.CODELIST);
+    field.setId("1");
+    field.setName("");
+
+    Document document = new Document();
+    Document documentField = new Document();
+    List<Document> documentsField = new ArrayList<>();
+    documentsField.add(documentField);
+    document.put("fieldSchemas", documentsField);
+    documentField.put("headerName", "");
+    documentField.put("_id", "");
+
+    Mockito.when(schemasRepository.findRecordSchemaByRecordSchemaId(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    try {
+      dataSchemaServiceImpl.updateFieldSchema("5eb4269d06390651aced7c93", field);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, field.getName(),
+          field.getIdRecord(), "5eb4269d06390651aced7c93"), e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -1921,6 +1989,38 @@ public class DatasetSchemaServiceTest {
     fieldSchemaVO.setType(DataType.ATTACHMENT);
     Document doc = new Document();
     doc.put("typeData", "ATTACHMENT");
+    when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(doc);
+    dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void checkDeleteAttachmentsFirstHasToCleanTest() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5eb4269d06390651aced7c93");
+    fieldSchemaVO.setType(DataType.ATTACHMENT);
+    fieldSchemaVO.setValidExtensions(new String[0]);
+    Document doc = new Document();
+    doc.put("typeData", "ATTACHMENT1");
+    doc.put("validExtensions", new ArrayList<>());
+    when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(doc);
+    dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void checkDeleteAttachmentsSecondHasToCleanTest() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5eb4269d06390651aced7c93");
+    fieldSchemaVO.setType(DataType.ATTACHMENT);
+    fieldSchemaVO.setValidExtensions(new String[0]);
+    fieldSchemaVO.setMaxSize(1f);
+    Document doc = new Document();
+    doc.put("typeData", "ATTACHMENT");
+    doc.put("validExtensions", new ArrayList<>());
+    doc.put("maxSize", 0.0);
     when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(doc);
     dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
