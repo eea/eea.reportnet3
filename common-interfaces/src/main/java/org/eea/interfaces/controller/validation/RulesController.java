@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -364,5 +365,9 @@ public interface RulesController {
    */
   @PostMapping("/private/insertIntegrities")
   void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO);
+
+
+  @PostMapping("/private/importRulesSchema")
+  Map<String, String> importRulesSchema(@RequestBody ImportSchemaVO importRules);
 
 }

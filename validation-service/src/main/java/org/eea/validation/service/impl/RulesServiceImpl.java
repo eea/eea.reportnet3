@@ -1251,4 +1251,173 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+
+  @Override
+  public Map<String, String> importRulesSchema(List<RulesSchema> schemaRules,
+      Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integritiesVo)
+      throws EEAException {
+
+    // We've got the dictionaries and the list of the origin dataset schemas involved to get the
+    // rules of them, and with the help of the dictionary,
+    // replace the objectIds from the origin to the new ones of the target schemas, to finally save
+    // them as new rules. The data needed is inside the auxiliary CopySchemaVO
+    // List<String> listDatasetSchemaIdToCopy = rules.getOriginDatasetSchemaIds();
+    // Map<String, String> dictionaryOriginTargetObjectId =
+    // rules.getDictionaryOriginTargetObjectId();
+    // Map<Long, Long> dictionaryOriginTargetDatasetsId =
+    // rules.getDictionaryOriginTargetDatasetsId();
+    for (RulesSchema ruleSchema : schemaRules) {
+      String newDatasetSchemaId =
+          dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
+
+      // Delete the the rules created in the steps before on the new schema, we are going to copy
+      // them directly
+      // from the original schema with properties like 'enabled'
+      rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+      rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+
+      for (Rule rule : ruleSchema.getRules()) {
+        // We copy only the rules that are not of type Link, because these one are created
+        // automatically in the process when we update the fieldSchema in previous calls of the copy
+        // process
+        // Rule rule = ruleMapper.classToEntity(ruleVo);
+        List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
+        importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities);
+      }
+    }
+    return dictionaryOriginTargetObjectId;
+  }
+
+
+  private Map<String, String> importData(Map<String, String> dictionaryOriginTargetObjectId,
+      String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities) throws EEAException {
+
+    // Here we change the fields of the rule involved with the help of the dictionary
+    fillRuleImport(rule, dictionaryOriginTargetObjectId);
+
+    // If the rule is a Dataset type, we need to do the same process with the
+    // IntegritySchema
+    if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
+      importIntegrity(integrities, dictionaryOriginTargetObjectId, rule);
+    }
+
+    LOG.info(
+        "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
+        rule.getRuleName(), rule.getReferenceId());
+    if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    } else {
+      // add the rules sequence
+      rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
+    }
+
+    return dictionaryOriginTargetObjectId;
+  }
+
+  private Map<String, String> fillRuleImport(Rule rule,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+
+    LOG.info("El when condition original de la regla es {}", rule.getWhenCondition());
+    String newRuleId = new ObjectId().toString();
+    dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
+    rule.setRuleId(new ObjectId(newRuleId));
+    if (dictionaryOriginTargetObjectId.containsKey(rule.getReferenceId().toString())) {
+      rule.setReferenceId(
+          new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
+    }
+    if (rule.getReferenceFieldSchemaPKId() != null && dictionaryOriginTargetObjectId
+        .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
+      rule.setReferenceFieldSchemaPKId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
+    }
+    if (rule.getUniqueConstraintId() != null) {
+      String newUniqueConstraintId = new ObjectId().toString();
+      dictionaryOriginTargetObjectId.put(rule.getUniqueConstraintId().toString(),
+          newUniqueConstraintId);
+      rule.setUniqueConstraintId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
+    }
+
+    if (rule.getIntegrityConstraintId() != null) {
+      String newIntegrityConstraintId = new ObjectId().toString();
+      dictionaryOriginTargetObjectId.put(rule.getIntegrityConstraintId().toString(),
+          newIntegrityConstraintId);
+      rule.setIntegrityConstraintId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
+
+    }
+
+    // modify the when condition
+    if (StringUtils.isNotBlank(rule.getWhenCondition())) {
+      dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+        String newWhenCondition = rule.getWhenCondition();
+        newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
+        rule.setWhenCondition(newWhenCondition);
+      });
+
+      LOG.info("El when condition a grabar final de la regla es {}", rule.getWhenCondition());
+
+      // Special case for SQL Sentences
+      if (rule.getWhenCondition().contains("isSQLSentence")) {
+        // isSQLSentence(this.datasetId.id, '600ff55f02682544d4c5d60b')
+
+        // dictionaryOriginTargetDatasetsId.forEach((Long oldDatasetId, Long newDatasetId) -> {
+        //
+        // // Change the datasetId in "isSQLSentence(xxx,...."
+        // String newWhenCondition = rule.getWhenCondition();
+        // newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
+        // "(" + newDatasetId.toString());
+        //
+        // // Change the dataset_X in the sentence itself if necessary, like
+        // // select * from table_one t1 inner join dataset_256.table_two....
+        // newWhenCondition = newWhenCondition.replace(DATASET + oldDatasetId.toString(),
+        // DATASET + newDatasetId.toString());
+        // rule.setWhenCondition(newWhenCondition);
+        //
+        // // Do the same in the property SqlSentence
+        // if (StringUtils.isNotBlank(rule.getSqlSentence())) {
+        // String newSqlSentence = rule.getSqlSentence();
+        // newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
+        // DATASET + newDatasetId.toString());
+        // rule.setSqlSentence(newSqlSentence);
+        // }
+        //
+        // });
+      }
+    }
+    return dictionaryOriginTargetObjectId;
+  }
+
+
+  private void importIntegrity(List<IntegritySchema> integritySchemas,
+      Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
+
+    for (IntegritySchema integrity : integritySchemas) {
+      integrity.setId(rule.getIntegrityConstraintId());
+      integrity.setOriginDatasetSchemaId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(integrity.getOriginDatasetSchemaId().toString())));
+      integrity.setReferencedDatasetSchemaId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(integrity.getReferencedDatasetSchemaId().toString())));
+      integrity.setRuleId(rule.getRuleId());
+      for (int i = 0; i < integrity.getOriginFields().size(); i++) {
+        integrity.getOriginFields().set(i, new ObjectId(
+            dictionaryOriginTargetObjectId.get(integrity.getOriginFields().get(i).toString())));
+      }
+      for (int i = 0; i < integrity.getReferencedFields().size(); i++) {
+        integrity.getReferencedFields().set(i, new ObjectId(
+            dictionaryOriginTargetObjectId.get(integrity.getReferencedFields().get(i).toString())));
+      }
+
+      integritySchemaRepository.save(integrity);
+
+      Long datasetReferencedId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
+      Long datasetOriginId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
+          datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+          integrity.getReferencedDatasetSchemaId().toString());
+    }
+  }
+
 }

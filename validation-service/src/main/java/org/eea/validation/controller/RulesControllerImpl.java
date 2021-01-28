@@ -1,5 +1,7 @@
 package org.eea.validation.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
@@ -9,11 +11,14 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.mapper.RuleMapper;
+import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.slf4j.Logger;
@@ -33,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -63,6 +70,9 @@ public class RulesControllerImpl implements RulesController {
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
+
+  @Autowired
+  private RulesSchemaMapper rulesSchemaMapper;
 
 
   /**
@@ -587,4 +597,36 @@ public class RulesControllerImpl implements RulesController {
     rulesService.insertIntegritySchemas(integritiesVO);
   }
 
+
+  @Override
+  @HystrixCommand
+  @PostMapping("/private/importRulesSchema")
+  public Map<String, String> importRulesSchema(@RequestBody ImportSchemaVO importRules) {
+    try {
+
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
+      List<RulesSchema> qcrules = new ArrayList<>();
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+      for (byte[] content : importRules.getQcrulesbytes()) {
+        if (content != null && content.length > 0) {
+          try {
+            qcrules.add(objectMapper.readValue(content, RulesSchema.class));
+            LOG.info("QcRule class recovered from zip file");
+          } catch (IOException e) {
+            LOG_ERROR.error("Error convirtiendo el bytes[] a lista de rules", e.getMessage(), e);
+          }
+        }
+      }
+      return rulesService.importRulesSchema(qcrules,
+          importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error importing rule: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
 }
