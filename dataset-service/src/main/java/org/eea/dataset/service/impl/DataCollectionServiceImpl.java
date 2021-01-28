@@ -970,7 +970,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           ResourceGroupEnum.DATASET_LEAD_REPORTER));
 
       // Assign Dataflow-%s-LEAD_REPORTER
-      assignments.add(createAssignments(entry.getKey(), entry.getValue(),
+      assignments.add(createAssignments(dataflowId, entry.getValue(),
           ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
     }
   }
