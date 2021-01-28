@@ -64,9 +64,12 @@ public class ImportDesignCompletedEvent implements NotificableEventHandler {
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
             : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
     String tableSchemaId = notificationVO.getTableSchemaId();
-    String tableSchemaName =
-        notificationVO.getTableSchemaName() != null ? notificationVO.getTableSchemaName()
-            : dataschemaService.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
+    String tableSchemaName = notificationVO.getTableSchemaName();
+
+    if (null == tableSchemaName && null != tableSchemaId) {
+      tableSchemaName =
+          dataschemaService.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
+    }
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());

@@ -29,18 +29,14 @@ const ActionsColumn = ({
             disabledButtons
           }
           icon={rowUpdatingId !== rowDataId || !isUpdating ? 'edit' : 'spinnerAnimate'}
-          onClick={!isDeletingDocument ? () => onEditClick() : null}
+          onClick={() => onEditClick()}
           type="button"
         />
       )}
       {!isNil(onDeleteClick) && !hideDeletion && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
-          disabled={
-            (rowDeletingId === rowDataId && isDeletingDocument) ||
-            (rowUpdatingId === rowDataId && isUpdating) ||
-            disabledButtons
-          }
+          disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={() => onDeleteClick()}
           type="button"

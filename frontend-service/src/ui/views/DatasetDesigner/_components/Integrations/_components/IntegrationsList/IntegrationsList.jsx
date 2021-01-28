@@ -23,10 +23,14 @@ export const IntegrationsList = ({
   designerState,
   getUpdatedData,
   integrationsList,
+  isCreating,
+  isUpdating,
   manageDialogs,
   needsRefresh,
   onUpdateDesignData,
-  refreshList
+  refreshList,
+  setIsCreating,
+  setIsUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -36,8 +40,10 @@ export const IntegrationsList = ({
     filtered: false,
     filteredData: [],
     integrationId: '',
+    integrationToDeleteId: '',
     isDataUpdated: false,
     isDeleteDialogVisible: false,
+    isDeleting: false,
     isLoading: true
   });
 
@@ -49,6 +55,8 @@ export const IntegrationsList = ({
 
   const actionsTemplate = row => (
     <ActionsColumn
+      isDeletingDocument={integrationListState.isDeleting}
+      isUpdating={isUpdating}
       onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
         const filteredData = integrationListState.data.filter(
@@ -57,6 +65,9 @@ export const IntegrationsList = ({
         manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
+      rowDataId={row.integrationId}
+      rowDeletingId={integrationListState.integrationToDeleteId}
+      rowUpdatingId={integrationListState.integrationId}
     />
   );
 
@@ -86,6 +97,11 @@ export const IntegrationsList = ({
 
   const onDeleteIntegration = async () => {
     try {
+      integrationListDispatch({
+        type: 'SET_INTEGRATION_ID_TO_DELETE',
+        payload: { data: integrationListState.integrationId }
+      });
+      integrationListDispatch({ type: 'IS_DELETING', payload: true });
       const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
@@ -94,6 +110,7 @@ export const IntegrationsList = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
+      integrationListDispatch({ type: 'IS_DELETING', payload: false });
     } finally {
       isDeleteDialogVisible(false);
     }
@@ -103,7 +120,9 @@ export const IntegrationsList = ({
 
   const onLoadIntegrations = async () => {
     try {
-      isLoading(true);
+      if (isCreating || isUpdating || integrationsList.isDeleting) {
+        isLoading(false);
+      }
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
       integrationsList(response);
@@ -112,6 +131,9 @@ export const IntegrationsList = ({
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
       isLoading(false);
+      setIsUpdating(false);
+      setIsCreating(false);
+      integrationListDispatch({ type: 'IS_DELETING', payload: false });
     }
   };
 
@@ -181,7 +203,9 @@ export const IntegrationsList = ({
       {integrationListState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={integrationListState.isDeleting}
           header={resources.messages['deleteIntegrationHeader']}
+          iconConfirm={integrationListState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteIntegration(integrationListState.integrationId)}

@@ -12,6 +12,9 @@ export const integrationsListReducer = (state, { type, payload }) => {
     case 'IS_DELETE_DIALOG_VISIBLE':
       return { ...state, isDeleteDialogVisible: payload.value };
 
+    case 'IS_DELETING':
+      return { ...state, isDeleting: payload };
+
     case 'IS_FILTERED':
       return { ...state, filtered: payload.value };
 
@@ -20,6 +23,9 @@ export const integrationsListReducer = (state, { type, payload }) => {
 
     case 'ON_LOAD_INTEGRATION_ID':
       return { ...state, integrationId: payload.value };
+
+    case 'SET_INTEGRATION_ID_TO_DELETE':
+      return { ...state, integrationToDeleteId: payload.data };
 
     default:
       return state;

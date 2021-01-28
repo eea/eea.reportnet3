@@ -467,6 +467,18 @@ public class DatasetServiceImpl implements DatasetService {
       if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
           && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
         recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
+        // if we have fixed number records we delete the non readonly fields
+      } else if (tableSchema.getFixedNumber()) {
+        List<String> fieldSchemasToDelete = new ArrayList();
+        for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+          if (null != fieldSchema.getReadOnly() && !fieldSchema.getReadOnly()) {
+            fieldSchemasToDelete.add(fieldSchema.getIdFieldSchema().toString());
+          }
+        }
+        List<FieldValue> fieldValue =
+            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToDelete);
+        fieldValue.stream().forEach(fieldVal -> fieldVal.setValue(""));
+        fieldRepository.saveAll(fieldValue);
       }
     }
     try {

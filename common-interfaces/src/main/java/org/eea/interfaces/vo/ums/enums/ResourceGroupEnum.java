@@ -33,6 +33,7 @@ public enum ResourceGroupEnum {
 
   /** The dataflow national coordinator. */
   DATAFLOW_NATIONAL_COORDINATOR("Dataflow-%s-NATIONAL_COORDINATOR"),
+
   // Dataset
 
   /** The dataset steward. */
@@ -55,6 +56,7 @@ public enum ResourceGroupEnum {
 
   /** The dataset national coordinator. */
   DATASET_NATIONAL_COORDINATOR("Dataset-%s-NATIONAL_COORDINATOR"),
+
   // DatasetSchema
 
   /** The dataschema custodian. */
@@ -71,6 +73,7 @@ public enum ResourceGroupEnum {
 
   /** The dataschema national coordinator. */
   DATASCHEMA_NATIONAL_COORDINATOR("Dataschema-%s-NATIONAL_COORDINATOR"),
+
   /** The dataschema editor read. */
   DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ"),
 
@@ -79,20 +82,26 @@ public enum ResourceGroupEnum {
 
   // DataCollection
 
+  /** The datacollection steward. */
+  DATACOLLECTION_STEWARD("DataCollection-%s-DATA_STEWARD"),
+
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("DataCollection-%s-DATA_CUSTODIAN"),
 
   /** The datacollection lead reporter. */
   DATACOLLECTION_LEAD_REPORTER("DataCollection-%s-DATA_LEAD_REPORTER"),
 
+  // EUDataset
+
+  /** The eudataset steward. */
+  EUDATASET_STEWARD("EUDataset-%s-DATA_STEWARD"),
+
+  /** The eudataset custodian. */
+  EUDATASET_CUSTODIAN("EUDataset-%s-DATA_CUSTODIAN"),
 
   /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR
-  PROVIDER_NATIONAL_COORDINATOR("Provider-%s-NATIONAL_COORDINATOR"),
-  // EUDataset
-
-  /** The eudataset custodian. */
-  EUDATASET_CUSTODIAN("EUDataset-%s-DATA_CUSTODIAN");
+  PROVIDER_NATIONAL_COORDINATOR("Provider-%s-NATIONAL_COORDINATOR");
 
   /** The expression. */
   private String expression;

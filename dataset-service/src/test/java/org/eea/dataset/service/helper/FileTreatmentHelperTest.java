@@ -236,52 +236,6 @@ public class FileTreatmentHelperTest {
   }
 
   @Test
-  public void importFileDataEmptyZipTest() throws EEAException, IOException {
-
-    RecordValue recordValue = new RecordValue();
-    List<RecordValue> recordValues = new ArrayList<>();
-    recordValues.add(recordValue);
-    recordValues.add(recordValue);
-
-    TableValue tableValue = new TableValue();
-    tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
-    tableValue.setRecords(recordValues);
-    List<TableValue> tableValues = new ArrayList<>();
-    tableValues.add(tableValue);
-
-    DatasetValue datasetValue = new DatasetValue();
-    datasetValue.setTableValues(tableValues);
-
-    DataSetSchema datasetSchema = new DataSetSchema();
-    datasetSchema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    datasetSchema.setIdDataFlow(1L);
-
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
-    List<IntegrationVO> integrationVOs = new ArrayList<>();
-    integrationVOs.add(integrationVO);
-
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    ZipOutputStream zip = new ZipOutputStream(baos);
-    zip.close();
-    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
-        "application/x-zip-compressed", baos.toByteArray());
-
-    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
-        .thenReturn(datasetSchema);
-
-    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip");
-    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-    // .thenReturn(integrationVOs);
-
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
-    FileUtils
-        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
-
-    Mockito.verify(datasetService, times(1)).getMimetype(Mockito.anyString());
-  }
-
-  @Test
   public void importFileDataXlsFMETest() throws EEAException, IOException {
 
     DataSetSchema datasetSchema = new DataSetSchema();

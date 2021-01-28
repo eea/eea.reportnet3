@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
@@ -69,13 +70,17 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
   const reorderDataflows = async (pinnedItem, isPinned) => {
     const inmUserProperties = { ...userContext.userProps };
-    const inmPinnedDataflows = inmUserProperties.pinnedDataflows;
+    const inmPinnedDataflows = intersection(
+      inmUserProperties.pinnedDataflows,
+      dataToFilter.map(data => data.id.toString())
+    );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
     } else {
       inmPinnedDataflows.push(pinnedItem.id.toString());
     }
     inmUserProperties.pinnedDataflows = inmPinnedDataflows;
+
     const response = await changeUserProperties(inmUserProperties);
     if (!isNil(response) && response.status >= 200 && response.status <= 299) {
       userContext.onChangePinnedDataflows(inmPinnedDataflows);
@@ -128,6 +133,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
           inputOptions={DataflowConf.filterItems['input']}
           selectOptions={DataflowConf.filterItems['select']}
           sortable={true}
+          sortCategory={'pinned'}
         />
       </div>
 
