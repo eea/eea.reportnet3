@@ -52,7 +52,8 @@ const validationReducer = (state, { type, payload }) => {
         referenceId: payload.referenceId,
         ruleEdit: true,
         ruleToEdit: payload.ruleToEdit,
-        level: payload.level
+        level: payload.level,
+        updatedRuleId: payload.updatedRuleId
       };
     case 'ON_OPENER_RESET':
       return {
@@ -70,18 +71,27 @@ const validationReducer = (state, { type, payload }) => {
         ...state,
         isAutomaticRuleUpdated: payload
       };
+
+    case 'ON_FETCHING_DATA':
+      return {
+        ...state,
+        isFetchingData: payload.isFetchingData,
+        updatedRuleId: payload.updatedRuleId
+      };
     default:
       return state;
   }
 };
 
 const initialState = {
+  isFetchingData: false,
   isVisible: false,
   level: null,
   opener: null,
   referenceId: null,
   reOpenOpener: false,
-  ruleEdit: false
+  ruleEdit: false,
+  updatedRuleId: null
 };
 
 export const ValidationProvider = ({ children }) => {
@@ -114,7 +124,7 @@ export const ValidationProvider = ({ children }) => {
         onOpenToEdit: (rule, level) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
-            payload: { ruleToEdit: { ...rule }, referenceId: rule.referenceId, level }
+            payload: { ruleToEdit: { ...rule }, referenceId: rule.referenceId, level, updatedRuleId: rule.id }
           });
         },
 
@@ -128,6 +138,13 @@ export const ValidationProvider = ({ children }) => {
 
         resetReOpenOpener: () => {
           dispatch({ type: 'RESET_REOPEN_OPENER' });
+        },
+
+        onFetchingData: (isFetchingData, updatedRuleId) => {
+          dispatch({
+            type: 'ON_FETCHING_DATA',
+            payload: { isFetchingData, updatedRuleId }
+          });
         }
       }}>
       {children}
