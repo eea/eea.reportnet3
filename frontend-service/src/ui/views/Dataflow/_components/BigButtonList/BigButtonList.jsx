@@ -88,6 +88,7 @@ export const BigButtonList = ({
   );
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
+  const [isImportingDataflow, setIsImportingDataflow] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] = useState(
     false
@@ -132,6 +133,12 @@ export const BigButtonList = ({
   useCheckNotifications(
     ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_FAILED_EVENT', 'COPY_DATASET_SCHEMA_NOT_FOUND_EVENT'],
     setIsCloningDataflow,
+    false
+  );
+
+  useCheckNotifications(
+    ['IMPORT_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_FAILED_EVENT'],
+    setIsImportingDataflow,
     false
   );
 
@@ -277,6 +284,7 @@ export const BigButtonList = ({
 
   const onUpload = async () => {
     setIsImportSchemaVisible(false);
+    setIsImportingDataflow(true);
     notificationContext.add({
       type: 'IMPORT_DATASET_SCHEMA_INIT',
       content: { dataflowName }
@@ -501,6 +509,7 @@ export const BigButtonList = ({
       handleRedirect,
       isActiveButton,
       isCloningDataflow,
+      isImportingDataflow,
       isLeadReporterOfCountry,
       onCloneDataflow,
       onImportSchema,
