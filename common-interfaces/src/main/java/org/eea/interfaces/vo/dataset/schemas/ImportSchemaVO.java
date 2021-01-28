@@ -9,15 +9,25 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class ImportSchemaVO.
+ */
 @Getter
 @Setter
 @ToString
 public class ImportSchemaVO {
 
 
+  /** The dictionary origin target object id. */
   private Map<String, String> dictionaryOriginTargetObjectId;
+
+  /** The rules schema VO. */
   private List<RulesSchemaVO> rulesSchemaVO;
+
+  /** The integrities VO. */
   private List<IntegrityVO> integritiesVO;
+
+  /** The qcrulesbytes. */
   private List<byte[]> qcrulesbytes;
 
 }

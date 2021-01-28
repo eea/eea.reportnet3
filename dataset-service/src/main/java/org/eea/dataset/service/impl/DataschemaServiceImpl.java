@@ -2230,12 +2230,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       ImportSchemaVO importRules = new ImportSchemaVO();
       importRules.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
-      // importRules.setRulesSchemaVO(importClasses.getRules());
       importRules.setIntegritiesVO(importClasses.getIntegrities());
       importRules.setQcrulesbytes(importClasses.getQcrulesBytes());
-      // mapToImportRules.put(importClasses.getRules(), dictionaryOriginTargetObjectId);
-      // rulesControllerZuul.importRulesSchema(importClasses.getRules(),
-      // dictionaryOriginTargetObjectId);
       rulesControllerZuul.importRulesSchema(importRules);
 
       createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,

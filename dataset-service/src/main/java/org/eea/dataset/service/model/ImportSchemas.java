@@ -12,17 +12,31 @@ import lombok.ToString;
 
 
 
+/**
+ * The Class ImportSchemas.
+ */
 @Getter
 @Setter
 @ToString
 public class ImportSchemas {
 
 
+  /** The schemas. */
   private List<DataSetSchema> schemas;
+
+  /** The schema names. */
   private Map<String, String> schemaNames;
+
+  /** The external integrations. */
   private List<IntegrationVO> externalIntegrations;
+
+  /** The uniques. */
   private List<UniqueConstraintSchema> uniques;
+
+  /** The integrities. */
   private List<IntegrityVO> integrities;
+
+  /** The qcrules bytes. */
   private List<byte[]> qcrulesBytes;
 
 }

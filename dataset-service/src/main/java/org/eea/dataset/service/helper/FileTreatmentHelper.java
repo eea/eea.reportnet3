@@ -28,7 +28,6 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
@@ -146,6 +145,14 @@ public class FileTreatmentHelper implements DisposableBean {
 
 
 
+  /**
+   * Un zip import schema.
+   *
+   * @param multipartFile the multipart file
+   * @return the import schemas
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   public ImportSchemas unZipImportSchema(MultipartFile multipartFile)
       throws EEAException, IOException {
 
@@ -158,124 +165,36 @@ public class FileTreatmentHelper implements DisposableBean {
       Map<String, String> schemaNames = new HashMap<>();
       List<IntegrationVO> extIntegrations = new ArrayList<>();
       List<UniqueConstraintSchema> uniques = new ArrayList<>();
-      List<RulesSchema> qcrules = new ArrayList<>();
       List<IntegrityVO> integrities = new ArrayList<>();
       List<byte[]> qcrulesBytes = new ArrayList<>();
 
       if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
         try (ZipInputStream zip = new ZipInputStream(input)) {
-
           for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
 
             String entryName = entry.getName();
             String mimeType = datasetService.getMimetype(entryName);
-            if ("schema".equalsIgnoreCase(mimeType)) {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              ByteArrayOutputStream output = new ByteArrayOutputStream();
-              byte[] buf = new byte[1024];
-              int n;
-              while ((n = zip.read(buf, 0, 1024)) != -1) {
-                output.write(buf, 0, n);
-              }
-              byte[] content = output.toByteArray();
-              if (content != null && content.length > 0) {
-                DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-                LOG.info("Schema class recovered from zip file");
-                schemas.add(schema);
-              }
-            }
-            if ("qcrules".equalsIgnoreCase(mimeType)) {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              ByteArrayOutputStream output = new ByteArrayOutputStream();
-              byte[] buf = new byte[1024];
-              int n;
-              while ((n = zip.read(buf, 0, 1024)) != -1) {
-                output.write(buf, 0, n);
-              }
-              byte[] content = output.toByteArray();
-
-
-              if (content != null && content.length > 0) {
-                RulesSchema qcRule = objectMapper.readValue(content, RulesSchema.class);
-                LOG.info("QcRule class recovered from zip file");
-                qcrules.add(qcRule);
-                LOG.info("la qc rule es: {}", qcRule);
-                qcrulesBytes.add(content);
-                // qcrulesBytes = ArrayUtils.addAll(qcrulesBytes, qcRule.toString().getBytes());
-                // LOG.info("el byte[] tiene longitud de {}", qcrulesBytes.length);
-                // if (qcrulesBytes != null && qcrulesBytes.length > 0) {
-                // LOG.info("Hago un append de bytes");
-                // outputStream.write(qcrulesBytes);
-                // }
-                // qcrulesBytes = ArrayUtils.addAll(qcrulesBytes, content);
-                // qcrulesBytes = outputStream.toByteArray();
-
-              }
-            }
-            if ("unique".equalsIgnoreCase(mimeType)) {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              ByteArrayOutputStream output = new ByteArrayOutputStream();
-              byte[] buf = new byte[1024];
-              int n;
-              while ((n = zip.read(buf, 0, 1024)) != -1) {
-                output.write(buf, 0, n);
-              }
-              byte[] content = output.toByteArray();
-              if (content != null && content.length > 0) {
-                uniques.addAll(
-                    Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
-                LOG.info("Unique class recovered from zip file");
-              }
-            }
-            if ("names".equalsIgnoreCase(mimeType)) {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              ByteArrayOutputStream output = new ByteArrayOutputStream();
-              byte[] buf = new byte[1024];
-              int n;
-              while ((n = zip.read(buf, 0, 1024)) != -1) {
-                output.write(buf, 0, n);
-              }
-              byte[] content = output.toByteArray();
-              if (content != null && content.length > 0) {
-                schemaNames = objectMapper.readValue(content, Map.class);
-                LOG.info("Schema names recovered from zip file");
-              }
-            }
-            if ("extintegrations".equalsIgnoreCase(mimeType)) {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              ByteArrayOutputStream output = new ByteArrayOutputStream();
-              byte[] buf = new byte[1024];
-              int n;
-              while ((n = zip.read(buf, 0, 1024)) != -1) {
-                output.write(buf, 0, n);
-              }
-              byte[] content = output.toByteArray();
-              if (content != null && content.length > 0) {
-                extIntegrations
-                    .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
-                LOG.info("External integration recovered from zip file");
-              }
-            }
-            if ("integrity".equalsIgnoreCase(mimeType)) {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              ByteArrayOutputStream output = new ByteArrayOutputStream();
-              byte[] buf = new byte[1024];
-              int n;
-              while ((n = zip.read(buf, 0, 1024)) != -1) {
-                output.write(buf, 0, n);
-              }
-              byte[] content = output.toByteArray();
-              if (content != null && content.length > 0) {
-                integrities
-                    .addAll(Arrays.asList(objectMapper.readValue(content, IntegrityVO[].class)));
-                LOG.info("External integration recovered from zip file");
-              }
+            switch (mimeType.toLowerCase()) {
+              case "schema":
+                schemas = unzippingSchemaClasses(zip, schemas);
+                break;
+              case "qcrules":
+                qcrulesBytes = unzippingQcClasses(zip, qcrulesBytes);
+                break;
+              case "unique":
+                uniques = unzippingUniqueClasses(zip, uniques);
+                break;
+              case "names":
+                schemaNames = unzippingDatasetNamesClasses(zip, schemaNames);
+                break;
+              case "extintegrations":
+                extIntegrations = unzippingExtIntegrationsClasses(zip, extIntegrations);
+                break;
+              case "integrity":
+                integrities = unzippingIntegrityQcClasses(zip, integrities);
+                break;
+              default:
+                break;
             }
           }
           zip.closeEntry();
@@ -284,14 +203,193 @@ public class FileTreatmentHelper implements DisposableBean {
           fileUnziped.setSchemas(schemas);
           fileUnziped.setUniques(uniques);
           fileUnziped.setExternalIntegrations(extIntegrations);
-          // fileUnziped.setRules(rulesSchemaMapper.entityListToClass(qcrules));
           fileUnziped.setQcrulesBytes(qcrulesBytes);
           fileUnziped.setIntegrities(integrities);
-
         }
       }
     }
     return fileUnziped;
+
+  }
+
+  /**
+   * Unzipping schema classes.
+   *
+   * @param zip the zip
+   * @param schemas the schemas
+   * @return the list
+   */
+  private List<DataSetSchema> unzippingSchemaClasses(ZipInputStream zip,
+      List<DataSetSchema> schemas) {
+
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int n;
+      while ((n = zip.read(buf, 0, 1024)) != -1) {
+        output.write(buf, 0, n);
+      }
+      byte[] content = output.toByteArray();
+      if (content != null && content.length > 0) {
+        DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+        LOG.info("Schema class recovered from zip file");
+        schemas.add(schema);
+      }
+    } catch (Exception e) {
+
+    }
+    return schemas;
+  }
+
+
+  /**
+   * Unzipping qc classes.
+   *
+   * @param zip the zip
+   * @param qcrulesBytes the qcrules bytes
+   * @return the list
+   */
+  private List<byte[]> unzippingQcClasses(ZipInputStream zip, List<byte[]> qcrulesBytes) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int n;
+      while ((n = zip.read(buf, 0, 1024)) != -1) {
+        output.write(buf, 0, n);
+      }
+      byte[] content = output.toByteArray();
+
+      if (content != null && content.length > 0) {
+        LOG.info("QcRule class recovered from zip file");
+        qcrulesBytes.add(content);
+      }
+    } catch (Exception e) {
+
+    }
+    return qcrulesBytes;
+  }
+
+  /**
+   * Unzipping unique classes.
+   *
+   * @param zip the zip
+   * @param uniques the uniques
+   * @return the list
+   */
+  private List<UniqueConstraintSchema> unzippingUniqueClasses(ZipInputStream zip,
+      List<UniqueConstraintSchema> uniques) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int n;
+      while ((n = zip.read(buf, 0, 1024)) != -1) {
+        output.write(buf, 0, n);
+      }
+      byte[] content = output.toByteArray();
+      if (content != null && content.length > 0) {
+        uniques
+            .addAll(Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
+        LOG.info("Unique class recovered from zip file");
+      }
+    } catch (Exception e) {
+
+    }
+    return uniques;
+  }
+
+
+  /**
+   * Unzipping dataset names classes.
+   *
+   * @param zip the zip
+   * @param schemaNames the schema names
+   * @return the map
+   */
+  private Map<String, String> unzippingDatasetNamesClasses(ZipInputStream zip,
+      Map<String, String> schemaNames) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int n;
+      while ((n = zip.read(buf, 0, 1024)) != -1) {
+        output.write(buf, 0, n);
+      }
+      byte[] content = output.toByteArray();
+      if (content != null && content.length > 0) {
+        schemaNames = objectMapper.readValue(content, Map.class);
+        LOG.info("Schema names recovered from zip file");
+      }
+    } catch (Exception e) {
+
+    }
+    return schemaNames;
+  }
+
+  /**
+   * Unzipping ext integrations classes.
+   *
+   * @param zip the zip
+   * @param extIntegrations the ext integrations
+   * @return the list
+   */
+  private List<IntegrationVO> unzippingExtIntegrationsClasses(ZipInputStream zip,
+      List<IntegrationVO> extIntegrations) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int n;
+      while ((n = zip.read(buf, 0, 1024)) != -1) {
+        output.write(buf, 0, n);
+      }
+      byte[] content = output.toByteArray();
+      if (content != null && content.length > 0) {
+        extIntegrations
+            .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
+        LOG.info("External integration recovered from zip file");
+      }
+    } catch (Exception e) {
+
+    }
+    return extIntegrations;
+  }
+
+  /**
+   * Unzipping integrity qc classes.
+   *
+   * @param zip the zip
+   * @param integrities the integrities
+   * @return the list
+   */
+  private List<IntegrityVO> unzippingIntegrityQcClasses(ZipInputStream zip,
+      List<IntegrityVO> integrities) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int n;
+      while ((n = zip.read(buf, 0, 1024)) != -1) {
+        output.write(buf, 0, n);
+      }
+      byte[] content = output.toByteArray();
+      if (content != null && content.length > 0) {
+        integrities.addAll(Arrays.asList(objectMapper.readValue(content, IntegrityVO[].class)));
+        LOG.info("External integration recovered from zip file");
+      }
+    } catch (Exception e) {
+
+    }
+    return integrities;
   }
 
 
