@@ -309,15 +309,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getImportList = () => {
     const { externalOperationsList } = designerState;
 
-    const importFromFile = !isEmpty(externalOperationsList.import)
-      ? [
-          {
-            command: () => manageDialogs('isImportDatasetDialogVisible', true),
-            icon: config.icons['import'],
-            label: resources.messages['importFromFile']
-          }
-        ]
-      : [];
+    const importFromFile = [
+      {
+        command: () => manageDialogs('isImportDatasetDialogVisible', true),
+        icon: config.icons['import'],
+        label: resources.messages['importFromFile']
+      }
+    ];
 
     const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
       ? [
