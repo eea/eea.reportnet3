@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The Class BackupManagmentControlerServiceImpl.
+ * The Class UserRoleServiceImpl.
  */
 @Service("UserRoleService")
 public class UserRoleServiceImpl implements UserRoleService {
@@ -39,30 +39,36 @@ public class UserRoleServiceImpl implements UserRoleService {
    */
   @Override
   public List<UserRoleVO> getUserRolesByDataflowCountry(Long dataflowId, Long dataProviderId) {
+
+    Map<String, List<GroupInfo>> groupInfoMap = new HashMap<>();
+    List<UserRoleVO> finalList = new ArrayList<>();
+
     List<Long> datasetIds = dataflowControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
-    Map<String, List<GroupInfo>> groupInfoMap = new HashMap<>();
-    for (Long long1 : datasetIds) {
-      getGroupInfoMap(groupInfoMap, long1);
-    }
+    if (null != datasetIds && !datasetIds.isEmpty()) {
+      for (Long long1 : datasetIds) {
+        getGroupInfoMap(groupInfoMap, long1);
+      }
 
-    Map<String, UserRoleVO> usersMap = new HashMap<>();
-    // CUSTODIAN
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_CUSTODIAN.toString());
-    // LEAD REPORTER
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.LEAD_REPORTER.toString());
-    // NATIONAL COORDINATOR
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.NATIONAL_COORDINATOR.toString());
-    // REPORTER READ
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.REPORTER_READ.toString());
-    // REPORTER WRITE
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.REPORTER_WRITE.toString());
-    // REQUESTER
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_REQUESTER.toString());
-    // STEWARD
-    getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_STEWARD.toString());
-    List<UserRoleVO> finalList = new ArrayList<>();
-    usersMap.forEach((k, v) -> finalList.add(v));
+      Map<String, UserRoleVO> usersMap = new HashMap<>();
+      // CUSTODIAN
+      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_CUSTODIAN.toString());
+      // LEAD REPORTER
+      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.LEAD_REPORTER.toString());
+      // NATIONAL COORDINATOR
+      getUsersRolesByGroup(groupInfoMap, usersMap,
+          SecurityRoleEnum.NATIONAL_COORDINATOR.toString());
+      // REPORTER READ
+      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.REPORTER_READ.toString());
+      // REPORTER WRITE
+      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.REPORTER_WRITE.toString());
+      // REQUESTER
+      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_REQUESTER.toString());
+      // STEWARD
+      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_STEWARD.toString());
+
+      usersMap.forEach((k, v) -> finalList.add(v));
+    }
     return finalList;
   }
 
