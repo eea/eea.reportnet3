@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
@@ -55,7 +56,7 @@ export const WebformView = ({
       tables,
       selectedTableName
     ),
-    singlesCalculatedData: {}
+    singlesCalculatedData: []
   });
 
   const { isLoading, isVisible, singlesCalculatedData } = webformViewState;
@@ -175,10 +176,16 @@ export const WebformView = ({
     const combinatedTableValues = [];
 
     singlesCalculatedData.forEach(singleRecord => {
-      const singleRecordValue =
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())];
-      if (!isNil(singleRecordValue) && !isEmpty(singleRecordValue)) {
-        combinatedTableValues.push(...singleRecordValue);
+      const filteredValue = first(
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())]
+      );
+      if (!isNil(filteredValue) && !isEmpty(filteredValue)) {
+        const singleRecordValue = {
+          pamsId: singleRecord['id'],
+          pamName: singleRecord['paMName'],
+          ...filteredValue
+        };
+        combinatedTableValues.push(singleRecordValue);
       }
     });
 

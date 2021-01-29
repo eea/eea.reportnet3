@@ -81,11 +81,6 @@ public class MethodLockAspect {
             e);
       }
       throw e;
-    } catch (Exception e) {
-      if (lockMethod.isController()) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown exception", e);
-      }
-      throw e;
     }
   }
 

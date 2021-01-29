@@ -303,14 +303,15 @@ export class MultiSelect extends Component {
 
   findLabelByValue(val) {
     let label = null;
+    if (this.props.options) {
+      for (let i = 0; i < this.props.options.length; i++) {
+        let option = this.props.options[i];
+        let optionValue = this.getOptionValue(option);
 
-    for (let i = 0; i < this.props.options.length; i++) {
-      let option = this.props.options[i];
-      let optionValue = this.getOptionValue(option);
-
-      if (ObjectUtils.equals(optionValue, val)) {
-        label = this.getOptionLabel(option);
-        break;
+        if (ObjectUtils.equals(optionValue, val)) {
+          label = this.getOptionLabel(option);
+          break;
+        }
       }
     }
 

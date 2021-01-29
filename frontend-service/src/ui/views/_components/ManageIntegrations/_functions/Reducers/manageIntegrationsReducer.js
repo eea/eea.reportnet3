@@ -42,6 +42,9 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
     case 'ON_FILL_REPOSITORY':
       return { ...state, [payload.name]: payload.data, processName: payload.processName };
 
+    case 'SET_IS_INTEGRATION_MANAGING':
+      return { ...state, [payload.state]: payload.value };
+
     case 'SHOW_ERRORS':
       return { ...state, displayErrors: payload.value };
 

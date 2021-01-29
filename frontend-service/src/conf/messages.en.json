@@ -951,6 +951,10 @@
     "yes": "Yes",
     "notificationRequired": "API POST used",
     "notificationRequiredTooltip": "The workspace uses the Reportnet 3 API POST method to insert individual records directly into the dataset table(s).",
-    "wrongWebLinkError": "Invalid URL. Please check it."
+    "wrongWebLinkError": "Invalid URL. Please check it.",
+    "settingsHelp": "User settings help",
+    "dataflowPinnedInit": "You have pinned the dataflow",
+    "dataflowUnpinnedInit": "You have unpinned the dataflow",
+    "pinned": "Pinned"
   }
 }

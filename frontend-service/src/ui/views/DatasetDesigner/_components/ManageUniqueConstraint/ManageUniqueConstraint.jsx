@@ -16,7 +16,16 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, refreshList, resetUniques }) => {
+export const ManageUniqueConstraint = ({
+  dataflowId,
+  designerState,
+  manageDialogs,
+  refreshList,
+  resetUniques,
+  setConstraintManagingId,
+  setIsUniqueConstraintCreating,
+  setIsUniqueConstraintUpdating
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -25,6 +34,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
     datasetSchemaId,
     isDuplicatedToManageUnique,
     isManageUniqueConstraintDialogVisible,
+    isUniqueConstraintCreating,
+    isUniqueConstraintUpdating,
     manageUniqueConstraintData,
     uniqueConstraintsList
   } = designerState;
@@ -35,6 +46,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (isManageUniqueConstraintDialogVisible) {
@@ -119,6 +132,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
 
   const onCreateConstraint = async () => {
     try {
+      setIsUniqueConstraintCreating(true);
+      setIsCreating(true);
       const response = await UniqueConstraintsService.create(
         dataflowId,
         datasetSchemaId,
@@ -132,6 +147,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -144,6 +161,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
   };
 
   const onUpdateConstraint = async () => {
+    setConstraintManagingId(uniqueId);
     const fieldsInUniqueConstraint = fieldData.map(field => field.fieldId);
     const selectedFieldsInUniqueConstraint = selectedFields.map(field => field.value);
 
@@ -154,6 +172,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       onResetValues();
     } else {
       try {
+        setIsUpdating(true);
+        setIsUniqueConstraintUpdating(true);
         const response = await UniqueConstraintsService.update(
           dataflowId,
           datasetSchemaId,
@@ -168,6 +188,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         }
       } catch (error) {
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
+      } finally {
+        setIsUpdating(false);
       }
     }
   };
@@ -202,8 +224,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       <span data-tip data-for="createTooltip">
         <Button
           className={`p-button-primary ${!isEmpty(selectedFields) && !isDuplicated ? 'p-button-animated-blink' : ''}`}
-          disabled={isEmpty(selectedFields) || isDuplicated}
-          icon={'check'}
+          disabled={isEmpty(selectedFields) || isDuplicated || isCreating || isUpdating}
+          icon={isCreating || isUpdating ? 'spinnerAnimate' : 'check'}
           label={!isNil(uniqueId) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
         />

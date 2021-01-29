@@ -9,6 +9,7 @@ import styles from './WebformRecord.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { GroupedRecordValidations } from 'ui/views/Webforms/_components/GroupedRecordValidations';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 
 import { WebformField } from './_components/WebformField';
@@ -22,6 +23,7 @@ import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 
 export const WebformRecord = ({
@@ -63,6 +65,7 @@ export const WebformRecord = ({
   const { isConditionalChanged, isDialogVisible, selectedRecordId } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
+  const { parseRecordValidations } = WebformsUtils;
 
   useEffect(() => {
     webformRecordDispatch({
@@ -187,29 +190,45 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
 
-  const renderElements = (elements = []) => {
+  const renderElements = (elements = [], fieldsBlock = false) => {
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
-
       if (element.type === 'BLOCK') {
-        return (
-          !isFieldVisible && (
+        const isSubtable = () => {
+          return element.elementsRecords.length > 1;
+        };
+
+        if (isSubtable()) {
+          return (
             <div key={i} className={styles.fieldsBlock}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
-                .map(record => renderElements(record.elements))}
+                .map(record => renderElements(record.elements, true))}
             </div>
-          )
+          );
+        }
+
+        return (
+          <div key={i} className={styles.fieldsBlock}>
+            {element.elementsRecords.map(record => renderElements(record.elements))}
+          </div>
         );
       }
 
       if (element.type === 'FIELD') {
+        const fieldStyle = { width: '100%' };
+        if (fieldsBlock) {
+          const elementCount = elements.length;
+          const elementGap = 5 * elementCount;
+          const elementWidth = (100 - elementGap) / elementCount;
+          fieldStyle.width = elementWidth;
+        }
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div key={i} className={styles.field}>
+            <div key={i} className={styles.field} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -276,10 +295,11 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           checkLabelVisibility(element) && (
-            <Fragment key={element.title}>
+            <div key={element.title}>
               {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
               {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
               {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+              {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
               {element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
@@ -288,7 +308,7 @@ export const WebformRecord = ({
                   tooltipOptions={{ position: 'top' }}
                 />
               )}
-            </Fragment>
+            </div>
           )
         );
       } else {
@@ -393,21 +413,12 @@ export const WebformRecord = ({
 
   const renderWebformContent = content => {
     const errorMessages = renderErrorMessages(content);
-    const validationIcons = { BLOCKER: 'Blockers', ERROR: 'Errors', INFO: 'Infos', WARNING: 'Warnings' };
+
     return (
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
-            {!isEmpty(content.validations) &&
-              uniqBy(content.validations, validation => {
-                return [validation.levelError].join();
-              }).map((validation, index) => (
-                <IconTooltip
-                  key={index}
-                  levelError={validation.levelError}
-                  message={resources.messages[`record${validationIcons[validation.levelError]}`]}
-                />
-              ))}
+            <GroupedRecordValidations parsedRecordData={parseRecordValidations(webformRecordState.record)} />
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}

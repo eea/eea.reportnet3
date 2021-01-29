@@ -28,7 +28,10 @@ export const UniqueConstraints = ({
   manageDialogs,
   needsRefresh = true,
   refreshList,
-  setIsDuplicatedToManageUnique
+  setIsDuplicatedToManageUnique,
+  setConstraintManagingId,
+  setIsUniqueConstraintCreating,
+  setIsUniqueConstraintUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -36,6 +39,9 @@ export const UniqueConstraints = ({
   const {
     datasetSchemaId,
     datasetSchemaAllTables,
+    constraintManagingId,
+    isUniqueConstraintCreating,
+    isUniqueConstraintUpdating,
     manageUniqueConstraintData: { uniqueId }
   } = designerState;
 
@@ -45,7 +51,8 @@ export const UniqueConstraints = ({
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isLoading: true
+    isLoading: true,
+    isDeleting: false
   });
 
   useEffect(() => {
@@ -58,10 +65,15 @@ export const UniqueConstraints = ({
     if (getUniques) getUniques(constraintsState.data);
   }, [constraintsState.data]);
 
-  const actionsTemplate = () => (
+  const actionsTemplate = row => (
     <ActionsColumn
+      isDeletingDocument={constraintsState.isDeleting}
+      isUpdating={isUniqueConstraintUpdating}
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
+      rowDataId={row.uniqueId}
+      rowDeletingId={constraintManagingId}
+      rowUpdatingId={constraintManagingId}
     />
   );
 
@@ -86,6 +98,8 @@ export const UniqueConstraints = ({
   const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteConstraint = async () => {
+    setConstraintManagingId(uniqueId);
+    constraintsDispatch({ type: 'IS_DELETING', payload: true });
     try {
       const response = await UniqueConstraintsService.deleteById(dataflowId, uniqueId);
       if (response.status >= 200 && response.status <= 299) {
@@ -94,6 +108,7 @@ export const UniqueConstraints = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
+      constraintsDispatch({ type: 'IS_DELETING', payload: false });
     } finally {
       isDeleteDialogVisible(false);
       getManageUniqueConstraint({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });
@@ -102,7 +117,9 @@ export const UniqueConstraints = ({
 
   const onLoadConstraints = async () => {
     try {
-      isLoading(true);
+      if (isUniqueConstraintCreating || isUniqueConstraintUpdating || constraintsState.isDeleting) {
+        isLoading(false);
+      }
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
       const uniques = UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables);
       constraintsDispatch({
@@ -115,6 +132,9 @@ export const UniqueConstraints = ({
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
     } finally {
       isLoading(false);
+      constraintsDispatch({ type: 'IS_DELETING', payload: false });
+      setIsUniqueConstraintCreating(false);
+      setIsUniqueConstraintUpdating(false);
     }
   };
 
@@ -195,7 +215,9 @@ export const UniqueConstraints = ({
       {constraintsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={constraintsState.isDeleting}
           header={resources.messages['deleteUniqueConstraintHeader']}
+          iconConfirm={constraintsState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConstraint()}
