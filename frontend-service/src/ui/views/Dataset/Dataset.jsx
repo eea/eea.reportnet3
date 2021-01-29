@@ -176,11 +176,7 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
-    if (isEmpty(externalOperationsList.import)) {
-      setImportButtonsList(importFromOtherSystems);
-    } else {
-      setImportButtonsList(importFromFile.concat(importFromOtherSystems));
-    }
+    setImportButtonsList(importFromFile.concat(importFromOtherSystems));
   }, [externalOperationsList.import]);
 
   useEffect(() => {
@@ -1035,7 +1031,7 @@ export const Dataset = withRouter(({ match, history }) => {
           dialogVisible={isImportDatasetDialogVisible}
           isDialog={true}
           accept={getImportExtensions}
-          chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+          chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
           fileLimit={1}
           infoTooltip={infoExtensionsTooltip}

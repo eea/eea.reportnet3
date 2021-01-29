@@ -268,16 +268,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
-  // const filterActiveIndex = index => {
-  //   if (!isNil(index) && isNaN(index)) {
-  //     const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
-  //     if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
-  //       return filteredTable[0].index;
-  //     }
-  //   }
-  //   return index;
-  // };
-
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
@@ -309,15 +299,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getImportList = () => {
     const { externalOperationsList } = designerState;
 
-    const importFromFile = !isEmpty(externalOperationsList.import)
-      ? [
-          {
-            command: () => manageDialogs('isImportDatasetDialogVisible', true),
-            icon: config.icons['import'],
-            label: resources.messages['importFromFile']
-          }
-        ]
-      : [];
+    const importFromFile = [
+      {
+        command: () => manageDialogs('isImportDatasetDialogVisible', true),
+        icon: config.icons['import'],
+        label: resources.messages['importFromFile']
+      }
+    ];
 
     const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
       ? [
@@ -895,18 +883,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderSwitchView = () => {
     const switchView = (
-      // <Fragment>
-      //   <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-      //   <InputSwitch
-      //     checked={designerState.viewType['table']}
-      //     // disabled={true}
-      //     // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-      //     onChange={event =>
-      //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
-      //     }
-      //   />
-      //   <span className={styles.switchTextInput}>{resources.messages['tabularDataView']}</span>
-      // </Fragment>
       <TabularSwitch
         elements={[resources.messages['designView'], resources.messages['tabularDataView']]}
         getIsTableCreated={setIsTableCreated}
