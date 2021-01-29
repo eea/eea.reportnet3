@@ -45,8 +45,9 @@ export const Filters = ({
   selectOptions,
   sendData,
   sortable,
-  validationsAllTypesFilters,
-  validations
+  sortCategory,
+  validations,
+  validationsAllTypesFilters
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -54,6 +55,7 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
+    clearedFilters: false,
     checkboxes: [],
     data: data,
     filterBy: {},
@@ -96,6 +98,12 @@ export const Filters = ({
     getChangedCheckboxes(filterState.property);
   }, [JSON.stringify(filterState.checkboxes), filterState.property]);
 
+  useEffect(() => {
+    if (sendData && filterState.clearedFilters) {
+      sendData(filterState.filterBy);
+      filterDispatch({ type: 'SET_CLEARED_FILTERS', payload: false });
+    }
+  }, [filterState.clearedFilters]);
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
   const getCheckboxFilterState = property => {
@@ -218,7 +226,8 @@ export const Filters = ({
         searchBy: '',
         checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
         filtered: false,
-        filteredSearched: false
+        filteredSearched: false,
+        clearedFilters: true
       }
     });
   };
@@ -246,8 +255,8 @@ export const Filters = ({
   };
 
   const onOrderData = (order, property) => {
-    const sortedData = SortUtils.onSortData([...filterState.data], order, property);
-    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
+    const sortedData = SortUtils.onSortData([...filterState.data], order, property, sortCategory);
+    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property, sortCategory);
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
 

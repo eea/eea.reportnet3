@@ -20,5 +20,11 @@ export const tabsValidationsReducer = (state, { type, payload }) => {
 
     case 'ON_LOAD_VALIDATION_LIST':
       return { ...state, validationList: payload.validationsServiceList };
+
+    case 'SET_DELETED_RULE_ID':
+      return { ...state, deletedRuleId: payload.deletedRuleId };
+
+    case 'IS_DELETING_RULE':
+      return { ...state, isDeletingRule: payload.isDeletingRule };
   }
 };

@@ -94,6 +94,24 @@ import feign.FeignException;
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant FILE_PATTERN_NAME. */
+  private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PATTERN_NAME_RULES. */
+  private static final String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PATTERN_NAME_UNIQUE. */
+  private static final String FILE_PATTERN_NAME_UNIQUE = "uniqueSnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
+  private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
+
   /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
@@ -133,7 +151,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
-
 
   /** The reporting dataset repository. */
   @Autowired
@@ -204,26 +221,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
 
-
-  /** The Constant FILE_PATTERN_NAME. */
-  private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
-
-  /** The Constant FILE_PATTERN_NAME_RULES. */
-  private static final String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
-
-  /** The Constant FILE_PATTERN_NAME_UNIQUE. */
-  private static final String FILE_PATTERN_NAME_UNIQUE = "uniqueSnapshot_%s-DesignDataset_%s";
-
-  /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
-  private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
-
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
   /**
    * Gets the by id.
    *
@@ -273,8 +270,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * Adds the snapshot.
    *
    * @param idDataset the id dataset
-   * @param description the description
-   * @param released the released
+   * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
    */
   @Override
@@ -375,7 +371,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     Snapshot snap = snapshotRepository.findById(idSnapshot).orElse(new Snapshot());
     if (snap.getAutomatic() != null && Boolean.TRUE.equals(snap.getAutomatic())) {
-      LOG_ERROR.error("Error deleting snapshot, the snapshot is automatic");
+      LOG_ERROR.error("Error deleting automatic snapshot {}", idSnapshot);
       throw new EEAException(EEAErrorMessage.ERROR_DELETING_SNAPSHOT);
     }
     // Remove from the metabase
@@ -437,7 +433,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   @Async
@@ -510,8 +506,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
             representative.setReceiptOutdated(true);
             representativeControllerZuul.updateRepresentative(representative);
-            LOG.info("Receipt from the representative {} marked as outdated",
-                representative.getId());
+            LOG.info(
+                "Receipt marked as outdated: dataflowId={}, datasetId={}, providerId={}, representativeId={}",
+                idDataflow, idDataset, provider.getId(), representative.getId());
           }
         }
 
@@ -528,13 +525,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
         LOG.info("Snapshot {} released", idSnapshot);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error in release snapshot with the message {},", e.getMessage(), e);
+        LOG_ERROR.error("Error releasing snapshot {},", idSnapshot, e);
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage());
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
     } else {
-      LOG_ERROR.error("Error in release snapshot");
+      LOG_ERROR.error("Error in release snapshot {}", idSnapshot);
       releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot");
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
@@ -593,7 +590,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDesignDataset(designDataset);
       snap.setDataSetName("snapshot schema from design dataset_" + idDataset);
       snapshotSchemaRepository.save(snap);
-      LOG.info("Snapshot schema {} created into the metabase", snap.getId());
+      LOG.info(
+          "Snapshot schema created into the metabase: datasetId={}, datasetSchemaId={}, snapshotId={}",
+          idDataset, idDatasetSchema, snap.getId());
 
       // 2. Create the schema file from the document in Mongo
       DataSetSchema schema = schemaRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
@@ -674,7 +673,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
       DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-      LOG.info("Schema class recovered");
+      LOG.info("Schema recovered: datasetId={}, snapshotId={}", idDataset, idSnapshot);
 
       // Get the rules document to mapper it to RulesSchema class
       String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
@@ -683,7 +682,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
       RulesSchema rules = objectMapperRules.readValue(contentRules, RulesSchema.class);
-      LOG.info("Schema rules class recovered");
+      LOG.info("Rules recovered: datasetId={}, snapshotId={}", idDataset, idSnapshot);
 
       // Since there's the Unique property, we need to restore that file too
       // Get the unique document to mapper it into the List of UniqueConstraintSchema
@@ -694,7 +693,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       byte[] contentUnique = documentControllerZuul.getSnapshotDocument(idDataset, nameFileUnique);
       List<UniqueConstraintSchema> listUnique = objectMapperUnique.readValue(contentUnique,
           new TypeReference<List<UniqueConstraintSchema>>() {});
-      LOG.info("Schema Unique class recovered");
+      LOG.info("Uniques recovered: datasetId={}, snapshotId={}", idDataset, idSnapshot);
 
 
       rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString(), idDataset);
@@ -717,7 +716,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (listIntegrityVO != null && !listIntegrityVO.isEmpty()) {
         rulesControllerZuul.insertIntegritySchema(listIntegrityVO);
       }
-      LOG.info("Schema Integrity class recovered");
+      LOG.info("Integrities recovered: datasetId={}, snapshotId={}", idDataset, idSnapshot);
 
 
       // First we delete all the entries in the catalogue of the previous schema, before replacing
@@ -738,8 +737,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       LOG.info("Schema Snapshot {} totally restored", idSnapshot);
     } catch (EEAException | FeignException e) {
-      LOG_ERROR.error("Error restoring a schema snapshot. IdDataset {}, IdSnapshot {}. Message: {}",
-          idDataset, idSnapshot, e.getMessage(), e);
+      LOG_ERROR.error("Error restoring a schema snapshot: datasetId={}, snapshotId={}", idDataset,
+          idSnapshot, e);
       releaseEvent(EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset,
           "Error restoring the schema snapshot");
       // Release the lock manually
@@ -788,13 +787,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException {
 
-    LOG.info("Deleting all schema snapshots when the design dataset it's going to be deleted");
+    LOG.info("Deleting all schema snapshots: datasetId={}", idDesignDataset);
     List<SnapshotVO> snapshots = getSchemaSnapshotsByIdDataset(idDesignDataset);
     snapshots.stream().forEach(s -> {
       try {
         removeSchemaSnapshot(idDesignDataset, s.getId());
       } catch (Exception e) {
-        LOG_ERROR.error("Error deleting the schema snapshot " + s.getId(), e.getMessage(), e);
+        LOG_ERROR.error("Error deleting the schema snapshot {}", s.getId(), e);
       }
     });
   }
@@ -863,7 +862,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // Check if it's needed to update the status of the button (i.e I only want to download the
       // receipt twice, but no state is changed)
-      if (!representative.getReceiptDownloaded() || representative.getReceiptOutdated()) {
+      if (Boolean.FALSE.equals(representative.getReceiptDownloaded())
+          || Boolean.TRUE.equals(representative.getReceiptOutdated())) {
         // update provider. Button downloaded = true && outdated = false
         representative.setReceiptDownloaded(true);
         representative.setReceiptOutdated(false);
@@ -873,21 +873,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     }
 
     receiptPDFGenerator.generatePDF(receipt, out);
-  }
-
-
-  /**
-   * Adds the lock related to copy data to EU dataset.
-   *
-   * @param dataflowId the dataflow id
-   * @throws EEAException the EEA exception
-   */
-  private void addLockRelatedToCopyDataToEUDataset(Long dataflowId) throws EEAException {
-    Map<String, Object> mapCriteria = new HashMap<>();
-    mapCriteria.put("signature", LockSignature.POPULATE_EU_DATASET.getValue());
-    mapCriteria.put("dataflowId", dataflowId);
-    lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        (String) ThreadPropertiesManager.getVariable("user"), LockType.METHOD, mapCriteria);
   }
 
   /**
@@ -907,7 +892,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param datasetId the dataset id
    * @return the snapshots released by id dataset
-   * @throws EEAException the EEA exception
    */
   @Override
   public List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId) {
@@ -922,7 +906,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param dataCollectionId the data collection id
    * @return the snapshots released by id data collection
-   * @throws EEAException the EEA exception
    */
   @Override
   public List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId) {
@@ -965,7 +948,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * Update snapshot EU release.
    *
    * @param datasetId the dataset id
-   * @throws EEAException the EEA exception
    */
   @Override
   public void updateSnapshotEURelease(Long datasetId) {
@@ -1017,7 +999,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   @Async
@@ -1126,15 +1108,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Map<String, Object> mapCriteria = new HashMap<>();
       mapCriteria.put("datasetId", datasetId);
       // Insert
-      createlockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
+      createLockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
       // Delete
-      createlockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
+      createLockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
       // Update field
-      createlockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
+      createLockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
       // Update record
-      createlockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
+      createLockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
       // Delete dataset
-      createlockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
+      createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
 
       // Delete table and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
@@ -1143,12 +1125,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         mapCriteriaTables.put("datasetId", datasetId);
         mapCriteriaTables.put("tableSchemaId", table.getIdTableSchema());
 
-        createlockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables, userName);
+        createLockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables, userName);
       }
       // Import
-      createlockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
+      createLockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
       // ETL Import
-      createlockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
+      createLockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
 
       // Set the 'releasing' property to true in the dataset metabase
       ReportingDatasetVO reportingVO = new ReportingDatasetVO();
@@ -1160,25 +1142,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Lock the operation to copy from the DC to the EU
     Map<String, Object> mapCriteriaCopyToEu = new HashMap<>();
     mapCriteriaCopyToEu.put("dataflowId", dataflowId);
-    createlockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu, userName);
+    createLockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu, userName);
 
   }
 
-
   /**
-   * Createlock with signature.
+   * Creates the lock with signature.
    *
    * @param lockSignature the lock signature
    * @param mapCriteria the map criteria
    * @param userName the user name
    * @throws EEAException the EEA exception
    */
-  private void createlockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+  private void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
       String userName) throws EEAException {
     mapCriteria.put("signature", lockSignature.getValue());
     lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
         mapCriteria);
   }
-
-
 }

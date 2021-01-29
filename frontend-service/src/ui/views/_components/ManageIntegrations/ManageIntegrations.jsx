@@ -10,6 +10,7 @@ import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -36,6 +37,8 @@ export const ManageIntegrations = ({
   manageDialogs,
   onUpdateData,
   refreshList,
+  setIsCreating,
+  setIsUpdating = () => {},
   state,
   updatedData
 }) => {
@@ -60,9 +63,12 @@ export const ManageIntegrations = ({
     externalParameters: [],
     fileExtension: '',
     id: null,
+    isIntegrationCreating: false,
+    isIntegrationEditing: false,
     isLoading: true,
     isUpdatedVisible: false,
     name: '',
+    notificationRequired: false,
     operation: {},
     parameterKey: '',
     parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
@@ -158,6 +164,10 @@ export const ManageIntegrations = ({
       : onToggleDialogError('duplicated', option, true);
   };
 
+  const onChangeNotificationRequiredCheckboxEvent = (data, name) => {
+    manageIntegrationsDispatch({ type: 'IS_NOTIFICATION_REQUIRED', payload: { data, name } });
+  };
+
   const onChangeParameter = (value, option, id) => {
     manageIntegrationsDispatch({
       type: 'MANAGE_PARAMETERS',
@@ -173,7 +183,16 @@ export const ManageIntegrations = ({
     }
   };
 
+  const setIsIntegrationManaging = (state, value) => {
+    manageIntegrationsDispatch({
+      type: 'SET_IS_INTEGRATION_MANAGING',
+      payload: { state, value }
+    });
+  };
+
   const onCreateIntegration = async () => {
+    setIsIntegrationManaging('isIntegrationCreating', true);
+    setIsCreating(true);
     try {
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.create(manageIntegrationsState);
@@ -184,6 +203,9 @@ export const ManageIntegrations = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
+      setIsCreating(false);
+    } finally {
+      setIsIntegrationManaging('isIntegrationCreating', false);
     }
   };
 
@@ -229,6 +251,10 @@ export const ManageIntegrations = ({
 
   const onFillOperation = (data, name) => {
     manageIntegrationsDispatch({ type: 'ON_FILL_OPERATION', payload: { data, name } });
+    manageIntegrationsDispatch({
+      type: 'CLEAR_FILE_EXTENSION_NOTIFICATION_REQUIRED',
+      payload: { fileExtension: '', notificationRequired: false }
+    });
   };
 
   const onResetParameterInput = () => {
@@ -278,6 +304,8 @@ export const ManageIntegrations = ({
 
   const onUpdateIntegration = async () => {
     try {
+      setIsIntegrationManaging('isIntegrationEditing', true);
+      setIsUpdating(true);
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.update(manageIntegrationsState);
 
@@ -288,6 +316,9 @@ export const ManageIntegrations = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+      setIsUpdating(false);
+    } finally {
+      setIsIntegrationManaging('isIntegrationEditing', false);
     }
   };
 
@@ -312,13 +343,49 @@ export const ManageIntegrations = ({
     return 'fcSubmitButtonDisabled';
   };
 
+  const renderCheckboxLayout = options => {
+    return options.map((option, index) => (
+      <div className={`${styles.field} ${styles[option]} formField `} key={index}>
+        <label htmlFor={`${componentName}__${option}`}>
+          {resources.messages[option]}
+          <Button
+            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+            icon="infoCircle"
+            tooltip={resources.messages['notificationRequiredTooltip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+        </label>
+        <div className={styles.checkboxWrapper}>
+          <Checkbox
+            id={'notificationRequired'}
+            inputId={'notificationRequired'}
+            isChecked={manageIntegrationsState.notificationRequired}
+            label={'notificationRequired'}
+            onChange={event => {
+              onChangeNotificationRequiredCheckboxEvent(event.checked, option);
+            }}
+            value={manageIntegrationsState[option]}
+          />
+        </div>
+      </div>
+    ));
+  };
+
   const renderDialogFooter = (
     <Fragment>
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isIntegrationNameDuplicated}
-          icon="check"
+          disabled={
+            isIntegrationNameDuplicated ||
+            manageIntegrationsState.isIntegrationCreating ||
+            manageIntegrationsState.isIntegrationEditing
+          }
+          icon={
+            manageIntegrationsState.isIntegrationCreating || manageIntegrationsState.isIntegrationEditing
+              ? 'spinnerAnimate'
+              : 'check'
+          }
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
             if (isEmptyForm) onShowErrors();
@@ -420,29 +487,35 @@ export const ManageIntegrations = ({
   );
 
   const renderInputLayout = (options = []) => {
-    return options.map((option, index) => (
-      <div
-        className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
-        key={index}>
-        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
-        <InputText
-          id={`${componentName}__${option}`}
-          maxLength={
-            option === 'fileExtension'
-              ? config.MAX_FILE_EXTENSION_LENGTH
-              : option === 'name'
-              ? config.MAX_INTEGRATION_NAME_LENGTH
-              : 255
-          }
-          onChange={event => onFillField(event.target.value, option)}
-          onKeyDown={event => onSaveKeyDown(event)}
-          placeholder={resources.messages[option]}
-          ref={inputRefs[option]}
-          type="search"
-          value={manageIntegrationsState[option]}
-        />
-      </div>
-    ));
+    return options.map((option, index) => {
+      return (
+        <div
+          className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
+            manageIntegrationsState.operation.value === 'IMPORT' && option === 'fileExtension'
+              ? styles.fileExtensionNotification
+              : styles[option]
+          }`}
+          key={index}>
+          <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
+          <InputText
+            id={`${componentName}__${option}`}
+            maxLength={
+              option === 'fileExtension'
+                ? config.MAX_FILE_EXTENSION_LENGTH
+                : option === 'name'
+                ? config.MAX_INTEGRATION_NAME_LENGTH
+                : 255
+            }
+            onChange={event => onFillField(event.target.value, option)}
+            onKeyDown={event => onSaveKeyDown(event)}
+            placeholder={resources.messages[option]}
+            ref={inputRefs[option]}
+            type="search"
+            value={manageIntegrationsState[option]}
+          />
+        </div>
+      );
+    });
   };
 
   const renderParametersLayout = () => {
@@ -495,6 +568,9 @@ export const ManageIntegrations = ({
             {!isNil(manageIntegrationsState.operation) &&
             operationsWithFileExtension.includes(manageIntegrationsState.operation.value)
               ? renderInputLayout(['fileExtension'])
+              : null}
+            {!isNil(manageIntegrationsState.operation) && manageIntegrationsState.operation.value === 'IMPORT'
+              ? renderCheckboxLayout(['notificationRequired'])
               : null}
           </div>
         )}

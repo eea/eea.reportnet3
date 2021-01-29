@@ -179,9 +179,11 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
 
       if (null != checkResult && null != checkResult.getBody()
-          && null != checkResult.getBody().getId()) {
+          && null != checkResult.getBody()
+          .getId()) { //NOSONAR check result and body are verified not to be null. false positive
         LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-        result = checkResult.getBody().getId();
+        result = checkResult.getBody()
+            .getId(); //NOSONAR check result and body are verified not to be null. false positive
       } else {
         throw new IllegalStateException("Error submitting job to FME, no result retrieved");
       }
@@ -312,14 +314,15 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     ResponseEntity<byte[]> checkResult = null;
     try {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-          .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+              .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
           byte[].class);
     } catch (HttpClientErrorException e) {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
-      stream = new ByteArrayInputStream(checkResult.getBody());
+      stream = new ByteArrayInputStream(checkResult
+          .getBody()); //NOSONAR  check result and body are verified not to be null. false positive
     } else {
       stream = new ByteArrayInputStream(new byte[0]);
     }

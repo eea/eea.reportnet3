@@ -1,4 +1,4 @@
-package org.eea.dataset.service;
+package org.eea.dataset.service.impl;
 
 import static org.mockito.Mockito.times;
 import java.sql.Connection;
@@ -17,7 +17,8 @@ import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
-import org.eea.dataset.service.impl.DataCollectionServiceImpl;
+import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -34,6 +35,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.junit.Assert;
@@ -48,7 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /** The Class DataCollectionServiceTest. */
 @RunWith(MockitoJUnitRunner.class)
-public class DataCollectionServiceTest {
+public class DataCollectionServiceImplTest {
 
   /** The data collection service. */
   @InjectMocks
@@ -284,12 +286,15 @@ public class DataCollectionServiceTest {
     List<DesignDataset> designsValue = new ArrayList<>();
     List<RepresentativeVO> representatives = new ArrayList<>();
     List<DataProviderVO> dataProviders = new ArrayList<>();
-    List<RuleVO> rulesSql = new ArrayList();
+    List<RuleVO> rulesSql = new ArrayList<>();
+    List<UserRepresentationVO> userRepresentationVOs = new ArrayList<>();
     DesignDataset designDataset = new DesignDataset();
     DesignDatasetVO design = new DesignDatasetVO();
     RepresentativeVO representative = new RepresentativeVO();
     DataProviderVO dataProvider = new DataProviderVO();
     RuleVO ruleVO = new RuleVO();
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setEmail("email@reportnet.net");
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
@@ -303,6 +308,7 @@ public class DataCollectionServiceTest {
     dataProviders.add(dataProvider);
     designsValue.add(designDataset);
     rulesSql.add(ruleVO);
+    userRepresentationVOs.add(userRepresentationVO);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
@@ -321,6 +327,8 @@ public class DataCollectionServiceTest {
     Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(Mockito.any()))
         .thenReturn(rulesSql);
     Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
+    Mockito.when(userManagementControllerZuul.getUsersByGroup(Mockito.anyString()))
+        .thenReturn(userRepresentationVOs);
     Mockito.doNothing().when(userManagementControllerZuul)
         .addContributorsToResources(Mockito.any());
     Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(designsValue);

@@ -204,4 +204,13 @@ public interface FieldRepository
   FieldValue findOneByIdFieldSchemaAndValue(String idFieldSchema, String value);
 
 
+  /**
+   * Find all by id field schema in.
+   *
+   * @param idFieldSchemas the id field schemas
+   * @return the list
+   */
+  @Query
+  List<FieldValue> findAllByIdFieldSchemaIn(List<String> idFieldSchemas);
+
 }

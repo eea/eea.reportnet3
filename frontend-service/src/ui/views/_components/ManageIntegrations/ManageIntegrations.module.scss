@@ -10,6 +10,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: stretch;
     margin-bottom: 1.5rem;
 
     &:nth-last-child(2) {
@@ -48,10 +49,27 @@
       &.operation {
         width: 49%;
       }
-      &.fileExtension,
       &.repository,
+      &.fileExtension,
       &.processName {
         width: 49%;
+      }
+
+      &.fileExtensionNotification {
+        width: 32% !important;
+      }
+
+      &.notificationRequired {
+        width: 15%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        .checkboxWrapper {
+          display: flex;
+          align-items: center;
+          height: 100%;
+        }
       }
 
       &.description,
@@ -63,6 +81,26 @@
       &.parameterKey,
       &.parameterValue {
         width: 44%;
+      }
+
+      .infoButton {
+        background-color: var(--white) !important;
+        border-radius: 50% !important;
+        color: var(--datatable-header-info-button-color) !important;
+        font-size: 12pt !important;
+        height: 0.7em !important;
+        margin-left: 0.4rem !important;
+        width: 0.7em !important;
+
+        > span {
+          left: 46% !important;
+          margin-left: -0.48em !important;
+          margin-top: -0.7em !important;
+        }
+
+        &:focus {
+          box-shadow: none !important;
+        }
       }
     }
 

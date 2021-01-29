@@ -78,21 +78,28 @@ const parseIntegrationsOperationsExtensionsList = integrations => {
   return;
 };
 
-const parseManageIntegration = integration => ({
-  description: integration.description,
-  externalParameters: parseExternalParameters(integration.externalParameters),
-  id: integration.id,
-  internalParameters: {
+const parseManageIntegration = integration => {
+  const integrationToSave = {};
+  integrationToSave.description = integration.description;
+  integrationToSave.externalParameters = parseExternalParameters(integration.externalParameters);
+  integrationToSave.id = integration.id;
+  integrationToSave.internalParameters = {
     dataflowId: integration.dataflowId,
     datasetSchemaId: integration.datasetSchemaId,
     fileExtension: integration.fileExtension,
     processName: integration.processName.value,
     repository: integration.repository.value
-  },
-  name: integration.name,
-  operation: integration.operation.value,
-  tool: integration.tool
-});
+  };
+  integrationToSave.name = integration.name;
+  integrationToSave.operation = integration.operation.value;
+  integrationToSave.tool = integration.tool;
+
+  if (integration.notificationRequired) {
+    integrationToSave.internalParameters.notificationRequired = integration.notificationRequired;
+  }
+
+  return integrationToSave;
+};
 
 const parseIntegrationOperationExtension = integration => ({
   datasetSchemaId: integration.internalParameters.datasetSchemaId,

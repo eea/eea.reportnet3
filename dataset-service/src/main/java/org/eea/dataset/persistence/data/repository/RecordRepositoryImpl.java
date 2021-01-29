@@ -8,11 +8,15 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import org.bson.Document;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +34,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /** The record no validation mapper. */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
+
+  @Autowired
+  private SchemasRepository schemasRepository;
+
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RecordRepositoryImpl.class);
@@ -160,15 +170,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the table VO
    */
   @Override
-  public TableVO findByTableValueWithOrder(String idTableSchema, List<ErrorTypeEnum> levelErrorList,
-      Pageable pageable, List<String> idRules, String fieldSchema, String fieldValue,
-      SortField... sortFields) {
+  public TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
+      List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
+      String fieldSchema, String fieldValue, SortField... sortFields) {
 
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     TableVO result = new TableVO();
-    createSorterQuery(sortQueryBuilder, directionQueryBuilder, criteriaNumber, sortFields);
+    createSorterQuery(datasetId, sortQueryBuilder, directionQueryBuilder, criteriaNumber,
+        sortFields);
     String filter = "";
     List<ErrorTypeEnum> errorList = new ArrayList<>();
     result.setTotalFilteredRecords(0L);
@@ -323,12 +334,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * Creates the sorter query.
    *
+   * @param datasetId the dataset id
    * @param sortQueryBuilder the sort query builder
    * @param directionQueryBuilder the direction query builder
    * @param criteriaNumber the criteria number
    * @param sortFields the sort fields
    */
-  private void createSorterQuery(StringBuilder sortQueryBuilder,
+  private void createSorterQuery(Long datasetId, StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, int criteriaNumber, SortField... sortFields) {
     // Multisorting Query accept n fields and order asc(1)/desc(0)
     String sortQuery = "";
@@ -336,6 +348,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (null != sortFields) {
       LOG.info("Init Order");
       for (SortField field : sortFields) {
+        // we check if the field is link and look the linked type to sort in the table
+        if (field.getTypefield().equals(DataType.LINK)) {
+          String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+          Document documentField =
+              schemasRepository.findFieldSchema(datasetSchemaId, field.getFieldName());
+          Document documentReference = (Document) ((Document) documentField).get("referencedField");
+          Document documentFieldReferenced =
+              schemasRepository.findFieldSchema(documentReference.get("idDatasetSchema").toString(),
+                  documentReference.get("idPk").toString());
+
+          DataType typeData = DataType.valueOf(documentFieldReferenced.get("typeData").toString());
+          field.setTypefield(typeData);
+        }
         switch (field.getTypefield()) {
           case NUMBER_INTEGER:
           case NUMBER_DECIMAL:

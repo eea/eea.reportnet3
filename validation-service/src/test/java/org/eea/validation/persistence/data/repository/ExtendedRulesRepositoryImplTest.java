@@ -376,4 +376,13 @@ public class ExtendedRulesRepositoryImplTest {
     Assert.assertFalse(
         extendedRulesRepositoryImpl.deleteNotEmptyRule(new ObjectId(), new ObjectId()));
   }
+
+
+  @Test
+  public void emptyRulesSchemaByDatasetSchemaIdTest() {
+    Mockito.when(mongoTemplate.updateMulti(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(
+        extendedRulesRepositoryImpl.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId()));
+  }
 }

@@ -29,7 +29,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 
 export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
-  const { datasetSchema } = state;
+  const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
@@ -162,7 +162,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const onLoadData = () => {
     if (!isEmpty(datasetSchema)) {
-      const data = onParseWebformData(datasetSchema, tables, datasetSchema.tables);
+      const data = onParseWebformData(datasetSchema, tables, datasetSchema.tables, datasetStatistics);
 
       data.forEach(table =>
         table.elements.forEach(element => {

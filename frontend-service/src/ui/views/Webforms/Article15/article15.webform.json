@@ -809,25 +809,25 @@
           "type": "FIELD",
           "name": "DescribeReducingClimateImpacts",
           "title": "Progress towards reducing climate impacts, vulnerabilities and risks (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3a"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3a"
         },
         {
           "type": "FIELD",
           "name": "DescribeIncreasingAdaptiveCapacity",
           "title": "Progress towards increasing adaptive capacity (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3b"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3b"
         },
         {
           "type": "FIELD",
           "name": "DescribeMeetingAdaptationPriorities",
           "title": "Progress towards meeting adaptation priorities (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3c"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3c"
         },
         {
           "type": "FIELD",
           "name": "DescribeProgressTowardsAddressing",
           "title": "Progress towards addressing barriers to adaptation (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3d"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3d"
         },
         {
           "type": "FIELD",
@@ -855,6 +855,26 @@
       "title": "Cooperation, good practices, synergies, experience and lessons learned in the field of adaptation",
       "multipleRecords": false,
       "elements": [
+        {
+          "type": "TABLE",
+          "name": "AvailableGoodPractices",
+          "title": "Good practices and lessons learnt",
+          "multipleRecords": true,
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "Area",
+              "title": "Area of good practices",
+              "tooltip": "Select minimum 1 of the following areas of good practice (any combination of areas is possible). Annex I: footnote 19"
+            },
+            {
+              "type": "FIELD",
+              "name": "DescribeGoodPractice",
+              "title": "Good practices and lessons learnt, including at sub-national level (max. 500 characters)",
+              "tooltip": "Annex I: 5.1"
+            }
+          ]
+        },
         {
           "type": "FIELD",
           "name": "DescribeSynergiesAdaptation",
@@ -884,13 +904,14 @@
         {
           "type": "TABLE",
           "name": "ContactGeneral",
-          "title": "Contact details of the national coordinating and reporting organisation(s)",
+          "title": "Key contact details of national coordinator and organisation",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "Organisation",
-              "title": "Organisation"
+              "title": "Organisation",
+              "tooltip": "Maximum 5 records can be added to this table, provide details of coordinating organisations. Annex I: 6.1"
             },
             {
               "type": "FIELD",
@@ -900,134 +921,103 @@
             {
               "type": "FIELD",
               "name": "Role",
-              "title": "Role of the organisation on adaptation"
+              "title": "Role of the organisation",
+              "tooltip": "e.g. Coordinating adaptation policies or responsible for reporting"
             },
             {
               "type": "FIELD",
               "name": "NameContact",
-              "title": "Name of a contact person"
+              "title": "Contact person"
             },
             {
               "type": "FIELD",
               "name": "RoleContact",
-              "title": "Role of the contact person"
+              "title": "Role of the contact person",
+              "tooltip": "e.g. National Focal Point"
             },
             {
               "type": "FIELD",
               "name": "GeneralEmail",
-              "title": "General email address (or address to use for questions on adaptation)"
+              "title": "Email address",
+              "tooltip": "Important! Keep in mind that this information will be made available in the country profiles of Climate-ADAPT. We suggest to fill in a functional mailbox used for questions on adaptation rather than a personal email address from the contact person."
             },
             {
               "type": "FIELD",
               "name": "Website",
-              "title": "Website of the organisation (or subsection on adaptation)"
-            }
-          ]
-        },
-        {
-          "type": "TABLE",
-          "name": "ContactPersonal",
-          "title": "Contact details of the reporter(s) - for internal use only",
-          "multipleRecords": true,
-          "elements": [
-            {
-              "type": "FIELD",
-              "name": "Organisation",
-              "title": "Organisation"
-            },
-            {
-              "type": "FIELD",
-              "name": "Department",
-              "title": "Department within the organisation"
-            },
-            {
-              "type": "FIELD",
-              "name": "RoleOrganisation",
-              "title": "Role of the organisation on adaptation"
-            },
-            {
-              "type": "FIELD",
-              "name": "NameContact",
-              "title": "Name of a contact person"
-            },
-            {
-              "type": "FIELD",
-              "name": "RoleContact",
-              "title": "Role of the contact person"
-            },
-            {
-              "type": "FIELD",
-              "name": "PersonalEmail",
-              "title": "Personal email address of the contact person"
-            },
-            {
-              "type": "FIELD",
-              "name": "PhoneNumber",
-              "title": "Phone number of the contact person"
+              "title": "Website",
+              "tooltip": "Preferably a link to the section on adaptation on the website of the organisation or otherwise the general website of the organisation."
             }
           ]
         },
         {
           "type": "TABLE",
           "name": "Websites",
-          "title": "Websites and social media sources used for communication on adaptation action at national and sub-national level",
+          "title": "Relevant websites and social media sources (as appropriate)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "Title",
-              "title": "Title of website or social media source"
+              "title": "Title",
+              "tooltip": "Title of relevant website or social media source used for communication on adaptation action at national and sub-national level (preferably translated into English), Annex I: 6.2"
             },
             {
               "type": "FIELD",
               "name": "Type",
-              "title": "Key reports and publications at national and sub-national level"
+              "title": "Type"
+            },
+            {
+              "type": "FIELD",
+              "name": "Level",
+              "title": "National or sub-national level"
             },
             {
               "type": "FIELD",
               "name": "Url",
-              "title": "Url of the website or multimedia source"
+              "title": "Weblink"
             }
           ]
         },
         {
           "type": "TABLE",
           "name": "CCIV_PortalsPlatforms",
-          "title": "CCIV portals and platforms",
+          "title": "Adaptation portals and platforms (optional)",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "Name",
-              "title": "Name of the CCIV portal or platform"
+              "title": "Name",
+              "tooltip": "Name of the climate, hazards, vulnerability, impact or adaptation portal or platform (preferably translated into English)"
             },
             {
               "type": "FIELD",
               "name": "Status",
-              "title": "Status of the CCIV portal or platform"
+              "title": "Status"
+            },
+            {
+              "type": "FIELD",
+              "name": "Focus",
+              "title": "Focus of the portal or platform"
             },
             {
               "type": "FIELD",
               "name": "Website",
-              "title": "Website of the CCIV portal or platform"
+              "title": "Weblink"
             }
           ]
         },
         {
           "type": "TABLE",
           "name": "Publications",
-          "title": "Key reports and publications at national and sub-national level (including these mentioned in text fields but excluding those already reported elsewhere, like NAS, NAP, CCIV assessment or research programmes)",
+          "title": "Key reports and publications at national and sub-national level",
           "multipleRecords": true,
           "elements": [
             {
               "type": "FIELD",
               "name": "TitleEnglish",
-              "title": "Title of the report (in English)"
-            },
-            {
-              "type": "FIELD",
-              "name": "TitleOriginal",
-              "title": "Title of the report (original language)"
+              "title": "Title",
+              "tooltip": "Do not repeat links to documents already provided elsewhere (like links to NAS or NAP). Links to documents in assessment texts not provided yet can be added here. Preferably translate titles into English. Annex I: 6.3"
             },
             {
               "type": "FIELD",
@@ -1037,19 +1027,21 @@
             {
               "type": "FIELD",
               "name": "Publisher",
-              "title": "Publisher"
+              "title": "Publisher",
+              "tooltip": "The organisation that published the report or document, preferably translated into English"
             },
             {
               "type": "FIELD",
               "name": "WebLink",
-              "title": "Weblink to the report"
+              "title": "Weblink"
             }
           ]
         },
         {
           "type": "FIELD",
           "name": "AdditionalInformation",
-          "title": "Please provide any additional information (max. 1000 characters)"
+          "title": "Any other relevant information (max. 1000 characters)",
+          "tooltip": "Annex I: 6.4"
         },
         {
           "type": "FIELD",
