@@ -216,7 +216,7 @@
         },
         {
           "type": "LABEL",
-          "level": 4,
+          "level": 3,
           "title": "Union policy which resulted in the implementation of the PaM",
           "tooltip": "Only Union policy/policies that are implemented through the national policy or where national policies are aimed directly at meeting the objectives of Union policies shall be listed. Union policies are organized by sector that is most likely applicable. The selected ‘Sector(s) affected’ can differ from the sector(s) listed here. More than one Union policy can be selected, additional union policies could be added and specified under 'other'. Sectors are not listed in alphabetical order"
         },
@@ -278,18 +278,23 @@
           "hideWhenCalculated": true
         },
         {
-          "type": "FIELD",
-          "name": "ImplementationPeriodStart",
-          "title": "Start",
-          "calculatedWhenGroup": true,
-          "hideWhenCalculated": true
-        },
-        {
-          "type": "FIELD",
-          "name": "ImplementationPeriodFinish",
-          "title": "Finish",
-          "calculatedWhenGroup": true,
-          "hideWhenCalculated": true
+          "type": "BLOCK",
+          "elements": [
+            {
+              "type": "FIELD",
+              "name": "ImplementationPeriodStart",
+              "title": "Start",
+              "calculatedWhenGroup": true,
+              "hideWhenCalculated": true
+            },
+            {
+              "type": "FIELD",
+              "name": "ImplementationPeriodFinish",
+              "title": "Finish",
+              "calculatedWhenGroup": true,
+              "hideWhenCalculated": true
+            }
+          ]
         },
         {
           "type": "FIELD",
@@ -474,7 +479,7 @@
         },
         {
           "type": "LABEL",
-          "level": 4,
+          "level": 3,
           "title": "Ex-ante assessment",
           "showRequiredCharacter": true
         },
@@ -636,7 +641,7 @@
         },
         {
           "type": "LABEL",
-          "level": 4,
+          "level": 3,
           "title": "Ex-post assessment",
           "showRequiredCharacter": true,
           "tooltip": " Ex-post evaluations include all evaluations based on results from parts of, or the whole implementation period. Ex-post assessments for more than one year may be reported, where available reporting shall focus on years ending with 0 or 5"
@@ -754,7 +759,7 @@
         },
         {
           "type": "LABEL",
-          "level": 4,
+          "level": 3,
           "title": "Projected costs and benefits",
           "showRequiredCharacter": true
         },
@@ -866,7 +871,7 @@
         },
         {
           "type": "LABEL",
-          "level": 4,
+          "level": 3,
           "title": "Realised costs and benefits",
           "showRequiredCharacter": true
         },
