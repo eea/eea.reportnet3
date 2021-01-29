@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * The Class ImportDatasetSchemaCompletedEvent.
+ * The Class ImportDatasetSchemaFailedEvent.
  */
 @Component
-public class ImportDatasetSchemaCompletedEvent implements NotificableEventHandler {
+public class ImportDatasetSchemaFailedEvent implements NotificableEventHandler {
 
   /** The dataset service. */
   @Autowired
@@ -36,7 +36,7 @@ public class ImportDatasetSchemaCompletedEvent implements NotificableEventHandle
    */
   @Override
   public EventType getEventType() {
-    return EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT;
+    return EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT;
   }
 
   /**
@@ -60,6 +60,7 @@ public class ImportDatasetSchemaCompletedEvent implements NotificableEventHandle
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", dataflowName);
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 }

@@ -1,5 +1,6 @@
 package org.eea.dataset.service.helper;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -26,13 +28,18 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
+import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
@@ -97,6 +104,24 @@ public class FileTreatmentHelper implements DisposableBean {
 
   /** The import executor service. */
   private ExecutorService importExecutorService;
+
+
+  /** The rules repository. */
+  @Autowired
+  private RulesRepository rulesRepository;
+
+  /** The unique constraint repository. */
+  @Autowired
+  private UniqueConstraintRepository uniqueConstraintRepository;
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
+  /** The integration controller zuul. */
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
+
 
   /** The batch size. */
   private int batchSize = 1000;
@@ -209,8 +234,226 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
     return fileUnziped;
+  }
+
+
+  /**
+   * Zip schema.
+   *
+   * @param designs the designs
+   * @param schemas the schemas
+   * @param dataflowId the dataflow id
+   * @return the byte[]
+   */
+  public byte[] zipSchema(List<DesignDataset> designs, List<DataSetSchema> schemas,
+      Long dataflowId) {
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    Map<String, String> schemaNames = new HashMap<>();
+    try (ZipOutputStream zos = new ZipOutputStream(bos)) {
+      for (DataSetSchema schema : schemas) {
+
+        // Put the datasetSchemaId and the dataset name into a map to store later in the zip file
+        DesignDataset design = designs.stream()
+            .filter(d -> d.getDatasetSchema().equals(schema.getIdDataSetSchema().toString()))
+            .findFirst().orElse(new DesignDataset());
+        schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
+
+        // Schemas
+        zipSchemaClasses(schema, zos);
+
+        // Rules
+        zipRuleClasses(schema, zos);
+
+        // Unique
+        zipUniqueClasses(schema, zos);
+
+        // Integrity
+        zipIntegrityClasses(schema, zos);
+
+        // Store the external integration
+        zipExternalIntegrationClasses(schema, dataflowId, zos);
+      }
+      // Store the dataset names
+      zipDatasetNames(schemaNames, zos);
+
+    } catch (Exception e) {
+      LOG.error("Error exporting schemas to a ZIP file {}", e.getMessage(), e);
+    }
+    return bos.toByteArray();
 
   }
+
+
+  /**
+   * Zip schema classes.
+   *
+   * @param schema the schema
+   * @param zos the zos
+   */
+  private void zipSchemaClasses(DataSetSchema schema, ZipOutputStream zos) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      String nameFile = "schema_" + schema.getIdDataSetSchema() + ".schema";
+      InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
+      ZipEntry zeSchem = new ZipEntry(nameFile);
+      zos.putNextEntry(zeSchem);
+      byte[] bytes = new byte[1024];
+      int count = schemaStream.read(bytes);
+      while (count > -1) {
+        zos.write(bytes, 0, count);
+        count = schemaStream.read(bytes);
+      }
+      schemaStream.close();
+    } catch (IOException e) {
+      LOG.error("Error exporting the schema into the zip. {}", e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Zip rule classes.
+   *
+   * @param schema the schema
+   * @param zos the zos
+   */
+  private void zipRuleClasses(DataSetSchema schema, ZipOutputStream zos) {
+    try {
+      RulesSchema rules = rulesRepository.findByIdDatasetSchema(schema.getIdDataSetSchema());
+      ObjectMapper objectMapperRules = new ObjectMapper();
+      String nameFileRules = "schema_" + schema.getIdDataSetSchema() + ".qcrules";
+      InputStream rulesStream =
+          new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(rules));
+      ZipEntry zeRules = new ZipEntry(nameFileRules);
+      zos.putNextEntry(zeRules);
+      byte[] bytesRules = new byte[1024];
+      int countRules = rulesStream.read(bytesRules);
+      while (countRules > -1) {
+        zos.write(bytesRules, 0, countRules);
+        countRules = rulesStream.read(bytesRules);
+      }
+      rulesStream.close();
+    } catch (IOException e) {
+      LOG.error("Error exporting the qcRules into the zip. {}", e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Zip unique classes.
+   *
+   * @param schema the schema
+   * @param zos the zos
+   */
+  private void zipUniqueClasses(DataSetSchema schema, ZipOutputStream zos) {
+    try {
+      List<UniqueConstraintSchema> listUnique =
+          uniqueConstraintRepository.findByDatasetSchemaId(schema.getIdDataSetSchema());
+      ObjectMapper objectMapperUnique = new ObjectMapper();
+      String nameFileUnique = "schema_" + schema.getIdDataSetSchema() + ".unique";
+      InputStream uniqueStream =
+          new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
+      ZipEntry zeUnique = new ZipEntry(nameFileUnique);
+      zos.putNextEntry(zeUnique);
+      byte[] bytesUnique = new byte[1024];
+      int countUnique = uniqueStream.read(bytesUnique);
+      while (countUnique > -1) {
+        zos.write(bytesUnique, 0, countUnique);
+        countUnique = uniqueStream.read(bytesUnique);
+      }
+      uniqueStream.close();
+    } catch (IOException e) {
+      LOG.error("Error exporting the unique rules into the zip. {}", e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Zip integrity classes.
+   *
+   * @param schema the schema
+   * @param zos the zos
+   */
+  private void zipIntegrityClasses(DataSetSchema schema, ZipOutputStream zos) {
+    try {
+      List<IntegrityVO> listIntegrity = rulesControllerZuul
+          .getIntegrityRulesByDatasetSchemaId(schema.getIdDataSetSchema().toString());
+      ObjectMapper objectMapperIntegrity = new ObjectMapper();
+      String nameFileIntegrity = "schema_" + schema.getIdDataSetSchema() + ".integrity";
+      InputStream integrityStream =
+          new ByteArrayInputStream(objectMapperIntegrity.writeValueAsBytes(listIntegrity));
+      ZipEntry zeIntegrity = new ZipEntry(nameFileIntegrity);
+      zos.putNextEntry(zeIntegrity);
+      byte[] bytesIntegrity = new byte[1024];
+      int countIntegrity = integrityStream.read(bytesIntegrity);
+      while (countIntegrity > -1) {
+        zos.write(bytesIntegrity, 0, countIntegrity);
+        countIntegrity = integrityStream.read(bytesIntegrity);
+      }
+      integrityStream.close();
+    } catch (IOException e) {
+      LOG.error("Error exporting the integrity rules into the zip. {}", e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Zip external integration classes.
+   *
+   * @param schema the schema
+   * @param dataflowId the dataflow id
+   * @param zos the zos
+   */
+  private void zipExternalIntegrationClasses(DataSetSchema schema, Long dataflowId,
+      ZipOutputStream zos) {
+    try {
+      IntegrationVO integration = new IntegrationVO();
+      Map<String, String> internalParameters = new HashMap<>();
+      internalParameters.put("dataflowId", dataflowId.toString());
+      internalParameters.put("datasetSchemaId", schema.getIdDataSetSchema().toString());
+      integration.setInternalParameters(internalParameters);
+      List<IntegrationVO> extIntegrations =
+          integrationControllerZuul.findAllIntegrationsByCriteria(integration);
+      ObjectMapper objectMapperIntegration = new ObjectMapper();
+      InputStream extIntegrationStream =
+          new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
+      String nameFileExtIntegrations = "schema_" + schema.getIdDataSetSchema() + ".extintegrations";
+      ZipEntry zeIntegration = new ZipEntry(nameFileExtIntegrations);
+      zos.putNextEntry(zeIntegration);
+      byte[] bytesIntegration = new byte[1024];
+      int countIntegration = extIntegrationStream.read(bytesIntegration);
+      while (countIntegration > -1) {
+        zos.write(bytesIntegration, 0, countIntegration);
+        countIntegration = extIntegrationStream.read(bytesIntegration);
+      }
+      extIntegrationStream.close();
+    } catch (IOException e) {
+      LOG.error("Error exporting the external integrations into the zip. {}", e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Zip dataset names.
+   *
+   * @param schemaNames the schema names
+   * @param zos the zos
+   */
+  private void zipDatasetNames(Map<String, String> schemaNames, ZipOutputStream zos) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      InputStream schemaNamesStream =
+          new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaNames));
+      ZipEntry ze = new ZipEntry("datasetSchemaNames.names");
+      zos.putNextEntry(ze);
+      byte[] bytes = new byte[1024];
+      int count = schemaNamesStream.read(bytes);
+      while (count > -1) {
+        zos.write(bytes, 0, count);
+        count = schemaNamesStream.read(bytes);
+      }
+      schemaNamesStream.close();
+    } catch (IOException e) {
+      LOG.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
+    }
+  }
+
 
   /**
    * Unzipping schema classes.

@@ -930,7 +930,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 
@@ -948,7 +948,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       dataschemaService.importSchemas(dataflowId, file);
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 
