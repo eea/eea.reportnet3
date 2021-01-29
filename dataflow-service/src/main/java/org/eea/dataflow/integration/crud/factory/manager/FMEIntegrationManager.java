@@ -250,8 +250,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       integrationVO.setDescription(description);
     }
 
-    integrationVO.setId(null);
-
     return integrationVO;
   }
 
