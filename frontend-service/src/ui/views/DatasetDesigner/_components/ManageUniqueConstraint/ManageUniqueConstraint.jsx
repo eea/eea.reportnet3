@@ -162,8 +162,6 @@ export const ManageUniqueConstraint = ({
 
   const onUpdateConstraint = async () => {
     setConstraintManagingId(uniqueId);
-    setIsUniqueConstraintUpdating(true);
-    setIsUpdating(true);
     const fieldsInUniqueConstraint = fieldData.map(field => field.fieldId);
     const selectedFieldsInUniqueConstraint = selectedFields.map(field => field.value);
 
@@ -174,6 +172,8 @@ export const ManageUniqueConstraint = ({
       onResetValues();
     } else {
       try {
+        setIsUpdating(true);
+        setIsUniqueConstraintUpdating(true);
         const response = await UniqueConstraintsService.update(
           dataflowId,
           datasetSchemaId,
