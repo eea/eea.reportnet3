@@ -34,8 +34,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   useEffect(() => {
     const parsedDataflows = orderBy(
       DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
-      ['pinned', 'expirationDate', 'status'],
-      ['asc', 'asc', 'asc']
+      ['pinned', 'expirationDate', 'status', 'id'],
+      ['asc', 'asc', 'asc', 'asc']
     );
     setDataToFilter(parsedDataflows);
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
@@ -44,7 +44,11 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   }, [content]);
 
   useEffect(() => {
-    const parsedDataflows = orderBy(filteredData, ['pinned', 'expirationDate', 'status'], ['asc', 'asc', 'asc']);
+    const parsedDataflows = orderBy(
+      filteredData,
+      ['pinned', 'expirationDate', 'status', 'id'],
+      ['asc', 'asc', 'asc', 'asc']
+    );
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [filteredData]);
@@ -101,8 +105,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
       const orderedFilteredData = orderBy(
         changedFilteredData,
-        ['pinned', 'expirationDate', 'status'],
-        ['asc', 'asc', 'asc']
+        ['pinned', 'expirationDate', 'status', 'id'],
+        ['asc', 'asc', 'asc', 'asc']
       );
 
       const orderedPinned = orderedFilteredData.map(el => el.pinned);
@@ -116,7 +120,9 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
         return item;
       });
 
-      setDataToFilter(orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status'], ['asc', 'asc', 'asc']));
+      setDataToFilter(
+        orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status', 'id'], ['asc', 'asc', 'asc', 'asc'])
+      );
     }
   };
 
