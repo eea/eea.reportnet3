@@ -190,10 +190,9 @@ public class FileTreatmentHelper implements DisposableBean {
 
           // Queue import tasks for stored files
           if (!files.isEmpty()) {
-            wipeData(datasetId, tableSchemaId, delete);
+            wipeData(datasetId, null, delete);
             IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName,
-                copyIntegrationVO);
+            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO);
           } else {
             releaseLock(datasetId);
             throw new EEAException("Empty zip file");
@@ -378,7 +377,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
       try (InputStream inputStream = new FileInputStream(file)) {
 
-        if (null == tableSchemaId && "csv".equalsIgnoreCase(datasetService.getMimetype(fileName))) {
+        if (files.size() > 1) {
           tableSchemaId = getTableSchemaIdFromFileName(schema, fileName);
         }
 
