@@ -4,6 +4,7 @@ spring:
       discovery:
         preferIpAddress: true
         instanceId: ${spring.application.name}:${random.value}
+        deregister: true
       config:
         name: communication
       host: ${CONSUL_HOST:localhost}
