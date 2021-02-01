@@ -1,5 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
 const getCheckboxFilterInitialState = checkboxOptions => {
@@ -106,7 +107,7 @@ const getOptionTypes = (data, option, list, order) => {
           template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
         }
       });
-      return template;
+      return sortBy(template, 'type');
     }
   }
 };
@@ -124,7 +125,7 @@ const getValidationsOptionTypes = (data, option) => {
         !isNil(item) && template.push({ type: item.toUpperCase(), value: item.toUpperCase() });
       }
     });
-    return template;
+    return sortBy(template, 'type');
   }
 };
 

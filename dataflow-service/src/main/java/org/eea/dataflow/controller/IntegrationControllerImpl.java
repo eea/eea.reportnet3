@@ -233,7 +233,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')  OR (checkApiKey(#dataflowId,0L))")
   @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,

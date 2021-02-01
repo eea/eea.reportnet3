@@ -66,7 +66,7 @@ public class EEAHealthIndicatorConfiguration {
         return Health.up().withDetail("clusterId", clusterId).withDetail("nodeCount", nodeCount)
             .build();
       } catch (final InterruptedException | ExecutionException e) {
-        // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
+        // //NOSONAR false positive, I really need the thread to go on since this is a healtchecker.
         // Exception is managed by Spring Actuator
         if (e instanceof InterruptedException) {
           Thread.currentThread().interrupt();

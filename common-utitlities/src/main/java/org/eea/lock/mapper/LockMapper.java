@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * The Interface LockMapper.
  */
 @Mapper(componentModel = "spring")
-public interface LockMapper extends IMapper<Lock, LockVO> {
+public abstract class LockMapper implements IMapper<Lock, LockVO> {
 
   /**
    * The Constant LOG_ERROR.
@@ -32,21 +32,23 @@ public interface LockMapper extends IMapper<Lock, LockVO> {
    * Entity to class.
    *
    * @param entity the entity
+   *
    * @return the lock VO
    */
   @Mapping(target = "lockCriteria", ignore = true)
   @Override
-  LockVO entityToClass(Lock entity);
+  public abstract LockVO entityToClass(Lock entity);
 
   /**
    * Class to entity.
    *
    * @param model the model
+   *
    * @return the lock
    */
   @Mapping(target = "lockCriteria", ignore = true)
   @Override
-  Lock classToEntity(LockVO model);
+  public abstract Lock classToEntity(LockVO model);
 
   /**
    * Byte to hash map.
@@ -54,9 +56,8 @@ public interface LockMapper extends IMapper<Lock, LockVO> {
    * @param lock the lock
    * @param lockVO the lock VO
    */
-  @SuppressWarnings("unchecked")
   @AfterMapping
-  default void byteToHashMap(Lock lock, @MappingTarget LockVO lockVO) {
+  public void byteToHashMap(Lock lock, @MappingTarget LockVO lockVO) {
 
     ByteArrayInputStream byteIn = new ByteArrayInputStream(lock.getLockCriteria());
     ObjectInputStream in;
@@ -76,7 +77,7 @@ public interface LockMapper extends IMapper<Lock, LockVO> {
    * @param lock the lock
    */
   @AfterMapping
-  default void hashMapToByte(LockVO lockVO, @MappingTarget Lock lock) {
+  public void hashMapToByte(LockVO lockVO, @MappingTarget Lock lock) {
     try {
       ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
       ObjectOutputStream out = new ObjectOutputStream(byteOut);

@@ -94,6 +94,14 @@ export const userReducer = (state, { type, payload }) => {
           userImage: payload
         }
       };
+    case 'USER_PINNED_DATAFLOWS':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          pinnedDataflows: payload
+        }
+      };
 
     default:
       return state;

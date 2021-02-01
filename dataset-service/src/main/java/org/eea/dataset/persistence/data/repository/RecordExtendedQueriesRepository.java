@@ -17,6 +17,7 @@ public interface RecordExtendedQueriesRepository {
   /**
    * Find by table value with order.
    *
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param levelErrorList the level error list
    * @param pageable the pageable
@@ -26,9 +27,9 @@ public interface RecordExtendedQueriesRepository {
    * @param sortFields the sort fields
    * @return the list
    */
-  TableVO findByTableValueWithOrder(String idTableSchema, List<ErrorTypeEnum> levelErrorList,
-      Pageable pageable, List<String> idRules, String fieldSchema, String fieldValue,
-      SortField... sortFields);
+  TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
+      List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
+      String fieldSchema, String fieldValue, SortField... sortFields);
 
 
 

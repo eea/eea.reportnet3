@@ -113,7 +113,7 @@ export const PublicFrontpage = () => {
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
                           target="_blank">
-                          webforms
+                          Webforms
                         </a>
                       </li>
                     </ul>
@@ -126,7 +126,7 @@ export const PublicFrontpage = () => {
         <div className={`rep-container`}>
           <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.currentDataflows}>
-              <h3>Dataflows currently (01.08.2020) in scope for Reportnet 3.0:</h3>
+              <h3>Dataflows in scope of Reportnet 3.0:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
                   <Card {...dataflow} />

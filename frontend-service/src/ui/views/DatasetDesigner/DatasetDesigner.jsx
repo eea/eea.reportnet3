@@ -79,6 +79,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
+    constraintManagingId: '',
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
@@ -119,6 +120,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isManageUniqueConstraintDialogVisible: false,
     isRefreshHighlighted: false,
     isTableCreated: false,
+    isUniqueConstraintCreating: false,
+    isUniqueConstraintUpdating: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -265,16 +268,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
-  // const filterActiveIndex = index => {
-  //   if (!isNil(index) && isNaN(index)) {
-  //     const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
-  //     if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
-  //       return filteredTable[0].index;
-  //     }
-  //   }
-  //   return index;
-  // };
-
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
@@ -306,15 +299,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getImportList = () => {
     const { externalOperationsList } = designerState;
 
-    const importFromFile = !isEmpty(externalOperationsList.import)
-      ? [
-          {
-            command: () => manageDialogs('isImportDatasetDialogVisible', true),
-            icon: config.icons['import'],
-            label: resources.messages['importFromFile']
-          }
-        ]
-      : [];
+    const importFromFile = [
+      {
+        command: () => manageDialogs('isImportDatasetDialogVisible', true),
+        icon: config.icons['import'],
+        label: resources.messages['importFromFile']
+      }
+    ];
 
     const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
       ? [
@@ -892,18 +883,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderSwitchView = () => {
     const switchView = (
-      // <Fragment>
-      //   <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-      //   <InputSwitch
-      //     checked={designerState.viewType['table']}
-      //     // disabled={true}
-      //     // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-      //     onChange={event =>
-      //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
-      //     }
-      //   />
-      //   <span className={styles.switchTextInput}>{resources.messages['tabularDataView']}</span>
-      // </Fragment>
       <TabularSwitch
         elements={[resources.messages['designView'], resources.messages['tabularDataView']]}
         getIsTableCreated={setIsTableCreated}
@@ -949,6 +928,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             needsRefresh={needsRefreshUnique}
             refreshList={refreshUniqueList}
             setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
+            setConstraintManagingId={setConstraintManagingId}
+            setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+            setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
           />
         </Dialog>
       )}
@@ -1005,6 +987,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setIsDuplicatedToManageUnique = value =>
     designerDispatch({ type: 'UPDATED_IS_DUPLICATED', payload: { value } });
+
+  const setConstraintManagingId = constraintManagingId =>
+    designerDispatch({ type: 'SET_CONSTRAINT_MANAGING_ID', payload: { constraintManagingId } });
+
+  const setIsUniqueConstraintCreating = isUniqueConstraintCreatingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_CREATING', payload: { isUniqueConstraintCreatingValue } });
+
+  const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
@@ -1265,6 +1256,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
           refreshList={refreshUniqueList}
           resetUniques={manageUniqueConstraint}
+          setConstraintManagingId={setConstraintManagingId}
+          setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+          setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
 
         {designerState.validateDialogVisible && (

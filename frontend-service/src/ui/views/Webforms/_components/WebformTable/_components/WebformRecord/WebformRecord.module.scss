@@ -93,9 +93,20 @@
     justify-content: space-between;
     max-width: 90%;
     .field {
-      width: 20%;
+      flex: auto;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      &:first-of-type {
+        margin-left: 0;
+      }
+      &:last-of-type {
+        margin-right: 0;
+      }
       .template {
         width: 100%;
+      }
+      label {
+        max-width: 100%;
       }
     }
   }

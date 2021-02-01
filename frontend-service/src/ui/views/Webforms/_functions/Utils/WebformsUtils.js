@@ -224,10 +224,17 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
   });
 };
 
-const onParseWebformData = (datasetSchema, allTables, schemaTables) => {
+const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStatistics) => {
   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
 
   data.map(table => {
+    table.hasErrors =
+      !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+        ? {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasErrors
+        : false;
+
     if (table.records) {
       table.records[0].fields = table.records[0].fields.map(field => {
         const { fieldId, recordId, type } = field;
@@ -300,12 +307,50 @@ const parsePamsRecords = records =>
     return data;
   });
 
+const parseRecordsValidations = (records = []) => {
+  if (isNil(records)) return [];
+
+  return records.map(record => parseRecordValidations(record));
+};
+
+const parseRecordValidations = record => {
+  const datasetPartitionId = record.datasetPartitionId;
+  const providerCode = record.providerCode;
+  const recordValidations = record.validations;
+  const recordId = record.recordId;
+  const recordSchemaId = record.recordSchemaId;
+  const arrayDataFields = record.fields.map(field => {
+    return {
+      fieldData: {
+        [field.fieldSchemaId]: field.value,
+        type: field.type,
+        id: field.fieldId,
+        fieldSchemaId: field.fieldSchemaId
+      },
+      fieldValidations: field.validations
+    };
+  });
+  arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
+  arrayDataFields.push({ fieldData: { datasetPartitionId: record.datasetPartitionId }, fieldValidations: null });
+  const arrayDataAndValidations = {
+    dataRow: arrayDataFields,
+    recordValidations,
+    recordId,
+    datasetPartitionId,
+    providerCode,
+    recordSchemaId
+  };
+  return arrayDataAndValidations;
+};
+
 export const WebformsUtils = {
   getWebformTabs,
   mergeArrays,
   onParseWebformData,
   onParseWebformRecords,
   parseNewTableRecord,
+  parseOtherObjectivesRecord,
   parsePamsRecords,
-  parseOtherObjectivesRecord
+  parseRecordsValidations,
+  parseRecordValidations
 };

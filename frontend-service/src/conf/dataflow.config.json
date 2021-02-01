@@ -15,7 +15,7 @@
   },
   "filterItems": {
     "input": ["name", "description", "legalInstrument", "obligationTitle"],
-    "select": ["status", "userRole"],
+    "select": ["status", "userRole", "pinned"],
     "date": ["expirationDate"]
   }
 }

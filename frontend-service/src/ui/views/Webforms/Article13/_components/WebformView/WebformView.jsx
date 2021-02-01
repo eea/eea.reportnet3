@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
@@ -55,7 +56,7 @@ export const WebformView = ({
       tables,
       selectedTableName
     ),
-    singlesCalculatedData: {}
+    singlesCalculatedData: []
   });
 
   const { isLoading, isVisible, singlesCalculatedData } = webformViewState;
@@ -175,10 +176,16 @@ export const WebformView = ({
     const combinatedTableValues = [];
 
     singlesCalculatedData.forEach(singleRecord => {
-      const singleRecordValue =
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())];
-      if (!isNil(singleRecordValue) && !isEmpty(singleRecordValue)) {
-        combinatedTableValues.push(...singleRecordValue);
+      const filteredValue = first(
+        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())]
+      );
+      if (!isNil(filteredValue) && !isEmpty(filteredValue)) {
+        const singleRecordValue = {
+          pamsId: singleRecord['id'],
+          pamName: singleRecord['paMName'],
+          ...filteredValue
+        };
+        combinatedTableValues.push(singleRecordValue);
       }
     });
 
@@ -254,18 +261,13 @@ export const WebformView = ({
       .filter(table => table.isVisible)
       .map((webform, i) => {
         const isCreated = headers.includes(webform.name);
-        const childHasErrors = webform.elements
-          .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
-          .map(table => table.hasErrors);
-        const hasErrors = [webform.hasErrors].concat(childHasErrors);
-
         return (
           <Button
             className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
-            icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
-            iconClasses={!isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''}
-            iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
+            icon={!isCreated ? 'info' : 'table'}
+            iconClasses={!isVisible[webform.title] ? 'info' : ''}
+            iconPos={!isCreated ? 'right' : 'left'}
             key={i}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
@@ -290,8 +292,8 @@ export const WebformView = ({
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
-        onUpdateSinglesList={onUpdateSinglesList}
         onUpdatePamsValue={onUpdatePamsValue}
+        onUpdateSinglesList={onUpdateSinglesList}
         pamsRecords={pamsRecords}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}

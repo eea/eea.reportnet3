@@ -113,6 +113,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [isTableView, setIsTableView] = useState(true);
   const [webformData, setWebformData] = useState(null);
+  const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -175,11 +176,7 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
-    if (isEmpty(externalOperationsList.import)) {
-      setImportButtonsList(importFromOtherSystems);
-    } else {
-      setImportButtonsList(importFromFile.concat(importFromOtherSystems));
-    }
+    setImportButtonsList(importFromFile.concat(importFromOtherSystems));
   }, [externalOperationsList.import]);
 
   useEffect(() => {
@@ -560,6 +557,7 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
+      setDatasetStatisticsInState({ ...datasetStatistics });
       setDatasetName(datasetStatistics.datasetSchemaName);
       const tableSchemaList = [];
       setTableSchema(
@@ -880,7 +878,7 @@ export const Dataset = withRouter(({ match, history }) => {
               className={`p-button-rounded p-button-secondary-transparent dataset-validate-help-step ${
                 !hasWritePermissions || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
-              disabled={!hasWritePermissions || !datasetHasData}
+              disabled={!hasWritePermissions}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -979,7 +977,11 @@ export const Dataset = withRouter(({ match, history }) => {
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReporting
-          state={{ datasetSchema: { tables: datasetSchemaAllTables }, schemaTables }}
+          state={{
+            datasetSchema: { tables: datasetSchemaAllTables },
+            schemaTables,
+            datasetStatistics: datasetStatisticsInState
+          }}
           webformType={webformData}
         />
       )}
@@ -1029,7 +1031,7 @@ export const Dataset = withRouter(({ match, history }) => {
           dialogVisible={isImportDatasetDialogVisible}
           isDialog={true}
           accept={getImportExtensions}
-          chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+          chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
           fileLimit={1}
           infoTooltip={infoExtensionsTooltip}

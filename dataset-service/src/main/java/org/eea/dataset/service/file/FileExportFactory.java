@@ -4,6 +4,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
  * A factory for creating FileParser objects.
  */
 @Component
+@RefreshScope
 public class FileExportFactory implements IFileExportFactory {
 
   /**
@@ -27,7 +29,7 @@ public class FileExportFactory implements IFileExportFactory {
    *
    * @param mimeType the mime type
    *
-   * @return the i file parse contextd
+   * @return the i file parse context
    */
   @Override
   public IFileExportContext createContext(String mimeType) {

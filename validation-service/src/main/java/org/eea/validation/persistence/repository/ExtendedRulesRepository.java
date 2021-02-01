@@ -190,4 +190,13 @@ public interface ExtendedRulesRepository {
    * @return true, if successful
    */
   boolean deleteAutomaticRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
+
+
+  /**
+   * Empty rules of schema by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return true, if successful
+   */
+  boolean emptyRulesOfSchemaByDatasetSchemaId(ObjectId datasetSchemaId);
 }

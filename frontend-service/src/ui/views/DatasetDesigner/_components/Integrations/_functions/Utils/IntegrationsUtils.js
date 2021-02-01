@@ -1,20 +1,27 @@
 import isNil from 'lodash/isNil';
 
-const parseIntegration = data => ({
-  description: data.integrationDescription,
-  externalParameters: parseIntegrationParameters(data.externalParameters),
-  fileExtension: data.internalParameters.fileExtension,
-  id: data.integrationId,
-  isUpdatedVisible: true,
-  name: data.integrationName,
-  operation: { label: data.operationName, value: data.operation },
-  processName: !isNil(data.internalParameters.processName)
+const parseIntegration = data => {
+  const integration = {};
+  integration.description = data.integrationDescription;
+  integration.externalParameters = parseIntegrationParameters(data.externalParameters);
+  integration.fileExtension = data.internalParameters.fileExtension;
+  integration.id = data.integrationId;
+  integration.isUpdatedVisible = true;
+  integration.name = data.integrationName;
+  integration.operation = { label: data.operationName, value: data.operation };
+  integration.processName = !isNil(data.internalParameters.processName)
     ? { label: data.internalParameters.processName, value: data.internalParameters.processName }
-    : {},
-  repository: !isNil(data.internalParameters.repository)
+    : {};
+  integration.repository = !isNil(data.internalParameters.repository)
     ? { label: data.internalParameters.repository, value: data.internalParameters.repository }
-    : {}
-});
+    : {};
+
+  if (!isNil(data.internalParameters.notificationRequired)) {
+    integration.notificationRequired = data.internalParameters.notificationRequired === 'true';
+  }
+
+  return integration;
+};
 
 const parseIntegrationParameters = parameters => {
   return Object.keys(parameters).map((item, index) => ({
