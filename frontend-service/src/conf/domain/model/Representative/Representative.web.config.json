@@ -1,9 +1,11 @@
-{   
-    "add": "/representative/{:dataflowId}",
-    "allDataProviders": "/representative/dataProvider/{:dataProviderGroupId}",
-    "allRepresentatives": "/representative/dataflow/{:dataflowId}",
-    "deleteById":"/representative/{:representativeId}",
-    "getProviderTypes": "/representative/dataProvider/types",    
-    "updateDataProviderId":"/representative/update",
-    "updateProviderAccount":"/representative/update"
+{
+  "add": "/representative/{:dataflowId}",
+  "allDataProviders": "/representative/dataProvider/{:dataProviderGroupId}",
+  "allRepresentatives": "/representative/dataflow/{:dataflowId}",
+  "deleteById": "/representative/{:representativeId}",
+  "exportRepresentatives": "/representative/export/{:dataflowId}",
+  "getProviderTypes": "/representative/dataProvider/types",
+  "importLeadReporters": "/representative/import/{:dataflowId}",
+  "updateDataProviderId": "/representative/update",
+  "updateProviderAccount": "/representative/update"
 }

@@ -44,6 +44,14 @@ const apiRepresentative = {
     return response;
   },
 
+  downloadById: async dataflowId => {
+    const response = await HTTPRequester.download({
+      url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
+    });
+
+    return response;
+  },
+
   getProviderTypes: async () => {
     const response = await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.getProviderTypes, {})

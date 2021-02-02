@@ -16,12 +16,14 @@ import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
+import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
 import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -48,6 +50,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -78,6 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isExportEuDatasetLoading: false,
+    isImportLeadReportersVisible: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
@@ -244,12 +248,26 @@ const Dataflow = withRouter(({ history, match }) => {
   const handleRedirect = target => history.push(target);
 
   const manageRoleDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
-    />
+    <>
+      <Button
+        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
+        icon={'import'}
+        label={resources.messages['importLeadReporters']}
+        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
+      />
+      <Button
+        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
+        icon={'export'}
+        label={resources.messages['exportLeadReporters']}
+        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+      />
+    </>
   );
   const manageRightsDialogFooter = (
     <Button
@@ -425,6 +443,17 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onUploadLeadReporters = () => {
+    manageDialogs('isImportLeadReportersVisible', false);
+    notificationContext.add({
+      type: 'DATAFLOW_LOADING_LEAD_REPORTERS_INIT',
+      content: {
+        datasetLoadingMessage: resources.messages['dataflowLoadingLeadReportersInit'],
+        dataflowName: TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)
+      }
+    });
+  };
+
   const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
     const [notification] = notificationContext.all.filter(
       notification =>
@@ -486,6 +515,12 @@ const Dataflow = withRouter(({ history, match }) => {
     ['ADD_DATACOLLECTION_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'],
     setIsDataUpdated
   );
+
+  const getImportExtensions = ['.zip'].join(', ').toLowerCase();
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
+    getImportExtensions.split(', ')
+  ).join(', ')}`;
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -600,6 +635,30 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
             />
           </Dialog>
+        )}
+
+        {dataflowState.isImportLeadReportersVisible && (
+          <CustomFileUpload
+            // dialogClassName={styles.Dialog}
+            dialogHeader={`${resources.messages['importLeadReporters']}`}
+            dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}
+            dialogVisible={dataflowState.isImportLeadReportersVisible}
+            isDialog={true}
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
+            // className={styles.FileUpload}
+            fileLimit={1}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onUpload={onUploadLeadReporters}
+            // replaceCheck={true}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DataflowConfig.importLeadReporters, {
+              dataflowId
+            })}`}
+          />
         )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />

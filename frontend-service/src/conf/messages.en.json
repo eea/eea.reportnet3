@@ -955,6 +955,9 @@
     "settingsHelp": "User settings help",
     "dataflowPinnedInit": "You have pinned the dataflow",
     "dataflowUnpinnedInit": "You have unpinned the dataflow",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "importLeadReporters": "Import lead reporters",
+    "exportLeadReporters": "Export lead reporters",
+    "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>"
   }
 }

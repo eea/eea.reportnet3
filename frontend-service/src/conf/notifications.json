@@ -777,6 +777,9 @@
         {
           "key": "DATAFLOW_UNPINNED_INIT",
           "lifeTime": 1500
+        },
+        {
+          "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT"
         }
       ]
     }
