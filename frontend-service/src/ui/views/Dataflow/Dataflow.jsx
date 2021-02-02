@@ -16,7 +16,7 @@ import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
-import { DataflowConfig } from 'conf/domain/model/Dataflow';
+import { RepresentativeConfig } from 'conf/domain/model/Representative';
 
 import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
@@ -656,7 +656,7 @@ const Dataflow = withRouter(({ history, match }) => {
             name="file"
             onUpload={onUploadLeadReporters}
             // replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DataflowConfig.importLeadReporters, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importLeadReporters, {
               dataflowId
             })}`}
           />
