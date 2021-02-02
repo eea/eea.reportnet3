@@ -521,6 +521,12 @@
         },
         {
           "key": "WRONG_WEB_LINK_ERROR"
+        },
+        {
+          "key": "IMPORT_DATASET_SCHEMA_FAILED_EVENT"
+        },
+        {
+          "key": "EXPORT_DATASET_SCHEMA_FAILED_EVENT"
         }
       ]
     },
@@ -726,6 +732,13 @@
         { "key": "VALIDATED_QC_RULE_EVENT" },
         {
           "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+        },
+        {
+          "key": "IMPORT_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         }
       ]
     },
@@ -777,6 +790,9 @@
         {
           "key": "DATAFLOW_UNPINNED_INIT",
           "lifeTime": 1500
+        },
+        {
+          "key": "IMPORT_DATASET_SCHEMA_INIT"
         }
       ]
     }

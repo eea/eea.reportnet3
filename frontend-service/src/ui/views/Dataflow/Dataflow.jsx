@@ -24,6 +24,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
@@ -78,6 +79,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isExportEuDatasetLoading: false,
+    isExportDialogVisible: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
@@ -163,6 +165,15 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'edit'
       };
 
+      const exportSchemaBtn = {
+        className: 'dataflow-export-schema-help-step',
+        icon: 'download',
+        isVisible: buttonsVisibility.exportBtn,
+        label: 'exportSchema',
+        onClick: () => manageDialogs('isExportDialogVisible', true),
+        title: 'exportSchema'
+      };
+
       const manageEditorsBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
@@ -190,7 +201,7 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
+      const allButtons = [propertiesBtn, editBtn, exportSchemaBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
@@ -226,6 +237,7 @@ const Dataflow = withRouter(({ history, match }) => {
       return {
         apiKeyBtn: false,
         editBtn: false,
+        exportBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
         propertiesBtn: false
@@ -235,6 +247,7 @@ const Dataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
+      exportBtn: isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
@@ -322,7 +335,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onEditDataflow = (newName, newDescription) => {
     dataflowDispatch({
       type: 'ON_EDIT_DATA',
-      payload: { name: newName, description: newDescription, isEditDialogVisible: false }
+      payload: { name: newName, description: newDescription, isEditDialogVisible: false, isExportDialogVisible: false }
     });
     onLoadReportingDataflow();
   };
@@ -468,6 +481,20 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isReleaseDialogVisible', true);
   };
 
+  const onConfirmExport = async () => {
+    try {
+      const response = await DataflowService.downloadById(dataflowId);
+      if (!isNil(response)) {
+        DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.zip`);
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT'
+      });
+    }
+  };
+
   const onConfirmRelease = async () => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
@@ -600,6 +627,18 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
             />
           </Dialog>
+        )}
+
+        {dataflowState.isExportDialogVisible && (
+          <ConfirmDialog
+            header={resources.messages['exportSchema']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={() => onConfirmExport()}
+            onHide={() => manageDialogs('isExportDialogVisible', false)}
+            visible={dataflowState.isExportDialogVisible}>
+            {resources.messages['confirmExportSchema']}
+          </ConfirmDialog>
         )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
