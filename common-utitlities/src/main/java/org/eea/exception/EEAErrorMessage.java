@@ -87,6 +87,10 @@ public final class EEAErrorMessage {
   /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
+  /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
+  public static final String USER_AND_COUNTRY_EXIST =
+      "Email and country already exist in this dataflow";
+
   /** The Constant USER_NOTFOUND: {@value}. */
   public static final String USER_NOTFOUND = "User %s not found";
 

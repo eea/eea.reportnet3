@@ -1,5 +1,6 @@
 package org.eea.dataflow.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
@@ -83,10 +84,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (userManagementControllerZull.getUserByEmail(email) == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-
-    if (existsUserMail(dataProviderId, email, dataflowId)) {
-      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(dataflowId,
+        representativeVO.getDataProviderId(), representativeVO.getProviderAccount())) {
+      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
+
 
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
@@ -135,6 +137,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeRepository.findById(representativeVO.getId()).orElse(null);
     if (representative == null) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+
+    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(
+        representative.getDataflow().getId(), representativeVO.getDataProviderId(),
+        representativeVO.getProviderAccount())) {
+      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
     if (existsUserMail(
         representativeVO.getDataProviderId() != null ? representativeVO.getDataProviderId()
@@ -293,6 +301,20 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       changes = false;
     }
     return changes;
+  }
+
+  /**
+   * Export file.
+   *
+   * @param dataflowId the dataflow id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public byte[] exportFile(Long dataflowId, String mimeType) throws EEAException, IOException {
+
+    return null;
   }
 
 

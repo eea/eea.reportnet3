@@ -1,5 +1,6 @@
 package org.eea.dataflow.service;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
@@ -85,4 +86,16 @@ public interface RepresentativeService {
    * @return the represetatives by dataflow id and email
    */
   List<RepresentativeVO> getRepresetativesByDataflowIdAndEmail(Long dataflowId, String email);
+
+
+  /**
+   * Export file.
+   *
+   * @param dataflowId the dataflow id
+   * @param mimeType the mime type
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  byte[] exportFile(Long dataflowId, String mimeType) throws EEAException, IOException;
 }

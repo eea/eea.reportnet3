@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeController. */
 public interface RepresentativeController {
@@ -100,4 +101,24 @@ public interface RepresentativeController {
    */
   @GetMapping("/private/dataProvider")
   List<DataProviderVO> findDataProvidersByIds(@RequestParam("id") List<Long> dataProviderIds);
+
+
+  /**
+   * Export file.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportFile(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Import file data.
+   *
+   * @param dataflowId the dataflow id
+   * @param file the file
+   */
+  @PostMapping("/import/{dataflowId}")
+  void importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
+      @RequestParam("file") MultipartFile file);
 }
