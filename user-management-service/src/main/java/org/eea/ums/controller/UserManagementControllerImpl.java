@@ -737,7 +737,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')")
-  @GetMapping("/getUserRolesByDataflow/{dataflowId}/country/{dataProviderId}")
+  @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
       responseContainer = "List")
   public List<UserRoleVO> getUserRolesByDataflowAndCountry(
@@ -747,7 +747,6 @@ public class UserManagementControllerImpl implements UserManagementController {
 
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
-
 
 
   /**

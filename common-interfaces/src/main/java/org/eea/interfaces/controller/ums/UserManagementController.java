@@ -333,7 +333,9 @@ public interface UserManagementController {
    * @param dataProviderId the data provider id
    * @return the user roles by dataflow and country
    */
-  @GetMapping("/getUserRolesByDataflow/{dataflowId}/country/{dataProviderId}")
+  @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   List<UserRoleVO> getUserRolesByDataflowAndCountry(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId);
+
+
 }

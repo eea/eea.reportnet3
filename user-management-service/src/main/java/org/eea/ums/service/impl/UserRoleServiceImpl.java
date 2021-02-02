@@ -28,7 +28,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
   /** The dataflow controller zuul. */
   @Autowired
-  private DataSetMetabaseControllerZuul dataflowControllerZuul;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * Gets the user roles by dataflow country.
@@ -43,7 +43,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     Map<String, List<GroupInfo>> groupInfoMap = new HashMap<>();
     List<UserRoleVO> finalList = new ArrayList<>();
 
-    List<Long> datasetIds = dataflowControllerZuul
+    List<Long> datasetIds = datasetMetabaseControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
     if (null != datasetIds && !datasetIds.isEmpty()) {
       for (Long long1 : datasetIds) {
@@ -71,6 +71,8 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
     return finalList;
   }
+
+
 
   /**
    * Gets the group info map.
