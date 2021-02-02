@@ -225,7 +225,7 @@ public class FileTreatmentHelper implements DisposableBean {
           fileUnziped.setSchemas(schemas);
           fileUnziped.setUniques(uniques);
           fileUnziped.setExternalIntegrations(extIntegrations);
-          fileUnziped.setQcrulesBytes(qcrulesBytes);
+          fileUnziped.setQcRulesBytes(qcrulesBytes);
           fileUnziped.setIntegrities(integrities);
         }
       }
@@ -257,19 +257,19 @@ public class FileTreatmentHelper implements DisposableBean {
         schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
 
         // Schemas
-        zipSchemaClasses(schema, zos);
+        zipSchemaClasses(schema, zos, design.getDataSetName());
 
         // Rules
-        zipRuleClasses(schema, zos);
+        zipRuleClasses(schema, zos, design.getDataSetName());
 
         // Unique
-        zipUniqueClasses(schema, zos);
+        zipUniqueClasses(schema, zos, design.getDataSetName());
 
         // Integrity
-        zipIntegrityClasses(schema, zos);
+        zipIntegrityClasses(schema, zos, design.getDataSetName());
 
         // Store the external integration
-        zipExternalIntegrationClasses(schema, dataflowId, zos);
+        zipExternalIntegrationClasses(schema, dataflowId, zos, design.getDataSetName());
       }
       // Store the dataset names
       zipDatasetNames(schemaNames, zos);
@@ -287,11 +287,12 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param schema the schema
    * @param zos the zos
+   * @param fileName the file name
    */
-  private void zipSchemaClasses(DataSetSchema schema, ZipOutputStream zos) {
+  private void zipSchemaClasses(DataSetSchema schema, ZipOutputStream zos, String fileName) {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      String nameFile = "schema_" + schema.getIdDataSetSchema() + ".schema";
+      String nameFile = fileName + ".schema";
       InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
       ZipEntry zeSchem = new ZipEntry(nameFile);
       zos.putNextEntry(zeSchem);
@@ -312,12 +313,13 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param schema the schema
    * @param zos the zos
+   * @param fileName the file name
    */
-  private void zipRuleClasses(DataSetSchema schema, ZipOutputStream zos) {
+  private void zipRuleClasses(DataSetSchema schema, ZipOutputStream zos, String fileName) {
     try {
       RulesSchema rules = rulesRepository.findByIdDatasetSchema(schema.getIdDataSetSchema());
       ObjectMapper objectMapperRules = new ObjectMapper();
-      String nameFileRules = "schema_" + schema.getIdDataSetSchema() + ".qcrules";
+      String nameFileRules = fileName + ".qcrules";
       InputStream rulesStream =
           new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(rules));
       ZipEntry zeRules = new ZipEntry(nameFileRules);
@@ -339,13 +341,14 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param schema the schema
    * @param zos the zos
+   * @param fileName the file name
    */
-  private void zipUniqueClasses(DataSetSchema schema, ZipOutputStream zos) {
+  private void zipUniqueClasses(DataSetSchema schema, ZipOutputStream zos, String fileName) {
     try {
       List<UniqueConstraintSchema> listUnique =
           uniqueConstraintRepository.findByDatasetSchemaId(schema.getIdDataSetSchema());
       ObjectMapper objectMapperUnique = new ObjectMapper();
-      String nameFileUnique = "schema_" + schema.getIdDataSetSchema() + ".unique";
+      String nameFileUnique = fileName + ".unique";
       InputStream uniqueStream =
           new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
       ZipEntry zeUnique = new ZipEntry(nameFileUnique);
@@ -367,13 +370,14 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param schema the schema
    * @param zos the zos
+   * @param fileName the file name
    */
-  private void zipIntegrityClasses(DataSetSchema schema, ZipOutputStream zos) {
+  private void zipIntegrityClasses(DataSetSchema schema, ZipOutputStream zos, String fileName) {
     try {
       List<IntegrityVO> listIntegrity = rulesControllerZuul
           .getIntegrityRulesByDatasetSchemaId(schema.getIdDataSetSchema().toString());
       ObjectMapper objectMapperIntegrity = new ObjectMapper();
-      String nameFileIntegrity = "schema_" + schema.getIdDataSetSchema() + ".integrity";
+      String nameFileIntegrity = fileName + ".integrity";
       InputStream integrityStream =
           new ByteArrayInputStream(objectMapperIntegrity.writeValueAsBytes(listIntegrity));
       ZipEntry zeIntegrity = new ZipEntry(nameFileIntegrity);
@@ -396,9 +400,10 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param dataflowId the dataflow id
    * @param zos the zos
+   * @param fileName the file name
    */
   private void zipExternalIntegrationClasses(DataSetSchema schema, Long dataflowId,
-      ZipOutputStream zos) {
+      ZipOutputStream zos, String fileName) {
     try {
       IntegrationVO integration = new IntegrationVO();
       Map<String, String> internalParameters = new HashMap<>();
@@ -410,7 +415,7 @@ public class FileTreatmentHelper implements DisposableBean {
       ObjectMapper objectMapperIntegration = new ObjectMapper();
       InputStream extIntegrationStream =
           new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
-      String nameFileExtIntegrations = "schema_" + schema.getIdDataSetSchema() + ".extintegrations";
+      String nameFileExtIntegrations = fileName + ".extintegrations";
       ZipEntry zeIntegration = new ZipEntry(nameFileExtIntegrations);
       zos.putNextEntry(zeIntegration);
       byte[] bytesIntegration = new byte[1024];

@@ -409,11 +409,16 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
 
+  /**
+   * Creates the integrations.
+   *
+   * @param integrationsVO the integrations VO
+   * @throws EEAException the EEA exception
+   */
   @Transactional
   @Override
   public void createIntegrations(List<IntegrationVO> integrationsVO) throws EEAException {
 
-    LOG.info("LLEGO A CREATE INTEGRATIONS");
     for (IntegrationVO integrationVO : integrationsVO) {
       CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
       crudManager.create(integrationVO);

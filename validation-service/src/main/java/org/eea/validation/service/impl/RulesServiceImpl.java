@@ -1255,6 +1255,15 @@ public class RulesServiceImpl implements RulesService {
   }
 
 
+  /**
+   * Import rules schema.
+   *
+   * @param qcRulesBytes the qc rules bytes
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param integritiesVo the integrities vo
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
   @Override
   public Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
       Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integritiesVo)
@@ -1307,6 +1316,16 @@ public class RulesServiceImpl implements RulesService {
   }
 
 
+  /**
+   * Import data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param newDatasetSchemaId the new dataset schema id
+   * @param rule the rule
+   * @param integrities the integrities
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
   private Map<String, String> importData(Map<String, String> dictionaryOriginTargetObjectId,
       String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities) throws EEAException {
 
@@ -1320,7 +1339,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     LOG.info(
-        "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
+        "A new rule is going to be created in the import schema process {}, with this Reference id {}",
         rule.getRuleName(), rule.getReferenceId());
     if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
@@ -1332,6 +1351,13 @@ public class RulesServiceImpl implements RulesService {
     return dictionaryOriginTargetObjectId;
   }
 
+  /**
+   * Fill rule import.
+   *
+   * @param rule the rule
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @return the map
+   */
   private Map<String, String> fillRuleImport(Rule rule,
       Map<String, String> dictionaryOriginTargetObjectId) {
 
@@ -1349,9 +1375,6 @@ public class RulesServiceImpl implements RulesService {
           dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
     }
     if (rule.getUniqueConstraintId() != null) {
-      String newUniqueConstraintId = new ObjectId().toString();
-      dictionaryOriginTargetObjectId.put(rule.getUniqueConstraintId().toString(),
-          newUniqueConstraintId);
       rule.setUniqueConstraintId(new ObjectId(
           dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
     }
@@ -1375,33 +1398,7 @@ public class RulesServiceImpl implements RulesService {
 
       LOG.info("El when condition a grabar final de la regla es {}", rule.getWhenCondition());
 
-      // Special case for SQL Sentences
-      if (rule.getWhenCondition().contains("isSQLSentence")) {
-        // isSQLSentence(this.datasetId.id, '600ff55f02682544d4c5d60b')
 
-        // dictionaryOriginTargetDatasetsId.forEach((Long oldDatasetId, Long newDatasetId) -> {
-        //
-        // // Change the datasetId in "isSQLSentence(xxx,...."
-        // String newWhenCondition = rule.getWhenCondition();
-        // newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
-        // "(" + newDatasetId.toString());
-        //
-        // // Change the dataset_X in the sentence itself if necessary, like
-        // // select * from table_one t1 inner join dataset_256.table_two....
-        // newWhenCondition = newWhenCondition.replace(DATASET + oldDatasetId.toString(),
-        // DATASET + newDatasetId.toString());
-        // rule.setWhenCondition(newWhenCondition);
-        //
-        // // Do the same in the property SqlSentence
-        // if (StringUtils.isNotBlank(rule.getSqlSentence())) {
-        // String newSqlSentence = rule.getSqlSentence();
-        // newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
-        // DATASET + newDatasetId.toString());
-        // rule.setSqlSentence(newSqlSentence);
-        // }
-        //
-        // });
-      }
     }
     return dictionaryOriginTargetObjectId;
   }

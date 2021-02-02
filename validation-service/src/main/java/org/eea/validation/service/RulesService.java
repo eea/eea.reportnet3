@@ -275,6 +275,15 @@ public interface RulesService {
   void insertIntegritySchemas(List<IntegrityVO> integritiesVO);
 
 
+  /**
+   * Import rules schema.
+   *
+   * @param qcRulesBytes the qc rules bytes
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param integrities the integrities
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
   Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
       Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integrities)
       throws EEAException;

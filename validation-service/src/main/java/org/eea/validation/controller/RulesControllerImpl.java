@@ -589,6 +589,12 @@ public class RulesControllerImpl implements RulesController {
   }
 
 
+  /**
+   * Import rules schema.
+   *
+   * @param importRules the import rules
+   * @return the map
+   */
   @Override
   @HystrixCommand
   @PostMapping("/private/importRulesSchema")
@@ -599,7 +605,7 @@ public class RulesControllerImpl implements RulesController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
 
-      return rulesService.importRulesSchema(importRules.getQcrulesbytes(),
+      return rulesService.importRulesSchema(importRules.getQcRulesBytes(),
           importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
     } catch (EEAException e) {
       LOG_ERROR.error("Error importing rule: {}", e.getMessage(), e);

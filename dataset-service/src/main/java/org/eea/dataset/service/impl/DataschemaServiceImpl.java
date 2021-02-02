@@ -2125,12 +2125,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       ImportSchemaVO importRules = new ImportSchemaVO();
       importRules.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
       importRules.setIntegritiesVO(importClasses.getIntegrities());
-      importRules.setQcrulesbytes(importClasses.getQcrulesBytes());
+      importRules.setQcRulesBytes(importClasses.getQcRulesBytes());
       rulesControllerZuul.importRulesSchema(importRules);
 
       // Import the external integrations
       createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
           dictionaryOriginTargetObjectId);
+
+      // Create the views necessary to the validation in the new datasets created
+      mapDatasetsDestinyAndSchemasOrigin
+          .forEach((Long datasetCreated, DataSetSchema schema) -> recordStoreControllerZuul
+              .createUpdateQueryView(datasetCreated, false));
 
       // Success notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
@@ -2282,7 +2287,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the field updated with the objectIds of the imported dataset, we modify the field to
-        // update all the things
+        // update all the stuff
         // related to the PK/FK
         try {
           String datasetSchemaId = getDatasetSchemaId(datasetId);
@@ -2371,13 +2376,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param uniques the uniques
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    */
-  private void importUniqueConstraintsCatalogue(List<UniqueConstraintSchema> uniques,
+  private Map<String, String> importUniqueConstraintsCatalogue(List<UniqueConstraintSchema> uniques,
       Map<String, String> dictionaryOriginTargetObjectId) {
 
     List<UniqueConstraintVO> uniquesVo = uniqueConstraintMapper.entityListToClass(uniques);
     for (UniqueConstraintVO uniqueConstraintVO : uniquesVo) {
-      uniqueConstraintVO
-          .setUniqueId(dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getUniqueId()));
+      String newUniqueId = new ObjectId().toString();
+      dictionaryOriginTargetObjectId.put(uniqueConstraintVO.getUniqueId(), newUniqueId);
+      uniqueConstraintVO.setUniqueId(newUniqueId);
       uniqueConstraintVO.setDatasetSchemaId(
           dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getDatasetSchemaId()));
       uniqueConstraintVO.setTableSchemaId(
@@ -2386,10 +2392,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         uniqueConstraintVO.getFieldSchemaIds().set(i,
             dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
       }
-      LOG.info("A unique constraint is going to be created during the import process");
+      LOG.info("A unique constraint is going to be created during the import process. UniqueId {}",
+          uniqueConstraintVO.getUniqueId());
       uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
     }
-
+    return dictionaryOriginTargetObjectId;
   }
 
 }

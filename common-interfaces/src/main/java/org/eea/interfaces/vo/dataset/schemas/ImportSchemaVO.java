@@ -27,7 +27,7 @@ public class ImportSchemaVO {
   /** The integrities VO. */
   private List<IntegrityVO> integritiesVO;
 
-  /** The qcrulesbytes. */
-  private List<byte[]> qcrulesbytes;
+  /** The qc rules bytes. */
+  private List<byte[]> qcRulesBytes;
 
 }

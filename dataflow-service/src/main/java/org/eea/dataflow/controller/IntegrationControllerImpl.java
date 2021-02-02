@@ -361,6 +361,11 @@ public class IntegrationControllerImpl implements IntegrationController {
   }
 
 
+  /**
+   * Creates the integrations.
+   *
+   * @param integrations the integrations
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")

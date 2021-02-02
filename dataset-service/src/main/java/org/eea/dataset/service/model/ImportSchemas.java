@@ -36,7 +36,8 @@ public class ImportSchemas {
   /** The integrities. */
   private List<IntegrityVO> integrities;
 
-  /** The qcrules bytes. */
-  private List<byte[]> qcrulesBytes;
+
+  /** The qc rules bytes. */
+  private List<byte[]> qcRulesBytes;
 
 }
