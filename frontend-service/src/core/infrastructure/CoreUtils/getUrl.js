@@ -9,10 +9,9 @@ export const getUrl = (url, urlParams = {}, isRoute = false) => {
       if (isUndefined(urlParams[key])) {
         let i = cUrl.indexOf(`{:${key}}`);
         while (cUrl.charAt(i) !== '&' && cUrl.charAt(i) !== '?') {
-          i = i - 1;
+          i--;
         }
         let min = i;
-        // cUrl.indexOf(`{:${key}}`) - `${key}`.length - 2;
         let max = cUrl.indexOf(`{:${key}}`) + `{:${key}}`.length;
         if (cUrl.charAt(min) === '?') {
           min++;
