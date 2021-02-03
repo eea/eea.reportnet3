@@ -521,6 +521,13 @@
         },
         {
           "key": "WRONG_WEB_LINK_ERROR"
+        },
+        {
+          "key": "IMPORT_DESIGN_BAD_REQUEST_ERROR",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
