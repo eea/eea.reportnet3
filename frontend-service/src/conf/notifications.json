@@ -528,6 +528,13 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "IMPORT_REPORTING_BAD_REQUEST_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
