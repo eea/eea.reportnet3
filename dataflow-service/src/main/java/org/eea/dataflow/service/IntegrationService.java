@@ -135,5 +135,7 @@ public interface IntegrationService {
   void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException;
 
+  void createIntegrations(List<IntegrationVO> integrationsVO) throws EEAException;
+
 
 }

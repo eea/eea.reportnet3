@@ -359,4 +359,26 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
 
   }
+
+
+  /**
+   * Creates the integrations.
+   *
+   * @param integrations the integrations
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @PostMapping(value = "/private/createIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Create Integrations")
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void createIntegrations(@ApiParam(type = "Object",
+      value = "IntegrationVO Object") @RequestBody List<IntegrationVO> integrations) {
+    try {
+      integrationService.createIntegrations(integrations);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating integrations. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 }
