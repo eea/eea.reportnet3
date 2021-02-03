@@ -5,10 +5,13 @@ export const getUrl = (url, urlParams = {}, isRoute = false) => {
   let cUrl = url;
   if (isObject(urlParams)) {
     const keys = Object.keys(urlParams);
-
     keys.forEach(key => {
       if (isUndefined(urlParams[key])) {
-        let min = cUrl.indexOf(`{:${key}}`) - `${key}`.length - 2;
+        let i = cUrl.indexOf(`{:${key}}`);
+        while (cUrl.charAt(i) !== '&' && cUrl.charAt(i) !== '?') {
+          i--;
+        }
+        let min = i;
         let max = cUrl.indexOf(`{:${key}}`) + `{:${key}}`.length;
         if (cUrl.charAt(min) === '?') {
           min++;
