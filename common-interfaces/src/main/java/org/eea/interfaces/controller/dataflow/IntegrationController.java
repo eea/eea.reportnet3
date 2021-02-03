@@ -162,6 +162,12 @@ public interface IntegrationController {
       @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "replace", defaultValue = "false") Boolean replace);
 
-  @PostMapping(value = "/private/createIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+
+  /**
+   * Creates the integrations.
+   *
+   * @param integrations the integrations
+   */
+  @PostMapping("/private/createIntegrations")
   void createIntegrations(@RequestBody List<IntegrationVO> integrations);
 }

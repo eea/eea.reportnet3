@@ -24,5 +24,11 @@ public interface SchemasRepository
    */
   DataSetSchema findByIdDataSetSchema(ObjectId idDatasetSchema);
 
+  /**
+   * Find by id data flow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
   List<DataSetSchema> findByIdDataFlow(Long idDataflow);
 }

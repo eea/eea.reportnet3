@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.json.JsonWriterSettings;
@@ -77,7 +78,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -146,7 +146,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   /** The dataset service. */
   @Autowired
-  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /** The pk catalogue repository. */
@@ -2040,7 +2039,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
     List<DataSetSchema> schemas = schemasRepository.findByIdDataFlow(dataflowId);
 
-    if (schemas == null || schemas.isEmpty()) {
+    if (CollectionUtils.isEmpty(schemas)) {
       // Error. There aren't schemas to export in the dataflow
       LOG.error("No schemas found to export in the dataflow {}", dataflowId);
       throw new EEAException(String.format("No schemas to export in the dataflow %s", dataflowId));
@@ -2101,12 +2100,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         LOG.info("New dataset created in the import process with id {}", datasetId.get());
         mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
+
         // Time to wait before continuing the process. If the process goes too fast, it won't find
         // the
         // dataset schema created and the process will fail. By default 4000ms
         Thread.sleep(4000);
-
       }
+
+
 
       // After creating the datasets schemas on the DB, fill them and create the permissions
       for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
@@ -2225,6 +2226,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       schema.getTableSchemas().add(table);
 
       // propagate new table into the datasets schema
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
     }
     // save the schema with the new values
