@@ -369,11 +369,11 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
-  @PostMapping(value = "/private/createIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/private/createIntegrations")
   @ApiOperation(value = "Create Integrations")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void createIntegrations(@ApiParam(type = "Object",
-      value = "IntegrationVO Object") @RequestBody List<IntegrationVO> integrations) {
+      value = "List<IntegrationVO> Object") @RequestBody List<IntegrationVO> integrations) {
     try {
       integrationService.createIntegrations(integrations);
     } catch (EEAException e) {

@@ -316,12 +316,16 @@ public class FileTreatmentHelper implements DisposableBean {
       throws IOException {
     ZipEntry zeSchem = new ZipEntry(fileName);
     zos.putNextEntry(zeSchem);
+
+    // IOUtils.copyLarge(stream, zos);
+
     byte[] bytes = new byte[1024];
     int count = stream.read(bytes);
     while (count > -1) {
       zos.write(bytes, 0, count);
       count = stream.read(bytes);
     }
+
     stream.close();
   }
 
