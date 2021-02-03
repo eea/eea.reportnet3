@@ -734,6 +734,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     manageDialogs('isImportOtherSystemsDialogVisible', false);
   };
 
+  const onImportDatasetError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'IMPORT_DESIGN_BAD_REQUEST_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
+  };
+
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
@@ -1364,6 +1377,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             mode="advanced"
             multiple={false}
             name="file"
+            onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
