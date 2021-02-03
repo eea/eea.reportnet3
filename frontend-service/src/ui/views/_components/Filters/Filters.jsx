@@ -252,6 +252,7 @@ export const Filters = ({
       checkedKeys,
       checkboxOptions,
       state: filterState,
+      data: data,
       value
     });
 
