@@ -38,6 +38,7 @@ import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
+import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -137,6 +138,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refresh: false,
     replaceData: false,
     schemaTables: [],
+    tabs: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
@@ -555,7 +557,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onUpdateTabs = data => {
     const parsedData = [];
     data.forEach(table => parsedData.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
-    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData } });
+    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData, tabs: data } });
   };
 
   const onLoadSchema = () => {
@@ -1231,6 +1233,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             }
             tableSchemaId={designerState.dataViewerOptions.tableSchemaId}
             viewType={designerState.viewType}
+          />
+        )}
+        {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
+          <Validations
+            datasetId={datasetId}
+            datasetSchema={designerState.datasetSchema}
+            datasetSchemas={designerState.datasetSchemas}
+            tabs={DatasetDesignerUtils.getTabs({
+              datasetSchema: designerState.datasetSchema,
+              datasetSchemas: designerState.datasetSchemas,
+              editable: true
+            })}
           />
         )}
         <Snapshots
