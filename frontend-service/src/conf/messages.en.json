@@ -958,6 +958,7 @@
     "pinned": "Pinned",
     "importLeadReporters": "Import lead reporters",
     "exportLeadReporters": "Export lead reporters",
-    "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>"
+    "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>",
+    "exportDataflowLeadReportersFailedEvent": "Error exporting lead reporters"
   }
 }

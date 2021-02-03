@@ -49,7 +49,7 @@ const apiRepresentative = {
       url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
     });
 
-    return response;
+    return response.data;
   },
 
   getProviderTypes: async () => {

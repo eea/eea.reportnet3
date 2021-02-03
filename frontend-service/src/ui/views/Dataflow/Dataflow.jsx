@@ -26,6 +26,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
@@ -248,28 +249,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const manageRoleDialogFooter = (
-    <>
-      <Button
-        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
-        icon={'import'}
-        label={resources.messages['importLeadReporters']}
-        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
-      />
-      <Button
-        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
-        icon={'export'}
-        label={resources.messages['exportLeadReporters']}
-        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
-      />
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
-      />
-    </>
-  );
   const manageRightsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -284,9 +263,6 @@ const Dataflow = withRouter(({ history, match }) => {
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
-
-  const onConfirmDeleteDataflow = event =>
-    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
   const setFormHasRepresentatives = value =>
     dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
@@ -346,6 +322,23 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
   };
 
+  const onConfirmDeleteDataflow = event =>
+    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+
+  const onExportLeadReporters = async () => {
+    try {
+      const response = await RepresentativeService.downloadById(dataflowId);
+      if (!isNil(response)) {
+        DownloadFile(response, `${dataflowState.name}_${Date.now()}.csv`);
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT'
+      });
+    }
+  };
+
   const getCurrentDatasetId = () => {
     if (isEmpty(dataflowState.data)) return null;
 
@@ -357,6 +350,29 @@ const Dataflow = withRouter(({ history, match }) => {
         .map(dataset => dataset.datasetId)
     );
   };
+
+  const manageRoleDialogFooter = (
+    <>
+      <Button
+        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
+        icon={'import'}
+        label={resources.messages['importLeadReporters']}
+        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
+      />
+      <Button
+        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
+        icon={'export'}
+        label={resources.messages['exportLeadReporters']}
+        onClick={onExportLeadReporters}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+      />
+    </>
+  );
 
   const onLoadPermission = () => {
     const currentDatasetId = getCurrentDatasetId();
@@ -517,7 +533,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated
   );
 
-  const getImportExtensions = ['.zip'].join(', ').toLowerCase();
+  const getImportExtensions = ['.csv'].join(', ').toLowerCase();
 
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getImportExtensions.split(', ')
