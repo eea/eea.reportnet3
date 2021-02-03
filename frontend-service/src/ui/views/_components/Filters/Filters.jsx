@@ -142,6 +142,7 @@ export const Filters = ({
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
+
     const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
       inputOptions,
@@ -151,7 +152,9 @@ export const Filters = ({
       checkboxOptions,
       filterByList
     );
+
     const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
+
     const initialLabelAnimations = FiltersUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
@@ -160,6 +163,7 @@ export const Filters = ({
       checkboxOptions,
       filterState.filterBy
     );
+
     const initialOrderBy = SortUtils.getOrderInitialState(
       inputOptions,
       selectOptions,
@@ -241,6 +245,7 @@ export const Filters = ({
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
+
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
       dropdownOptions,
