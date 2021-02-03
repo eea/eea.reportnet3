@@ -72,7 +72,11 @@ export const Filters = ({
 
   useEffect(() => {
     getInitialState();
-  }, [data]);
+
+    if (filterState.filtered) {
+      onReApplyFilters();
+    }
+  }, [data, filterByList]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filterState.filteredData);
