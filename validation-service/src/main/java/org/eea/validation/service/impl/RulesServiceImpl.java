@@ -1277,9 +1277,9 @@ public class RulesServiceImpl implements RulesService {
       if (content != null && content.length > 0) {
         try {
           schemaRules.add(objectMapper.readValue(content, RulesSchema.class));
-          LOG.info("QcRule class recovered from zip file");
         } catch (IOException e) {
-          LOG_ERROR.error("Error convirtiendo el bytes[] a lista de rules", e.getMessage(), e);
+          LOG_ERROR.error("Error converting from bytes[] to RulesSchema class. Message {}",
+              e.getMessage(), e);
         }
       }
     }
@@ -1287,12 +1287,7 @@ public class RulesServiceImpl implements RulesService {
     // We've got the dictionaries and the list of the origin dataset schemas involved to get the
     // rules of them, and with the help of the dictionary,
     // replace the objectIds from the origin to the new ones of the target schemas, to finally save
-    // them as new rules. The data needed is inside the auxiliary CopySchemaVO
-    // List<String> listDatasetSchemaIdToCopy = rules.getOriginDatasetSchemaIds();
-    // Map<String, String> dictionaryOriginTargetObjectId =
-    // rules.getDictionaryOriginTargetObjectId();
-    // Map<Long, Long> dictionaryOriginTargetDatasetsId =
-    // rules.getDictionaryOriginTargetDatasetsId();
+    // them as new rules.
     for (RulesSchema ruleSchema : schemaRules) {
       String newDatasetSchemaId =
           dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
@@ -1304,10 +1299,6 @@ public class RulesServiceImpl implements RulesService {
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
       for (Rule rule : ruleSchema.getRules()) {
-        // We copy only the rules that are not of type Link, because these one are created
-        // automatically in the process when we update the fieldSchema in previous calls of the copy
-        // process
-        // Rule rule = ruleMapper.classToEntity(ruleVo);
         List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
         importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities);
       }
@@ -1337,7 +1328,6 @@ public class RulesServiceImpl implements RulesService {
     if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
       importIntegrity(integrities, dictionaryOriginTargetObjectId, rule);
     }
-
     LOG.info(
         "A new rule is going to be created in the import schema process {}, with this Reference id {}",
         rule.getRuleName(), rule.getReferenceId());
@@ -1361,7 +1351,6 @@ public class RulesServiceImpl implements RulesService {
   private Map<String, String> fillRuleImport(Rule rule,
       Map<String, String> dictionaryOriginTargetObjectId) {
 
-    LOG.info("El when condition original de la regla es {}", rule.getWhenCondition());
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
     rule.setRuleId(new ObjectId(newRuleId));
@@ -1396,14 +1385,18 @@ public class RulesServiceImpl implements RulesService {
         rule.setWhenCondition(newWhenCondition);
       });
 
-      LOG.info("El when condition a grabar final de la regla es {}", rule.getWhenCondition());
-
-
     }
     return dictionaryOriginTargetObjectId;
   }
 
 
+  /**
+   * Import integrity.
+   *
+   * @param integritySchemas the integrity schemas
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param rule the rule
+   */
   private void importIntegrity(List<IntegritySchema> integritySchemas,
       Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
 

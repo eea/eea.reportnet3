@@ -915,6 +915,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   }
 
 
+  /**
+   * Export schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
@@ -928,17 +934,26 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       String fileName = "dataflow_export_" + dataflowId + ".zip";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (Exception e) {
+      LOG.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 
 
 
+  /**
+   * Import schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @param file the file
+   */
   @Override
   @HystrixCommand
-  @PostMapping("/import")
+  @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file) {
@@ -948,6 +963,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       dataschemaService.importSchemas(dataflowId, file);
     } catch (Exception e) {
+      LOG.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }

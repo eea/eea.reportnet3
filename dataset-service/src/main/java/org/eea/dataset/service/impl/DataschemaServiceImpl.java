@@ -2032,14 +2032,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param dataflowId the dataflow id
    * @return the byte[]
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Override
-  public byte[] exportSchemas(Long dataflowId) throws IOException {
+  public byte[] exportSchemas(Long dataflowId) throws IOException, EEAException {
 
     List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
     List<DataSetSchema> schemas = schemasRepository.findByIdDataFlow(dataflowId);
 
+    if (schemas == null || schemas.isEmpty()) {
+      // Error. There aren't schemas to export in the dataflow
+      LOG.error("No schemas found to export in the dataflow {}", dataflowId);
+      throw new EEAException(String.format("No schemas to export in the dataflow %s", dataflowId));
+    }
     return fileTreatmentHelper.zipSchema(designs, schemas, dataflowId);
+
+
   }
 
 
@@ -2133,9 +2141,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           dictionaryOriginTargetObjectId);
 
       // Create the views necessary to the validation in the new datasets created
-      mapDatasetsDestinyAndSchemasOrigin
-          .forEach((Long datasetCreated, DataSetSchema schema) -> recordStoreControllerZuul
-              .createUpdateQueryView(datasetCreated, false));
+      // Also, launch a SQL QC Validation
+      mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
+        recordStoreControllerZuul.createUpdateQueryView(datasetCreated, false);
+        rulesControllerZuul.validateSqlRules(datasetCreated,
+            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()));
+      });
 
       // Success notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
@@ -2195,7 +2206,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ObjectId newFieldId = new ObjectId();
           dictionaryOriginTargetObjectId.put(fieldOrigin.getIdFieldSchema().toString(),
               newFieldId.toString());
-          // FieldSchema field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
           FieldSchema field = fieldOrigin;
           field.setIdFieldSchema(newFieldId);
           field.setIdRecord(newRecordId);
@@ -2299,7 +2309,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               fieldSchemaNoRulesMapper.entityToClass(field), type, datasetId);
           addToPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
         } catch (EEAException e) {
-          LOG.error("Error importing the schema when there are links: {}", e.getMessage(), e);
+          LOG.error("Error importing the schema on the datasetId {} when there are links: {}",
+              datasetId, e.getMessage(), e);
         }
       }
     });
@@ -2356,6 +2367,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void createExternalIntegrations(List<IntegrationVO> extIntegrations, Long dataflowId,
       Map<String, String> dictionaryOriginTargetObjectId) {
 
+    // Create the structure of the external integrations on the import schema process and send them
+    // all to the integrationController to be created
     List<IntegrationVO> integrations = new ArrayList<>();
     for (IntegrationVO integration : extIntegrations) {
       integration.getInternalParameters().put(IntegrationParams.DATASET_SCHEMA_ID,

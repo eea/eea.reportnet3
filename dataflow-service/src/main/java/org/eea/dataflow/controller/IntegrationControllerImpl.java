@@ -377,7 +377,7 @@ public class IntegrationControllerImpl implements IntegrationController {
     try {
       integrationService.createIntegrations(integrations);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
+      LOG_ERROR.error("Error creating integrations. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

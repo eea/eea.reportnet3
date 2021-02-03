@@ -292,9 +292,21 @@ public interface DatasetSchemaController {
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
+  /**
+   * Export schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
   @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   ResponseEntity<byte[]> exportSchemas(@RequestParam("dataflowId") final Long dataflowId);
 
+  /**
+   * Import schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @param file the file
+   */
   @PostMapping("/import")
   void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file);

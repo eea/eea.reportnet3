@@ -608,7 +608,7 @@ public class RulesControllerImpl implements RulesController {
       return rulesService.importRulesSchema(importRules.getQcRulesBytes(),
           importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error importing rule: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error importing the rules: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }

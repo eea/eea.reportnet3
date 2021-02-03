@@ -492,7 +492,23 @@ public interface DatasetSchemaService {
   void releaseCreateUpdateView(Long datasetId, String user, boolean checkSQL);
 
 
-  byte[] exportSchemas(Long dataflowId) throws IOException;
+  /**
+   * Export schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the byte[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  byte[] exportSchemas(Long dataflowId) throws IOException, EEAException;
 
+  /**
+   * Import schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @param multipartFile the multipart file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   void importSchemas(Long dataflowId, MultipartFile multipartFile) throws IOException, EEAException;
 }

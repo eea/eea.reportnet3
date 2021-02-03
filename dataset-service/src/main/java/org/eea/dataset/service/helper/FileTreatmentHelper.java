@@ -230,6 +230,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       }
     }
+    LOG.info("Schemas recovered from the Zip file during the import process");
     return fileUnziped;
   }
 
@@ -275,7 +276,8 @@ public class FileTreatmentHelper implements DisposableBean {
       zipDatasetNames(schemaNames, zos);
 
     } catch (Exception e) {
-      LOG.error("Error exporting schemas to a ZIP file {}", e.getMessage(), e);
+      LOG.error("Error exporting schemas from the dataflowId {} to a ZIP file. Message {}",
+          dataflowId, e.getMessage(), e);
     }
     return bos.toByteArray();
 
@@ -294,18 +296,33 @@ public class FileTreatmentHelper implements DisposableBean {
       ObjectMapper objectMapper = new ObjectMapper();
       String nameFile = fileName + ".schema";
       InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
-      ZipEntry zeSchem = new ZipEntry(nameFile);
-      zos.putNextEntry(zeSchem);
-      byte[] bytes = new byte[1024];
-      int count = schemaStream.read(bytes);
-      while (count > -1) {
-        zos.write(bytes, 0, count);
-        count = schemaStream.read(bytes);
-      }
-      schemaStream.close();
+      zippingClasses(zos, nameFile, schemaStream);
     } catch (IOException e) {
-      LOG.error("Error exporting the schema into the zip. {}", e.getMessage(), e);
+      LOG.error(
+          "Error exporting the schema of the dataflow {} with datasetSchemaId {} into the zip. {}",
+          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
+  }
+
+  /**
+   * Zipping classes.
+   *
+   * @param zos the zos
+   * @param fileName the file name
+   * @param stream the stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void zippingClasses(ZipOutputStream zos, String fileName, InputStream stream)
+      throws IOException {
+    ZipEntry zeSchem = new ZipEntry(fileName);
+    zos.putNextEntry(zeSchem);
+    byte[] bytes = new byte[1024];
+    int count = stream.read(bytes);
+    while (count > -1) {
+      zos.write(bytes, 0, count);
+      count = stream.read(bytes);
+    }
+    stream.close();
   }
 
   /**
@@ -322,17 +339,12 @@ public class FileTreatmentHelper implements DisposableBean {
       String nameFileRules = fileName + ".qcrules";
       InputStream rulesStream =
           new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(rules));
-      ZipEntry zeRules = new ZipEntry(nameFileRules);
-      zos.putNextEntry(zeRules);
-      byte[] bytesRules = new byte[1024];
-      int countRules = rulesStream.read(bytesRules);
-      while (countRules > -1) {
-        zos.write(bytesRules, 0, countRules);
-        countRules = rulesStream.read(bytesRules);
-      }
-      rulesStream.close();
+      zippingClasses(zos, nameFileRules, rulesStream);
+
     } catch (IOException e) {
-      LOG.error("Error exporting the qcRules into the zip. {}", e.getMessage(), e);
+      LOG.error(
+          "Error exporting the qcRules of the dataflow {} with datasetSchemaId {} into the zip. {}",
+          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -351,17 +363,11 @@ public class FileTreatmentHelper implements DisposableBean {
       String nameFileUnique = fileName + ".unique";
       InputStream uniqueStream =
           new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
-      ZipEntry zeUnique = new ZipEntry(nameFileUnique);
-      zos.putNextEntry(zeUnique);
-      byte[] bytesUnique = new byte[1024];
-      int countUnique = uniqueStream.read(bytesUnique);
-      while (countUnique > -1) {
-        zos.write(bytesUnique, 0, countUnique);
-        countUnique = uniqueStream.read(bytesUnique);
-      }
-      uniqueStream.close();
+      zippingClasses(zos, nameFileUnique, uniqueStream);
     } catch (IOException e) {
-      LOG.error("Error exporting the unique rules into the zip. {}", e.getMessage(), e);
+      LOG.error(
+          "Error exporting the unique rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
+          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -380,17 +386,12 @@ public class FileTreatmentHelper implements DisposableBean {
       String nameFileIntegrity = fileName + ".integrity";
       InputStream integrityStream =
           new ByteArrayInputStream(objectMapperIntegrity.writeValueAsBytes(listIntegrity));
-      ZipEntry zeIntegrity = new ZipEntry(nameFileIntegrity);
-      zos.putNextEntry(zeIntegrity);
-      byte[] bytesIntegrity = new byte[1024];
-      int countIntegrity = integrityStream.read(bytesIntegrity);
-      while (countIntegrity > -1) {
-        zos.write(bytesIntegrity, 0, countIntegrity);
-        countIntegrity = integrityStream.read(bytesIntegrity);
-      }
-      integrityStream.close();
+      zippingClasses(zos, nameFileIntegrity, integrityStream);
+
     } catch (IOException e) {
-      LOG.error("Error exporting the integrity rules into the zip. {}", e.getMessage(), e);
+      LOG.error(
+          "Error exporting the integrity rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
+          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -416,17 +417,12 @@ public class FileTreatmentHelper implements DisposableBean {
       InputStream extIntegrationStream =
           new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
       String nameFileExtIntegrations = fileName + ".extintegrations";
-      ZipEntry zeIntegration = new ZipEntry(nameFileExtIntegrations);
-      zos.putNextEntry(zeIntegration);
-      byte[] bytesIntegration = new byte[1024];
-      int countIntegration = extIntegrationStream.read(bytesIntegration);
-      while (countIntegration > -1) {
-        zos.write(bytesIntegration, 0, countIntegration);
-        countIntegration = extIntegrationStream.read(bytesIntegration);
-      }
-      extIntegrationStream.close();
+      zippingClasses(zos, nameFileExtIntegrations, extIntegrationStream);
+
     } catch (IOException e) {
-      LOG.error("Error exporting the external integrations into the zip. {}", e.getMessage(), e);
+      LOG.error(
+          "Error exporting the external integrations of the dataflow {} with datasetSchemaId {} into the zip. {}",
+          dataflowId, schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -442,15 +438,7 @@ public class FileTreatmentHelper implements DisposableBean {
       ObjectMapper objectMapper = new ObjectMapper();
       InputStream schemaNamesStream =
           new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaNames));
-      ZipEntry ze = new ZipEntry("datasetSchemaNames.names");
-      zos.putNextEntry(ze);
-      byte[] bytes = new byte[1024];
-      int count = schemaNamesStream.read(bytes);
-      while (count > -1) {
-        zos.write(bytes, 0, count);
-        count = schemaNamesStream.read(bytes);
-      }
-      schemaNamesStream.close();
+      zippingClasses(zos, "datasetSchemaNames.names", schemaNamesStream);
     } catch (IOException e) {
       LOG.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
     }
@@ -468,24 +456,37 @@ public class FileTreatmentHelper implements DisposableBean {
       List<DataSetSchema> schemas) {
 
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int n;
-      while ((n = zip.read(buf, 0, 1024)) != -1) {
-        output.write(buf, 0, n);
-      }
-      byte[] content = output.toByteArray();
+      byte[] content = unzippingClasses(zip);
       if (content != null && content.length > 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-        LOG.info("Schema class recovered from zip file");
         schemas.add(schema);
       }
     } catch (Exception e) {
-
+      LOG_ERROR.error("Error unzipping the schemas classes during the import process. Message {}",
+          e.getMessage(), e);
     }
     return schemas;
+  }
+
+
+  /**
+   * Unzipping classes.
+   *
+   * @param zip the zip
+   * @return the byte[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private byte[] unzippingClasses(ZipInputStream zip) throws IOException {
+
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    byte[] buf = new byte[1024];
+    int n;
+    while ((n = zip.read(buf, 0, 1024)) != -1) {
+      output.write(buf, 0, n);
+    }
+    return output.toByteArray();
   }
 
 
@@ -498,22 +499,13 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private List<byte[]> unzippingQcClasses(ZipInputStream zip, List<byte[]> qcrulesBytes) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int n;
-      while ((n = zip.read(buf, 0, 1024)) != -1) {
-        output.write(buf, 0, n);
-      }
-      byte[] content = output.toByteArray();
-
+      byte[] content = unzippingClasses(zip);
       if (content != null && content.length > 0) {
-        LOG.info("QcRule class recovered from zip file");
         qcrulesBytes.add(content);
       }
     } catch (Exception e) {
-
+      LOG_ERROR.error("Error unzipping the qcrules during the import process. Message {}",
+          e.getMessage(), e);
     }
     return qcrulesBytes;
   }
@@ -528,22 +520,16 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<UniqueConstraintSchema> unzippingUniqueClasses(ZipInputStream zip,
       List<UniqueConstraintSchema> uniques) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int n;
-      while ((n = zip.read(buf, 0, 1024)) != -1) {
-        output.write(buf, 0, n);
-      }
-      byte[] content = output.toByteArray();
+      byte[] content = unzippingClasses(zip);
       if (content != null && content.length > 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         uniques
             .addAll(Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
-        LOG.info("Unique class recovered from zip file");
       }
     } catch (Exception e) {
-
+      LOG_ERROR.error("Error unzipping the unique rules during the import process. Message {}",
+          e.getMessage(), e);
     }
     return uniques;
   }
@@ -559,21 +545,15 @@ public class FileTreatmentHelper implements DisposableBean {
   private Map<String, String> unzippingDatasetNamesClasses(ZipInputStream zip,
       Map<String, String> schemaNames) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int n;
-      while ((n = zip.read(buf, 0, 1024)) != -1) {
-        output.write(buf, 0, n);
-      }
-      byte[] content = output.toByteArray();
+      byte[] content = unzippingClasses(zip);
       if (content != null && content.length > 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         schemaNames = objectMapper.readValue(content, Map.class);
-        LOG.info("Schema names recovered from zip file");
       }
     } catch (Exception e) {
-
+      LOG_ERROR.error("Error unzipping the dataset names during the import process. Message {}",
+          e.getMessage(), e);
     }
     return schemaNames;
   }
@@ -588,22 +568,17 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<IntegrationVO> unzippingExtIntegrationsClasses(ZipInputStream zip,
       List<IntegrationVO> extIntegrations) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int n;
-      while ((n = zip.read(buf, 0, 1024)) != -1) {
-        output.write(buf, 0, n);
-      }
-      byte[] content = output.toByteArray();
+      byte[] content = unzippingClasses(zip);
       if (content != null && content.length > 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         extIntegrations
             .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
-        LOG.info("External integration recovered from zip file");
       }
     } catch (Exception e) {
-
+      LOG_ERROR.error(
+          "Error unzipping the external integrations during the import process. Message {}",
+          e.getMessage(), e);
     }
     return extIntegrations;
   }
@@ -618,21 +593,15 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<IntegrityVO> unzippingIntegrityQcClasses(ZipInputStream zip,
       List<IntegrityVO> integrities) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      byte[] buf = new byte[1024];
-      int n;
-      while ((n = zip.read(buf, 0, 1024)) != -1) {
-        output.write(buf, 0, n);
-      }
-      byte[] content = output.toByteArray();
+      byte[] content = unzippingClasses(zip);
       if (content != null && content.length > 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         integrities.addAll(Arrays.asList(objectMapper.readValue(content, IntegrityVO[].class)));
-        LOG.info("External integration recovered from zip file");
       }
     } catch (Exception e) {
-
+      LOG_ERROR.error("Error unzipping the integration rules during the import process. Message {}",
+          e.getMessage(), e);
     }
     return integrities;
   }
