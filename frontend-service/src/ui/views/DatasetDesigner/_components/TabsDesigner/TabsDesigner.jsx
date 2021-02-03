@@ -15,7 +15,6 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
-import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -484,14 +483,6 @@ export const TabsDesigner = withRouter(
       <Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
-        {datasetSchema && tabs && validationContext.isVisible && (
-          <Validations
-            datasetId={datasetId}
-            datasetSchema={datasetSchema}
-            datasetSchemas={datasetSchemas}
-            tabs={tabs}
-          />
-        )}
       </Fragment>
     );
   }
