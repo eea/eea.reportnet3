@@ -21,6 +21,7 @@ import { DatasetService } from 'core/services/Dataset';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
+import { DatasetDesignerUtils } from 'ui/views/DatasetDesigner/_functions/Utils/DatasetDesignerUtils';
 import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
@@ -134,34 +135,7 @@ export const TabsDesigner = withRouter(
 
     const onLoadSchema = async () => {
       try {
-        const inmDatasetSchema = { ...datasetSchema };
-        inmDatasetSchema.tables.forEach((table, idx) => {
-          table.addTab = false;
-          table.description = table.description || table.tableSchemaDescription;
-          table.editable = editable;
-          table.fixedNumber = table.fixedNumber || table.tableSchemaFixedNumber;
-          table.hasErrors =
-            !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
-              ? {
-                  ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
-                }.hasErrors
-              : false;
-          table.header = table.tableSchemaName;
-          table.index = idx;
-          table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
-          table.newTab = false;
-          table.notEmpty = table.notEmpty || table.tableSchemaNotEmpty;
-          table.readOnly = table.readOnly || table.tableSchemaReadOnly;
-          table.showContextMenu = false;
-          table.toPrefill = table.toPrefill || table.tableSchemaToPrefill;
-        });
-        //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
-        inmDatasetSchema.tables = inmDatasetSchema.tables.filter(
-          table => table.tableSchemaId !== undefined && table.addTab === false && table.tableSchemaId !== ''
-        );
-        inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
-
-        setTabs(inmDatasetSchema.tables);
+        setTabs(DatasetDesignerUtils.getTabs({ datasetSchema, datasetStatistics, editable }));
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {

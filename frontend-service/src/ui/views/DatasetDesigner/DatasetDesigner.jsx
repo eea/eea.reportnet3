@@ -1240,7 +1240,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
-            tabs={designerState.tabs}
+            tabs={DatasetDesignerUtils.getTabs({
+              datasetSchema: designerState.datasetSchema,
+              datasetSchemas: designerState.datasetSchemas,
+              editable: true
+            })}
           />
         )}
         <Snapshots
