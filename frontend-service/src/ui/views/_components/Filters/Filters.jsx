@@ -45,8 +45,9 @@ export const Filters = ({
   selectOptions,
   sendData,
   sortable,
-  validationsAllTypesFilters,
-  validations
+  sortCategory,
+  validations,
+  validationsAllTypesFilters
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -254,8 +255,8 @@ export const Filters = ({
   };
 
   const onOrderData = (order, property) => {
-    const sortedData = SortUtils.onSortData([...filterState.data], order, property);
-    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
+    const sortedData = SortUtils.onSortData([...filterState.data], order, property, sortCategory);
+    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property, sortCategory);
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
 

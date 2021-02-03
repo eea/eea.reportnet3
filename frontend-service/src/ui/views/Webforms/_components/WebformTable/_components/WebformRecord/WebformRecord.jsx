@@ -190,11 +190,10 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
 
-  const renderElements = (elements = []) => {
+  const renderElements = (elements = [], fieldsBlock = false) => {
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
-
       if (element.type === 'BLOCK') {
         const isSubtable = () => {
           return element.elementsRecords.length > 1;
@@ -205,7 +204,7 @@ export const WebformRecord = ({
             <div key={i} className={styles.fieldsBlock}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
-                .map(record => renderElements(record.elements))}
+                .map(record => renderElements(record.elements, true))}
             </div>
           );
         }
@@ -218,11 +217,18 @@ export const WebformRecord = ({
       }
 
       if (element.type === 'FIELD') {
+        const fieldStyle = { width: '100%' };
+        if (fieldsBlock) {
+          const elementCount = elements.length;
+          const elementGap = 5 * elementCount;
+          const elementWidth = (100 - elementGap) / elementCount;
+          fieldStyle.width = elementWidth;
+        }
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div key={i} className={styles.field}>
+            <div key={i} className={styles.field} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}

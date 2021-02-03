@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
@@ -33,8 +34,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   useEffect(() => {
     const parsedDataflows = orderBy(
       DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
-      ['pinned', 'expirationDate', 'status'],
-      ['asc', 'asc', 'asc']
+      ['pinned', 'expirationDate', 'status', 'id'],
+      ['asc', 'asc', 'asc', 'asc']
     );
     setDataToFilter(parsedDataflows);
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
@@ -43,7 +44,11 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
   }, [content]);
 
   useEffect(() => {
-    const parsedDataflows = orderBy(filteredData, ['pinned', 'expirationDate', 'status'], ['asc', 'asc', 'asc']);
+    const parsedDataflows = orderBy(
+      filteredData,
+      ['pinned', 'expirationDate', 'status', 'id'],
+      ['asc', 'asc', 'asc', 'asc']
+    );
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [filteredData]);
@@ -69,13 +74,17 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
   const reorderDataflows = async (pinnedItem, isPinned) => {
     const inmUserProperties = { ...userContext.userProps };
-    const inmPinnedDataflows = inmUserProperties.pinnedDataflows;
+    const inmPinnedDataflows = intersection(
+      inmUserProperties.pinnedDataflows,
+      dataToFilter.map(data => data.id.toString())
+    );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
     } else {
       inmPinnedDataflows.push(pinnedItem.id.toString());
     }
     inmUserProperties.pinnedDataflows = inmPinnedDataflows;
+
     const response = await changeUserProperties(inmUserProperties);
     if (!isNil(response) && response.status >= 200 && response.status <= 299) {
       userContext.onChangePinnedDataflows(inmPinnedDataflows);
@@ -96,8 +105,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
       const orderedFilteredData = orderBy(
         changedFilteredData,
-        ['pinned', 'expirationDate', 'status'],
-        ['asc', 'asc', 'asc']
+        ['pinned', 'expirationDate', 'status', 'id'],
+        ['asc', 'asc', 'asc', 'asc']
       );
 
       const orderedPinned = orderedFilteredData.map(el => el.pinned);
@@ -111,7 +120,9 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
         return item;
       });
 
-      setDataToFilter(orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status'], ['asc', 'asc', 'asc']));
+      setDataToFilter(
+        orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status', 'id'], ['asc', 'asc', 'asc', 'asc'])
+      );
     }
   };
 
@@ -128,6 +139,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
           inputOptions={DataflowConf.filterItems['input']}
           selectOptions={DataflowConf.filterItems['select']}
           sortable={true}
+          sortCategory={'pinned'}
         />
       </div>
 

@@ -20,24 +20,20 @@ const onResetOrderData = (input = [], select = [], date = [], check = []) => {
   return input.concat(select, date, check).reduce((obj, key) => Object.assign(obj, { [key]: 0 }), {});
 };
 
-const onSortData = (data, order, property) => {
-  if (order !== 1) {
-    return data.sort((a, b) => {
-      if (!isNil(a[property]) && !isNil(b[property]) && !isBoolean(a[property]) && !isBoolean(b[property])) {
-        const textA = a[property].toUpperCase();
-        const textB = b[property].toUpperCase();
-        return textA < textB ? -1 : textA > textB ? 1 : 0;
+const onSortData = (data, order, property, sortCategory) => {
+  return data.sort((a, b) => {
+    if (!isNil(a[property]) && !isNil(b[property]) && !isBoolean(a[property]) && !isBoolean(b[property])) {
+      const textA = a[property].toUpperCase();
+      const textB = b[property].toUpperCase();
+
+      if (!isNil(sortCategory) && a[sortCategory] !== b[sortCategory]) {
+        return a[sortCategory] < b[sortCategory] ? -2 : 2;
       }
-    });
-  } else {
-    return data.sort((a, b) => {
-      if (!isNil(a[property]) && !isNil(b[property]) && !isBoolean(a[property]) && !isBoolean(b[property])) {
-        const textA = a[property].toUpperCase();
-        const textB = b[property].toUpperCase();
-        return textA < textB ? 1 : textA > textB ? -1 : 0;
-      }
-    });
-  }
+
+      const orderValue = order !== 1 ? -1 : 1;
+      return textA < textB ? orderValue : textA > textB ? -orderValue : 0;
+    }
+  });
 };
 
 export const SortUtils = { getOrderIcon, getOrderInitialState, onResetOrderData, onSortData };
