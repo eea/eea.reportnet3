@@ -85,7 +85,6 @@ export const apiDataflow = {
     const response = await HTTPRequester.download({
       url: getUrl(DataflowConfig.exportSchema, { dataflowId })
     });
-    console.log(response);
     return response.data;
   },
   getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
