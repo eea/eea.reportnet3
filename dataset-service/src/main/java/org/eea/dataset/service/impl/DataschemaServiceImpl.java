@@ -2422,6 +2422,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+  /**
+   * Name to imported schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param schemaNames the schema names
+   * @param designs the designs
+   * @return the string
+   */
   private String nameToImportedSchema(String datasetSchemaId, Map<String, String> schemaNames,
       List<DesignDataset> designs) {
     // The name of the dataset copied will be IMPORTED_whatever. If it exists, it will be
