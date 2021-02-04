@@ -1384,8 +1384,19 @@ public class RulesServiceImpl implements RulesService {
         newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
         rule.setWhenCondition(newWhenCondition);
       });
-
     }
+
+    // Special case for SQL Sentences
+    if (StringUtils.isNotBlank(rule.getWhenCondition())
+        && rule.getWhenCondition().contains("isSQLSentence")
+        && StringUtils.isNotBlank(rule.getSqlSentence())) {
+      dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+        String newSqlSentence = rule.getSqlSentence().toLowerCase();
+        newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
+        rule.setSqlSentence(newSqlSentence);
+      });
+    }
+
     return dictionaryOriginTargetObjectId;
   }
 

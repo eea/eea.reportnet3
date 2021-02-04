@@ -2071,6 +2071,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Unzip the file and keep the classes on an auxiliary bean
       ImportSchemas importClasses = fileTreatmentHelper.unZipImportSchema(multipartFile);
 
+      List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
+
       for (DataSetSchema schema : importClasses.getSchemas()) {
         // Create the empty new dataset schema
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
@@ -2094,12 +2096,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         // Create the schema in the metabase
         Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-            schemaName(schema.getIdDataSetSchema().toString(), importClasses.getSchemaNames()),
+            nameToImportedSchema(schema.getIdDataSetSchema().toString(),
+                importClasses.getSchemaNames(), designs),
             newIdDatasetSchema, dataflowId, null, null, 0);
 
 
         LOG.info("New dataset created in the import process with id {}", datasetId.get());
         mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
+        String newDataset = "dataset_" + datasetId.get().toString();
+        String oldDataset =
+            "dataset_" + importClasses.getSchemaIds().get(schema.getIdDataSetSchema().toString());
+        dictionaryOriginTargetObjectId.put(oldDataset, newDataset);
 
         // Time to wait before continuing the process. If the process goes too fast, it won't find
         // the
@@ -2412,6 +2419,28 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
     }
     return dictionaryOriginTargetObjectId;
+  }
+
+
+  private String nameToImportedSchema(String datasetSchemaId, Map<String, String> schemaNames,
+      List<DesignDataset> designs) {
+    // The name of the dataset copied will be IMPORTED_whatever. If it exists, it will be
+    // IMPORTED_whatever (1) and so
+    String name = schemaNames.get(datasetSchemaId);
+    String result = "IMPORTED_" + name;
+    int index = 1;
+    for (int i = 0; i < designs.size(); i++) {
+      if (designs.get(i).getDataSetName().equals(result)) {
+        if (result.contains("(" + (index - 1) + ")")) {
+          result = result.replace("(" + (index - 1) + ")", "(" + index + ")");
+        } else {
+          result = result + " (" + index + ")";
+        }
+        i = 0;
+        index++;
+      }
+    }
+    return result;
   }
 
 }
