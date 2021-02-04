@@ -182,7 +182,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/v3.0.0.1-RC5.3"
                 }
             }
             parallel {
@@ -301,7 +301,7 @@ pipeline {
         stage('Cleaning docker images'){
           when {
             expression {
-              return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+              return BRANCH_NAME == "develop" || BRANCH_NAME == "release/v3.0.0.1-RC5.3"
             }
           }
           steps {
