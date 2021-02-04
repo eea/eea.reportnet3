@@ -278,4 +278,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       type = "Long List") @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);
   }
+
+  /**
+   * Find data providers by code.
+   *
+   * @param code the code
+   * @return the list
+   */
+  @Override
+  @GetMapping("/private/dataProviderByCode/{code}")
+  @ApiOperation(value = "Find DataProviders based on a code", response = DataProviderVO.class,
+      responseContainer = "List", hidden = true)
+  public List<DataProviderVO> findDataProvidersByCode(@PathVariable("code") String code) {
+    return representativeService.findDataProvidersByCode(code);
+  }
 }

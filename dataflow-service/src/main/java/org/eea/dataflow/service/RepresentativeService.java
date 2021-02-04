@@ -85,4 +85,12 @@ public interface RepresentativeService {
    * @return the represetatives by dataflow id and email
    */
   List<RepresentativeVO> getRepresetativesByDataflowIdAndEmail(Long dataflowId, String email);
+
+  /**
+   * Find data providers by code.
+   *
+   * @param code the code
+   * @return the list
+   */
+  List<DataProviderVO> findDataProvidersByCode(String code);
 }

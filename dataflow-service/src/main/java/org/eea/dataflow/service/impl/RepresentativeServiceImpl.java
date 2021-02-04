@@ -263,6 +263,20 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
+   * Find data providers by ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  @Override
+  public List<DataProviderVO> findDataProvidersByCode(String code) {
+    List<DataProviderVO> list = new ArrayList<>();
+    List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
+    dataProviders.forEach(dataProvider -> list.add(dataProviderMapper.entityToClass(dataProvider)));
+    return list;
+  }
+
+  /**
    * Gets the represetatives by dataflow id and email.
    *
    * @param dataflowId the dataflow id

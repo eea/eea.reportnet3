@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.ums;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -335,6 +336,10 @@ public interface UserManagementController {
    */
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   List<UserRoleVO> getUserRolesByDataflowAndCountry(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId);
+
+  @GetMapping("/getUserRolesAllDataflows/dataProviderId/{dataProviderId}")
+  List<DataflowUserRoleVO> getUserRolesAllDataflows(
       @PathVariable("dataProviderId") Long dataProviderId);
 
 

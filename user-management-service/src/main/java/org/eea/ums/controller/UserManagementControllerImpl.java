@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -748,6 +749,24 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getUserRolesAllDataflows/dataProviderId/{dataProviderId}")
+  public List<DataflowUserRoleVO> getUserRolesAllDataflows(
+      @PathVariable("dataProviderId") Long dataProviderId) {
+    List<Long> dataProviderIds = new ArrayList<>();
+    List<DataflowUserRoleVO> result = new ArrayList<>();
+    try {
+      dataProviderIds = userRoleService.getProviderIds();
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
+    }
+    List<List<DataflowUserRoleVO>> results =
+        dataProviderIds.stream().map(dataProvider -> userRoleService.getUserRoles(dataProviderId))
+            .collect(Collectors.toList());
+    results.stream().forEach(list -> result.addAll(list));
+    return result;
+  }
 
   /**
    * Gets the resources by user email.
