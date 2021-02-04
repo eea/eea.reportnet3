@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Interface DatasetSchemaController.
@@ -289,5 +291,24 @@ public interface DatasetSchemaController {
   SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Export schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportSchemas(@RequestParam("dataflowId") final Long dataflowId);
+
+  /**
+   * Import schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @param file the file
+   */
+  @PostMapping("/import")
+  void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
+      @RequestParam("file") MultipartFile file);
 
 }
