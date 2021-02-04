@@ -39,8 +39,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,6 +54,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.netty.util.internal.StringUtil;
@@ -368,7 +371,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
-          tableSchemaVO.getIdTableSchema(), datasetId))) {
+              tableSchemaVO.getIdTableSchema(), datasetId))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
                 tableSchemaVO.getIdTableSchema(), datasetId),
@@ -861,8 +864,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param dataflowIdOrigin the dataflow id origin
    * @param dataflowIdDestination the dataflow id destination
    *
-   *     Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's an
-   *     async call. It sends a notification when all the process it's done
+   *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
+   *        an async call. It sends a notification when all the process it's done
    */
   @Override
   @HystrixCommand
@@ -907,6 +910,61 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getSimpleSchema(datasetId);
     } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+  }
+
+
+  /**
+   * Export schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportSchemas(@RequestParam("dataflowId") final Long dataflowId) {
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      byte[] fileZip = dataschemaService.exportSchemas(dataflowId);
+      String fileName = "dataflow_export_" + dataflowId + ".zip";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
+    } catch (Exception e) {
+      LOG.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+  }
+
+
+
+  /**
+   * Import schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @param file the file
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
+      @RequestParam("file") MultipartFile file) {
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      dataschemaService.importSchemas(dataflowId, file);
+    } catch (Exception e) {
+      LOG.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
