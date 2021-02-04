@@ -956,6 +956,8 @@
     "dataflowPinnedInit": "You have pinned the dataflow",
     "dataflowUnpinnedInit": "You have unpinned the dataflow",
     "pinned": "Pinned",
+    "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
+    "importReportingBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importDatasetSchemaFailedEvent": "Error downloading the dataflow schema",
     "importDatasetSchemaCompletedEvent": "Dataflow schema imported at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
     "confirmExportSchema": "Are you sure you want to download the dataflow schema?",

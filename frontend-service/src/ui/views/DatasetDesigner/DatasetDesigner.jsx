@@ -38,6 +38,7 @@ import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
+import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -137,6 +138,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refresh: false,
     replaceData: false,
     schemaTables: [],
+    tabs: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
@@ -555,7 +557,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onUpdateTabs = data => {
     const parsedData = [];
     data.forEach(table => parsedData.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
-    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData } });
+    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData, tabs: data } });
   };
 
   const onLoadSchema = () => {
@@ -730,6 +732,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const cleanImportOtherSystemsDialog = () => {
     designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: false } });
     manageDialogs('isImportOtherSystemsDialogVisible', false);
+  };
+
+  const onImportDatasetError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'IMPORT_DESIGN_BAD_REQUEST_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -1233,6 +1248,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             viewType={designerState.viewType}
           />
         )}
+        {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
+          <Validations
+            datasetId={datasetId}
+            datasetSchema={designerState.datasetSchema}
+            datasetSchemas={designerState.datasetSchemas}
+            tabs={DatasetDesignerUtils.getTabs({
+              datasetSchema: designerState.datasetSchema,
+              datasetSchemas: designerState.datasetSchemas,
+              editable: true
+            })}
+          />
+        )}
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}
           isSnapshotDialogVisible={isSnapshotDialogVisible}
@@ -1350,6 +1377,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             mode="advanced"
             multiple={false}
             name="file"
+            onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
