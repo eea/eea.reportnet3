@@ -36,6 +36,7 @@ const RepresentativesList = ({
   dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
+  setDataProviderSelected,
   setFormHasRepresentatives,
   setHasRepresentativesWithoutDatasets
 }) => {
@@ -74,6 +75,7 @@ const RepresentativesList = ({
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     }
+    setDataProviderSelected(formState.selectedDataProviderGroup);
   }, [formState.selectedDataProviderGroup]);
 
   useEffect(() => {

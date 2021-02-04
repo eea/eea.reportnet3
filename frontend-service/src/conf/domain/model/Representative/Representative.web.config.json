@@ -5,7 +5,7 @@
   "deleteById": "/representative/{:representativeId}",
   "exportRepresentatives": "/representative/export/{:dataflowId}",
   "getProviderTypes": "/representative/dataProvider/types",
-  "importLeadReporters": "/representative/import/{:dataflowId}",
+  "importLeadReporters": "/representative/import/{:dataflowId}/group/{:dataProviderGroupId}",
   "updateDataProviderId": "/representative/update",
   "updateProviderAccount": "/representative/update"
 }

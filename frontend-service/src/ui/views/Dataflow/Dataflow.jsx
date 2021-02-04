@@ -68,6 +68,7 @@ const Dataflow = withRouter(({ history, match }) => {
     currentUrl: '',
     data: {},
     dataProviderId: [],
+    dataProviderSelected: {},
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
@@ -263,6 +264,8 @@ const Dataflow = withRouter(({ history, match }) => {
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
+
+  const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
 
   const setFormHasRepresentatives = value =>
     dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
@@ -603,11 +606,12 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
-                dataflowRepresentatives={dataflowState.data.representatives}
                 dataflowId={dataflowId}
+                dataflowRepresentatives={dataflowState.data.representatives}
                 isActiveManageRolesDialog={dataflowState.isManageRolesDialogVisible}
-                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
+                setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
+                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
               />
             </div>
           </Dialog>
