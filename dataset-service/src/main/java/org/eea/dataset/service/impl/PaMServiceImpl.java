@@ -26,6 +26,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.PaMConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -60,6 +61,7 @@ public class PaMServiceImpl implements PaMService {
   private DatasetMetabaseService datasetMetabaseService;
 
   /** The dataset schema service. */
+  @Lazy
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 

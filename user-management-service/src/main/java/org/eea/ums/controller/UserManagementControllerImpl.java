@@ -1,10 +1,5 @@
 package org.eea.ums.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +14,7 @@ import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -27,6 +23,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.UserRoleService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -47,6 +44,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -79,6 +81,9 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Autowired
   private UserRepresentationMapper userRepresentationMapper;
+
+  @Autowired
+  private UserRoleService userRoleService;
 
   /**
    * The Constant LOG_ERROR.
@@ -719,6 +724,28 @@ public class UserManagementControllerImpl implements UserManagementController {
     return users != null
         ? userRepresentationMapper.entityListToClass(new ArrayList<>(Arrays.asList(users)))
         : null;
+  }
+
+
+  /**
+   * Gets the user roles by dataflow and country.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the user roles by dataflow and country
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
+  @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
+      responseContainer = "List")
+  public List<UserRoleVO> getUserRolesByDataflowAndCountry(
+      @ApiParam(value = "dataflowId") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "dataProviderId") @PathVariable("dataProviderId") Long dataProviderId) {
+
+
+    return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
 
