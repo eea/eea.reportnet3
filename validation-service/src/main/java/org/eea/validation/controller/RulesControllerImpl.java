@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -587,4 +588,28 @@ public class RulesControllerImpl implements RulesController {
     rulesService.insertIntegritySchemas(integritiesVO);
   }
 
+
+  /**
+   * Import rules schema.
+   *
+   * @param importRules the import rules
+   * @return the map
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/private/importRulesSchema")
+  public Map<String, String> importRulesSchema(@RequestBody ImportSchemaVO importRules) {
+    try {
+
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
+      return rulesService.importRulesSchema(importRules.getQcRulesBytes(),
+          importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error importing the rules: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
 }
