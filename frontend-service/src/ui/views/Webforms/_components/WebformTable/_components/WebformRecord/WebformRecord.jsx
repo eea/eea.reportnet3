@@ -174,18 +174,6 @@ export const WebformRecord = ({
     }
   };
 
-  const checkRequiredLabelVisibility = el => {
-    if (isNil(isGroup)) {
-      return true;
-    } else {
-      if (isGroup() && el.calculatedWhenGroup) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-  };
-
   const handleDialogs = (dialog, value) => {
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };

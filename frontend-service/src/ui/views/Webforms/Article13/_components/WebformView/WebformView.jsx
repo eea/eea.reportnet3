@@ -97,9 +97,7 @@ export const WebformView = ({
       case 'sectoraffected':
       case 'policyinstrument':
       case 'policyimpacting':
-      case 'unionpolicylist':
       case 'otherpolicyinstrument':
-      case 'typepolicyinstrument':
         fields = combinationFieldRender(field.name);
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
       case 'pamnames':
@@ -114,6 +112,8 @@ export const WebformView = ({
           'implementationperiodcomment'
         ]);
       case 'projectionsscenario':
+      case 'typepolicyinstrument':
+      case 'unionpolicylist':
         return tableFieldRender(field.name, []);
       case 'entities':
         return combinationTableRender('entities');

@@ -40,4 +40,7 @@ public class ImportSchemas {
   /** The qc rules bytes. */
   private List<byte[]> qcRulesBytes;
 
+  /** The schema ids. */
+  private Map<String, Long> schemaIds;
+
 }

@@ -956,6 +956,8 @@
     "dataflowPinnedInit": "You have pinned the dataflow",
     "dataflowUnpinnedInit": "You have unpinned the dataflow",
     "pinned": "Pinned",
+    "TypePolicyInstrument": "Types",
+    "UnionPolicyList": "Union policies",
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importReportingBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files "
   }
