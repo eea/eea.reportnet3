@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -64,9 +64,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
-      formDispatcher({
-        type: 'REFRESH'
-      });
+      formDispatcher({ type: 'REFRESH' });
     }
   }, [isActiveManageRolesDialog]);
 
