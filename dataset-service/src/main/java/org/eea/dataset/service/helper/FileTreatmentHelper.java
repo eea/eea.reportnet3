@@ -115,10 +115,6 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The integration controller zuul. */
-  @Autowired
-  private IntegrationControllerZuul integrationControllerZuul;
-
 
   /** The batch size. */
   private int batchSize = 1000;
@@ -185,6 +181,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
       List<DataSetSchema> schemas = new ArrayList<>();
       Map<String, String> schemaNames = new HashMap<>();
+      Map<String, Long> schemaIds = new HashMap<>();
       List<IntegrationVO> extIntegrations = new ArrayList<>();
       List<UniqueConstraintSchema> uniques = new ArrayList<>();
       List<IntegrityVO> integrities = new ArrayList<>();
@@ -215,6 +212,9 @@ public class FileTreatmentHelper implements DisposableBean {
               case "integrity":
                 integrities = unzippingIntegrityQcClasses(zip, integrities);
                 break;
+              case "ids":
+                schemaIds = unzippingDatasetIdsClasses(zip, schemaIds);
+                break;
               default:
                 break;
             }
@@ -227,6 +227,7 @@ public class FileTreatmentHelper implements DisposableBean {
           fileUnziped.setExternalIntegrations(extIntegrations);
           fileUnziped.setQcRulesBytes(qcrulesBytes);
           fileUnziped.setIntegrities(integrities);
+          fileUnziped.setSchemaIds(schemaIds);
         }
       }
     }
@@ -248,6 +249,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     Map<String, String> schemaNames = new HashMap<>();
+    Map<String, Long> schemaDatasetsId = new HashMap<>();
     try (ZipOutputStream zos = new ZipOutputStream(bos)) {
       for (DataSetSchema schema : schemas) {
 
@@ -256,6 +258,7 @@ public class FileTreatmentHelper implements DisposableBean {
             .filter(d -> d.getDatasetSchema().equals(schema.getIdDataSetSchema().toString()))
             .findFirst().orElse(new DesignDataset());
         schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
+        schemaDatasetsId.put(schema.getIdDataSetSchema().toString(), design.getId());
 
         // Schemas
         zipSchemaClasses(schema, zos, design.getDataSetName());
@@ -274,6 +277,9 @@ public class FileTreatmentHelper implements DisposableBean {
       }
       // Store the dataset names
       zipDatasetNames(schemaNames, zos);
+
+      // Store the dataset ids
+      zipDatasetIds(schemaDatasetsId, zos);
 
     } catch (Exception e) {
       LOG.error("Error exporting schemas from the dataflowId {} to a ZIP file. Message {}",
@@ -416,7 +422,7 @@ public class FileTreatmentHelper implements DisposableBean {
       internalParameters.put("datasetSchemaId", schema.getIdDataSetSchema().toString());
       integration.setInternalParameters(internalParameters);
       List<IntegrationVO> extIntegrations =
-          integrationControllerZuul.findAllIntegrationsByCriteria(integration);
+          integrationController.findAllIntegrationsByCriteria(integration);
       ObjectMapper objectMapperIntegration = new ObjectMapper();
       InputStream extIntegrationStream =
           new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
@@ -445,6 +451,23 @@ public class FileTreatmentHelper implements DisposableBean {
       zippingClasses(zos, "datasetSchemaNames.names", schemaNamesStream);
     } catch (IOException e) {
       LOG.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Zip dataset ids.
+   *
+   * @param schemaDatasetsId the schema datasets id
+   * @param zos the zos
+   */
+  private void zipDatasetIds(Map<String, Long> schemaDatasetsId, ZipOutputStream zos) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      InputStream schemaDatasetsIdsStream =
+          new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaDatasetsId));
+      zippingClasses(zos, "datasetSchemaIds.ids", schemaDatasetsIdsStream);
+    } catch (IOException e) {
+      LOG.error("Error exporting the dataset ids into the zip. {}", e.getMessage(), e);
     }
   }
 
@@ -561,6 +584,31 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     return schemaNames;
   }
+
+
+  /**
+   * Unzipping dataset ids classes.
+   *
+   * @param zip the zip
+   * @param schemaIds the schema ids
+   * @return the map
+   */
+  private Map<String, Long> unzippingDatasetIdsClasses(ZipInputStream zip,
+      Map<String, Long> schemaIds) {
+    try {
+      byte[] content = unzippingClasses(zip);
+      if (content != null && content.length > 0) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        schemaIds = objectMapper.readValue(content, Map.class);
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error unzipping the dataset ids during the import process. Message {}",
+          e.getMessage(), e);
+    }
+    return schemaIds;
+  }
+
 
   /**
    * Unzipping ext integrations classes.
