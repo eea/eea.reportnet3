@@ -34,6 +34,12 @@ import org.springframework.stereotype.Service;
 @Service("UserRoleService")
 public class UserRoleServiceImpl implements UserRoleService {
 
+  /** The Constant REGEX: {@value}. */
+  private static final String REGEX = "-";
+
+  /** The Constant ROLE_PROVIDER: {@value}. */
+  private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
+
   /** The keycloak connector service. */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
@@ -66,9 +72,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     List<Long> datasetIds = datasetMetabaseControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
     if (null != datasetIds && !datasetIds.isEmpty()) {
-      for (Long long1 : datasetIds) {
-        getGroupInfoMap(groupInfoMap, long1);
-      }
+      getGroupInfoMap(groupInfoMap, datasetIds.get(0));
 
       Map<String, UserRoleVO> usersMap = new HashMap<>();
       // CUSTODIAN
@@ -93,11 +97,17 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
 
+  /**
+   * Gets the user roles.
+   *
+   * @param dataProviderId the data provider id
+   * @return the user roles
+   */
   @Override
   public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId) {
-    List<DataFlowVO> taka = dataflowControllerZuul.findDataflows();
+    List<DataFlowVO> dataflowList = dataflowControllerZuul.findDataflows();
     List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
-    for (DataFlowVO dataflowVO : taka) {
+    for (DataFlowVO dataflowVO : dataflowList) {
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
         DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
         dataflowUserRoleVO.setDataflowId(dataflowVO.getId());
@@ -199,11 +209,17 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
 
+  /**
+   * Gets the provider ids.
+   *
+   * @return the provider ids
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<Long> getProviderIds() throws EEAException {
-    List<DataProviderVO> dataProviders = new ArrayList<>();
+    List<DataProviderVO> dataProviders = null;
     String countryCode = getCountryCodeNC();
-    if (countryCode != null) {
+    if (null != countryCode) {
       dataProviders = representativeControllerZuul.findDataProvidersByCode(countryCode);
     } else {
       throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
@@ -212,14 +228,19 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
 
+  /**
+   * Gets the country code NC.
+   *
+   * @return the country code NC
+   */
   private String getCountryCodeNC() {
     Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
         .collect(Collectors.toList());
     String countryCode = null;
     for (String auth : authorities) {
-      if (auth != null && auth.contains("ROLE_PROVIDER-")) {
-        String[] roleSplit = auth.split("-");
+      if (null != auth && auth.contains(ROLE_PROVIDER)) {
+        String[] roleSplit = auth.split(REGEX);
         countryCode = roleSplit[1];
         break;
       }

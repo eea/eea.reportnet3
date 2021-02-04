@@ -749,22 +749,25 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
+  /**
+   * Gets the user roles all dataflows.
+   *
+   * @return the user roles all dataflows
+   */
   @Override
   @PreAuthorize("isAuthenticated()")
-  @GetMapping("/getUserRolesAllDataflows/dataProviderId/{dataProviderId}")
-  public List<DataflowUserRoleVO> getUserRolesAllDataflows(
-      @PathVariable("dataProviderId") Long dataProviderId) {
+  @GetMapping("/getUserRolesAllDataflows")
+  public List<DataflowUserRoleVO> getUserRolesAllDataflows() {
     List<Long> dataProviderIds = new ArrayList<>();
     List<DataflowUserRoleVO> result = new ArrayList<>();
     try {
+      // get providerId and check if user is National coordinator
       dataProviderIds = userRoleService.getProviderIds();
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
     }
-    List<List<DataflowUserRoleVO>> results =
-        dataProviderIds.stream().map(dataProvider -> userRoleService.getUserRoles(dataProviderId))
-            .collect(Collectors.toList());
-    results.stream().forEach(list -> result.addAll(list));
+    dataProviderIds.stream()
+        .forEach(dataProvider -> result.addAll(userRoleService.getUserRoles(dataProvider)));
     return result;
   }
 
