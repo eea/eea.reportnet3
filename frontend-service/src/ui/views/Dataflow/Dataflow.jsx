@@ -357,7 +357,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const manageRoleDialogFooter = (
     <>
       <Button
-        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
+        className={`${styles.manageLeadReportersButton} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={isEmpty(dataflowState.dataProviderSelected)}
         icon={'import'}
         label={resources.messages['importLeadReporters']}
         onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
@@ -677,7 +680,8 @@ const Dataflow = withRouter(({ history, match }) => {
             onUpload={onUploadLeadReporters}
             // replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importLeadReporters, {
-              dataflowId
+              dataflowId,
+              dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
             })}`}
           />
         )}
