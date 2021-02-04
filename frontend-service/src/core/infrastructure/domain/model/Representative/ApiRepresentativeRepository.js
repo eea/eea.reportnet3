@@ -46,6 +46,10 @@ const deleteById = async representativeId => {
   return await apiRepresentative.deleteById(representativeId);
 };
 
+const downloadById = async dataflowId => {
+  return await apiRepresentative.downloadById(dataflowId);
+};
+
 const updateProviderAccount = async (representativeId, providerAccount) => {
   return await apiRepresentative.updateProviderAccount(representativeId, providerAccount);
 };
@@ -59,6 +63,7 @@ export const ApiRepresentativeRepository = {
   allDataProviders,
   add,
   deleteById,
+  downloadById,
   getProviderTypes,
   updateProviderAccount,
   updateDataProviderId
