@@ -121,7 +121,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final String USER = "root";
 
-  /** The Constant HEADER_NAME. */
+  /**
+   * The Constant HEADER_NAME.
+   */
   private static final String HEADER_NAME = "headerName";
 
   /**
@@ -326,7 +328,6 @@ public class DatasetServiceImpl implements DatasetService {
   private PkCatalogueRepository pkCatalogueRepository;
 
 
-
   /**
    * The Constant DATASET_ID.
    */
@@ -467,6 +468,18 @@ public class DatasetServiceImpl implements DatasetService {
       if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
           && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
         recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
+        // if we have fixed number records we delete the non readonly fields
+      } else if (tableSchema.getFixedNumber()) {
+        List<String> fieldSchemasToDelete = new ArrayList();
+        for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+          if (null != fieldSchema.getReadOnly() && !fieldSchema.getReadOnly()) {
+            fieldSchemasToDelete.add(fieldSchema.getIdFieldSchema().toString());
+          }
+        }
+        List<FieldValue> fieldValue =
+            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToDelete);
+        fieldValue.stream().forEach(fieldVal -> fieldVal.setValue(""));
+        fieldRepository.saveAll(fieldValue);
       }
     }
     try {
@@ -815,7 +828,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -1654,7 +1667,7 @@ public class DatasetServiceImpl implements DatasetService {
         List<TableSchema> listOfTablesFiltered = getTableFromSchema(originDesign);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
-          LOG.info("There is data to copy. Copy data from datasetId {} to datasetId {}",
+          LOG.info("There are data to copy. Copy data from datasetId {} to datasetId {}",
               originDataset, targetDataset);
           List<RecordValue> recordDesignValuesList = new ArrayList<>();
           List<AttachmentValue> attachments = new ArrayList<>();
@@ -1937,7 +1950,7 @@ public class DatasetServiceImpl implements DatasetService {
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+          .size() > 0) {
 
         processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
@@ -1951,6 +1964,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
+
   /**
    * Process record page.
    *
@@ -2200,6 +2214,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table VO
    */
   private TableVO calculatedErrorsAndRecordsToSee(final Long datasetId, final String idTableSchema,
@@ -2236,6 +2251,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table VO
    */
   private TableVO fieldsMap(final Long datasetId, final String idTableSchema, Pageable pageable,
@@ -2832,8 +2848,12 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
-
+          .size() > 0) {
+        LOG.info(
+            "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
+            fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
+            numberOfFieldsInRecord, desingTable.getNameTableSchema(),
+            desingTable.getIdTableSchema(), originDataset, targetDataset);
         // For this, the best is getting fields in big completed sets and assign them to the records
         // to avoid excessive queries to bd
 
@@ -2903,7 +2923,8 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-
+    // Force last database pointer position
+    recordRepository.findLastRecord();
     return recordValues;
   }
 

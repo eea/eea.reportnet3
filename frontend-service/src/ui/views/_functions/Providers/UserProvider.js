@@ -14,6 +14,7 @@ const userSettingsDefaultState = {
     basemapLayer: { label: 'Topographic', value: 'Topographic' },
     dateFormat: 'YYYY-MM-DD',
     listView: true,
+    pinnedDataflows: [],
     rowsPerPage: 10,
     showLogoutConfirmation: true,
     userImage: [],
@@ -66,7 +67,8 @@ export const UserProvider = ({ children }) => {
 
         onChangeBasemapLayer: basemapLayer => userDispatcher({ type: 'BASEMAP_LAYER', payload: basemapLayer }),
         onChangeDateFormat: dateFormat => userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat }),
-
+        onChangePinnedDataflows: pinnedDataflows =>
+          userDispatcher({ type: 'USER_PINNED_DATAFLOWS', payload: pinnedDataflows }),
         onChangeRowsPerPage: rowNumber => userDispatcher({ type: 'DEFAULT_ROW_SELECTED', payload: rowNumber }),
 
         onLogin: user => userDispatcher({ type: 'LOGIN', payload: user }),

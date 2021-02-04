@@ -518,6 +518,23 @@
         },
         {
           "key": "UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR"
+        },
+        {
+          "key": "WRONG_WEB_LINK_ERROR"
+        },
+        {
+          "key": "IMPORT_DESIGN_BAD_REQUEST_ERROR",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "IMPORT_REPORTING_BAD_REQUEST_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -766,6 +783,14 @@
         },
         {
           "key": "DATASET_IMPORT_INIT"
+        },
+        {
+          "key": "DATAFLOW_PINNED_INIT",
+          "lifeTime": 1500
+        },
+        {
+          "key": "DATAFLOW_UNPINNED_INIT",
+          "lifeTime": 1500
         }
       ]
     }

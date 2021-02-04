@@ -45,8 +45,9 @@ export const Filters = ({
   selectOptions,
   sendData,
   sortable,
-  validationsAllTypesFilters,
-  validations
+  sortCategory,
+  validations,
+  validationsAllTypesFilters
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -54,6 +55,7 @@ export const Filters = ({
   const dateRef = useRef(null);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
+    clearedFilters: false,
     checkboxes: [],
     data: data,
     filterBy: {},
@@ -70,7 +72,11 @@ export const Filters = ({
 
   useEffect(() => {
     getInitialState();
-  }, [data]);
+
+    if (filterState.filtered) {
+      onReApplyFilters();
+    }
+  }, [data, filterByList]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filterState.filteredData);
@@ -96,6 +102,12 @@ export const Filters = ({
     getChangedCheckboxes(filterState.property);
   }, [JSON.stringify(filterState.checkboxes), filterState.property]);
 
+  useEffect(() => {
+    if (sendData && filterState.clearedFilters) {
+      sendData(filterState.filterBy);
+      filterDispatch({ type: 'SET_CLEARED_FILTERS', payload: false });
+    }
+  }, [filterState.clearedFilters]);
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
   const getCheckboxFilterState = property => {
@@ -130,6 +142,7 @@ export const Filters = ({
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
+
     const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
       inputOptions,
@@ -139,7 +152,9 @@ export const Filters = ({
       checkboxOptions,
       filterByList
     );
+
     const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
+
     const initialLabelAnimations = FiltersUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
@@ -148,6 +163,7 @@ export const Filters = ({
       checkboxOptions,
       filterState.filterBy
     );
+
     const initialOrderBy = SortUtils.getOrderInitialState(
       inputOptions,
       selectOptions,
@@ -218,7 +234,8 @@ export const Filters = ({
         searchBy: '',
         checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
         filtered: false,
-        filteredSearched: false
+        filteredSearched: false,
+        clearedFilters: true
       }
     });
   };
@@ -228,6 +245,7 @@ export const Filters = ({
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
+
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
       dropdownOptions,
@@ -239,6 +257,7 @@ export const Filters = ({
       checkedKeys,
       checkboxOptions,
       state: filterState,
+      data: data,
       value
     });
 
@@ -246,8 +265,8 @@ export const Filters = ({
   };
 
   const onOrderData = (order, property) => {
-    const sortedData = SortUtils.onSortData([...filterState.data], order, property);
-    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property);
+    const sortedData = SortUtils.onSortData([...filterState.data], order, property, sortCategory);
+    const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property, sortCategory);
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
 

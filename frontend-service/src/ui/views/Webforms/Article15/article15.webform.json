@@ -809,25 +809,25 @@
           "type": "FIELD",
           "name": "DescribeReducingClimateImpacts",
           "title": "Progress towards reducing climate impacts, vulnerabilities and risks (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3a"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3a"
         },
         {
           "type": "FIELD",
           "name": "DescribeIncreasingAdaptiveCapacity",
           "title": "Progress towards increasing adaptive capacity (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3b"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3b"
         },
         {
           "type": "FIELD",
           "name": "DescribeMeetingAdaptationPriorities",
           "title": "Progress towards meeting adaptation priorities (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3c"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3c"
         },
         {
           "type": "FIELD",
           "name": "DescribeProgressTowardsAddressing",
           "title": "Progress towards addressing barriers to adaptation (max. 3000 characters)",
-          "tooltip": "Based on theMRE methodology reported above. Annex I: 4.3d"
+          "tooltip": "Based on the MRE methodology reported above. Annex I: 4.3d"
         },
         {
           "type": "FIELD",

@@ -676,6 +676,35 @@ public class DatasetServiceTest {
   }
 
   /**
+   * Test delete import data fixed.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testDeleteImportDataFixed() throws Exception {
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    List<FieldSchema> fieldSchemaList = new ArrayList();
+    FieldSchema field = new FieldSchema();
+    FieldSchema field2 = new FieldSchema();
+    field.setReadOnly(true);
+    fieldSchemaList.add(field);
+    fieldSchemaList.add(field2);
+    record.setFieldSchema(fieldSchemaList);
+    table.setIdTableSchema(new ObjectId());
+    table.setFixedNumber(true);
+    table.setRecordSchema(record);
+    schema.setTableSchemas(Arrays.asList(table));
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.deleteImportData(1L);
+    Mockito.verify(fieldRepository, times(1)).saveAll(Mockito.any());
+  }
+
+  /**
    * Test delete data schema.
    *
    * @throws Exception the exception

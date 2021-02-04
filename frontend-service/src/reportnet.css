@@ -102,6 +102,10 @@
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
   --c-growl-info-blue: #8bc3ed;
+  --c-growl-info-darker-blue: #61a8df;
+  --c-growl-success-darker-green: #7fc27f;
+  --c-growl-warning-darker-yellow: #ceaf00;
+  --c-growl-error-darker-red: #a1424a;
   /* level error statusbox colors */
   --statusBox-blocker-bg: 194, 200, 207;
   --statusBox-blocker-color: 0, 0, 0;
@@ -264,15 +268,19 @@
   --growl-info-bg: var(--c-growl-info-blue);
   --growl-info-color: var(--black);
   --growl-info-icon-color: var(--black);
+  --growl-info-border-color: var(--c-growl-info-darker-blue);
   --growl-success-bg: var(--success-color-lighter);
   --growl-success-color: var(--black);
   --growl-success-icon-color: var(--black);
+  --growl-success-border-color: var(--c-growl-success-darker-blue);
   --growl-warning-bg: var(--c-corporate-yellow);
   --growl-warning-color: var(--black);
   --growl-warning-icon-color: var(--black);
+  --growl-info-border-color: var(--c-growl-warning-darker-yellow);
   --growl-error-bg: var(--c-pink);
   --growl-error-color: var(--black);
   --growl-error-icon-color: var(--black);
+  --growl-info-border-color: var(--c-growl-error-darker-error);
 
   /* Inputtext */
   --inputtext-color: var(--main-font-color);

@@ -37,6 +37,8 @@ export const ManageIntegrations = ({
   manageDialogs,
   onUpdateData,
   refreshList,
+  setIsCreating,
+  setIsUpdating = () => {},
   state,
   updatedData
 }) => {
@@ -61,6 +63,8 @@ export const ManageIntegrations = ({
     externalParameters: [],
     fileExtension: '',
     id: null,
+    isIntegrationCreating: false,
+    isIntegrationEditing: false,
     isLoading: true,
     isUpdatedVisible: false,
     name: '',
@@ -179,7 +183,16 @@ export const ManageIntegrations = ({
     }
   };
 
+  const setIsIntegrationManaging = (state, value) => {
+    manageIntegrationsDispatch({
+      type: 'SET_IS_INTEGRATION_MANAGING',
+      payload: { state, value }
+    });
+  };
+
   const onCreateIntegration = async () => {
+    setIsIntegrationManaging('isIntegrationCreating', true);
+    setIsCreating(true);
     try {
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.create(manageIntegrationsState);
@@ -190,6 +203,9 @@ export const ManageIntegrations = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
+      setIsCreating(false);
+    } finally {
+      setIsIntegrationManaging('isIntegrationCreating', false);
     }
   };
 
@@ -288,6 +304,8 @@ export const ManageIntegrations = ({
 
   const onUpdateIntegration = async () => {
     try {
+      setIsIntegrationManaging('isIntegrationEditing', true);
+      setIsUpdating(true);
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       const response = await IntegrationService.update(manageIntegrationsState);
 
@@ -298,6 +316,9 @@ export const ManageIntegrations = ({
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+      setIsUpdating(false);
+    } finally {
+      setIsIntegrationManaging('isIntegrationEditing', false);
     }
   };
 
@@ -355,8 +376,16 @@ export const ManageIntegrations = ({
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isIntegrationNameDuplicated}
-          icon="check"
+          disabled={
+            isIntegrationNameDuplicated ||
+            manageIntegrationsState.isIntegrationCreating ||
+            manageIntegrationsState.isIntegrationEditing
+          }
+          icon={
+            manageIntegrationsState.isIntegrationCreating || manageIntegrationsState.isIntegrationEditing
+              ? 'spinnerAnimate'
+              : 'check'
+          }
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
             if (isEmptyForm) onShowErrors();

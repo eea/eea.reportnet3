@@ -354,7 +354,17 @@ public enum EventType {
 
   /** The datacollection national coordinator event. */
   DATACOLLECTION_NATIONAL_COORDINATOR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "datacollection_national_coordinator_event", true);
+      "datacollection_national_coordinator_event", true),
+
+
+  /** The import dataset schema completed event. */
+  IMPORT_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_dataset_schema_completed_event", true),
+
+
+  /** The import dataset schema failed event. */
+  IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_dataset_schema_completed_event", true);
 
   /** The topic. */
   private String topic;

@@ -233,7 +233,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')  OR (checkApiKey(#dataflowId,0L))")
   @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
@@ -358,5 +358,27 @@ public class IntegrationControllerImpl implements IntegrationController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
+  }
+
+
+  /**
+   * Creates the integrations.
+   *
+   * @param integrations the integrations
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @PostMapping("/private/createIntegrations")
+  @ApiOperation(value = "Create Integrations")
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void createIntegrations(@ApiParam(type = "Object",
+      value = "List<IntegrationVO> Object") @RequestBody List<IntegrationVO> integrations) {
+    try {
+      integrationService.createIntegrations(integrations);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating integrations. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 }

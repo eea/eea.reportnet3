@@ -176,11 +176,7 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
-    if (isEmpty(externalOperationsList.import)) {
-      setImportButtonsList(importFromOtherSystems);
-    } else {
-      setImportButtonsList(importFromFile.concat(importFromOtherSystems));
-    }
+    setImportButtonsList(importFromFile.concat(importFromOtherSystems));
   }, [externalOperationsList.import]);
 
   useEffect(() => {
@@ -403,6 +399,15 @@ export const Dataset = withRouter(({ match, history }) => {
   const cleanImportOtherSystemsDialog = () => {
     setReplaceData(false);
     onSetVisible(setIsImportOtherSystemsDialogVisible, false);
+  };
+
+  const onImportDatasetError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'IMPORT_REPORTING_BAD_REQUEST_ERROR',
+        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -1035,7 +1040,7 @@ export const Dataset = withRouter(({ match, history }) => {
           dialogVisible={isImportDatasetDialogVisible}
           isDialog={true}
           accept={getImportExtensions}
-          chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+          chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
           fileLimit={1}
           infoTooltip={infoExtensionsTooltip}
@@ -1043,6 +1048,7 @@ export const Dataset = withRouter(({ match, history }) => {
           mode="advanced"
           multiple={false}
           name="file"
+          onError={onImportDatasetError}
           onUpload={onUpload}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {

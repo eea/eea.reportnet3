@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -140,6 +141,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The design dataset service. */
   @Autowired
+  @Lazy
   private DesignDatasetService designDatasetService;
 
   /** The representative controller zuul. */
@@ -970,7 +972,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           ResourceGroupEnum.DATASET_LEAD_REPORTER));
 
       // Assign Dataflow-%s-LEAD_REPORTER
-      assignments.add(createAssignments(entry.getKey(), entry.getValue(),
+      assignments.add(createAssignments(dataflowId, entry.getValue(),
           ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
     }
   }

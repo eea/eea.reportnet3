@@ -38,6 +38,7 @@ import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
+import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -79,6 +80,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
+    constraintManagingId: '',
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
@@ -119,6 +121,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isManageUniqueConstraintDialogVisible: false,
     isRefreshHighlighted: false,
     isTableCreated: false,
+    isUniqueConstraintCreating: false,
+    isUniqueConstraintUpdating: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -134,6 +138,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refresh: false,
     replaceData: false,
     schemaTables: [],
+    tabs: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false,
@@ -265,16 +270,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
-  // const filterActiveIndex = index => {
-  //   if (!isNil(index) && isNaN(index)) {
-  //     const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
-  //     if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
-  //       return filteredTable[0].index;
-  //     }
-  //   }
-  //   return index;
-  // };
-
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
@@ -306,15 +301,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getImportList = () => {
     const { externalOperationsList } = designerState;
 
-    const importFromFile = !isEmpty(externalOperationsList.import)
-      ? [
-          {
-            command: () => manageDialogs('isImportDatasetDialogVisible', true),
-            icon: config.icons['import'],
-            label: resources.messages['importFromFile']
-          }
-        ]
-      : [];
+    const importFromFile = [
+      {
+        command: () => manageDialogs('isImportDatasetDialogVisible', true),
+        icon: config.icons['import'],
+        label: resources.messages['importFromFile']
+      }
+    ];
 
     const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
       ? [
@@ -564,7 +557,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onUpdateTabs = data => {
     const parsedData = [];
     data.forEach(table => parsedData.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
-    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData } });
+    designerDispatch({ type: 'ON_UPDATE_TABS', payload: { data: parsedData, tabs: data } });
   };
 
   const onLoadSchema = () => {
@@ -741,6 +734,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     manageDialogs('isImportOtherSystemsDialogVisible', false);
   };
 
+  const onImportDatasetError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'IMPORT_DESIGN_BAD_REQUEST_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
+  };
+
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
@@ -892,18 +898,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderSwitchView = () => {
     const switchView = (
-      // <Fragment>
-      //   <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-      //   <InputSwitch
-      //     checked={designerState.viewType['table']}
-      //     // disabled={true}
-      //     // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-      //     onChange={event =>
-      //       designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: event.value ? 'table' : 'design' } })
-      //     }
-      //   />
-      //   <span className={styles.switchTextInput}>{resources.messages['tabularDataView']}</span>
-      // </Fragment>
       <TabularSwitch
         elements={[resources.messages['designView'], resources.messages['tabularDataView']]}
         getIsTableCreated={setIsTableCreated}
@@ -949,6 +943,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             needsRefresh={needsRefreshUnique}
             refreshList={refreshUniqueList}
             setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
+            setConstraintManagingId={setConstraintManagingId}
+            setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+            setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
           />
         </Dialog>
       )}
@@ -1005,6 +1002,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setIsDuplicatedToManageUnique = value =>
     designerDispatch({ type: 'UPDATED_IS_DUPLICATED', payload: { value } });
+
+  const setConstraintManagingId = constraintManagingId =>
+    designerDispatch({ type: 'SET_CONSTRAINT_MANAGING_ID', payload: { constraintManagingId } });
+
+  const setIsUniqueConstraintCreating = isUniqueConstraintCreatingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_CREATING', payload: { isUniqueConstraintCreatingValue } });
+
+  const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
+    designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
@@ -1242,6 +1248,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             viewType={designerState.viewType}
           />
         )}
+        {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
+          <Validations
+            datasetId={datasetId}
+            datasetSchema={designerState.datasetSchema}
+            datasetSchemas={designerState.datasetSchemas}
+            tabs={DatasetDesignerUtils.getTabs({
+              datasetSchema: designerState.datasetSchema,
+              datasetSchemas: designerState.datasetSchemas,
+              editable: true
+            })}
+          />
+        )}
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}
           isSnapshotDialogVisible={isSnapshotDialogVisible}
@@ -1265,6 +1283,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
           refreshList={refreshUniqueList}
           resetUniques={manageUniqueConstraint}
+          setConstraintManagingId={setConstraintManagingId}
+          setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+          setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
 
         {designerState.validateDialogVisible && (
@@ -1356,6 +1377,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             mode="advanced"
             multiple={false}
             name="file"
+            onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
