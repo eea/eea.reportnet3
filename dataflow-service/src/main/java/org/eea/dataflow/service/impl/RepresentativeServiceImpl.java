@@ -27,6 +27,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
@@ -59,6 +60,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
+
+  /**
+   * The delimiter.
+   */
+  @Value("${loadDataDelimiter}")
+  private char delimiter;
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RepresentativeServiceImpl.class);
@@ -303,7 +311,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public byte[] exportFile(Long dataflowId) throws EEAException, IOException {
     // we create the csv
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.DEFAULT_QUOTE_CHARACTER,
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
     List<String> headers = new ArrayList<>();
     headers.add("Email");
@@ -339,7 +347,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public byte[] exportTemplateReportersFile(Long groupId) throws EEAException, IOException {
     // we create the csv
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.DEFAULT_QUOTE_CHARACTER,
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
     List<String> headers = new ArrayList<>();
     headers.add("Email");
@@ -378,7 +386,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     // we create the cvs to send when finish the import
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.DEFAULT_QUOTE_CHARACTER,
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
     List<String> headers = new ArrayList<>();
     headers.add("Email");
