@@ -78,6 +78,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * The time to wait before continue copy.
+   */
+  @Value("${wait.continue.copy.ms}")
+  private Long timeToWaitBeforeContinueCopy;
 
   /** The schemas repository. */
   @Autowired
@@ -2072,7 +2078,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       ImportSchemas importClasses = fileTreatmentHelper.unZipImportSchema(multipartFile);
 
       List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
-
+      // If there are no schemas, error
+      if (CollectionUtils.isEmpty(importClasses.getSchemas())) {
+        LOG_ERROR.error("No schemas from the zip file to import in the dataflowId {}", dataflowId);
+        throw new EEAException(
+            "No schemas from the zip file to import in the dataflowId " + dataflowId);
+      }
       for (DataSetSchema schema : importClasses.getSchemas()) {
         // Create the empty new dataset schema
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
@@ -2111,9 +2122,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         // Time to wait before continuing the process. If the process goes too fast, it won't find
         // the
         // dataset schema created and the process will fail. By default 4000ms
-        Thread.sleep(4000);
+        Thread.sleep(timeToWaitBeforeContinueCopy);
       }
-
 
 
       // After creating the datasets schemas on the DB, fill them and create the permissions
@@ -2162,7 +2172,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               .dataflowId(dataflowId).build());
 
     } catch (Exception e) {
-      LOG.error("An error in the import process happened. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error("An error in the import process happened. Message: {}", e.getMessage(), e);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
           null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(dataflowId).error("Error importing the schemas").build());
