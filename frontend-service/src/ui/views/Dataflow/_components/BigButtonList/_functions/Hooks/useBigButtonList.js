@@ -92,7 +92,8 @@ const useBigButtonList = ({
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
+      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
+      designDatasetsOpen: isLeadDesigner && isDraftStatus
     };
   };
 
@@ -184,14 +185,15 @@ const useBigButtonList = ({
         caption: newDatasetSchema.datasetSchemaName,
         dataflowStatus: dataflowState.status,
         datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-        enabled: buttonsVisibility.designDatasetsActions,
-        handleRedirect: buttonsVisibility.designDatasetsActions
-          ? () => {
-              handleRedirect(
-                getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
-              );
-            }
-          : () => {},
+        enabled: buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen,
+        handleRedirect:
+          buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen
+            ? () => {
+                handleRedirect(
+                  getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+                );
+              }
+            : () => {},
 
         helpClassName: 'dataflow-schema-help-step',
         index: newDatasetSchema.index,
@@ -234,8 +236,11 @@ const useBigButtonList = ({
         onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
         placeholder: resources.messages['datasetSchemaNamePlaceholder'],
         setErrorDialogData: setErrorDialogData,
-        tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
-        visibility: buttonsVisibility.designDatasets
+        tooltip:
+          !buttonsVisibility.designDatasetsActions && !buttonsVisibility.designDatasetsOpen
+            ? resources.messages['accessDenied']
+            : '',
+        visibility: buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
       }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
