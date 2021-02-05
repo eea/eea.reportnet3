@@ -53,7 +53,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [filteredData]);
 
-  const onLoadFiltredData = data => setFilteredData(data);
+  const onLoadFilteredData = data => setFilteredData(data);
 
   const changeUserProperties = async userProperties => {
     try {
@@ -113,7 +113,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
 
       const inmDataToFilter = [...dataToFilter];
-      const changedInitialdData = inmDataToFilter.map(item => {
+      const changedInitialData = inmDataToFilter.map(item => {
         if (item.id === pinnedItem.id) {
           item.pinned = isPinned ? 'pinned' : 'unpinned';
         }
@@ -121,7 +121,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       });
 
       setDataToFilter(
-        orderBy(changedInitialdData, ['pinned', 'expirationDate', 'status', 'id'], ['asc', 'asc', 'asc', 'asc'])
+        orderBy(changedInitialData, ['pinned', 'expirationDate', 'status', 'id'], ['asc', 'asc', 'asc', 'asc'])
       );
     }
   };
@@ -134,7 +134,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
         <Filters
           data={dataToFilter}
           dateOptions={DataflowConf.filterItems['date']}
-          getFilteredData={onLoadFiltredData}
+          getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredSearched}
           inputOptions={DataflowConf.filterItems['input']}
           selectOptions={DataflowConf.filterItems['select']}

@@ -83,7 +83,7 @@ const getCellValue = (tableData, field) => {
 const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow, reporting) => {
   //Delete double quotes from strings
   const copiedClipboardRecords = pastedData
-    .split('\r\n')
+    .split('\n')
     .filter(l => l.length > 0)
     .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
   //Maximum number of records to paste should be 500

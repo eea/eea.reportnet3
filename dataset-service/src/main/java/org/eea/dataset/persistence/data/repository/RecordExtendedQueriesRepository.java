@@ -52,4 +52,10 @@ public interface RecordExtendedQueriesRepository {
    */
   List<RecordValue> findByTableValueAllRecords(String idTableSchema);
 
+  /**
+   * Find last record in the db table.
+   *
+   * @return the record value
+   */
+  RecordValue findLastRecord();
 }

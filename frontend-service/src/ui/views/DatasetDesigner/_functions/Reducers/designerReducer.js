@@ -192,7 +192,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, selectedWebform: undefined };
 
     case 'ON_UPDATE_TABS':
-      return { ...state, schemaTables: payload.data };
+      return { ...state, schemaTables: payload.data, tabs: payload.tabs };
 
     default:
       return state;
