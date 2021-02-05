@@ -394,7 +394,7 @@ export const ManageIntegrations = ({
         />
       </span>
       <Button
-        className="p-button-secondary p-button-rounded p-button-animated-blink"
+        className="p-button-secondary p-button-rounded p-button-animated-blink button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => onCloseModal()}
@@ -588,7 +588,7 @@ export const ManageIntegrations = ({
             </span>
             {editorView.isEditing && (
               <Button
-                className="p-button-secondary p-button-rounded p-button-animated-blink"
+                className="p-button-secondary p-button-rounded p-button-animated-blink p-button-right-aligned"
                 icon={'cancel'}
                 label={resources.messages['cancel']}
                 onClick={() => onResetParameterInput()}

@@ -50,6 +50,10 @@ const downloadById = async dataflowId => {
   return await apiRepresentative.downloadById(dataflowId);
 };
 
+const downloadTemplateById = async dataProviderGroupId => {
+  return await apiRepresentative.downloadTemplateById(dataProviderGroupId);
+};
+
 const updateProviderAccount = async (representativeId, providerAccount) => {
   return await apiRepresentative.updateProviderAccount(representativeId, providerAccount);
 };
@@ -64,6 +68,7 @@ export const ApiRepresentativeRepository = {
   add,
   deleteById,
   downloadById,
+  downloadTemplateById,
   getProviderTypes,
   updateProviderAccount,
   updateDataProviderId

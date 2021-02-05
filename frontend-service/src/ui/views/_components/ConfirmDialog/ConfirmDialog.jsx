@@ -106,6 +106,7 @@ const ConfirmDialog = forwardRef((props, _) => {
         icon={iconCancel ? iconCancel : 'cancel'}
         label={labelCancel}
         onClick={onHide}
+        style={{ marginRight: '0' }}
       />
     </div>
   );

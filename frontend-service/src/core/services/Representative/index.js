@@ -3,6 +3,7 @@ import { AllRepresentatives } from './AllRepresentatives';
 import { AllDataProviders } from './AllDataProviders';
 import { Delete } from './Delete';
 import { Download } from './Download';
+import { DownloadTemplate } from './DownloadTemplate';
 import { GetProviderTypes } from './GetProviderTypes';
 import { Update } from './Update';
 import { UpdateDataProviderId } from './UpdateDataProviderId';
@@ -16,6 +17,7 @@ export const RepresentativeService = {
   add: Add({ representativeRepository }),
   deleteById: Delete({ representativeRepository }),
   downloadById: Download({ representativeRepository }),
+  downloadTemplateById: DownloadTemplate({ representativeRepository }),
   getProviderTypes: GetProviderTypes({ representativeRepository }),
   update: Update({ representativeRepository }),
   updateDataProviderId: UpdateDataProviderId({ representativeRepository }),

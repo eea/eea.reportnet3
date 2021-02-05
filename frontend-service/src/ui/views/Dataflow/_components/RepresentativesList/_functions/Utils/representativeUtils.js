@@ -3,6 +3,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+
 import { RepresentativeService } from 'core/services/Representative';
 
 export const autofocusOnEmptyInput = formState => {
@@ -179,6 +181,13 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
     });
   } catch (error) {
     console.error('error on RepresentativeService.deleteById: ', error);
+  }
+};
+
+export const onExportLeadReportersTemplate = async selectedDataProviderGroup => {
+  const response = await RepresentativeService.downloadTemplateById(selectedDataProviderGroup.dataProviderGroupId);
+  if (!isNil(response)) {
+    DownloadFile(response, `${selectedDataProviderGroup.dataProviderGroupId}_${Date.now()}.csv`);
   }
 };
 

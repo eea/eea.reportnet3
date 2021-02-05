@@ -119,7 +119,7 @@ export const DataflowManagement = ({
   const renderCancelButton = action => (
     <Button
       icon="cancel"
-      className="p-button-secondary"
+      className="p-button-secondary button-right-aligned"
       label={resources.messages['cancel']}
       onClick={() => action()}
     />

@@ -252,7 +252,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const manageRightsDialogFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isShareRightsDialogVisible', false)}
@@ -372,7 +372,7 @@ const Dataflow = withRouter(({ history, match }) => {
         onClick={onExportLeadReporters}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
@@ -663,14 +663,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isImportLeadReportersVisible && (
           <CustomFileUpload
-            // dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}
             dialogVisible={dataflowState.isImportLeadReportersVisible}
             isDialog={true}
             accept={getImportExtensions}
             chooseLabel={resources.messages['selectFile']}
-            // className={styles.FileUpload}
             fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}

@@ -708,7 +708,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const validationListFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => onSetVisible(setValidationListDialogVisible, false)}
@@ -752,7 +752,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const renderDashboardFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => onSetVisible(setDashDialogVisible, false)}
@@ -768,7 +768,7 @@ export const Dataset = withRouter(({ match, history }) => {
         onClick={() => onImportOtherSystems()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => cleanImportOtherSystemsDialog()}
@@ -800,7 +800,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const renderValidationsFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => setValidationsVisible(false)}

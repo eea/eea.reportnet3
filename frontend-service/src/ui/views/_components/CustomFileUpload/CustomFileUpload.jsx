@@ -357,7 +357,7 @@ export const CustomFileUpload = ({
           let size = <div>{formatSize(file.size)}</div>;
           let removeButton = (
             <div>
-              <Button type="button" icon="cancel" onClick={() => remove(index)} />
+              <Button icon="cancel" onClick={() => remove(index)} type="button" />
             </div>
           );
 
@@ -489,7 +489,7 @@ export const CustomFileUpload = ({
         <div className={styles.primaryZone}>
           {uploadButton}
           <Button
-            className="p-button-secondary p-button-animated-blink"
+            className="p-button-secondary p-button-animated-blink p-button-right-aligned"
             icon={'cancel'}
             label={resourcesContext.messages['close']}
             onClick={() => dialogOnHide()}

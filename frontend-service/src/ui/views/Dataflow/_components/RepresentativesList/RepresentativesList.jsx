@@ -19,17 +19,20 @@ import {
   onAddProvider,
   onDataProviderIdChange,
   onDeleteConfirm,
+  onExportLeadReportersTemplate,
   onKeyDown,
   isValidEmail
 } from './_functions/Utils/representativeUtils';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const RepresentativesList = ({
@@ -40,6 +43,7 @@ const RepresentativesList = ({
   setFormHasRepresentatives,
   setHasRepresentativesWithoutDatasets
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -233,7 +237,6 @@ const RepresentativesList = ({
     <div className={styles.container}>
       <div className={styles.selectWrapper}>
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
-
         <div>
           <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
@@ -246,6 +249,24 @@ const RepresentativesList = ({
             placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
             className={styles.dataProvidersDropdown}
             value={formState.selectedDataProviderGroup}
+          />
+          <Button
+            className={`${styles.exportTemplate} p-button-secondary ${
+              !isEmpty(formState.selectedDataProviderGroup) ? 'p-button-animated-blink' : ''
+            }`}
+            disabled={isEmpty(formState.selectedDataProviderGroup)}
+            icon={'export'}
+            label={resources.messages['exportLeadReportersTemplate']}
+            onClick={() => {
+              try {
+                onExportLeadReportersTemplate(formState.selectedDataProviderGroup);
+              } catch (error) {
+                console.error(error);
+                notificationContext.add({
+                  type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
+                });
+              }
+            }}
           />
         </div>
       </div>

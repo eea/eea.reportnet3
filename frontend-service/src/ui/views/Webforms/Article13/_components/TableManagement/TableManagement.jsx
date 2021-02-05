@@ -107,7 +107,7 @@ export const TableManagement = ({
         }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['cancel']}
         onClick={onCancelRowEdit}

@@ -124,9 +124,9 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
                 type="submit"
               />
               <Button
-                className={`${styles.cancelButton} p-button-secondary`}
-                label={resources.messages['cancel']}
+                className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
                 icon="cancel"
+                label={resources.messages['cancel']}
                 onClick={() => setNewDatasetDialog(false)}
               />
             </div>
