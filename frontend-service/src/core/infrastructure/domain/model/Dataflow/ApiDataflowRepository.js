@@ -302,6 +302,10 @@ const deleteById = async dataflowId => {
   return await apiDataflow.deleteById(dataflowId);
 };
 
+const downloadById = async dataflowId => {
+  return await apiDataflow.downloadById(dataflowId);
+};
+
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
   const datasetSchemas = datasetSchemasDTO.map(datasetSchemaDTO => {
@@ -615,6 +619,7 @@ export const ApiDataflowRepository = {
   datasetsReleasedStatus,
   datasetsValidationStatistics,
   deleteById,
+  downloadById,
   generateApiKey,
   getAllSchemas,
   getApiKey,
