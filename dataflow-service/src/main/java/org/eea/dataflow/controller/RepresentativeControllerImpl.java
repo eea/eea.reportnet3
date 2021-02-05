@@ -301,15 +301,40 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Export file lead reporters")
   public ResponseEntity<byte[]> exportFile(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-
-
     try {
-      byte[] file = representativeService.exportFile(dataflowId, "csv");
-      String fileName = "Bajar-fichero.csv";
+      byte[] file = representativeService.exportFile(dataflowId);
+      String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Internal server error: {}", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Export template reporters file.
+   *
+   * @param groupId the group id
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @ApiOperation(value = "Export template file lead reporters")
+  public ResponseEntity<byte[]> exportTemplateReportersFile(@PathVariable("groupId") Long groupId) {
+
+    try {
+      byte[] file = representativeService.exportTemplateReportersFile(groupId);
+      String fileName = "CountryCodes-Lead-Reporters.csv";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Internal server error: {}", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -318,22 +343,41 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Import file data.
    *
    * @param dataflowId the dataflow id
+   * @param groupId the group id
    * @param file the file
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PostMapping("/import/{dataflowId}")
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @ApiOperation(value = "Import file lead reporters")
-  public void importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
-      @RequestParam("file") MultipartFile file) {
+  @PostMapping("/import/{dataflowId}/group/{groupId}")
+  public ResponseEntity<byte[]> importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
+      @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file) {
+    System.err.println(System.currentTimeMillis());
+    // we check if the field is a csv
+    final int location = file.getOriginalFilename().lastIndexOf('.');
+    if (location == -1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_EXTENSION);
+    }
+    String mimeType = file.getOriginalFilename().substring(location + 1);
+    if (!"csv".equalsIgnoreCase(mimeType)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CSV_FIELD_ERROR);
+    }
 
-    // try {
-    // fileTreatmentHelper.importFileData(dataflowId, file);
-    // } catch (EEAException e) {
-    // LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}", dataflowId,
-    // file.getName());
-    // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
-    // }
+    try {
+      byte[] fileEnded = representativeService.importFile(dataflowId, groupId, file);
+      String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Errors-improt.csv";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      System.err.println(System.currentTimeMillis());
+      return new ResponseEntity<>(fileEnded, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}", dataflowId,
+          file.getName());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+    }
   }
+
+
 }

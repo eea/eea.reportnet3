@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.RepresentativeService;
@@ -23,7 +24,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The Class RepresentativeControllerImplTest. */
@@ -311,5 +314,50 @@ public class RepresentativeControllerImplTest {
         .thenReturn(dataProviders);
     assertEquals(dataProviders,
         representativeControllerImpl.findDataProvidersByIds(new ArrayList<>()));
+  }
+
+  @Test
+  public void exportFile() throws EEAException, IOException {
+    byte[] file = null;
+    String fileName = "Dataflow-1-Lead-Reporters.csv";
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    Mockito.when(representativeService.exportFile(Mockito.any())).thenReturn(file);
+    assertEquals(new ResponseEntity<>(file, httpHeaders, HttpStatus.OK),
+        representativeControllerImpl.exportFile(1L));
+  }
+
+  @Test
+  public void exportFileError() throws EEAException, IOException {
+    Mockito.when(representativeService.exportFile(Mockito.any())).thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.exportFile(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(null, e.getReason());
+    }
+  }
+
+  @Test
+  public void exportFileLead() throws EEAException, IOException {
+    byte[] file = null;
+    String fileName = "CountryCodes-Lead-Reporters.csv";
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    Mockito.when(representativeService.exportTemplateReportersFile(Mockito.any())).thenReturn(file);
+    assertEquals(new ResponseEntity<>(file, httpHeaders, HttpStatus.OK),
+        representativeControllerImpl.exportTemplateReportersFile(1L));
+  }
+
+  @Test
+  public void exportFileLeadError() throws EEAException, IOException {
+    Mockito.when(representativeService.exportTemplateReportersFile(Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.exportTemplateReportersFile(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(null, e.getReason());
+    }
   }
 }

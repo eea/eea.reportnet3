@@ -162,6 +162,9 @@ public final class EEAErrorMessage {
   /** The Constant REPRESENTATIVE_NOT_FOUND: {@value}. */
   public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
 
+  /** The Constant CSV_FIELD_ERROR: {@value}. */
+  public static final String CSV_FIELD_ERROR = "Field format invalid, use csv field ";
+
   /** The Constant REPRESENTATIVE_DUPLICATED: {@value}. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 

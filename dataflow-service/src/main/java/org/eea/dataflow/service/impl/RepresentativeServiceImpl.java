@@ -1,8 +1,11 @@
 package org.eea.dataflow.service.impl;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
@@ -25,6 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import com.opencsv.CSVWriter;
+import io.jsonwebtoken.lang.Collections;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -286,6 +292,160 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
 
   /**
+   * Export file.
+   *
+   * @param dataflowId the dataflow id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public byte[] exportFile(Long dataflowId) throws EEAException, IOException {
+    // we create the csv
+    StringWriter writer = new StringWriter();
+    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+    List<String> headers = new ArrayList<>();
+    headers.add("Email");
+    headers.add("Representing");
+    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+    int nHeaders = 2;
+    String[] fieldsToWrite = new String[nHeaders];
+
+    // we find all representatives and add all representatives
+    List<Representative> representativeList =
+        representativeRepository.findAllByDataflow_Id(dataflowId);
+    for (Representative representative : representativeList) {
+      fieldsToWrite[0] = representative.getUserMail();
+      fieldsToWrite[1] = representative.getDataProvider().getCode();
+      csvWriter.writeNext(fieldsToWrite);
+    }
+
+    // Once read we convert it to string
+    String csv = writer.getBuffer().toString();
+
+    return csv.getBytes();
+  }
+
+  /**
+   * Export template reporters file.
+   *
+   * @param groupId the group id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public byte[] exportTemplateReportersFile(Long groupId) throws EEAException, IOException {
+    // we create the csv
+    StringWriter writer = new StringWriter();
+    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+    List<String> headers = new ArrayList<>();
+    headers.add("Email");
+    headers.add("Representing");
+    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+    int nHeaders = 2;
+    String[] fieldsToWrite = new String[nHeaders];
+
+    // we find all dataprovider for group id
+    List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
+    for (DataProvider dataProvider : dataProviderList) {
+      fieldsToWrite[1] = dataProvider.getCode();
+      csvWriter.writeNext(fieldsToWrite);
+
+    }
+    // Once read we convert it to string
+    String csv = writer.getBuffer().toString();
+
+    return csv.getBytes();
+  }
+
+  /**
+   * Import file.
+   *
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  // @Transactional
+  public byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
+      throws EEAException, IOException {
+
+    // we create the cvs to send when finish the import
+    StringWriter writer = new StringWriter();
+    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+    List<String> headers = new ArrayList<>();
+    headers.add("Email");
+    headers.add("Representing");
+    headers.add("Imported");
+    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+    int nHeaders = 3;
+    String[] fieldsToWrite = new String[nHeaders];
+
+
+    List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
+    List<String> countryCodeList =
+        dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
+
+    String content = new String(file.getBytes());
+    List<String> everyLines = new ArrayList(Arrays.asList(content.split("\n")));
+    everyLines.remove(0);
+
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+
+    List<Representative> representativeList = new ArrayList();
+    for (String representativeData : everyLines) {
+      String[] dataLine = representativeData.split("[|]");
+      String email = dataLine[0];
+      String contryCode = dataLine[1];
+      if (!countryCodeList.contains(contryCode)
+          && null == userManagementControllerZull.getUserByEmail(email)) {
+        fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
+      } else if (!countryCodeList.contains(contryCode)) {
+        fieldsToWrite[2] = "KO imported country doesn't exist";
+      } else if (null == userManagementControllerZull.getUserByEmail(email)) {
+        fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
+      } else {
+        Long dataProviderId = dataProviderList.stream()
+            .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode())).findFirst()
+            .get().getId();
+
+        if (!representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(dataflowId,
+            dataProviderId, email)) {
+          Representative representative = new Representative();
+          DataProvider dataProvider = new DataProvider();
+          dataProvider.setId(dataProviderId);
+          representative.setDataflow(dataflow);
+          representative.setDataProvider(dataProvider);
+          representative.setReceiptDownloaded(false);
+          representative.setReceiptOutdated(false);
+          representative.setHasDatasets(false);
+          representative.setUserMail(email);
+          representativeList.add(representative);
+          fieldsToWrite[2] = "OK imported";
+        } else {
+          fieldsToWrite[2] = "KO imported already exist in reportnet";
+        }
+      }
+      fieldsToWrite[0] = email;
+      fieldsToWrite[1] = contryCode;
+      csvWriter.writeNext(fieldsToWrite);
+    }
+    if (!Collections.isEmpty(representativeList)) {
+      representativeRepository.saveAll(representativeList);
+    }
+    // Once read we convert it to string
+    String csv = writer.getBuffer().toString();
+    return csv.getBytes();
+  }
+
+  /**
    * Changes in receipt status.
    *
    * @param representative the representative
@@ -303,19 +463,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return changes;
   }
 
-  /**
-   * Export file.
-   *
-   * @param dataflowId the dataflow id
-   * @return the byte[]
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  public byte[] exportFile(Long dataflowId, String mimeType) throws EEAException, IOException {
-
-    return null;
-  }
 
 
 }

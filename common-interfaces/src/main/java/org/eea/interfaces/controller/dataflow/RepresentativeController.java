@@ -113,12 +113,25 @@ public interface RepresentativeController {
   ResponseEntity<byte[]> exportFile(@PathVariable("dataflowId") Long dataflowId);
 
   /**
+   * Export template reporters file.
+   *
+   * @param groupId the group id
+   * @return the response entity
+   */
+  @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportTemplateReportersFile(@PathVariable("groupId") Long groupId);
+
+  /**
    * Import file data.
    *
    * @param dataflowId the dataflow id
+   * @param groupId the group id
    * @param file the file
+   * @return the response entity
    */
-  @PostMapping("/import/{dataflowId}")
-  void importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
-      @RequestParam("file") MultipartFile file);
+  @PostMapping("/import/{dataflowId}/group/{groupId}")
+  ResponseEntity<byte[]> importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
+      @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
+
 }
