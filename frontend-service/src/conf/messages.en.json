@@ -958,6 +958,7 @@
     "pinned": "Pinned",
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importReportingBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
-    "showPublicInfo": "Show public information"
+    "showPublicInfo": "Show public information",
+    "availableInPublicView": "Available in public view"
   }
 }

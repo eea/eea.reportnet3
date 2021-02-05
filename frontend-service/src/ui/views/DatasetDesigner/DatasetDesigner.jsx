@@ -1073,6 +1073,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               value={designerState.datasetDescription || ''}
             />
             <div className={styles.datasetConfigurationButtons}>
+              {/* <Checkbox
+                  id={`available_in_public_view_checkbox`}
+                  inputId={`available_in_public_view_checkbox`}
+                  isChecked={showPublicInfo}
+                  onChange={e => setShowPublicInfo(e.checked)}
+                  role="checkbox"
+                />
+                <label
+                  onClick={() => setShowPublicInfo(!showPublicInfo)}
+                  style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+                  {resources.messages['availableInPublicView']}
+                </label>             */}
               <Button
                 className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
                 icon={'table'}
