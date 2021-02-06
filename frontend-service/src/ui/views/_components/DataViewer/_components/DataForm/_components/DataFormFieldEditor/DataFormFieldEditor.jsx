@@ -203,7 +203,8 @@ const DataFormFieldEditor = ({
       // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
       filter,
       conditionalFieldValue,
-      datasetSchemaId
+      datasetSchemaId,
+      100
     );
     const linkItems = referencedFieldValues
       .map(referencedField => {
