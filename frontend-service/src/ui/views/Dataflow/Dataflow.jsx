@@ -561,6 +561,33 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated
   );
 
+  const onConfirmUpdateIsReleaseable = async () => {
+    manageDialogs('isReleaseableDialogVisible', false);
+    try {
+      await DataflowService.update(
+        dataflowId,
+        dataflowState.data.name,
+        dataflowState.data.description,
+        dataflowState.obligations.obligationId,
+        dataflowState.isReleaseable
+      );
+
+      onLoadReportingDataflow();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onCloseIsReleaseableDialog = () => {
+    manageDialogs('isReleaseableDialogVisible', false);
+    if (dataflowState.data.isReleaseable !== dataflowState.isReleaseable) {
+      dataflowDispatch({
+        type: 'SET_IS_RELEASEABLE',
+        payload: { isReleaseable: dataflowState.data.isReleaseable }
+      });
+    }
+  };
+
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
@@ -693,8 +720,8 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['isReleaseableDataflowDialogHeader']}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
-            onConfirm={onConfirmExport}
-            onHide={() => manageDialogs('isReleaseableDialogVisible', false)}
+            onConfirm={onConfirmUpdateIsReleaseable}
+            onHide={() => onCloseIsReleaseableDialog()}
             visible={dataflowState.isReleaseableDialogVisible}>
             <Checkbox
               id="isReleaseableCheckbox"
