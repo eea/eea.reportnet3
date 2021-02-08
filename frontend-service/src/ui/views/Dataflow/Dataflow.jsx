@@ -201,10 +201,26 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, exportSchemaBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
+      const releaseableBtn = {
+        className: 'dataflow-releaseable-help-step',
+        icon: 'released',
+        isVisible: buttonsVisibility.releaseableBtn,
+        label: 'releasingLeftSideBarButton',
+        onClick: () => manageDialogs('isReleaseableDialogVisible', true),
+        title: 'releasingLeftSideBarButton'
+      };
+
+      const allButtons = [
+        propertiesBtn,
+        editBtn,
+        releaseableBtn,
+        exportSchemaBtn,
+        apiKeyBtn,
+        manageReportersBtn,
+        manageEditorsBtn
+      ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
-      console.log(dataflowState.designDatasetSchemas.length);
     }
   }, [
     dataflowState.userRoles,
@@ -245,6 +261,7 @@ const Dataflow = withRouter(({ history, match }) => {
         apiKeyBtn: false,
         editBtn: false,
         exportBtn: false,
+        releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
         propertiesBtn: false
@@ -255,6 +272,7 @@ const Dataflow = withRouter(({ history, match }) => {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
+      releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
@@ -271,6 +289,7 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
     />
   );
+
   const manageRightsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
