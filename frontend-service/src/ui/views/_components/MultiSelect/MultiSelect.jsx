@@ -558,6 +558,7 @@ export class MultiSelect extends Component {
 
         return (
           <MultiSelectItem
+            disabled={option.disabled}
             key={optionLabel + '_' + index}
             label={optionLabel}
             option={option}

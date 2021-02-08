@@ -123,7 +123,7 @@ export const WebformField = ({
       filter,
       !isNil(conditionalField) ? conditionalField.value : field.value,
       datasetSchemaId,
-      50
+      100
     );
 
     const linkItems = referencedFieldValues
@@ -146,6 +146,14 @@ export const WebformField = ({
         itemType: resources.messages['noneCodelist'],
         value: ''
       });
+    }
+
+    if (referencedFieldValues.length > 99) {
+      linkItems[linkItems.length - 1] = {
+        disabled: true,
+        itemType: resources.messages['moreElements'],
+        value: ''
+      };
     }
 
     webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });

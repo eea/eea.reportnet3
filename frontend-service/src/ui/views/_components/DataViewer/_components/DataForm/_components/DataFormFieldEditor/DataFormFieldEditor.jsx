@@ -256,6 +256,13 @@ const DataFormFieldEditor = ({
         value: ''
       });
     }
+    if (referencedFieldValues.length > 99) {
+      linkItems[linkItems.length - 1] = {
+        disabled: true,
+        itemType: resources.messages['moreElements'],
+        value: ''
+      };
+    }
     return linkItems;
   };
 
