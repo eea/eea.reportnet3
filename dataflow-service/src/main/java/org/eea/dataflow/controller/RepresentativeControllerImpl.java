@@ -218,10 +218,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         LOG_ERROR.error("Duplicated representative relationship", e.getCause());
         message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
         status = HttpStatus.CONFLICT;
-      } else if (EEAErrorMessage.USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS.equals(e.getMessage())) {
-        LOG_ERROR.error("Duplicated user and country relationship", e.getCause());
-        message = EEAErrorMessage.USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS;
-        status = HttpStatus.CONFLICT;
       } else {
         LOG_ERROR.error("Bad Request", e.getCause());
         message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;

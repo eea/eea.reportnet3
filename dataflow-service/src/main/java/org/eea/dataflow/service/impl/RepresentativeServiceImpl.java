@@ -98,11 +98,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (userManagementControllerZull.getUserByEmail(email) == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(dataflowId,
-        representativeVO.getDataProviderId(), representativeVO.getProviderAccount())) {
-      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS);
-    }
-
 
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
@@ -151,12 +146,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeRepository.findById(representativeVO.getId()).orElse(null);
     if (representative == null) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
-    }
-
-    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(
-        representative.getDataflow().getId(), representativeVO.getDataProviderId(),
-        representativeVO.getProviderAccount())) {
-      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS);
     }
     if (existsUserMail(
         representativeVO.getDataProviderId() != null ? representativeVO.getDataProviderId()
