@@ -104,9 +104,9 @@ const all = async userData => {
     }
   }
 
-  const groupByUserRequesetStatus = CoreUtils.onGroupBy('userRequestStatus');
+  const groupByUserRequestStatus = CoreUtils.onGroupBy('userRequestStatus');
 
-  const dataflowsData = groupByUserRequesetStatus(dataflows);
+  const dataflowsData = groupByUserRequestStatus(dataflows);
 
   const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
