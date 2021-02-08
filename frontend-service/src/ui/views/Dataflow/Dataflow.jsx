@@ -22,6 +22,7 @@ import { BigButtonList } from './_components/BigButtonList';
 import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -89,6 +90,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseDialogVisible: false,
     name: '',
     obligations: {},
+    restrictFromPublic: false,
     status: '',
     updatedDatasetSchema: undefined,
     userRoles: []
@@ -212,6 +214,25 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
+
+  const checkRestrictFromPublic = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`restrict_from_public_checkbox`}
+        inputId={`restrict_from_public_checkbox`}
+        isChecked={dataflowState.restrictFromPublic}
+        onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
+        role="checkbox"
+      />
+      <label
+        onClick={e =>
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
+        }
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['restrictFromPublic']}
+      </label>
+    </div>
+  );
 
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
@@ -470,7 +491,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
-      await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
+      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
@@ -532,6 +553,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
+            footerAddon={checkRestrictFromPublic}
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
