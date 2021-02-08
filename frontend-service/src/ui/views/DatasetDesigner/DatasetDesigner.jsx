@@ -1052,8 +1052,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  console.log('designerState.hasWritePermissions', designerState.hasWritePermissions);
-
   const layout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -1099,7 +1097,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className={styles.datasetConfigurationButtons}>
               <Button
                 className={`p-button-secondary ${
-                  designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
                 } datasetSchema-uniques-help-step`}
                 disabled={designerState.hasWritePermissions}
                 icon={'table'}
@@ -1113,7 +1111,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Fragment>
                 <Button
                   className={`p-button-rounded p-button-secondary ${
-                    designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                    !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
                   }`}
                   disabled={designerState.hasWritePermissions}
                   icon={'import'}
@@ -1136,7 +1134,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               </Fragment>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
                 }`}
                 disabled={designerState.hasWritePermissions}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
@@ -1194,7 +1192,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
                 }`}
                 disabled={designerState.hasWritePermissions}
                 icon={'key'}
@@ -1232,7 +1230,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  ${designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null}`}
+                }  ${!designerState.hasWritePermissions ? 'p-button-animated-blink' : null}`}
                 disabled={designerState.hasWritePermissions}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
