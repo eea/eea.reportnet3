@@ -104,13 +104,13 @@ public interface RepresentativeController {
 
 
   /**
-   * Export file.
+   * Export file of all lead reporters.
    *
    * @param dataflowId the dataflow id
    * @return the response entity
    */
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<byte[]> exportFile(@PathVariable("dataflowId") Long dataflowId);
+  ResponseEntity<byte[]> exportLeadReportersFile(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Export template reporters file.
@@ -123,7 +123,8 @@ public interface RepresentativeController {
   ResponseEntity<byte[]> exportTemplateReportersFile(@PathVariable("groupId") Long groupId);
 
   /**
-   * Import file data.
+   * Import file country template.With that controller we can download a country template to import
+   * data with the countrys with this group id
    *
    * @param dataflowId the dataflow id
    * @param groupId the group id
@@ -131,7 +132,8 @@ public interface RepresentativeController {
    * @return the response entity
    */
   @PostMapping("/import/{dataflowId}/group/{groupId}")
-  ResponseEntity<byte[]> importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
+  ResponseEntity<byte[]> importFileCountryTemplate(
+      @PathVariable(value = "dataflowId") Long dataflowId,
       @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
 }

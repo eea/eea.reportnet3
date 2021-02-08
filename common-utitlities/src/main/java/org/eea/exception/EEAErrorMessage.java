@@ -88,8 +88,8 @@ public final class EEAErrorMessage {
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
   /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
-  public static final String USER_AND_COUNTRY_EXIST =
-      "Email and country already exist in this dataflow";
+  public static final String USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS =
+      "Email and country already exist in this dataflow for a lead reporter";
 
   /** The Constant USER_NOTFOUND: {@value}. */
   public static final String USER_NOTFOUND = "User %s not found";
@@ -163,7 +163,7 @@ public final class EEAErrorMessage {
   public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
 
   /** The Constant CSV_FILE_ERROR: {@value}. */
-  public static final String CSV_FILE_ERROR = "File format invalid, use csv field ";
+  public static final String CSV_FILE_ERROR = "File format invalid, use csv file ";
 
   /** The Constant REPRESENTATIVE_DUPLICATED: {@value}. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";

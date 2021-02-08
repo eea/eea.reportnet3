@@ -100,7 +100,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(dataflowId,
         representativeVO.getDataProviderId(), representativeVO.getProviderAccount())) {
-      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
+      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS);
     }
 
 
@@ -156,7 +156,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(
         representative.getDataflow().getId(), representativeVO.getDataProviderId(),
         representativeVO.getProviderAccount())) {
-      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
+      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST_FOR_LEAD_REPORTERS);
     }
     if (existsUserMail(
         representativeVO.getDataProviderId() != null ? representativeVO.getDataProviderId()

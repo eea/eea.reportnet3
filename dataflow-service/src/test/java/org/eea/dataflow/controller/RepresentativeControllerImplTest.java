@@ -307,6 +307,9 @@ public class RepresentativeControllerImplTest {
     }
   }
 
+  /**
+   * Find data providers by ids test.
+   */
   @Test
   public void findDataProvidersByIdsTest() {
     List<DataProviderVO> dataProviders = new ArrayList<>();
@@ -316,6 +319,12 @@ public class RepresentativeControllerImplTest {
         representativeControllerImpl.findDataProvidersByIds(new ArrayList<>()));
   }
 
+  /**
+   * Export file.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void exportFile() throws EEAException, IOException {
     byte[] file = null;
@@ -324,20 +333,32 @@ public class RepresentativeControllerImplTest {
     httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
     Mockito.when(representativeService.exportFile(Mockito.any())).thenReturn(file);
     assertEquals(new ResponseEntity<>(file, httpHeaders, HttpStatus.OK),
-        representativeControllerImpl.exportFile(1L));
+        representativeControllerImpl.exportLeadReportersFile(1L));
   }
 
+  /**
+   * Export file error.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void exportFileError() throws EEAException, IOException {
     Mockito.when(representativeService.exportFile(Mockito.any())).thenThrow(EEAException.class);
     try {
-      representativeControllerImpl.exportFile(1L);
+      representativeControllerImpl.exportLeadReportersFile(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals(null, e.getReason());
     }
   }
 
+  /**
+   * Export file lead.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void exportFileLead() throws EEAException, IOException {
     byte[] file = null;
@@ -349,6 +370,12 @@ public class RepresentativeControllerImplTest {
         representativeControllerImpl.exportTemplateReportersFile(1L));
   }
 
+  /**
+   * Export file lead error.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void exportFileLeadError() throws EEAException, IOException {
     Mockito.when(representativeService.exportTemplateReportersFile(Mockito.any()))
