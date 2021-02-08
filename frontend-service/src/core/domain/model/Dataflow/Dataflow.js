@@ -9,6 +9,7 @@ export class Dataflow {
     euDatasets,
     expirationDate,
     id,
+    isReleaseable,
     manualAcceptance,
     name,
     obligation,
@@ -29,6 +30,7 @@ export class Dataflow {
     this.euDatasets = euDatasets;
     this.expirationDate = expirationDate;
     this.id = id;
+    this.isReleaseable = isReleaseable;
     this.manualAcceptance = manualAcceptance;
     this.name = name;
     this.obligation = obligation;

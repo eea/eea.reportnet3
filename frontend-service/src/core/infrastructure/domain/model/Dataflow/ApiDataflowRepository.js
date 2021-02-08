@@ -411,6 +411,8 @@ const parseDataflowDTO = dataflowDTO =>
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
+    // isReleaseable:  dataflowDTO.isReleaseable,
+    isReleaseable: false,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
