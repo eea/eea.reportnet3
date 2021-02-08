@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
@@ -45,6 +47,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -708,6 +711,15 @@ public class DataflowServiceImpl implements DataflowService {
 
     getObligation(dataflowVO);
 
+    // we sort the weblinks and documents
+    if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
+      dataflowVO.getWeblinks()
+          .sort(Comparator.comparing(WeblinkVO::getDescription, String.CASE_INSENSITIVE_ORDER));
+    }
+    if (!CollectionUtils.isEmpty(dataflowVO.getDocuments())) {
+      dataflowVO.getDocuments()
+          .sort(Comparator.comparing(DocumentVO::getName, String.CASE_INSENSITIVE_ORDER));
+    }
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
