@@ -375,26 +375,41 @@ public class FileTreatmentHelperTest {
   }
 
 
+  /**
+   * @throws IOException
+   * @throws EEAException
+   * 
+   */
   @Test
-  public void unzipSchemaTest() {
+  public void unzipSchemaTest() throws EEAException, IOException {
 
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ZipOutputStream zip = new ZipOutputStream(baos);
-      ZipEntry entry1 = new ZipEntry("Table.schema");
-      ZipEntry entry2 = new ZipEntry("Table.qcrules");
-      zip.putNextEntry(entry1);
-      zip.putNextEntry(entry2);
-      zip.close();
-      MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
-          "application/x-zip-compressed", baos.toByteArray());
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-      Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip");
-      fileTreatmentHelper.unZipImportSchema(multipartFile);
-    } catch (EEAException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    ZipEntry entry3 = new ZipEntry("Table.unique");
+    ZipEntry entry4 = new ZipEntry("Table.names");
+    ZipEntry entry5 = new ZipEntry("Table.extintegrations");
+    ZipEntry entry6 = new ZipEntry("Table.integrity");
+    ZipEntry entry7 = new ZipEntry("Table.ids");
+
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.putNextEntry(entry3);
+    zip.putNextEntry(entry4);
+    zip.putNextEntry(entry5);
+    zip.putNextEntry(entry6);
+    zip.putNextEntry(entry7);
+
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
+        .thenReturn("schema").thenReturn("qcrules").thenReturn("unique").thenReturn("names")
+        .thenReturn("extintegrations").thenReturn("integrity").thenReturn("ids");
+    Assert.assertNotNull(fileTreatmentHelper.unZipImportSchema(multipartFile));
   }
 }
 

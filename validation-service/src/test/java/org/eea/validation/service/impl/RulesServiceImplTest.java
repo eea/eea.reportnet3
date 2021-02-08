@@ -4,12 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
@@ -47,6 +51,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /** The Class RulesServiceImplTest. */
 @RunWith(MockitoJUnitRunner.class)
@@ -1650,5 +1655,80 @@ public class RulesServiceImplTest {
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
     Assert.assertEquals(Integer.valueOf(1), rulesServiceImpl.getAllUncheckedRules(1L, designs));
   }
+
+
+  @Test
+  public void importRuleTest() throws EEAException, IOException {
+
+    List<String> listDatasetSchemaIdToCopy = new ArrayList<>();
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    listDatasetSchemaIdToCopy.add("5e44110d6a9e3a270ce13fac");
+    dictionaryOriginTargetObjectId.put("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+
+
+    List<IntegritySchema> integrities = new ArrayList<>();
+    List<Rule> rules = new ArrayList<>();
+    List<RuleVO> rulesVO = new ArrayList<>();
+    List<IntegrityVO> listIntegrityVO = new ArrayList<>();
+    ObjectId id = new ObjectId();
+    new RulesSchemaVO();
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId(id.toString());
+    rulesVO.add(ruleVO);
+    rule.setRuleId(id);
+    rule.setIntegrityConstraintId(id);
+    rule.setType(EntityTypeEnum.TABLE);
+    rule.setShortCode("shortCode");
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("isSQLSentence 5e44110d6a9e3a270ce13fac");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setReferenceId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setReferenceFieldSchemaPKId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setUniqueConstraintId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setSqlSentence("sqlSentence");
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setIdDatasetSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    ruleSchema.setRules(rules);
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId(id.toString());
+    integrityVO.setRuleId(new ObjectId().toString());
+    integrityVO.setOriginDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setReferencedDatasetSchemaId("5e44110d6a9e3a270ce13fac");
+    integrityVO.setOriginFields(Arrays.asList("5e44110d6a9e3a270ce13fac"));
+    integrityVO.setReferencedFields(Arrays.asList("5e44110d6a9e3a270ce13fac"));
+    integrities.add(new IntegritySchema());
+    listIntegrityVO.add(integrityVO);
+    RulesSchemaVO ruleSchemaVO = new RulesSchemaVO();
+    ruleSchemaVO.setRules(rulesVO);
+
+    Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    List<IntegritySchema> integritySchemaList = new ArrayList<>();
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    integritySchema.setOriginFields(Arrays.asList(new ObjectId("5e44110d6a9e3a270ce13fac")));
+    integritySchema.setReferencedFields(Arrays.asList(new ObjectId("5e44110d6a9e3a270ce13fac")));
+    integritySchemaList.add(integritySchema);
+
+    Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    Mockito.when(integrityMapper.classListToEntity(Mockito.any())).thenReturn(integritySchemaList);
+
+
+    ObjectMapper objectMapperRules = new ObjectMapper();
+    InputStream rulesStream =
+        new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(ruleSchema));
+    List<byte[]> qcRulesList = new ArrayList<>();
+    qcRulesList.add(IOUtils.toByteArray(rulesStream));
+
+    rulesServiceImpl.importRulesSchema(qcRulesList, dictionaryOriginTargetObjectId,
+        listIntegrityVO);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
 
 }

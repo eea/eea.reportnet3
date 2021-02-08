@@ -2253,18 +2253,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
-  /**
-   * Schema name.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param schemaNames the schema names
-   * @return the string
-   */
-  private String schemaName(String datasetSchemaId, Map<String, String> schemaNames) {
-    String name = schemaNames.get(datasetSchemaId);
-    return "IMPORTED_" + name;
-  }
-
 
   /**
    * Map link result.
