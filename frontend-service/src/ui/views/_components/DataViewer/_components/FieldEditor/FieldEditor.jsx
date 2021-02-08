@@ -128,7 +128,8 @@ const FieldEditor = ({
       //   : colSchema.referencedField.referencedField.fieldSchemaId,
       filter,
       RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
-      datasetSchemaId
+      datasetSchemaId,
+      100
     );
 
     const linkItems = referencedFieldValues
