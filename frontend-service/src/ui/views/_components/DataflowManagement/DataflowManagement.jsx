@@ -53,7 +53,8 @@ export const DataflowManagement = ({
     obligationPrevState:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
-        : { id: null, title: '' }
+        : { id: null, title: '' },
+    isReleaseable: state.isReleaseable
   };
 
   const [dataflowManagementState, dataflowManagementDispatch] = useReducer(
