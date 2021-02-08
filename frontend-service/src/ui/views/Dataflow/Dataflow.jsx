@@ -32,7 +32,7 @@ import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { Title } from '../_components/Title/Title';
+import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
