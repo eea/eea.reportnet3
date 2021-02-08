@@ -67,6 +67,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_RECEIPT_OUTDATED':
       return { ...state, isReceiptOutdated: payload.isReceiptOutdated };
 
+    case 'SET_IS_RELEASEABLE':
+      return { ...state, isReleaseable: payload.isReleaseable };
+
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 
