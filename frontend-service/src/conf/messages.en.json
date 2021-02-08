@@ -968,5 +968,6 @@
     "releasingLeftSideBarButton": "Releasing status",
     "isReleaseableDataflowCheckboxLabel":"Dataflow can be released by the reporters",
     "isReleaseableDataflowDialogHeader":"Open/Close release period",
+    "releaseButtonTooltip": "Releasing period is closed"
   }
 }
