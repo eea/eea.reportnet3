@@ -241,6 +241,26 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getImportList();
   }, [designerState.externalOperationsList]);
 
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      const hasWritePermissions =
+        (userContext.hasPermission(
+          [config.permissions.DATA_CUSTODIAN],
+          `${config.permissions.DATAFLOW}${dataflowId}`
+        ) ||
+          userContext.hasPermission(
+            [config.permissions.DATA_STEWARD],
+            `${config.permissions.DATAFLOW}${dataflowId}`
+          )) &&
+        designerState?.metaData?.dataflow?.status === 'DRAFT';
+
+      designerDispatch({
+        type: 'HAS_WRITE_PERMISSIONS',
+        payload: { hasWritePermissions }
+      });
+    }
+  }, [userContext, designerState?.metaData?.dataflow?.status]);
+
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   const callSetMetaData = async () => {
@@ -1032,6 +1052,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  console.log('designerState.hasWritePermissions', designerState.hasWritePermissions);
+
   const layout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -1061,6 +1083,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <InputTextarea
               className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
               collapsedHeight={55}
+              disabled={designerState.hasWritePermissions}
               expandableOnClick={true}
               id="datasetDescription"
               key="datasetDescription"
@@ -1075,7 +1098,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
             <div className={styles.datasetConfigurationButtons}>
               <Button
-                className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+                className={`p-button-secondary ${
+                  designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                } datasetSchema-uniques-help-step`}
+                disabled={designerState.hasWritePermissions}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
@@ -1086,7 +1112,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-left">
               <Fragment>
                 <Button
-                  className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+                  className={`p-button-rounded p-button-secondary ${
+                    designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                  }`}
+                  disabled={designerState.hasWritePermissions}
                   icon={'import'}
                   label={resources.messages['importDataset']}
                   onClick={
@@ -1106,7 +1135,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 )}
               </Fragment>
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                }`}
+                disabled={designerState.hasWritePermissions}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
                 label={resources.messages['exportDataset']}
@@ -1128,6 +1160,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? ' p-button-animated-blink'
                     : null
                 }`}
+                disabled={designerState.hasWritePermissions}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -1141,7 +1174,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors}
+                disabled={!designerState.datasetStatistics.datasetErrors || designerState.hasWritePermissions}
                 icon={'warning'}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
@@ -1160,7 +1193,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null
+                }`}
+                disabled={designerState.hasWritePermissions}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
@@ -1178,7 +1214,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && 'p-button-animated-blink'
                 }`}
-                disabled={!designerState.datasetHasData}
+                disabled={!designerState.datasetHasData || designerState.hasWritePermissions}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
@@ -1196,7 +1232,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  p-button-animated-blink`}
+                }  ${designerState.hasWritePermissionsOpenDataset ? 'p-button-animated-blink' : null}`}
+                disabled={designerState.hasWritePermissions}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
