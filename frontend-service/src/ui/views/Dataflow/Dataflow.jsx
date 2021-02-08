@@ -717,6 +717,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseableDialogVisible && (
           <ConfirmDialog
+            disabledConfirm={dataflowState.data.isReleaseable === dataflowState.isReleaseable}
             header={resources.messages['isReleaseableDataflowDialogHeader']}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
