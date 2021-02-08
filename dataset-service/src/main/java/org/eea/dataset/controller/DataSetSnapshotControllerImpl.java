@@ -10,7 +10,9 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -53,6 +55,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
+
+  /** The dataflow controller zull. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZull;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -461,11 +467,19 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    try {
-      datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+
+    DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
+    if (null != dataflow && dataflow.isReleaseable()) {
+      try {
+        datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
+            e);
+      }
+    } else {
+      throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
+          String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASEABLE, dataflowId));
     }
   }
 
