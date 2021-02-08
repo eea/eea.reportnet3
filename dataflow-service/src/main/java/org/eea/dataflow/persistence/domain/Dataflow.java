@@ -70,6 +70,10 @@ public class Dataflow {
   @Column(name = "MANUAL_ACCEPTANCE")
   private boolean manualAcceptance;
 
+  /** The releaseable. */
+  @Column(name = "RELEASEABLE")
+  private boolean releaseable;
+
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private SubmissionAgreement submissionAgreement;
