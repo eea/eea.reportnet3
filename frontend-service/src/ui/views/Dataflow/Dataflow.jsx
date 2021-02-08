@@ -21,6 +21,7 @@ import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox/';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -93,7 +94,9 @@ const Dataflow = withRouter(({ history, match }) => {
     obligations: {},
     status: '',
     updatedDatasetSchema: undefined,
-    userRoles: []
+    userRoles: [],
+    isReleaseableDialogVisible: false,
+    isReleaseable: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -329,6 +332,12 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { isExportEuDatasetLoading: value }
     });
 
+  const setIsReleaseable = value =>
+    dataflowDispatch({
+      type: 'SET_IS_RELEASEABLE',
+      payload: { isReleaseable: value }
+    });
+
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const setIsPageLoading = isPageLoading =>
@@ -408,7 +417,8 @@ const Dataflow = withRouter(({ history, match }) => {
           description: dataflow.description,
           name: dataflow.name,
           obligations: dataflow.obligation,
-          status: dataflow.status
+          status: dataflow.status,
+          isReleaseable: dataflow.isReleaseable
         }
       });
 
@@ -675,6 +685,29 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isExportDialogVisible', false)}
             visible={dataflowState.isExportDialogVisible}>
             {resources.messages['confirmExportSchema']}
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isReleaseableDialogVisible && (
+          <ConfirmDialog
+            header={resources.messages['isReleaseableDataflowDialogHeader']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
+            onConfirm={onConfirmExport}
+            onHide={() => manageDialogs('isReleaseableDialogVisible', false)}
+            visible={dataflowState.isReleaseableDialogVisible}>
+            <Checkbox
+              id="isReleaseableCheckbox"
+              inputId="isReleaseableCheckbox"
+              isChecked={dataflowState.isReleaseable}
+              onChange={() => setIsReleaseable(!dataflowState.isReleaseable)}
+              role="checkbox"
+            />
+            <label htmlFor="isReleaseableCheckbox" className={styles.isReleaseableLabel}>
+              <a onClick={() => setIsReleaseable(!dataflowState.isReleaseable)}>
+                {resources.messages['isReleaseableDataflowCheckboxLabel']}
+              </a>
+            </label>
           </ConfirmDialog>
         )}
 

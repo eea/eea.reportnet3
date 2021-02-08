@@ -966,5 +966,7 @@
     "importSchema": "Import Schema",
     "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
     "releasingLeftSideBarButton": "Releasing status",
+    "isReleaseableDataflowCheckboxLabel":"Dataflow can be released by the reporters",
+    "isReleaseableDataflowDialogHeader":"Open/Close release period",
   }
 }
