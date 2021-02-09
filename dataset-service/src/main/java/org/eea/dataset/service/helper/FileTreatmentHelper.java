@@ -231,7 +231,8 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       }
     }
-    LOG.info("Schemas recovered from the Zip file during the import process");
+    LOG.info("Schemas recovered from the Zip file {} during the import process",
+        multipartFile.getOriginalFilename());
     return fileUnziped;
   }
 
@@ -281,8 +282,9 @@ public class FileTreatmentHelper implements DisposableBean {
       // Store the dataset ids
       zipDatasetIds(schemaDatasetsId, zos);
 
+
     } catch (Exception e) {
-      LOG.error("Error exporting schemas from the dataflowId {} to a ZIP file. Message {}",
+      LOG_ERROR.error("Error exporting schemas from the dataflowId {} to a ZIP file. Message {}",
           dataflowId, e.getMessage(), e);
     }
     return bos.toByteArray();
@@ -304,7 +306,7 @@ public class FileTreatmentHelper implements DisposableBean {
       InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
       zippingClasses(zos, nameFile, schemaStream);
     } catch (IOException e) {
-      LOG.error(
+      LOG_ERROR.error(
           "Error exporting the schema of the dataflow {} with datasetSchemaId {} into the zip. {}",
           schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
@@ -323,14 +325,7 @@ public class FileTreatmentHelper implements DisposableBean {
     ZipEntry zeSchem = new ZipEntry(fileName);
     zos.putNextEntry(zeSchem);
 
-    // IOUtils.copyLarge(stream, zos);
-
-    byte[] bytes = new byte[1024];
-    int count = stream.read(bytes);
-    while (count > -1) {
-      zos.write(bytes, 0, count);
-      count = stream.read(bytes);
-    }
+    IOUtils.copyLarge(stream, zos);
 
     stream.close();
   }
@@ -352,7 +347,7 @@ public class FileTreatmentHelper implements DisposableBean {
       zippingClasses(zos, nameFileRules, rulesStream);
 
     } catch (IOException e) {
-      LOG.error(
+      LOG_ERROR.error(
           "Error exporting the qcRules of the dataflow {} with datasetSchemaId {} into the zip. {}",
           schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
@@ -375,7 +370,7 @@ public class FileTreatmentHelper implements DisposableBean {
           new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
       zippingClasses(zos, nameFileUnique, uniqueStream);
     } catch (IOException e) {
-      LOG.error(
+      LOG_ERROR.error(
           "Error exporting the unique rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
           schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
@@ -399,7 +394,7 @@ public class FileTreatmentHelper implements DisposableBean {
       zippingClasses(zos, nameFileIntegrity, integrityStream);
 
     } catch (IOException e) {
-      LOG.error(
+      LOG_ERROR.error(
           "Error exporting the integrity rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
           schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
@@ -430,7 +425,7 @@ public class FileTreatmentHelper implements DisposableBean {
       zippingClasses(zos, nameFileExtIntegrations, extIntegrationStream);
 
     } catch (IOException e) {
-      LOG.error(
+      LOG_ERROR.error(
           "Error exporting the external integrations of the dataflow {} with datasetSchemaId {} into the zip. {}",
           dataflowId, schema.getIdDataSetSchema(), e.getMessage(), e);
     }
@@ -450,7 +445,7 @@ public class FileTreatmentHelper implements DisposableBean {
           new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaNames));
       zippingClasses(zos, "datasetSchemaNames.names", schemaNamesStream);
     } catch (IOException e) {
-      LOG.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
+      LOG_ERROR.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
     }
   }
 
@@ -467,7 +462,7 @@ public class FileTreatmentHelper implements DisposableBean {
           new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaDatasetsId));
       zippingClasses(zos, "datasetSchemaIds.ids", schemaDatasetsIdsStream);
     } catch (IOException e) {
-      LOG.error("Error exporting the dataset ids into the zip. {}", e.getMessage(), e);
+      LOG_ERROR.error("Error exporting the dataset ids into the zip. {}", e.getMessage(), e);
     }
   }
 
@@ -483,7 +478,7 @@ public class FileTreatmentHelper implements DisposableBean {
       List<DataSetSchema> schemas) {
 
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -498,24 +493,6 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
 
-  /**
-   * Unzipping classes.
-   *
-   * @param zip the zip
-   * @return the byte[]
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private byte[] unzippingClasses(ZipInputStream zip) throws IOException {
-
-    ByteArrayOutputStream output = new ByteArrayOutputStream();
-    byte[] buf = new byte[1024];
-    int n;
-    while ((n = zip.read(buf, 0, 1024)) != -1) {
-      output.write(buf, 0, n);
-    }
-    return output.toByteArray();
-  }
-
 
   /**
    * Unzipping qc classes.
@@ -526,7 +503,7 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private List<byte[]> unzippingQcClasses(ZipInputStream zip, List<byte[]> qcrulesBytes) {
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         qcrulesBytes.add(content);
       }
@@ -547,7 +524,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<UniqueConstraintSchema> unzippingUniqueClasses(ZipInputStream zip,
       List<UniqueConstraintSchema> uniques) {
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -572,7 +549,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private Map<String, String> unzippingDatasetNamesClasses(ZipInputStream zip,
       Map<String, String> schemaNames) {
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -596,7 +573,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private Map<String, Long> unzippingDatasetIdsClasses(ZipInputStream zip,
       Map<String, Long> schemaIds) {
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -620,7 +597,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<IntegrationVO> unzippingExtIntegrationsClasses(ZipInputStream zip,
       List<IntegrationVO> extIntegrations) {
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -645,7 +622,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<IntegrityVO> unzippingIntegrityQcClasses(ZipInputStream zip,
       List<IntegrityVO> integrities) {
     try {
-      byte[] content = unzippingClasses(zip);
+      byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

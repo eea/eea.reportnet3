@@ -368,7 +368,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping("/private/createIntegrations")
   @ApiOperation(value = "Create Integrations")
   @ApiResponse(code = 500, message = "Internal Server Error")

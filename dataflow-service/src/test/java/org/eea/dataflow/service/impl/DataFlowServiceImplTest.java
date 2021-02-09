@@ -50,6 +50,7 @@ import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -209,6 +210,14 @@ public class DataFlowServiceImplTest {
     List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
     DesignDatasetVO designDatasetVO = new DesignDatasetVO();
     designDatasetVOs.add(designDatasetVO);
+    List<WeblinkVO> weblinks = new ArrayList();
+    WeblinkVO weblinkVO = new WeblinkVO();
+    weblinkVO.setDescription("bbbb");
+    WeblinkVO weblinkVO2 = new WeblinkVO();
+    weblinkVO2.setDescription("aaa");
+    weblinks.add(weblinkVO);
+    weblinks.add(weblinkVO2);
+
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -225,6 +234,7 @@ public class DataFlowServiceImplTest {
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dataFlowVO.setObligation(obligation);
+    dataFlowVO.setWeblinks(weblinks);
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
   }
 
