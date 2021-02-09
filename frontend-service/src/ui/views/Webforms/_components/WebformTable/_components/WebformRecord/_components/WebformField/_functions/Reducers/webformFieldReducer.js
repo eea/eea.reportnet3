@@ -34,6 +34,8 @@ export const webformFieldReducer = (state, { type, payload }) => {
       return { ...state, sectorAffectedValue: payload.value };
     case 'SET_INITIAL_FIELD_VALUE':
       return { ...state, initialFieldValue: payload };
+    case 'SET_IS_LOADING_DATA':
+      return { ...state, isLoadingData: payload };
     default:
       return state;
   }
