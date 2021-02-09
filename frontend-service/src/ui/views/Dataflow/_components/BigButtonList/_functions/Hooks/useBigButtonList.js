@@ -451,11 +451,11 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleaseable,
-        handleRedirect: dataflowState.isReleaseable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: dataflowState.isReleasable,
+        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
-        tooltip: dataflowState.isReleaseable ? '' : resources.messages['releaseButtonTooltip'],
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];

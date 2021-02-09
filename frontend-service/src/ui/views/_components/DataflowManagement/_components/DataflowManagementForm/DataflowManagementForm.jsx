@@ -66,7 +66,7 @@ const DataflowManagementForm = forwardRef(
                 values.name,
                 values.description,
                 data.obligation.id,
-                data.isReleaseable
+                data.isReleasable
               );
               onEdit(values.name, values.description, data.obligation.id);
             } else {

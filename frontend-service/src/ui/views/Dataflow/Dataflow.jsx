@@ -87,7 +87,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
-    isReleaseable: false,
+    isReleasable: false,
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
     isShareRightsDialogVisible: false,
@@ -205,7 +205,7 @@ const Dataflow = withRouter(({ history, match }) => {
       };
 
       const releaseableBtn = {
-        className: 'dataflow-releaseable-help-step',
+        className: 'dataflow-releasable-help-step',
         icon: 'released',
         isVisible: buttonsVisibility.releaseableBtn,
         label: 'releasingLeftSideBarButton',
@@ -332,10 +332,10 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { isExportEuDatasetLoading: value }
     });
 
-  const setIsReleaseable = isReleaseable =>
+  const setIsReleaseable = isReleasable =>
     dataflowDispatch({
-      type: 'SET_IS_RELEASEABLE',
-      payload: { isReleaseable: isReleaseable }
+      type: 'SET_IS_RELEASABLE',
+      payload: { isReleasable: isReleasable }
     });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
@@ -415,7 +415,7 @@ const Dataflow = withRouter(({ history, match }) => {
         payload: {
           data: dataflow,
           description: dataflow.description,
-          isReleaseable: dataflow.isReleaseable,
+          isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
           status: dataflow.status
@@ -569,7 +569,7 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowState.data.name,
         dataflowState.data.description,
         dataflowState.obligations.obligationId,
-        dataflowState.isReleaseable
+        dataflowState.isReleasable
       );
 
       onLoadReportingDataflow();
@@ -580,10 +580,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onCloseIsReleaseableDialog = () => {
     manageDialogs('isReleaseableDialogVisible', false);
-    if (dataflowState.data.isReleaseable !== dataflowState.isReleaseable) {
+    if (dataflowState.data.isReleasable !== dataflowState.isReleasable) {
       dataflowDispatch({
-        type: 'SET_IS_RELEASEABLE',
-        payload: { isReleaseable: dataflowState.data.isReleaseable }
+        type: 'SET_IS_RELEASABLE',
+        payload: { isReleasable: dataflowState.data.isReleasable }
       });
     }
   };
@@ -717,7 +717,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseableDialogVisible && (
           <ConfirmDialog
-            disabledConfirm={dataflowState.data.isReleaseable === dataflowState.isReleaseable}
+            disabledConfirm={dataflowState.data.isReleasable === dataflowState.isReleasable}
             header={resources.messages['isReleaseableDataflowDialogHeader']}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
@@ -727,12 +727,12 @@ const Dataflow = withRouter(({ history, match }) => {
             <Checkbox
               id="isReleaseableCheckbox"
               inputId="isReleaseableCheckbox"
-              isChecked={dataflowState.isReleaseable}
-              onChange={() => setIsReleaseable(!dataflowState.isReleaseable)}
+              isChecked={dataflowState.isReleasable}
+              onChange={() => setIsReleaseable(!dataflowState.isReleasable)}
               role="checkbox"
             />
             <label htmlFor="isReleaseableCheckbox" className={styles.isReleaseableLabel}>
-              <a onClick={() => setIsReleaseable(!dataflowState.isReleaseable)}>
+              <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resources.messages['isReleaseableDataflowCheckboxLabel']}
               </a>
             </label>

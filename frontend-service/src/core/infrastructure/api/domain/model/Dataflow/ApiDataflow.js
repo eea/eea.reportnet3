@@ -144,10 +144,10 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  update: async (dataflowId, name, description, obligationId, isReleaseable) => {
+  update: async (dataflowId, name, description, obligationId, isReleasable) => {
     const response = await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { id: dataflowId, name, description, obligation: { obligationId }, releaseable: isReleaseable }
+      data: { id: dataflowId, name, description, obligation: { obligationId }, releasable: isReleasable }
     });
     return response;
   }

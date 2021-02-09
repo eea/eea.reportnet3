@@ -411,7 +411,7 @@ const parseDataflowDTO = dataflowDTO =>
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
-    isReleaseable: dataflowDTO.releaseable,
+    isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
@@ -605,8 +605,8 @@ const schemasValidation = async dataflowId => {
   return await apiDataflow.schemasValidation(dataflowId);
 };
 
-const update = async (dataflowId, name, description, obligationId, isReleaseable) =>
-  await apiDataflow.update(dataflowId, name, description, obligationId, isReleaseable);
+const update = async (dataflowId, name, description, obligationId, isReleasable) =>
+  await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
 
 export const ApiDataflowRepository = {
   accept,
