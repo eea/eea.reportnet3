@@ -849,6 +849,7 @@ const DataViewer = withRouter(
         }
       } else {
         try {
+          setIsSaving(true);
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
@@ -1337,6 +1338,7 @@ const DataViewer = withRouter(
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
                   hasWritePermissions={hasWritePermissions}
+                  isSaving={isSaving}
                   onChangeForm={onEditAddFormInput}
                   onConditionalChange={onConditionalChange}
                   onShowFieldInfo={onShowFieldInfo}
@@ -1368,6 +1370,7 @@ const DataViewer = withRouter(
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
                 hasWritePermissions={hasWritePermissions}
+                isSaving={isSaving}
                 onChangeForm={onEditAddFormInput}
                 onConditionalChange={onConditionalChange}
                 onShowCoordinateError={onShowCoordinateError}

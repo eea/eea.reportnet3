@@ -456,9 +456,11 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: dataflowState.isReleasable,
+        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];

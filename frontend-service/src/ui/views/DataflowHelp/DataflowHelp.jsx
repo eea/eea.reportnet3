@@ -193,13 +193,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   };
 
-  const sortByProperty = propertyName => (a, b) => {
-    if (a[propertyName] > b[propertyName]) return 1;
-
-    if (a[propertyName] < b[propertyName]) return -1;
-
-    return 0;
-  };
+  const sortByProperty = propertyName => (a, b) => a[propertyName].localeCompare(b[propertyName]);
 
   const onLoadDocuments = async () => {
     try {
