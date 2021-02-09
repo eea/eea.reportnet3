@@ -941,7 +941,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isNil(designerState.webform.value) ? renderRadioButtons() : switchView}
+          {!isNil(designerState.webform) && !isNil(designerState.webform.value) && !designerState.isDataflowOpen
+            ? renderRadioButtons()
+            : switchView}
         </div>
       </div>
     );
@@ -1082,7 +1084,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <InputTextarea
               className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
               collapsedHeight={55}
-              disabled={designerState.hasWritePermissions}
+              disabled={designerState.isDataflowOpen}
               expandableOnClick={true}
               id="datasetDescription"
               key="datasetDescription"
@@ -1098,9 +1100,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className={styles.datasetConfigurationButtons}>
               <Button
                 className={`p-button-secondary ${
-                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
                 } datasetSchema-uniques-help-step`}
-                disabled={designerState.hasWritePermissions}
+                disabled={designerState.isDataflowOpen}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
@@ -1112,9 +1114,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Fragment>
                 <Button
                   className={`p-button-rounded p-button-secondary ${
-                    !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                    !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
                   }`}
-                  disabled={designerState.hasWritePermissions}
+                  disabled={designerState.isDataflowOpen}
                   icon={'import'}
                   label={resources.messages['importDataset']}
                   onClick={
@@ -1135,9 +1137,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               </Fragment>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.hasWritePermissions}
+                disabled={designerState.isDataflowOpen}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
                 label={resources.messages['exportDataset']}
@@ -1155,11 +1157,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && designerState.viewType['tabularData']
+                  (designerState.datasetHasData && designerState.viewType['tabularData']) ||
+                  !designerState.isDataflowOpen
                     ? ' p-button-animated-blink'
                     : null
                 }`}
-                disabled={designerState.hasWritePermissions}
+                disabled={designerState.isDataflowOpen}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -1169,11 +1172,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetStatistics.datasetErrors && designerState.viewType['tabularData']
+                  (designerState.datasetStatistics.datasetErrors && designerState.viewType['tabularData']) ||
+                  !designerState.isDataflowOpen
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors || designerState.hasWritePermissions}
+                disabled={!designerState.datasetStatistics.datasetErrors || designerState.isDataflowOpen}
                 icon={'warning'}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
@@ -1193,9 +1197,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.hasWritePermissions}
+                disabled={designerState.isDataflowOpen}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
@@ -1211,28 +1215,35 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && 'p-button-animated-blink'
+                  (designerState.datasetHasData || !designerState.isDataflowOpen) && 'p-button-animated-blink'
                 }`}
-                disabled={!designerState.datasetHasData || designerState.hasWritePermissions}
+                disabled={!designerState.datasetHasData || designerState.isDataflowOpen}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
-                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                  !designerState.hasWritePermissions && !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.hasWritePermissions}
+                disabled={designerState.hasWritePermissions || designerState.isDataflowOpen}
                 icon={'camera'}
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
 
+              {console.log(
+                '!designerState.hasWritePermissions || !designerState.isDataflowOpen',
+                !designerState.hasWritePermissions || !designerState.isDataflowOpen
+              )}
+              {console.log('!designerState.hasWritePermissions', !designerState.hasWritePermissions)}
+              {console.log('!designerState.isDataflowOpen', !designerState.isDataflowOpen)}
+
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  ${!designerState.hasWritePermissions ? 'p-button-animated-blink' : null}`}
-                disabled={designerState.hasWritePermissions}
+                }  ${!designerState.isDataflowOpen ? 'p-button-animated-blink' : null}`}
+                disabled={designerState.isDataflowOpen}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
