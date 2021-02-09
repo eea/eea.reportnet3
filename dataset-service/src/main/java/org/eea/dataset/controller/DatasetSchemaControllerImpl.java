@@ -934,10 +934,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       String fileName = "dataflow_export_" + dataflowId + ".zip";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-
+      LOG.info("Schemas from the dataflowId {} exported", dataflowId);
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (Exception e) {
-      LOG.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
+      LOG_ERROR.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
@@ -963,7 +963,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       dataschemaService.importSchemas(dataflowId, file);
     } catch (Exception e) {
-      LOG.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
+      LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }

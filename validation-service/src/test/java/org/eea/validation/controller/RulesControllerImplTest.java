@@ -8,6 +8,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -643,6 +644,33 @@ public class RulesControllerImplTest {
     rulesControllerImpl.deleteAutomaticRuleByReferenceId(Mockito.any(), Mockito.any());
     Mockito.verify(rulesService, times(1)).deleteAutomaticRuleByReferenceId(Mockito.any(),
         Mockito.any());
+  }
+
+  @Test
+  public void testImportRules() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    rulesControllerImpl.importRulesSchema(new ImportSchemaVO());
+    Mockito.verify(rulesService, times(1)).importRulesSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testImportRulesException() throws EEAException {
+
+    try {
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      Mockito.doThrow(EEAException.class).when(rulesService).importRulesSchema(Mockito.any(),
+          Mockito.any(), Mockito.any());
+      rulesControllerImpl.importRulesSchema(new ImportSchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+
   }
 
 }
