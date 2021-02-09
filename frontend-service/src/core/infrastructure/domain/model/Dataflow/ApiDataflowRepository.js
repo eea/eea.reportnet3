@@ -104,9 +104,9 @@ const all = async userData => {
     }
   }
 
-  const groupByUserRequesetStatus = CoreUtils.onGroupBy('userRequestStatus');
+  const groupByUserRequestStatus = CoreUtils.onGroupBy('userRequestStatus');
 
-  const dataflowsData = groupByUserRequesetStatus(dataflows);
+  const dataflowsData = groupByUserRequestStatus(dataflows);
 
   const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
@@ -411,6 +411,7 @@ const parseDataflowDTO = dataflowDTO =>
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
+    isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
@@ -604,8 +605,8 @@ const schemasValidation = async dataflowId => {
   return await apiDataflow.schemasValidation(dataflowId);
 };
 
-const update = async (dataflowId, name, description, obligationId) =>
-  await apiDataflow.update(dataflowId, name, description, obligationId);
+const update = async (dataflowId, name, description, obligationId, isReleasable) =>
+  await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
 
 export const ApiDataflowRepository = {
   accept,

@@ -21,3 +21,13 @@
 .releaseSnapshotsDialog :global .p-dialog-content {
   max-height: 50vh !important;
 }
+
+.isReleasableLabel {
+  padding-left: 0.5rem;
+  a {
+    color: var(--main-font-color);
+    &:hover {
+      color: var(--main-font-color);
+    }
+  }
+}
