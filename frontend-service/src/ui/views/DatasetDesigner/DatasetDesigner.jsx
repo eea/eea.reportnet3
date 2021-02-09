@@ -110,6 +110,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     importButtonsList: [],
     initialDatasetDescription: '',
     isConfigureWebformDialogVisible: false,
+    isDataflowOpen: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
@@ -240,6 +241,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     getImportList();
   }, [designerState.externalOperationsList]);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      const isDataflowOpen =
+        (userContext.hasPermission(
+          [config.permissions.DATA_CUSTODIAN],
+          `${config.permissions.DATAFLOW}${dataflowId}`
+        ) ||
+          userContext.hasPermission(
+            [config.permissions.DATA_STEWARD],
+            `${config.permissions.DATAFLOW}${dataflowId}`
+          )) &&
+        designerState?.metaData?.dataflow?.status === 'DRAFT';
+
+      designerDispatch({
+        type: 'IS_DATAFLOW_OPEN',
+        payload: { isDataflowOpen }
+      });
+    }
+  }, [userContext, designerState?.metaData?.dataflow?.status]);
+
+  console.log('designerState.isDataflowOpen', designerState.isDataflowOpen);
 
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
@@ -1221,6 +1244,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             editable={true}
             getIsTableCreated={setIsTableCreated}
             history={history}
+            isDataflowOpen={designerState.isDataflowOpen}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
             isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
