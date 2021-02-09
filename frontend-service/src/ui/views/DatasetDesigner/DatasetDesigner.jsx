@@ -1157,8 +1157,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  (designerState.datasetHasData && designerState.viewType['tabularData']) ||
-                  !designerState.isDataflowOpen
+                  designerState.datasetHasData && designerState.viewType['tabularData'] && !designerState.isDataflowOpen
                     ? ' p-button-animated-blink'
                     : null
                 }`}
@@ -1172,7 +1171,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  (designerState.datasetStatistics.datasetErrors && designerState.viewType['tabularData']) ||
+                  designerState.datasetStatistics.datasetErrors &&
+                  designerState.viewType['tabularData'] &&
                   !designerState.isDataflowOpen
                     ? 'p-button-animated-blink'
                     : null
@@ -1215,7 +1215,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  (designerState.datasetHasData || !designerState.isDataflowOpen) && 'p-button-animated-blink'
+                  designerState.datasetHasData && !designerState.isDataflowOpen && 'p-button-animated-blink'
                 }`}
                 disabled={!designerState.datasetHasData || designerState.isDataflowOpen}
                 icon={'dashboard'}
@@ -1231,13 +1231,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
-
-              {console.log(
-                '!designerState.hasWritePermissions || !designerState.isDataflowOpen',
-                !designerState.hasWritePermissions || !designerState.isDataflowOpen
-              )}
-              {console.log('!designerState.hasWritePermissions', !designerState.hasWritePermissions)}
-              {console.log('!designerState.isDataflowOpen', !designerState.isDataflowOpen)}
 
               <Button
                 className={`p-button-rounded p-button-${
