@@ -966,8 +966,8 @@
     "importSchema": "Import Schema",
     "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
     "releasingLeftSideBarButton": "Releasing status",
-    "isReleaseableDataflowCheckboxLabel":"Dataflow is opened for releases",
-    "isReleaseableDataflowDialogHeader":"Open/close release period",
+    "isReleasableDataflowCheckboxLabel":"Dataflow is opened for releases",
+    "isReleasableDataflowDialogHeader":"Open/close release period",
     "releaseButtonTooltip": "Releasing period is closed"
   }
 }

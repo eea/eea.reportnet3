@@ -718,7 +718,7 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isReleaseableDialogVisible && (
           <ConfirmDialog
             disabledConfirm={dataflowState.data.isReleasable === dataflowState.isReleasable}
-            header={resources.messages['isReleaseableDataflowDialogHeader']}
+            header={resources.messages['isReleasableDataflowDialogHeader']}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
             onConfirm={onConfirmUpdateIsReleaseable}
@@ -733,7 +733,7 @@ const Dataflow = withRouter(({ history, match }) => {
             />
             <label htmlFor="isReleaseableCheckbox" className={styles.isReleaseableLabel}>
               <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
-                {resources.messages['isReleaseableDataflowCheckboxLabel']}
+                {resources.messages['isReleasableDataflowCheckboxLabel']}
               </a>
             </label>
           </ConfirmDialog>
