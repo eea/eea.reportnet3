@@ -262,6 +262,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [userContext, designerState?.metaData?.dataflow?.status]);
 
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      if (
+        designerState?.metaData?.dataflow?.status === 'DRAFT' &&
+        !userContext.hasPermission([config.permissions.DATA_STEWARD], `${config.permissions.DATAFLOW}${dataflowId}`) &&
+        !userContext.hasPermission([config.permissions.DATA_CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
+      ) {
+        notificationContext.add({ type: 'NOT_ALLOWED_ERROR' });
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+    }
+  }, [designerState?.metaData?.dataflow?.status, userContext]);
+
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   const callSetMetaData = async () => {
