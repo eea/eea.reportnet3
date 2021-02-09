@@ -332,10 +332,10 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { isExportEuDatasetLoading: value }
     });
 
-  const setIsReleaseable = value =>
+  const setIsReleaseable = isReleaseable =>
     dataflowDispatch({
       type: 'SET_IS_RELEASEABLE',
-      payload: { isReleaseable: value }
+      payload: { isReleaseable: isReleaseable }
     });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
