@@ -39,6 +39,7 @@ const DataFormFieldEditor = ({
   fieldValue = '',
   isConditional = false,
   isConditionalChanged = false,
+  isSaving,
   isVisible,
   onChangeForm,
   onCheckCoordinateFieldsError,
@@ -274,7 +275,7 @@ const DataFormFieldEditor = ({
     return (
       <Dropdown
         appendTo={document.body}
-        disabled={column.readOnly && reporting}
+        disabled={(column.readOnly && reporting) || isSaving}
         onChange={e => {
           onChangeForm(field, e.target.value.value, isConditional);
         }}
@@ -291,7 +292,7 @@ const DataFormFieldEditor = ({
       <MultiSelect
         addSpaceCommaSeparator={true}
         appendTo={document.body}
-        disabled={column.readOnly && reporting}
+        disabled={(column.readOnly && reporting) || isSaving}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value, isConditional)}
         options={column.codelistItems
@@ -361,7 +362,7 @@ const DataFormFieldEditor = ({
       renderTextarea(field, fieldValue)
     ) : (
       <InputText
-        disabled={column.readOnly && reporting}
+        disabled={(column.readOnly && reporting) || isSaving}
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
@@ -384,7 +385,7 @@ const DataFormFieldEditor = ({
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
-        disabled={column.readOnly && reporting}
+        disabled={(column.readOnly && reporting) || isSaving}
         monthNavigator={true}
         onChange={e =>
           onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
@@ -409,7 +410,7 @@ const DataFormFieldEditor = ({
           addSpaceCommaSeparator={true}
           appendTo={document.body}
           clearButton={false}
-          disabled={column.readOnly && reporting}
+          disabled={(column.readOnly && reporting) || isSaving}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           maxSelectedLabels={10}
@@ -434,7 +435,7 @@ const DataFormFieldEditor = ({
         <Dropdown
           appendTo={document.body}
           currentValue={fieldValue}
-          disabled={column.readOnly && reporting}
+          disabled={(column.readOnly && reporting) || isSaving}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           filterBy="itemType,value"
@@ -467,7 +468,7 @@ const DataFormFieldEditor = ({
         <label className={styles.epsg}>{'Coords:'}</label>
         <InputText
           className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
-          disabled={column.readOnly && reporting}
+          disabled={(column.readOnly && reporting) || isSaving}
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
             onChangeForm(
@@ -535,7 +536,7 @@ const DataFormFieldEditor = ({
   const renderTextarea = (field, fieldValue) => (
     <InputTextarea
       collapsedHeight={75}
-      disabled={column.readOnly && reporting}
+      disabled={(column.readOnly && reporting) || isSaving}
       id={field}
       keyfilter={RecordUtils.getFilter(type)}
       maxLength={getMaxCharactersByType(type)}
