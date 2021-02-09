@@ -257,6 +257,7 @@ const DataViewer = withRouter(
       hasWebformWritePermissions,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
+      isDataflowOpen,
       onFileDeleteVisible,
       onFileDownload,
       onFileUploadVisible,
