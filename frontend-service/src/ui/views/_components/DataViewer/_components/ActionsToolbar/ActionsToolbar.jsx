@@ -194,9 +194,9 @@ const ActionsToolbar = ({
         {(hasWritePermissions || showWriteButtons) && (
           <Button
             className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
-              !hasWritePermissions ? null : 'p-button-animated-blink'
+              !hasWritePermissions || isDataflowOpen ? null : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions}
+            disabled={!hasWritePermissions || isDataflowOpen}
             icon={'import'}
             label={resources.messages['importTable']}
             onClick={() => setImportTableDialogVisible(true)}
@@ -205,7 +205,10 @@ const ActionsToolbar = ({
         {isExportable && (
           <Button
             id="buttonExportTable"
-            className="p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step p-button-animated-blink"
+            className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
+              isDataflowOpen ? null : 'p-button-animated-blink'
+            }`}
+            disabled={isDataflowOpen}
             icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
             label={resources.messages['exportTable']}
             onClick={event => {
@@ -226,11 +229,11 @@ const ActionsToolbar = ({
         {(hasWritePermissions || showWriteButtons) && (
           <Button
             className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
-              !hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted
+              !hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted || isDataflowOpen
                 ? null
                 : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted}
+            disabled={!hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted || isDataflowOpen}
             icon={'trash'}
             label={resources.messages['deleteTable']}
             onClick={() => onSetVisible(setDeleteDialogVisible, true)}
@@ -238,8 +241,10 @@ const ActionsToolbar = ({
         )}
 
         <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-showColumn-help-step`}
-          disabled={false}
+          className={`p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step ${
+            isDataflowOpen ? null : 'p-button-animated-blink'
+          }`}
+          disabled={isDataflowOpen}
           icon={'eye'}
           iconClasses={filter.visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
           label={resources.messages['showHideColumns']}
