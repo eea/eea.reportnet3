@@ -725,13 +725,13 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => onCloseIsReleaseableDialog()}
             visible={dataflowState.isReleaseableDialogVisible}>
             <Checkbox
-              id="isReleaseableCheckbox"
-              inputId="isReleaseableCheckbox"
+              id="isReleasableCheckbox"
+              inputId="isReleasableCheckbox"
               isChecked={dataflowState.isReleasable}
               onChange={() => setIsReleaseable(!dataflowState.isReleasable)}
               role="checkbox"
             />
-            <label htmlFor="isReleaseableCheckbox" className={styles.isReleaseableLabel}>
+            <label htmlFor="isReleasableCheckbox" className={styles.isReleasableLabel}>
               <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resources.messages['isReleasableDataflowCheckboxLabel']}
               </a>
