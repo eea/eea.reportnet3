@@ -291,15 +291,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const manageRoleDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
-    />
-  );
-
   const manageRightsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -401,18 +392,6 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const getCurrentDatasetId = () => {
-    if (isEmpty(dataflowState.data)) return null;
-
-    const { datasets } = dataflowState.data;
-
-    return first(
-      datasets
-        .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
-        .map(dataset => dataset.datasetId)
-    );
-  };
-
   const manageRoleDialogFooter = (
     <>
       <Button
@@ -438,6 +417,18 @@ const Dataflow = withRouter(({ history, match }) => {
       />
     </>
   );
+
+  const getCurrentDatasetId = () => {
+    if (isEmpty(dataflowState.data)) return null;
+
+    const { datasets } = dataflowState.data;
+
+    return first(
+      datasets
+        .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
+        .map(dataset => dataset.datasetId)
+    );
+  };
 
   const onLoadPermission = () => {
     const currentDatasetId = getCurrentDatasetId();
@@ -634,7 +625,7 @@ const Dataflow = withRouter(({ history, match }) => {
     ],
     setIsDataUpdated
   );
-  
+
   const getImportExtensions = ['.csv'].join(', ').toLowerCase();
 
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
@@ -824,7 +815,7 @@ const Dataflow = withRouter(({ history, match }) => {
           </ConfirmDialog>
         )}
 
-{dataflowState.isImportLeadReportersVisible && (
+        {dataflowState.isImportLeadReportersVisible && (
           <CustomFileUpload
             dialogHeader={`${resources.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}
@@ -845,7 +836,6 @@ const Dataflow = withRouter(({ history, match }) => {
               dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
             })}`}
           />
-
         )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
