@@ -60,6 +60,7 @@ const DataViewer = withRouter(
   ({
     hasCountryCode,
     hasWritePermissions,
+    isDataflowOpen,
     isDatasetDeleted = false,
     isExportable,
     isFilterable,
@@ -1120,6 +1121,7 @@ const DataViewer = withRouter(
           hasCountryCode={hasCountryCode}
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
+          isDataflowOpen={isDataflowOpen}
           isExportable={isExportable}
           isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}

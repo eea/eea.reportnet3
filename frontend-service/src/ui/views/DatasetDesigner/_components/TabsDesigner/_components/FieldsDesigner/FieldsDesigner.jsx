@@ -30,6 +30,7 @@ export const FieldsDesigner = ({
   datasetId,
   datasetSchemaId,
   datasetSchemas,
+  isDataflowOpen,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -344,6 +345,7 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           hasWritePermissions={true}
+          isDataflowOpen={isDataflowOpen}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}

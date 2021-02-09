@@ -30,6 +30,7 @@ const ActionsToolbar = ({
   datasetId,
   hasWritePermissions,
   hideValidationFilter,
+  isDataflowOpen,
   isExportable,
   isFilterable = true,
   isFilterValidationsActive,
