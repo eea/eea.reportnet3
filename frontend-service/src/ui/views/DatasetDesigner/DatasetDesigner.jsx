@@ -110,6 +110,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     importButtonsList: [],
     initialDatasetDescription: '',
     isConfigureWebformDialogVisible: false,
+    isDataflowOpen: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
@@ -243,7 +244,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      const hasWritePermissions =
+      const isDataflowOpen =
         (userContext.hasPermission(
           [config.permissions.DATA_CUSTODIAN],
           `${config.permissions.DATAFLOW}${dataflowId}`
@@ -255,8 +256,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerState?.metaData?.dataflow?.status === 'DRAFT';
 
       designerDispatch({
-        type: 'HAS_WRITE_PERMISSIONS',
-        payload: { hasWritePermissions }
+        type: 'IS_DATAFLOW_OPEN',
+        payload: { isDataflowOpen }
       });
     }
   }, [userContext, designerState?.metaData?.dataflow?.status]);
@@ -1256,6 +1257,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             editable={true}
             getIsTableCreated={setIsTableCreated}
             history={history}
+            isDataflowOpen={designerState.isDataflowOpen}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
             isValidationSelected={designerState.dataViewerOptions.isValidationSelected}

@@ -52,6 +52,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 
+    case 'IS_DATAFLOW_OPEN':
+      return { ...state, isDataflowOpen: payload.isDataflowOpen };
+
     case 'UPDATED_IS_DUPLICATED':
       return { ...state, isDuplicatedToManageUnique: payload.value };
 
