@@ -1007,6 +1007,7 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetId={datasetId}
             datasetName={datasetName}
             hasWritePermissions={hasWritePermissions}
+            isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             schemaTables={schemaTables}
