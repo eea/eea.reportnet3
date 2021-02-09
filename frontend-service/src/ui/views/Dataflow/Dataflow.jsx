@@ -84,6 +84,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isExportEuDatasetLoading: false,
+    isExportDialogVisible: false,
     isImportLeadReportersVisible: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
@@ -170,6 +171,15 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'edit'
       };
 
+      const exportSchemaBtn = {
+        className: 'dataflow-export-schema-help-step',
+        icon: 'download',
+        isVisible: buttonsVisibility.exportBtn,
+        label: 'exportSchema',
+        onClick: () => manageDialogs('isExportDialogVisible', true),
+        title: 'exportSchema'
+      };
+
       const manageEditorsBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
@@ -197,11 +207,18 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
+      const allButtons = [propertiesBtn, editBtn, exportSchemaBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
+      console.log(dataflowState.designDatasetSchemas.length);
     }
-  }, [dataflowState.userRoles, dataflowState.status, representativeId, dataflowState.datasetId]);
+  }, [
+    dataflowState.userRoles,
+    dataflowState.status,
+    representativeId,
+    dataflowState.datasetId,
+    dataflowState.designDatasetSchemas.length
+  ]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
@@ -233,6 +250,7 @@ const Dataflow = withRouter(({ history, match }) => {
       return {
         apiKeyBtn: false,
         editBtn: false,
+        exportBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
         propertiesBtn: false
@@ -242,6 +260,7 @@ const Dataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
+      exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
@@ -320,7 +339,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onEditDataflow = (newName, newDescription) => {
     dataflowDispatch({
       type: 'ON_EDIT_DATA',
-      payload: { name: newName, description: newDescription, isEditDialogVisible: false }
+      payload: { name: newName, description: newDescription, isEditDialogVisible: false, isExportDialogVisible: false }
     });
     onLoadReportingDataflow();
   };
@@ -427,6 +446,8 @@ const Dataflow = withRouter(({ history, match }) => {
         });
 
         setUpdatedDatasetSchema(datasetSchemaInfo);
+      } else {
+        dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: [] } });
       }
 
       if (!isNil(dataProviderId)) {
@@ -520,6 +541,25 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isReleaseDialogVisible', true);
   };
 
+  const onConfirmExport = async () => {
+    try {
+      const response = await DataflowService.downloadById(dataflowId);
+      if (!isNil(response)) {
+        DownloadFile(
+          response,
+          `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT'
+      });
+    } finally {
+      manageDialogs('isExportDialogVisible', false);
+    }
+  };
+
   const onConfirmRelease = async () => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
@@ -535,7 +575,11 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   useCheckNotifications(
-    ['ADD_DATACOLLECTION_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'],
+    [
+      'ADD_DATACOLLECTION_COMPLETED_EVENT',
+      'COPY_DATASET_SCHEMA_COMPLETED_EVENT',
+      'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'
+    ],
     setIsDataUpdated
   );
 
@@ -661,7 +705,19 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        {dataflowState.isImportLeadReportersVisible && (
+        {dataflowState.isExportDialogVisible && (
+          <ConfirmDialog
+            header={resources.messages['exportSchema']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmExport}
+            onHide={() => manageDialogs('isExportDialogVisible', false)}
+            visible={dataflowState.isExportDialogVisible}>
+            {resources.messages['confirmExportSchema']}
+          </ConfirmDialog>
+        )}
+
+{dataflowState.isImportLeadReportersVisible && (
           <CustomFileUpload
             dialogHeader={`${resources.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}

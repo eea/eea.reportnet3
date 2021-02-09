@@ -4,21 +4,13 @@
             {
                 "text": "CSV (.csv)",
                 "code": "csv"    
-            },
-            {
-                "text": "XLS (.xls)",
-                "code": "xls"    
-            },
+            },          
             {
                 "text": "XLSX (.xlsx)",
                 "code": "xlsx"    
             }
         ],
-        "exportDatasetTypes": [
-            {
-                "text": "XLS (.xls)",
-                "code": "xls"    
-            },
+        "exportDatasetTypes": [           
             {
                 "text": "XLSX (.xlsx)",
                 "code": "xlsx"    

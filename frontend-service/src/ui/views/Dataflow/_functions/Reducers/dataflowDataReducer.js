@@ -39,6 +39,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         ...state,
         description: payload.description,
         isEditDialogVisible: payload.isEditDialogVisible,
+        isExportDialogVisible: payload.isExportDialogVisible,
         name: payload.name
       };
 

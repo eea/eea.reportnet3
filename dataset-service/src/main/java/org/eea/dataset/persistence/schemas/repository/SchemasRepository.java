@@ -3,6 +3,7 @@
  */
 package org.eea.dataset.persistence.schemas.repository;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -22,4 +23,12 @@ public interface SchemasRepository
    * @return the data set schema
    */
   DataSetSchema findByIdDataSetSchema(ObjectId idDatasetSchema);
+
+  /**
+   * Find by id data flow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  List<DataSetSchema> findByIdDataFlow(Long idDataflow);
 }

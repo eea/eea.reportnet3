@@ -161,4 +161,13 @@ public interface IntegrationController {
   void executeExternalIntegration(@PathVariable(value = "integrationId") Long integrationId,
       @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "replace", defaultValue = "false") Boolean replace);
+
+
+  /**
+   * Creates the integrations.
+   *
+   * @param integrations the integrations
+   */
+  @PostMapping("/private/createIntegrations")
+  void createIntegrations(@RequestBody List<IntegrationVO> integrations);
 }
