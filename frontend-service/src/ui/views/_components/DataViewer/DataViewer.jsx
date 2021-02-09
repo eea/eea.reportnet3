@@ -1162,6 +1162,7 @@ const DataViewer = withRouter(
               hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
+                  isDataflowOpen={isDataflowOpen}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
