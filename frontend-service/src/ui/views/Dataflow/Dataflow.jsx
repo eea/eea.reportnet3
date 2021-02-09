@@ -204,7 +204,6 @@ const Dataflow = withRouter(({ history, match }) => {
       const allButtons = [propertiesBtn, editBtn, exportSchemaBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
-      console.log(dataflowState.designDatasetSchemas.length);
     }
   }, [
     dataflowState.userRoles,

@@ -964,6 +964,8 @@
     "importDatasetSchemaCompletedEvent": "Dataflow schema imported at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
     "confirmExportSchema": "Are you sure you want to download the dataflow schema?",
     "importSchema": "Import Schema",
-    "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>"
+    "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
+    "moreElements": "There are more elements, use the search to limit results",
+    "getReferencedLinkValuesError": "Error while loading the referenced field values"
   }
 }
