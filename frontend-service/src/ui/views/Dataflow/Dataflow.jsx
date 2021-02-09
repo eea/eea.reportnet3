@@ -79,24 +79,24 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
-    isExportEuDatasetLoading: false,
     isExportDialogVisible: false,
+    isExportEuDatasetLoading: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
+    isReleaseable: false,
+    isReleaseableDialogVisible: false,
+    isReleaseDialogVisible: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
-    isReleaseDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
     updatedDatasetSchema: undefined,
-    userRoles: [],
-    isReleaseableDialogVisible: false,
-    isReleaseable: false
+    userRoles: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -415,10 +415,10 @@ const Dataflow = withRouter(({ history, match }) => {
         payload: {
           data: dataflow,
           description: dataflow.description,
+          isReleaseable: dataflow.isReleaseable,
           name: dataflow.name,
           obligations: dataflow.obligation,
-          status: dataflow.status,
-          isReleaseable: dataflow.isReleaseable
+          status: dataflow.status
         }
       });
 
