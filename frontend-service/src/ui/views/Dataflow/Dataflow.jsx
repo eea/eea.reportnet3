@@ -97,6 +97,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseDialogVisible: false,
     name: '',
     obligations: {},
+    representativesImport: false,
     status: '',
     updatedDatasetSchema: undefined,
     userRoles: []
@@ -210,7 +211,6 @@ const Dataflow = withRouter(({ history, match }) => {
       const allButtons = [propertiesBtn, editBtn, exportSchemaBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
-      console.log(dataflowState.designDatasetSchemas.length);
     }
   }, [
     dataflowState.userRoles,
@@ -351,7 +351,10 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       const response = await RepresentativeService.downloadById(dataflowId);
       if (!isNil(response)) {
-        DownloadFile(response, `${dataflowState.name}_${Date.now()}.csv`);
+        DownloadFile(
+          response,
+          `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Lead_Reporters.csv`
+        );
       }
     } catch (error) {
       console.error(error);
@@ -487,15 +490,26 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const onUploadLeadReporters = () => {
+  const onUploadLeadReporters = event => {
     manageDialogs('isImportLeadReportersVisible', false);
-    notificationContext.add({
-      type: 'DATAFLOW_LOADING_LEAD_REPORTERS_INIT',
-      content: {
-        datasetLoadingMessage: resources.messages['dataflowLoadingLeadReportersInit'],
-        dataflowName: TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)
+    try {
+      if (!isNil(event.xhr) && !isNil(event.xhr.response)) {
+        DownloadFile(
+          event.xhr.response,
+          `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Results.csv`
+        );
+        dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: true });
       }
-    });
+    } catch (error) {
+      console.error(`Error while downloading the file: ${error}`);
+      // notificationContext.add({
+      //   type: 'DATAFLOW_LOADING_LEAD_REPORTERS_INIT',
+      //   content: {
+      //     datasetLoadingMessage: resources.messages['dataflowLoadingLeadReportersInit'],
+      //     dataflowName: TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)
+      //   }
+      // });
+    }
   };
 
   const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
@@ -655,10 +669,14 @@ const Dataflow = withRouter(({ history, match }) => {
               <RepresentativesList
                 dataflowId={dataflowId}
                 dataflowRepresentatives={dataflowState.data.representatives}
+                representativesImport={dataflowState.representativesImport}
                 isActiveManageRolesDialog={dataflowState.isManageRolesDialogVisible}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
+                setRepresentativeImport={isImport =>
+                  dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })
+                }
               />
             </div>
           </Dialog>
@@ -717,7 +735,7 @@ const Dataflow = withRouter(({ history, match }) => {
           </ConfirmDialog>
         )}
 
-{dataflowState.isImportLeadReportersVisible && (
+        {dataflowState.isImportLeadReportersVisible && (
           <CustomFileUpload
             dialogHeader={`${resources.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}

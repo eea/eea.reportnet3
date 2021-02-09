@@ -15,6 +15,8 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_FORM_HAS_REPRESENTATIVES':
       return { ...state, formHasRepresentatives: payload.formHasRepresentatives };
 
+    case 'SET_REPRESENTATIVES_IMPORT':
+      return { ...state, representativesImport: payload };
     case 'LOAD_PERMISSIONS':
       return {
         ...state,

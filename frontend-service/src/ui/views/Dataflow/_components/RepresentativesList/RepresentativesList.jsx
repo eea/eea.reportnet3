@@ -16,12 +16,12 @@ import {
   createUnusedOptionsList,
   getAllDataProviders,
   getInitialData,
+  isValidEmail,
   onAddProvider,
   onDataProviderIdChange,
   onDeleteConfirm,
   onExportLeadReportersTemplate,
-  onKeyDown,
-  isValidEmail
+  onKeyDown
 } from './_functions/Utils/representativeUtils';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
@@ -39,9 +39,11 @@ const RepresentativesList = ({
   dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
+  representativesImport = false,
   setDataProviderSelected,
   setFormHasRepresentatives,
-  setHasRepresentativesWithoutDatasets
+  setHasRepresentativesWithoutDatasets,
+  setRepresentativeImport
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -52,20 +54,27 @@ const RepresentativesList = ({
     dataflowRepresentatives: dataflowRepresentatives,
     dataProvidersTypesList: [],
     initialRepresentatives: [],
+    isLoading: false,
     isVisibleConfirmDeleteDialog: false,
     refresher: false,
-    representativesHaveError: [],
     representativeIdToDelete: '',
     representatives: [],
+    representativesHaveError: [],
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: [],
-    isLoading: false
+    unusedDataProvidersOptions: []
   };
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
   }, [formState.refresher]);
+
+  useEffect(() => {
+    if (representativesImport) {
+      getInitialData(formDispatcher, dataflowId, formState);
+      setRepresentativeImport(false);
+    }
+  }, [representativesImport]);
 
   useEffect(() => {
     if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
