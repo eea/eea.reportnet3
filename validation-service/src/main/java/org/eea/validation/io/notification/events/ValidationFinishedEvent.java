@@ -1,11 +1,13 @@
 package org.eea.validation.io.notification.events;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -57,9 +59,20 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
 
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    String datasetName = dataSetMetabaseVO.getDataSetName();
-    DatasetTypeEnum type = dataSetMetabaseVO.getDatasetTypeEnum();
+    List<DesignDatasetVO> desingDataset = datasetMetabaseController
+        .findDesignDataSetIdByDataflowId(dataSetMetabaseVO.getDataflowId());
 
+    // we find the name of the dataset to asing it for the notiicaion
+    String datasetName = "";
+    for (DesignDatasetVO designDatasetVO : desingDataset) {
+      if (designDatasetVO.getDatasetSchema()
+          .equalsIgnoreCase(dataSetMetabaseVO.getDatasetSchema())) {
+        datasetName = designDatasetVO.getDataSetName();
+      }
+    }
+
+    String country = dataSetMetabaseVO.getDataSetName();
+    DatasetTypeEnum type = dataSetMetabaseVO.getDatasetTypeEnum();
     String dataflowName =
         dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName();
 
@@ -69,6 +82,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("dataflowId", dataSetMetabaseVO.getDataflowId());
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
+    notification.put("country", country);
     notification.put("type", type);
     return notification;
   }
