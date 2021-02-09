@@ -399,8 +399,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     List<Representative> representativeList = new ArrayList();
     for (String representativeData : everyLines) {
       String[] dataLine = representativeData.split("[|]");
-      String email = dataLine[0];
-      String contryCode = dataLine[1];
+      String email = dataLine[0].replaceAll("\"", "");
+      String contryCode = dataLine[1].replaceAll("\"", "");
       if (!countryCodeList.contains(contryCode)
           && null == userManagementControllerZull.getUserByEmail(email)) {
         fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
