@@ -55,6 +55,7 @@ export const WebformField = ({
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
+    isLoadingData: false,
     isSubmiting: false,
     linkItemsOptions: [],
     record: record,
@@ -69,6 +70,7 @@ export const WebformField = ({
     initialFieldValue,
     isDeleteAttachmentVisible,
     isFileDialogVisible,
+    isLoadingData,
     isSubmiting,
     linkItemsOptions,
     sectorAffectedValue,
@@ -117,46 +119,56 @@ export const WebformField = ({
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
-    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
-      datasetId,
-      field.fieldSchemaId,
-      filter,
-      !isNil(conditionalField) ? conditionalField.value : field.value,
-      datasetSchemaId,
-      100
-    );
+    try {
+      webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: true });
+      const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+        datasetId,
+        field.fieldSchemaId,
+        filter,
+        !isNil(conditionalField) ? conditionalField.value : field.value,
+        datasetSchemaId,
+        100
+      );
 
-    const linkItems = referencedFieldValues
-      .map(referencedField => {
-        return {
-          itemType: `${
-            !isNil(referencedField.label) &&
-            referencedField.label !== '' &&
-            referencedField.label !== referencedField.value
-              ? `${referencedField.label}`
-              : referencedField.value
-          }`,
-          value: referencedField.value
+      const linkItems = referencedFieldValues
+        .map(referencedField => {
+          return {
+            itemType: `${
+              !isNil(referencedField.label) &&
+              referencedField.label !== '' &&
+              referencedField.label !== referencedField.value
+                ? `${referencedField.label}`
+                : referencedField.value
+            }`,
+            value: referencedField.value
+          };
+        })
+        .sort((a, b) => a.value - b.value);
+
+      if (!field.pkHasMultipleValues) {
+        linkItems.unshift({
+          itemType: resources.messages['noneCodelist'],
+          value: ''
+        });
+      }
+
+      if (referencedFieldValues.length > 99) {
+        linkItems[linkItems.length - 1] = {
+          disabled: true,
+          itemType: resources.messages['moreElements'],
+          value: ''
         };
-      })
-      .sort((a, b) => a.value - b.value);
+      }
 
-    if (!field.pkHasMultipleValues) {
-      linkItems.unshift({
-        itemType: resources.messages['noneCodelist'],
-        value: ''
+      webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
+    } catch (error) {
+      console.error(`Error getting referenced link values: ${error}`);
+      notificationContext.add({
+        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
       });
+    } finally {
+      webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: false });
     }
-
-    if (referencedFieldValues.length > 99) {
-      linkItems[linkItems.length - 1] = {
-        disabled: true,
-        itemType: resources.messages['moreElements'],
-        value: ''
-      };
-    }
-
-    webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
   };
 
   const onFocusField = value => {
@@ -288,8 +300,10 @@ export const WebformField = ({
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
+              disabled={isLoadingData}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              isLoadingData={isLoadingData}
               maxSelectedLabels={10}
               onChange={event => {
                 onFillField(field, option, event.target.value, isConditional);
@@ -308,9 +322,11 @@ export const WebformField = ({
             <Dropdown
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
+              disabled={isLoadingData}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
+              isLoadingData={isLoadingData}
               onChange={event => {
                 const value =
                   typeof event.target.value === 'object' && !Array.isArray(event.target.value)

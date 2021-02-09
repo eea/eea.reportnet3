@@ -23,6 +23,7 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
@@ -54,6 +55,7 @@ const DataFormFieldEditor = ({
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const dropdownRef = useRef(null);
@@ -67,6 +69,7 @@ const DataFormFieldEditor = ({
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
@@ -227,44 +230,55 @@ const DataFormFieldEditor = ({
     const conditionalFieldValue = !isNil(conditionalField)
       ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
       : '';
-    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
-      datasetId,
-      field,
-      // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
-      filter,
-      conditionalFieldValue,
-      datasetSchemaId,
-      100
-    );
-    const linkItems = referencedFieldValues
-      .map(referencedField => {
-        return {
-          itemType: `${referencedField.value}${
-            !isNil(referencedField.label) &&
-            referencedField.label !== '' &&
-            referencedField.label !== referencedField.value
-              ? ` - ${referencedField.label}`
-              : ''
-          }`,
-          value: referencedField.value
-        };
-      })
-      .sort((a, b) => a.value - b.value);
 
-    if (!hasMultipleValues) {
-      linkItems.unshift({
-        itemType: resources.messages['noneCodelist'],
-        value: ''
+    try {
+      setIsLoadingData(true);
+      const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+        datasetId,
+        field,
+        // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
+        filter,
+        conditionalFieldValue,
+        datasetSchemaId,
+        100
+      );
+      const linkItems = referencedFieldValues
+        .map(referencedField => {
+          return {
+            itemType: `${referencedField.value}${
+              !isNil(referencedField.label) &&
+              referencedField.label !== '' &&
+              referencedField.label !== referencedField.value
+                ? ` - ${referencedField.label}`
+                : ''
+            }`,
+            value: referencedField.value
+          };
+        })
+        .sort((a, b) => a.value - b.value);
+
+      if (!hasMultipleValues) {
+        linkItems.unshift({
+          itemType: resources.messages['noneCodelist'],
+          value: ''
+        });
+      }
+      if (referencedFieldValues.length > 99) {
+        linkItems[linkItems.length - 1] = {
+          disabled: true,
+          itemType: resources.messages['moreElements'],
+          value: ''
+        };
+      }
+      return linkItems;
+    } catch (error) {
+      console.error(`Error getting referenced link values: ${error}`);
+      notificationContext.add({
+        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
       });
+    } finally {
+      setIsLoadingData(false);
     }
-    if (referencedFieldValues.length > 99) {
-      linkItems[linkItems.length - 1] = {
-        disabled: true,
-        itemType: resources.messages['moreElements'],
-        value: ''
-      };
-    }
-    return linkItems;
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
@@ -410,9 +424,10 @@ const DataFormFieldEditor = ({
           addSpaceCommaSeparator={true}
           appendTo={document.body}
           clearButton={false}
-          disabled={(column.readOnly && reporting) || isSaving}
+          disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+          isLoadingData={isLoadingData}
           maxSelectedLabels={10}
           onChange={e => onChangeForm(field, e.value, isConditional)}
           onFilterInputChangeBackend={onFilter}
@@ -435,10 +450,11 @@ const DataFormFieldEditor = ({
         <Dropdown
           appendTo={document.body}
           currentValue={fieldValue}
-          disabled={(column.readOnly && reporting) || isSaving}
+          disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           filterBy="itemType,value"
+          isLoadingData={isLoadingData}
           onChange={e => {
             onChangeForm(field, e.target.value.value, isConditional);
           }}

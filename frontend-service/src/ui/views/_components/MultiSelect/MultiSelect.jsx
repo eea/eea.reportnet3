@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import { MultiSelectHeader } from './_components/MultiSelectHeader';
 import { MultiSelectItem } from './_components/MultiSelectItem';
 import { MultiSelectPanel } from './_components/MultiSelectPanel';
+import { Spinner } from 'ui/views/_components/Spinner';
+
 import Tooltip from 'primereact/tooltip';
 
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
@@ -35,6 +37,7 @@ export class MultiSelect extends Component {
     isFilter: false,
     itemTemplate: null,
     label: null,
+    isLoadingData: false,
     maxSelectedLabels: 3,
     notCheckAllHeader: null,
     onBlur: null,
@@ -77,6 +80,7 @@ export class MultiSelect extends Component {
     isFilter: PropTypes.bool,
     itemTemplate: PropTypes.func,
     label: PropTypes.string,
+    isLoadingData: PropTypes.bool,
     maxSelectedLabels: PropTypes.number,
     notCheckAllHeader: PropTypes.string,
     onBlur: PropTypes.func,
@@ -528,16 +532,20 @@ export class MultiSelect extends Component {
     });
 
     return this.props.hasSelectedItemsLabel ? (
-      <div
-        className="p-multiselect-label-container"
-        style={{
-          position: this.props.isFilter ? 'absolute' : 'relative',
-          top: '0',
-          paddingTop: '0.1rem',
-          width: '100%'
-        }}>
-        <label className={className}>{content || this.props.placeholder || 'empty'}</label>
-      </div>
+      this.props.isLoadingData ? (
+        <Spinner style={{ top: 0, width: '25px', height: '25px' }} />
+      ) : (
+        <div
+          className="p-multiselect-label-container"
+          style={{
+            position: this.props.isFilter ? 'absolute' : 'relative',
+            top: '0',
+            paddingTop: '0.1rem',
+            width: '100%'
+          }}>
+          <label className={className}>{content || this.props.placeholder || 'empty'}</label>
+        </div>
+      )
     ) : null;
   }
 
