@@ -39,7 +39,6 @@ export const TabsDesigner = withRouter(
     isDataflowOpen,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
-    isDataflowOpen,
     isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
