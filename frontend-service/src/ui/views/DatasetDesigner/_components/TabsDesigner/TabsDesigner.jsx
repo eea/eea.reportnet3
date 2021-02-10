@@ -39,7 +39,6 @@ export const TabsDesigner = withRouter(
     isDataflowOpen,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
-    isDataflowOpen,
     isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
@@ -389,7 +388,7 @@ export const TabsDesigner = withRouter(
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
-                        isDataflowOpen
+                        isDataflowOpen={isDataflowOpen}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}

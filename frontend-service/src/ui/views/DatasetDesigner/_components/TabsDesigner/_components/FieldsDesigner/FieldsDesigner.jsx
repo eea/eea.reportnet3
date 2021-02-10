@@ -425,7 +425,7 @@ export const FieldsDesigner = ({
           codelistItems={[]}
           datasetId={datasetId}
           datasetSchemaId={datasetSchemaId}
-          isDataflowOpen
+          isDataflowOpen={isDataflowOpen}
           fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""

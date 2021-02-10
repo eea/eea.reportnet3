@@ -254,7 +254,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             `${config.permissions.DATAFLOW}${dataflowId}`
           )) &&
         designerState?.metaData?.dataflow?.status === 'DRAFT';
-
       designerDispatch({
         type: 'IS_DATAFLOW_OPEN',
         payload: { isDataflowOpen }

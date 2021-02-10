@@ -218,6 +218,7 @@ const TabView = withRouter(
           id={id}
           index={index}
           initialTabIndexDrag={initialTabIndexDrag}
+          isDataflowOpen={isDataflowOpen}
           isNavigationHidden={isNavigationHidden}
           key={id}
           leftIcon={tab.props.leftIcon}
