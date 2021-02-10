@@ -16,6 +16,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DropdownPanel } from './_components/DropdownPanel';
 import { DropdownItem } from './_components/DropdownItem';
+import { Spinner } from 'ui/views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
 
 export class Dropdown extends Component {
@@ -35,6 +36,7 @@ export class Dropdown extends Component {
     id: null,
     inputClassName: null,
     inputId: null,
+    isLoadingData: false,
     itemTemplate: null,
     label: null,
     maxLength: null,
@@ -76,6 +78,7 @@ export class Dropdown extends Component {
     id: PropTypes.string,
     inputClassName: PropTypes.string,
     inputId: PropTypes.string,
+    isLoadingData: PropTypes.bool,
     itemTemplate: PropTypes.func,
     label: PropTypes.string,
     lazy: PropTypes.bool,
@@ -805,7 +808,11 @@ export class Dropdown extends Component {
 
     let hiddenSelect = this.renderHiddenSelect(selectedOption);
     let keyboardHelper = this.renderKeyboardHelper(label);
-    let labelElement = this.renderLabel(label, selectedOption);
+    let labelElement = this.props.isLoadingData ? (
+      <Spinner style={{ top: 0, width: '25px', height: '25px' }} />
+    ) : (
+      this.renderLabel(label, selectedOption)
+    );
     let dropdownIcon = this.renderDropdownIcon();
     let items = this.renderItems(selectedOption);
     let filterElement = this.renderFilter();
