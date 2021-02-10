@@ -876,13 +876,14 @@ public class FileTreatmentHelper implements DisposableBean {
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
+    boolean guessTableName = null == tableSchemaId;
 
     for (File file : files) {
       String fileName = file.getName();
 
       try (InputStream inputStream = new FileInputStream(file)) {
 
-        if (files.size() > 1) {
+        if (guessTableName) {
           tableSchemaId = getTableSchemaIdFromFileName(schema, fileName);
         }
 
