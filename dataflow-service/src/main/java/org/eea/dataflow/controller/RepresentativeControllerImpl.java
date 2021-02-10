@@ -74,7 +74,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PostMapping("/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @ApiOperation(value = "Create one Representative", response = Long.class)
   @ApiResponse(code = 400, message = "Email field provider is not an email")
   public Long createRepresentative(
@@ -110,7 +110,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Find all DataProviders  by their Group Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
       responseContainer = "List")
