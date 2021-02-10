@@ -6,7 +6,7 @@ import { config } from 'conf';
 
 import styles from './PublicDataflows.module.scss';
 
-import { Card } from 'ui/views/_components/Card';
+import { Card } from '../../views/PublicFrontpage/_components/Card';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
