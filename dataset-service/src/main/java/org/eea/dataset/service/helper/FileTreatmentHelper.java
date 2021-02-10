@@ -57,6 +57,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -891,7 +892,7 @@ public class FileTreatmentHelper implements DisposableBean {
             datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
         datasetVO.setId(datasetId);
         DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-        if (dataset == null) {
+        if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
           throw new EEAException("Error processing file " + fileName);
         }
 
