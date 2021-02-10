@@ -22,6 +22,10 @@ import lombok.Data;
 /**
  * Instantiates a new data set metabase.
  */
+
+/**
+ * Instantiates a new data set metabase.
+ */
 @Data
 @Entity
 @Table(name = "DATASET")
@@ -71,6 +75,10 @@ public class DataSetMetabase {
   /** The releasing. */
   @Column(name = "RELEASING")
   private Boolean releasing;
+
+  /** The isrestricted. */
+  @Column(name = "ISRESTRICTED")
+  private Boolean isrestricted;
 
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
