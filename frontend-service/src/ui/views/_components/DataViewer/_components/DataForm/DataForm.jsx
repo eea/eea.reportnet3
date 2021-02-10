@@ -21,6 +21,7 @@ const DataForm = ({
   formType,
   getTooltipMessage,
   hasWritePermissions,
+  isSaving = false,
   onChangeForm,
   onConditionalChange,
   onShowCoordinateError = () => {},
@@ -122,6 +123,7 @@ const DataForm = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isSaving={isSaving}
                       isVisible={editDialogVisible}
                       onChangeForm={(property, value, conditionalChanged = false) => {
                         if (isConditionalChanged !== conditionalChanged) {
@@ -204,6 +206,7 @@ const DataForm = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isSaving={isSaving}
                       isVisible={addDialogVisible}
                       onChangeForm={(property, value, conditionalChanged = false) => {
                         if (isConditionalChanged !== conditionalChanged) {

@@ -2,9 +2,18 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-export const MultiSelectItem = ({ label, onClick, onKeyDown, option, selected, tabIndex, template }) => {
+export const MultiSelectItem = ({
+  disabled = false,
+  label,
+  onClick,
+  onKeyDown,
+  option,
+  selected,
+  tabIndex,
+  template
+}) => {
   const onClickEvent = event => {
-    if (onClick) {
+    if (onClick && !disabled) {
       onClick({
         originalEvent: event,
         option: option
@@ -14,7 +23,7 @@ export const MultiSelectItem = ({ label, onClick, onKeyDown, option, selected, t
   };
 
   const onKeyDownEvent = event => {
-    if (onKeyDown) {
+    if (onKeyDown && !disabled) {
       onKeyDown({
         originalEvent: event,
         option: option
@@ -23,9 +32,13 @@ export const MultiSelectItem = ({ label, onClick, onKeyDown, option, selected, t
   };
 
   const className = classNames(option.className, 'p-multiselect-item', {
-    'p-highlight': selected
+    'p-highlight': selected,
+    'p-disabled': disabled
   });
-  const checkboxClassName = classNames('p-checkbox-box p-component', { 'p-highlight': selected });
+  const checkboxClassName = classNames('p-checkbox-box p-component', {
+    'p-highlight': selected,
+    'p-disabled': disabled
+  });
   const checkboxIcon = classNames('p-checkbox-icon p-c', { 'pi pi-check': selected });
   const content = template ? template(option) : label;
 
@@ -37,12 +50,14 @@ export const MultiSelectItem = ({ label, onClick, onKeyDown, option, selected, t
       onClick={event => onClickEvent(event)}
       onKeyDown={event => onKeyDownEvent(event)}
       role="option"
-      tabIndex={tabIndex}>
-      <div className="p-checkbox p-component">
-        <div className={checkboxClassName}>
-          <span className={checkboxIcon}></span>
+      tabIndex={disabled ? null : tabIndex}>
+      {!disabled && (
+        <div className="p-checkbox p-component">
+          <div className={checkboxClassName}>
+            <span className={checkboxIcon}></span>
+          </div>
         </div>
-      </div>
+      )}
       <label>{content}</label>
     </li>
   );
