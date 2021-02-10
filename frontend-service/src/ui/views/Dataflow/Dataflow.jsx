@@ -81,6 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isEditDialogVisible: false,
     isExportDialogVisible: false,
     isExportEuDatasetLoading: false,
+    isFetchingData: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
@@ -409,6 +410,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
+      Promise.resolve(dataflow).then(res => {
+        dataflowDispatch({
+          type: 'SET_IS_FETCHING_DATA',
+          payload: { isFetchingData: false }
+        });
+      });
 
       dataflowDispatch({
         type: 'INITIAL_LOAD',
@@ -562,9 +569,14 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
+
   const onConfirmUpdateIsReleaseable = async () => {
     manageDialogs('isReleaseableDialogVisible', false);
     try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
       await DataflowService.update(
         dataflowId,
         dataflowState.data.name,
@@ -572,11 +584,13 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable
       );
-
       onLoadReportingDataflow();
     } catch (error) {
-      console.error(error);
       notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
+      dataflowDispatch({
+        type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
+        payload: { isReleasable: dataflowState.data.isReleasable, isFetchingData: false }
+      });
     }
   };
 
@@ -719,7 +733,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseableDialogVisible && (
           <ConfirmDialog
-            disabledConfirm={dataflowState.data.isReleasable === dataflowState.isReleasable}
+            disabledConfirm={
+              dataflowState.data.isReleasable === dataflowState.isReleasable || dataflowState.isFetchingData
+            }
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             header={resources.messages['isReleasableDataflowDialogHeader']}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
