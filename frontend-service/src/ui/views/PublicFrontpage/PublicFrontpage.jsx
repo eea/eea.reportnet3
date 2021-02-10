@@ -17,6 +17,7 @@ import logo from 'assets/images/logo.png';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { PublicCard } from '../_components/PublicCard/PublicCard';
 
 export const PublicFrontpage = ({ history }) => {
   const themeContext = useContext(ThemeContext);
@@ -143,13 +144,31 @@ export const PublicFrontpage = ({ history }) => {
               <h3>Dataflows in scope of Reportnet 3.0:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
-                  <Card {...dataflow} />
+                  <PublicCard
+                    key={dataflow.key}
+                    card={dataflow}
+                    dataflowId={dataflow.id}
+                    dueDate={dataflow.targetDate}
+                    frequency={dataflow.reportingFrequency}
+                    pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
+                    subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
+                    title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                  />
                 ))}
               </div>
               <h3>EEA Voluntary Dataflows:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
-                  <Card {...dataflow} />
+                  <PublicCard
+                    key={dataflow.key}
+                    card={dataflow}
+                    dataflowId={dataflow.id}
+                    dueDate={dataflow.targetDate}
+                    frequency={dataflow.reportingFrequency}
+                    pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
+                    subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
+                    title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                  />
                 ))}
               </div>
             </div>

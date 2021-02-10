@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
+import { routes } from 'ui/routes';
 
 import styles from './PublicDataflows.module.scss';
 
@@ -13,7 +16,9 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-export const PublicDataflows = () => {
+import { getUrl } from 'core/infrastructure/CoreUtils';
+
+export const PublicDataflows = withRouter(({ history, match }) => {
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
@@ -36,13 +41,26 @@ export const PublicDataflows = () => {
     setPublicDataflows(publicData);
   };
 
+  const onOpenDataflow = dataflowId => history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+
+  console.log('publicDataflows', publicDataflows);
+
   return (
     <PublicLayout>
       <div style={contentStyles}>
         <h3>Public dataflows:</h3>
         <div className={styles.dataflowsList}>
           {!isEmpty(publicDataflows) ? (
-            publicDataflows.map(dataflow => <PublicCard card={dataflow} onCardClick={() => {}} />)
+            publicDataflows.map(dataflow => (
+              <PublicCard
+                key={dataflow.id}
+                title={{ text: dataflow.name, url: '' }}
+                subtitle={{ text: dataflow.description, url: '' }}
+                card={dataflow}
+                dueDate={dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-'}
+                onCardClick={onOpenDataflow}
+              />
+            ))
           ) : (
             <span>No public dataflows available</span>
           )}
@@ -50,4 +68,4 @@ export const PublicDataflows = () => {
       </div>
     </PublicLayout>
   );
-};
+});

@@ -91,6 +91,8 @@
 }
 
 .clickable {
+  transition: all 0.2s ease;
+
   &:hover {
     box-shadow: var(--card-item-box-shadow-hover);
     transform: scale(1.02, 1.02);
