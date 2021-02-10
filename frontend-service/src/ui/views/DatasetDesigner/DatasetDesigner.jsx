@@ -471,6 +471,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: {
+          countryName: 'DESIGN',
           dataflowId,
           dataflowName: designerState.dataflowName,
           datasetId,
@@ -481,6 +482,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
         content: {
+          countryName: 'DESIGN',
           dataflowId,
           dataflowName: designerState.dataflowName,
           datasetId,
