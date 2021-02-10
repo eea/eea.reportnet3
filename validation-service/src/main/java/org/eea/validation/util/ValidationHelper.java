@@ -742,7 +742,7 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
+      int workingThreads = validationExecutorService.getActiveCount();
 
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
