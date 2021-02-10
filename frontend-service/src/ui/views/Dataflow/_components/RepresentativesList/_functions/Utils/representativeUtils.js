@@ -187,7 +187,7 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
 export const onExportLeadReportersTemplate = async selectedDataProviderGroup => {
   const response = await RepresentativeService.downloadTemplateById(selectedDataProviderGroup.dataProviderGroupId);
   if (!isNil(response)) {
-    DownloadFile(response, `${selectedDataProviderGroup.dataProviderGroupId}_${Date.now()}.csv`);
+    DownloadFile(response, `GroupId_${selectedDataProviderGroup.dataProviderGroupId}_Template.csv`);
   }
 };
 
