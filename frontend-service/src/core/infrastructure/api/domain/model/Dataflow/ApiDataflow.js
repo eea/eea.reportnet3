@@ -47,7 +47,7 @@ export const apiDataflow = {
   create: async (name, description, obligationId) => {
     const response = await HTTPRequester.post({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { name, description, obligation: { obligationId } }
+      data: { name, description, obligation: { obligationId }, releasable: true }
     });
     return response;
   },
