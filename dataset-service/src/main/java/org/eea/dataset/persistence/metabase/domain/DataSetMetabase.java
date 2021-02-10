@@ -78,7 +78,7 @@ public class DataSetMetabase {
 
   /** The isrestricted. */
   @Column(name = "ISRESTRICTED")
-  private Boolean isrestricted;
+  private boolean isrestricted;
 
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
