@@ -83,17 +83,17 @@ const useBigButtonList = ({
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
+      designDatasetsOpen: isLeadDesigner && isDraftStatus,
       feedback:
         (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
+      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
-      designDatasetsOpen: isLeadDesigner && isDraftStatus
+      release: isLeadReporterOfCountry
     };
   };
 
