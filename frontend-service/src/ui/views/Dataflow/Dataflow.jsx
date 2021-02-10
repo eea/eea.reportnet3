@@ -561,6 +561,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated
   );
 
+  useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
   const onConfirmUpdateIsReleaseable = async () => {
     manageDialogs('isReleaseableDialogVisible', false);
     try {
@@ -575,6 +576,7 @@ const Dataflow = withRouter(({ history, match }) => {
       onLoadReportingDataflow();
     } catch (error) {
       console.error(error);
+      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
     }
   };
 

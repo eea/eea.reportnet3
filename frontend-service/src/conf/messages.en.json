@@ -970,6 +970,7 @@
     "isReleasableDataflowDialogHeader":"Open/close release period",
     "releaseButtonTooltip": "Releasing period is closed",
     "moreElements": "There are more elements, use the search to limit results",
-    "getReferencedLinkValuesError": "Error while loading the referenced field values"
+    "getReferencedLinkValuesError": "Error while loading the referenced field values",
+    "updateReleasableFailedEvent": "Error changing the dataflow release status"
   }
 }
