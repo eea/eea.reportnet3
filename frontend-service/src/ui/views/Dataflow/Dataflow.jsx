@@ -21,6 +21,7 @@ import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox/';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -31,7 +32,7 @@ import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { Title } from '../_components/Title/Title';
+import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -78,17 +79,19 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
-    isExportEuDatasetLoading: false,
     isExportDialogVisible: false,
+    isExportEuDatasetLoading: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
+    isReleasable: false,
+    isReleaseableDialogVisible: false,
+    isReleaseDialogVisible: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
-    isReleaseDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
@@ -201,7 +204,24 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, exportSchemaBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
+      const releaseableBtn = {
+        className: 'dataflow-releasable-help-step',
+        icon: 'released',
+        isVisible: buttonsVisibility.releaseableBtn,
+        label: 'releasingLeftSideBarButton',
+        onClick: () => manageDialogs('isReleaseableDialogVisible', true),
+        title: 'releasingLeftSideBarButton'
+      };
+
+      const allButtons = [
+        propertiesBtn,
+        editBtn,
+        releaseableBtn,
+        exportSchemaBtn,
+        apiKeyBtn,
+        manageReportersBtn,
+        manageEditorsBtn
+      ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
@@ -244,6 +264,7 @@ const Dataflow = withRouter(({ history, match }) => {
         apiKeyBtn: false,
         editBtn: false,
         exportBtn: false,
+        releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
         propertiesBtn: false
@@ -254,6 +275,7 @@ const Dataflow = withRouter(({ history, match }) => {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
+      releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
@@ -270,6 +292,7 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
     />
   );
+
   const manageRightsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -307,6 +330,12 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({
       type: 'SET_IS_EXPORT_EU_DATASET',
       payload: { isExportEuDatasetLoading: value }
+    });
+
+  const setIsReleaseable = isReleasable =>
+    dataflowDispatch({
+      type: 'SET_IS_RELEASABLE',
+      payload: { isReleasable: isReleasable }
     });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
@@ -386,6 +415,7 @@ const Dataflow = withRouter(({ history, match }) => {
         payload: {
           data: dataflow,
           description: dataflow.description,
+          isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
           status: dataflow.status
@@ -531,6 +561,33 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated
   );
 
+  const onConfirmUpdateIsReleaseable = async () => {
+    manageDialogs('isReleaseableDialogVisible', false);
+    try {
+      await DataflowService.update(
+        dataflowId,
+        dataflowState.data.name,
+        dataflowState.data.description,
+        dataflowState.obligations.obligationId,
+        dataflowState.isReleasable
+      );
+
+      onLoadReportingDataflow();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onCloseIsReleaseableDialog = () => {
+    manageDialogs('isReleaseableDialogVisible', false);
+    if (dataflowState.data.isReleasable !== dataflowState.isReleasable) {
+      dataflowDispatch({
+        type: 'SET_IS_RELEASABLE',
+        payload: { isReleasable: dataflowState.data.isReleasable }
+      });
+    }
+  };
+
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
@@ -655,6 +712,30 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isExportDialogVisible', false)}
             visible={dataflowState.isExportDialogVisible}>
             {resources.messages['confirmExportSchema']}
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isReleaseableDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={dataflowState.data.isReleasable === dataflowState.isReleasable}
+            header={resources.messages['isReleasableDataflowDialogHeader']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
+            onConfirm={onConfirmUpdateIsReleaseable}
+            onHide={() => onCloseIsReleaseableDialog()}
+            visible={dataflowState.isReleaseableDialogVisible}>
+            <Checkbox
+              id="isReleasableCheckbox"
+              inputId="isReleasableCheckbox"
+              isChecked={dataflowState.isReleasable}
+              onChange={() => setIsReleaseable(!dataflowState.isReleasable)}
+              role="checkbox"
+            />
+            <label htmlFor="isReleasableCheckbox" className={styles.isReleasableLabel}>
+              <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
+                {resources.messages['isReleasableDataflowCheckboxLabel']}
+              </a>
+            </label>
           </ConfirmDialog>
         )}
 
