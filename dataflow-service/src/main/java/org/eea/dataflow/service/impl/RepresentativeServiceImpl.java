@@ -3,14 +3,13 @@ package org.eea.dataflow.service.impl;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
@@ -34,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
 import io.jsonwebtoken.lang.Collections;
 
@@ -300,6 +299,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
   }
 
+
+  /**
    * Export file.
    *
    * @param dataflowId the dataflow id
@@ -324,7 +325,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     List<Representative> representativeList =
         representativeRepository.findAllByDataflow_Id(dataflowId);
     for (Representative representative : representativeList) {
-      fieldsToWrite[0] = representative.getUserMail();
+      fieldsToWrite[0] = representative.getReporters().stream().map(User::getUserMail)
+          .collect(Collectors.toList()).toString();
       fieldsToWrite[1] = representative.getDataProvider().getCode();
       csvWriter.writeNext(fieldsToWrite);
     }
@@ -347,21 +349,24 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public byte[] exportTemplateReportersFile(Long groupId) throws EEAException, IOException {
     // we create the csv
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-    List<String> headers = new ArrayList<>();
-    headers.add("Email");
-    headers.add("Representing");
-    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-    int nHeaders = 2;
-    String[] fieldsToWrite = new String[nHeaders];
+    try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+      List<String> headers = new ArrayList<>();
+      headers.add("Email");
+      headers.add("Representing");
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 2;
+      String[] fieldsToWrite = new String[nHeaders];
 
-    // we find all dataprovider for group id
-    List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
-    for (DataProvider dataProvider : dataProviderList) {
-      fieldsToWrite[1] = dataProvider.getCode();
-      csvWriter.writeNext(fieldsToWrite);
+      // we find all dataprovider for group id
+      List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
+      for (DataProvider dataProvider : dataProviderList) {
+        fieldsToWrite[1] = dataProvider.getCode();
+        csvWriter.writeNext(fieldsToWrite);
 
+      }
+    } catch (IOException e) {
+      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -402,12 +407,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
 
     String content = new String(file.getBytes());
-    List<String> everyLines = new ArrayList(Arrays.asList(content.split("\n")));
+    List<String> everyLines = new ArrayList<>(Arrays.asList(content.split("\n")));
     everyLines.remove(0);
 
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
-    List<Representative> representativeList = new ArrayList();
+    List<Representative> representativeList = new ArrayList<>();
     for (String representativeData : everyLines) {
       String[] dataLine = representativeData.split("[|]");
       String email = dataLine[0].replaceAll("\"", "");
@@ -424,8 +429,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode())).findFirst()
             .get().getId();
 
-        if (!representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(dataflowId,
-            dataProviderId, email)) {
+        if (!representativeRepository.existsByDataflow_IdAndDataProvider_IdAndReporters_UserMail(
+            dataflowId, dataProviderId, email)) {
           Representative representative = new Representative();
           DataProvider dataProvider = new DataProvider();
           dataProvider.setId(dataProviderId);
@@ -434,7 +439,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           representative.setReceiptDownloaded(false);
           representative.setReceiptOutdated(false);
           representative.setHasDatasets(false);
-          representative.setUserMail(email);
+          // representative.setUserMail(email);
           representativeList.add(representative);
           fieldsToWrite[2] = "OK imported";
         } else {
@@ -453,7 +458,5 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return csv.getBytes();
   }
 
-  /**
-
-
 }
+

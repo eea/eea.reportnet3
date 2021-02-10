@@ -420,7 +420,7 @@ public class RepresentativeServiceImplTest {
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(1L);
     representative.setDataProvider(dataProvider);
-    representative.setUserMail("test@reportnet.net");
+    representative.setReporters(new HashSet<>());
     representatives.add(representative);
     Mockito.when(representativeRepository.findAllByDataflow_Id(1L)).thenReturn(representatives);
     byte[] expectedResult = "".getBytes();
