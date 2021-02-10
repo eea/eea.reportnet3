@@ -346,6 +346,37 @@ public class DataCollectionServiceImplTest {
   }
 
   /**
+   * Creates the empty data collection rules ok test.
+   *
+   * @throws SQLException the SQL exception
+   */
+  @Test
+  public void createEmptyDataCollectionRulesOkTest() throws SQLException {
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setDataSetName("datasetName_");
+    design.setDatasetSchema("datasetSchema_");
+    designs.add(design);
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(designs);
+    Mockito.when(rulesControllerZuul.getAllDisabledRules(Mockito.any(), Mockito.any()))
+        .thenReturn(1);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+  }
+
+  @Test
+  public void createEmptyDataCollectionReleaseLockTest() throws SQLException {
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(designs);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+  }
+
+
+
+  /**
    * Creates the empty data collection test SQL exception path.
    *
    * @throws SQLException the SQL exception

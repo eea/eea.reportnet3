@@ -1377,6 +1377,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
               hasWritePermissions={designerState.hasWritePermissions}
+              isWebformView={designerState.viewType.webform}
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
               onSelectValidation={onSelectValidation}
               schemaTables={designerState.schemaTables}

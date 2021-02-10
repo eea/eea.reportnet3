@@ -81,6 +81,12 @@ export const apiDataflow = {
     });
     return response;
   },
+  downloadById: async dataflowId => {
+    const response = await HTTPRequester.download({
+      url: getUrl(DataflowConfig.exportSchema, { dataflowId })
+    });
+    return response.data;
+  },
   getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     let url = isCustodian
       ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
@@ -138,10 +144,10 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  update: async (dataflowId, name, description, obligationId) => {
+  update: async (dataflowId, name, description, obligationId, isReleasable) => {
     const response = await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { id: dataflowId, name, description, obligation: { obligationId } }
+      data: { id: dataflowId, name, description, obligation: { obligationId }, releasable: isReleasable }
     });
     return response;
   }
