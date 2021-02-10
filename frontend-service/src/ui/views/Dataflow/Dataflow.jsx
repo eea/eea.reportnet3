@@ -23,7 +23,6 @@ import { BigButtonListRepresentative } from './_components/BigButtonListRepresen
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { Checkbox } from 'ui/views/_components/Checkbox';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';

@@ -18,6 +18,7 @@ import { EULogin } from 'ui/views/Login/EULogin';
 import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivacyStatement } from 'ui/views/PrivacyStatement';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
+import { PublicDataflows } from 'ui/views/PublicDataflows';
 import { PublicFrontpage } from 'ui/views/PublicFrontpage';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
 import { Settings } from 'ui/views/Settings';
@@ -47,6 +48,7 @@ const App = () => {
                         <Notifications />
                         <Router>
                           <Switch>
+                            <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
                             <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
                             <Route exact path={routes.LOGIN} component={ReportnetLogin} />
                             <Route exact path={routes.EULOGIN} component={EULogin} />

@@ -585,6 +585,11 @@ const pending = async () => {
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
 };
 
+const publicData = async () => {
+  const publicDataflows = await apiDataflow.publicData();
+  return publicDataflows;
+};
+
 const reject = async dataflowId => {
   const status = await apiDataflow.reject(dataflowId);
   return status;
@@ -626,6 +631,7 @@ export const ApiDataflowRepository = {
   getApiKey,
   newEmptyDatasetSchema,
   pending,
+  publicData,
   reject,
   reporting,
   schemasValidation,

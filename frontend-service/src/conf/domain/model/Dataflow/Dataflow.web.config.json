@@ -18,5 +18,6 @@
   "importSchema": "/dataschema/import?dataflowId={:dataflowId}",
   "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
   "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
-  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
+  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
+  "publicData": "/dataflow/getPublicDataflows"
 }

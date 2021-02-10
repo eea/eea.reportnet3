@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { config } from 'conf';
+import { routes } from 'ui/routes';
 
 import styles from './PublicFrontpage.module.scss';
 
@@ -14,7 +16,9 @@ import logo from 'assets/images/logo.png';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
-export const PublicFrontpage = () => {
+import { getUrl } from 'core/infrastructure/CoreUtils';
+
+export const PublicFrontpage = ({ history }) => {
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
 
@@ -25,6 +29,8 @@ export const PublicFrontpage = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
+
+  const handleRedirect = target => history.push(target);
 
   return (
     <PublicLayout>
@@ -124,6 +130,14 @@ export const PublicFrontpage = () => {
           </div>
         </div>
         <div className={`rep-container`}>
+          <div className={`${styles.pageContent} rep-row`}>
+            <div className={styles.showPublicDataflows}>
+              <Button
+                icon="eye"
+                label="View public dataflows"
+                onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
+            </div>
+          </div>
           <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.currentDataflows}>
               <h3>Dataflows in scope of Reportnet 3.0:</h3>
