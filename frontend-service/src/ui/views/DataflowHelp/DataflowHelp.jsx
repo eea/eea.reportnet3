@@ -199,7 +199,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     try {
       let loadedDocuments = await DocumentService.all(`${dataflowId}`);
 
-      loadedDocuments = loadedDocuments.sort(sortByProperty('title'));
+      loadedDocuments = loadedDocuments.sort(sortByProperty('description'));
 
       setDocuments(loadedDocuments);
     } catch (error) {
