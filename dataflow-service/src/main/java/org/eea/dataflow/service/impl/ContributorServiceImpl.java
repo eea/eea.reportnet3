@@ -492,6 +492,17 @@ public class ContributorServiceImpl implements ContributorService {
     List<UserRepresentationVO> usersCustodian = userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
 
+
+    List<UserRepresentationVO> usersDataSteward = userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
+
+    if (!CollectionUtils.isEmpty(usersDataSteward)) {
+      for (UserRepresentationVO userDataSteward : usersDataSteward) {
+        resources.add(fillResourceAssignation(datasetId, userDataSteward.getEmail(),
+            ResourceGroupEnum.DATASCHEMA_STEWARD));
+
+      }
+    }
     // find custodian and add custodian if we create since a editor
     createCustodian(datasetId, resources, usersCustodian);
     // we create resources for any users to add the new resource associated with the new

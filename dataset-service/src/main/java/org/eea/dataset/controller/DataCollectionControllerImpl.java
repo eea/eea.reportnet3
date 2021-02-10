@@ -91,7 +91,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   public void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
@@ -133,7 +133,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PutMapping("/update/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public void updateDataCollection(
       @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
 

@@ -82,7 +82,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @param contributorVO the contributor VO
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
   @ApiOperation(value = "Delete one Editor in a Dataflow")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted editor"),
@@ -119,7 +119,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @param contributorVO the contributor VO
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
   @ApiOperation(value = "Delete one Reporter in a Dataflow")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted reporter"),
@@ -159,7 +159,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @return the list
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Editors in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
@@ -181,7 +181,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Find all Reporters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
       responseContainer = "List")
@@ -204,7 +204,7 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Editor in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
@@ -252,7 +252,7 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Reporter in a Dataflow",
