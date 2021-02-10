@@ -46,6 +46,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
+    case 'HAS_WRITE_PERMISSIONS':
+      return { ...state, hasWritePermissions: payload.hasWritePermissions };
+
     case 'HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 

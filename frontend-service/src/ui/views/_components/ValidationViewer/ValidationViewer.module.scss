@@ -1,5 +1,13 @@
 .validationWrapper {
   min-height: 60vh !important;
+
+  .tableWebform {
+    tbody {
+      td {
+        cursor: default;
+      }
+    }
+  }
 }
 
 .invisibleHeader {

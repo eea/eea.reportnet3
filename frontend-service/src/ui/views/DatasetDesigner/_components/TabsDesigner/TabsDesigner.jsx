@@ -36,6 +36,7 @@ export const TabsDesigner = withRouter(
     getIsTableCreated,
     getUpdatedTabs,
     history,
+    isDataflowOpen,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isDataflowOpen,

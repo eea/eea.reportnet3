@@ -541,6 +541,9 @@
         },
         {
           "key": "EXPORT_DATASET_SCHEMA_FAILED_EVENT"
+        },
+        {
+          "key": "GET_REFERENCED_LINK_VALUES_ERROR"
         }
       ]
     },

@@ -345,6 +345,7 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           hasWritePermissions={true}
+          isDataflowOpen={isDataflowOpen}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
