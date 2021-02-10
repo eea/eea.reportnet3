@@ -95,7 +95,7 @@ const ConfirmDialog = forwardRef((props, _) => {
               !isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary p-button-animated-blink'
             } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
             disabled={disabledConfirm}
-            icon={iconConfirm ? iconConfirm : 'check'}
+            icon={disabledConfirm ? 'spinnerAnimate' : iconConfirm ? iconConfirm : 'check'}
             label={labelConfirm}
             onClick={onConfirm}
           />

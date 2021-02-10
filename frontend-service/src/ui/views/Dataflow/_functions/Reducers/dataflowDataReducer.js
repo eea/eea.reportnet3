@@ -76,6 +76,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'ON_ERROR_UPDATE_IS_RELEASABLE':
       return { ...state, isFetchingData: payload.isFetchingData, isReleasable: payload.isReleasable };
 
+    case 'SET_IS_EXPORTING':
+      return { ...state, isExporting: payload };
+
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 
