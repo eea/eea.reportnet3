@@ -437,7 +437,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowSave.get().setName(dataflowVO.getName());
         dataflowSave.get().setDescription(dataflowVO.getDescription());
         dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
-        dataflowSave.get().setReleaseable(dataflowVO.isReleaseable());
+        dataflowSave.get().setReleasable(dataflowVO.isReleasable());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
@@ -561,6 +561,17 @@ public class DataflowServiceImpl implements DataflowService {
     } else {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
+  }
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @Override
+  public List<DataFlowVO> getPublicDataflows() {
+    // This call is dummy we must change to real call
+    return dataflowNoContentMapper.entityListToClass(dataflowRepository.findAll());
   }
 
   /**

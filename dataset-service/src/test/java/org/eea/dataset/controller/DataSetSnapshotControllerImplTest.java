@@ -534,7 +534,7 @@ public class DataSetSnapshotControllerImplTest {
   @Test
   public void createReleaseSnapshots() throws Exception {
     DataFlowVO dataflow = new DataFlowVO();
-    dataflow.setReleaseable(true);
+    dataflow.setReleasable(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
@@ -550,7 +550,7 @@ public class DataSetSnapshotControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createReleaseSnapshotsThrow() throws Exception {
     DataFlowVO dataflow = new DataFlowVO();
-    dataflow.setReleaseable(true);
+    dataflow.setReleasable(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");

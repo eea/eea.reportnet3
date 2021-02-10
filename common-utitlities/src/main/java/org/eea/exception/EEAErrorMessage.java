@@ -312,8 +312,8 @@ public final class EEAErrorMessage {
   public static final String PK_ID_ALREADY_EXIST =
       "The value %s in a pk already exist in this Webform";
 
-  /** The Constant DATAFLOW_NOT_RELEASEABLE: {@value}. */
-  public static final String DATAFLOW_NOT_RELEASEABLE = "The dataflow %s is not releaseable";
+  /** The Constant DATAFLOW_NOT_RELEASABLE: {@value}. */
+  public static final String DATAFLOW_NOT_RELEASABLE = "The dataflow %s is not releasable";
 
   /**
    * Instantiates a new EEA error message.

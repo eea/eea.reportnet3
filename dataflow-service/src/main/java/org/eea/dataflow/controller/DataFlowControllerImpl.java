@@ -464,6 +464,19 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @Override
+  @GetMapping("/getPublicDataflows")
+  public List<DataFlowVO> getPublicDataflows() {
+    return dataflowService.getPublicDataflows();
+  }
+
+
   /**
    * Checks if is user data custodian.
    *

@@ -469,7 +469,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
-    if (null != dataflow && dataflow.isReleaseable()) {
+    if (null != dataflow && dataflow.isReleasable()) {
       try {
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
       } catch (EEAException e) {
@@ -479,7 +479,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       }
     } else {
       throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
-          String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASEABLE, dataflowId));
+          String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
     }
   }
 
