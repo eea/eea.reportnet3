@@ -6,7 +6,7 @@ import { config } from 'conf';
 
 import styles from './PublicDataflows.module.scss';
 
-import { Card } from '../../views/PublicFrontpage/_components/Card';
+import { PublicCard } from 'ui/views/_components/PublicCard';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
@@ -15,6 +15,7 @@ import { DataflowService } from 'core/services/Dataflow';
 
 export const PublicDataflows = () => {
   const themeContext = useContext(ThemeContext);
+
   const [contentStyles, setContentStyles] = useState({});
   const [publicDataflows, setPublicDataflows] = useState([]);
 
@@ -41,7 +42,7 @@ export const PublicDataflows = () => {
         <h3>Public dataflows:</h3>
         <div className={styles.dataflowsList}>
           {!isEmpty(publicDataflows) ? (
-            publicDataflows.map(dataflow => <Card {...dataflow} />)
+            publicDataflows.map(dataflow => <PublicCard card={dataflow} onCardClick={() => {}} />)
           ) : (
             <span>No public dataflows available</span>
           )}
