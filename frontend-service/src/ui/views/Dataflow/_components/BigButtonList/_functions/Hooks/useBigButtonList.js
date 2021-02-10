@@ -24,8 +24,10 @@ const useBigButtonList = ({
   handleRedirect,
   isActiveButton,
   isCloningDataflow,
+  isImportingDataflow,
   isLeadReporterOfCountry,
   onCloneDataflow,
+  onImportSchema,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -145,21 +147,30 @@ const useBigButtonList = ({
     },
     {
       label: resources.messages['cloneSchemasFromDataflow'],
-      icon: 'add',
+      icon: 'clone',
       command: () => onCloneDataflow()
+    },
+    {
+      label: resources.messages['importSchema'],
+      icon: 'import',
+      command: () => onImportSchema()
     }
   ];
 
   const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
-      buttonIcon: isCloningDataflow ? 'spinner' : 'plus',
-      buttonIconClass: isCloningDataflow ? 'spinner' : 'newItemCross',
+      buttonIcon: isCloningDataflow || isImportingDataflow ? 'spinner' : 'plus',
+      buttonIconClass: isCloningDataflow || isImportingDataflow ? 'spinner' : 'newItemCross',
       caption: resources.messages['newSchema'],
-      handleRedirect: !isCloningDataflow ? () => onShowNewSchemaDialog() : () => {},
+      handleRedirect: !isCloningDataflow && !isImportingDataflow ? () => onShowNewSchemaDialog() : () => {},
       helpClassName: 'dataflow-new-schema-help-step',
-      layout: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? 'menuBigButton' : 'defaultBigButton',
-      model: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? newSchemaModel : [],
+      layout:
+        buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow
+          ? 'menuBigButton'
+          : 'defaultBigButton',
+      model:
+        buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema
     }
   ];
@@ -440,9 +451,11 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: dataflowState.isReleasable,
+        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];

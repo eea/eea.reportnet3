@@ -68,7 +68,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PostMapping("/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @ApiOperation(value = "Create one Representative", response = Long.class)
   @ApiResponse(code = 400, message = "Email field provider is not an email")
   public Long createRepresentative(
@@ -105,7 +105,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Find all DataProviders  by their Group Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
       responseContainer = "List")
@@ -204,10 +204,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         LOG_ERROR.error("Duplicated representative relationship", e.getCause());
         message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
         status = HttpStatus.CONFLICT;
-      } else if (EEAErrorMessage.USER_AND_COUNTRY_EXIST.equals(e.getMessage())) {
-        LOG_ERROR.error("Duplicated user and country relationship", e.getCause());
-        message = EEAErrorMessage.USER_AND_COUNTRY_EXIST;
-        status = HttpStatus.CONFLICT;
       } else {
         LOG_ERROR.error("Bad Request", e.getCause());
         message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;
@@ -275,7 +271,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
-   * Export file.
+   * Export file of lead reporters.
    *
    * @param dataflowId the dataflow id
    * @return the response entity
@@ -285,41 +281,86 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export file lead reporters")
-  public ResponseEntity<byte[]> exportFile(
+  public ResponseEntity<byte[]> exportLeadReportersFile(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-
-
     try {
-      byte[] file = representativeService.exportFile(dataflowId, "csv");
-      String fileName = "Bajar-fichero.csv";
+      byte[] file = representativeService.exportFile(dataflowId);
+      String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Internal server error: {}", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
   /**
-   * Import file data.
+   * Export template reporters file.
    *
-   * @param dataflowId the dataflow id
-   * @param file the file
+   * @param groupId the group id
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PostMapping("/import/{dataflowId}")
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @ApiOperation(value = "Import file lead reporters")
-  public void importFileData(@PathVariable(value = "dataflowId") Long dataflowId,
-      @RequestParam("file") MultipartFile file) {
+  @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @ApiOperation(value = "Export template file countrys avaliable")
+  public ResponseEntity<byte[]> exportTemplateReportersFile(@PathVariable("groupId") Long groupId) {
 
-    // try {
-    // fileTreatmentHelper.importFileData(dataflowId, file);
-    // } catch (EEAException e) {
-    // LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}", dataflowId,
-    // file.getName());
-    // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
-    // }
+    try {
+      byte[] file = representativeService.exportTemplateReportersFile(groupId);
+      String fileName = "CountryCodes-Lead-Reporters.csv";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Internal server error: {}", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
+
+
+  /**
+   * Import file country template.With that controller we can download a country template to import
+   * data with the countrys with this group id
+   * 
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @ApiOperation(value = "Import file lead reporters ")
+  @PostMapping("/import/{dataflowId}/group/{groupId}")
+  public ResponseEntity<byte[]> importFileCountryTemplate(
+      @PathVariable(value = "dataflowId") Long dataflowId,
+      @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file) {
+    // we check if the field is a csv
+    final int location = file.getOriginalFilename().lastIndexOf('.');
+    if (location == -1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_EXTENSION);
+    }
+    String mimeType = file.getOriginalFilename().substring(location + 1);
+    if (!"csv".equalsIgnoreCase(mimeType)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CSV_FILE_ERROR);
+    }
+
+    try {
+      byte[] fileEnded = representativeService.importFile(dataflowId, groupId, file);
+      String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Errors-improt.csv";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return new ResponseEntity<>(fileEnded, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}", dataflowId,
+          file.getName());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+    }
+  }
+
+
 }

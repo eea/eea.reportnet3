@@ -6,6 +6,7 @@ import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -323,4 +324,18 @@ public interface UserManagementController {
    */
   @GetMapping("/private/resourcesByMail")
   List<ResourceAccessVO> getResourcesByUserEmail(@RequestParam("email") String email);
+
+
+  /**
+   * Gets the user roles by dataflow and country.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the user roles by dataflow and country
+   */
+  @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
+  List<UserRoleVO> getUserRolesByDataflowAndCountry(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId);
+
+
 }

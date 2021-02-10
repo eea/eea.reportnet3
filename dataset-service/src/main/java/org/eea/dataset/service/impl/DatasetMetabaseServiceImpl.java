@@ -508,6 +508,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
 
+    // Create group Dataschema-X-DATA_STEWARD
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_STEWARD));
 
   }
 

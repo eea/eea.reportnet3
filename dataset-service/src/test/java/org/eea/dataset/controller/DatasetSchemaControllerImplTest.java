@@ -7,10 +7,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -50,9 +54,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -1362,4 +1368,79 @@ public class DatasetSchemaControllerImplTest {
       throw e;
     }
   }
+
+
+  @Test
+  public void testImportSchemas() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+
+    dataSchemaControllerImpl.importSchemas(1L, multipartFile);
+    Mockito.verify(dataschemaService, times(1)).importSchemas(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testImportSchemasException() throws EEAException, IOException {
+    try {
+      doThrow(EEAException.class).when(dataschemaService).importSchemas(Mockito.any(),
+          Mockito.any());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ZipOutputStream zip = new ZipOutputStream(baos);
+      ZipEntry entry1 = new ZipEntry("Table.schema");
+      ZipEntry entry2 = new ZipEntry("Table.qcrules");
+      zip.putNextEntry(entry1);
+      zip.putNextEntry(entry2);
+      zip.close();
+      MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+          "application/x-zip-compressed", baos.toByteArray());
+
+
+      dataSchemaControllerImpl.importSchemas(1L, multipartFile);
+
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testExportSchemas() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+
+    dataSchemaControllerImpl.exportSchemas(1L);
+    Mockito.verify(dataschemaService, times(1)).exportSchemas(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testExportSchemasException() throws EEAException, IOException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).exportSchemas(Mockito.any());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+
+      dataSchemaControllerImpl.exportSchemas(1L);
+
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
 }

@@ -3,6 +3,7 @@ package org.eea.dataflow.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -411,5 +412,31 @@ public class RepresentativeServiceImplTest {
     Assert.assertEquals(0, representativeServiceImpl
         .getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net").size());
   }
+
+  @Test
+  public void exportFile() throws EEAException, IOException {
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setId(1L);
+    representative.setDataProvider(dataProvider);
+    representative.setUserMail("test@reportnet.net");
+    representatives.add(representative);
+    Mockito.when(representativeRepository.findAllByDataflow_Id(1L)).thenReturn(representatives);
+    byte[] expectedResult = "".getBytes();
+    Assert.assertNotEquals(expectedResult, representativeServiceImpl.exportFile(1L));
+  }
+
+  @Test
+  public void exportTemplateReportersFile() throws EEAException, IOException {
+    List<DataProvider> dataProviderList = new ArrayList();
+    DataProvider dataProvider = new DataProvider();
+    dataProviderList.add(dataProvider);
+    Mockito.when(dataProviderRepository.findAllByGroupId(1L)).thenReturn(dataProviderList);
+    byte[] expectedResult = "".getBytes();
+    Assert.assertNotEquals(expectedResult,
+        representativeServiceImpl.exportTemplateReportersFile(1L));
+  }
+
 
 }

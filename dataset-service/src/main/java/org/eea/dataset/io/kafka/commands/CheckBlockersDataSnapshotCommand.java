@@ -23,6 +23,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -76,7 +77,14 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
+
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+
+    LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+    LOG.info(
+        "The user on threadPropertiesManager on CheckBlockersDataSnapshotCommand.execute is {}",
+        (String) ThreadPropertiesManager.getVariable("user"));
 
     // with one id we take all the datasets with the same dataProviderId and dataflowId
     DataSetMetabase dataset =

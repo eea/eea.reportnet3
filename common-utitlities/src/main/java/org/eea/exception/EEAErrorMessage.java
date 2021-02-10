@@ -87,10 +87,6 @@ public final class EEAErrorMessage {
   /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
-  /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
-  public static final String USER_AND_COUNTRY_EXIST =
-      "Email and country already exist in this dataflow";
-
   /** The Constant USER_NOTFOUND: {@value}. */
   public static final String USER_NOTFOUND = "User %s not found";
 
@@ -161,6 +157,9 @@ public final class EEAErrorMessage {
 
   /** The Constant REPRESENTATIVE_NOT_FOUND: {@value}. */
   public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
+
+  /** The Constant CSV_FILE_ERROR: {@value}. */
+  public static final String CSV_FILE_ERROR = "File format invalid, use csv file ";
 
   /** The Constant REPRESENTATIVE_DUPLICATED: {@value}. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
@@ -312,6 +311,9 @@ public final class EEAErrorMessage {
   /** The Constant PK_ID_ALREADY_EXIST: {@value}. */
   public static final String PK_ID_ALREADY_EXIST =
       "The value %s in a pk already exist in this Webform";
+
+  /** The Constant DATAFLOW_NOT_RELEASABLE: {@value}. */
+  public static final String DATAFLOW_NOT_RELEASABLE = "The dataflow %s is not releasable";
 
   /**
    * Instantiates a new EEA error message.

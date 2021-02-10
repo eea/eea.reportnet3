@@ -406,6 +406,9 @@ body .p-multiselect-panel .p-multiselect-items .p-multiselect-item {
   -moz-border-radius: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
+  word-break: break-all;
+  white-space: normal;
+  display: flex;
 }
 body .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
   color: var(--multiselect-panel-item-color-hover);
@@ -431,6 +434,9 @@ body .p-multiselect-panel .p-multiselect-items .p-multiselect-item .p-checkbox {
 body .p-multiselect-panel .p-multiselect-items .p-multiselect-item label {
   display: inline-block;
   vertical-align: middle;
+}
+body .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-disabled) label {
+  cursor: pointer;
 }
 body .p-editor-container .p-editor-toolbar {
   border: 1px solid #c8c8c8;

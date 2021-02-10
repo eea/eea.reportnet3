@@ -377,7 +377,7 @@
     "expirationDate": "Date range",
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportDataset": "Export dataset data",
-    "exportDatasetSchema": "Export schema",
+    "exportSchema": "Export schema",
     "exportEuDatasetError": "Error exporting data from EU Datasets",
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetInit": "Exporting EU datasets data",
@@ -955,6 +955,21 @@
     "settingsHelp": "User settings help",
     "dataflowPinnedInit": "You have pinned the dataflow",
     "dataflowUnpinnedInit": "You have unpinned the dataflow",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "TypePolicyInstrument": "Types",
+    "UnionPolicyList": "Union policies",
+    "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
+    "importReportingBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
+    "importDatasetSchemaFailedEvent": "Error importing the dataflow schema",
+    "importDatasetSchemaCompletedEvent": "Dataflow schema imported at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
+    "confirmExportSchema": "Are you sure you want to download the dataflow schema?",
+    "importSchema": "Import Schema",
+    "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
+    "releasingLeftSideBarButton": "Releasing status",
+    "isReleasableDataflowCheckboxLabel":"Dataflow is opened for releases",
+    "isReleasableDataflowDialogHeader":"Open/close release period",
+    "releaseButtonTooltip": "Releasing period is closed",
+    "moreElements": "There are more elements, use the search to limit results",
+    "getReferencedLinkValuesError": "Error while loading the referenced field values"
   }
 }
