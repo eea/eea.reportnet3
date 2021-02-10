@@ -81,6 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isEditDialogVisible: false,
     isExportDialogVisible: false,
     isExportEuDatasetLoading: false,
+    isExporting: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
@@ -521,6 +522,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmExport = async () => {
     try {
+      dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
       const response = await DataflowService.downloadById(dataflowId);
       if (!isNil(response)) {
         DownloadFile(
@@ -535,6 +537,7 @@ const Dataflow = withRouter(({ history, match }) => {
       });
     } finally {
       manageDialogs('isExportDialogVisible', false);
+      dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: false });
     }
   };
 
@@ -705,6 +708,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isExportDialogVisible && (
           <ConfirmDialog
+            disabledConfirm={dataflowState.isExporting}
             header={resources.messages['exportSchema']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
