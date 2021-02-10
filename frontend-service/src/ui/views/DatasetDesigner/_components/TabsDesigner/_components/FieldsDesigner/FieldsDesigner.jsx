@@ -487,7 +487,7 @@ export const FieldsDesigner = ({
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
                 isCodelistOrLink={isCodelistOrLink}
-                isDataflowOpen
+                isDataflowOpen={isDataflowOpen}
                 key={field.fieldId}
                 onCodelistAndLinkShow={onCodelistAndLinkShow}
                 onFieldDelete={onFieldDelete}
