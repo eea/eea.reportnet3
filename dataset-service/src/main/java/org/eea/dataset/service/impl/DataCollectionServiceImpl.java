@@ -568,7 +568,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
-      datasetIdsEmails.put(datasetId, representative.getProviderAccount());
+      for (String email : representative.getProviderAccounts()) {
+        datasetIdsEmails.put(datasetId, email);
+      }
       datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
 
       FKDataCollection newReporting = new FKDataCollection();

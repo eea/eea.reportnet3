@@ -2,15 +2,18 @@ package org.eea.dataflow.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.transaction.Transactional;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
 import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.domain.User;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -21,10 +24,12 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -73,22 +78,21 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO)
       throws EEAException {
 
-    String email = representativeVO.getProviderAccount();
+    String email = representativeVO.getProviderAccounts().get(0);
     Long dataProviderId = representativeVO.getDataProviderId();
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
     if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-
-    if (userManagementControllerZull.getUserByEmail(email) == null) {
+    UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
+    if (user == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(dataflowId,
-        representativeVO.getDataProviderId(), representativeVO.getProviderAccount())) {
+    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndReporters_UserMail(
+        dataflowId, representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
-
 
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
@@ -98,6 +102,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptDownloaded(false);
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
+    representative.getReporters().stream().findFirst()
+        .ifPresent(reporter -> reporter.setId(user.getId()));
+
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
@@ -139,40 +146,35 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
 
-    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndUserMail(
-        representative.getDataflow().getId(), representativeVO.getDataProviderId(),
-        representativeVO.getProviderAccount())) {
-      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
+    // update changes on first level
+    if (representativeVO.getProviderAccounts() != null) {
+      Set<User> usersToInsert = new HashSet<>();
+      for (String email : representativeVO.getProviderAccounts()) {
+        Optional<User> user = representative.getReporters().stream()
+            .filter(reporter -> reporter.getUserMail().equals(email)).findAny();
+        if (user.isPresent()) {
+          usersToInsert.add(user.get());
+        } else {
+          UserRepresentationVO newUser = userManagementControllerZull.getUserByEmail(email);
+          usersToInsert.add(new User(newUser.getId(), newUser.getEmail(), null));
+        }
+      }
+      representative.setReporters(usersToInsert);
     }
-    if (existsUserMail(
-        representativeVO.getDataProviderId() != null ? representativeVO.getDataProviderId()
-            : representative.getDataProvider().getId(),
-        representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
-            : representative.getUserMail(),
-        representative.getDataflow().getId())
-        && !changesInReceiptStatus(representative, representativeVO)) {
-      LOG_ERROR.error("Duplicated representative relationship");
-      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
-    } else {
-      // update changes on first level
-      if (representativeVO.getProviderAccount() != null) {
-        representative.setUserMail(representativeVO.getProviderAccount());
-      }
-      if (representativeVO.getDataProviderId() != null) {
-        DataProvider dataProvider = new DataProvider();
-        dataProvider.setId(representativeVO.getDataProviderId());
-        representative.setDataProvider(dataProvider);
-      }
-      if (representativeVO.getReceiptDownloaded() != null) {
-        representative.setReceiptDownloaded(representativeVO.getReceiptDownloaded());
-      }
-      if (representativeVO.getReceiptOutdated() != null) {
-        representative.setReceiptOutdated(representativeVO.getReceiptOutdated());
-      }
+    if (representativeVO.getDataProviderId() != null) {
+      DataProvider dataProvider = new DataProvider();
+      dataProvider.setId(representativeVO.getDataProviderId());
+      representative.setDataProvider(dataProvider);
+    }
+    if (representativeVO.getReceiptDownloaded() != null) {
+      representative.setReceiptDownloaded(representativeVO.getReceiptDownloaded());
+    }
+    if (representativeVO.getReceiptOutdated() != null) {
+      representative.setReceiptOutdated(representativeVO.getReceiptOutdated());
+    }
 
-      // save changes
-      return representativeRepository.save(representative).getId();
-    }
+    // save changes
+    return representativeRepository.save(representative).getId();
   }
 
   /**
@@ -231,9 +233,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  private boolean existsUserMail(Long dataProviderId, String userMail, Long dataflowId)
+  private boolean existsUserMail(Long dataProviderId, List<String> userMail, Long dataflowId)
       throws EEAException {
-    if (dataProviderId == null || StringUtils.isBlank(userMail)) {
+    if (dataProviderId == null || CollectionUtils.isEmpty(userMail)) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
     return representativeRepository.findByDataProviderIdAndDataflowId(dataProviderId, dataflowId)
@@ -282,25 +284,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       String email) {
     return representativeMapper
         .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
-  }
-
-
-  /**
-   * Changes in receipt status.
-   *
-   * @param representative the representative
-   * @param representativeVO the representative VO
-   * @return true, if successful
-   */
-  private boolean changesInReceiptStatus(Representative representative,
-      RepresentativeVO representativeVO) {
-
-    Boolean changes = true;
-    if (representative.getReceiptDownloaded().equals(representativeVO.getReceiptDownloaded())
-        && representative.getReceiptOutdated().equals(representativeVO.getReceiptOutdated())) {
-      changes = false;
-    }
-    return changes;
   }
 
   /**

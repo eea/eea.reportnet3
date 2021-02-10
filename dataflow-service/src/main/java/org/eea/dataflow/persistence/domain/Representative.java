@@ -1,12 +1,16 @@
 package org.eea.dataflow.persistence.domain;
 
 import java.util.Objects;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -42,13 +46,11 @@ public class Representative {
   @JoinColumn(name = "data_provider_id")
   private DataProvider dataProvider;
 
-  /** The user id. */
-  @Column(name = "user_id")
-  private String userId;
-
-  /** The user mail. */
-  @Column(name = "user_mail")
-  private String userMail;
+  /** The lead reporters. */
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "representative_user", joinColumns = @JoinColumn(name = "representative_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> reporters;
 
   /** The receipt downloaded. */
   @Column(name = "receipt_downloaded")
@@ -89,6 +91,6 @@ public class Representative {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, userMail, dataflow, dataProvider);
+    return Objects.hash(id, dataflow, dataProvider);
   }
 }

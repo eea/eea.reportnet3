@@ -9,11 +9,9 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,11 +58,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
-
-
   /**
    * Creates the representative.
    *
@@ -82,17 +76,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       @ApiParam(type = "Object",
           value = "Representative Object") @RequestBody RepresentativeVO representativeVO) {
 
-    if (null == representativeVO.getProviderAccount()) {
+    if (CollectionUtils.isEmpty(representativeVO.getProviderAccounts())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
     }
     Pattern p = Pattern.compile(EMAIL_REGEX);
-    Matcher m = p.matcher(representativeVO.getProviderAccount());
-    boolean result = m.matches();
-    if (Boolean.FALSE.equals(result)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    for (String representative : representativeVO.getProviderAccounts()) {
+      Matcher m = p.matcher(representative);
+      boolean result = m.matches();
+      if (Boolean.FALSE.equals(result)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.NOT_EMAIL, representative));
+      }
     }
-
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
@@ -189,30 +184,21 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     String message = null;
     HttpStatus status = HttpStatus.OK;
 
-    if (null != representativeVO.getProviderAccount()) {
+    if (null != representativeVO.getProviderAccounts()) {
       Pattern p = Pattern.compile(EMAIL_REGEX);
-      Matcher m = p.matcher(representativeVO.getProviderAccount());
-      boolean result = m.matches();
-      if (Boolean.FALSE.equals(result)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+      for (String representative : representativeVO.getProviderAccounts()) {
+        Matcher m = p.matcher(representative);
+        boolean result = m.matches();
+        if (Boolean.FALSE.equals(result)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              String.format(EEAErrorMessage.NOT_EMAIL, representative));
+        }
       }
     }
 
-    if (representativeVO.getProviderAccount() != null) {
-      List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
-      UserRepresentationVO userRepresentationVO = users.stream()
-          .filter(user -> representativeVO.getProviderAccount().equalsIgnoreCase(user.getEmail()))
-          .findFirst().orElse(null);
-      if (userRepresentationVO == null) {
-        message = EEAErrorMessage.USER_REQUEST_NOTFOUND;
-        status = HttpStatus.NOT_FOUND;
-      }
-    }
     try {
-      message = message == null
-          ? String.valueOf(representativeService.updateDataflowRepresentative(representativeVO))
-          : message;
+      message =
+          String.valueOf(representativeService.updateDataflowRepresentative(representativeVO));
     } catch (EEAException e) {
       if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
         LOG_ERROR.error("Duplicated representative relationship", e.getCause());
