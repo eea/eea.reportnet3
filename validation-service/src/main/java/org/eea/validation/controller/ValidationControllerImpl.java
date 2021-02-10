@@ -46,6 +46,9 @@ public class ValidationControllerImpl implements ValidationController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
+
   /**
    * The validation service.
    */
@@ -75,6 +78,11 @@ public class ValidationControllerImpl implements ValidationController {
   public void validateDataSetData(
       @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestParam(value = "released", required = false) boolean released) {
+
+    LOG.info(
+        "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());

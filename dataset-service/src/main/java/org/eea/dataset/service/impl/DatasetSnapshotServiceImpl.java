@@ -474,6 +474,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
+    value.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    LOG.info("The user set on threadPropertiesManager is {}",
+        (String) ThreadPropertiesManager.getVariable("user"));
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
   }
 

@@ -63,6 +63,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetSnapshotControllerImpl.class);
+
   /**
    * Gets the by id.
    *
@@ -222,6 +225,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
+
+    LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -466,6 +472,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           required = true) Long dataProviderId) {
 
     ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
