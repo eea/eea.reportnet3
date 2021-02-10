@@ -12,9 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
@@ -42,9 +42,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import lombok.AllArgsConstructor;
 
 /**
  * The Class ValidationHelper.
@@ -131,7 +132,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * The validation executor service.
    */
-  private ExecutorService validationExecutorService;
+  private ThreadPoolTaskExecutor validationExecutorService;
 
 
   /**
@@ -140,11 +141,6 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
-  /**
-   * The validation controller.
-   */
-  @Autowired
-  private ValidationController validationController;
 
   /**
    * Instantiates a new file loader helper.
@@ -159,7 +155,14 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(maxRunningTasks);
+    executor.setMaxPoolSize(maxRunningTasks);
+    executor.setQueueCapacity(Integer.MAX_VALUE);
+    executor.setThreadNamePrefix("asynchronous-validation-thread-");
+    executor.setTaskDecorator(runnable -> new DelegatingSecurityContextRunnable(runnable));
+    executor.initialize();
+    validationExecutorService = executor;
   }
 
   /**
@@ -383,7 +386,7 @@ public class ValidationHelper implements DisposableBean {
 
     // first every task is always queued up to ensure the order
 
-    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
+    if (validationExecutorService.getActiveCount() == maxRunningTasks) {
       LOG.info(
           "Event {} will be queued up as there are no validating threads available at the moment",
           eeaEventVO);
