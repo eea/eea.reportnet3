@@ -178,7 +178,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR hasRole('DATA_STEWARD') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,

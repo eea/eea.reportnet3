@@ -153,7 +153,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/createEmptyDatasetSchema")
-  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN') AND hasRole('DATA_CUSTODIAN')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
+  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') AND (hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD'))) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
@@ -205,7 +205,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
@@ -327,7 +327,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping(value = "/{datasetId}/tableSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
@@ -693,7 +693,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId) {
     // Recover the designs datasets of the dataflowId given. And then, for each design dataset
     // executes a validation.
@@ -718,7 +718,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD') OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_DATA_STEWARD')")
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
       @PathVariable("idDataflow") Long idDataflow) {
 
