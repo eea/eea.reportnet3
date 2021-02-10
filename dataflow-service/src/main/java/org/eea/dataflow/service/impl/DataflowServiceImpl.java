@@ -564,6 +564,17 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @Override
+  public List<DataFlowVO> getPublicDataflows() {
+    // This call is dummy we must change to real call
+    return dataflowNoContentMapper.entityListToClass(dataflowRepository.findAll());
+  }
+
+  /**
    * Delete documents.
    *
    * @param idDataflow the id dataflow
