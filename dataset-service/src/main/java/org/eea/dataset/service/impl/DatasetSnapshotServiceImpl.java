@@ -73,13 +73,13 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -158,7 +158,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   /** The dataset service. */
   @Autowired
-  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /** The schema service. */
@@ -497,6 +496,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataProviderVO provider, Long idDataCollection) throws EEAException {
     Long idDataflow = datasetService.getDataFlowIdById(idDataset);
     if (provider != null && idDataCollection != null) {
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
       datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
