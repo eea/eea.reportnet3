@@ -262,8 +262,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [userContext, designerState?.metaData?.dataflow?.status]);
 
-  console.log('designerState.isDataflowOpen', designerState.isDataflowOpen);
-
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   const callSetMetaData = async () => {
@@ -1084,6 +1082,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <InputTextarea
               className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
               collapsedHeight={55}
+              disabled={designerState.isDataflowOpen}
               expandableOnClick={true}
               id="datasetDescription"
               key="datasetDescription"
@@ -1099,6 +1098,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className={styles.datasetConfigurationButtons}>
               <Button
                 className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+                disabled={designerState.isDataflowOpen}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}

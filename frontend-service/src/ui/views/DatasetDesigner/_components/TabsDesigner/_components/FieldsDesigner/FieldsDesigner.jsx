@@ -30,6 +30,7 @@ export const FieldsDesigner = ({
   datasetId,
   datasetSchemaId,
   datasetSchemas,
+  isDataflowOpen,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -423,6 +424,7 @@ export const FieldsDesigner = ({
           codelistItems={[]}
           datasetId={datasetId}
           datasetSchemaId={datasetSchemaId}
+          isDataflowOpen
           fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
@@ -484,6 +486,7 @@ export const FieldsDesigner = ({
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
                 isCodelistOrLink={isCodelistOrLink}
+                isDataflowOpen
                 key={field.fieldId}
                 onCodelistAndLinkShow={onCodelistAndLinkShow}
                 onFieldDelete={onFieldDelete}
@@ -560,6 +563,7 @@ export const FieldsDesigner = ({
         <InputTextarea
           className={styles.tableDescriptionInput}
           collapsedHeight={55}
+          disabled={isDataflowOpen}
           expandableOnClick={true}
           id="tableDescription"
           key="tableDescription"
@@ -575,6 +579,7 @@ export const FieldsDesigner = ({
         <div className={styles.constraintsButtons}>
           <Button
             className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+            disabled={isDataflowOpen}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -600,6 +605,7 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={isReadOnlyTable}
               className={styles.fieldDesignerItem}
+              disabled={isDataflowOpen}
               id={`${table.tableSchemaId}_check_readOnly`}
               inputId={`${table.tableSchemaId}_check_readOnly`}
               label="Default"
@@ -613,7 +619,7 @@ export const FieldsDesigner = ({
             <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
             <Checkbox
               checked={toPrefill || fixedNumber}
-              disabled={isReadOnlyTable || fixedNumber}
+              disabled={isReadOnlyTable || fixedNumber || isDataflowOpen}
               className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
@@ -629,6 +635,7 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={fixedNumber}
               className={styles.fieldDesignerItem}
+              disabled={isDataflowOpen}
               id={`${table.tableSchemaId}_check_fixed_number`}
               inputId={`${table.tableSchemaId}_check_fixed_number`}
               label="Default"
@@ -643,6 +650,7 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={notEmpty}
               className={styles.fieldDesignerItem}
+              disabled={isDataflowOpen}
               id={`${table.tableSchemaId}_check_not_empty`}
               inputId={`${table.tableSchemaId}_check_not_empty`}
               label="Default"

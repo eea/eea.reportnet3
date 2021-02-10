@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
@@ -31,6 +31,7 @@ const TabView = withRouter(
     id = null,
     initialTabIndexDrag,
     isErrorDialogVisible,
+    isDataflowOpen,
     onTabAdd,
     onTabAddCancel,
     onTabBlur,
@@ -200,7 +201,7 @@ const TabView = withRouter(
       });
       const id = `${idx}_header_${index}`;
       const ariaControls = `${idx}_content_${index}`;
-      return (
+      return !(isDataflowOpen && tab.props.addTab) ? (
         <Tab
           addTab={tab.props.addTab}
           ariaControls={ariaControls}
@@ -241,6 +242,8 @@ const TabView = withRouter(
           tableSchemaId={tab.props.tableSchemaId}
           totalTabs={totalTabs}
         />
+      ) : (
+        <Fragment></Fragment>
       );
     };
 
