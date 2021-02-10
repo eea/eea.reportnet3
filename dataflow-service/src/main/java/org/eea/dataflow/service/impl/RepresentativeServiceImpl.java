@@ -312,25 +312,27 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public byte[] exportFile(Long dataflowId) throws EEAException, IOException {
     // we create the csv
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-    List<String> headers = new ArrayList<>();
-    headers.add("Email");
-    headers.add("Representing");
-    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-    int nHeaders = 2;
-    String[] fieldsToWrite = new String[nHeaders];
+    try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+      List<String> headers = new ArrayList<>();
+      headers.add("Email");
+      headers.add("Representing");
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 2;
+      String[] fieldsToWrite = new String[nHeaders];
 
-    // we find all representatives and add all representatives
-    List<Representative> representativeList =
-        representativeRepository.findAllByDataflow_Id(dataflowId);
-    for (Representative representative : representativeList) {
-      fieldsToWrite[0] = representative.getReporters().stream().map(User::getUserMail)
-          .collect(Collectors.toList()).toString();
-      fieldsToWrite[1] = representative.getDataProvider().getCode();
-      csvWriter.writeNext(fieldsToWrite);
+      // we find all representatives and add all representatives
+      List<Representative> representativeList =
+          representativeRepository.findAllByDataflow_Id(dataflowId);
+      for (Representative representative : representativeList) {
+        fieldsToWrite[0] = representative.getReporters().stream().map(User::getUserMail)
+            .collect(Collectors.toList()).toString();
+        fieldsToWrite[1] = representative.getDataProvider().getCode();
+        csvWriter.writeNext(fieldsToWrite);
+      }
+    } catch (IOException e) {
+      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     }
-
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
 
@@ -439,7 +441,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           representative.setReceiptDownloaded(false);
           representative.setReceiptOutdated(false);
           representative.setHasDatasets(false);
-          // representative.setUserMail(email);
+          representative.setUserMail(email);
           representativeList.add(representative);
           fieldsToWrite[2] = "OK imported";
         } else {
