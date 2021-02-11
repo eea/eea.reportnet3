@@ -957,6 +957,7 @@
     "dataflowUnpinnedInit": "You have unpinned the dataflow",
     "pinned": "Pinned",
     "TypePolicyInstrument": "Types",
-    "UnionPolicyList": "Union policies"
+    "UnionPolicyList": "Union policies",
+    "releaseBlockedEvent": "Releasing process is being blocked by another action, please wait"
   }
 }
