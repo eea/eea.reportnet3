@@ -5,7 +5,6 @@ import styles from './App.module.css';
 
 import { routes } from 'ui/routes';
 
-import { Feedback } from 'ui/views/Feedback';
 import { DataCollection } from 'ui/views/DataCollection';
 import { Dataflow } from 'ui/views/Dataflow';
 import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
@@ -15,9 +14,11 @@ import { Dataset } from 'ui/views/Dataset';
 import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
 import { EUDataset } from 'ui/views/EUDataset';
 import { EULogin } from 'ui/views/Login/EULogin';
+import { Feedback } from 'ui/views/Feedback';
 import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivacyStatement } from 'ui/views/PrivacyStatement';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
+import { PublicDataflowInformation } from 'ui/views/PublicDataflowInformation';
 import { PublicDataflows } from 'ui/views/PublicDataflows';
 import { PublicFrontpage } from 'ui/views/PublicFrontpage';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
@@ -49,6 +50,11 @@ const App = () => {
                         <Router>
                           <Switch>
                             <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
+                            <Route
+                              exact
+                              path={routes.PUBLIC_DATAFLOW_INFORMATION}
+                              component={PublicDataflowInformation}
+                            />
                             <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
                             <Route exact path={routes.LOGIN} component={ReportnetLogin} />
                             <Route exact path={routes.EULOGIN} component={EULogin} />

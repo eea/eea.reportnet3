@@ -41,7 +41,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
     setPublicDataflows(publicData);
   };
 
-  const onOpenDataflow = dataflowId => history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+  const onOpenDataflow = dataflowId => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: 77 }));
 
   console.log('publicDataflows', publicDataflows);
 
