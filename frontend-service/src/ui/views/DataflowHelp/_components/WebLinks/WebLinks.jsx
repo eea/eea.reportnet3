@@ -23,7 +23,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const WebLinks = ({
   dataflowId,
-  isCustodian,
   isToolbarVisible,
   onLoadWebLinks,
   setSortFieldWeblinks,
