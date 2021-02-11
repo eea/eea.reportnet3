@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -37,6 +35,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -106,8 +106,7 @@ public class ValidationHelperTest {
    */
   private Map<String, ValidationProcessVO> processesMap;
 
-  /** The executor service. */
-  private ExecutorService executorService;
+  private ThreadPoolTaskExecutor validationExecutorService;
 
   /**
    * Inits the mocks.
@@ -123,7 +122,14 @@ public class ValidationHelperTest {
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_RECORD);
     eeaEventVO.setData(data);
     processesMap = new ConcurrentHashMap<>();
-    executorService = Executors.newFixedThreadPool(2);
+    validationExecutorService = new ThreadPoolTaskExecutor();
+    validationExecutorService.setCorePoolSize(2);
+    validationExecutorService.setMaxPoolSize(2);
+    validationExecutorService.setQueueCapacity(Integer.MAX_VALUE);
+    validationExecutorService.setThreadNamePrefix("asynchronous-validation-thread-");
+    validationExecutorService
+        .setTaskDecorator(runnable -> new DelegatingSecurityContextRunnable(runnable));
+    validationExecutorService.initialize();
     MockitoAnnotations.initMocks(this);
   }
 
@@ -132,7 +138,7 @@ public class ValidationHelperTest {
    */
   @After
   public void finishTasks() {
-    executorService.shutdown();
+    validationExecutorService.shutdown();
   }
 
   /**
@@ -353,7 +359,7 @@ public class ValidationHelperTest {
   public void processValidationExcedingMaximumParallelism()
       throws EEAException, InterruptedException {
     ReflectionTestUtils.setField(validationHelper, "validationExecutorService",
-        Executors.newFixedThreadPool(2));
+        validationExecutorService);
     ReflectionTestUtils.setField(validationHelper, "maxRunningTasks", 2);
 
     Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
@@ -407,7 +413,8 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
 
-    ReflectionTestUtils.setField(validationHelper, "validationExecutorService", executorService);
+    ReflectionTestUtils.setField(validationHelper, "validationExecutorService",
+        validationExecutorService);
     Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       // Thiss counter will be usefull to verify how many threads has been executed simultaneously
       // before the test ends
@@ -440,7 +447,8 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 1);
 
-    ReflectionTestUtils.setField(validationHelper, "validationExecutorService", executorService);
+    ReflectionTestUtils.setField(validationHelper, "validationExecutorService",
+        validationExecutorService);
 
     Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       // Thiss counter will be usefull to verify how many threads has been executed simultaneously
