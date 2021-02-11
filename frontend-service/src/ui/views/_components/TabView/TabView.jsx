@@ -201,50 +201,50 @@ const TabView = withRouter(
       });
       const id = `${idx}_header_${index}`;
       const ariaControls = `${idx}_content_${index}`;
-      return !(isDataflowOpen && tab.props.addTab) ? (
-        <Tab
-          addTab={tab.props.addTab}
-          ariaControls={ariaControls}
-          checkEditingTabs={checkEditingTabs}
-          children={tab.props.children}
-          className={className}
-          designMode={designMode}
-          disabled={tab.props.disabled}
-          editable={tab.props.editable}
-          divScrollTabsRef={divTabsRef.current}
-          hasPKReferenced={tab.props.hasPKReferenced}
-          header={tab.props.header}
-          headerStyle={tab.props.headerStyle}
-          id={id}
-          index={index}
-          initialTabIndexDrag={initialTabIndexDrag}
-          isDataflowOpen={isDataflowOpen}
-          isNavigationHidden={isNavigationHidden}
-          key={id}
-          leftIcon={tab.props.leftIcon}
-          newTab={tab.props.newTab}
-          onTabBlur={onTabBlur}
-          onTabAddCancel={onTabAddCancel}
-          onTabDeleteClick={onTabDeleteClicked}
-          onTabDragAndDrop={onTabDragAndDrop}
-          onTabDragAndDropStart={onTabDragAndDropStart}
-          onTabHeaderClick={event => {
-            onTabHeaderClick(event, tab, index);
-            if (!isUndefined(onTabEditingHeader)) {
-              onTabEditingHeader(false);
-            }
-          }}
-          onTabEditingHeader={onTabEditingHeader}
-          onTabMouseWheel={onTabMouseWheel}
-          onTabNameError={onTabNameError}
-          rightIcon={tab.props.rightIcon}
-          scrollTo={scrollTo}
-          selected={selected}
-          tableSchemaId={tab.props.tableSchemaId}
-          totalTabs={totalTabs}
-        />
-      ) : (
-        <Fragment></Fragment>
+      return (
+        !(isDataflowOpen && tab.props.addTab) && (
+          <Tab
+            addTab={tab.props.addTab}
+            ariaControls={ariaControls}
+            checkEditingTabs={checkEditingTabs}
+            children={tab.props.children}
+            className={className}
+            designMode={designMode}
+            disabled={tab.props.disabled}
+            editable={tab.props.editable}
+            divScrollTabsRef={divTabsRef.current}
+            hasPKReferenced={tab.props.hasPKReferenced}
+            header={tab.props.header}
+            headerStyle={tab.props.headerStyle}
+            id={id}
+            index={index}
+            initialTabIndexDrag={initialTabIndexDrag}
+            isDataflowOpen={isDataflowOpen}
+            isNavigationHidden={isNavigationHidden}
+            key={id}
+            leftIcon={tab.props.leftIcon}
+            newTab={tab.props.newTab}
+            onTabBlur={onTabBlur}
+            onTabAddCancel={onTabAddCancel}
+            onTabDeleteClick={onTabDeleteClicked}
+            onTabDragAndDrop={onTabDragAndDrop}
+            onTabDragAndDropStart={onTabDragAndDropStart}
+            onTabHeaderClick={event => {
+              onTabHeaderClick(event, tab, index);
+              if (!isUndefined(onTabEditingHeader)) {
+                onTabEditingHeader(false);
+              }
+            }}
+            onTabEditingHeader={onTabEditingHeader}
+            onTabMouseWheel={onTabMouseWheel}
+            onTabNameError={onTabNameError}
+            rightIcon={tab.props.rightIcon}
+            scrollTo={scrollTo}
+            selected={selected}
+            tableSchemaId={tab.props.tableSchemaId}
+            totalTabs={totalTabs}
+          />
+        )
       );
     };
 
