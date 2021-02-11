@@ -428,7 +428,9 @@ const Dataflow = withRouter(({ history, match }) => {
   const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
     const [notification] = notificationContext.all.filter(
       notification =>
-        notification.key === 'RELEASE_FAILED_EVENT' || notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+        notification.key === 'RELEASE_FAILED_EVENT' ||
+        notification.key === 'RELEASE_BLOCKED_EVENT' ||
+        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
@@ -441,7 +443,7 @@ const Dataflow = withRouter(({ history, match }) => {
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
-    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
     setIsReleasingDatasetsProviderId,
     false
   );
@@ -476,7 +478,11 @@ const Dataflow = withRouter(({ history, match }) => {
         .filter(dataset => dataset.dataProviderId === dataProviderId)
         .forEach(dataset => (dataset.isReleasing = true));
     } catch (error) {
-      notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' });
+      } else {
+        notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
+      }
     } finally {
       manageDialogs('isReleaseDialogVisible', false);
     }

@@ -521,6 +521,9 @@
         },
         {
           "key": "WRONG_WEB_LINK_ERROR"
+        },
+        {
+          "key": "RELEASE_BLOCKED_EVENT"
         }
       ]
     },
