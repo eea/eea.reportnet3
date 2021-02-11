@@ -59,10 +59,7 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
   public void run() {
 
     try {
-      LOG.info(
-          " executing task with security context {} {}",
-          SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
-          SecurityContextHolder.getContext().getAuthentication().getCredentials());
+
       delegate.run();
     } finally {
 

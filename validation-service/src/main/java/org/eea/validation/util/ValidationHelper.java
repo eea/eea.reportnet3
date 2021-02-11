@@ -745,6 +745,10 @@ public class ValidationHelper implements DisposableBean {
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+      LOG.info(
+          " executing task with security context {} {}",
+          SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+          SecurityContextHolder.getContext().getAuthentication().getCredentials());
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
