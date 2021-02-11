@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
-import io.jsonwebtoken.lang.Collections;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -103,8 +102,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (user == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-    if (representativeRepository.existsByDataflow_IdAndDataProvider_IdAndReporters_UserMail(
-        dataflowId, representativeVO.getDataProviderId(), email)) {
+    if (representativeRepository.existsByDataflowIdAndDataProviderIdAndUserMail(dataflowId,
+        representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
 
@@ -325,14 +324,14 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<Representative> representativeList =
           representativeRepository.findAllByDataflow_Id(dataflowId);
       for (Representative representative : representativeList) {
-          List<String> usersRepresentative = representative.getReporters().stream().map(User::getUserMail)
-            .collect(Collectors.toList());
-          usersRepresentative.stream().forEach(users -> {
-              fieldsToWrite[0] = users;
-                fieldsToWrite[1] = representative.getDataProvider().getCode();
-                csvWriter.writeNext(fieldsToWrite);
-          });
-        
+        List<String> usersRepresentative = representative.getReporters().stream()
+            .map(User::getUserMail).collect(Collectors.toList());
+        usersRepresentative.stream().forEach(users -> {
+          fieldsToWrite[0] = users;
+          fieldsToWrite[1] = representative.getDataProvider().getCode();
+          csvWriter.writeNext(fieldsToWrite);
+        });
+
       }
     } catch (IOException e) {
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
@@ -397,67 +396,63 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     // we create the cvs to send when finish the import
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-    List<String> headers = new ArrayList<>();
-    headers.add("Email");
-    headers.add("Representing");
-    headers.add("Imported");
-    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-    int nHeaders = 3;
-    String[] fieldsToWrite = new String[nHeaders];
+    try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+      List<String> headers = new ArrayList<>();
+      headers.add("Email");
+      headers.add("Representing");
+      headers.add("Imported");
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 3;
+      String[] fieldsToWrite = new String[nHeaders];
 
 
-    List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
-    List<String> countryCodeList =
-        dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
+      List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
+      List<String> countryCodeList =
+          dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
 
-    String content = new String(file.getBytes());
-    List<String> everyLines = new ArrayList<>(Arrays.asList(content.split("\n")));
-    everyLines.remove(0);
+      String content = new String(file.getBytes());
+      List<String> everyLines = new ArrayList<>(Arrays.asList(content.split("\n")));
+      everyLines.remove(0);
 
-    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
-    List<Representative> representativeList = new ArrayList<>();
-    for (String representativeData : everyLines) {
-      String[] dataLine = representativeData.split("[|]");
-      String email = dataLine[0].replaceAll("\"", "");
-      String contryCode = dataLine[1].replaceAll("\"", "");
-      if (!countryCodeList.contains(contryCode)
-          && null == userManagementControllerZull.getUserByEmail(email)) {
-        fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
-      } else if (!countryCodeList.contains(contryCode)) {
-        fieldsToWrite[2] = "KO imported country doesn't exist";
-      } else if (null == userManagementControllerZull.getUserByEmail(email)) {
-        fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
-      } else {
-        Long dataProviderId = dataProviderList.stream()
-            .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode())).findFirst()
-            .get().getId();
+      List<Representative> representativeList = new ArrayList<>();
 
-        if (!representativeRepository.existsByDataflow_IdAndDataProvider_IdAndReporters_UserMail(
-            dataflowId, dataProviderId, email)) {
-          Representative representative = new Representative();
-          DataProvider dataProvider = new DataProvider();
-          dataProvider.setId(dataProviderId);
-          representative.setDataflow(dataflow);
-          representative.setDataProvider(dataProvider);
-          representative.setReceiptDownloaded(false);
-          representative.setReceiptOutdated(false);
-          representative.setHasDatasets(false);
-          // representative.setUserMail(email);
-          representativeList.add(representative);
-          fieldsToWrite[2] = "OK imported";
+      for (String representativeData : everyLines) {
+        String[] dataLine = representativeData.split("[|]");
+        String email = dataLine[0].replaceAll("\"", "");
+        String contryCode = dataLine[1].replaceAll("\"", "");
+        if (!countryCodeList.contains(contryCode)
+            && null == userManagementControllerZull.getUserByEmail(email)) {
+          fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
+        } else if (!countryCodeList.contains(contryCode)) {
+          fieldsToWrite[2] = "KO imported country doesn't exist";
+        } else if (null == userManagementControllerZull.getUserByEmail(email)) {
+          fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
-          fieldsToWrite[2] = "KO imported already exist in reportnet";
+          Long dataProviderId = dataProviderList.stream()
+              .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode()))
+              .findFirst().get().getId();
+
+          if (!representativeRepository.existsByDataflowIdAndDataProviderIdAndUserMail(dataflowId,
+              dataProviderId, email)) {
+
+            Representative representative = new Representative();
+            fieldsToWrite[2] = "OK imported";
+          } else {
+            fieldsToWrite[2] = "KO imported already exist in reportnet";
+          }
         }
+        fieldsToWrite[0] = email;
+        fieldsToWrite[1] = contryCode;
+        csvWriter.writeNext(fieldsToWrite);
       }
-      fieldsToWrite[0] = email;
-      fieldsToWrite[1] = contryCode;
-      csvWriter.writeNext(fieldsToWrite);
-    }
-    if (!Collections.isEmpty(representativeList)) {
-      representativeRepository.saveAll(representativeList);
+      // if (!Collections.isEmpty(representativeList)) {
+      // representativeRepository.saveAll(representativeList);
+      // }
+    } catch (IOException e) {
+      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
