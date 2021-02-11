@@ -423,7 +423,9 @@ export const WebformRecord = ({
         ) : (
           <ul className={styles.errorList}>
             {errorMessages.map(msg => (
-              <li className={styles.errorItem}>{msg}</li>
+              <li key={msg} className={styles.errorItem}>
+                {msg}
+              </li>
             ))}
           </ul>
         )}
