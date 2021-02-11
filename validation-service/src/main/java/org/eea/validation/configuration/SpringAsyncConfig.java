@@ -11,12 +11,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class SpringAsyncConfig implements AsyncConfigurer {
 
-  // @Override
-  // public Executor getAsyncExecutor() {
-  // ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-  // executor.setThreadNamePrefix("asynchronous-taskExecutor-thread-");
-  // executor.initialize();
-  // return new DelegatingSecurityContextAsyncTaskExecutor(executor);
-  // }
+  @Override
+  public Executor getAsyncExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setThreadNamePrefix("asynchronous-taskExecutor-thread-");
+    executor.initialize();
+    return new DelegatingSecurityContextAsyncTaskExecutor(executor);
+  }
 
 }
