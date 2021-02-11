@@ -376,22 +376,12 @@ export const Dataset = withRouter(({ match, history }) => {
       await DatasetService.validateDataById(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     }
   };
@@ -399,6 +389,15 @@ export const Dataset = withRouter(({ match, history }) => {
   const cleanImportOtherSystemsDialog = () => {
     setReplaceData(false);
     onSetVisible(setIsImportOtherSystemsDialogVisible, false);
+  };
+
+  const onImportDatasetError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'IMPORT_REPORTING_BAD_REQUEST_ERROR',
+        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -998,6 +997,7 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetId={datasetId}
             datasetName={datasetName}
             hasWritePermissions={hasWritePermissions}
+            isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             schemaTables={schemaTables}
@@ -1039,6 +1039,7 @@ export const Dataset = withRouter(({ match, history }) => {
           mode="advanced"
           multiple={false}
           name="file"
+          onError={onImportDatasetError}
           onUpload={onUpload}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {

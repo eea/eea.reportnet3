@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class ValidationService.
@@ -1239,6 +1242,191 @@ public class RulesServiceImpl implements RulesService {
 
     List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVO);
     for (IntegritySchema integrity : integrities) {
+      integritySchemaRepository.save(integrity);
+
+      Long datasetReferencedId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
+      Long datasetOriginId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
+          datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+          integrity.getReferencedDatasetSchemaId().toString());
+    }
+  }
+
+
+  /**
+   * Import rules schema.
+   *
+   * @param qcRulesBytes the qc rules bytes
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param integritiesVo the integrities vo
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
+      Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integritiesVo)
+      throws EEAException {
+
+    List<RulesSchema> schemaRules = new ArrayList<>();
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    for (byte[] content : qcRulesBytes) {
+      if (content != null && content.length > 0) {
+        try {
+          schemaRules.add(objectMapper.readValue(content, RulesSchema.class));
+        } catch (IOException e) {
+          LOG_ERROR.error("Error converting from bytes[] to RulesSchema class. Message {}",
+              e.getMessage(), e);
+        }
+      }
+    }
+
+    // We've got the dictionaries and the list of the origin dataset schemas involved to get the
+    // rules of them, and with the help of the dictionary,
+    // replace the objectIds from the origin to the new ones of the target schemas, to finally save
+    // them as new rules.
+    for (RulesSchema ruleSchema : schemaRules) {
+      String newDatasetSchemaId =
+          dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
+
+      // Delete the the rules created in the steps before on the new schema, we are going to copy
+      // them directly
+      // from the original schema with properties like 'enabled'
+      rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+      rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
+
+      for (Rule rule : ruleSchema.getRules()) {
+        List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
+        importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities);
+      }
+    }
+    return dictionaryOriginTargetObjectId;
+  }
+
+
+  /**
+   * Import data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param newDatasetSchemaId the new dataset schema id
+   * @param rule the rule
+   * @param integrities the integrities
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
+  private Map<String, String> importData(Map<String, String> dictionaryOriginTargetObjectId,
+      String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities) throws EEAException {
+
+    // Here we change the fields of the rule involved with the help of the dictionary
+    fillRuleImport(rule, dictionaryOriginTargetObjectId);
+
+    // If the rule is a Dataset type, we need to do the same process with the
+    // IntegritySchema
+    if (EntityTypeEnum.TABLE.equals(rule.getType()) && null != rule.getIntegrityConstraintId()) {
+      importIntegrity(integrities, dictionaryOriginTargetObjectId, rule);
+    }
+    LOG.info(
+        "A new rule is going to be created in the import schema process {}, with this Reference id {}",
+        rule.getRuleName(), rule.getReferenceId());
+    if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    } else {
+      // add the rules sequence
+      rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
+    }
+
+    return dictionaryOriginTargetObjectId;
+  }
+
+  /**
+   * Fill rule import.
+   *
+   * @param rule the rule
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @return the map
+   */
+  private Map<String, String> fillRuleImport(Rule rule,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+
+    String newRuleId = new ObjectId().toString();
+    dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
+    rule.setRuleId(new ObjectId(newRuleId));
+    if (dictionaryOriginTargetObjectId.containsKey(rule.getReferenceId().toString())) {
+      rule.setReferenceId(
+          new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
+    }
+    if (rule.getReferenceFieldSchemaPKId() != null && dictionaryOriginTargetObjectId
+        .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
+      rule.setReferenceFieldSchemaPKId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
+    }
+    if (rule.getUniqueConstraintId() != null) {
+      rule.setUniqueConstraintId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
+    }
+
+    if (rule.getIntegrityConstraintId() != null) {
+      String newIntegrityConstraintId = new ObjectId().toString();
+      dictionaryOriginTargetObjectId.put(rule.getIntegrityConstraintId().toString(),
+          newIntegrityConstraintId);
+      rule.setIntegrityConstraintId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
+
+    }
+
+    // modify the when condition
+    if (StringUtils.isNotBlank(rule.getWhenCondition())) {
+      dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+        String newWhenCondition = rule.getWhenCondition();
+        newWhenCondition = newWhenCondition.replace(oldObjectId, newObjectId);
+        rule.setWhenCondition(newWhenCondition);
+      });
+    }
+
+    // Special case for SQL Sentences
+    if (StringUtils.isNotBlank(rule.getWhenCondition())
+        && rule.getWhenCondition().contains("isSQLSentence")
+        && StringUtils.isNotBlank(rule.getSqlSentence())) {
+      dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+        String newSqlSentence = rule.getSqlSentence().toLowerCase();
+        newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
+        rule.setSqlSentence(newSqlSentence);
+      });
+    }
+
+    return dictionaryOriginTargetObjectId;
+  }
+
+
+  /**
+   * Import integrity.
+   *
+   * @param integritySchemas the integrity schemas
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param rule the rule
+   */
+  private void importIntegrity(List<IntegritySchema> integritySchemas,
+      Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
+
+    for (IntegritySchema integrity : integritySchemas) {
+      integrity.setId(rule.getIntegrityConstraintId());
+      integrity.setOriginDatasetSchemaId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(integrity.getOriginDatasetSchemaId().toString())));
+      integrity.setReferencedDatasetSchemaId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(integrity.getReferencedDatasetSchemaId().toString())));
+      integrity.setRuleId(rule.getRuleId());
+      for (int i = 0; i < integrity.getOriginFields().size(); i++) {
+        integrity.getOriginFields().set(i, new ObjectId(
+            dictionaryOriginTargetObjectId.get(integrity.getOriginFields().get(i).toString())));
+      }
+      for (int i = 0; i < integrity.getReferencedFields().size(); i++) {
+        integrity.getReferencedFields().set(i, new ObjectId(
+            dictionaryOriginTargetObjectId.get(integrity.getReferencedFields().get(i).toString())));
+      }
+
       integritySchemaRepository.save(integrity);
 
       Long datasetReferencedId = dataSetMetabaseControllerZuul

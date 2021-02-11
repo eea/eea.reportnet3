@@ -26,6 +26,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.PaMConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -60,6 +61,7 @@ public class PaMServiceImpl implements PaMService {
   private DatasetMetabaseService datasetMetabaseService;
 
   /** The dataset schema service. */
+  @Lazy
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
@@ -460,6 +462,7 @@ public class PaMServiceImpl implements PaMService {
               getValue(fields, schemaIds.get(PaMConstants.PROJECTIONS_SCENARIO)));
           singlePaMVO.setOtherPolicyInstrument(
               getValue(fields, schemaIds.get(PaMConstants.OTHER_POLICY_INSTRUMENT)));
+          singlePaMVO.setUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_T1)));
           String unionPolicyList = getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_LIST));
           String typePolicyInstrumentList =
               getValue(fields, schemaIds.get(PaMConstants.TYPE_POLICY_INSTRUMENT));
@@ -563,6 +566,8 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.GHG_AFFECTED, table1Id, schema)));
     schemaIds.put(PaMConstants.OTHER_POLICY_INSTRUMENT, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER_POLICY_INSTRUMENT, table1Id, schema)));
+    schemaIds.put(PaMConstants.UNION_POLICY_T1, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.UNION_POLICY, table1Id, schema)));
 
     // ENTITIES
     schemaIds.put(PaMConstants.FK_PAMS_ENTITIES, isFieldSchemaNull(
