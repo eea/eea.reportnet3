@@ -16,7 +16,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @Query("SELECT r from Representative r JOIN FETCH r.reporters rep WHERE r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters rep WHERE r.dataflow.id= :dataflowId")
   List<Representative> findAllByDataflow_Id(@Param("dataflowId") Long dataflowId);
 
   /**

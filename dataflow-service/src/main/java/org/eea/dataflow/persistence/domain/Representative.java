@@ -47,7 +47,7 @@ public class Representative {
   private DataProvider dataProvider;
 
   /** The lead reporters. */
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToMany(cascade = {CascadeType.MERGE})
   @JoinTable(name = "representative_user", joinColumns = @JoinColumn(name = "representative_id"),
       inverseJoinColumns = @JoinColumn(name = "user_id"))
   private Set<User> reporters;
